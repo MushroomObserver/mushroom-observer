@@ -8,58 +8,49 @@
 #  real mess, but all the complexity of merging synonyms, etc. is dealt with in
 #  Name.
 #
-#  *NOTE*: I have tweaked the code so that this class should _never_ be
-#  instantiated.  Ever.  At all.  Really.  Well okay, except when creating it.
-#
 #  == Attributes
 #
 #  id::         Locally unique numerical id, starting at 1.
 #
 #  == Class methods
 #
-#  None.
+#  Synonym.make_sure_all_refererenced_synonyms_exist::   Nightly cronjob.
 #
 #  == Instance methods
 #
-#  choose_accepted_name::  Sets "accepted_name" for all of the attached Name's.
+#  None.
 #
 #  == Callbacks
 #
 #  None.
 #
-################################################################################
-
 class Synonym < AbstractModel
-  has_many :names
+  has_many :names, dependent: :nullify
 
-  # Mightly cronjob to ensure that no synonym records accidentally got deleted.
+  # Nightly cronjob to ensure that no synonym records accidentally got deleted.
   # This actually happened to Fungi itself(!)  Not sure how it happened, and
   # obviously I'd prefer to fix the cause.  But meanwhile, might as well keep
   # the site working...
+
   def self.make_sure_all_referenced_synonyms_exist
-    msgs = []
-    references = Name.connection.select_values(%(
-      SELECT DISTINCT synonym_id FROM names
-      WHERE synonym_id IS NOT NULL
-      ORDER BY synonym_id ASC
-    ))
-    records = Name.connection.select_values(%(
-      SELECT id FROM synonyms ORDER BY id ASC
-    ))
+    references = Name.select(:synonym_id).where.not(synonym: nil).distinct.
+                 order(:synonym_id).pluck(:synonym_id)
+    records = Synonym.all.order(id: :asc).pluck(:id)
     unused  = records - references
     missing = references - records
+
+    Synonym.where(id: unused).delete_all
+    Synonym.insert_all(missing.map { |m| { id: m } }) if missing.present?
+
+    changed_synonyms_msgs(unused, missing)
+  end
+
+  private_class_method def self.changed_synonyms_msgs(unused, missing)
+    msgs = []
     if unused.any?
-      Name.connection.execute(%(
-        DELETE FROM synonyms
-        WHERE id IN (#{unused.map(&:to_s).join(",")})
-      ))
       msgs << "Deleting #{unused.count} unused synonyms: #{unused.inspect}"
     end
     if missing.any?
-      Name.connection.execute(%(
-        INSERT INTO synonyms (id) VALUES
-        #{missing.map { |id| "(#{id})" }.join(",")}
-      ))
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs

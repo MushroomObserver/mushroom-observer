@@ -51,7 +51,8 @@
 #  None.
 #
 class CollectionNumber < AbstractModel
-  has_and_belongs_to_many :observations
+  has_many :observation_collection_numbers, dependent: :destroy
+  has_many :observations, through: :observation_collection_numbers
   belongs_to :user
 
   before_update :log_update
@@ -102,25 +103,14 @@ class CollectionNumber < AbstractModel
   end
 
   def destroy_without_callbacks
-    self.class.connection.execute(%(
-      DELETE FROM collection_numbers WHERE id = #{id}
-    ))
+    delete
   end
 
   # Mirror changes to collection number in herbarium records.  Do this
   # low-level to avoid redundant rss logs and other callbacks.
   def change_corresponding_herbarium_records(old_format_name)
-    new_format_name = Observation.connection.quote(format_name)
-    old_format_name = Observation.connection.quote(old_format_name)
-    Observation.connection.execute(%(
-      UPDATE collection_numbers_observations cno,
-             herbarium_records_observations hro,
-             herbarium_records hr
-      SET hr.accession_number = #{new_format_name}
-      WHERE cno.collection_number_id = #{id}
-        AND cno.observation_id = hro.observation_id
-        AND hro.herbarium_record_id = hr.id
-        AND hr.accession_number = #{old_format_name}
-    ))
+    HerbariumRecord.joins(observations: :collection_numbers).where(
+      accession_number: old_format_name, collection_numbers: { id: id }
+    ).update_all(accession_number: format_name)
   end
 end

@@ -16,7 +16,8 @@ class ExternalSite < AbstractModel
   has_many   :observations, through: :external_links
 
   validates :project, presence: true
-  validates :name,    presence: true, length: { maximum: 100 }, uniqueness: true
+  validates :name,    presence: true, length: { maximum: 100 },
+                      uniqueness: { case_sensitive: false }
 
   def member?(user)
     user.in_group?(project.user_group)

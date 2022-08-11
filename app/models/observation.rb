@@ -75,6 +75,52 @@
 #  show_formatted::         notes (or any hash) to string with plain
 #                           captions (keys)
 #
+#  ==== Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  found_on("yyyymmdd")
+#  found_after("yyyymmdd")
+#  found_before("yyyymmdd")
+#  found_between(start, end)
+#  of_name(name)
+#  of_name_like(string)
+#  with_name
+#  without_name
+#  by_user(user)
+#  with_location
+#  without_location
+#  at_location(location)
+#  in_region(where)
+#  in_box(n,s,e,w)
+#  is_collection_location
+#  not_collection_location
+#  with_image
+#  without_image
+#  with_notes
+#  without_notes
+#  has_notes_field(field)
+#  notes_include(note)
+#  with_specimen
+#  without_specimen
+#  with_sequence
+#  without_sequence
+#  confidence (min %, max %)
+#  with_comments
+#  without_comments
+#  comments_include(summary)
+#  for_project(project)
+#  in_herbarium(herbarium)
+#  herbarium_record_notes_include(notes)
+#  on_species_list(species_list)
+#  on_species_list_of_project(project)
+#
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
@@ -90,8 +136,7 @@
 #  notes_export_formatted:: notes to string with marked up captions (keys)
 #  notes_show_formatted::   notes to string with plain captions (keys)
 #
-#  ==== Name Formats
-#  text_name::              Plain text.
+#  ==== Name Formats #  text_name::              Plain text.
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
@@ -105,9 +150,9 @@
 #  owners_vote::            Owner's Vote on a given Naming.
 #  users_vote::             A given User's Vote on a given Naming
 #  owners_votes::           Get all of the onwer's Vote's for this Observation.
-#  is_owners_favorite?::    Is a given Naming one of the owner's favorite(s)
+#  owners_favorite?::       Is a given Naming one of the owner's favorite(s)
 #                           for this Observation?
-#  is_users_favorite?::     Is a given Naming one of the given user's
+#  users_favorite?::        Is a given Naming one of the given user's
 #                           favorites for this Observation?
 #  owner_preference         owners's unique prefered Name (if any) for this Obs
 #  change_vote::            Change a given User's Vote for a given Naming.
@@ -138,7 +183,7 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
-  belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
+  belongs_to :thumb_image, class_name: "Image"
   belongs_to :name # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log
@@ -149,8 +194,8 @@ class Observation < AbstractModel
   before_destroy :notify_users_before_destroy
 
   has_many :votes
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :sequences, dependent: :destroy
   has_many :external_links, dependent: :destroy
 
@@ -158,30 +203,210 @@ class Observation < AbstractModel
   # consensus several times and send bogus emails!!
   has_many :namings
 
-  has_and_belongs_to_many :images
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
-                                          before_remove: :remove_spl_callback
-  has_and_belongs_to_many :collection_numbers
-  has_and_belongs_to_many :herbarium_records
-  has_many :observation_views
+  has_many :observation_images, dependent: :destroy
+  has_many :images, through: :observation_images
+
+  has_many :project_observations, dependent: :destroy
+  has_many :projects, through: :project_observations
+
+  has_many :species_list_observations, dependent: :destroy
+  has_many :species_lists, through: :species_list_observations,
+                           after_add: :add_spl_callback,
+                           before_remove: :remove_spl_callback
+
+  has_many :observation_collection_numbers, dependent: :destroy
+  has_many :collection_numbers, through: :observation_collection_numbers
+
+  has_many :observation_herbarium_records, dependent: :destroy
+  has_many :herbarium_records, through: :observation_herbarium_records
+
+  has_many :observation_views, dependent: :destroy
   has_many :viewers, class_name: "User",
                      through: :observation_views,
                      source: :user
 
-  before_destroy { destroy_orphaned_collection_numbers }
+  # rubocop:disable Rails/ActiveRecordCallbacksOrder
+  # else Rubocop says: "before_save is supposed to appear before before_destroy"
+  # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
+  before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  # Override the default show_controller
-  def self.show_controller
-    "/observer"
-  end
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
+  # Extra timestamp scopes for when Observation found:
+  scope :found_on, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :found_after, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :found_before, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :found_between, lambda { |earliest, latest|
+    where(arel_table[:when].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:when].format("%Y-%m-%d") <= latest)
+  }
+
+  scope :with_name,
+        -> { where.not(name: Name.unknown) }
+  scope :without_name,
+        -> { where(name: Name.unknown) }
+  scope :without_confident_name, lambda {
+    without_name.or(where(vote_cache: ..0))
+  }
+  scope :needs_identification, lambda {
+    without_confident_name.order(created_at: :desc)
+  }
+  # scope :of_name(name, **args)
+  #
+  # Accepts either a Name instance, a string, or an id as the first argument.
+  #  Other args:
+  #  - include_synonyms: boolean
+  #  - include_subtaxa: boolean
+  #  - include_all_name_proposals: boolean
+  #  - of_look_alikes: boolean
+  #
+  scope :of_name, lambda { |name, **args|
+    # First, get a name record if string or id submitted
+    case name
+    when String
+      name = Name.find_by(text_name: name)
+    when Integer
+      name = Name.find_by(id: name)
+    end
+    return Observation.none unless name.is_a?(Name)
+
+    # Filter args may add to an array of names to collect Observations
+    names_array = [name]
+    # Maybe add synonyms (Name#synonyms includes original name)
+    names_array = name.synonyms if args[:include_synonyms]
+    # Keep names_array intact as is; maybe add more to its clone name_ids.
+    # (I'm thinking it's easier to pass name ids to the Observation query)
+    name_ids = names_array.map(&:id)
+
+    # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
+    # (don't modify the names_array we're iterating over)
+    if args[:include_subtaxa]
+      names_array.each do |n|
+        # |= don't add duplicates
+        name_ids |= Name.subtaxa_of(n).map(&:id)
+      end
+    end
+
+    # Query, with possible join to Naming. Mutually exclusive options:
+    if args[:include_all_name_proposals]
+      joins(:namings).where(namings: { name_id: name_ids })
+    elsif args[:of_look_alikes]
+      joins(:namings).where(namings: { name_id: name_ids }).
+        where.not(name: name_ids)
+    else
+      where(name_id: name_ids)
+    end
+  }
+  scope :of_name_like,
+        ->(name) { where(name: Name.text_name_includes(name)) }
+  scope :by_user,
+        ->(user) { where(user: user) }
+  scope :with_location,
+        -> { where.not(location: nil) }
+  scope :without_location,
+        -> { where(location: nil) }
+  scope :at_location,
+        ->(location) { where(location: location) }
+  scope :in_region,
+        ->(where) { where(Observation[:where].matches("%#{where}")) }
+  scope :in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          box = Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
+          return none unless box.valid?
+
+          # expand box by epsilon to create leeway for Float rounding
+          # Fixes a bug where Califoria fixture was not in a box
+          # defined by the fixture's north, south, east, west
+          expanded_box = box.expand(0.00001)
+
+          if box.straddles_180_deg?
+            where(
+              (Observation[:lat] >= expanded_box.south).
+              and(Observation[:lat] <= expanded_box.north).
+              and(Observation[:long] >= expanded_box.west).
+              or(Observation[:long] <= expanded_box.east)
+            )
+          else
+            where(
+              (Observation[:lat] >= expanded_box.south).
+              and(Observation[:lat] <= expanded_box.north).
+              and(Observation[:long] >= expanded_box.west).
+              and(Observation[:long] <= expanded_box.east)
+            )
+          end
+        }
+  scope :is_collection_location,
+        -> { where(is_collection_location: true) }
+  scope :not_collection_location,
+        -> { where(is_collection_location: false) }
+  scope :with_image,
+        -> { where.not(thumb_image: nil) }
+  scope :without_image,
+        -> { where(thumb_image: nil) }
+  scope :with_notes,
+        -> { where.not(notes: no_notes) }
+  scope :without_notes,
+        -> { where(notes: no_notes) }
+  scope :has_notes_field,
+        ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
+  scope :notes_include,
+        ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
+  scope :with_specimen,
+        -> { where(specimen: true) }
+  scope :without_specimen,
+        -> { where(specimen: false) }
+  scope :with_sequence,
+        -> { joins(:sequences).distinct }
+  scope :without_sequence, lambda {
+    # much faster than `missing(:sequences)` which uses left outer join.
+    where.not(id: with_sequence)
+  }
+  scope :confidence, lambda { |min, max = min| # confidence between min & max %
+    where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
+  }
+  scope :with_comments,
+        -> { joins(:comments).distinct }
+  scope :without_comments,
+        -> { where.not(id: Observation.with_comments) }
+  scope :comments_include, lambda { |summary|
+    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+  }
+  scope :for_project, lambda { |project|
+    joins(:project_observations).
+      where(ProjectObservation[:project_id] == project.id).distinct
+  }
+  scope :in_herbarium, lambda { |herbarium|
+    joins(:herbarium_records).
+      where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+  }
+  scope :herbarium_record_notes_include, lambda { |notes|
+    joins(:herbarium_records).
+      where(HerbariumRecord[:notes].matches("%#{notes}%")).distinct
+  }
+  scope :on_species_list, lambda { |species_list|
+    joins(:species_list_observations).
+      where(SpeciesListObservation[:species_list_id] == species_list.id).
+      distinct
+  }
+  scope :on_species_list_of_project, lambda { |project|
+    joins(species_lists: :project_species_lists).
+      where(ProjectSpeciesList[:project_id] == project.id).distinct
+  }
 
   def is_location?
     false
@@ -225,43 +450,26 @@ class Observation < AbstractModel
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
   def self.refresh_cached_column(type, foreign, local = foreign)
-    msgs = report_broken_caches(type, foreign, local)
-    refresh_cached_column_fix_errors(type, foreign, local)
-    msgs
-  end
-
-  # Check how many entries are broken in a mirrored column.  It will be good to
-  # keep track of this at first to make sure we've caught all the ways in which
-  # the mirror can get inadvertently broken.
-  def self.report_broken_caches(type, foreign, local)
-    Observation.connection.select_values(%(
-      SELECT o.id
-      FROM observations o, #{type}s x
-      WHERE o.#{type}_id = x.id
-        AND o.#{local} != x.#{foreign}
-    )).map do |id|
+    tbl = type.camelize.constantize.arel_table
+    broken_caches = get_broken_caches(type, tbl, foreign, local)
+    broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
+    # Refresh the mirror of a foreign table's column in the observations table.
+    broken_caches.update_all(
+      Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
+    )
   end
 
-  # Refresh the mirror of a foreign table's column in the observations table.
-  def self.refresh_cached_column_fix_errors(type, foreign, local)
-    Observation.connection.execute(%(
-      UPDATE observations o, #{type}s x
-      SET o.#{local} = x.#{foreign}
-      WHERE o.#{type}_id = x.id
-        AND o.#{local} != x.#{foreign}
-    ))
+  private_class_method def self.get_broken_caches(type, tbl, foreign, local)
+    Observation.joins(type.to_sym).
+      where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
   end
 
   # Used by Name and Location to update the observation cache when a cached
   # field value is changed.
   def self.update_cache(type, field, id, val)
-    Observation.connection.execute(%(
-      UPDATE observations
-      SET `#{field}` = #{Observation.connection.quote(val)}
-      WHERE #{type}_id = #{id}
-    ))
+    Observation.where("#{type}_id": id).update_all("#{field}": val)
   end
 
   # Check for any observations whose consensus is a misspelled name.  This can
@@ -269,18 +477,16 @@ class Observation < AbstractModel
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   def self.make_sure_no_observations_are_misspelled
-    msgs = Observation.connection.select_rows(%(
-      SELECT o.id, n.text_name FROM observations o, names n
-      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    )).map do |id, search_name|
+    misspellings = Observation.joins(:name).
+                   where(Name[:correct_spelling_id].not_eq(nil))
+
+    misspellings.
+      pluck(Observation[:id], Name[:text_name]).map do |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
-    Observation.connection.execute(%(
-      UPDATE observations o, names n
-      SET o.name_id = n.correct_spelling_id
-      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    ))
-    msgs
+    misspellings.update_all(
+      Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
+    )
   end
 
   def update_view_stats
@@ -308,11 +514,11 @@ class Observation < AbstractModel
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to :postal).
+  # Also applies the location_format of the current user (defaults to "postal").
   def place_name
     if location
       location.display_name
-    elsif User.current_location_format == :scientific
+    elsif User.current_location_format == "scientific"
       Location.reverse_name(where)
     else
       where
@@ -324,7 +530,7 @@ class Observation < AbstractModel
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
     place_name = place_name.strip_squeeze
-    where = if User.current_location_format == :scientific
+    where = if User.current_location_format == "scientific"
               Location.reverse_name(place_name)
             else
               place_name
@@ -712,15 +918,15 @@ class Observation < AbstractModel
   # votes from the owner of this observation.
   # Note: multiple namings can return true for a given observation.
   # This is used to display eyes next to Proposed Name on Observation page
-  def is_owners_favorite?(naming)
-    lookup_naming(naming).is_users_favorite?(user)
+  def owners_favorite?(naming)
+    lookup_naming(naming).users_favorite?(user)
   end
 
   # Returns true if a given Naming has received one of the highest positive
   # votes from the given user (among namings for this observation).
   # Note: multiple namings can return true for a given user and observation.
-  def is_users_favorite?(naming, user)
-    lookup_naming(naming).is_users_favorite?(user)
+  def users_favorite?(naming, user)
+    lookup_naming(naming).users_favorite?(user)
   end
 
   # All of observation.user's votes on all Namings for this Observation
@@ -863,17 +1069,17 @@ class Observation < AbstractModel
   def process_real_vote(naming, vote, value, user)
     downgrade_totally_confident_votes(value, user)
     favorite = adjust_other_favorites(value, other_votes(vote, user))
-    if !vote
+    if vote
+      vote.value = value
+      vote.favorite = favorite
+      vote.save
+    else
       naming.votes.create!(
         user: user,
         observation: self,
         value: value,
         favorite: favorite
       )
-    else
-      vote.value = value
-      vote.favorite = favorite
-      vote.save
     end
   end
 

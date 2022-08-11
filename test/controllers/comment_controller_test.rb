@@ -4,26 +4,68 @@ require("test_helper")
 
 class CommentControllerTest < FunctionalTestCase
   def test_list_comments
+    login
     get_with_dump(:list_comments)
     assert_template("list_comments")
   end
 
   def test_show_comment
+    login
     get_with_dump(:show_comment,
                   id: comments(:minimal_unknown_obs_comment_1).id)
     assert_template("show_comment")
   end
 
   def test_show_comments_for_user
+    login
     get_with_dump(:show_comments_for_user, id: rolf.id)
     assert_template("list_comments")
   end
 
   def test_show_comments_by_user
+    login
     get_with_dump(:show_comments_by_user, id: rolf.id)
     assert_redirected_to(action: "show_comment",
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
+  end
+
+  def test_show_comments_for_target_with_comments
+    target = observations(:minimal_unknown_obs)
+    params = { type: target.class.name, id: target.id }
+    comments = Comment.where(target_type: target.class.name, target: target)
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_select("div[class *='list-group comment']", count: comments.size)
+  end
+
+  def test_show_comments_for_valid_target_without_comments
+    target = names(:conocybe_filaris)
+    params = { type: target.class.name, id: target.id }
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+  end
+
+  def test_show_comments_for_invalid_target_type
+    target = api_keys(:rolfs_api_key)
+    params = { type: target.class.name, id: target.id }
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                                         value: params[:type].to_s))
+  end
+
+  def test_show_comments_for_non_model
+    params = { type: "Hacker", id: 666 }
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                                         value: params[:type].to_s))
   end
 
   def test_add_comment
@@ -47,9 +89,10 @@ class CommentControllerTest < FunctionalTestCase
   def test_add_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
     login(:katrina)
-    get(:add_comment, type: "NameDescription", id: katrina_is_not_reader.id)
+    get(:add_comment,
+        params: { type: "NameDescription", id: katrina_is_not_reader.id })
 
-    assert_flash_error("MO should flash if trying to comment on object"\
+    assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")
   end
 
@@ -60,7 +103,7 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("rolf", comment.user.login)
     requires_user(
       :edit_comment,
-      { controller: :observer, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_form_action(action: "edit_comment", id: comment.id.to_s)
@@ -74,7 +117,7 @@ class CommentControllerTest < FunctionalTestCase
     params = { id: comment.id.to_s }
     requires_user(
       :destroy_comment,
-      { controller: :observer, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_equal(9, rolf.reload.contribution)
@@ -90,7 +133,7 @@ class CommentControllerTest < FunctionalTestCase
                type: "Observation",
                comment: { summary: "A Summary", comment: "Some text." } }
     post_requires_login(:add_comment, params)
-    assert_redirected_to(controller: "observer", action: "show_observation")
+    assert_redirected_to(controller: :observations, action: :show)
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
@@ -107,7 +150,7 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("rolf", comment.user.login)
     post_requires_user(
       :edit_comment,
-      { controller: :observer, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_equal(10, rolf.reload.contribution)

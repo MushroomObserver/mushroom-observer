@@ -29,7 +29,7 @@ class WebSequenceArchive
     end
 
     def all_archives
-      archives.map { |archive| archive[:name] }
+      archives.pluck(:name)
     end
 
     def valid_archive?(str)
@@ -57,7 +57,7 @@ class WebSequenceArchive
     end
 
     def blast_format_help
-      "https://blast.ncbi.nlm.nih.gov/Blast.cgi?"\
+      "https://blast.ncbi.nlm.nih.gov/Blast.cgi?" \
       "CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp"
     end
   end

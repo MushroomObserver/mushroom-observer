@@ -2,16 +2,17 @@
 
 # Controls viewing and modifying herbarium records.
 class HerbariumRecordController < ApplicationController
-  before_action :login_required, except: [
-    :index_herbarium_record,
-    :list_herbarium_records,
-    :herbarium_record_search,
-    :herbarium_index,
-    :observation_index,
-    :show_herbarium_record,
-    :next_herbarium_record,
-    :prev_herbarium_record
-  ]
+  before_action :login_required
+  # except: [
+  #   :index_herbarium_record,
+  #   :list_herbarium_records,
+  #   :herbarium_record_search,
+  #   :herbarium_index,
+  #   :observation_index,
+  #   :show_herbarium_record,
+  #   :next_herbarium_record,
+  #   :prev_herbarium_record
+  # ]
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_herbarium_record
@@ -83,9 +84,10 @@ class HerbariumRecordController < ApplicationController
     return unless @observation
 
     @back_object = @observation
-    if request.method == "GET"
+    case request.method
+    when "GET"
       @herbarium_record = default_herbarium_record
-    elsif request.method == "POST"
+    when "POST"
       post_create_herbarium_record
     else
       redirect_back_or_default("/")
@@ -102,9 +104,10 @@ class HerbariumRecordController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!
 
-    if request.method == "GET"
+    case request.method
+    when "GET"
       @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
-    elsif request.method == "POST"
+    when "POST"
       post_edit_herbarium_record
     else
       redirect_back_or_default("/")
@@ -143,7 +146,8 @@ class HerbariumRecordController < ApplicationController
     args = {
       action: :list_herbarium_records,
       letters: "herbarium_records.initial_det",
-      num_per_page: 100
+      num_per_page: 100,
+      include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(args)
 
     @links ||= []

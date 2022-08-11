@@ -121,7 +121,7 @@ class QueuedEmail < AbstractModel
   has_many :queued_email_strings,  dependent: :destroy
   has_one :queued_email_note, dependent: :destroy
   belongs_to :user
-  belongs_to :to_user, class_name: "User", foreign_key: "to_user_id"
+  belongs_to :to_user, class_name: "User"
 
   # This tells ActiveRecord to instantiate new records into the class referred
   # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration
@@ -284,7 +284,7 @@ class QueuedEmail < AbstractModel
 
   # Returns "flavor from to" for debugging.
   def text_name
-    "#{flavor.sub("QueuedEmail::", "")} "\
+    "#{flavor.sub("QueuedEmail::", "")} " \
     "#{user ? user.login : "no one"} -> #{to_user ? to_user.login : "no one"}"
   end
 
@@ -322,7 +322,7 @@ class QueuedEmail < AbstractModel
     if @integers.key?(key)
       result = @integers[key]
     else
-      int = QueuedEmailInteger.find_by_queued_email_id_and_key(id, key.to_s)
+      int = QueuedEmailInteger.find_by(queued_email_id: id, key: key.to_s)
       result = @integers[key] = int ? int.value.to_i : nil
     end
     result
@@ -347,7 +347,7 @@ class QueuedEmail < AbstractModel
     if @strings.key?(key)
       result = @strings[key]
     else
-      str = QueuedEmailString.find_by_queued_email_id_and_key(id, key.to_s)
+      str = QueuedEmailString.find_by(queued_email_id: id, key: key.to_s)
       result = @strings[key] = str ? str.value.to_s : nil
     end
     result
@@ -434,7 +434,7 @@ class QueuedEmail < AbstractModel
   #   email.add_integer('observation_id', obs.id)
   #
   def add_integer(key, value)
-    int = QueuedEmailInteger.find_by_queued_email_id_and_key(id, key.to_s)
+    int = QueuedEmailInteger.find_by(queued_email_id: id, key: key.to_s)
     unless int
       int = QueuedEmailInteger.new
       int.queued_email_id = id
@@ -450,7 +450,7 @@ class QueuedEmail < AbstractModel
   #   email.add_string('login', user.login)
   #
   def add_string(key, value)
-    str = QueuedEmailString.find_by_queued_email_id_and_key(id, key.to_s)
+    str = QueuedEmailString.find_by(queued_email_id: id, key: key.to_s)
     unless str
       str = QueuedEmailString.new
       str.queued_email_id = id
@@ -508,10 +508,4 @@ class QueuedEmail < AbstractModel
     end
     self.queued_email_note = note
   end
-end
-
-################################################################################
-
-# Tell rdoc not to document Email class.  (But do allow subclasses!)
-class Email # :nodoc:
 end

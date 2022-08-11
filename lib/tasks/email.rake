@@ -14,21 +14,14 @@ namespace :email do
     require "#{::Rails.root}/app/extensions/extensions.rb"
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
-    for e in QueuedEmail.all
+    QueuedEmail.all.each do |e|
       now = Time.zone.now()
       # Has it been queued (and unchanged) for MO.email_queue_delay or more.
       if e.queued + MO.email_queue_delay.seconds < now
 
         # Sent successfully.  (Delete it without sending if user isn't local!
         # This shouldn't happen, but just in case, better safe...)
-        if !e.to_user
-          e.destroy
-          count += 1
-          if count >= MO.email_per_minute
-            # break
-          end
-
-        else
+        if e.to_user
           result = nil
           File.open("#{::Rails.root}/log/email-low-level.log", "a") do |fh|
             fh.puts("sending #{e.id.inspect}...")
@@ -64,6 +57,13 @@ namespace :email do
             end
             e.save
           end
+        else
+          e.destroy
+          count += 1
+          if count >= MO.email_per_minute
+            # break
+          end
+
         end
       end
     end
@@ -71,9 +71,9 @@ namespace :email do
 
   desc "Purge the email queue without sending anything"
   task(purge: :environment) do
-    for e in QueuedEmail.all
-      print("Purging #{e.id}: from => #{e&.user&.login}, "\
-            "to => #{e.to_user.login}, flavor => #{e.flavor}, "\
+    QueuedEmail.all.each do |e|
+      print("Purging #{e.id}: from => #{e&.user&.login}, " \
+            "to => #{e.to_user.login}, flavor => #{e.flavor}, " \
             "queued => #{e.queued}\n")
       e.destroy
     end

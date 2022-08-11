@@ -47,13 +47,13 @@ class ExpertTest < IntegrationTestCase
     # work (e.g., I don't want to make any assertions about the hidden fields)
     # -- all I want to be sure of is that it doesn't mess up our list of names.
     open_form do |form|
-      assert_equal(list.split(/\r\n/).sort,
-                   form.get_value!("list_members").split(/\r\n/).sort)
+      assert_equal(list.split("\r\n").sort,
+                   form.get_value!("list_members").split("\r\n").sort)
       # field = form.get_field('approved_names')
       form.submit
     end
     assert_flash_success
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_logs/index")
 
     assert_not_nil(Name.find_by(text_name: "Caloplaca"))
 
@@ -122,7 +122,7 @@ class ExpertTest < IntegrationTestCase
     newer_location_reverse = "USA, California, Somewhere Else"
 
     # Good opportunity to test scientific location notation!
-    dick.location_format = :scientific
+    dick.location_format = "scientific"
     dick.save
 
     # First attempt at creating a list.
@@ -157,8 +157,8 @@ class ExpertTest < IntegrationTestCase
 
     # Fix the ambiguous names: should be good now.
     open_form do |form|
-      assert_equal(list.split(/\r\n/).sort,
-                   form.get_value!("list_members").split(/\r\n/).sort)
+      assert_equal(list.split("\r\n").sort,
+                   form.get_value!("list_members").split("\r\n").sort)
       form.check(
         /chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/
       )
@@ -189,7 +189,7 @@ class ExpertTest < IntegrationTestCase
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
-    click(href: /edit_species_list/)
+    click_mo_link(href: /edit_species_list/)
     new_member_notes = "New member notes."
     open_form do |form|
       form.assert_value("list_members", "")
@@ -277,7 +277,7 @@ class ExpertTest < IntegrationTestCase
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.
-    click(href: /add_comment/)
+    click_mo_link(href: /add_comment/)
     assert_template("comment/add_comment")
     assert_select("div#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)

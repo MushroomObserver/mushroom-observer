@@ -2,7 +2,7 @@
 
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
-  before_action :login_required, except: [:index, :show, :show_past]
+  before_action :login_required # except: [:index, :show, :show_past]
   before_action :store_location, except: [:create, :update, :destroy]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
@@ -12,15 +12,15 @@ class GlossaryTermsController < ApplicationController
     # See https://www.pivotaltracker.com/story/show/167657202
     # Glossary should be query-able
     # See https://www.pivotaltracker.com/story/show/167809123
-    @glossary_terms = GlossaryTerm.includes(thumb_image: :image_votes).
-                      order(:name)
+    includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    @glossary_terms = GlossaryTerm.includes(includes).order(:name)
   end
 
   def show
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
-    @objects = @glossary_term.images
+    @objects = @glossary_term.images.order(vote_cache: :desc)
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -160,7 +160,6 @@ class GlossaryTermsController < ApplicationController
       flash_object_errors(image)
       nil
     elsif !image.process_image
-      logger.error("Unable to upload image")
       name = image.original_name
       name = "???" if name.empty?
       flash_error(:runtime_image_invalid_image.t(name: name))

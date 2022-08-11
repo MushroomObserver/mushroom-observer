@@ -2,7 +2,7 @@
 
 module Report
   # Format for export to FunDiS.
-  class Fundis < Report::CSV
+  class Fundis < CSV
     FUNDIS_PROJECT_NAME = "Fungal Diversity Survey"
 
     def labels

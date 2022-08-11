@@ -15,9 +15,8 @@
 ################################################################################
 
 class InterestController < ApplicationController
-  before_action :login_required, except: []
-
-  before_action :disable_link_prefetching, except: []
+  before_action :login_required
+  before_action :disable_link_prefetching
 
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
@@ -60,8 +59,8 @@ class InterestController < ApplicationController
     uid    = params[:user]
     target = Comment.find_object(type, oid)
     if @user
-      interest = Interest.find_by_target_type_and_target_id_and_user_id(
-        type, oid, @user.id
+      interest = Interest.find_by(
+        target_type: type, target_id: oid, user_id: @user.id
       )
       if uid && @user.id != uid.to_i
         flash_error(:set_interest_user_mismatch.l)
@@ -79,12 +78,10 @@ class InterestController < ApplicationController
             flash_notice(:set_interest_already_deleted.l(name: name))
           elsif !interest.destroy
             flash_notice(:set_interest_failure.l(name: name))
+          elsif interest.state
+            flash_notice(:set_interest_success_was_on.l(name: name))
           else
-            if interest.state
-              flash_notice(:set_interest_success_was_on.l(name: name))
-            else
-              flash_notice(:set_interest_success_was_off.l(name: name))
-            end
+            flash_notice(:set_interest_success_was_off.l(name: name))
           end
         elsif interest.state == true && state.positive?
           flash_notice(
@@ -99,16 +96,14 @@ class InterestController < ApplicationController
           interest.updated_at = Time.zone.now
           if !interest.save
             flash_notice(:set_interest_failure.l(name: target.unique_text_name))
+          elsif state.positive?
+            flash_notice(
+              :set_interest_success_on.l(name: target.unique_text_name)
+            )
           else
-            if state.positive?
-              flash_notice(
-                :set_interest_success_on.l(name: target.unique_text_name)
-              )
-            else
-              flash_notice(
-                :set_interest_success_off.l(name: target.unique_text_name)
-              )
-            end
+            flash_notice(
+              :set_interest_success_off.l(name: target.unique_text_name)
+            )
           end
         end
       end

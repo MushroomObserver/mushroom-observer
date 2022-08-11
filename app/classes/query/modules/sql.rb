@@ -59,7 +59,7 @@ module Query::Modules::Sql
       if x.match(/^\(.*\)$/) || !x.match(/ or /i)
         x
       else
-        "(" + x + ")"
+        "(#{x})"
       end
     end
     ands.join(" AND ")
@@ -89,7 +89,7 @@ module Query::Modules::Sql
   def flatten_joins(arg = join, keep_qualifiers = true)
     result = []
     if arg.is_a?(Hash)
-      for key, val in arg
+      arg.each do |key, val|
         key = key.to_s.sub(/\..*/, "") unless keep_qualifiers
         result << key.to_s
         result += flatten_joins(val)
@@ -110,7 +110,7 @@ module Query::Modules::Sql
     result = []
     from = from.to_s
     if to.is_a?(Hash)
-      for key, val in to
+      to.each do |key, val|
         result += calc_join_condition(from, key.to_s, done)
         result += calc_join_conditions(key.to_s, val, done)
       end

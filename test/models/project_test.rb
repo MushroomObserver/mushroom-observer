@@ -95,4 +95,13 @@ class ProjectTest < UnitTestCase
     proj.remove_species_list(first_list)
     assert_obj_list_equal([], proj.species_lists)
   end
+
+  def test_destroy_orphans_log
+    proj = projects(:two_list_project)
+    log = proj.rss_log
+    assert_not_nil(log)
+    proj.destroy!
+    proj.log_destroy
+    assert_nil(log.reload.target_id)
+  end
 end

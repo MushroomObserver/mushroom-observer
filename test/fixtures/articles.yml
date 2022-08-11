@@ -9,6 +9,7 @@ DEFAULTS: &DEFAULTS
 
 premier_article:
   <<: *DEFAULTS
+  rss_log: article_rss_log
 
 second_article:
   <<:  *DEFAULTS

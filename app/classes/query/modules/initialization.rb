@@ -4,12 +4,7 @@ module Query
   module Modules
     # Helper methods for turning Query parameters into SQL conditions.
     module Initialization
-      attr_accessor :join
-      attr_accessor :tables
-      attr_accessor :where
-      attr_accessor :group
-      attr_accessor :order
-      attr_accessor :executor
+      attr_accessor :join, :tables, :where, :group, :order, :executor
 
       def initialized?
         @initialized ? true : false
@@ -39,19 +34,25 @@ module Query
       #   @where << "names.id IN (#{set})"
       #
       def clean_id_set(ids)
-        set = ids.map(&:to_i).uniq[0, MO.query_max_array].map(&:to_s).join(",")
+        set = limited_id_set(ids).map(&:to_s).join(",")
         set.presence || "-1"
+      end
+
+      # array of max of 1000 unique ids for use with Arel "in"
+      #    where(<x>.in(limited_id_set(ids)))
+      def limited_id_set(ids)
+        ids.map(&:to_i).uniq[0, MO.query_max_array]
       end
 
       # Clean a pattern for use in LIKE condition.  Takes and returns a String.
       def clean_pattern(pattern)
-        pattern.gsub(/[%'"\\]/) { |x| '\\' + x }.tr("*", "%")
+        pattern.gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
       end
 
       # Combine args into one parenthesized condition by ANDing them.
       def and_clause(*args)
         if args.length > 1
-          "(" + args.join(" AND ") + ")"
+          "(#{args.join(" AND ")})"
         else
           args.first
         end
@@ -60,7 +61,7 @@ module Query
       # Combine args into one parenthesized condition by ORing them.
       def or_clause(*args)
         if args.length > 1
-          "(" + args.join(" OR ") + ")"
+          "(#{args.join(" OR ")})"
         else
           args.first
         end
@@ -110,14 +111,14 @@ module Query
       # Safely add to +arg+ in +args+.  Dups <tt>args[arg]</tt>, casts it into
       # an Array, and returns the new Array.
       def extend_arg(args, arg)
-        case old_arg = args[arg]
-        when Symbol, String
-          args[arg] = [old_arg]
-        when Array
-          args[arg] = old_arg.dup
-        else
-          args[arg] = []
-        end
+        args[arg] = case old_arg = args[arg]
+                    when Symbol, String
+                      [old_arg]
+                    when Array
+                      old_arg.dup
+                    else
+                      []
+                    end
       end
     end
   end

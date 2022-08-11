@@ -8,7 +8,7 @@ MushroomObserver::Application.configure do
   # ----------------------------
 
   config.domain      = "mushroomobserver.org"
-  config.http_domain = "http://mushroomobserver.org"
+  config.http_domain = "https://mushroomobserver.org"
 
   # List of alternate server domains.
   # We redirect from each of these to the real one.
@@ -34,7 +34,11 @@ MushroomObserver::Application.configure do
   # test suite.  You never need to work with it otherwise.  Remember that
   # your test database is "scratch space" for the test suite and is wiped
   # and recreated between test runs.  Don't rely on the data there!
+  # Rails 6 makes cache_classes default to false, but i'm keeping it true.
+  # Also adds config.action_view.cache_template_loading, seems desirable
+  # [Nimmo 20220526]
   config.cache_classes = true
+  config.action_view.cache_template_loading = true
 
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
@@ -67,6 +71,10 @@ MushroomObserver::Application.configure do
   # like if you have constraints or database-specific column types
   # config.active_record.schema_format = :sql
 
+  # Allow YAML deserializer to deserialize symbols
+  # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
+  config.active_record.yaml_column_permitted_classes = [Symbol]
+
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
 
@@ -82,7 +90,29 @@ MushroomObserver::Application.configure do
   # To control the debugger turing testing
   config.activate_debugger = false
 
+  # Enable stdout logger
+  config.logger = Logger.new($stdout)
+
+  # Set log level
+  config.log_level = :ERROR
+
+  # config.action_dispatch.show_exceptions = false
+
   config.active_support.test_order = :random
+
+  # ----------------------------
+  #  Bullet configuration.
+  # ----------------------------
+
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.raise = true # Show message by raising errors.
+    Bullet.stacktrace_includes = []
+    Bullet.stacktrace_excludes = []
+    Bullet.unused_eager_loading_enable = false
+    # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
+    #                     association: :comments)
+  end
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

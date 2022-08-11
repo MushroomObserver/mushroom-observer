@@ -33,7 +33,7 @@
 #  note_status::          Return some basic stats on notes fields.
 #
 #  ==== Source Info
-#  source_type::          Category of source, e.g. :public, :project, :user.
+#  source_type::          Category of source, e.g. "public", "project", "user".
 #  source_name::          Source identifier (e.g., Project title).
 #  source_object::        Return reference to object representing source.
 #  belongs_to_project?::  Does this Description belong to a given Project?
@@ -235,16 +235,20 @@ class Description < AbstractModel
 
   # Note, this is the order they will be listed in show_name.
   ALL_SOURCE_TYPES = [
-    :public,    # Public ones created by any user.
-    :foreign,   # Foreign "public" description(s) written on another server.
-    :source,    # Derived from another source, e.g. another website or book.
-    :project,   # Draft created for a project.
-    :user       # Created by an individual user.
+    "public",    # Public ones created by any user.
+    "foreign",   # Foreign "public" description(s) written on another server.
+    "source",    # Derived from another source, e.g. another website or book.
+    "project",   # Draft created for a project.
+    "user"       # Created by an individual user.
   ].freeze
 
-  # Return an Array of source type Symbols, e.g. :public, :project, etc.
+  # Return an Array of source type Strings, e.g. "public", "project", etc.
   def self.all_source_types
     ALL_SOURCE_TYPES
+    # NOTE: Why not keep this simple and just load them in order of the enums?
+    # source_types.map do |name, _integer|
+    #   name
+    # end
   end
 
   # Retreive object representing the source (if applicable).  Presently, this
@@ -253,15 +257,15 @@ class Description < AbstractModel
   def source_object
     case source_type
     # (this may eventually be replaced with source_id)
-    when :project then project
-    when :source then nil # (haven't created "Source" model yet)
-    when :user then user
+    when "project" then project
+    when "source" then nil # (haven't created "Source" model yet)
+    when "user" then user
     end
   end
 
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
-    (source_type == :project) &&
+    (source_type == "project") &&
       (project_id == project.id)
   end
 
@@ -273,7 +277,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep admin groups.
   def self.admins_join_table
-    "#{table_name}_admins".to_sym
+    "#{table_name.singularize}_admins".to_sym
   end
 
   # Wrapper around class method of same name
@@ -283,7 +287,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
-    "#{table_name}_writers".to_sym
+    "#{table_name.singularize}_writers".to_sym
   end
 
   # Wrapper around class method of same name
@@ -293,7 +297,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
-    "#{table_name}_readers".to_sym
+    "#{table_name.singularize}_readers".to_sym
   end
 
   # Wrapper around class method of same name
@@ -396,28 +400,32 @@ class Description < AbstractModel
     @group_users[table] ||= User.where(id: group_user_ids(table)).to_a
   end
 
+  private
+
   # Do minimal query to enumerate the users in a list of groups.  Return as an
   # Array of ids.  Caches result.
   def group_user_ids(table)
     @group_user_ids ||= {}
-    @group_user_ids[table] ||= self.class.connection.select_values(%(
-      SELECT DISTINCT u.user_id FROM #{table} t, user_groups_users u
-      WHERE t.#{type_tag}_id = #{id}
-        AND t.user_group_id = u.user_group_id
-      ORDER BY u.user_id ASC
-    )).map(&:to_i)
+    @group_user_ids[table] ||=
+      table.to_s.classify.constantize.
+      joins(user_group: :user_group_users).
+      where("#{type_tag}_id" => id).
+      order(user_id: :asc).distinct.
+      pluck(:user_id)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
   # Caches result.  (Equivalent to using <tt>association.ids</tt>, I think.)
   def group_ids(table)
     @group_ids ||= {}
-    @group_ids[table] ||= self.class.connection.select_values(%(
-      SELECT DISTINCT user_group_id FROM #{table}
-      WHERE #{type_tag}_id = #{id}
-      ORDER BY user_group_id ASC
-    )).map(&:to_i)
+    @group_ids[table] ||=
+      table.to_s.classify.constantize.
+      where("#{type_tag}_id" => id).
+      order(user_group_id: :asc).distinct.
+      pluck(:user_group_id)
   end
+
+  public
 
   ##############################################################################
   #
@@ -427,7 +435,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name}_authors".to_sym
+    "#{table_name.singularize}_authors".to_sym
   end
 
   # Wrapper around class method of same name
@@ -437,7 +445,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name}_editors".to_sym
+    "#{table_name.singularize}_editors".to_sym
   end
 
   # Wrapper around class method of same name
@@ -524,8 +532,6 @@ class Description < AbstractModel
 
   ##############################################################################
 
-  private
-
   # Descriptive subtitle for this description (when it is not necessary to
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
@@ -552,7 +558,7 @@ class Description < AbstractModel
   def chg_permission(groups, arg, mode)
     arg = UserGroup.one_user(arg) if arg.is_a?(User)
     if (mode == :add) &&
-       !groups.include?(arg)
+       groups.exclude?(arg)
       groups.push(arg)
     elsif (mode == :remove) &&
           groups.include?(arg)
@@ -561,11 +567,7 @@ class Description < AbstractModel
   end
 
   def user_made_a_change?(user)
-    self.class.connection.select_value(%(
-      SELECT id FROM #{versioned_table_name}
-      WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
-      LIMIT 1
-    ))
+    versions.where(user_id: user.id).any?
   end
 
   # By default make first user to add any text an author.

@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-class ApiKey < AbstractModel
+class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
   KEY_LENGTH = 32
 
   def self.show_controller
-    "/account"
+    :account
   end
 
   def self.index_action
@@ -45,7 +45,7 @@ class ApiKey < AbstractModel
 
   validate :check_key
   def check_key
-    other = self.class.find_by_key(key)
+    other = self.class.find_by(key: key)
     if other && other.id != id
       # This should never happen.
       errors.add(:key, "api keys must be unique")

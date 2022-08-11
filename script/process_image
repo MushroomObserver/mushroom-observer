@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Create the various resized copies of the given original image and transfer
 #  them to the image server(s).

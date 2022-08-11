@@ -74,9 +74,9 @@ function copy_file_from_server {
     cp $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
   ssh)
-    wait_for "(scp|ssh)"
+    wait_for "(ssh|rsync)"
     path=${image_server_data[$server,path]}
-    scp $path/$file $image_root/$file || die "Failed to get $file from $path."
+    rsync -a $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
   http*)
     url=${image_server_data[$server,url]}
@@ -99,14 +99,9 @@ function copy_file_to_server {
     cp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
     ;;
   "ssh")
-    wait_for "(scp|ssh)"
+    wait_for "(ssh|rsync)"
     path=${image_server_data[$server,path]}
-    scp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
-    ;;
-  "s3")
-    cmd=$app_root/script/s3cp.rb
-    wait_for $cmd
-    $cmd $image_root/$file $server $file || die "Failed to transfer $file to $path."
+    rsync -a $image_root/$file $path/$file || die "Failed to transfer $file to $path."
     ;;
   *)
     url=${image_server_data[$server,url]}
@@ -117,28 +112,28 @@ function copy_file_to_server {
 # Read a directory on a server.
 #   read_directory "cdmr" "thumb" > cdmr.files
 function read_server_directory {
+  FIND=gfind
+  if ! which $FIND >& /dev/null; then
+    FIND=find;
+  fi
   server=$1
   subdir=$2
   case ${image_server_data[$server,type]} in
   "file")
     path=${image_server_data[$server,path]}
-    find -L $path/$subdir -maxdepth 1 -type f -printf '%f\t%s\n' || \
+    $FIND -L $path/$subdir -maxdepth 1 -type f -printf '%f\t%s\n' || \
       die "Failed to list $path/$subdir on $server server."
     ;;
   "ssh")
-    wait_for "(scp|ssh)"
+    wait_for "(ssh|rsync)"
     host=$( echo "${image_server_data[$server,path]}" | sed "s/:.*//" )
     path=$( echo "${image_server_data[$server,path]}" | sed "s/.*://" )
-    ssh $host find -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
+    ssh $host $FIND -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
       die "Failed to list $host:$path/$subdir on $server server."
-    ;;
-  "s3")
-    # Listing an S3 bucket takes forever, rely on cached listing instead.
-    grep ^$subdir $image_root/$server.files | sed 's/[^\/]*\///' | $app_root/script/s3uniq.rb
     ;;
   *)
     url=${image_server_data[$server,url]}
     die "Don't know how to get listing of $url/$subdir on $server server."
   esac
-} 
+}
 

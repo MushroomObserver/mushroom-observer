@@ -3,7 +3,7 @@
 <%= :eol_preview_explanation.tp %>
 
 <% odd_or_even = 0
-for name in @names.select(&:ok_for_export)
+@names.select(&:ok_for_export).each do |name|
   odd_or_even = 1 - odd_or_even %>
   <div class="ListLine<%= odd_or_even %>"
        style="padding-top:10px; padding-bottom:10px;">

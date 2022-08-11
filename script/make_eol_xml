@@ -28,7 +28,7 @@ require("erb")
 class ParsedUrl
   def initialize(url)
     @url = url
-    @m = url.match(%r{^https?://([\w\.]+)(:[0-9]+)*(.*)$})
+    @m = url.match(%r{^https?://([\w.]+)(:[0-9]+)*(.*)$})
   end
 
   attr_reader :url
@@ -84,10 +84,10 @@ end
 ################################################################################
 
 if testing
-  LOCAL_URL = "https://localhost:3000/api/observations?id=1"
-  REMOTE_URL = "https://mushroomobserver.org/api/observations?id=1"
+  LOCAL_URL = "http://localhost:3000/api2/observations?id=1"
+  REMOTE_URL = "https://mushroomobserver.org/api2/observations?id=1"
 else
-  LOCAL_URL = "https://localhost:3000/name/eol"
+  LOCAL_URL = "http://localhost:3000/name/eol"
   REMOTE_URL = "https://mushroomobserver.org/name/eol"
 end
 
@@ -112,7 +112,7 @@ if !new_size
   print("Unable to create the new EOL dump as #{temp_filename}.\n")
   exit(1)
 elsif new_size < old_size * 0.9
-  print("Size of new EOL dump, #{new_size}, "\
+  print("Size of new EOL dump, #{new_size}, " \
         "was less than 90% of the old dump, #{old_size}.\n")
   print("Left the old file in place.\n")
   exit(1)

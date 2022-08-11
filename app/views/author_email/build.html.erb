@@ -11,9 +11,9 @@
 
   links = []
   links.push([:author_request_add_author.t,
-    "#{MO.http_domain}/observer/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
+    "#{MO.http_domain}/authors/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
   links.push([:email_links_show_user.t,
-    "#{MO.http_domain}/observer/show_user/#{@sender.id}"])
+    "#{MO.http_domain}/users/#{@sender.id}"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
@@ -27,20 +27,20 @@ if @user.email_html %>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-  <%= @message.tp %>
+<%= @message.tp %>
 </div>
 <%= handy_links.tp %>
 <ul type=none>
-  <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
-  <% end %>
+<% links.each do |label, url| %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
 </ul>
 <%= report_abuse.tp %>
 <br/>
 </body>
 </html>
 <% else %><%=
-  intro.tp.html_to_ascii
+intro.tp.html_to_ascii
 %>
 
 <%= @message.tp.html_to_ascii %>
@@ -50,7 +50,7 @@ if @user.email_html %>
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = "".html_safe
-  for label, url in links
+  links.each do |label, url|
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>

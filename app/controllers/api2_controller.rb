@@ -11,9 +11,9 @@
 #
 ################################################################################
 #
-class Api2Controller < ApplicationController
+class API2Controller < ApplicationController
   require "xmlrpc/client"
-  require_dependency "api"
+  require "api2"
 
   disable_filters
 

@@ -23,7 +23,6 @@
 #  check_permission!::      Same, but flashes "denied" message, too.
 #  reviewer?::              Is the current User a reviewer?
 #  in_admin_mode?::         Is the current User in admin mode?
-#  unshown_notifications?:: Are there pending Notification's of a given type?
 #  autologin_cookie_set::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
 #  session_user_set::       (store user in session -- id only)
@@ -112,7 +111,6 @@ class ApplicationController < ActionController::Base
   before_action :autologin
   before_action :set_locale
   before_action :set_timezone
-  before_action :refresh_translations
   before_action :track_translations
   # before_action :extra_gc
   # after_action  :extra_gc
@@ -128,10 +126,18 @@ class ApplicationController < ActionController::Base
     skip_before_action(:fix_bad_domains)
     skip_before_action(:autologin)
     skip_before_action(:set_timezone)
-    skip_before_action(:refresh_translations)
     skip_before_action(:track_translations)
     before_action(:disable_link_prefetching)
     before_action { User.current = nil }
+  end
+
+  # Disables Bullet tester for one action. Use this in your controller:
+  #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
+  def skip_bullet
+    Bullet.n_plus_one_query_enable = false
+    yield
+  ensure
+    Bullet.n_plus_one_query_enable = true
   end
 
   ## @view can be used by classes to access view specific features like render
@@ -177,13 +183,13 @@ class ApplicationController < ActionController::Base
 
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
+    return true if params[:controller].start_with?("api")
     return true unless browser.bot?
-    return true if Robots.allowed?(
-      controller: params[:controller],
-      action: params[:action],
-      ua: browser.ua,
-      ip: request.remote_ip
-    )
+    return true if Robots.authorized?(browser.ua) &&
+                   Robots.action_allowed?(
+                     controller: params[:controller],
+                     action: params[:action]
+                   )
 
     render(plain: "Robots are not allowed on this page.",
            status: :forbidden,
@@ -193,10 +199,10 @@ class ApplicationController < ActionController::Base
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    return true if @user&.is_successful_contributor?
+    return true if @user&.successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
     false
   end
 
@@ -255,14 +261,9 @@ class ApplicationController < ActionController::Base
 
   private :request_stats, :request_stats_log_message
 
-  # Update Globalite with any recent changes to translations.
-  def refresh_translations
-    Language.update_recent_translations
-  end
-
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by_locale(I18n.locale)
+    @language = Language.find_by(locale: I18n.locale)
     if @user && @language &&
        (!@language.official || reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -371,7 +372,7 @@ class ApplicationController < ActionController::Base
 
   def valid_user_from_cookie
     return unless (cookie = cookies["mo_user"]) &&
-                  (split = cookie.split(" ")) &&
+                  (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
                   (split[1] == user.auth_code)
 
@@ -401,9 +402,9 @@ class ApplicationController < ActionController::Base
 
   def make_logged_in_user_available_to_everyone
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : "0"}" \
-                " robot=#{browser.bot? ? "Y" : "N"}" \
-                " ip=#{request.remote_ip}")
+    logger.warn("user=#{@user ? @user.id : "0"} " \
+                "robot=#{browser.bot? ? "Y" : "N"} " \
+                "ip=#{request.remote_ip}")
   end
 
   # Track when user requested a page, but update at most once an hour.
@@ -505,26 +506,6 @@ class ApplicationController < ActionController::Base
   end
   helper_method :in_admin_mode?
 
-  # Are there are any QueuedEmail's of the given flavor for the given User?
-  # Returns true or false.
-  #
-  # This only applies to emails that are associated with Notification's for
-  # which there is a note_template.  (Only one type now: Notification's with
-  # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  def unshown_notifications?(user, flavor = :naming)
-    QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
-      ints = q.get_integers(%w[shown notification], true)
-      next if ints["shown"]
-
-      notification = Notification.safe_find(ints["notification"].to_i)
-      next unless notification&.note_template
-
-      return true
-    end
-
-    false
-  end
-
   # ----------------------------
   #  "Private" methods.
   # ----------------------------
@@ -570,7 +551,7 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    lang = Language.find_by_locale(specified_locale) || Language.official
+    lang = Language.find_by(locale: specified_locale) || Language.official
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
@@ -650,14 +631,13 @@ class ApplicationController < ActionController::Base
   #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
   #
   def sorted_locales_from_request_header
-    result = []
-    if (accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"])
+    accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
+    logger.debug("[globalite] HTTP header = #{accepted_locales.inspect}")
+    return [] unless accepted_locales.present?
 
-      locale_weights = map_locales_to_weights(accepted_locales)
-      # Now sort by decreasing weights.
-      result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
-    end
-
+    locale_weights = map_locales_to_weights(accepted_locales)
+    # Sort by decreasing weights.
+    result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     logger.debug("[globalite] client accepted locales: #{result.join(", ")}")
     result
   end
@@ -665,7 +645,7 @@ class ApplicationController < ActionController::Base
   # Extract locales and weights, creating map from locale to weight.
   def map_locales_to_weights(locales)
     locales.split(",").each_with_object({}) do |term, loc_wts|
-      next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+      next unless "#{term};q=1" =~ /^(.+?);q=([^;]+)/
 
       loc_wts[Regexp.last_match(1)] = (begin
                                          Regexp.last_match(2).to_f
@@ -774,7 +754,7 @@ class ApplicationController < ActionController::Base
   # top of the next page the User sees.
   def flash_notice(*strs)
     session[:notice] ||= "0"
-    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join("")
+    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join
   end
   helper_method :flash_notice
 
@@ -1035,7 +1015,7 @@ class ApplicationController < ActionController::Base
   def append_query_param_to_path(path, query_param)
     return path unless query_param
 
-    if path.match?(/\?/) # Does path already have a query string?
+    if path.include?("?") # Does path already have a query string?
       "#{path}&q=#{query_param}" # add query_param to existing query string
     else
       "#{path}?q=#{query_param}" # create a query string comprising query_param
@@ -1127,7 +1107,7 @@ class ApplicationController < ActionController::Base
     return unless invalid_q_param?
 
     flash_error(:advanced_search_bad_q_error.t)
-    redirect_to(observer_advanced_search_form_path)
+    redirect_to(search_advanced_path)
   end
 
   private ##########
@@ -1212,7 +1192,7 @@ class ApplicationController < ActionController::Base
 
   def invalid_q_param?
     params && params[:q] &&
-      !QueryRecord.where(id: params[:q].dealphabetize).exists?
+      !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
 
   public ##########
@@ -1296,7 +1276,7 @@ class ApplicationController < ActionController::Base
 
   def query_and_next_object_rss_log_increment(object, method)
     # Special exception for prev/next in RssLog query: If go to "next" in
-    # show_observation, for example, inside an RssLog query, go to the next
+    # observations/show, for example, inside an RssLog query, go to the next
     # object, even if it's not an observation. If...
     #             ... q param is an RssLog query
     return unless (query = current_query_is_rss_log) &&
@@ -1497,7 +1477,7 @@ class ApplicationController < ActionController::Base
     # (overriding any title specified in the view)
     # and the html <title> metadata == a translated tag or the action name
     # see ApplicationHelper#title_tag_contents
-    @num_results.zero? ? @title = "" : @title ||= query.title
+    @num_results.zero? ? @title = args[:no_hits_title] : @title ||= query.title
 
     # Add magic links for sorting if enough results to sort
     @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
@@ -1630,14 +1610,21 @@ class ApplicationController < ActionController::Base
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
-    result = model.safe_find(id)
-    unless result
-      flash_error(:runtime_object_not_found.t(id: id || "0",
-                                              type: model.type_tag))
-      redirect_with_query(controller: model.show_controller,
-                          action: model.index_action)
-    end
-    result
+    model.safe_find(id) || flash_error_and_goto_index(model, id)
+  end
+
+  def flash_error_and_goto_index(model, id)
+    flash_error(:runtime_object_not_found.t(id: id || "0",
+                                            type: model.type_tag))
+
+    # Assure that this method calls a top level controller namespace by
+    # the show_controller in a string after a leading slash.
+    # The name must be anchored with a slash to avoid namespacing it.
+    # references: http://guides.rubyonrails.org/routing.html#controller-namespaces-and-routing
+    # https://stackoverflow.com/questions/20057910/rails-url-for-behaving-differently-when-using-namespace-based-on-current-cont
+    redirect_with_query(controller: "/#{model.show_controller}",
+                        action: model.index_action)
+    nil
   end
 
   private ##########
@@ -1768,7 +1755,7 @@ class ApplicationController < ActionController::Base
   #
   # The old policy was to disable this feature for a few obviously dangerous
   # actions.  I've changed it now to only _enable_ it for common (and safe)
-  # actions like show_observation, post_comment, etc.  Each controller is now
+  # actions like observations/show, post_comment, etc.  Each controller is now
   # responsible for explicitly listing the actions which accept it.
   # -JPH 20100123
   #
@@ -1796,7 +1783,7 @@ class ApplicationController < ActionController::Base
       @user.thumbnail_size
     else
       session[:thumbnail_size]
-    end || :thumbnail
+    end || "thumbnail"
   end
   helper_method :default_thumbnail_size
 
@@ -1831,7 +1818,7 @@ class ApplicationController < ActionController::Base
   def render_xml(args)
     request.format = "xml"
     respond_to do |format|
-      format.xml { render args }
+      format.xml { render(args) }
     end
   end
 
@@ -1842,6 +1829,19 @@ class ApplicationController < ActionController::Base
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
     end
+  end
+
+  def load_for_show_observation_or_goto_index(id)
+    Observation.includes(
+      :collection_numbers,
+      { comments: :user },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { namings: :name },
+      :projects,
+      :sequences
+    ).find_by(id: id) ||
+      flash_error_and_goto_index(Observation, id)
   end
 
   ##############################################################################

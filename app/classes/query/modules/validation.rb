@@ -4,8 +4,7 @@ module Query
   module Modules
     # validation of Query parameters
     module Validation
-      attr_accessor :params
-      attr_accessor :params_cache
+      attr_accessor :params, :params_cache
 
       def required_parameters
         keys = parameter_declarations.keys
@@ -75,7 +74,7 @@ module Query
           val[0, MO.query_max_array].map do |val2|
             scalar_validate(arg, val2, arg_type)
           end
-        when API::OrderedRange, API2::OrderedRange
+        when ::API2::OrderedRange
           [scalar_validate(arg, val.begin, arg_type),
            scalar_validate(arg, val.end, arg_type)]
         else
@@ -92,29 +91,32 @@ module Query
         elsif arg_type.is_a?(Hash)
           validate_enum(arg, val, arg_type)
         else
-          raise("Invalid declaration of :#{arg} for #{model} :#{flavor} "\
+          raise("Invalid declaration of :#{arg} for #{model} :#{flavor} " \
                 "query! (invalid type: #{arg_type.class.name})")
         end
       end
 
       def validate_enum(arg, val, hash)
         if hash.keys.length != 1
-          raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} "\
-                "query! (wrong number of keys in hash)")
+          raise(
+            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+            "query! (wrong number of keys in hash)")
         end
 
         arg_type = hash.keys.first
         set = hash.values.first
         unless set.is_a?(Array)
-          raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} "\
-                "query! (expected value to be an array of allowed values)")
+          raise(
+            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+            "query! (expected value to be an array of allowed values)"
+          )
         end
 
         val2 = scalar_validate(arg, val, arg_type)
         if (arg_type == :string) && set.include?(val2.to_sym)
           val2 = val2.to_sym
-        elsif !set.include?(val2)
-          raise("Value for :#{arg} should be one of the following: "\
+        elsif set.exclude?(val2)
+          raise("Value for :#{arg} should be one of the following: " \
                 "#{set.inspect}.")
         end
         val2
@@ -162,7 +164,7 @@ module Query
            val.is_a?(Symbol)
           val.to_s
         else
-          raise("Value for :#{arg} should be a string or symbol, "\
+          raise("Value for :#{arg} should be a string or symbol, " \
                 "got a #{val.class}: #{val.inspect}")
         end
       end
@@ -181,7 +183,7 @@ module Query
         elsif could_be_record_id?(val)
           val.to_i
         else
-          raise("Value for :#{arg} should be id or an #{type} instance, "\
+          raise("Value for :#{arg} should be id or an #{type} instance, " \
                 "got: #{val.inspect}")
         end
       end
@@ -193,9 +195,7 @@ module Query
           @params_cache ||= {}
           @params_cache[arg] = val
           val.id
-        elsif val.is_a?(String)
-          val
-        elsif val.is_a?(Integer)
+        elsif val.is_a?(String) || val.is_a?(Integer)
           val
         else
           raise("Value for :#{arg} should be a Name, String or Integer, " \
@@ -206,9 +206,8 @@ module Query
       def validate_date(arg, val)
         if val.acts_like?(:date)
           format("%04d-%02d-%02d", val.year, val.mon, val.day)
-        elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s)
-          val
-        elsif /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
+        elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
+              /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
           val
         elsif val.blank? || val.to_s == "0"
           nil

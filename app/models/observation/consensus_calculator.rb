@@ -3,7 +3,7 @@
 class Observation
   class ConsensusCalculator
     def initialize(namings)
-      @namings     = namings
+      @namings     = namings.includes(:name, votes: [:observation, :user])
       @name_votes  = {}  # Strongest vote for a given name for a user.
       @taxon_votes = {}  # Strongest vote for any names in a group of
       #                    synonyms for a given user.
@@ -108,17 +108,17 @@ class Observation
 
     def taxon_identifier(naming, name_id)
       if naming.name.synonym_id
-        "s" + naming.name.synonym_id.to_s
+        "s#{naming.name.synonym_id}"
       else
-        "n" + name_id.to_s
+        "n#{name_id}"
       end
     end
 
     def update_naming_cache(naming, value)
-      if naming.vote_cache != value
-        naming.vote_cache = value
-        naming.save
-      end
+      return unless naming.vote_cache != value
+
+      naming.vote_cache = value
+      naming.save
     end
 
     def find_taxon_votes
@@ -139,8 +139,7 @@ class Observation
     end
 
     class VoteScale
-      attr_reader :weight
-      attr_reader :age
+      attr_reader :weight, :age
 
       def initialize(vote: nil, age: nil)
         @weight = vote && vote[1]

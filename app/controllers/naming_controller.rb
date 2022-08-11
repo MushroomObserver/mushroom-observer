@@ -3,17 +3,14 @@
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
   before_action :login_required
-
-  before_action :disable_link_prefetching, except: [
-    :create,
-    :edit
-  ]
+  before_action :disable_link_prefetching, except: [:create, :edit]
 
   def edit
     pass_query_params
     @params = NamingParams.new
     naming = @params.naming = Naming.from_params(params)
-    @params.observation = naming.observation
+    @params.observation =
+      load_for_show_observation_or_goto_index(naming.observation_id)
     return default_redirect(naming.observation) unless check_permission!(naming)
 
     # TODO: Can this get moved into NamingParams#naming=
@@ -24,7 +21,8 @@ class NamingController < ApplicationController
   def create
     pass_query_params
     @params = NamingParams.new(params[:name])
-    @params.observation = find_or_goto_index(Observation, params[:id].to_s)
+    @params.observation =
+      load_for_show_observation_or_goto_index(params[:id])
     fill_in_reference_for_suggestions(@params) if params[:name].present?
     return unless @params.observation
 
@@ -57,7 +55,7 @@ class NamingController < ApplicationController
   def create_post
     if rough_draft && can_save?
       save_changes
-      check_for_notifications
+      default_redirect(@params.observation, :show)
     else # If anything failed reload the form.
       flash_object_errors(@params.naming) if @params.name_missing?
       @params.add_reason(params[:reason])
@@ -69,15 +67,6 @@ class NamingController < ApplicationController
                         param_lookup([:name, :name]),
                         params[:approved_name],
                         param_lookup([:chosen_name, :name_id], "").to_s)
-  end
-
-  def check_for_notifications
-    action = if unshown_notifications?(@user, :naming)
-               :show_notifications
-             else
-               :show_observation
-             end
-    default_redirect(@params.observation, action)
   end
 
   def can_save?
@@ -104,8 +93,8 @@ class NamingController < ApplicationController
     success
   end
 
-  def default_redirect(obs, action = :show_observation)
-    redirect_with_query(controller: :observer,
+  def default_redirect(obs, action = :show)
+    redirect_with_query(controller: :observations,
                         action: action,
                         id: obs.id)
   end
@@ -152,7 +141,7 @@ class NamingController < ApplicationController
   end
 
   def fill_in_reference_for_suggestions(params)
-    params.reason.values.each do |r|
+    params.reason.each_value do |r|
       r.notes = "AI Observer" if r.num == 2
     end
   end

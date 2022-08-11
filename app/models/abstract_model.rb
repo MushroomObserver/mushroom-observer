@@ -6,8 +6,23 @@
 #  == Methods
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
-#  enum_default_value   Default value (as a Symbol) of an enum attribute
-#                       Ex: User.enum_default_value(:image_size) => :medium
+#
+#  == Scopes
+#
+#  Scopes for collecting objects created (or updated) on, before, after or
+#  between a given "%Y-%m-%d" string(s).
+#
+#  Examples: Observation.created_between("2006-09-01", "2012-09-01")
+#            Name.updated_after("2016-12-01")
+#
+#  created_on::
+#  created_after::
+#  created_before::
+#  created_between::
+#  updated_on::
+#  updated_after::
+#  updated_before::
+#  updated_between::
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
@@ -59,7 +74,6 @@
 #  log_remove_image::   Log removal of Image.
 #  log_destroy_image::  Log destruction of Image.
 #  init_rss_log::       Create and attach RssLog if not already there.
-#  attach_rss_log::     Attach RssLog after creating new record.
 #  autolog_created::    Callback to log creation.
 #  autolog_updated::    Callback to log an update.
 #  autolog_destroyed::  Callback to log destruction.
@@ -87,15 +101,38 @@ class AbstractModel < ApplicationRecord
     self.class.name.underscore.to_sym
   end
 
-  # Default value (as a symbol) for an enum attribute
-  def self.enum_default_value(attr)
-    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
-  end
+  ##############################################################################
+  #
+  #  :section: Scopes
+  #
+  ##############################################################################
 
-  # number (or nil) that is the default value for attr
-  def self.default_cardinal(attr)
-    column_defaults[attr.to_s]
-  end
+  scope :created_on, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :created_after, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :created_before, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :created_between, lambda { |earliest, latest|
+    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
+  }
+  scope :updated_on, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :updated_after, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :updated_before, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :updated_between, lambda { |earliest, latest|
+    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
+  }
 
   ##############################################################################
   #
@@ -130,17 +167,6 @@ class AbstractModel < ApplicationRecord
     type.classify.constantize.find(id.to_i)
   rescue NameError, ActiveRecord::RecordNotFound
     nil
-  end
-
-  # Add limit to a SQL query, then pass it to find_by_sql.
-  #
-  #   sql = "SELECT id FROM names WHERE user_id = 123"
-  #   names = Name.find_by_sql_with_limit(sql, 20, 10)
-  #
-  def self.find_by_sql_with_limit(sql, offset, limit)
-    sql = sanitize_sql(sql)
-    add_limit!(sql, limit: limit, offset: offset)
-    find_by_sql(sql)
   end
 
   # Wrap a normal SQL query in a <tt>COUNT(*)</tt> query, then pass it to
@@ -182,9 +208,7 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    # self.created_at ||= Time.now        if respond_to?('created_at=')
-    # self.updated_at ||= Time.now        if respond_to?('updated_at=')
-    self.user_id ||= User.current_id if respond_to?("user_id=")
+    self.user_id ||= User.current_id if respond_to?(:user_id=)
     autolog_created if has_rss_log?
   end
 
@@ -195,7 +219,7 @@ class AbstractModel < ApplicationRecord
   after_create :update_contribution
   def update_contribution
     SiteData.update_contribution(:add, self)
-    attach_rss_log if has_rss_log?
+    attach_rss_log_final_step if has_rss_log?
   end
 
   # This is called just before an object's changes are saved.
@@ -208,7 +232,6 @@ class AbstractModel < ApplicationRecord
   # either of these things.
   before_update :do_log_update
   def do_log_update
-    # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
     autolog_updated if has_rss_log? && !@save_without_our_callbacks
   end
@@ -226,7 +249,7 @@ class AbstractModel < ApplicationRecord
   before_destroy :do_log_destroy
   def do_log_destroy
     SiteData.update_contribution(:del, self)
-    autolog_destroyed if has_rss_log?
+    autolog_destroyed if has_rss_log? && rss_log.present?
     @id_was = id
   end
 
@@ -264,7 +287,7 @@ class AbstractModel < ApplicationRecord
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
-  #   def show_observation
+  #   def show
   #     @observation = Observation.find(params[:id].to_s)
   #     @observation.update_view_stats
   #     ...
@@ -277,13 +300,13 @@ class AbstractModel < ApplicationRecord
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
   def update_view_stats
-    return unless respond_to?("num_views=") || respond_to?("last_view=")
+    return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
     @old_num_views = num_views
     @old_last_view = last_view
     self.class.record_timestamps = false
-    self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-    self.last_view = Time.zone.now        if respond_to?("last_view=")
+    self.num_views = (num_views || 0) + 1 if respond_to?(:num_views=)
+    self.last_view = Time.zone.now        if respond_to?(:last_view=)
     save_without_our_callbacks
     self.class.record_timestamps = true
   end
@@ -319,13 +342,15 @@ class AbstractModel < ApplicationRecord
   #   obj.errors.add(:attr, "message").
   def formatted_errors
     out = []
-    errors.each do |attr, msg|
-      if /^[A-Z]/.match?(msg)
-        out << msg
+    errors.each do |error|
+      attribute = error.attribute
+      message = error.message
+      if /^[A-Z]/.match?(message)
+        out << message
       else
-        name = attr.to_s.to_sym.l
+        name = attribute.to_s.to_sym.l
         obj = type_tag.to_s.upcase_first.to_sym.l
-        out << "#{obj} #{name} #{msg}."
+        out << "#{obj} #{name} #{message}."
       end
     end
     out
@@ -343,21 +368,18 @@ class AbstractModel < ApplicationRecord
   # I don't think there will be relevant special cases,
   # i.e., searchable models with singular controller names. JDC 2020-08-02
   #
-  # Return the name of the controller (as a simple lowercase string)
-  # that handles the "show_<object>" action for this object.
+  # Return the name of the controller (as a symbol)
+  # that handles the "show_<object>" for this object.
   #
-  # The name must be anchored with a slash to avoid namespacing it.
+  #   Article.show_controller => :articles # for normalized controller
   #
-  #   Article.show_controller => "/articles" # for normalized controller
-  #
-  #   Name.show_controller => "/name" # unnormalized controller & special cases
-  #   name.show_controller => "/name"
+  #   Name.show_controller => :name # unnormalized controller & special cases
   #
   def self.show_controller
-    if controller_normalized?(name)
-      "/#{name.pluralize.underscore}" # Rails standard for most controllers
+    if controller_normalized?
+      name.pluralize.underscore.to_sym # Rails standard for most controllers
     else
-      "/#{name.underscore}" # old MO controller names and any special cases
+      name.underscore.to_sym # old MO controller names and any special cases
     end
   end
 
@@ -367,7 +389,7 @@ class AbstractModel < ApplicationRecord
 
   # Has controller been normalized to Rails 6.0 standards:
   #  plural controller name, CRUD action names standardized if they exist
-  def self.controller_normalized?(name)
+  def self.controller_normalized?
     class_defined?("#{name.pluralize}Controller")
   end
 
@@ -378,13 +400,11 @@ class AbstractModel < ApplicationRecord
     false
   end
 
-  # Return the name of the "index_<object>" action (as a simple
-  # lowercase string) that displays search index for this object.
+  # Return the name of the "index_<object>" action (as a symbol)
+  # that displays search index for this object.
   #
-  #   Article.index_action => "index" # normalized controller
-  #
-  #   Name.index_action => "index_name" #unormalized
-  #   name.index_action => "index_name"
+  #   Article.index_action => :index # normalized controller
+  #   Name.index_action => :index_name # unormalized
   #
   # WARNING.
   # 1. There is no standard Rails action name for displaying a **search** index.
@@ -399,48 +419,47 @@ class AbstractModel < ApplicationRecord
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
   def self.index_action
-    return "index" if controller_normalized?(name) # Rails standard
+    return :index if controller_normalized? # Rails standard
 
-    "index_#{name.underscore}" # Old MO style
+    "index_#{name.underscore}".to_sym # Old MO style
   end
 
   def index_action
     self.class.index_action
   end
 
-  # Return the name of the "show_<object>" action (as a simple
-  # lowercase string) that displays this object.
+  # Return the name of the "show_<object>" action (as a symbol)
+  # that displays this object.
   #
-  #   Article.show_action => "show" # normalized controller
+  #   Article.show_action => :show # normalized controller
   #
-  #   Name.show_action => "show_name" #unormalized
-  #   name.show_action => "show_name"
+  #   Name.show_action => :show_name # unormalized
+  #   name.show_action => :show_name
   #
   def self.show_action
-    return "show" if controller_normalized?(name) # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "show_#{name.underscore}" # Old MO style
+    "show_#{name.underscore}".to_sym # Old MO style
   end
 
   def show_action
     self.class.show_action
   end
 
-  # Return the URL of the "show_<object>" action
+  # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
-  #   Article.index_action => "http://mushroomobserver.org/article/12"
+  #   Article.index_action => "https://mushroomobserver.org/article/12"
   #
   #   # unnormalized controller
-  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
-  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
+  #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
+  #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
   #
-  # Note that show_controller has a leading forward slash
   def self.show_url(id)
-    if controller_normalized?(name)
-      "#{MO.http_domain}#{show_controller}/#{id}"
+    if controller_normalized?
+      "#{MO.http_domain}/#{show_controller}/#{id}"
     else
-      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
+      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
     end
   end
 
@@ -453,9 +472,9 @@ class AbstractModel < ApplicationRecord
   # actions are normalized.
   # See https://www.pivotaltracker.com/story/show/174440291
   def self.show_past_action
-    return "show_past" if controller_normalized?(name) # Rails standard
+    return :show_past if controller_normalized? # Rails standard
 
-    "show_past_#{name.underscore}" # Old MO style
+    "show_past_#{name.underscore}".to_sym # Old MO style
   end
 
   def show_past_action
@@ -465,9 +484,9 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "next" action
   # See comments above at show_action
   def self.next_action
-    return "next" if controller_normalized?(name) # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "next_#{name.underscore}" # Old MO style
+    "next_#{name.underscore}".to_sym # Old MO style
   end
 
   def next_action
@@ -477,9 +496,9 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "prev" action
   # See comments above at show_action
   def self.prev_action
-    return "prev" if controller_normalized?(name) # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "prev_#{name.underscore}" # Old MO style
+    "prev_#{name.underscore}".to_sym # Old MO style
   end
 
   def prev_action
@@ -504,7 +523,7 @@ class AbstractModel < ApplicationRecord
   #   name.eol_url => "http://eol.org/blah/blah/blah"
   #
   def eol_url
-    triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
+    triple = Triple.find_by(subject: show_url, predicate: eol_predicate)
     triple&.object
   end
 
@@ -537,9 +556,9 @@ class AbstractModel < ApplicationRecord
   #   name.edit_action => "edit_name"
   #
   def self.edit_action
-    return "edit" if controller_normalized?(name) # Rails standard
+    return :edit if controller_normalized? # Rails standard
 
-    "edit_#{name.underscore}" # Old MO styl
+    "edit_#{name.underscore}".to_sym # Old MO styl
   end
 
   def edit_action
@@ -548,8 +567,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "edit_<object>" action
   #
-  #   Name.edit_url(12) => "http://mushroomobserver.org/name/edit_name/12"
-  #   name.edit_url     => "http://mushroomobserver.org/name/edit_name/12"
+  #   Name.edit_url(12) => "https://mushroomobserver.org/name/edit_name/12"
+  #   name.edit_url     => "https://mushroomobserver.org/name/edit_name/12"
   #
   def self.edit_url(id)
     "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
@@ -586,14 +605,16 @@ class AbstractModel < ApplicationRecord
     show_controller
   end
 
-  # Return the name of the "destroy_<object>" action (as a simple
-  # lowercase string) that displays this object.
+  # Return the name of the "destroy_<object>" action (as a symbol)
+  # that displays this object.
   #
+  #   Article.destroy_action => :destroy
   #   Name.destroy_action => "destroy_name"
-  #   name.destroy_action => "destroy_name"
   #
   def self.destroy_action
-    "destroy_" + name.underscore
+    return :destroy if controller_normalized? # Rails standard
+
+    "destroy_#{name.underscore}".to_sym # Old MO styl
   end
 
   def destroy_action
@@ -602,8 +623,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "destroy_<object>" action
   #
-  #   Name.destroy_url(12) => "http://mushroomobserver.org/name/destroy_name/12"
-  #   name.destroy_url     => "http://mushroomobserver.org/name/destroy_name/12"
+  #   Name.destroy_url(12) => "https://mushroomobserver.org/name/destroy_name/12"
+  #   name.destroy_url     => "https://mushroomobserver.org/name/destroy_name/12"
   #
   def self.destroy_url(id)
     "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"
@@ -663,7 +684,7 @@ class AbstractModel < ApplicationRecord
   #
   def log(tag, args = {})
     init_rss_log unless rss_log
-    touch unless new_record? || # rubocop:disable Rails/SkipsModelValidations
+    touch unless new_record? ||
                  args[:touch] == false
     rss_log.add_with_date(tag, args)
   end
@@ -675,51 +696,8 @@ class AbstractModel < ApplicationRecord
   #   orphan_log(:log_observation_destroyed)
   #
   def orphan_log(*args)
-    rss_log = init_rss_log(:orphan)
+    rss_log = init_rss_log(orphan: true)
     rss_log.orphan(format_name, *args)
-  end
-
-  # Logs addition of new Image.
-  def log_create_image(image)
-    log_image(:log_image_created, image, true)
-  end
-
-  # Logs addition of existing Image.
-  def log_reuse_image(image)
-    log_image(:log_image_reused, image, true)
-  end
-
-  # Logs update of Image.
-  def log_update_image(image)
-    log_image(:log_image_updated, image, false)
-  end
-
-  # Logs removal of Image.
-  def log_remove_image(image)
-    log_image(:log_image_removed, image, false)
-  end
-
-  # Logs destruction of Image.
-  def log_destroy_image(image)
-    log_image(:log_image_destroyed, image, false)
-  end
-
-  # Log addition of new Sequence to object
-  def log_add_sequence(sequence)
-    log_sequence(:log_sequence_added, sequence, true)
-  end
-
-  # Log Sequence's accession to archive
-  def log_accession_sequence(sequence)
-    log_sequence(:log_sequence_accessioned, sequence, true)
-  end
-
-  def log_update_sequence(sequence)
-    log_sequence(:log_sequence_updated, sequence, false)
-  end
-
-  def log_destroy_sequence(sequence)
-    log_sequence(:log_sequence_destroyed, sequence, true)
   end
 
   # Callback that logs creation.
@@ -734,19 +712,20 @@ class AbstractModel < ApplicationRecord
 
   # Callback that logs destruction.
   def autolog_destroyed
-    autolog_event(:destroyed, :orphan)
+    autolog_event(:destroyed, orphan: true)
   end
 
   # Do we log this event? and how?
-  def autolog_event(event, orphan = nil)
+  def autolog_event(event, orphan: nil)
     return unless RunLevel.is_normal?
 
-    touch = if autolog_events.include?(event)
-              false
-            elsif autolog_events.include?("#{event}!".to_sym)
-              true
-            end
-    return if touch.nil?
+    if autolog_events.include?(event)
+      touch = false
+    elsif autolog_events.include?("#{event}!".to_sym)
+      touch = true
+    else
+      return
+    end
 
     type = type_tag
     msg = "log_#{type}_#{event}".to_sym
@@ -756,59 +735,42 @@ class AbstractModel < ApplicationRecord
   # Create RssLog and attach it if we don't already have one.  This is
   # primarily for the benefit of old objects that don't have RssLog's already.
   # All new objects automatically get one.
-  def init_rss_log(orphan = false)
-    result = nil
-    if rss_log
-      result = rss_log
-    else
-      rss_log = RssLog.new
-      rss_log.created_at = created_at unless new_record?
-      # Don't attach to object if about to destroy.
-      if !orphan
-        rss_log.send("#{type_tag}_id=", id) if id
-        rss_log.save
-        # Save it now unless we are sure it will be saved later.
-        need_to_save = !new_record? && !changed?
-        self.rss_log_id = rss_log.id
-        self.rss_log    = rss_log
-        save if need_to_save
-      else
-        # Always save the rss_log.
-        rss_log.save
-      end
-      result = rss_log
-    end
-    # We need to return it in case we created an orphaned log, otherwise
-    # the caller won't have access to it!
-    result
+  def init_rss_log(orphan: false)
+    return rss_log if rss_log
+
+    rss_log = RssLog.new
+    rss_log.created_at = created_at unless new_record?
+    rss_log.send("#{type_tag}_id=", id) if id && !orphan
+    rss_log.save
+    attach_rss_log_first_step(rss_log) unless orphan
+    rss_log
+  end
+
+  # Point object to its new RssLog and save the object unless we are sure
+  # it will be saved later.
+  def attach_rss_log_first_step(rss_log)
+    will_save_later = new_record? || changed?
+    self.rss_log_id = rss_log.id
+    self.rss_log    = rss_log
+    save unless will_save_later
   end
 
   # Fill in reverse-lookup id in RssLog after creating new record.
-  def attach_rss_log
+  def attach_rss_log_final_step
     return unless rss_log && (rss_log.send("#{type_tag}_id") != id)
 
     rss_log.send("#{type_tag}_id=", id)
     rss_log.save
   end
 
-  # The label which is displayed for the model's tab in the RssLog tabset
-  # e.g. "Names", "Species Lists"
-  def self.rss_log_tab_label
-    to_s.pluralized_title
-  end
-
-  # Add a note
+  # Add a note to the notes field with paragraph break between different notes.
   def add_note(note)
-    if notes
-      self.notes += "\n\n" + note
-    else
-      self.notes = note
-    end
+    self.notes = notes.present? ? "\n\n#{note}" : note
     save
   end
 
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user == user))
+    !respond_to?(:user) || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)
@@ -828,19 +790,5 @@ class AbstractModel < ApplicationRecord
   # See notes at https://www.pivotaltracker.com/story/show/163189614
   def saved_version_changes?
     track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Layout/LineLength
-  end
-
-  ##############################################################################
-
-  private
-
-  def log_image(tag, image, touch) # :nodoc:
-    name = "#{:Image.t} ##{image.id || image.was || "??"}"
-    log(tag, name: name, touch: touch)
-  end
-
-  def log_sequence(tag, sequence, touch) # :nodoc:
-    name = "#{:SEQUENCE.t} ##{sequence.id || "??"}"
-    log(tag, name: name, touch: touch)
   end
 end

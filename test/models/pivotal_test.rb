@@ -47,7 +47,7 @@ class PivotalTest < UnitTestCase
     # Clean up after failed previous tests.
     stories = Pivotal.get_stories
     stories.select { |s| s.name == "temp" }.each do |story|
-      puts "Cleaning up story ##{story.id}"
+      puts("Cleaning up story ##{story.id}")
       Pivotal.delete_story(story.id)
     end
 

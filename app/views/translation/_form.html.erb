@@ -29,7 +29,7 @@
     # Estimate number of rows needed for text area.
     str = @strings[tag].to_s.gsub(/\\n/, "\n")
     rows = 1
-    for line in str.each_line
+    str.each_line.each do |line|
       rows += (line.length / 80).truncate + 1
     end
     rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
@@ -81,7 +81,7 @@
       user_logins[record.user_id] ||= record.user.login rescue nil
       last_text = record.text
       versions_to_show = []
-      for version in record.versions.reverse
+      record.versions.reverse.each do |version|
         if version.text != last_text
           versions_to_show << version
           last_text = version.text

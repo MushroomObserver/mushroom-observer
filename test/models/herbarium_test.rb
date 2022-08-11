@@ -58,9 +58,7 @@ class HerbariumTest < UnitTestCase
     assert_equal(description, result.description)
     # Do it this way to make absolutely sure no duplicate records are being
     # created in the glue table.  This can and has happened with other tables.
-    curator_ids = Name.connection.select_values(%(
-      SELECT user_id FROM herbaria_curators WHERE herbarium_id = #{ny.id}
-    ))
+    curator_ids = HerbariumCurator.where(herbarium_id: ny.id).pluck(:user_id)
     assert_equal(curators.map(&:id).sort, curator_ids.sort)
     assert_obj_list_equal(herbarium_records, result.herbarium_records)
   end

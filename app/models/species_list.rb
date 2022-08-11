@@ -87,12 +87,16 @@ class SpeciesList < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :observations, after_add: :add_obs_callback,
-                                         before_remove: :remove_obs_callback
+  has_many :project_species_lists, dependent: :destroy
+  has_many :projects, through: :project_species_lists
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :species_list_observations, dependent: :destroy
+  has_many :observations, through: :species_list_observations,
+                          after_add: :add_obs_callback,
+                          before_remove: :remove_obs_callback
+
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   attr_accessor :data
 
@@ -120,10 +124,8 @@ class SpeciesList < AbstractModel
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
-    SpeciesList.connection.delete(%(
-      DELETE FROM observations_species_lists
-      WHERE species_list_id = #{id}
-    ))
+
+    SpeciesListObservation.where(species_list_id: id).delete_all
   end
 
   ##############################################################################
@@ -134,11 +136,11 @@ class SpeciesList < AbstractModel
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to :postal).
+  # Also applies the location_format of the current user (defaults to "postal").
   def place_name
     if location
       location.display_name
-    elsif User.current_location_format == :scientific
+    elsif User.current_location_format == "scientific"
       Location.reverse_name(where)
     else
       where
@@ -149,7 +151,7 @@ class SpeciesList < AbstractModel
   # the given +display_name+.  (Fills the other in with +nil+.)
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
-    where = if User.current_location_format == :scientific
+    where = if User.current_location_format == "scientific"
               Location.reverse_name(place_name)
             else
               place_name
@@ -173,7 +175,7 @@ class SpeciesList < AbstractModel
     title
   end
 
-  # Return formatted title with id appended to make in unique.
+  # Return formatted title with id appended to make unique.
   def unique_format_name
     title = self.title
     if title.blank?
@@ -190,43 +192,7 @@ class SpeciesList < AbstractModel
 
   # Get list of Names, sorted by sort_name, for this list's Observation's.
   def names
-    # Takes 0.07 seconds on Sebastopol Observations.
-    # (Methods that call this don't need the description, review status, etc.)
-    Name.find_by_sql(%(
-      SELECT DISTINCT n.id, n.rank, n.deprecated, n.text_name, n.search_name,
-             n.author, n.display_name, n.display_name, n.synonym_id,
-             n.correct_spelling_id, n.citation
-      FROM names n, observations o, observations_species_lists os
-      WHERE n.id = o.name_id
-        AND os.observation_id = o.id
-        AND os.species_list_id = #{id}
-      ORDER BY n.sort_name ASC
-    ))
-
-    # Takes 0.10 seconds on Sebastopol Observations.
-    # Name.find_by_sql %(
-    #   SELECT DISTINCT n.*
-    #   FROM names n, observations o, observations_species_lists os
-    #   WHERE n.id = o.name_id
-    #     AND os.observation_id = o.id
-    #     AND os.species_list_id = #{id}
-    #   ORDER BY n.sort_name ASC
-    # )
-
-    # Takes 0.25 seconds on Sebastopol Observations.
-    # ids = observations.map(&:name_id).uniq
-    # Name.find(:all, :conditions => ['id IN (?)', ids], :
-    #           order => 'sort_name ASC')
-
-    # Takes 0.71 seconds on Sebastopol Observations.
-    # self.observations.map {|o| o.name_id}.
-    #   uniq.map {|id| Name.find(id)}.sort_by(&:sort_name)
-
-    # Takes 1.00 seconds on Sebastopol Observations.
-    # Name.all(:conditions =>
-    #            ['observations_species_lists.species_list_id = ?', id],
-    #          :include => {:observations => :species_lists},
-    #          :order => 'names.sort_name ASC')
+    Name.where(id: observations.map(&:name_id).uniq).order(sort_name: :asc)
   end
 
   # Tests to see if the species list includes an Observation with the given
@@ -237,13 +203,9 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE species_lists
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    SpeciesList.where(where: old_name).update_all(
+      where: location.name, location_id: location.id
+    )
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.

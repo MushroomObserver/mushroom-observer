@@ -376,12 +376,15 @@ class LocationTest < UnitTestCase
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown
     assert_objs_equal(loc1, loc2)
-    I18n.locale = "es"
-    loc3 = Location.unknown
-    assert_objs_equal(loc1, loc3)
-    TranslationString.translations(:es)[:unknown_locations] = "Desconocido"
-    loc4 = Location.unknown
-    assert_objs_equal(loc1, loc4)
+    I18n.with_locale(:es) do
+      loc3 = Location.unknown
+      assert_objs_equal(loc1, loc3)
+      TranslationString.store_localizations(
+        :es, { unknown_locations: "Desconocido" }
+      )
+      loc4 = Location.unknown
+      assert_objs_equal(loc1, loc4)
+    end
   end
 
   def test_merge_with_user
@@ -411,13 +414,13 @@ class LocationTest < UnitTestCase
     loc = Location.first
 
     User.current = rolf
-    assert_equal(:postal, User.current_location_format)
+    assert_equal("postal", User.current_location_format)
     loc.update_attribute(:display_name, "One, Two, Three")
     assert_equal("One, Two, Three", loc.name)
     assert_equal("Three, Two, One", loc.scientific_name)
 
     User.current = roy
-    assert_equal(:scientific, User.current_location_format)
+    assert_equal("scientific", User.current_location_format)
     loc.update_attribute(:display_name, "Un, Deux, Trois")
     assert_equal("Trois, Deux, Un", loc.name)
     assert_equal("Un, Deux, Trois", loc.scientific_name)
@@ -459,5 +462,96 @@ class LocationTest < UnitTestCase
     loc.west = 170
     loc.force_valid_lat_longs!
     assert_equal([8, 6, -170, 170], [loc.north, loc.south, loc.east, loc.west])
+  end
+
+  def test_destroy_orphans_log
+    loc = locations(:mitrula_marsh)
+    log = loc.rss_log
+    assert_not_nil(log)
+    loc.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
+  def test_merge_orphans_log
+    loc1 = locations(:mitrula_marsh)
+    loc2 = locations(:albion)
+    log1 = loc1.rss_log
+    log2 = loc2.rss_log
+    assert_not_nil(log1)
+    assert_not_nil(log2)
+    loc2.merge(loc1)
+    assert_nil(log1.reload.target_id)
+    assert_not_nil(log2.reload.target_id)
+    assert_equal(:log_orphan, log1.parse_log[0][0])
+    assert_equal(:log_location_merged, log1.parse_log[1][0])
+  end
+
+  # test BoxMethods module `lat_long_close?` method
+  def test_lat_long_close
+    loc = locations(:east_lt_west_location)
+    centrum = { lat: loc.south + loc.north_south_distance / 2,
+                lon: loc.east - loc.east_west_distance / 2 }
+    assert_true(loc.lat_long_close?(centrum[:lat], centrum[:lon]),
+                "Location's centrum should be 'close' to Location.")
+    assert_false(loc.lat_long_close?(centrum[:lat], centrum[:lon] + 180),
+                 "Opposite side of globe should not be 'close' to Location.")
+  end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_scope_name_includes
+    assert_includes(
+      Location.name_includes("Albion"),
+      locations(:albion)
+    )
+    assert_empty(Location.name_includes(ARBITRARY_SHA))
+  end
+
+  def test_scope_in_region
+    assert_includes(
+      Location.in_region("New York\, USA"),
+      locations(:nybg_location)
+    )
+    assert_not_includes(
+      Location.in_region("York"),
+      locations(:nybg_location),
+      "Entire trailing part of Location name should match region"
+    )
+    assert_empty(Location.in_region(ARBITRARY_SHA))
+  end
+
+  # supplements API tests
+  def test_scope_in_box
+    cal = locations(:california)
+    locs_in_cal_box = Location.in_box(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+    assert_includes(locs_in_cal_box, locations(:albion))
+    assert_includes(locs_in_cal_box, cal)
+
+    wrangel = locations(:east_lt_west_location)
+    locs_in_wrangel_box = Location.in_box(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+    assert_includes(locs_in_wrangel_box, wrangel)
+    assert_not_includes(locs_in_wrangel_box, cal)
+
+    assert_empty(
+      Location.in_box(n: cal.north, s: cal.south, e: cal.east),
+      "`scope: in_box` should be empty if an argument is missing"
+    )
+    assert_empty(
+      Location.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      "`scope: in_box` should be empty if an argument is out of bounds"
+    )
+    assert_empty(
+      Location.in_box(
+        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+      ),
+      "`scope: in_box` should be empty if N < S"
+    )
   end
 end

@@ -25,8 +25,8 @@ MushroomObserver::Application.configure do
     domain: "localhost"
   }
 
-  config.image_precedence = { default: [:local, :cdmr] }
-  config.image_fallback_source = :cdmr
+  config.image_precedence = { default: [:local, :mycolab] }
+  config.image_fallback_source = :mycolab
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
@@ -50,6 +50,10 @@ MushroomObserver::Application.configure do
   # The :file delivery method accumulates sent emails in the
   # ../mail directory.  (This is a feature I added. -JPH 20080213)
   config.action_mailer.delivery_method = :file
+
+  # Allow YAML deserializer to deserialize symbols
+  # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
+  config.active_record.yaml_column_permitted_classes = [Symbol]
 
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log

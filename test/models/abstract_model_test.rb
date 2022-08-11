@@ -8,19 +8,20 @@ class AbstractModelTest < UnitTestCase
     (old_attrs.keys + new_attrs.keys).map(&:to_s).uniq.sort.each do |key|
       old_val = old_attrs[key]
       new_val = new_attrs[key]
+      rss_log_id_or_reason = %w[rss_log_id reasons]
       if key == "num_views"
-        assert_equal((old_val || 0) + 1, new_val, msg + "num_views wrong")
+        assert_equal((old_val || 0) + 1, new_val, "#{msg}num_views wrong")
       elsif key == "last_view"
         if new_val
-          assert(new_val > 1.hour.ago, msg + "#{key} more than one hour old")
-          assert(new_val > old_val, msg + "#{key} wasn't updated") if old_val
+          assert(new_val > 1.hour.ago, "#{msg}#{key} more than one hour old")
+          assert(new_val > old_val, "#{msg}#{key} wasn't updated") if old_val
         end
-      elsif %w[rss_log_id reasons].member?(key) && (new_val != old_val)
+      elsif rss_log_id_or_reason.member?(key) && (new_val != old_val)
         assert(new_val)
       elsif key == "updated_at"
-        assert(new_val >= old_val, msg + "#{key} is older than it was")
+        assert(new_val >= old_val, "#{msg}#{key} is older than it was")
       else
-        assert(old_val == new_val, msg + "#{key} shouldn't have changed!")
+        assert(old_val == new_val, "#{msg}#{key} shouldn't have changed!")
       end
     end
   end
@@ -207,7 +208,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_location_merged, rss_log)
     assert(rss_log.updated_at > time)
     assert_nil(Location.safe_find(loc_id))
-    assert_equal(:location, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_name_rss_log_life_cycle
@@ -254,7 +255,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_name_merged, rss_log)
     assert(rss_log.updated_at > time)
     assert_nil(Name.safe_find(name_id))
-    assert_equal(:name, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_observation_rss_log_life_cycle
@@ -268,7 +269,7 @@ class AbstractModelTest < UnitTestCase
 
     assert_nil(obs.rss_log)
     assert_save(obs)
-    # This is normally done by ObserverController#create_observation.
+    # This is normally done by ObservationsController#create.
     obs.log(:log_observation_created)
     obs_id = obs.id
     assert_not_nil(rss_log = obs.rss_log)
@@ -286,7 +287,7 @@ class AbstractModelTest < UnitTestCase
 
     # rss_log.update_attribute(:updated_at, time)
     Observation.update(obs.id, notes: "New Notes")
-    # This is normally done by ObserverController#edit_observation.
+    # This is normally done by ObservationsController#edit.
     obs.log(:log_observation_updated, touch: true)
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
@@ -301,7 +302,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_observation_destroyed, rss_log)
     # assert_in_delta(time, rss_log.updated_at, 1.second)
     assert_nil(Observation.safe_find(obs_id))
-    assert_equal(:observation, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_project_rss_log_life_cycle
@@ -353,7 +354,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_project_destroyed, rss_log)
     assert(proj.rss_log.updated_at > time)
     assert_nil(Project.safe_find(proj_id))
-    assert_equal(:project, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_species_list_rss_log_life_cycle
@@ -394,7 +395,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_lines(5, rss_log)
     assert_rss_log_has_tag(:log_species_list_destroyed, rss_log)
     assert_nil(SpeciesList.safe_find(spl_id))
-    assert_equal(:species_list, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   # -------------------------------------------------------------------
@@ -403,31 +404,31 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_show_controller
-    assert_equal("/articles", Article.show_controller)
-    assert_equal("/#{self.class.name.underscore}/phony", Phony.show_controller)
+    assert_equal(:articles, Article.show_controller)
+    assert_equal(:phony, Phony.show_controller)
   end
 
   def test_show_action
-    assert_equal("show", Article.show_action)
-    assert_equal("show_#{Phony.name.underscore}", Phony.show_action)
+    assert_equal(:show, Article.show_action)
+    assert_equal("show_#{Phony.name.underscore}".to_sym, Phony.show_action)
   end
 
   def test_show_url
     assert_equal("#{MO.http_domain}/articles/2020",
                  Article.show_url(2020))
     assert_equal(
-      "#{MO.http_domain}#{Phony.show_controller}/#{Phony.show_action}/2020",
+      "#{MO.http_domain}/#{Phony.show_controller}/#{Phony.show_action}/2020",
       Phony.show_url(2020)
     )
   end
 
   def test_index_action
-    assert_equal("index", Article.index_action)
-    assert_equal("index_#{Phony.name.underscore}", Phony.index_action)
+    assert_equal(:index, Article.index_action)
+    assert_equal("index_#{Phony.name.underscore}".to_sym, Phony.index_action)
   end
 
   # fixture for above tests
-  class Phony < AbstractModel
+  class ::Phony < AbstractModel
   end
 
   # -------------------------------------------
@@ -435,7 +436,7 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------
 
   def test_show_urls
-    assert_show_url(ApiKey, "account/show_api_key")
+    assert_show_url(APIKey, "account/show_api_key")
     assert_show_url(CollectionNumber,
                     "collection_number/show_collection_number")
     assert_show_url(Comment, "comment/show_comment")
@@ -445,17 +446,89 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Image, "image/show_image")
     assert_show_url(Location, "location/show_location")
     assert_show_url(Name, "name/show_name")
-    assert_show_url(Naming, "observer/show_naming")
-    assert_show_url(Observation, "observer/show_observation")
+    assert_show_url(Naming, "observations/show_naming")
+    assert_show_url(Observation, "observations")
     assert_show_url(Project, "project/show_project")
     assert_show_url(Sequence, "sequence/show_sequence")
     assert_show_url(SpeciesList, "species_list/show_species_list")
-    assert_show_url(User, "observer/show_user")
+    assert_show_url(User, "users")
   end
 
   def assert_show_url(model, path)
-    domain = "http://mushroomobserver.org"
+    domain = "https://mushroomobserver.org"
     obj = model.first
     assert_equal("#{domain}/#{path}/#{obj.id}", obj.show_url)
+  end
+
+  # -------------------------------------------------------------------------
+  #  Checks that arel-helpers are included (from the gem) in ApplicationRecord.
+  #  In the test below, the brackets in User[:login] referring to table column
+  #  will throw  NoMethodError: undefined method `[]' for #<Class>
+  #  if arel-helpers not included. Error could be mystifying at first.
+  # -------------------------------------------------------------------------
+  def test_arel_helpers_included
+    arel_find_user = User.find_by(User[:login].eq(rolf.login))
+    assert_equal(arel_find_user.login, rolf.login)
+  end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def start_of_time
+    Date.jd(0).strftime("%Y, %m, %d")
+  end
+
+  def a_century_from_now
+    (Time.zone.today + 100.years).strftime("%Y, %m, %d")
+  end
+
+  def two_centuries_from_now
+    (Time.zone.today + 200.years).strftime("%Y, %m, %d")
+  end
+
+  def test_scope_created_after
+    assert_equal(Observation.count,
+                 Observation.created_after(start_of_time).count)
+    assert_empty(Observation.created_after(a_century_from_now))
+  end
+
+  def test_scope_created_before
+    assert_equal(Observation.count,
+                 Observation.created_before(a_century_from_now).count)
+    assert_empty(Observation.created_before(start_of_time))
+  end
+
+  def test_scope_created_between
+    assert_equal(
+      Observation.count,
+      Observation.created_between(start_of_time, a_century_from_now).count
+    )
+    assert_empty(
+      Observation.created_between(a_century_from_now, two_centuries_from_now)
+    )
+  end
+
+  def test_scope_updated_after
+    assert_equal(Observation.count,
+                 Observation.updated_after(start_of_time).count)
+    assert_empty(Observation.updated_after(a_century_from_now))
+  end
+
+  def test_scope_updated_before
+    assert_equal(Observation.count,
+                 Observation.updated_before(a_century_from_now).count)
+    assert_empty(Observation.updated_before(start_of_time))
+  end
+
+  def test_scope_updated_between
+    assert_equal(
+      Observation.count,
+      Observation.updated_between(start_of_time, a_century_from_now).count
+    )
+    assert_empty(
+      Observation.updated_between(a_century_from_now, two_centuries_from_now)
+    )
   end
 end

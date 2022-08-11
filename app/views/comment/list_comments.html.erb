@@ -10,7 +10,7 @@
 <div class="max-width-text-plus-image">
   <%= paginate_block(@pages) do %>
     <% if @objects.any? %>
-      <% for comment in @objects %>
+      <% @objects.each do |comment| %>
         <%= render(partial: "comment", object: comment, locals: {show_name: true}) %>
       <% end %>
     <% end %>

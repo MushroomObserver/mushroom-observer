@@ -107,7 +107,7 @@ class EolData
 
   def prune_synonyms(names)
     synonyms = Hash.new { |h, k| h[k] = [] }
-    for name in names
+    names.each do |name|
       synonyms[name.synonym_id] << name if name.synonym_id
     end
     names_to_keep = {}
@@ -123,7 +123,7 @@ class EolData
 
   def most_desirable_name(names)
     most_desirable = names[0]
-    for new_name in names[1..]
+    (names[1..]).each do |new_name|
       most_desirable = most_desirable.more_popular(new_name)
     end
     most_desirable
@@ -134,12 +134,12 @@ class EolData
     AND names.ok_for_export
     AND NOT names.deprecated
     AND name_descriptions.review_status in (
-      #{NameDescription.review_statuses[:vetted]},
-      #{NameDescription.review_statuses[:unvetted]}
+      #{NameDescription.review_statuses["vetted"]},
+      #{NameDescription.review_statuses["unvetted"]}
     )
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
-  )
+  ).freeze
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -163,31 +163,31 @@ class EolData
     )
   end
 
-  IMAGE_CONDITIONS = %(FROM observations, images_observations, images, names
+  IMAGE_CONDITIONS = %(FROM observations, observation_images, images, names
     WHERE observations.name_id = names.id
     AND observations.vote_cache >= 2.4
-    AND observations.id = images_observations.observation_id
-    AND images_observations.image_id = images.id
+    AND observations.id = observation_images.observation_id
+    AND observation_images.image_id = images.id
     AND images.vote_cache >= 2
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
     AND names.`rank` IN (#{Name.ranks.values_at(
-      :Form, :Variety, :Subspecies, :Species, :Genus
+      "Form", "Variety", "Subspecies", "Species", "Genus"
     ).join(",")})
-  )
+  ).freeze
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
 
   GLOSSARY_TERM_CONDITIONS = %(
-    FROM images, images_observations, observations, names, glossary_terms
-    LEFT OUTER JOIN glossary_terms_images
-    ON glossary_terms.id = glossary_terms_images.glossary_term_id
-    WHERE ((images.id = glossary_terms_images.image_id)
+    FROM images, observation_images, observations, names, glossary_terms
+    LEFT OUTER JOIN glossary_term_images
+    ON glossary_terms.id = glossary_term_images.glossary_term_id
+    WHERE ((images.id = glossary_term_images.image_id)
            OR (glossary_terms.thumb_image_id = images.id))
-    AND images_observations.image_id = images.id
-    AND images_observations.observation_id = observations.id
+    AND observation_images.image_id = images.id
+    AND observation_images.observation_id = observations.id
     AND observations.name_id = names.id
     AND images.vote_cache >= 2
     AND observations.vote_cache >= 2.4
@@ -232,7 +232,7 @@ class EolData
   end
 
   def image_id_to_names
-    make_list_hash_from_pairs(name_images_list.reduce { |a, b| a + b })
+    make_list_hash_from_pairs(name_images_list.sum([]))
   end
 
   def name_images_list
@@ -254,7 +254,7 @@ class EolData
       SELECT id, IF(COALESCE(name,'') = '', login, name) AS name
       FROM users WHERE contribution > 0
     ))
-    for id, legal_name in data
+    data.each do |id, legal_name|
       result[id] = legal_name
     end
     result
@@ -262,7 +262,7 @@ class EolData
 
   def description_id_to_authors
     data = Name.connection.select_rows(%(
-      SELECT name_description_id, user_id FROM name_descriptions_authors
+      SELECT name_description_id, user_id FROM name_description_authors
     ))
     pairs = data.map do |name_description_id, user_id|
       [name_description_id.to_i, @user_id_to_legal_name[user_id.to_i]]
@@ -278,7 +278,7 @@ class EolData
 
   def make_list_hash_from_pairs(pairs)
     result = Hash.new { |h, k| h[k] = [] }
-    for x, y in pairs
+    pairs.each do |x, y|
       result[x].push(y)
     end
     result
@@ -296,7 +296,7 @@ class EolData
   end
 
   def create_triples(subjects, predicate)
-    for s in subjects
+    subjects.each do |s|
       Triple.new(subject: s.show_url, predicate: predicate,
                  object: eol_search_url(s.class.name, s)).save
     end
@@ -304,10 +304,10 @@ class EolData
 
   def eol_search_url(class_name, subject)
     if class_name == "Image"
-      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}"\
+      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}" \
       "&type%5B%5D=Image"
     elsif class_name == "Name"
-      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}"\
+      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}" \
       "&type%5B%5D=TaxonConcept"
     else
       "http://eol.org"

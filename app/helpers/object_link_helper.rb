@@ -19,7 +19,7 @@ module ObjectLinkHelper
     content_tag(:span, result, class: "Data")
   end
 
-  # Wrap location name in link to show_location / observations_at_where.
+  # Wrap location name in link to show_location / observations/index.
   #
   #   Where: <%= location_link(obs.where, obs.location) %>
   #
@@ -32,8 +32,8 @@ module ObjectLinkHelper
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, controller: :observer,
-                           action: :observations_at_where, where: where)
+      link_to(link_string, controller: :observations,
+                           action: :index, where: where)
     end
   end
 
@@ -115,10 +115,10 @@ module ObjectLinkHelper
   def user_link(user, name = nil)
     if user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
-      link_to(name, "#{observer_show_user_path}/#{user}")
+      link_to(name, user_path(user))
     elsif user
       name ||= user.unique_text_name
-      link_to(name, "#{observer_show_user_path}/#{user.id}")
+      link_to(name, user_path(user.id))
     else
       "?"
     end
@@ -193,7 +193,8 @@ module ObjectLinkHelper
   def observation_herbarium_record_link(obs)
     count = obs.herbarium_records.count
     if count.positive?
-      link_to(pluralize(count, :herbarium_record.t),
+
+      link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
               controller: :herbarium_record, action: :observation_index,
               id: obs.id)
     else

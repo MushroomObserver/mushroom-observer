@@ -26,12 +26,11 @@
 #  * Supplement fixtures as needed by added tests
 #  * Add a filter definition below
 #  * In config/locales/en.txt define text to be displayed in account/prefs
-#    and observer/advanced_search_form pages (search for "filters_has_images")
+#    and search/advanced pages (search for "filters_has_images")
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
 class ContentFilter
-  attr_accessor :sym
-  attr_accessor :models
+  attr_accessor :sym, :models
 
   def initialize(opts)
     opts.each do |key, val|

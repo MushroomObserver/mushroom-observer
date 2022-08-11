@@ -2,7 +2,7 @@
 
 module Report
   # base table class
-  class BaseTable < Report::Base
+  class BaseTable < Base
     attr_accessor :query
 
     class_attribute :separator
@@ -127,7 +127,7 @@ module Report
         SELECT ho.observation_id,
           CONCAT(h.initial_det, ": ", h.accession_number)
         FROM herbarium_records h
-        JOIN herbarium_records_observations ho ON ho.herbarium_record_id = h.id
+        JOIN observation_herbarium_records ho ON ho.herbarium_record_id = h.id
         JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
       ))
       add_column!(rows, vals, col)
@@ -138,7 +138,7 @@ module Report
         SELECT ho.observation_id,
           GROUP_CONCAT(DISTINCT CONCAT(h.code, "\t", hr.accession_number)
                        SEPARATOR "\n")
-        FROM herbarium_records_observations ho
+        FROM observation_herbarium_records ho
         JOIN herbarium_records hr ON hr.id = ho.herbarium_record_id
         JOIN herbaria h ON h.id = hr.herbarium_id
         JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
@@ -154,7 +154,7 @@ module Report
           GROUP_CONCAT(DISTINCT CONCAT(c.id, "\t", c.name, "\t", c.number)
                        SEPARATOR "\n")
         FROM collection_numbers c
-        JOIN collection_numbers_observations co
+        JOIN observation_collection_numbers co
           ON co.collection_number_id = c.id
         JOIN (#{plain_query}) AS ids ON ids.id = co.observation_id
         GROUP BY co.observation_id
@@ -165,7 +165,7 @@ module Report
     def add_image_ids!(rows, col)
       vals = Image.connection.select_rows(%(
         SELECT io.observation_id, io.image_id
-        FROM images_observations io
+        FROM observation_images io
         JOIN (#{plain_query}) AS ids ON ids.id = io.observation_id
       ))
       add_column!(rows, vals, col)

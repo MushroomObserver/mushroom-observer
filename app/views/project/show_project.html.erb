@@ -53,10 +53,10 @@
         <b><%= :OBSERVATIONS.t %>:</b>
         <% if @project.observations.any? %>
           <%= @project.observations.length %>
-          (<%= link_to(:SHOW.t, controller: :observer,
-                       action: :observations_for_project, id: @project.id) %> |
-          <%= link_to(:app_checklist.t, controller: :observer,
-                      action: :checklist, project_id: @project.id) %>)
+          (<%= link_to(:SHOW.t, controller: :observations,
+                       action: :index, project: @project.id) %> |
+          <%= link_to(:app_checklist.t,
+                      checklist_path(project_id: @project.id)) %>)
         <% else %>
           <%= :NONE.t %>
         <% end %>

@@ -11,15 +11,9 @@ class CapybarLurkerTest < IntegrationTestCase
 
   def test_poke_around
     # Start at index.
+    reset_session!
     visit(root_path)
-
-    # Test page content rather than template because:
-    #   assert_template unavailable to Capybara
-    #   assert_template will be deprecated in Rails 5 (but available as a gem)
-    #     because (per DHH) testing content is a better practice
-    # Following gives more informative error message than
-    # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
-    assert_equal("#{:app_title.l}: Activity Log", page.title, "Wrong page")
+    login
 
     # Click on first observation in feed results
     first(:xpath, rss_observation_created_xpath).click
@@ -94,12 +88,7 @@ class CapybarLurkerTest < IntegrationTestCase
     # First login
     reset_session!
     visit(root_path)
-    first(:link, "Login").click
-    assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
-    fill_in("User name or Email address:", with: lurker.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
-    assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+    login(lurker.login)
 
     visit("/#{obs.id}")
     assert_match(/#{:app_title.l}: Observation #{obs.id}/, page.title,
@@ -121,7 +110,7 @@ class CapybarLurkerTest < IntegrationTestCase
       #  Observation itself, naming, comment.
       # (plus a link to it is also in table of names for mobile)
       assert(
-        assert_selector("#content a[href^='/observer/show_user/#{owner.id}']",
+        assert_selector("#content a[href^='/users/#{owner.id}']",
                         minimum: 4)
       )
 
@@ -138,7 +127,7 @@ class CapybarLurkerTest < IntegrationTestCase
     # Check out species list.
     go_back_after do
       list = SpeciesList.joins(:observations).
-             where("observation_id = ?", obs.id).first
+             where(observations: { id: obs.id }).first
       click_link(list.title)
       assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
                    page.title, "Wrong page")
@@ -168,5 +157,21 @@ class CapybarLurkerTest < IntegrationTestCase
     image_count = all(:xpath, observation_image_xpath).count
     assert(image_count == 2,
            "expected 2 Images in Observation, got #{image_count}")
+  end
+
+  ################
+
+  private
+
+  def login(login = users(:zero_user).login)
+    first(:link, "Login").click
+    assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
+    fill_in("User name or Email address:", with: login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+
+    # Following gives more informative error message than
+    # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
+    assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
   end
 end

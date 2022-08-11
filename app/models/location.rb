@@ -35,6 +35,20 @@
 #  primer::             List of User's latest Locations to prime auto-completer.
 #  clean_name::         Clean a name before doing searches on it.
 #
+#  == Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  name_includes(place_name)
+#  in_region(place_name)
+#  in_box(n,s,e,w)
+#
 #  == Instance methods
 #
 #  interests::          Interests in this Location.
@@ -83,10 +97,11 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, -> { order "num_views DESC" },
-           class_name: "LocationDescription"
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :descriptions, -> { order(num_views: :desc) },
+           class_name: "LocationDescription",
+           inverse_of: :location
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
@@ -119,20 +134,58 @@ class Location < AbstractModel
   before_update :update_observation_cache
   after_update :notify_users
 
-  # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!]
+  # Automatically log standard events.  Merge will already log the destruction
+  # as a merge and orphan the log.
+  self.autolog_events = [:created!, :updated!, :destroyed]
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
-       Location.connection.select_value(%(
-         SELECT COUNT(*) FROM locations_versions
-         WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Location::Version.where(
+         location_id: ver.location_id, user_id: ver.user_id
+       ).count.zero?
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
+
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
+  scope :name_includes,
+        ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
+  scope :in_region,
+        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
+  scope :in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          box = Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
+          return none unless box.valid?
+
+          # expand box by epsilon to create leeway for Float rounding
+          # Fixes a bug where Califoria fixture was not in a box
+          # defined by the fixture's north, south, east, west
+          expanded_box = box.expand(0.00001)
+
+          if box.straddles_180_deg?
+            where(
+              (Location[:south] >= expanded_box.south).
+                and(Location[:north] <= expanded_box.north).
+              # Location[:west] between w & 180 OR between 180 and e
+              and((Location[:west] >= expanded_box.west).
+                or(Location[:west] <= expanded_box.east)).
+              and((Location[:east] >= expanded_box.west).
+                or(Location[:east] <= expanded_box.east))
+            )
+          else
+            where(
+              (Location[:south] >= expanded_box.south).
+                and(Location[:north] <= expanded_box.north).
+              and(Location[:west] >= expanded_box.west).
+                and(Location[:east] <= expanded_box.east).
+              and(Location[:west] <= Location[:east])
+            )
+          end
+        }
 
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
@@ -149,14 +202,14 @@ class Location < AbstractModel
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
+    (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
+    (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
-  \s*$/x.freeze
+  \s*$/x
 
   ALTITUDE_REGEX = /^\s*
-    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′′]*)
-  \s*$/x.freeze
+    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′]*)
+  \s*$/x
 
   # Shared logic between latitude and longitude
   def self.parse_lxxxitude(value, direction1, direction2, max_degrees)
@@ -235,19 +288,18 @@ class Location < AbstractModel
   def self.official_unknown
     # yikes! need to make sure we always include the English words
     # for "unknown", even when viewing the site in another language
-    Language.official.translation_strings.find_by_tag("unknown_locations").
+    Language.official.translation_strings.find_by(tag: "unknown_locations").
       text.split(/, */)
   rescue StandardError
     []
   end
 
-  # Get an instance of the Name that means "unknown".
+  # Get an instance of the Location whose name means "unknown".
   def self.unknown
-    names_for_unknown.each do |name|
-      location = Location.find_by("name LIKE ?", name)
-      return location if location
-    end
-    raise("There is no \"unknown\" location!")
+    raise("There is no \"unknown_location_name\" configured!") if
+      MO.unknown_location_name.blank?
+
+    Location.find_by(name: MO.unknown_location_name)
   end
 
   # Is this one of the names we recognize for the "unknown" location?
@@ -260,11 +312,11 @@ class Location < AbstractModel
   end
 
   def display_name
-    User.current_location_format == :scientific ? scientific_name : name
+    User.current_location_format == "scientific" ? scientific_name : name
   end
 
   def display_name=(val)
-    if User.current_location_format == :scientific
+    if User.current_location_format == "scientific"
       self.name = Location.reverse_name(val)
       self.scientific_name = val
     else
@@ -311,7 +363,7 @@ class Location < AbstractModel
   def self.clean_name(str, leave_stars = false)
     str = str.to_ascii
     if leave_stars
-      str.gsub!(/[^\w\*]+/, " ")
+      str.gsub!(/[^\w*]+/, " ")
       str.gsub!(/ +\*/, "*")
       str.gsub!(/\* +/, "*")
     else
@@ -342,7 +394,7 @@ class Location < AbstractModel
     #   ORDER BY observations.updated_at DESC
     #   LIMIT 100
     # )).sort
-    # if User.current_location_format == :scientific
+    # if User.current_location_format == "scientific"
     #   result.map! { |n| Location.reverse_name(n) }
     # end
     # result
@@ -379,12 +431,11 @@ class Location < AbstractModel
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    find_by_name(name) ||
-      find_by_scientific_name(name)
+    Location.where(name: name).or(Location.where(scientific_name: name)).first
   end
 
   def self.user_name(user, name)
-    if user && (user.location_format == :scientific)
+    if user && (user.location_format == "scientific")
       Location.reverse_name(name)
     else
       name
@@ -467,17 +518,9 @@ class Location < AbstractModel
     return false unless name
 
     @@location_cache ||= (
-      Location.connection.select_values(%(
-        SELECT name FROM locations
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `observations`
-        WHERE `where` is not NULL
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `species_lists`
-        WHERE `where` is not NULL
-      ))
+      Location.pluck(:name) +
+        Observation.where.not(where: nil).pluck(:where) +
+        SpeciesList.where.not(where: nil).pluck(:where)
     ).uniq
     @@location_cache.member?(name)
   end
@@ -673,8 +716,8 @@ class Location < AbstractModel
 
     # Add note to explain the merge
     # Intentionally not translated
-    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: "\
-             "North: #{old_loc.north}, South: #{old_loc.south}, "\
+    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: " \
+             "North: #{old_loc.north}, South: #{old_loc.south}, " \
              "West: #{old_loc.west}, East: #{old_loc.east}")
 
     # Merge the two "main" descriptions if it can.
@@ -699,6 +742,7 @@ class Location < AbstractModel
     # Log the action.
     old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
                             this: old_loc.name, that: name)
+    old_loc.rss_log = nil
 
     # Destroy past versions.
     editors = []
@@ -778,7 +822,7 @@ class Location < AbstractModel
   protected
 
   validate :check_requirements
-  def check_requirements # :nodoc:
+  def check_requirements
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end

@@ -50,7 +50,7 @@
     one_liners += "*#{:Citation.l} #{is_now}:* #{new_name.citation}\n"  if new_name.citation   != old_name.citation
     one_liners += "*#{:Rank.l} #{is_now}:* #{new_name.rank}\n"          if new_name.rank       != old_name.rank
     one_liners += "*#{:License.l} #{is_now}:* #{license.display_name}\n" if license && new_desc.license_id != old_desc.license_id
-    one_liners += "*#{:Reviewed.l} #{is_now}:* #{@review_status}\n"      if @review_status       != :no_change
+    one_liners += "*#{:Reviewed.l} #{is_now}:* #{@review_status}\n"      if @review_status       != "no_change"
     one_liners += "*#{:Name.l} #{is_now}:* #{:Deprecated.l}\n"           if new_name.deprecated && !old_name.deprecated
     one_liners += "*#{:Status.l} #{is_now}:* #{:Accepted.l}\n"       if !new_name.deprecated && old_name.deprecated
     one_liners += "*#{:Status.l} #{is_now}:* #{:Misspelled.l}\n"     if !new_name.correct_spelling_id && !!old_name.correct_spelling_id
@@ -58,7 +58,7 @@
     one_liners += "*#{:Correct_spelling.l} #{is_now}:* #{new_spell} (#{new_name.correct_spelling_id}, #{old_name.correct_spelling_id})\n" if new_name.correct_spelling_id != old_name.correct_spelling_id
 
     if new_desc
-      for field in NameDescription.all_note_fields
+      NameDescription.all_note_fields.each do |field|
         old_val = old_desc.send(field) rescue nil
         new_val = new_desc.send(field)
         many_liners.push([("form_names_" + field.to_s).to_sym.t, new_val]) if new_val != old_val
@@ -94,23 +94,23 @@
 if @user.email_html %>
 <html>
 <head>
-	<title><%= "#{:app_title.t}: #{@title}" %></title>
+<title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
 <%= fields.tp %>
 <%= one_liners.tp if !one_liners.blank? %>
-<% for var, val in many_liners %>
-  <%= "*#{var} #{is_now}:*".tp %>
-  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-    <%= val.to_s.tp %>
-  </div>
+<% many_liners.each do |var, val| %>
+<%= "*#{var} #{is_now}:*".tp %>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+<%= val.to_s.tp %>
+</div>
 <% end %>
 <%= handy_links.tp %>
 <ul type=none>
-  <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
-  <% end %>
+<% links.each do |label, url| %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
 </ul>
 <br/>
 </body>
@@ -120,7 +120,7 @@ if @user.email_html %>
 <%= fields.tp.html_to_ascii %>
 
 <%= one_liners.tp.html_to_ascii if !one_liners.blank? %>
-<% for var, val in many_liners %>
+<% many_liners.each do |var, val| %>
 
 <%= var + " " + is_now %>:
 --------------------------------------------------
@@ -133,7 +133,7 @@ if @user.email_html %>
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = "".html_safe
-  for label, url in links
+  links.each do |label, url|
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>

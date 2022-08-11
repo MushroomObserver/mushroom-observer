@@ -17,8 +17,7 @@ class Query::CommentForTarget < Query::CommentBase
   end
 
   def target_instance
-    type = params[:type].to_s.constantize
-    unless type.reflect_on_association(:comments)
+    unless (type = Comment.safe_model_from_name(params[:type]))
       raise("The model #{params[:type].inspect} does not support comments!")
     end
 

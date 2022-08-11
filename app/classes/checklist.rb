@@ -49,7 +49,7 @@ class Checklist
 
     def query
       super(
-        tables: ["observations_projects op"],
+        tables: ["project_observations op"],
         conditions: ["op.observation_id = o.id",
                      "op.project_id = #{@project.id}"]
       )
@@ -66,7 +66,7 @@ class Checklist
 
     def query
       super(
-        tables: ["observations_species_lists os"],
+        tables: ["species_list_observations os"],
         conditions: ["os.observation_id = o.id",
                      "os.species_list_id = #{@list.id}"]
       )
@@ -127,26 +127,22 @@ class Checklist
 
   def count_synonyms(synonyms)
     synonyms.each do |syn_id, text_name|
-      text_name ||= Name.connection.select_values(%(
-        SELECT text_name FROM names
-        WHERE synonym_id = #{syn_id}
-          AND `rank` IN (#{ranks_to_consider})
-        ORDER BY deprecated ASC
-      )).first
+      text_name ||= Name.where(synonym_id: syn_id, rank: ranks_to_consider).
+                    order(deprecated: :asc).pluck(:text_name).first
       count_species(text_name)
     end
   end
 
   def count_species(text_name)
-    if text_name.present?
-      g, s = text_name.split(" ", 3)
-      @genera[g] = g
-      @species[[g, s]] = "#{g} #{s}"
-    end
+    return if text_name.blank?
+
+    g, s = text_name.split(" ", 3)
+    @genera[g] = g
+    @species[[g, s]] = "#{g} #{s}"
   end
 
   def ranks_to_consider
-    Name.ranks.values_at(:Species, :Subspecies, :Variety, :Form).join(", ")
+    Name.ranks.values_at("Species", "Subspecies", "Variety", "Form").join(", ")
   end
 
   def query(args = {})

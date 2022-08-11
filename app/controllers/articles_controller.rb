@@ -15,16 +15,10 @@
 #  Public methods      None (ideally)
 #
 class ArticlesController < ApplicationController
-  before_action :login_required, except: [
-    :index,
-    :show
-  ]
+  before_action :login_required, except: [:index, :show]
   before_action :store_location, except: :destroy
   before_action :pass_query_params, except: :index
-  before_action :ignore_request_unless_permitted, except: [
-    :index,
-    :show
-  ]
+  before_action :ignore_request_unless_permitted, except: [:index, :show]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
@@ -127,6 +121,7 @@ class ArticlesController < ApplicationController
       action: :index,
       letters: "articles.title",
       num_per_page: 50,
+      include: :user,
       sorting_links: [["created_at",  :sort_by_created_at.t],
                       ["updated_at",  :sort_by_updated_at.t],
                       ["user",        :sort_by_user.t],

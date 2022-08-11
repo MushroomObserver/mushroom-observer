@@ -29,6 +29,7 @@ module MushroomObserver
 end
 
 # ----------------------------------------
+HELP_ARGS = ["-h", "--help"].freeze
 
 app_root = File.expand_path("..", __dir__)
 require("#{app_root}/config/consts.rb")
@@ -36,7 +37,7 @@ require("#{app_root}/app/classes/ip_stats.rb")
 require("fileutils")
 require("time")
 
-abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
+abort(<<"HELP") if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
 
   USAGE::
 
@@ -73,7 +74,7 @@ def report_user(stats)
   id = stats[:user]
   puts("User ##{id} is hogging the server!")
   puts("  API key: #{stats[:api_key]}") if stats[:api_key].to_s != ""
-  puts("  https://mushroomobserver.org/observer/show_user/#{id}")
+  puts("  https://mushroomobserver.org/users/#{id}")
   puts("  request rate: #{(stats[:rate] * 60).round(2)} requests / minute")
   puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
   puts("  server load:  #{(stats[:load] * 100).round(2)}% of one worker")

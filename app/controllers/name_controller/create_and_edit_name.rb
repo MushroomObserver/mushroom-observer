@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
-  before_action :disable_link_prefetching, except: [
-    :create_name,
-    :edit_name
-  ]
-
+module NameController::CreateAndEditName
   def create_name
     store_location
     pass_query_params
@@ -38,7 +33,7 @@ class NameController
 
   def init_create_name_form
     @name = Name.new
-    @name.rank = :Species
+    @name.rank = "Species"
     @name_string = ""
   end
 
@@ -52,16 +47,16 @@ class NameController
   end
 
   def init_edit_name_form
-    if !params[:name]
+    if params[:name]
+      @misspelling      = params[:name][:misspelling] == "1"
+      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
+    else
       @misspelling      = @name.is_misspelling?
       @correct_spelling = if @misspelling
                             @name.correct_spelling.real_search_name
                           else
                             ""
                           end
-    else
-      @misspelling      = params[:name][:misspelling] == "1"
-      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
     @name_string = @name.real_text_name
   end
@@ -71,7 +66,7 @@ class NameController
   # ------
 
   def make_sure_name_doesnt_exist!
-    matches = Name.names_matching_desired_new_name(@parse)
+    matches = Name.matching_desired_new_parsed_name(@parse)
     if matches.one?
       raise(:runtime_name_create_already_exists.
               t(name: matches.first.display_name))
@@ -115,7 +110,7 @@ class NameController
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
       redirect_with_query(
-        controller: :observer, action: :email_name_change_request,
+        controller: :emails, action: :name_change_request,
         params: {
           name_id: @name.id,
           # Auricularia Bull. [#17132]
@@ -236,7 +231,7 @@ class NameController
     text_name = parsed_text_name
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
-    in_rank = params[:name][:rank].to_sym
+    in_rank = params[:name][:rank]
     old_deprecated = @name ? @name.deprecated : false
     parse = Name.parse_name(in_str, rank: in_rank, deprecated: old_deprecated)
     if !parse || parse.rank != in_rank
@@ -247,7 +242,7 @@ class NameController
   end
 
   def parsed_text_name
-    if params[:name][:text_name].blank? && @name
+    if params[:name][:text_name].blank? && @name&.text_name.present?
       @name.real_text_name
     else
       params[:name][:text_name]
@@ -316,7 +311,7 @@ class NameController
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_with_query(controller: :observer, action: :email_merge_request,
+      redirect_with_query(controller: :emails, action: :merge_request,
                           type: :Name, old_id: @name.id, new_id: new_name.id)
     end
   end

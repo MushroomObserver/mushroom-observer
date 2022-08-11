@@ -55,7 +55,7 @@ class ScriptTest < UnitTestCase
       "id login name email verified last_use\n" \
       "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
       "2006-03-02 21:14:00 NULL\n"
-    actual = File.read(tempfile).gsub(/ +/, " ")
+    actual = File.read(tempfile).squeeze(" ")
     assert_equal(expect, actual)
   end
 
@@ -77,26 +77,8 @@ class ScriptTest < UnitTestCase
     # (or mocks grabbing the first observation from api).
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert File.read(dest_file).match(/<results number="1">/)
+    assert File.read(dest_file).include?('<results number="1">')
     # system("cp #{dest_file} x.xml")
-  end
-
-  test "monitor_top" do
-    script = script_file("monitor_top")
-    tempfile = Tempfile.new("test").path
-    logfile = "#{::Rails.root}/log/top.log"
-    old_size = begin
-                 File.size(logfile)
-               rescue StandardError
-                 0
-               end
-    cmd = "#{script} 2>&1 > #{tempfile}"
-    status = system(cmd)
-    errors = File.read(tempfile)
-    assert(status, "Something went wrong with #{script}:\n#{errors}")
-    assert_equal("", File.read(tempfile))
-    new_size = File.size(logfile)
-    assert_operator(new_size, :>, old_size)
   end
 
   test "parse_log" do

@@ -46,8 +46,8 @@
 
 # View and modify Herbaria (displayed as "Fungaria")
 class HerbariaController < ApplicationController
-  # filters
-  before_action :login_required, only: [:create, :destroy, :edit, :new, :update]
+  before_action :login_required
+  # only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
   before_action :pass_query_params, only: [
     :create, :destroy, :edit, :new, :show, :update
@@ -190,7 +190,7 @@ class HerbariaController < ApplicationController
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
     }.merge(args,
-            template: "/herbaria/index.html.erb", # render with this template
+            template: "/herbaria/index", # render with this template
             # Add some alternate sorting criteria.
             sorting_links: [["records",     :sort_by_records.t],
                             ["user",        :sort_by_user.t],
@@ -244,11 +244,11 @@ class HerbariaController < ApplicationController
     dest = Herbarium.where(name: @herbarium.name).first
     return true if !dest || dest == @herbarium
 
-    if !@herbarium.id # i.e. in create mode
+    if @herbarium.id
+      @herbarium = perform_or_request_merge(@herbarium, dest)
+    else # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
       false
-    else
-      @herbarium = perform_or_request_merge(@herbarium, dest)
     end
   end
 

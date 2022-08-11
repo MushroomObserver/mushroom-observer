@@ -99,8 +99,7 @@ module SessionExtensions
 
       # Tiny class used to represent option in select field.
       class Option
-        attr_accessor :value
-        attr_accessor :label
+        attr_accessor :value, :label
       end
     end
 
@@ -149,7 +148,7 @@ module SessionExtensions
             inputs << field
 
           when "textarea"
-            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
+            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join)
             inputs << field
 
           when "file"
@@ -165,10 +164,10 @@ module SessionExtensions
             val = nil
             field.options = opts = []
             context.assert_select(elem, "option") do |elems|
-              for elem in elems
+              elems.each do |elem|
                 opt = Field::Option.new
                 opt.value = CGI.unescapeHTML(elem["value"])
-                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
+                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join)
                 opts << opt
                 val = opt.value \
                   if elem["selected"] == "selected"
@@ -196,9 +195,8 @@ module SessionExtensions
       results = []
       inputs.each do |field|
         id2 = field.id
-        if id.is_a?(Regexp) && id2.match(id)
-          results << field
-        elsif (i = id2.rindex(id)) && (i + id.length == id2.length)
+        if id.is_a?(Regexp) && id2.match(id) ||
+           (i = id2.rindex(id)) && (i + id.length == id2.length)
           results << field
         end
       end
@@ -227,9 +225,8 @@ module SessionExtensions
       results = []
       inputs.each do |field|
         nm2 = field.name
-        if name.is_a?(Regexp) && nm2.match(name)
-          results << field
-        elsif (i = nm2.rindex(name)) && (i + name.length == nm2.length)
+        if name.is_a?(Regexp) && nm2.match(name) ||
+           (i = nm2.rindex(name)) && (i + name.length == nm2.length)
           results << field
         end
       end
@@ -258,9 +255,8 @@ module SessionExtensions
         next unless field.type == :checkbox
 
         nm2 = field.name
-        if name.is_a?(Regexp) && nm2.match(name)
-          results << field
-        elsif (i = nm2.rindex(name)) && (i + name.length == nm2.length)
+        if name.is_a?(Regexp) && nm2.match(name) ||
+           (i = nm2.rindex(name)) && (i + name.length == nm2.length)
           results << field
         end
       end
@@ -431,13 +427,11 @@ module SessionExtensions
       field.node["checked"] = "checked" if field.type == :checkbox
 
       # Uncheck all the other radio-boxes in this group.
-      if field.type == :radio
-        field.value = true
-        inputs.each do |field2|
-          if (field2 != field) && (field2.name == field.name)
-            field2.value = false
-          end
-        end
+      return unless field.type == :radio
+
+      field.value = true
+      inputs.each do |field2|
+        field2.value = false if (field2 != field) && (field2.name == field.name)
       end
     end
 
@@ -494,7 +488,7 @@ module SessionExtensions
     def submit(button = nil)
       found = false
       hash = {}
-      for field in inputs
+      inputs.each do |field|
         if field.type == :checkbox
           hash[field.name] =
             field.node["checked"] == "checked" ? field.on_value : "0"
@@ -528,8 +522,9 @@ module SessionExtensions
       end
       context.assert(found,
                      "Couldn't find submit button labeled #{button.inspect}.")
-      puts("POST #{url}: #{hash.inspect}") if debug
-      context.post(url, params: hash)
+      # Not all forms use "POST" - use the method in the form tag
+      puts("#{form[:method].upcase} #{url}: #{hash.inspect}") if debug
+      context.send(form[:method].to_s, url, params: hash)
     end
   end
 end

@@ -146,15 +146,15 @@ class Textile < String
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
     @@name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/
-    if rank == :Species
+    if rank == "Species"
       @@last_species    = name
       @@last_subspecies = nil
       @@last_variety    = nil
-    elsif rank == :Subspecies
+    elsif rank == "Subspecies"
       @@last_species    = name.sub(/ ssp\. .*/, "")
       @@last_subspecies = name
       @@last_variety    = nil
-    elsif rank == :Variety
+    elsif rank == "Variety"
       @@last_species    = name.sub(/ (ssp|var)\. .*/, "")
       @@last_subspecies = name.sub(/ var\. .*/, "")
       @@last_variety    = name
@@ -198,10 +198,10 @@ class Textile < String
 
   NAME_LINK_PATTERN = /
     (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
-  /x.freeze
+  /x
   OTHER_LINK_PATTERN = /
    (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
-  /x.freeze
+  /x
 
   # Convert __Names__ to links in a textile string.
   def check_name_links!
@@ -222,7 +222,7 @@ class Textile < String
          # "Lichen Flora of the Greater Sonoran Region".
          # I'm sure it can still break with species but it should be
          # very infrequent (I don't see it in current tests). -JPH
-         (parse.author.blank? || parse.rank != :Genus)
+         (parse.author.blank? || parse.rank != "Genus")
         Textile.private_register_name(parse.real_text_name, parse.rank)
         prefix + "x{NAME __#{label}__ }{ #{name} }x"
       else
@@ -240,7 +240,7 @@ class Textile < String
   # This will be sent to lookup_name.
   def expand_genus_abbreviation(str)
     str.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
-      (n = @@name_lookup[Regexp.last_match(1)]) ? n + " " : x
+      (n = @@name_lookup[Regexp.last_match(1)]) ? "#{n} " : x
     end
   end
 
@@ -343,7 +343,7 @@ class Textile < String
     gsub!(%r{(<a[^>]*>.*?</a>|<img[^>]*>)}) do |href|
       if do_object_links
         href = href.gsub(/
-          x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+          x\{([A-Z]+) \s+ ([^{}]+?) \s+\}\{\s+ ([^{}]+?) \s+\}x
         /x, '\\2')
       end
       saved_links.push(href)
@@ -355,12 +355,12 @@ class Textile < String
   def restore_pre_existing_links!(saved_links)
     gsub!(/<XXX(\d+)>/) do
       saved_links[Regexp.last_match(1).to_i].to_s.
-        gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
+        gsub(/ x\{ ([^{}]*) \}x /x, '\\1')
     end
   end
 
   def convert_bare_urls_to_links!
-    gsub!(%r{([a-z]+:\/\/[^\s<>]+)}) do |url|
+    gsub!(%r{([a-z]+://[^\s<>]+)}) do |url|
       extra = url.sub!(%r{([^\w/]+$)}, "") ? Regexp.last_match(1) : ""
       # Leave as much untouched as possible, but some characters will cause the
       # HTML to be badly formed, so escape them.
@@ -373,9 +373,9 @@ class Textile < String
     return url unless truncate_link_label?(url)
 
     if url =~ %r{^(\w+://[^/]+)(.*?)$}
-      Regexp.last_match(1) + "/..."
+      "#{Regexp.last_match(1)}/..."
     else
-      url[0..URL_TRUNCATION_LENGTH] + "..."
+      "#{url[0..URL_TRUNCATION_LENGTH]}..."
     end
   end
 
@@ -385,7 +385,7 @@ class Textile < String
 
   def convert_object_tags_to_proper_links!
     gsub!(/
-      x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+      x\{([A-Z]+) \s+ ([^{}]+?) \s+\}\{\s+ ([^{}]+?) \s+\}x
     /x) do |_orig|
       type = Regexp.last_match(1)
       label = Regexp.last_match(2)

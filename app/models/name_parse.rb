@@ -23,14 +23,14 @@
 #                                   Omphalia ericetorum [Lichen Mushroom]"
 #      np.name                   # "Lichenomphalia umbellifera"
 #      np.search_name            # "Lichenomphalia umbellifera"
-#      np.rank                   # :Species
+#      np.rank                   # "Species"
 #      np.comment                # nil
 #      np.find_names             # (Array of Name instances matching
 #                                   "L. umbellifera")
 #      np.has_synonym            # true
 #      np.synonym                # "Omphalia ericetorum"
 #      np.synonym_search_name    # "Omphalia ericetorum"
-#      np.synonym_rank           # :Species
+#      np.synonym_rank           # "Species"
 #      np.synonym_comment        # "Lichen Mushroom"
 #      np.find_synonym_names     # (Array of Name instances matching
 #                                   "L. umbellifera")
@@ -50,17 +50,10 @@
 ################################################################################
 
 class NameParse
-  attr_reader :line_str
-  attr_reader :name
-  attr_reader :rank
-  attr_reader :search_name
-  attr_reader :comment
-  attr_reader :synonym
-  attr_reader :synonym_rank
-  attr_reader :synonym_search_name
-  attr_reader :synonym_comment
+  attr_reader :line_str, :name, :rank, :search_name, :comment,
+              :synonym, :synonym_rank, :synonym_search_name, :synonym_comment
 
-  COMMENT_PAT = /^\s* ([^\[\]]*) \s+ \[(.*)\] \s*$/x.freeze
+  COMMENT_PAT = /^\s* ([^\[\]]*) \s+ \[(.*)\] \s*$/x
 
   # spl_line can be either:
   #   <name>
@@ -79,7 +72,7 @@ class NameParse
       @name = @line_str[0..equal_pos - 1].strip
       @synonym = @line_str[equal_pos + 1..-1].strip
       @synonym_comment = nil
-      if match = COMMENT_PAT.match(@synonym)
+      if (match = COMMENT_PAT.match(@synonym))
         @synonym = match[1]
         @synonym_comment = match[2]
       end
@@ -90,7 +83,7 @@ class NameParse
       @synonym = nil
       @synonym_rank = nil
       @synonym_search_name = nil
-      if match = COMMENT_PAT.match(@name)
+      if (match = COMMENT_PAT.match(@name))
         @name = match[1]
         @comment = match[2]
       end
@@ -119,7 +112,7 @@ class NameParse
     result = [nil, str]
     space_pos = str.index(" ")
     if space_pos
-      rank = str[0..space_pos - 1].to_sym
+      rank = str[0..space_pos - 1]
       result = [rank, str[space_pos..-1].strip] if Name.all_ranks.member?(rank)
     end
     result

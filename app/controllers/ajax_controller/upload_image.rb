@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::UploadImage
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation
   def multi_image_template
     @user = session_user!
     @licenses = License.current_names_and_ids(@user.license)
     @image = Image.new(user: @user, when: Time.zone.now)
-    render(partial: "/observer/form_multi_image_template")
+    render(partial: "/observations/form_multi_image_template")
   end
 
   # Uploads an image object without an observation.
@@ -32,7 +32,7 @@ class AjaxController
 
   def render_errors(errors, args)
     name = args[:original_name].to_s
-    errors += "\n" + :runtime_no_upload_image.t(name: name)
+    errors += "\n#{:runtime_no_upload_image.t(name: name)}"
     logger.error("UPLOAD_FAILED: #{errors.inspect}")
     render(plain: errors.strip_html, status: :internal_server_error)
   end
@@ -68,7 +68,7 @@ class AjaxController
   end
 
   def image_original_name(args)
-    return nil if @user.keep_filenames == :toss
+    return nil if @user.keep_filenames == "toss"
 
     args[:original_name].to_s
   end

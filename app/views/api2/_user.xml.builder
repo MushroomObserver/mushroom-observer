@@ -22,22 +22,21 @@ xml.tag!(
   end
   xml_string(xml, :mailing_address,
              object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
-  if !detail
-    xml_minimal_object(xml, :location, :location, object.location_id)
-    xml_minimal_object(xml, :image, :image, object.image_id)
-  else
+  if detail
     xml_detailed_object(xml, :location, object.location)
     xml_detailed_object(xml, :image, object.image)
-    if @user == object ||
+    if (@user == object ||
        # (exception: show API keys of new user when API creates new user)
-       @show_api_keys_for_new_user
-      if object.api_keys.any?
-        xml.api_keys(number: object.api_keys.length) do
-          object.api_keys.each do |api_key|
-            xml_detailed_object(xml, :api_key, api_key)
-          end
+       @show_api_keys_for_new_user) &&
+       object.api_keys.any?
+      xml.api_keys(number: object.api_keys.length) do
+        object.api_keys.each do |api_key|
+          xml_detailed_object(xml, :api_key, api_key)
         end
       end
     end
+  else
+    xml_minimal_object(xml, :location, :location, object.location_id)
+    xml_minimal_object(xml, :image, :image, object.image_id)
   end
 end

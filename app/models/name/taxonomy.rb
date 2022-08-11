@@ -1,52 +1,13 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
-  scope :with_classification_like,
-        # Use multi-line lambda literal because fixtures blow up with "lambda":
-        # NoMethodError: undefined method `ranks'
-        #   test/fixtures/names.yml:28:in `get_binding'
-        ->(rank, text_name) { # rubocop:disable Style/Lambda
-          where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
-        }
-  scope :with_rank_below,
-        ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
-
-  def self.all_ranks
-    [:Form, :Variety, :Subspecies, :Species,
-     :Stirps, :Subsection, :Section, :Subgenus, :Genus,
-     :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
-     :Group]
-  end
-
-  # Returns a Hash mapping alternative ranks to standard ranks (all Symbol's).
-  def self.alt_ranks
-    { Division: :Phylum }
-  end
-
-  def self.ranks_above_genus
-    [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
-  end
-
-  def self.ranks_between_kingdom_and_genus
-    [:Phylum, :Subphylum, :Class, :Subclass, :Order, :Suborder, :Family]
-  end
-
-  def self.ranks_above_species
-    [:Stirps, :Subsection, :Section, :Subgenus, :Genus,
-     :Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
-  end
-
-  def self.ranks_below_genus
-    [:Form, :Variety, :Subspecies, :Species,
-     :Stirps, :Subsection, :Section, :Subgenus]
-  end
-
-  def self.ranks_below_species
-    [:Form, :Variety, :Subspecies]
+module Name::Taxonomy
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
   def at_or_below_genus?
-    rank == :Genus || below_genus?
+    rank == "Genus" || below_genus?
   end
 
   def above_genus?
@@ -55,7 +16,7 @@ class Name < AbstractModel
 
   def below_genus?
     Name.ranks_below_genus.include?(rank) ||
-      rank == :Group && text_name.include?(" ")
+      rank == "Group" && text_name.include?(" ")
   end
 
   def between_genus_and_species?
@@ -63,19 +24,11 @@ class Name < AbstractModel
   end
 
   def at_or_below_species?
-    (rank == :Species) || Name.ranks_below_species.include?(rank)
-  end
-
-  def self.rank_index(rank)
-    Name.all_ranks.index(rank.to_sym)
+    (rank == "Species") || Name.ranks_below_species.include?(rank)
   end
 
   def rank_index(rank)
-    Name.all_ranks.index(rank.to_sym)
-  end
-
-  def self.compare_ranks(rank_a, rank_b)
-    all_ranks.index(rank_a.to_sym) <=> all_ranks.index(rank_b.to_sym)
+    Name.all_ranks.index(rank)
   end
 
   def has_eol_data?
@@ -91,7 +44,8 @@ class Name < AbstractModel
         end
       end
       descriptions.each do |d|
-        return true if d.review_status == :vetted && d.ok_for_export && d.public
+        return true if d.review_status == "vetted" &&
+                       d.ok_for_export && d.public
       end
     end
     false
@@ -111,12 +65,12 @@ class Name < AbstractModel
   # Is name definitely in a fungal nomenclature repository?
   # (A heuristic that works for almost all cases)
   def unregistrable?
-    rank == :Group ||
-      rank == :Domain ||
+    rank == "Group" ||
+      rank == "Domain" ||
       unpublished? ||
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
-      /"/ =~ text_name && rank >= :Class ||
+      /"/ =~ text_name && rank >= "Class" ||
       # Use kingdom: Protozoa as a rough proxy for slime molds
       # Slime molds, which are Protozoa, are in fungal nomenclature registries.
       # But most Protozoa are not slime molds and there's no efficient way
@@ -133,7 +87,7 @@ class Name < AbstractModel
 
   def unsearchable_in_registry?
     kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom ||
-      rank == :Domain ||
+      rank == "Domain" ||
       /\bcrypt temp\b/i =~ author&.delete(".")
   end
 
@@ -148,9 +102,9 @@ class Name < AbstractModel
 
   # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
   def kingdom
-    return text_name if rank == :Kingdom
+    return text_name if rank == "Kingdom"
 
-    parse_classification.find { |rank| rank.first == :Kingdom }&.last
+    parse_classification.find { |rank| rank.first == "Kingdom" }&.last
   end
 
   public
@@ -203,18 +157,19 @@ class Name < AbstractModel
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
-    @accepted_genus ||= begin
-      accepted = approved_name
-      return unless accepted.text_name.include?(" ")
-
-      genus_name = accepted.text_name.split(" ", 2).first
-      genera     = Name.with_correct_spelling.where(text_name: genus_name)
-      accepted   = genera.reject(&:deprecated)
-      genera     = accepted if accepted.any?
-      nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
-      genera     = nonsensu if nonsensu.any?
-      genera.first
-    end
+    @accepted_genus ||= \
+      begin
+        accepted = approved_name
+        if accepted.text_name.include?(" ")
+          genus_name = accepted.text_name.split(" ", 2).first
+          genera     = Name.with_correct_spelling.where(text_name: genus_name)
+          accepted   = genera.reject(&:deprecated)
+          genera     = accepted if accepted.any?
+          nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
+          genera     = nonsensu if nonsensu.any?
+          genera.first
+        end
+      end
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.
@@ -236,7 +191,7 @@ class Name < AbstractModel
 
     # Start with infrageneric and genus names.
     # Get rid of quoted words and ssp., var., f., etc.
-    words = text_name.split(" ") - %w[group clade complex]
+    words = text_name.split - %w[group clade complex]
     words.pop
     until words.empty?
       name = words.join(" ")
@@ -270,23 +225,6 @@ class Name < AbstractModel
     [parents.first]
   end
 
-  # Handy method which searches for a plain old text name and picks the "best"
-  # version available.  That is, it ignores misspellings, chooses accepted,
-  # non-"sensu" names where possible, and finally picks the first one
-  # arbitrarily where there is still ambiguity.  Useful if you just need a
-  # name and it's not so critical that it be the exactly correct one.
-  def self.best_match(name)
-    matches = Name.with_correct_spelling.where(search_name: name)
-    return matches.first if matches.any?
-
-    matches  = Name.with_correct_spelling.where(text_name: name)
-    accepted = matches.reject(&:deprecated)
-    matches  = accepted if accepted.any?
-    nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
-    matches  = nonsensu if nonsensu.any?
-    matches.first
-  end
-
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
   # but includes deprecated Name's.
   #
@@ -314,136 +252,23 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all: false)
-    if at_or_below_genus?
-      sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
-      sql_args = "#{text_name} %"
-    else
-      sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
-      sql_args = "%#{rank}: _#{text_name}_%"
-    end
+    scoped_children =
+      if at_or_below_genus?
+        Name.with_correct_spelling.subtaxa_of_genus_or_below(text_name)
+      else
+        Name.with_correct_spelling.
+          with_rank_and_name_in_classification(rank, text_name)
+      end
 
-    return Name.where(sql_conditions, sql_args).to_a if all
+    return scoped_children.to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
+      matches = scoped_children.with_rank(rank2)
       return matches.to_a if matches.any?
     end
     []
-  end
-
-  # Parse the given +classification+ String, validate it, and reformat it so
-  # that it is standardized.  Return the reformatted String.  Throws a
-  # RuntimeError if there are any errors.
-  #
-  # rank::  Ensure all Names are of higher rank than this.
-  # text::  The +classification+ String.
-  #
-  # Example output:
-  #
-  #   Domain: _Eukarya_\r\n
-  #   Kingdom: _Fungi_\r\n
-  #   Phylum: _Basidiomycota_\r\n
-  #   Class: _Basidomycotina_\r\n
-  #   Order: _Agaricales_\r\n
-  #   Family: _Agaricaceae_\r\n
-  #
-  def self.validate_classification(rank, text)
-    result = text
-    if text
-      parsed_names = {}
-      raise(:runtime_user_bad_rank.t(rank: rank.to_s)) if rank_index(rank).nil?
-
-      rank_idx = [rank_index(:Genus), rank_index(rank)].max
-      rank_str = "rank_#{rank}".downcase.to_sym.l
-
-      # Check parsed output to make sure ranks are correct, names exist, etc.
-      kingdom = "Fungi"
-      parse_classification(text).each do |line_rank, line_name|
-        real_rank = Name.guess_rank(line_name)
-        real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
-        expect_rank = if ranks_between_kingdom_and_genus.include?(line_rank)
-                        line_rank
-                      else
-                        :Genus # cannot guess Kingdom or Domain
-                      end
-        line_rank_idx = rank_index(line_rank)
-        if line_rank_idx.nil?
-          raise(:runtime_user_bad_rank.t(rank: line_rank.to_s))
-        end
-
-        line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
-
-        if line_rank_idx <= rank_idx
-          raise(:runtime_invalid_rank.t(line_rank: line_rank_str,
-                                        rank: rank_str))
-        end
-        if parsed_names[line_rank]
-          raise(:runtime_duplicate_rank.t(rank: line_rank_str))
-        end
-
-        if real_rank != expect_rank && kingdom == "Fungi"
-          raise(:runtime_wrong_rank.t(expect: line_rank_str,
-                                      actual: real_rank_str, name: line_name))
-        end
-        parsed_names[line_rank] = line_name
-        kingdom = line_name if line_rank == :Kingdom
-      end
-
-      # Reformat output, writing out lines in correct order.
-      if parsed_names != {}
-        result = ""
-        Name.all_ranks.reverse_each do |rank|
-          if (name = parsed_names[rank])
-            result += "#{rank}: _#{name}_\r\n"
-          end
-        end
-        result.strip!
-      end
-    end
-    result
-  end
-
-  # Parses the Classification String to eturns an Array of pairs of values.
-  #
-  #  [[:Kingdom, "Fungi"], [:Phylum, "Basidiomycota"],
-  #   [:Class, "Basidiomycetes"]]
-  #
-  # String syntax is a bunch of lines of the form "rank: name":
-  #
-  #   Kingdom: Fungi
-  #   Order: Agaricales
-  #   Family: Agaricaceae
-  #
-  # It strips out excess whitespace.  Names can be surrounded by underscores.
-  # It throws a RuntimeError if there are any syntax errors.
-  #
-  #   lines = Name.parse_classification(str)
-  #   for (rank, name) in lines
-  #     # rank = :Family
-  #     # name = "Agaricaceae"
-  #   end
-  #
-  def self.parse_classification(text)
-    results = []
-    if text
-      alt_ranks = Name.alt_ranks
-      text.split(/\r?\n/).each do |line|
-        match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
-        if match
-          line_rank = match[1].downcase.capitalize.to_sym
-          if (alt_rank = alt_ranks[line_rank])
-            line_rank = alt_rank
-          end
-          line_name = match[2]
-          results.push([line_rank, line_name])
-        elsif line.present?
-          raise(:runtime_invalid_classification.t(text: line))
-        end
-      end
-    end
-    results
   end
 
   # Pass off to class method of the same name.
@@ -500,7 +325,7 @@ class Name < AbstractModel
       name.update(classification: new_str)
       name.description.update(classification: new_str) if name.description_id
     end
-    root.propagate_classification if root.rank == :Genus
+    root.propagate_classification if root.rank == "Genus"
   end
 
   # Copy the classification of a genus to all of its children.  Does not change
@@ -508,10 +333,8 @@ class Name < AbstractModel
   # in the name and default description records.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
-      if rank != :Genus
+      if rank != "Genus"
 
-    # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
       update_all(classification: classification)
@@ -519,7 +342,6 @@ class Name < AbstractModel
       update_all(classification: classification)
     Observation.where(name_id: subtaxa).
       update_all(classification: classification)
-    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Get list of subtaxa whose classification doesn't match (and therefore
@@ -527,29 +349,12 @@ class Name < AbstractModel
   # names below genus with the same generic epithet.  Then add all those
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
-    subtaxa = Name.where("deprecated IS FALSE AND " \
-                         "text_name LIKE ?",
-                         "#{text_name} %").to_a
-    synonyms = Name.where("deprecated IS TRUE AND " \
-                          "synonym_id IN (?) AND " \
-                          "classification != ?",
-                          subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
-                          classification)
+    subtaxa = Name.subtaxa_of_genus_or_below(text_name).not_deprecated.to_a
+    uniq_subtaxa = subtaxa.filter_map(&:synonym_id).uniq
+    # Beware of AR where.not gotcha - will not match a null classification below
+    synonyms = Name.where(deprecated: true, synonym_id: uniq_subtaxa).
+               where(Name[:classification].not_eq(classification))
     (subtaxa + synonyms).map(&:id).uniq
-  end
-
-  # This is meant to be run nightly to ensure that all the classification
-  # caches are up to date.  It only pays attention to genera or higher.
-  def self.refresh_classification_caches
-    # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
-    Name.where(rank: 0..Name.ranks[:Genus]).
-      joins(:description).
-      where("name_descriptions.classification != names.classification").
-      where("COALESCE(name_descriptions.classification, '') != ''").
-      update_all("names.classification = name_descriptions.classification")
-    # rubocop:enable Rails/SkipsModelValidations
-    []
   end
 
   # ----------------------------------------------------------------------------
@@ -573,27 +378,215 @@ class Name < AbstractModel
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      Name.where("text_name LIKE ?", "#{text_name} %").
-        with_correct_spelling.any?
+      Name.subtaxa_of_genus_or_below(text_name).with_correct_spelling.any?
     else
-      Name.with_classification_like(rank, text_name).with_correct_spelling.any?
+      Name.with_correct_spelling.
+        with_rank_and_name_in_classification(rank, text_name).any?
     end
   end
 
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
-    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
+    return genus_or_species_is_ancestor? if %w[Genus Species].include?(rank)
 
     false
   end
 
   def above_genus_is_ancestor?
-    Name.joins(:namings).with_classification_like(rank, text_name).any?
+    Name.joins(:namings).
+      with_rank_and_name_in_classification(rank, text_name).any?
   end
 
   def genus_or_species_is_ancestor?
-    Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
+    Name.joins(:namings).subtaxa_of_genus_or_below(text_name).
       with_rank_below(rank).any?
+  end
+
+  module ClassMethods
+    def all_ranks
+      ranks.map do |name, _integer|
+        name
+      end
+    end
+
+    # Returns a Hash mapping alternative ranks to standard ranks (all Symbol's).
+    def alt_ranks
+      { Division: "Phylum" }
+    end
+
+    def ranks_above_genus
+      %w[Family Order Class Phylum Kingdom Domain Group]
+    end
+
+    def ranks_between_kingdom_and_genus
+      %w[Phylum Subphylum Class Subclass Order Suborder Family]
+    end
+
+    def ranks_above_species
+      %w[Stirps Subsection Section Subgenus Genus
+         Family Order Class Phylum Kingdom Domain]
+    end
+
+    def ranks_below_genus
+      %w[Form Variety Subspecies Species Stirps Subsection Section Subgenus]
+    end
+
+    def ranks_below_species
+      %w[Form Variety Subspecies]
+    end
+
+    def rank_index(rank)
+      Name.all_ranks.index(rank)
+    end
+
+    def compare_ranks(rank_a, rank_b)
+      all_ranks.index(rank_a) <=> all_ranks.index(rank_b)
+    end
+
+    # Handy method which searches for a plain old text name and picks the "best"
+    # version available.  That is, it ignores misspellings, chooses accepted,
+    # non-"sensu" names where possible, and finally picks the first one
+    # arbitrarily where there is still ambiguity.  Useful if you just need a
+    # name and it's not so critical that it be the exactly correct one.
+    def best_match(name)
+      matches = Name.with_correct_spelling.where(search_name: name)
+      return matches.first if matches.any?
+
+      matches  = Name.with_correct_spelling.where(text_name: name)
+      accepted = matches.reject(&:deprecated)
+      matches  = accepted if accepted.any?
+      nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
+      matches  = nonsensu if nonsensu.any?
+      matches.first
+    end
+
+    # Parse the given +classification+ String, validate it, and reformat it so
+    # that it is standardized.  Return the reformatted String.  Throws a
+    # RuntimeError if there are any errors.
+    #
+    # rank::  Ensure all Names are of higher rank than this.
+    # text::  The +classification+ String.
+    #
+    # Example output:
+    #
+    #   Domain: _Eukarya_\r\n
+    #   Kingdom: _Fungi_\r\n
+    #   Phylum: _Basidiomycota_\r\n
+    #   Class: _Basidomycotina_\r\n
+    #   Order: _Agaricales_\r\n
+    #   Family: _Agaricaceae_\r\n
+    #
+    def validate_classification(rank, text)
+      result = text
+      if text
+        parsed_names = {}
+        if rank_index(rank).nil?
+          raise(:runtime_user_bad_rank.t(rank: rank.to_s))
+        end
+
+        rank_idx = [rank_index("Genus"), rank_index(rank)].max
+        rank_str = "rank_#{rank}".downcase.to_sym.l
+
+        # Check parsed output to make sure ranks are correct, names exist, etc.
+        kingdom = "Fungi"
+        parse_classification(text).each do |line_rank, line_name|
+          real_rank = Name.guess_rank(line_name)
+          real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
+          expect_rank = if ranks_between_kingdom_and_genus.include?(line_rank)
+                          line_rank
+                        else
+                          "Genus" # cannot guess Kingdom or Domain
+                        end
+          line_rank_idx = rank_index(line_rank)
+          if line_rank_idx.nil?
+            raise(:runtime_user_bad_rank.t(rank: line_rank.to_s))
+          end
+
+          line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
+
+          if line_rank_idx <= rank_idx
+            raise(:runtime_invalid_rank.t(line_rank: line_rank_str,
+                                          rank: rank_str))
+          end
+          if parsed_names[line_rank]
+            raise(:runtime_duplicate_rank.t(rank: line_rank_str))
+          end
+
+          if real_rank != expect_rank && kingdom == "Fungi"
+            raise(:runtime_wrong_rank.t(expect: line_rank_str,
+                                        actual: real_rank_str, name: line_name))
+          end
+          parsed_names[line_rank] = line_name
+          kingdom = line_name if line_rank == "Kingdom"
+        end
+
+        # Reformat output, writing out lines in correct order.
+        if parsed_names != {}
+          result = ""
+          Name.all_ranks.reverse_each do |rank|
+            if (name = parsed_names[rank])
+              result += "#{rank}: _#{name}_\r\n"
+            end
+          end
+          result.strip!
+        end
+      end
+      result
+    end
+
+    # Parses the Classification String to eturns an Array of pairs of values.
+    #
+    #  [["Kingdom", "Fungi"], ["Phylum", "Basidiomycota"],
+    #   ["Class", "Basidiomycetes"]]
+    #
+    # String syntax is a bunch of lines of the form "rank: name":
+    #
+    #   Kingdom: Fungi
+    #   Order: Agaricales
+    #   Family: Agaricaceae
+    #
+    # It strips out excess whitespace.  Names can be surrounded by underscores.
+    # It throws a RuntimeError if there are any syntax errors.
+    #
+    #   lines = Name.parse_classification(str)
+    #   for (rank, name) in lines
+    #     # rank = "Family"
+    #     # name = "Agaricaceae"
+    #   end
+    #
+    def parse_classification(text)
+      results = []
+      if text
+        alt_ranks = Name.alt_ranks
+        text.split(/\r?\n/).each do |line|
+          match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
+          if match
+            line_rank = match[1].downcase.capitalize
+            if (alt_rank = alt_ranks[line_rank])
+              line_rank = alt_rank
+            end
+            line_name = match[2]
+            results.push([line_rank, line_name])
+          elsif line.present?
+            raise(:runtime_invalid_classification.t(text: line))
+          end
+        end
+      end
+      results
+    end
+
+    # This is meant to be run nightly to ensure that all the classification
+    # caches are up to date.  It only pays attention to genera or higher.
+    def refresh_classification_caches
+      Name.where(rank: 0..Name.ranks[:Genus]).
+        joins(:description).
+        where(NameDescription[:classification].not_eq(Name[:classification])).
+        where(NameDescription[:classification].not_blank).
+        update_all(
+          Name[:classification].eq(NameDescription[:classification]).to_sql
+        )
+      []
+    end
   end
 end

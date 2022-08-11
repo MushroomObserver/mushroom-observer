@@ -6,7 +6,11 @@ class AccountMailer < ActionMailer::Base
 
   def setup_user(user)
     @user = user
-    I18n.locale = @user.try(&:locale) || MO.default_locale
+    @old_locale = I18n.locale
+    new_locale = @user.try(&:locale) || MO.default_locale
+    # Setting I18n.locale used to incur a significant performance penalty,
+    # avoid doing so if not required.  Not sure if this is still the case.
+    I18n.locale = new_locale if I18n.locale != new_locale
   end
 
   def mo_mail(title, headers = {})
@@ -19,6 +23,7 @@ class AccountMailer < ActionMailer::Base
          from: from,
          reply_to: reply_to,
          content_type: "text/#{content_style}")
+    I18n.locale = @old_locale if I18n.locale != @old_locale
   end
 
   def debug_log(template, from, to, objects = {})
@@ -26,7 +31,7 @@ class AccountMailer < ActionMailer::Base
     msg << " from=#{from.id}" if from
     msg << " to=#{to.id}" if to
     objects.each do |k, v|
-      value = v.nil? || v.class == String ? v : v.id
+      value = v.nil? || v.instance_of?(String) ? v : v.id
       msg << " #{k}=#{value}"
     end
     QueuedEmail.debug_log(msg)

@@ -20,8 +20,8 @@ class Query::CollectionNumberBase < Query::Base
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("collection_numbers")
-    add_id_condition("collection_numbers_observations.observation_id",
-                     params[:observations], :collection_numbers_observations)
+    add_id_condition("observation_collection_numbers.observation_id",
+                     params[:observations], :observation_collection_numbers)
     add_exact_match_condition("collection_numbers.name", params[:name])
     add_exact_match_condition("collection_numbers.number", params[:number])
     add_search_condition("collection_numbers.name", params[:name_has])

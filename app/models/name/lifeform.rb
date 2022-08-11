@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
+module Name::Lifeform
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
   ALL_LIFEFORMS = %w[
     basidiolichen
     lichen
@@ -8,8 +13,10 @@ class Name < AbstractModel
     lichenicolous
   ].freeze
 
-  def self.all_lifeforms
-    ALL_LIFEFORMS
+  module ClassMethods
+    def all_lifeforms
+      ALL_LIFEFORMS
+    end
   end
 
   # This will include "lichen", "lichenicolous" and "lichen-ally" -- the usual
@@ -21,10 +28,8 @@ class Name < AbstractModel
   # This excludes "lichen" but includes "mushroom" (so that truly lichenized
   # basidiolichens with mushroom fruiting bodies are included).
   def not_lichen?
-    !lifeform.include?(" lichen ")
+    lifeform.exclude?(" lichen ")
   end
-
-  validate :validate_lifeform
 
   # Sorts and uniquifies the lifeform words, and complains about any that are
   # not recognized.  It adds an extra space before and after to ensure that it
@@ -36,7 +41,7 @@ class Name < AbstractModel
   # and be confident that it will not skip "word" at the beginning or end,
   # and will not match "compoundword".
   def validate_lifeform
-    words = lifeform.to_s.split(" ").sort.uniq
+    words = lifeform.to_s.split.sort.uniq
     self.lifeform = words.any? ? " #{words.join(" ")} " : " "
     unknown_words = words - ALL_LIFEFORMS
     return unless unknown_words.any?
@@ -47,33 +52,49 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
-    concat_str = Name.connection.quote("#{lifeform} ")
-    search_str = Name.connection.quote("% #{lifeform} %")
-    Name.connection.execute(%(
-      UPDATE names SET lifeform = CONCAT(lifeform, #{concat_str})
-      WHERE id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform NOT LIKE #{search_str}
-    ))
-    Name.connection.execute(%(
-      UPDATE observations SET lifeform = CONCAT(lifeform, #{concat_str})
-      WHERE name_id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform NOT LIKE #{search_str}
-    ))
+    search_str = "% #{lifeform} %"
+    concat_str = "#{lifeform} "
+    name_ids = all_children.map(&:id)
+    return unless name_ids.any?
+
+    update_all_add_lifeform(name_ids, search_str, concat_str)
   end
 
   # Remove lifeform (one word only) from all children.
+  # Note that the simpler syntax for `replace` already works here in Rails 5
   def propagate_remove_lifeform(lifeform)
-    replace_str = Name.connection.quote(" #{lifeform} ")
-    search_str  = Name.connection.quote("% #{lifeform} %")
-    Name.connection.execute(%(
-      UPDATE names SET lifeform = REPLACE(lifeform, #{replace_str}, " ")
-      WHERE id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform LIKE #{search_str}
-    ))
-    Name.connection.execute(%(
-      UPDATE observations SET lifeform = REPLACE(lifeform, #{replace_str}, " ")
-      WHERE name_id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform LIKE #{search_str}
-    ))
+    search_str  = "% #{lifeform} %"
+    replace_str = " #{lifeform} "
+    name_ids = all_children.map(&:id)
+    return unless name_ids.any?
+
+    update_all_remove_lifeform(name_ids, search_str, replace_str)
+  end
+
+  private
+
+  # Needs to be statement.to_sql because Rails 5 does not parse a concat node.
+  # https://github.com/Faveod/arel-extensions/issues/76
+  # The following simpler syntax should work in Rails 6:
+  # update_all(lifeform: Name[:lifeform] + concat_str)
+  # update_all(lifeform: Name[:lifeform].concat(concat_str))
+  def update_all_add_lifeform(name_ids, search_str, concat_str)
+    Name.where(id: name_ids).
+      where(Name[:lifeform].does_not_match(search_str)).
+      update_all(Name[:lifeform].eq(Name[:lifeform] + concat_str).to_sql)
+    Observation.where(name_id: name_ids).
+      where(Observation[:lifeform].does_not_match(search_str)).
+      update_all(
+        Observation[:lifeform].eq(Observation[:lifeform] + concat_str).to_sql
+      )
+  end
+
+  def update_all_remove_lifeform(name_ids, search_str, replace_str)
+    Name.where(id: name_ids).
+      where(Name[:lifeform].matches(search_str)).
+      update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
+    Observation.where(name_id: name_ids).
+      where(Observation[:lifeform].matches(search_str)).
+      update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
   end
 end

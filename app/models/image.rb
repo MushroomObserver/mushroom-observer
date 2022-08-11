@@ -65,7 +65,7 @@ require("mimemagic")
 #
 #       # Supply any extra header info you may have.
 #       image.content_type = 'image/jpeg'
-#       image.md5sum = request.header[...]
+#       image.upload_md5sum = request.header[...]
 #
 #       # Validate and save record.
 #       image.save
@@ -209,8 +209,11 @@ require("mimemagic")
 #  ==== Callbacks and Logging
 #  update_thumbnails::  Change thumbnails before destroy.
 #  track_copyright_changes:: Log changes in copyright info.
-#  log_update::         Log update in associated Observation's.
-#  log_destroy::        Log destroy in associated Observation's.
+#  log_update::         Log update in associated observations, etc.
+#  log_destroy::        Log destroy in associated observations, etc.
+#  log_create_for::     Log adding new image to associated observtion, etc.
+#  log_reuse_for::      Log adding existing image to associated observtion, etc.
+#  log_remove_from::    Log removing image from associated observtion, etc.
 #
 ################################################################################
 #
@@ -218,37 +221,41 @@ class Image < AbstractModel
   require "fileutils"
   require "net/http"
 
-  has_and_belongs_to_many :observations
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :glossary_terms
+  has_many :observation_images, dependent: :destroy
+  has_many :observations, through: :observation_images
+
+  has_many :project_images, dependent: :destroy
+  has_many :projects, through: :project_images
+
+  has_many :glossary_term_images, dependent: :destroy
+  has_many :glossary_terms, through: :glossary_term_images
+
   has_many :thumb_clients, class_name: "Observation",
-                           foreign_key: "thumb_image_id"
+                           foreign_key: "thumb_image_id",
+                           inverse_of: :observation
   has_many :image_votes
   belongs_to :user
   belongs_to :license
-  belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
-  has_many :subjects, class_name: "User", foreign_key: "image_id"
-  has_many(:best_glossary_terms,
-           class_name: "GlossaryTerm",
-           foreign_key: "thumb_image_id",
-           inverse_of: :thumb_image)
+  belongs_to :reviewer, class_name: "User"
+  has_many :subjects, class_name: "User"
+  has_many :best_glossary_terms, class_name: "GlossaryTerm",
+                                 foreign_key: "thumb_image_id",
+                                 inverse_of: :thumb_image
+  has_many :copyright_changes, as: :target,
+                               dependent: :destroy,
+                               inverse_of: :target
 
-  has_many :copyright_changes, as: :target, dependent: :destroy
-
-  before_destroy :update_thumbnails
   after_update :track_copyright_changes
+  before_destroy :update_thumbnails
 
-  def all_glossary_terms
-    best_glossary_terms + glossary_terms
-  end
-
-  def get_subjects
-    observations + subjects + best_glossary_terms + glossary_terms
+  # Array of all observations, users and glossary terms using this image.
+  def all_subjects
+    observations + subjects + glossary_terms
   end
 
   # Is image used by an object other than obj
   def other_subjects?(obj)
-    (get_subjects - [obj]).present?
+    (all_subjects - [obj]).present?
   end
 
   # Create plain-text title for image from observations, appending image id to
@@ -259,7 +266,7 @@ class Image < AbstractModel
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = get_subjects.map(&:text_name).uniq.sort.join(" & ")
+    title = all_subjects.map(&:text_name).uniq.sort.join(" & ")
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -275,12 +282,17 @@ class Image < AbstractModel
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = get_subjects.map(&:format_name).uniq.sort.join(" & ")
+    title = all_subjects.map(&:format_name).uniq.sort.join(" & ")
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
       title + " (#{id || "?"})"
     end
+  end
+
+  # How this image is refered to in the rss logs.
+  def log_name
+    "#{:Image.t} ##{id || was || "?"}"
   end
 
   ##############################################################################
@@ -316,7 +328,7 @@ class Image < AbstractModel
   end
 
   def image_url(size)
-    Image::Url.new(
+    Image::URL.new(
       size: size,
       id: id,
       transferred: transferred,
@@ -325,7 +337,7 @@ class Image < AbstractModel
   end
 
   def self.image_url(size, id, args = {})
-    Image::Url.new(
+    Image::URL.new(
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
@@ -379,28 +391,13 @@ class Image < AbstractModel
     when "image/gif" then "gif"
     when "image/png" then "png"
     when "image/tiff" then "tiff"
-    when "image/bmp" then "bmp"
-    when "image/x-ms-bmp" then "bmp"
+    when "image/bmp", "image/x-ms-bmp" then "bmp"
     else; "raw"
     end
   end
 
   def extension(size)
     size == :original ? original_extension : "jpg"
-  end
-
-  def has_size?(size)
-    max = width.to_i > height.to_i ? width.to_i : height.to_i
-    case size.to_s
-    when "thumbnail" then true
-    when "small" then max > 160
-    when "medium" then max > 320
-    when "large" then max > 640
-    when "huge" then max > 960
-    when "full_size" then max > 1280
-    when "original" then true
-    else; false
-    end
   end
 
   # Calculate the approximate dimensions of the image of the given size.
@@ -532,7 +529,7 @@ class Image < AbstractModel
   end
 
   def upload_from_url(url)
-    upload = API::UploadFromURL.new(url)
+    upload = API2::UploadFromURL.new(url)
     self.image         = upload.content
     self.upload_length = upload.content_length
     self.upload_type   = upload.content_type
@@ -613,12 +610,12 @@ class Image < AbstractModel
   # ever actually happens).  Provide default name if not provided.
   def validate_image_name
     name = upload_original_name.to_s
-    name.sub!(/^[a-zA-Z]:/, "")
-    name.sub!(%r{^.*[/\\]}, "")
+    name = name.sub(/^[a-zA-Z]:/, "")
+    name = name.sub(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     return unless name.present? && User.current &&
-                  User.current.keep_filenames != :toss
+                  User.current.keep_filenames != "toss"
 
     self.original_name = name
   end
@@ -653,7 +650,7 @@ class Image < AbstractModel
           result = true
         rescue StandardError => e
           errors.add(:image,
-                     "Unexpected error while copying attached file "\
+                     "Unexpected error while copying attached file " \
                      "to temp file. Error class #{e.class}: #{e}")
           result = false
         end
@@ -673,7 +670,7 @@ class Image < AbstractModel
   # be called after the image has been validated and the record saved.  (We
   # need to have an ID at this point.)  Adds any errors to the :image field
   # and returns false.
-  def process_image(strip = false)
+  def process_image(strip: false)
     result = true
     if new_record?
       errors.add(:image, "Called process_image before saving image record.")
@@ -684,9 +681,7 @@ class Image < AbstractModel
       set = width.nil? ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
-      if !move_original
-        result = false
-      else
+      if move_original
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
               gsub("<ext>", ext).
@@ -696,6 +691,8 @@ class Image < AbstractModel
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
         end
+      else
+        result = false
       end
     end
     result
@@ -810,12 +807,12 @@ class Image < AbstractModel
   # Change a user's vote to the given value.  Pass in either the numerical vote
   # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
   # integers.  Returns value of new vote.
-  def change_vote(user, value = nil, anon = false)
+  def change_vote(user, value, anon: false)
     user_id = user.is_a?(User) ? user.id : user.to_i
     save_changes = !changed?
 
     # Modify image_votes table first.
-    vote = image_votes.find_by_user_id(user_id)
+    vote = image_votes.find_by(user_id: user_id)
     if (value = self.class.validate_vote(value))
       if vote
         vote.value = value
@@ -898,14 +895,33 @@ class Image < AbstractModel
     end
   end
 
-  # Log update in associated Observation's.
+  # Log update in associated observations, glossary terms, etc.
   def log_update
-    observations.each { |obs| obs.log_update_image(self) }
+    (glossary_terms + observations).each do |object|
+      object.log(:log_image_updated, name: log_name, touch: false)
+    end
   end
 
-  # Log destruction in associated Observation's.
+  # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
-    observations.each { |obs| obs.log_destroy_image(self) }
+    (glossary_terms + observations).each do |object|
+      object.log(:log_image_destroyed, name: log_name, touch: true)
+    end
+  end
+
+  # Log adding new image to an associated observation, glossary term, etc.
+  def log_create_for(object)
+    object.log(:log_image_created, name: log_name, touch: true)
+  end
+
+  # Log adding existing image to an associated observation, glossary term, etc.
+  def log_reuse_for(object)
+    object.log(:log_image_reused, name: log_name, touch: true)
+  end
+
+  # Log removing an image from an associated observation, glossary term, etc.
+  def log_remove_from(object)
+    object.log(:log_image_removed, name: log_name, touch: false)
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.
@@ -942,29 +958,28 @@ class Image < AbstractModel
 
   # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
-    # This is orders of magnitude faster than doing via active-record.
-    old_name = Image.connection.quote(old_name)
-    new_name = Image.connection.quote(new_name)
-    data = Image.connection.select_rows(%(
-      SELECT id, YEAR(`when`), license_id FROM images
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    data = Image.where(user: user, copyright_holder: old_name).
+           pluck(:id, Image[:when].year, :license_id)
     return unless data.any?
 
-    # brakeman generates what appears to be a false positive SQL injection
-    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, updated_at, target_type, target_id, year, name, license_id)
-      VALUES
-        #{data.map do |id, year, lic|
-            "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
-          end.join(",\n")}
-    ))
-    Image.connection.update(%(
-      UPDATE images SET copyright_holder = #{new_name}
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    CopyrightChange.insert_all(copyright_change_new_rows(data, old_name, user))
+
+    Image.where(user_id: user.id, copyright_holder: old_name).
+      update_all(copyright_holder: new_name)
+  end
+
+  private_class_method def self.copyright_change_new_rows(
+    data, old_name, user
+  )
+    data.map do |id, year, lic|
+      { "user_id" => user.id,
+        "updated_at" => Time.zone.now,
+        "target_type" => "Image",
+        "target_id" => id,
+        "year" => year,
+        "name" => old_name,
+        "license_id" => lic }
+    end
   end
 
   def year

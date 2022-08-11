@@ -33,8 +33,8 @@ class Query::HerbariumRecordBase < Query::Base
   def initialize_association_parameters
     add_id_condition("herbarium_records.herbarium_id",
                      lookup_herbaria_by_name(params[:herbaria]))
-    add_id_condition("herbarium_records_observations.observation_id",
-                     params[:observations], :herbarium_records_observations)
+    add_id_condition("observation_herbarium_records.observation_id",
+                     params[:observations], :observation_herbarium_records)
   end
 
   def initialize_boolean_parameters

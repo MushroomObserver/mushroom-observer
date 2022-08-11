@@ -82,7 +82,7 @@
 #  from_to::        Same as <tt>pages.from..pages.to</tt>.
 #
 ################################################################################
-
+#
 class MOPaginator
   attr_accessor :letter_arg    # Name of parameter to use for letter (if any).
   attr_accessor :number_arg    # Name of parameter to use for page number.
@@ -162,13 +162,10 @@ class MOPaginator
   end
 
   # Validate +used_letters+ array.  Force them all to uppercase, and remove
-  # duplicates and non-letters.  (Set to +nil+ to mean assume all letters have
-  # results.)
+  # duplicates and non-letters.
   def used_letters=(list)
-    @used_letters = if list
-                      list.map { |l| l.to_s[0, 1].upcase }.uniq.
-                        select { |l| l.match(/[A-Z]/) }.sort
-                    end
+    @used_letters = list.map { |l| l.to_s[0, 1].upcase }.uniq.
+                    select { |l| l.match(/[A-Z]/) }.sort
   end
 
   # Number of pages of results available.

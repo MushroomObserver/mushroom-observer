@@ -30,6 +30,7 @@ minimal_unknown_obs:
   when: 2006-05-11
   user: mary
   location: burbank
+  is_collection_location: 1
   where: Burbank, California, USA
   name: fungi
   text_name: Fungi
@@ -351,6 +352,7 @@ imged_unvouchered_obs:
   <<: *DEFAULTS
   images: query_first_image
   thumb_image: query_first_image
+  rss_log: imged_unvouchered_obs_rss_log
 
 vouchered_obs:
   <<: *DEFAULTS

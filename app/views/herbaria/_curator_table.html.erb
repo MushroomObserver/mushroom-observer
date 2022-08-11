@@ -4,7 +4,7 @@
   <thead>
     <tr>
       <th colspan="<%= can_delete ? 2 : 1 %>">
-        <%= "#{pluralize(herbarium.curators.length, :herbarium_curator.t)}:" %>
+        <%= "#{herbarium.curators.length == 1 ? :herbarium_curator.t : :herbarium_curators.t}:" %>
       </th>
     </tr>
   </thead>

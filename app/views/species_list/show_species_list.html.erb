@@ -76,25 +76,23 @@
           <div class="list-group-item default">
             <%= :species_list_show_members.t %>:
             <%= link_to(:species_list_show_regular_index.t,
-                        add_query_param({ controller: "observer",
-                                          action: "index_observation" },
+                        add_query_param({ controller: :observations,
+                                          action: :index },
                                          @query),
                         { help: :species_list_show_regular_index_help.t }) %> |
             <%= link_to_coerced_query(@query, Location) %> |
             <%= link_to_coerced_query(@query, Name) %> |
             <%= link_to_coerced_query(@query, Image) %> |
             <%= link_to(:app_checklist.t,
-                        { controller: :observer,
-                          action: :checklist,
-                          species_list_id: @species_list.id }) %> |
+                        checklist_path(species_list_id: @species_list.id)) %> |
             <%= link_to(:show_object.t(type: :map),
-                        add_query_param({ controller: "observer",
-                                          action: "map_observations" },
+                        add_query_param({ controller: :observations,
+                                          action: :map },
                                         @query)) %>
           </div>
 
           <% if @objects.any? %>
-            <% for observation in @objects %>
+            <% @objects.each do |observation| %>
               <div class="list-group-item">
                 <div class="row">
                   <div class="col-sm-4 col-md-3 col-lg-2">

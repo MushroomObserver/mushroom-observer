@@ -16,8 +16,8 @@ class NameTest < UnitTestCase
   end
 
   # Parse a string, with detailed error message.
-  def do_name_parse_test(str, expects, deprecated: false)
-    parse = Name.parse_name(str, deprecated: deprecated)
+  def do_name_parse_test(str, expects)
+    parse = Name.parse_name(str, deprecated: expects[:deprecated])
     assert(parse, "Expected #{str.inspect} to parse!")
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
@@ -290,7 +290,7 @@ class NameTest < UnitTestCase
   end
 
   def test_upper_word_pats
-    pat = /^#{Name::UPPER_WORD}$/
+    pat = /^#{::Name::Parse::UPPER_WORD}$/o
     assert_no_match(pat, "")
     assert_no_match(pat, "A")
     assert_no_match(pat, "A-")
@@ -310,7 +310,7 @@ class NameTest < UnitTestCase
   end
 
   def test_lower_word_pats
-    pat = /^#{Name::LOWER_WORD}$/
+    pat = /^#{::Name::Parse::LOWER_WORD}$/o
     assert_no_match(pat, "")
     assert_no_match(pat, "a")
     assert_no_match(pat, "a-")
@@ -336,7 +336,7 @@ class NameTest < UnitTestCase
 
   def test_author_pat
     @pat = "AUTHOR_PAT"
-    pat = Name::AUTHOR_PAT
+    pat = ::Name::Parse::AUTHOR_PAT
     assert_no_match(pat, "")
     assert_no_match(pat, "fails")
     assert_no_match(pat, "Amanita spuh.")
@@ -381,7 +381,7 @@ class NameTest < UnitTestCase
 
   def test_genus_or_up_pat
     @pat = "GENUS_OR_UP_PAT"
-    pat = Name::GENUS_OR_UP_PAT
+    pat = ::Name::Parse::GENUS_OR_UP_PAT
     assert_name_match_author_optional(pat, "Amanita")
     assert_name_match_author_optional(pat, "Amanita sp.", "Amanita")
     assert_name_match_author_optional(pat, '"Amanita"')
@@ -393,16 +393,17 @@ class NameTest < UnitTestCase
 
   def test_subgenus_pat
     @pat = "SUBGENUS_PAT"
-    pat = Name::SUBGENUS_PAT
+    pat = ::Name::Parse::SUBGENUS_PAT
     assert_name_match_author_optional(pat, "Amanita subgenus Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Subg. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg Vaginatae")
     assert_name_match_author_optional(pat, '"Amanita subg. Vaginatae"')
+    assert_name_match_author_optional(pat, "Amanita subgen. Vaginatae")
   end
 
   def test_section_pat
     @pat = "SECTION_PAT"
-    pat = Name::SECTION_PAT
+    pat = ::Name::Parse::SECTION_PAT
     assert_name_match_author_optional(pat, "Amanita section Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Sect. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita sect Vaginatae")
@@ -413,7 +414,7 @@ class NameTest < UnitTestCase
 
   def test_subsection_pat
     @pat = "SUBSECTION_PAT"
-    pat = Name::SUBSECTION_PAT
+    pat = ::Name::Parse::SUBSECTION_PAT
     assert_name_match_author_optional(pat, "Amanita subsection Vaginatae")
     assert_name_match_author_optional(pat, "Amanita SubSect. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subsect Vaginatae")
@@ -425,7 +426,7 @@ class NameTest < UnitTestCase
 
   def test_stirps_pat
     @pat = "STIRPS_PAT"
-    pat = Name::STIRPS_PAT
+    pat = ::Name::Parse::STIRPS_PAT
     assert_name_match_author_optional(pat, "Amanita stirps Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Stirps Vaginatae")
     assert_name_match_author_optional(
@@ -440,7 +441,7 @@ class NameTest < UnitTestCase
 
   def test_species_pat
     @pat = "SPECIES_PAT"
-    pat = Name::SPECIES_PAT
+    pat = ::Name::Parse::SPECIES_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata")
     assert_name_match_author_optional(pat, 'Amanita "vaginata"')
     assert_name_match_author_optional(pat, "Amanita vag-inata")
@@ -451,7 +452,7 @@ class NameTest < UnitTestCase
 
   def test_subspecies_pat
     @pat = "SUBSPECIES_PAT"
-    pat = Name::SUBSPECIES_PAT
+    pat = ::Name::Parse::SUBSPECIES_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata subspecies grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata subsp grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata Subsp grisea")
@@ -468,7 +469,7 @@ class NameTest < UnitTestCase
 
   def test_variety_pat
     @pat = "VARIETY_PAT"
-    pat = Name::VARIETY_PAT
+    pat = ::Name::Parse::VARIETY_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata variety grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata var grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata v grisea")
@@ -487,7 +488,7 @@ class NameTest < UnitTestCase
 
   def test_form_pat
     @pat = "FORM_PAT"
-    pat = Name::FORM_PAT
+    pat = ::Name::Parse::FORM_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata forma grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata form grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata f grisea")
@@ -510,7 +511,7 @@ class NameTest < UnitTestCase
 
   def test_group_pat
     @pat = "GROUP_PAT"
-    pat = Name::GROUP_PAT
+    pat = ::Name::Parse::GROUP_PAT
     assert_name_match(pat, "Amanita group", "Amanita")
     assert_name_match(pat, "Amanita Group", "Amanita")
     assert_name_match(pat, "Amanita Gr", "Amanita")
@@ -575,8 +576,9 @@ class NameTest < UnitTestCase
       sort_name: "Lecania ryaniana  van den Boom",
       display_name: "**__Lecania ryaniana__** van den Boom",
       parent_name: "Lecania",
-      rank: :Species,
-      author: "van den Boom"
+      rank: "Species",
+      author: "van den Boom",
+      deprecated: false
     )
   end
 
@@ -590,8 +592,9 @@ class NameTest < UnitTestCase
       sort_name: "Lecania  van den Boom",
       display_name: "**__Lecania__** van den Boom",
       parent_name: nil,
-      rank: :Genus,
-      author: "van den Boom"
+      rank: "Genus",
+      author: "van den Boom",
+      deprecated: false
     )
   end
 
@@ -605,8 +608,9 @@ class NameTest < UnitTestCase
       sort_name: "Lecania ryaniana  de Hoog",
       display_name: "**__Lecania ryaniana__** de Hoog",
       parent_name: "Lecania",
-      rank: :Species,
-      author: "de Hoog"
+      rank: "Species",
+      author: "de Hoog",
+      deprecated: false
     )
   end
 
@@ -620,8 +624,9 @@ class NameTest < UnitTestCase
       sort_name: "Lecania  de Hoog",
       display_name: "**__Lecania__** de Hoog",
       parent_name: nil,
-      rank: :Genus,
-      author: "de Hoog"
+      rank: "Genus",
+      author: "de Hoog",
+      deprecated: false
     )
   end
 
@@ -635,8 +640,9 @@ class NameTest < UnitTestCase
       sort_name: "Synchytrium  {1subg.  Endochytrium  du Plessis",
       display_name: "**__Synchytrium__** subg. **__Endochytrium__** du Plessis",
       parent_name: "Synchytrium",
-      rank: :Subgenus,
-      author: "du Plessis"
+      rank: "Subgenus",
+      author: "du Plessis",
+      deprecated: false
     )
   end
 
@@ -650,8 +656,9 @@ class NameTest < UnitTestCase
       sort_name: "Lecidea sanguineoatra  sensu Nyl",
       display_name: "**__Lecidea sanguineoatra__** sensu Nyl",
       parent_name: "Lecidea",
-      rank: :Species,
-      author: "sensu Nyl"
+      rank: "Species",
+      author: "sensu Nyl",
+      deprecated: false
     )
   end
 
@@ -665,8 +672,9 @@ class NameTest < UnitTestCase
       sort_name: "Acarospora squamulosa  sensu Th. Fr.",
       display_name: "**__Acarospora squamulosa__** sensu Th. Fr.",
       parent_name: "Acarospora",
-      rank: :Species,
-      author: "sensu Th. Fr."
+      rank: "Species",
+      author: "sensu Th. Fr.",
+      deprecated: false
     )
   end
 
@@ -684,8 +692,9 @@ class NameTest < UnitTestCase
         "**__Cladina portentosa__** subsp. **__pacifica__** " \
         "f. **__decolorans__** auct.",
       parent_name: "Cladina portentosa subsp. pacifica",
-      rank: :Form,
-      author: "auct."
+      rank: "Form",
+      author: "auct.",
+      deprecated: false
     )
   end
 
@@ -699,8 +708,9 @@ class NameTest < UnitTestCase
       sort_name: "Japewia tornoensis  Somloë",
       display_name: "**__Japewia tornoënsis__** Somloë",
       parent_name: "Japewia",
-      rank: :Species,
-      author: "Somloë"
+      rank: "Species",
+      author: "Somloë",
+      deprecated: false
     )
   end
 
@@ -714,8 +724,9 @@ class NameTest < UnitTestCase
       sort_name: 'Micarea globularis  (Ach. ex Nyl.) Hedl."',
       display_name: '**__Micarea globularis__** "(Ach. ex Nyl.) Hedl."',
       parent_name: "Micarea",
-      rank: :Species,
-      author: '"(Ach. ex Nyl.) Hedl."'
+      rank: "Species",
+      author: '"(Ach. ex Nyl.) Hedl."',
+      deprecated: false
     )
   end
 
@@ -729,8 +740,9 @@ class NameTest < UnitTestCase
       sort_name: 'Synechoblastus aggregatus  (Ach.") Th. Fr.',
       display_name: '**__Synechoblastus aggregatus__** ("Ach.") Th. Fr.',
       parent_name: "Synechoblastus",
-      rank: :Species,
-      author: '("Ach.") Th. Fr.'
+      rank: "Species",
+      author: '("Ach.") Th. Fr.',
+      deprecated: false
     )
   end
 
@@ -744,8 +756,9 @@ class NameTest < UnitTestCase
       sort_name: 'Toninia"',
       display_name: '**__"Toninia"__**',
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -759,8 +772,9 @@ class NameTest < UnitTestCase
       sort_name: 'Toninia"',
       display_name: '**__"Toninia"__**',
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -774,8 +788,9 @@ class NameTest < UnitTestCase
       sort_name: 'Toninia" squalescens',
       display_name: '**__"Toninia" squalescens__**',
       parent_name: '"Toninia"',
-      rank: :Species,
-      author: ""
+      rank: "Species",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -789,8 +804,9 @@ class NameTest < UnitTestCase
       sort_name: 'Anaptychia leucomelaena"  auct.',
       display_name: '**__Anaptychia "leucomelaena"__** auct.',
       parent_name: "Anaptychia",
-      rank: :Species,
-      author: "auct."
+      rank: "Species",
+      author: "auct.",
+      deprecated: false
     )
   end
 
@@ -804,8 +820,9 @@ class NameTest < UnitTestCase
       sort_name: "Anema",
       display_name: "**__Anema__**",
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -819,8 +836,9 @@ class NameTest < UnitTestCase
       sort_name: "Anema",
       display_name: "**__Anema__**",
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -834,8 +852,9 @@ class NameTest < UnitTestCase
       sort_name: "Anema",
       display_name: "**__Anema__**",
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -849,8 +868,9 @@ class NameTest < UnitTestCase
       sort_name: "Anema  Nyl. ex Forss.",
       display_name: "**__Anema__** Nyl. ex Forss.",
       parent_name: nil,
-      rank: :Genus,
-      author: "Nyl. ex Forss."
+      rank: "Genus",
+      author: "Nyl. ex Forss.",
+      deprecated: false
     )
   end
 
@@ -864,8 +884,9 @@ class NameTest < UnitTestCase
       sort_name: "Anema  Nyl. ex Forss.",
       display_name: "**__Anema__** Nyl. ex Forss.",
       parent_name: nil,
-      rank: :Genus,
-      author: "Nyl. ex Forss."
+      rank: "Genus",
+      author: "Nyl. ex Forss.",
+      deprecated: false
     )
   end
 
@@ -879,8 +900,9 @@ class NameTest < UnitTestCase
       sort_name: "Anema  Nyl. ex Forss.",
       display_name: "**__Anema__** Nyl. ex Forss.",
       parent_name: nil,
-      rank: :Genus,
-      author: "Nyl. ex Forss."
+      rank: "Genus",
+      author: "Nyl. ex Forss.",
+      deprecated: false
     )
   end
 
@@ -894,8 +916,9 @@ class NameTest < UnitTestCase
       sort_name: "Japewia tornoensis  {6var.  !tornoensis",
       display_name: "**__Japewia tornoënsis__** var. **__tornoënsis__**",
       parent_name: "Japewia tornoënsis",
-      rank: :Variety,
-      author: ""
+      rank: "Variety",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -910,8 +933,9 @@ class NameTest < UnitTestCase
       display_name: "**__Does this__** subsp. **__ever__** " \
                     "var. **__happen__** f. **__for__** Real?",
       parent_name: "Does this subsp. ever var. happen",
-      rank: :Form,
-      author: "Real?"
+      rank: "Form",
+      author: "Real?",
+      deprecated: false
     )
   end
 
@@ -925,8 +949,9 @@ class NameTest < UnitTestCase
       sort_name: "Boletus rex-veris  Arora & Simonini",
       display_name: "**__Boletus rex-veris__** Arora & Simonini",
       parent_name: "Boletus",
-      rank: :Species,
-      author: "Arora & Simonini"
+      rank: "Species",
+      author: "Arora & Simonini",
+      deprecated: false
     )
   end
 
@@ -940,8 +965,9 @@ class NameTest < UnitTestCase
       sort_name: 'Amanita quoted"',
       display_name: '**__Amanita "quoted"__**',
       parent_name: "Amanita",
-      rank: :Species,
-      author: ""
+      rank: "Species",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -955,8 +981,9 @@ class NameTest < UnitTestCase
       sort_name: "Amanita",
       display_name: "**__Amanita__**",
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -970,8 +997,9 @@ class NameTest < UnitTestCase
       sort_name: "Amanita  {2sect.  Vaginatae  (L.) Ach.",
       display_name: "**__Amanita__** sect. **__Vaginatae__** (L.) Ach.",
       parent_name: "Amanita",
-      rank: :Section,
-      author: "(L.) Ach."
+      rank: "Section",
+      author: "(L.) Ach.",
+      deprecated: false
     )
   end
 
@@ -985,8 +1013,9 @@ class NameTest < UnitTestCase
       sort_name: "Amanita  {4stirps  Vaginatae  Ach. & Fr.",
       display_name: "**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.",
       parent_name: "Amanita",
-      rank: :Stirps,
-      author: "Ach. & Fr."
+      rank: "Stirps",
+      author: "Ach. & Fr.",
+      deprecated: false
     )
   end
 
@@ -1001,8 +1030,9 @@ class NameTest < UnitTestCase
       display_name:
         "**__Amanita__** subg. **__Vaginatae__** stirps **__Vaginatae__**",
       parent_name: "Amanita subg. Vaginatae",
-      rank: :Stirps,
-      author: ""
+      rank: "Stirps",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -1016,8 +1046,9 @@ class NameTest < UnitTestCase
       sort_name: 'Amanita {sp-S01"',
       display_name: '**__Amanita "sp-S01"__**',
       parent_name: "Amanita",
-      rank: :Species,
-      author: ""
+      rank: "Species",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -1031,8 +1062,9 @@ class NameTest < UnitTestCase
       sort_name: 'Amanita {sp-S01"  Tulloss',
       display_name: '**__Amanita "sp-S01"__** Tulloss',
       parent_name: "Amanita",
-      rank: :Species,
-      author: "Tulloss"
+      rank: "Species",
+      author: "Tulloss",
+      deprecated: false
     )
   end
 
@@ -1046,8 +1078,9 @@ class NameTest < UnitTestCase
       sort_name: 'Amanita  Wrong Author"',
       display_name: '**__Amanita__** "Wrong Author"',
       parent_name: nil,
-      rank: :Genus,
-      author: '"Wrong Author"'
+      rank: "Genus",
+      author: '"Wrong Author"',
+      deprecated: false
     )
   end
 
@@ -1061,8 +1094,9 @@ class NameTest < UnitTestCase
       sort_name: "Amanita vaginata",
       display_name: "**__Amanita vaginata__**",
       parent_name: "Amanita",
-      rank: :Species,
-      author: ""
+      rank: "Species",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -1077,8 +1111,9 @@ class NameTest < UnitTestCase
       display_name:
         "**__Pleurotus djamor__** (Fr.) Boedijn var. **__djamor__**",
       parent_name: "Pleurotus djamor",
-      rank: :Variety,
-      author: "(Fr.) Boedijn"
+      rank: "Variety",
+      author: "(Fr.) Boedijn",
+      deprecated: false
     )
   end
 
@@ -1092,8 +1127,9 @@ class NameTest < UnitTestCase
       sort_name: 'Pleurotus {sp-T44"  Tulloss',
       display_name: '**__Pleurotus "sp-T44"__** Tulloss',
       parent_name: "Pleurotus",
-      rank: :Species,
-      author: "Tulloss"
+      rank: "Species",
+      author: "Tulloss",
+      deprecated: false
     )
   end
 
@@ -1107,8 +1143,9 @@ class NameTest < UnitTestCase
       sort_name: "Xylaria",
       display_name: "**__Xylaria__**",
       parent_name: nil,
-      rank: :Genus,
-      author: ""
+      rank: "Genus",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -1122,8 +1159,9 @@ class NameTest < UnitTestCase
       sort_name: "Amanita  {2sect.  !Amanita  Pers.",
       display_name: "**__Amanita__** Pers. sect. **__Amanita__**",
       parent_name: "Amanita",
-      rank: :Section,
-      author: "Pers."
+      rank: "Section",
+      author: "Pers.",
+      deprecated: false
     )
   end
 
@@ -1137,8 +1175,9 @@ class NameTest < UnitTestCase
       sort_name: "Amanita  {2sect.  !Amanita  Pers.",
       display_name: "**__Amanita__** Pers. sect. **__Amanita__**",
       parent_name: "Amanita",
-      rank: :Section,
-      author: "Pers."
+      rank: "Section",
+      author: "Pers.",
+      deprecated: false
     )
   end
 
@@ -1159,8 +1198,9 @@ class NameTest < UnitTestCase
         "**__Amanita__** subg. **__Amidella__** Singer " \
         "sect. **__Amidella__** stirps **__Amidella__**",
       parent_name: "Amanita subg. Amidella sect. Amidella",
-      rank: :Stirps,
-      author: "Singer"
+      rank: "Stirps",
+      author: "Singer",
+      deprecated: false
     )
   end
 
@@ -1174,8 +1214,9 @@ class NameTest < UnitTestCase
       sort_name: "Podoscyph!7  sensu Reid",
       display_name: "**__Podoscyphaceae__** sensu Reid",
       parent_name: nil,
-      rank: :Family,
-      author: "sensu Reid"
+      rank: "Family",
+      author: "sensu Reid",
+      deprecated: false
     )
   end
 
@@ -1189,8 +1230,9 @@ class NameTest < UnitTestCase
       sort_name: "Fossil-Asc!3",
       display_name: "**__Fossil-Ascomycetes__**",
       parent_name: nil,
-      rank: :Class,
-      author: ""
+      rank: "Class",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -1204,8 +1246,9 @@ class NameTest < UnitTestCase
       sort_name: "Fossil-Fungi",
       display_name: "**__Fossil-Fungi__**",
       parent_name: nil,
-      rank: :Phylum,
-      author: ""
+      rank: "Phylum",
+      author: "",
+      deprecated: false
     )
   end
 
@@ -1219,8 +1262,9 @@ class NameTest < UnitTestCase
       sort_name: "Armillaria mellea  D.C.",
       display_name: "**__Armillaria mellea__** D.C.",
       parent_name: "Armillaria",
-      rank: :Species,
-      author: "D.C."
+      rank: "Species",
+      author: "D.C.",
+      deprecated: false
     )
   end
 
@@ -1234,8 +1278,9 @@ class NameTest < UnitTestCase
       sort_name: "Sebacina schweinitzii  comb. prov.",
       display_name: "**__Sebacina schweinitzii__** comb. prov.",
       parent_name: "Sebacina",
-      rank: :Species,
-      author: "comb. prov."
+      rank: "Species",
+      author: "comb. prov.",
+      deprecated: false
     )
   end
 
@@ -1249,8 +1294,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus   group",
       display_name: "**__Agaricus__** group",
       parent_name: "",
-      rank: :Group,
-      author: ""
+      rank: "Group",
+      author: "",
+      deprecated: false
     )
     do_name_parse_test( # binomial, no author
       "Agaricus campestris group",
@@ -1261,8 +1307,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   group",
       display_name: "**__Agaricus campestris__** group",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: ""
+      rank: "Group",
+      author: "",
+      deprecated: false
     )
     do_name_parse_test( # monomial, with author
       "Agaricus group Author",
@@ -1273,8 +1320,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus   group  Author",
       display_name: "**__Agaricus__** group Author",
       parent_name: "",
-      rank: :Group,
-      author: "Author"
+      rank: "Group",
+      author: "Author",
+      deprecated: false
     )
     do_name_parse_test( # binomial, author
       "Agaricus campestris group Author",
@@ -1285,8 +1333,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   group  Author",
       display_name: "**__Agaricus campestris__** group Author",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: "Author"
+      rank: "Group",
+      author: "Author",
+      deprecated: false
     )
     do_name_parse_test( # binomial with author, "group" at end
       "Agaricus campestris Author group",
@@ -1297,8 +1346,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   group  Author",
       display_name: "**__Agaricus campestris__** group Author",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: "Author"
+      rank: "Group",
+      author: "Author",
+      deprecated: false
     )
     do_name_parse_test( # binomial, sensu author
       "Agaricus campestris group sensu Author",
@@ -1309,8 +1359,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   group  sensu Author",
       display_name: "**__Agaricus campestris__** group sensu Author",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: "sensu Author"
+      rank: "Group",
+      author: "sensu Author",
+      deprecated: false
     )
     do_name_parse_test( # species with Tulloss form of sp. nov.
       "Pleurotus sp. T44 group Tulloss",
@@ -1321,8 +1372,9 @@ class NameTest < UnitTestCase
       sort_name: 'Pleurotus {sp-T44"   group  Tulloss',
       display_name: '**__Pleurotus "sp-T44"__** group Tulloss',
       parent_name: "Pleurotus",
-      rank: :Group,
-      author: "Tulloss"
+      rank: "Group",
+      author: "Tulloss",
+      deprecated: false
     )
     do_name_parse_test( # subgenus group, with author
       "Amanita subg. Vaginatae group (L.) Ach.",
@@ -1334,8 +1386,9 @@ class NameTest < UnitTestCase
       display_name:
         "**__Amanita__** subg. **__Vaginatae__** group (L.) Ach.",
       parent_name: "Amanita",
-      rank: :Group,
-      author: "(L.) Ach."
+      rank: "Group",
+      author: "(L.) Ach.",
+      deprecated: false
     )
     do_name_parse_test( # stirps group, with sub-genus parent
       "Amanita subgenus Vaginatae stirps Vaginatae group",
@@ -1349,8 +1402,9 @@ class NameTest < UnitTestCase
         "**__Amanita__** subg. **__Vaginatae__** stirps " \
         "**__Vaginatae__** group",
       parent_name: "Amanita subg. Vaginatae",
-      rank: :Group,
-      author: ""
+      rank: "Group",
+      author: "",
+      deprecated: false
     )
     do_name_parse_test( # binomial, "group" part of epithet
       "Agaricus grouperi group Author",
@@ -1361,8 +1415,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus grouperi   group  Author",
       display_name: "**__Agaricus grouperi__** group Author",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: "Author"
+      rank: "Group",
+      author: "Author",
+      deprecated: false
     )
     do_name_parse_test( # author duplicates a word in the taxon
       "Agaricus group Agaricus",
@@ -1373,8 +1428,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus   group  Agaricus",
       display_name: "**__Agaricus__** group Agaricus",
       parent_name: "",
-      rank: :Group,
-      author: "Agaricus"
+      rank: "Group",
+      author: "Agaricus",
+      deprecated: false
     )
   end
 
@@ -1388,8 +1444,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus   clade",
       display_name: "**__Agaricus__** clade",
       parent_name: "",
-      rank: :Group,
-      author: ""
+      rank: "Group",
+      author: "",
+      deprecated: false
     )
     do_name_parse_test( # binomial, no author
       "Agaricus campestris clade",
@@ -1400,8 +1457,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   clade",
       display_name: "**__Agaricus campestris__** clade",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: ""
+      rank: "Group",
+      author: "",
+      deprecated: false
     )
     do_name_parse_test( # binomial, sensu author
       "Agaricus campestris clade sensu Author",
@@ -1412,8 +1470,9 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   clade  sensu Author",
       display_name: "**__Agaricus campestris__** clade sensu Author",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: "sensu Author"
+      rank: "Group",
+      author: "sensu Author",
+      deprecated: false
     )
     do_name_parse_test( # binomial with author, "clade" at end
       "Agaricus campestris Author clade",
@@ -1424,55 +1483,50 @@ class NameTest < UnitTestCase
       sort_name: "Agaricus campestris   clade  Author",
       display_name: "**__Agaricus campestris__** clade Author",
       parent_name: "Agaricus",
-      rank: :Group,
-      author: "Author"
+      rank: "Group",
+      author: "Author",
+      deprecated: false
     )
   end
 
   def test_name_parse_deprecated
     do_name_parse_test(
       "Lecania ryaniana van den Boom",
-      {
-        text_name: "Lecania ryaniana",
-        real_text_name: "Lecania ryaniana",
-        search_name: "Lecania ryaniana van den Boom",
-        real_search_name: "Lecania ryaniana van den Boom",
-        sort_name: "Lecania ryaniana  van den Boom",
-        display_name: "__Lecania ryaniana__ van den Boom",
-        parent_name: "Lecania",
-        rank: :Species,
-        author: "van den Boom"
-      },
+      text_name: "Lecania ryaniana",
+      real_text_name: "Lecania ryaniana",
+      search_name: "Lecania ryaniana van den Boom",
+      real_search_name: "Lecania ryaniana van den Boom",
+      sort_name: "Lecania ryaniana  van den Boom",
+      display_name: "__Lecania ryaniana__ van den Boom",
+      parent_name: "Lecania",
+      rank: "Species",
+      author: "van den Boom",
       deprecated: true
     )
     do_name_parse_test( # binomial, no author, deprecated
       "Agaricus campestris group",
-      {
-        text_name: "Agaricus campestris group",
-        real_text_name: "Agaricus campestris group",
-        search_name: "Agaricus campestris group",
-        real_search_name: "Agaricus campestris group",
-        sort_name: "Agaricus campestris   group",
-        display_name: "__Agaricus campestris__ group",
-        parent_name: "Agaricus",
-        rank: :Group,
-        author: ""
-      },
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group",
+      real_search_name: "Agaricus campestris group",
+      sort_name: "Agaricus campestris   group",
+      display_name: "__Agaricus campestris__ group",
+      parent_name: "Agaricus",
+      rank: "Group",
+      author: "",
       deprecated: true
     )
     do_name_parse_test( # binomial, sensu author, deprecated
       "Agaricus campestris group sensu Author",
-      {
-        text_name: "Agaricus campestris group",
-        real_text_name: "Agaricus campestris group",
-        search_name: "Agaricus campestris group sensu Author",
-        real_search_name: "Agaricus campestris group sensu Author",
-        sort_name: "Agaricus campestris   group  sensu Author",
-        display_name: "__Agaricus campestris__ group sensu Author",
-        parent_name: "Agaricus",
-        rank: :Group,
-        author: "sensu Author"
-      },
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group sensu Author",
+      real_search_name: "Agaricus campestris group sensu Author",
+      sort_name: "Agaricus campestris   group  sensu Author",
+      display_name: "__Agaricus campestris__ group sensu Author",
+      parent_name: "Agaricus",
+      rank: "Group",
+      author: "sensu Author",
       deprecated: true
     )
   end
@@ -1482,7 +1536,7 @@ class NameTest < UnitTestCase
   # -----------------------------
 
   def test_parse_classification_1
-    do_parse_classification_test("Kingdom: Fungi", [[:Kingdom, "Fungi"]])
+    do_parse_classification_test("Kingdom: Fungi", [%w[Kingdom Fungi]])
   end
 
   def test_parse_classification_2
@@ -1491,30 +1545,30 @@ class NameTest < UnitTestCase
       Class: Basidiomycetes\r
       Order: Agaricales\r
       Family: Amanitaceae),
-                                 [[:Kingdom, "Fungi"],
-                                  [:Phylum, "Basidiomycota"],
-                                  [:Class, "Basidiomycetes"],
-                                  [:Order, "Agaricales"],
-                                  [:Family, "Amanitaceae"]])
+                                 [%w[Kingdom Fungi],
+                                  %w[Phylum Basidiomycota],
+                                  %w[Class Basidiomycetes],
+                                  %w[Order Agaricales],
+                                  %w[Family Amanitaceae]])
   end
 
   def test_parse_classification_3
     do_parse_classification_test(%(Kingdom: Fungi\r
       \r
       Family: Amanitaceae),
-                                 [[:Kingdom, "Fungi"],
-                                  [:Family, "Amanitaceae"]])
+                                 [%w[Kingdom Fungi],
+                                  %w[Family Amanitaceae]])
   end
 
   def test_parse_classification_4
     do_parse_classification_test(%(Kingdom: _Fungi_\r
       Family: _Amanitaceae_),
-                                 [[:Kingdom, "Fungi"],
-                                  [:Family, "Amanitaceae"]])
+                                 [%w[Kingdom Fungi],
+                                  %w[Family Amanitaceae]])
   end
 
   def test_parse_classification_5
-    do_parse_classification_test("Queendom: Fungi", [[:Queendom, "Fungi"]])
+    do_parse_classification_test("Queendom: Fungi", [%w[Queendom Fungi]])
   end
 
   def test_parse_classification_6
@@ -1529,13 +1583,13 @@ class NameTest < UnitTestCase
 
   def test_validate_classification_1
     do_validate_classification_test(
-      :Species, "Kingdom: Fungi", "Kingdom: _Fungi_"
+      "Species", "Kingdom: Fungi", "Kingdom: _Fungi_"
     )
   end
 
   def test_validate_classification_2
     do_validate_classification_test(
-      :Species,
+      "Species",
       %(Kingdom: Fungi\r
         Phylum: Basidiomycota\r
         Class: Basidiomycetes\r
@@ -1550,68 +1604,68 @@ class NameTest < UnitTestCase
   end
 
   def test_validate_classification_3
-    do_validate_classification_test(:Species, %(Kingdom: Fungi\r
+    do_validate_classification_test("Species", %(Kingdom: Fungi\r
       \r
       Family: Amanitaceae),
                                     "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
 
   def test_validate_classification_4
-    do_validate_classification_test(:Species, %(Kingdom: _Fungi_\r
+    do_validate_classification_test("Species", %(Kingdom: _Fungi_\r
       Family: _Amanitaceae_),
                                     "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
 
   def test_validate_classification_5
-    do_validate_classification_test(:Species, "Queendom: Fungi", false)
+    do_validate_classification_test("Species", "Queendom: Fungi", false)
   end
 
   def test_validate_classification_6
-    do_validate_classification_test(:Species, "Junk text", false)
+    do_validate_classification_test("Species", "Junk text", false)
   end
 
   def test_validate_classification_7
-    do_validate_classification_test(:Genus, "Species: calyptroderma", false)
+    do_validate_classification_test("Genus", "Species: calyptroderma", false)
   end
 
   def test_validate_classification_8
     do_validate_classification_test(
-      :Species, "Family: Amanitaceae", "Family: _Amanitaceae_"
+      "Species", "Family: Amanitaceae", "Family: _Amanitaceae_"
     )
   end
 
   def test_validate_classification_9
-    do_validate_classification_test(:Queendom, "Family: Amanitaceae", false)
+    do_validate_classification_test("Queendom", "Family: Amanitaceae", false)
   end
 
   def test_validate_classification_10
-    do_validate_classification_test(:Species, "", "")
+    do_validate_classification_test("Species", "", "")
   end
 
   def test_validate_classification_11
-    do_validate_classification_test(:Species, nil, nil)
+    do_validate_classification_test("Species", nil, nil)
   end
 
   def test_validate_classification_12
-    do_validate_classification_test(:Genus, "Family: _Agaricales_", false)
+    do_validate_classification_test("Genus", "Family: _Agaricales_", false)
   end
 
   def test_validate_classification_13
-    do_validate_classification_test(:Genus, "Kingdom: _Agaricales_", false)
+    do_validate_classification_test("Genus", "Kingdom: _Agaricales_", false)
   end
 
   def test_validate_classification_14
     do_validate_classification_test(
-      :Genus, "Kingdom: _Blubber_", "Kingdom: _Blubber_"
+      "Genus", "Kingdom: _Blubber_", "Kingdom: _Blubber_"
     )
   end
 
   def test_validate_classification_15
     do_validate_classification_test(
-      :Genus, "Kingdom: _Fungi_\nOrder: _Insecta_", false
+      "Genus", "Kingdom: _Fungi_\nOrder: _Insecta_", false
     )
     do_validate_classification_test(
-      :Genus, "Kingdom: _Animalia_\nOrder: _Insecta_",
+      "Genus", "Kingdom: _Animalia_\nOrder: _Insecta_",
       "Kingdom: _Animalia_\r\nOrder: _Insecta_"
     )
   end
@@ -1669,11 +1723,14 @@ class NameTest < UnitTestCase
     assert_name_list_equal(
       [], names(:agaricus_campestris).children
     )
-    assert_name_list_equal([names(:agaricus_campestras),
+    assert_name_list_equal([names(:sect_agaricus)],
+                           names(:agaricus).children(all: false), :sort)
+    assert_name_list_equal([names(:sect_agaricus),
+                            names(:agaricus_campestras),
                             names(:agaricus_campestris),
                             names(:agaricus_campestros),
                             names(:agaricus_campestrus)],
-                           names(:agaricus).children, :sort)
+                           names(:agaricus).children(all: true), :sort)
   end
 
   def test_ancestors_2
@@ -1777,7 +1834,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.where("classification LIKE '%Ascomycota%'").count)
+    assert_equal(4, Name.classification_includes("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -2020,7 +2077,7 @@ class NameTest < UnitTestCase
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = rolf
     desc.reload
-    desc.update_review_status(:inaccurate)
+    desc.update_review_status("inaccurate")
     assert_equal(description_version + 3, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
@@ -2057,12 +2114,12 @@ class NameTest < UnitTestCase
     # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
     # The point is to update the review date if Dick *were*, or reset the
     # status to unreviewed in the present case that he *isn't*.)
-    desc.update_review_status(:inaccurate)
+    desc.update_review_status("inaccurate")
     desc.save
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(:unreviewed, desc.review_status)
+    assert_equal("unreviewed", desc.review_status)
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
@@ -2156,8 +2213,8 @@ class NameTest < UnitTestCase
   end
 
   def test_hiding_authors
-    dick.hide_authors = :above_species
-    mary.hide_authors = :none
+    dick.hide_authors = "above_species"
+    mary.hide_authors = "none"
 
     name = names(:agaricus_campestris)
     User.current = mary
@@ -2280,7 +2337,7 @@ class NameTest < UnitTestCase
       display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
       synonym: synonyms(:macrolepiota_rachodes_synonym),
       deprecated: true,
-      rank: :Species, user: users(:rolf)
+      rank: "Species", user: users(:rolf)
     )
     # M. rachodes & rhacodes are tied with 0 Observations
     # "Best" one is the one last updated
@@ -2297,7 +2354,7 @@ class NameTest < UnitTestCase
       display_name: "__Agaricus rhacodes__ Vittad.",
       synonym: synonyms(:chlorophyllum_rachodes_synonym),
       deprecated: true,
-      rank: :Species, user: users(:rolf)
+      rank: "Species", user: users(:rolf)
     )
     assert_equal(names(:chlorophyllum_rachodes),
                  deprecated_name.best_preferred_synonym)
@@ -2390,7 +2447,7 @@ class NameTest < UnitTestCase
                     less_observed_name.observation_count,
                     "Test needs different fixtures")
     less_observed_naming = Naming.where(name: less_observed_name).first
-    less_observed_naming.update(created_at: Time.zone.now + 1.hour)
+    less_observed_naming.update(created_at: 1.hour.from_now)
     assert_equal(
       more_observed_name,
       more_observed_name.more_popular(less_observed_name),
@@ -2412,7 +2469,7 @@ class NameTest < UnitTestCase
                  later_proposed_name.observation_count,
                  "Test needs different fixtures")
     later_proposed_naming = Naming.where(name: later_proposed_name).first
-    later_proposed_naming.update(created_at: Time.zone.now + 1.hour)
+    later_proposed_naming.update(created_at: 1.hour.from_now)
 
     assert_equal(
       later_proposed_name,
@@ -2459,7 +2516,7 @@ class NameTest < UnitTestCase
       text_name: "Xxx #{authors}",
       display_name: "**__Xxx__** #{authors}",
       author: authors.to_s,
-      rank: :Genus,
+      rank: "Genus",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
     )
@@ -2471,7 +2528,7 @@ class NameTest < UnitTestCase
       text_name: "Russula sect. Russula",
       display_name: "**__Russula__** Pers. sect. **__Russula__**",
       author: "Pers.",
-      rank: :Section,
+      rank: "Section",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
     )
@@ -2484,7 +2541,7 @@ class NameTest < UnitTestCase
       text_name: "Saproamanita sect. Saproamanita",
       display_name: "**__Saproamanita__** #{authors} sect. Saproamanita",
       author: authors,
-      rank: :Section,
+      rank: "Section",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
     )
@@ -2501,7 +2558,7 @@ class NameTest < UnitTestCase
       text_name: "Xxx yyy clade #{authors}",
       display_name: "**__Xxx yyy__** clade #{authors}",
       author: authors,
-      rank: :Group,
+      rank: "Group",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
     )
@@ -2527,7 +2584,7 @@ class NameTest < UnitTestCase
       text_name: "Russula sect. Russula",
       display_name: "**__Russula__** Pers. sect. **__Russula__**",
       author: "Pers.",
-      rank: :Section,
+      rank: "Section",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
     )
@@ -2541,51 +2598,55 @@ class NameTest < UnitTestCase
     # group with author
     assert_equal("**__Groupauthored__** group",
                  names(:authored_group).display_name_without_authors)
+
+    # Autonym
+    assert_equal("**__Agaricus__** sect. **__Agaricus__**",
+                 names(:sect_agaricus).display_name_without_authors)
   end
 
   def test_format_autonym
     assert_equal("**__Acarospora__**",
-                 Name.format_autonym("Acarospora", "", :Genus, false))
+                 Name.format_autonym("Acarospora", "", "Genus", false))
     assert_equal("**__Acarospora__** L.",
-                 Name.format_autonym("Acarospora", "L.", :Genus, false))
+                 Name.format_autonym("Acarospora", "L.", "Genus", false))
     assert_equal(
       "**__Acarospora nodulosa__** L.",
-      Name.format_autonym("Acarospora nodulosa", "L.", :Species, false)
+      Name.format_autonym("Acarospora nodulosa", "L.", "Species", false)
     )
     assert_equal(
       "__Acarospora nodulosa__ var. __reagens__ L.",
       Name.format_autonym(
-        "Acarospora nodulosa var. reagens", "L.", :Variety, true
+        "Acarospora nodulosa var. reagens", "L.", "Variety", true
       )
     )
     assert_equal(
       "__Acarospora nodulosa__ L. var. __nodulosa__",
       Name.format_autonym(
-        "Acarospora nodulosa var. nodulosa", "L.", :Variety, true
+        "Acarospora nodulosa var. nodulosa", "L.", "Variety", true
       )
     )
     assert_equal(
       "__Acarospora nodulosa__ L. ssp. __nodulosa__",
       Name.format_autonym(
-        "Acarospora nodulosa ssp. nodulosa", "L.", :Subspecies, true
+        "Acarospora nodulosa ssp. nodulosa", "L.", "Subspecies", true
       )
     )
     assert_equal(
       "__Acarospora nodulosa__ L. f. __nodulosa__",
       Name.format_autonym(
-        "Acarospora nodulosa f. nodulosa", "L.", :Form, true
+        "Acarospora nodulosa f. nodulosa", "L.", "Form", true
       )
     )
     assert_equal(
       "__Acarospora nodulosa__ ssp. __reagens__ L. var. __reagens__",
       Name.format_autonym(
-        "Acarospora nodulosa ssp. reagens var. reagens", "L.", :Variety, true
+        "Acarospora nodulosa ssp. reagens var. reagens", "L.", "Variety", true
       )
     )
     assert_equal(
       "__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__",
       Name.format_autonym(
-        "Acarospora nodulosa ssp. nodulosa var. nodulosa", "L.", :Variety, true
+        "Acarospora nodulosa ssp. nodulosa var. nodulosa", "L.", "Variety", true
       )
     )
     assert_equal(
@@ -2593,7 +2654,7 @@ class NameTest < UnitTestCase
       "f. __nodulosa__",
       Name.format_autonym(
         "Acarospora nodulosa ssp. nodulosa var. nodulosa f. nodulosa", "L.",
-        :Form, true
+        "Form", true
       )
     )
   end
@@ -2699,36 +2760,38 @@ class NameTest < UnitTestCase
   end
 
   def test_guess_rank
-    assert_equal(:Group, Name.guess_rank("Pleurotus djamor group"))
-    assert_equal(:Group, Name.guess_rank("Pleurotus djamor var. djamor group"))
-    assert_equal(:Form, Name.guess_rank("Pleurotus djamor var. djamor f. alba"))
-    assert_equal(:Variety, Name.guess_rank("Pleurotus djamor var. djamor"))
-    assert_equal(:Subspecies, Name.guess_rank("Pleurotus djamor subsp. djamor"))
-    assert_equal(:Species, Name.guess_rank("Pleurotus djamor"))
-    assert_equal(:Species, Name.guess_rank("Pleurotus djamor-foo"))
-    assert_equal(:Species, Name.guess_rank("Phellinus robineae"))
-    assert_equal(:Genus, Name.guess_rank("Pleurotus"))
-    assert_equal(:Stirps, Name.guess_rank("Amanita stirps Grossa"))
-    assert_equal(:Stirps,
+    assert_equal("Group", Name.guess_rank("Pleurotus djamor group"))
+    assert_equal("Group", Name.guess_rank("Pleurotus djamor var. djamor group"))
+    assert_equal("Form",
+                 Name.guess_rank("Pleurotus djamor var. djamor f. alba"))
+    assert_equal("Variety", Name.guess_rank("Pleurotus djamor var. djamor"))
+    assert_equal("Subspecies",
+                 Name.guess_rank("Pleurotus djamor subsp. djamor"))
+    assert_equal("Species", Name.guess_rank("Pleurotus djamor"))
+    assert_equal("Species", Name.guess_rank("Pleurotus djamor-foo"))
+    assert_equal("Species", Name.guess_rank("Phellinus robineae"))
+    assert_equal("Genus", Name.guess_rank("Pleurotus"))
+    assert_equal("Stirps", Name.guess_rank("Amanita stirps Grossa"))
+    assert_equal("Stirps",
                  Name.guess_rank("Amanita sect. Amanita stirps Grossa"))
-    assert_equal(:Subsection, Name.guess_rank("Amanita subsect. Amanita"))
-    assert_equal(:Section, Name.guess_rank("Amanita sect. Amanita"))
-    assert_equal(:Section, Name.guess_rank("Hygrocybe sect. Coccineae"))
-    assert_equal(:Subgenus, Name.guess_rank("Amanita subg. Amanita"))
-    assert_equal(:Family, Name.guess_rank("Amanitaceae"))
-    assert_equal(:Family, Name.guess_rank("Peltigerineae"))
-    assert_equal(:Order, Name.guess_rank("Peltigerales"))
-    assert_equal(:Order, Name.guess_rank("Lecanoromycetidae"))
-    assert_equal(:Class, Name.guess_rank("Lecanoromycetes"))
-    assert_equal(:Class, Name.guess_rank("Agaricomycotina"))
-    assert_equal(:Phylum, Name.guess_rank("Agaricomycota"))
-    assert_equal(:Genus, Name.guess_rank("Animalia"))
-    assert_equal(:Genus, Name.guess_rank("Plantae"))
-    assert_equal(:Phylum, Name.guess_rank("Fossil-Fungi"))
-    assert_equal(:Phylum, Name.guess_rank("Fossil-Ascomycota"))
-    assert_equal(:Class, Name.guess_rank("Fossil-Ascomycetes"))
-    assert_equal(:Order, Name.guess_rank("Fossil-Agaricales"))
-    assert_equal(:Phylum, Name.guess_rank("Fossil-Anythingelse"))
+    assert_equal("Subsection", Name.guess_rank("Amanita subsect. Amanita"))
+    assert_equal("Section", Name.guess_rank("Amanita sect. Amanita"))
+    assert_equal("Section", Name.guess_rank("Hygrocybe sect. Coccineae"))
+    assert_equal("Subgenus", Name.guess_rank("Amanita subg. Amanita"))
+    assert_equal("Family", Name.guess_rank("Amanitaceae"))
+    assert_equal("Family", Name.guess_rank("Peltigerineae"))
+    assert_equal("Order", Name.guess_rank("Peltigerales"))
+    assert_equal("Order", Name.guess_rank("Lecanoromycetidae"))
+    assert_equal("Class", Name.guess_rank("Lecanoromycetes"))
+    assert_equal("Class", Name.guess_rank("Agaricomycotina"))
+    assert_equal("Phylum", Name.guess_rank("Agaricomycota"))
+    assert_equal("Genus", Name.guess_rank("Animalia"))
+    assert_equal("Genus", Name.guess_rank("Plantae"))
+    assert_equal("Phylum", Name.guess_rank("Fossil-Fungi"))
+    assert_equal("Phylum", Name.guess_rank("Fossil-Ascomycota"))
+    assert_equal("Class", Name.guess_rank("Fossil-Ascomycetes"))
+    assert_equal("Order", Name.guess_rank("Fossil-Agaricales"))
+    assert_equal("Phylum", Name.guess_rank("Fossil-Anythingelse"))
   end
 
   def test_parent_if_parent_deprecated
@@ -2902,9 +2965,8 @@ class NameTest < UnitTestCase
     ancestor = names(:basidiomycetes)
     assert(
       !ancestor.is_misspelling? &&
-      Name.joins(:namings).where(
-        "classification LIKE ?",
-        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
+      Name.joins(:namings).with_rank_and_name_in_classification(
+        ancestor.rank, ancestor.text_name
       ).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
@@ -2912,7 +2974,7 @@ class NameTest < UnitTestCase
     assert(
       ancestor.dependents?,
       "`dependents?` should be true for a Name above genus " \
-      "(#{ancestor.text_name}) that is a correctly spelled ancestor "\
+      "(#{ancestor.text_name}) that is a correctly spelled ancestor " \
       "of a Proposed Name"
     )
 
@@ -2939,7 +3001,7 @@ class NameTest < UnitTestCase
     species_of_missplet_genus = Name.create(
       text_name: "#{misspelt_genus.text_name} lakei",
       display_name: "__#{misspelt_genus.text_name} lakei__",
-      rank: :Species,
+      rank: "Species",
       user: dick,
       correct_spelling: names(:boletus_edulis) # anything will do
     )
@@ -2994,29 +3056,29 @@ class NameTest < UnitTestCase
     assert_false(names(:fungi).imageless?)
   end
 
-  def test_names_matching_desired_new_name
+  def test_names_matching_desired_new_parsed_name
     # Prove unauthored ParseName matches are all extant matches to text_name
     # Such as multiple authored Names
     parsed = Name.parse_name("Amanita baccata")
     expect = [names(:amanita_baccata_arora), names(:amanita_baccata_borealis)]
     assert_equal(expect,
-                 Name.names_matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
     # or unauthored and authored Names
     parsed = Name.parse_name(names(:unauthored_with_naming).text_name)
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
-                 Name.names_matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
 
     # Prove authored Group ParsedName is not matched by extant unauthored Name
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
-    assert_not(Name.names_matching_desired_new_name(parsed).
+    assert_not(Name.matching_desired_new_parsed_name(parsed).
                 include?(names(:unauthored_with_naming)))
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
     extant = names(:authored_group)
     desired = extant.text_name
     parsed = Name.parse_name(desired)
-    assert_not(Name.names_matching_desired_new_name(parsed).include?(extant),
+    assert_not(Name.matching_desired_new_parsed_name(parsed).include?(extant),
                "'#{desired}' unexpectedly matches '#{extant.search_name}'")
 
     # Prove authored non-Group ParsedName matched by union of exact matches and
@@ -3024,7 +3086,7 @@ class NameTest < UnitTestCase
     parsed = Name.parse_name(names(:authored_with_naming).search_name)
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
-                 Name.names_matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
   def test_refresh_classification_caches
@@ -3054,10 +3116,8 @@ class NameTest < UnitTestCase
   def test_mark_misspelled
     # Make sure target name has synonyms.
     syn = Synonym.create
-    Name.connection.execute(%(
-      UPDATE names SET synonym_id = #{syn.id}
-      WHERE text_name LIKE "Agaricus camp%"
-    ))
+    Name.where(Name[:text_name].matches("Agaricus camp%")).
+      update_all(synonym_id: syn.id)
 
     good = names(:agaricus_campestris)
     bad  = names(:coprinus_comatus)
@@ -3102,7 +3162,7 @@ class NameTest < UnitTestCase
     name = names(:boletus_edulis_group)
     assert(name.unregistrable?, "Groups should be unregistrable")
 
-    name = Name.new(text_name: 'Cortinarus "quoted"', rank: :Species)
+    name = Name.new(text_name: 'Cortinarus "quoted"', rank: "Species")
     assert(name.unregistrable?,
            "Names below genus with quotes should be unregistrable")
 
@@ -3120,7 +3180,7 @@ class NameTest < UnitTestCase
     name = Name.new(text_name: "Agricales", author: "sensu lato")
     assert(name.unregistrable?, "Names s.l. should be unregistrable")
 
-    name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    name = Name.new(text_name: "Eukaryota", rank: "Domain")
     assert(name.unregistrable?, "Domains should be unregistrable")
 
     name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
@@ -3132,17 +3192,17 @@ class NameTest < UnitTestCase
 
     # Use Protozoa as a rough proxy for slime molds, which are included
     # fungal nomenclature registries, even though they are not fungi.
-    name = Name.new(text_name: "Myxomycetes", rank: :Class,
+    name = Name.new(text_name: "Myxomycetes", rank: "Class",
                     classification: "Kingdom: Protozoa")
     assert(name.registrable?, "Protozoa should be registrable")
 
-    name = Name.new(text_name: "New species", rank: :Species)
+    name = Name.new(text_name: "New species", rank: "Species")
     assert(name.registrable?,
            "Non-group, non-domain kingdom-less names should be registrable")
   end
 
   def test_searchability_in_registry
-    name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    name = Name.new(text_name: "Eukaryota", rank: "Domain")
     assert(name.unsearchable_in_registry?, "Domains should be unsearchable")
 
     name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
@@ -3157,7 +3217,7 @@ class NameTest < UnitTestCase
     assert(name.searchable_in_registry?,
            "Fungal `groups` can be searchable in registy")
 
-    name = Name.new(text_name: 'Cortinarus "quoted"', rank: :Species)
+    name = Name.new(text_name: 'Cortinarus "quoted"', rank: "Species")
     assert(name.searchable_in_registry?,
            "Names with quote marks can be searchable")
 
@@ -3166,7 +3226,7 @@ class NameTest < UnitTestCase
     assert(name.searchable_in_registry?,
            "Provisional names can be searchable in registry")
 
-    name = Name.new(text_name: "Myxomycetes", rank: :Class,
+    name = Name.new(text_name: "Myxomycetes", rank: "Class",
                     classification: "Kingdom: Protozoa")
     assert(name.searchable_in_registry?,
            "Protozoa should be searchable in registry")
@@ -3269,8 +3329,8 @@ class NameTest < UnitTestCase
                     "Boletaceae => Agaricaceae") &&
         msgs.include?("Filling in classification for Lepiota rhacodes") &&
         msgs.include?("Stripping classification from Agaricus campestris") &&
-        !msgs.include?("Filling in classification for Lepiota rachodes") &&
-        !msgs.include?("Stripping classification from Agaricus campestras"),
+        msgs.exclude?("Filling in classification for Lepiota rachodes") &&
+        msgs.exclude?("Stripping classification from Agaricus campestras"),
       "Messages wrong.  Got this:\n#{msgs.inspect}\n"
     )
 
@@ -3282,5 +3342,284 @@ class NameTest < UnitTestCase
                  l_rachodes.reload.classification)
     assert_equal(names(:lepiota).classification,
                  l_rhacodes.reload.classification)
+  end
+
+  def test_destroy_orphans_log
+    loc = locations(:mitrula_marsh)
+    log = loc.rss_log
+    assert_not_nil(log)
+    loc.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
+  def test_merge_orphans_log
+    name1 = names(:coprinus)
+    name2 = names(:fungi)
+    log1 = name1.rss_log
+    log2 = name2.rss_log
+    assert_not_nil(log1)
+    assert_not_nil(log2)
+    name2.merge(name1)
+    assert_nil(log1.reload.target_id)
+    assert_not_nil(log2.reload.target_id)
+    assert_equal(:log_orphan, log1.parse_log[0][0])
+    assert_equal(:log_name_merged, log1.parse_log[1][0])
+  end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_scope_description_includes
+    assert_equal(
+      [names(:suillus)],
+      Name.description_includes("by any other name would smell as sweet").to_a
+    )
+    assert_equal(0, Name.description_includes(ARBITRARY_SHA).count)
+  end
+
+  def test_scope_with_description_in_project
+    assert_includes(
+      Name.with_description_in_project(projects(:bolete_project)),
+      names(:boletus_edulis)
+    )
+    assert_not_includes(
+      Name.with_description_in_project(projects(:bolete_project)),
+      names(:peltigera)
+    )
+  end
+
+  def test_scope_with_description_created_by
+    name = names(:coprinus_comatus)
+    description = name_descriptions(:draft_coprinus_comatus)
+    assert_not_equal(name.user, description.user)
+
+    assert_includes(
+      Name.with_description_created_by(description.user),
+      name
+    )
+    assert_not_includes(
+      Name.with_description_created_by(users(:zero_user)),
+      names(:peltigera)
+    )
+  end
+
+  def test_scope_with_description_reviewed_by
+    assert_includes(
+      Name.with_description_reviewed_by(users(:rolf)),
+      names(:peltigera)
+    )
+    assert_not_includes(
+      Name.with_description_reviewed_by(users(:dick)),
+      names(:peltigera)
+    )
+  end
+
+  def test_scope_with_description_of_type
+    assert_includes(
+      Name.with_description_of_type("public"),
+      names(:peltigera)
+    )
+    assert_includes(
+      Name.with_description_of_type("user"),
+      names(:peltigera)
+    )
+    assert_not_includes(
+      Name.with_description_of_type("foreign"),
+      names(:peltigera)
+    )
+    assert_empty(Name.with_description_of_type("spam"))
+    assert_kind_of(
+      ActiveRecord::Relation, Name.with_description_of_type("spam")
+    )
+  end
+
+  def test_scope_subtaxa_of
+    mispelled_name = Name.create!(
+      text_name: "Amanita boodairy",
+      author: "",
+      display_name: "__Amanita boodairy__ ",
+      correct_spelling: names(:amanita_boudieri),
+      deprecated: true,
+      rank: "Species",
+      user: users(:rolf)
+    )
+
+    subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
+
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
+      "`subtaxa_of` a genus should include subgenera"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
+      "`subtaxa_of` a genus should include subgenera"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_boudieri),
+      "`subtaxa_of` a genus should include species"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_boudieri_var_beillei),
+      "`subtaxa_of` a genus should include variety"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:amanita_boudieri)),
+      names(:amanita_boudieri_var_beillei),
+      "`subtaxa_of` a species should include variety"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:pluteus)),
+      names(:pluteus_petasatus_deprecated),
+      "`subtaxa_of` should include deprecated, but correctly spelled, names"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:boletus)),
+      names(:boletus_edulis_group),
+      "`subtaxa_of` a genus should include species groups"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:agaricales)),
+      names(:agaricaceae),
+      "`subtaxa_of` a class should include family whose classification" \
+      "includes that class"
+    )
+    # This is a counter-intuitive compromise for an edge case.
+    # See comments in test_scope_subtaxa_of_genus_or_below
+    assert_includes(
+      Name.subtaxa_of(names(:boletus_edulis)),
+      names(:boletus_edulis_group),
+      "`subtaxa_of` <name> should include <name> group"
+    )
+
+    # -----------------
+
+    assert_not_includes(
+      subtaxa_of_amanita, names(:amanita),
+      "`subtaxa_of` a genus should not include that genus"
+    )
+    assert_not_includes(
+      subtaxa_of_amanita, names(:boletus_edulis),
+      "`subtaxa_of` a genus should not species from other genera"
+    )
+    assert_not_includes(
+      subtaxa_of_amanita, mispelled_name,
+      "`subtaxa_of` should not include misspellings"
+    )
+  end
+
+  def test_scope_subtaxa_of_genus_or_below
+    amanita_group = Name.create!(
+      text_name: "Amanita group",
+      display_name: "__Amanita group__",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Group",
+      user: users(:rolf)
+    )
+    amanita_sensu_lato = Name.create!(
+      text_name: "Amanita",
+      author: "sensu lato",
+      display_name: "__Amanita__ sensu lato",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Genus",
+      user: users(:rolf)
+    )
+
+    # This is somewhat counter-intuitive, but
+    #  is a rarely occuring edge case;
+    #  is consistent with the current behavior of pattern_search;
+    #  improves the performance of the scope; and
+    #  greatly simplifies the code.
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1082/files#r928148711
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1082#issuecomment-1193235924
+    assert_includes(
+      Name.subtaxa_of_genus_or_below("Amanita"), amanita_group,
+      "`subtaxa_of_genus_or_below` genus <X> should include `<X> group`"
+    )
+
+    assert_not_includes(
+      Name.subtaxa_of_genus_or_below("Amanita"), amanita_sensu_lato,
+      "`subtaxa_of_genus_or_below` genus <X> should not include " \
+      "`<X> sensu lato`"
+    )
+  end
+
+  def test_scope_without_comments
+    assert_includes(Name.without_comments, names(:bugs_bunny_one))
+    assert_not_includes(Name.without_comments, names(:fungi))
+  end
+
+  def test_scope_comments_include
+    assert_includes(Name.comments_include("do not change"), names(:fungi))
+    assert_empty(Name.comments_include(ARBITRARY_SHA))
+    assert_empty(
+      Name.comments_include(comments(:detailed_unknown_obs_comment).summary)
+    )
+  end
+
+  def test_scope_on_species_list
+    assert_includes(
+      Name.on_species_list(species_lists(:unknown_species_list)), names(:fungi)
+    )
+    assert_empty(Name.on_species_list(species_lists(:first_species_list)))
+  end
+
+  def test_scope_at_location
+    assert_includes(
+      Name.at_location(locations(:burbank)), # at location called with Location
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:burbank).id), # at location called with id
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:burbank).name), # called with string
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:california).name), # region
+      names(:agaricus_campestris)
+    )
+    assert_not_includes(
+      Name.at_location(locations(:obs_default_location)),
+      names(:notification_but_no_observation)
+    )
+    assert_empty(
+      Name.at_location({}),
+      "Name.at_location should be empty if called with bad argument class"
+    )
+  end
+
+  def test_scope_in_box
+    cal = locations(:california)
+    names_in_cal_box =
+      Name.in_box(n: cal.north, s: cal.south, e: cal.east, w: cal.west)
+    # Grab a couple of Names that are unused in Observation fixtures
+    names_without_observations =
+      Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
+    obs_on_cal_border =
+      Observation.create!(name: names_without_observations.first,
+                          location: nil,
+                          lat: cal.north,
+                          long: cal.east,
+                          user: rolf)
+    obs_in_cal_without_lat_long =
+      Observation.create!(name: names_without_observations.second,
+                          location: locations(:burbank),
+                          lat: nil,
+                          long: nil,
+                          user: rolf)
+
+    assert_includes(names_in_cal_box, obs_on_cal_border.name)
+    assert_not_includes(
+      names_in_cal_box,
+      obs_in_cal_without_lat_long.name,
+      "Name.in_box should exclude Names whose only Observations lack lat/long"
+    )
+    assert_empty(Name.in_box(n: 0.0001, s: 0, e: 0.0001, w: 0))
   end
 end

@@ -44,6 +44,7 @@ of unnecessary traffic, and probably save you a lot of work!
 * https://mushroomobserver.org/images_observations.csv
 * https://mushroomobserver.org/names.csv
 * https://mushroomobserver.org/locations.csv
+* https://mushroomobserver.org/name_descriptions.csv
 
 Overview
 --------

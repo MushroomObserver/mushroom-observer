@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# tests of Herbarium controller
+# tests of Votes (Confidence levels) of Proposed Names
 class VoteControllerTest < FunctionalTestCase
   # ----------------------------
   #  Test voting.
@@ -20,7 +20,7 @@ class VoteControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("dick")
-    post(:cast_vote, value: "3", id: nam2.id)
+    post(:cast_vote, params: { value: "3", id: nam2.id })
     assert_equal(11, dick.reload.contribution)
 
     # Check votes.
@@ -53,7 +53,7 @@ class VoteControllerTest < FunctionalTestCase
     nam1 = namings(:coprinus_comatus_naming)
 
     login("rolf")
-    post(:cast_vote, value: "2", id: nam1.id)
+    post(:cast_vote, params: { value: "2", id: nam1.id })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -71,7 +71,7 @@ class VoteControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("rolf")
-    post(:cast_vote, value: "3", id: nam2.id)
+    post(:cast_vote, params: { value: "3", id: nam2.id })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -91,9 +91,7 @@ class VoteControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("rolf")
-    post(:cast_vote,
-         value: "-1",
-         id: nam2.id)
+    post(:cast_vote, params: { value: "-1", id: nam2.id })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -125,7 +123,7 @@ class VoteControllerTest < FunctionalTestCase
     assert_equal(11, dick.reload.contribution)
 
     login("mary")
-    post(:cast_vote, value: Vote.delete_vote, id: nam1.id)
+    post(:cast_vote, params: { value: Vote.delete_vote, id: nam1.id })
     assert_equal(9, mary.reload.contribution)
 
     # Check votes.
@@ -141,9 +139,11 @@ class VoteControllerTest < FunctionalTestCase
   end
 
   def test_show_votes
+    login
     # First just make sure the page displays.
     get_with_dump(:show_votes, id: namings(:coprinus_comatus_naming).id)
-    assert_template(:show_votes, partial: "_show_votes")
+    assert_template(:show_votes)
+    assert_template("vote/_show_votes")
 
     # Now try to make somewhat sure the content is right.
     table = namings(:coprinus_comatus_naming).calc_vote_table
@@ -152,9 +152,7 @@ class VoteControllerTest < FunctionalTestCase
     table.each_key do |str|
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
-      elsif str == str1
-        assert_equal(1, table[str][:num])
-      elsif str == str2
+      elsif str == str1 || str == str2
         assert_equal(1, table[str][:num])
       else
         assert_equal(0, table[str][:num])

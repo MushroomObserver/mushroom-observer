@@ -203,54 +203,59 @@ class User < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
-  as_enum(:thumbnail_size,
-          {
-            thumbnail: 1,
-            small: 2
-          },
-          source: :thumbnail_size,
-          accessor: :whiny)
-  as_enum(:image_size,
-          {
-            thumbnail: 1,
-            small: 2,
-            medium: 3,
-            large: 4,
-            huge: 5,
-            full_size: 6
-          },
-          source: :image_size,
-          accessor: :whiny)
-  as_enum(:votes_anonymous,
-          {
-            no: 1,
-            yes: 2,
-            old: 3
-          },
-          source: :votes_anonymous,
-          accessor: :whiny)
-  as_enum(:location_format,
-          {
-            postal: 1,
-            scientific: 2
-          },
-          source: :location_format,
-          accessor: :whiny)
-  as_enum(:hide_authors,
-          {
-            none: 1,
-            above_species: 2
-          },
-          source: :hide_authors,
-          accessor: :whiny)
-  as_enum(:keep_filenames,
-          {
-            toss: 1,
-            keep_but_hide: 2,
-            keep_and_show: 3
-          },
-          source: :keep_filenames,
-          accessor: :whiny)
+  enum thumbnail_size:
+       {
+         thumbnail: 1,
+         small: 2
+       },
+       _prefix: :thumb_size,
+       _default: "thumbnail"
+
+  enum image_size:
+       {
+         thumbnail: 1,
+         small: 2,
+         medium: 3,
+         large: 4,
+         huge: 5,
+         full_size: 6
+       },
+       _prefix: true,
+       _default: "medium"
+
+  enum votes_anonymous:
+       {
+         no: 1,
+         yes: 2,
+         old: 3
+       },
+       _prefix: :votes_anon,
+       _default: "no"
+
+  enum location_format:
+       {
+         postal: 1,
+         scientific: 2
+       },
+       _prefix: true,
+       _default: "postal"
+
+  enum hide_authors:
+       {
+         none: 1,
+         above_species: 2
+       },
+       _prefix: true,
+       _default: "none"
+
+  enum keep_filenames:
+       {
+         toss: 1,
+         keep_but_hide: 2,
+         keep_and_show: 3
+       },
+       _suffix: :filenames,
+       _default: "toss"
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
@@ -274,29 +279,35 @@ class User < AbstractModel
   has_many :test_add_image_logs
   has_many :votes
 
-  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
+  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id",
+                             inverse_of: :reviewer
   has_many :reviewed_name_descriptions, class_name: "NameDescription",
-                                        foreign_key: "reviewer_id"
-  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
+                                        foreign_key: "reviewer_id",
+                                        inverse_of: :reviewer
+  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id",
+                       inverse_of: :queued_email
 
-  has_and_belongs_to_many :user_groups,
-                          class_name: "UserGroup",
-                          join_table: "user_groups_users"
-  has_and_belongs_to_many :authored_names,
-                          class_name: "NameDescription",
-                          join_table: "name_descriptions_authors"
-  has_and_belongs_to_many :edited_names,
-                          class_name: "NameDescription",
-                          join_table: "name_descriptions_editors"
-  has_and_belongs_to_many :authored_locations,
-                          class_name: "LocationDescription",
-                          join_table: "location_descriptions_authors"
-  has_and_belongs_to_many :edited_locations,
-                          class_name: "LocationDescription",
-                          join_table: "location_descriptions_editors"
-  has_and_belongs_to_many :curated_herbaria,
-                          class_name: "Herbarium",
-                          join_table: "herbaria_curators"
+  has_many :user_group_users, dependent: :destroy
+  has_many :user_groups, through: :user_group_users
+
+  has_many :herbarium_curators, dependent: :destroy
+  has_many :curated_herbaria, through: :herbarium_curators, source: :herbarium
+
+  has_many :name_description_authors, dependent: :destroy
+  has_many :authored_names, through: :name_description_authors,
+                            source: :name_description
+
+  has_many :name_description_editors, dependent: :destroy
+  has_many :edited_names, through: :name_description_editors,
+                          source: :name_description
+
+  has_many :location_description_authors, dependent: :destroy
+  has_many :authored_locations, through: :location_description_authors,
+                                source: :location_description
+
+  has_many :location_description_editors, dependent: :destroy
+  has_many :edited_locations, through: :location_description_editors,
+                              source: :location_description
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -327,6 +338,10 @@ class User < AbstractModel
   serialize :bonuses
   serialize :alert
 
+  scope :by_contribution, lambda {
+    order(contribution: :desc, name: :asc, login: :asc)
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation
@@ -337,7 +352,7 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    :users
   end
 
   # Find admin's record.
@@ -372,7 +387,7 @@ class User < AbstractModel
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter and API authentication.
   def self.current=(val)
-    @@location_format = val ? val.location_format : :postal
+    @@location_format = val ? val.location_format : "postal"
     @@user = val
   end
 
@@ -381,18 +396,13 @@ class User < AbstractModel
   #   location_format = User.current_location_format
   #
   def self.current_location_format
-    @@location_format = :postal unless defined?(@@location_format)
+    @@location_format = "postal" unless defined?(@@location_format)
     @@location_format
   end
 
   # Set the location format to use throughout the site.
   def self.current_location_format=(val)
     @@location_format = val
-  end
-
-  # Did current user opt to view owner_id's?
-  def self.view_owner_id_on?
-    try(:current).try(:view_owner_id)
   end
 
   # Clear cached data structures when reload.
@@ -454,10 +464,10 @@ class User < AbstractModel
   #   name missing:  "fred99"
   #
   def legal_name
-    if name.to_s != ""
-      name
-    else
+    if name.to_s == ""
       login
+    else
+      name
     end
   end
 
@@ -489,9 +499,12 @@ class User < AbstractModel
   #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
   def self.authenticate(login: nil, password: nil)
-    find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
-              password != '' ",
-            login, login, login, sha1(password))
+    User.find_by(
+      User[:login].eq(login).
+      or(User[:name].eq(login)).
+      or(User[:email].eq(login)).
+      and(User[:password].eq(sha1(password)))
+    )
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -532,17 +545,13 @@ class User < AbstractModel
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    @projects_admin ||= Project.find_by_sql(%(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.admin_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    ))
+    Project.joins(:admin_group_users).where(user_id: id)
   end
 
   # Return an Array of Project's that this User is a member of.
-  def projects_member(order: :created_at)
+  def projects_member(order: :created_at, include: nil)
     @projects_member ||= Project.where(user_group: user_groups.ids).
-                         order(order).to_a
+                         includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
@@ -561,19 +570,24 @@ class User < AbstractModel
   # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
-    @preferred_herbarium ||= begin
-      herbarium_id = Herbarium.connection.select_value(%(
-        SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
-        ORDER BY created_at DESC LIMIT 1
-      ))
-      herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
-    end
+    @preferred_herbarium ||= \
+      begin
+        herbarium_id = HerbariumRecord.where(user_id: id).
+                       order(created_at: :desc).
+                       pluck(:herbarium_id).first
+        if herbarium_id.blank?
+          personal_herbarium
+        else
+          Herbarium.find(herbarium_id)
+        end
+      end
   end
 
+  # Offers a default fallback for personal herbarium name
+  # Can't call personal_herbarium&.name here because instance var may be stale
   def personal_herbarium_name
-    Herbarium.connection.select_value(%(
-      SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
-    )) || :user_personal_herbarium.l(name: unique_text_name)
+    Herbarium.find_by(personal_user_id: id)&.name ||
+      :user_personal_herbarium.l(name: unique_text_name)
   end
 
   def personal_herbarium
@@ -591,22 +605,23 @@ class User < AbstractModel
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  # Return an Array of SpeciesList's that User owns or that are attached to a
-  # Project that the User is a member of.
+  # Return an ActiveRecord::Association of SpeciesList's that User owns or that
+  # are attached to a Project that the User is a member of.
   def all_editable_species_lists
-    @all_editable_species_lists ||= begin
-      results = species_lists
+    @all_editable_species_lists ||=
       if projects_member.any?
-        project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.find_by_sql(%(
-          SELECT species_lists.* FROM species_lists, projects_species_lists
-          WHERE species_lists.user_id != #{id}
-            AND projects_species_lists.project_id IN (#{project_ids})
-            AND projects_species_lists.species_list_id = species_lists.id
-        ))
+        SpeciesList.
+          where(SpeciesList[:user_id].eq(id).
+          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
+      else
+        species_lists
       end
-      results
-    end
+  end
+
+  def species_lists_in_users_projects
+    project_ids = projects_member.map(&:id)
+    ProjectSpeciesList.where(project_id: project_ids).distinct.
+      pluck(:species_list_id)
   end
 
   ##############################################################################
@@ -625,21 +640,18 @@ class User < AbstractModel
   #
   def interest_in(object)
     @interests ||= {}
-    @interests["#{object.class.name} #{object.id}"] ||= begin
-      state = Interest.connection.select_value(%(
-        SELECT state FROM interests
-        WHERE user_id = #{id}
-          AND target_type = '#{object.class.name}'
-          AND target_id = #{object.id}
-        LIMIT 1
-      )).to_s
-      case state
-      when "1"
-        :watching
-      when "0"
-        :ignoring
+    @interests["#{object.class.name} #{object.id}"] ||= \
+      begin
+        i = Interest.where(
+          user_id: id, target_type: object.class.name, target_id: object.id
+        ).pluck(:state).first
+        case i
+        when true
+          :watching
+        when false
+          :ignoring
+        end
       end
-    end
   end
 
   # Has this user expressed positive interest in a given object?
@@ -695,7 +707,7 @@ class User < AbstractModel
     bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
-  def is_successful_contributor?
+  def successful_contributor?
     observations.any?
   end
 
@@ -736,29 +748,42 @@ class User < AbstractModel
   # 1000 (by contribution or created within the last month) login String's
   # (with full name in parens).
   def self.primer
-    result = []
     if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
-
-      # Get list of users sorted first by when they last logged in (if recent),
-      # then by cotribution.
-      result = connection.select_values(%(
-        SELECT CONCAT(users.login,
-                      IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-        FROM users
-        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
-                    last_login, NULL) DESC,
-                 contribution DESC
-        LIMIT 1000
-      )).uniq.sort
-
-      File.open(MO.user_primer_cache_file, "w:utf-8").
-        write(result.join("\n") + "\n")
+       File.mtime(MO.user_primer_cache_file) < 1.day.ago
+      data = primer_data
+      write_primer_file(data)
+      data
     else
-      result = File.open(MO.user_primer_cache_file, "r:UTF-8").
-               readlines.map(&:chomp)
+      read_primer_file
     end
-    result
+  end
+
+  private_class_method def self.write_primer_file(data)
+    File.open(MO.user_primer_cache_file, "w:utf-8").
+      write("#{data.join("\n")}\n")
+  end
+
+  private_class_method def self.read_primer_file
+    File.open(MO.user_primer_cache_file, "r:UTF-8").
+      readlines.map(&:chomp)
+  end
+
+  def self.primer_data
+    users = User.select(:login, :name).order(
+      orderby_last_login_if_recent.desc, User[:contribution].desc
+    ).limit(1000).pluck(:login, :name)
+
+    users.map do |login, name|
+      name.empty? ? login : "#{login} <#{name}>"
+    end.sort
+  end
+
+  private_class_method def self.orderby_last_login_if_recent
+    User[:last_login].when(
+      User[:last_login] > 1.month.ago
+    ).then(
+      User[:last_login]
+    ).else(nil)
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -766,136 +791,144 @@ class User < AbstractModel
   # 2) Image votes.
   # 3) Personal descriptions and drafts.
   def self.erase_user(id)
-    # Blank out any references in public records.
-    [
-      [:location_descriptions,          :user_id],
-      [:location_descriptions_versions, :user_id],
-      [:locations,                      :user_id],
-      [:locations_versions,             :user_id],
-      [:name_descriptions,              :user_id],
-      [:name_descriptions,              :reviewer_id],
-      [:name_descriptions_versions,     :user_id],
-      [:names,                          :user_id],
-      [:names_versions,                 :user_id],
-      # Leave projects, because they're intertwined with descriptions too much.
-      [:projects,                       :user_id],
-      # Leave votes and namings, because I don't want to recalc consensuses.
-      [:namings,                        :user_id],
-      [:projects,                       :user_id],
-      [:translation_strings,            :user_id],
-      [:translation_strings_versions,   :user_id],
-      [:votes,                          :user_id]
-    ].each do |table, col|
-      User.connection.update(%(
-        UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
-      ))
-    end
+    blank_out_public_references(id)
+    delete_one_user_group_references(id)
+    delete_observations_attachments(id)
+    delete_own_records(id)
+  end
 
-    # Delete references to their one-user group.
-    group = UserGroup.one_user(id)
-    if group
-      group_id = group.id
-      [
-        [:location_descriptions_admins,  :user_group_id],
-        [:location_descriptions_readers, :user_group_id],
-        [:location_descriptions_writers, :user_group_id],
-        [:name_descriptions_admins,      :user_group_id],
-        [:name_descriptions_readers,     :user_group_id],
-        [:name_descriptions_writers,     :user_group_id],
-        [:user_groups,                   :id]
-      ].each do |table, col|
-        User.connection.delete(%(
-          DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-        ))
-      end
-    end
+  PUBLIC_REFERENCES = [
+    [:herbaria,                       :personal_user_id],
+    [:location_descriptions,          :user_id],
+    [:location_descriptions_versions, :user_id],
+    [:locations,                      :user_id],
+    [:locations_versions,             :user_id],
+    [:name_descriptions,              :user_id],
+    [:name_descriptions,              :reviewer_id],
+    [:name_descriptions_versions,     :user_id],
+    [:names,                          :user_id],
+    [:names_versions,                 :user_id],
+    # Leave projects, because they're intertwined with descriptions too much.
+    [:projects,                       :user_id],
+    # Leave votes and namings, because I don't want to recalc consensuses.
+    [:namings,                        :user_id],
+    [:projects,                       :user_id],
+    [:translation_strings,            :user_id],
+    [:translation_strings_versions,   :user_id],
+    [:votes,                          :user_id]
+  ].freeze
 
-    # Delete their observations' attachments.
-    ids = User.connection.select_values(%(
-      SELECT id FROM observations WHERE user_id = #{id}
-    )).map(&:to_s)
-    if ids.any?
-      ids = ids.join(",")
-      [
-        [:collection_numbers_observations, :observation_id],
-        [:comments,                        :target_id, :target_type],
-        [:herbarium_records_observations,  :observation_id],
-        [:images_observations,             :observation_id],
-        [:interests,                       :target_id, :target_type],
-        [:namings,                         :observation_id],
-        [:rss_logs,                        :observation_id],
-        [:sequences,                       :observation_id],
-        [:votes,                           :observation_id]
-      ].each do |table, id_col, type_col|
-        if type_col
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-          ))
-        else
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids})
-          ))
-        end
-      end
-    end
-
-    # Delete records they own, culminating in the user record itself.
-    [
-      [:api_keys,                       :user_id],
-      [:articles,                       :user_id],
-      [:collection_numbers,             :user_id],
-      [:comments,                       :user_id],
-      [:copyright_changes,              :user_id],
-      [:donations,                      :user_id],
-      [:external_links,                 :user_id],
-      [:glossary_terms,                 :user_id],
-      [:glossary_terms_versions,        :user_id],
-      [:herbaria,                       :personal_user_id],
-      [:herbaria_curators,              :user_id],
-      [:herbarium_records,              :user_id],
-      [:images,                         :user_id],
-      [:image_votes,                    :user_id],
-      [:interests,                      :user_id],
-      [:location_descriptions_authors,  :user_id],
-      [:location_descriptions_editors,  :user_id],
-      [:name_descriptions_authors,      :user_id],
-      [:name_descriptions_editors,      :user_id],
-      [:notifications,                  :user_id],
-      [:observations,                   :user_id],
-      [:publications,                   :user_id],
-      [:queued_emails,                  :user_id],
-      [:queued_emails,                  :to_user_id],
-      [:sequences,                      :user_id],
-      [:species_lists,                  :user_id],
-      [:user_groups_users,              :user_id],
-      [:users,                          :id]
-    ].each do |table, col|
-      User.connection.delete(%(
-        DELETE FROM #{table} WHERE `#{col}` = #{id}
-      ))
+  # Blank out any references in public records.
+  private_class_method def self.blank_out_public_references(id)
+    PUBLIC_REFERENCES.each do |table, col|
+      model = get_model_for_table(table)
+      model.where("#{col}": id).update_all("#{col}": 0)
     end
   end
 
-  # Does user have any unshown naming notifications?
-  # (I'm thoroughly confused about what role the observation plays in this
-  # complicated set of pages. -JPH)
-  def has_unshown_naming_notifications?(_observation = nil)
-    result = false
-    QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
-                      user_id: id).find_each do |q|
-      _naming_id, notification_id, shown =
-        q.get_integers([:naming, :notification, :shown])
-      next unless shown.nil?
+  ONE_USER_GROUP_REFERENCES = [
+    [:location_description_admins,  :user_group_id],
+    [:location_description_readers, :user_group_id],
+    [:location_description_writers, :user_group_id],
+    [:name_description_admins,      :user_group_id],
+    [:name_description_readers,     :user_group_id],
+    [:name_description_writers,     :user_group_id],
+    [:user_groups,                  :id]
+  ].freeze
 
-      notification = Notification.find(notification_id)
-      next unless notification&.note_template
+  # Delete references to their one-user group.
+  private_class_method def self.delete_one_user_group_references(id)
+    group = UserGroup.one_user(id)
+    return unless group
 
-      result = true
-      break
+    group_id = group.id
+
+    ONE_USER_GROUP_REFERENCES.each do |table, col|
+      model = get_model_for_table(table)
+      model.where("#{col}": group_id).delete_all
     end
-    result
+  end
+
+  OBSERVATIONS_ATTACHMENTS = [
+    [:observation_collection_numbers, :observation_id],
+    [:comments,                       :target_id, :target_type],
+    [:observation_herbarium_records,  :observation_id],
+    [:observation_images,             :observation_id],
+    [:interests,                      :target_id, :target_type],
+    [:namings,                        :observation_id],
+    [:rss_logs,                       :observation_id],
+    [:sequences,                      :observation_id],
+    [:votes,                          :observation_id]
+  ].freeze
+
+  # Delete their observations' attachments.
+  private_class_method def self.delete_observations_attachments(id)
+    obs_ids = Observation.where(user_id: id).pluck(:id)
+    return unless obs_ids.any?
+
+    OBSERVATIONS_ATTACHMENTS.each do |table, id_col, type_col|
+      delete_obs_attachments_from_one_table(
+        obs_ids, table, id_col, type_col
+      )
+    end
+  end
+
+  private_class_method def self.delete_obs_attachments_from_one_table(
+    obs_ids, table, id_col, type_col
+  )
+    model = get_model_for_table(table)
+    model = model.where("#{type_col}": "Observation") if type_col
+    model.where("#{id_col}": obs_ids).delete_all
+  end
+
+  OWN_RECORDS = [
+    [:api_keys,                       :user_id],
+    [:articles,                       :user_id],
+    [:collection_numbers,             :user_id],
+    [:comments,                       :user_id],
+    [:copyright_changes,              :user_id],
+    [:donations,                      :user_id],
+    [:external_links,                 :user_id],
+    [:glossary_terms,                 :user_id],
+    [:glossary_terms_versions,        :user_id],
+    [:herbaria,                       :personal_user_id],
+    [:herbarium_curators,             :user_id],
+    [:herbarium_records,              :user_id],
+    [:images,                         :user_id],
+    [:image_votes,                    :user_id],
+    [:interests,                      :user_id],
+    [:location_description_authors,   :user_id],
+    [:location_description_editors,   :user_id],
+    [:name_description_authors,       :user_id],
+    [:name_description_editors,       :user_id],
+    [:notifications,                  :user_id],
+    [:observations,                   :user_id],
+    [:publications,                   :user_id],
+    [:queued_emails,                  :user_id],
+    [:queued_emails,                  :to_user_id],
+    [:sequences,                      :user_id],
+    [:species_lists,                  :user_id],
+    [:user_group_users,               :user_id],
+    [:users,                          :id]
+  ].freeze
+
+  # Delete records they own, culminating in the user record itself.
+  private_class_method def self.delete_own_records(id)
+    OWN_RECORDS.each do |table, col|
+      model = get_model_for_table(table)
+      model.where("#{col}": id).delete_all
+    end
+  end
+
+  # Derive the model from the table name. Versions are namespaced
+  private_class_method def self.get_model_for_table(table)
+    table_name = table.to_s
+    if table_name.end_with?("versions")
+      parent_table_name = table_name.delete_suffix("_versions")
+      parent_table_name.singularize.camelize.constantize::Version
+    else
+      table_name.singularize.camelize.constantize
+    end
   end
 
   def remove_image(image)
@@ -908,19 +941,19 @@ class User < AbstractModel
   ##############################################################################
 
   # Encrypt a password.
-  def self.sha1(pass) # :nodoc:
+  def self.sha1(pass)
     Digest::SHA1.hexdigest("something__#{pass}__")
   end
 
   # Encrypted code used in autologin cookie and API authentication.
-  def self.old_auth_code(password) # :nodoc:
+  def self.old_auth_code(password)
     Digest::SHA1.hexdigest("SdFgJwLeR#{password}WeRtWeRkTj")
   end
 
   # This is a +before_create+ callback that encrypts the password before saving
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
-  def crypt_password # :nodoc:
+  def crypt_password
     self["password"] = self.class.sha1(password) if password.present?
     self["auth_code"] = String.random(40)
   end
@@ -934,46 +967,63 @@ class User < AbstractModel
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
 
-  def user_requirements # :nodoc:
+  def user_requirements
+    user_login_requirements
+    user_password_requirements
+    user_email_requirements
+    user_other_requirements
+  end
+
+  def user_login_requirements
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
     elsif login.length < 3 || login.size > 40
       errors.add(:login, :validate_user_login_too_long.t)
-    elsif (other = User.find_by_login(login)) && (other.id != id)
+    elsif login_already_taken?
       errors.add(:login, :validate_user_login_taken.t)
     end
+  end
 
-    if password.to_s.present? && (password.length < 5 || password.size > 40)
-      errors.add(:password, :validate_user_password_too_long.t)
-    end
+  def login_already_taken?
+    other = User.find_by(login: login)
+    other && other.id != id
+  end
 
+  def user_password_requirements
+    errors.add(:password, :validate_user_password_too_long.t) \
+      if password.to_s.present? && (password.length < 5 || password.size > 40)
+  end
+
+  def user_email_requirements
     if email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
     elsif email.size > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
+  end
 
+  def user_other_requirements
     errors.add(:theme, :validate_user_theme_too_long.t) if theme.to_s.size > 40
     errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
   end
 
-  def check_password # :nodoc:
-    if password.present?
-      if password_confirmation.to_s.blank?
-        errors.add(:password, :validate_user_password_confirmation_missing.t)
-      elsif password != password_confirmation
-        errors.add(:password, :validate_user_password_no_match.t)
-      end
+  def check_password
+    return if password.blank?
+
+    if password_confirmation.to_s.blank?
+      errors.add(:password, :validate_user_password_confirmation_missing.t)
+    elsif password != password_confirmation
+      errors.add(:password, :validate_user_password_no_match.t)
     end
   end
 
-  def notes_template_forbid_other # :nodoc
+  def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
       errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
     end
   end
 
-  def notes_template_forbid_duplicates # :nodoc
+  def notes_template_forbid_duplicates
     return if notes_template.blank?
 
     squished = notes_template.split(",").map(&:squish)
@@ -983,7 +1033,7 @@ class User < AbstractModel
     end
   end
 
-  def notes_template_bad_parts # :nodoc
+  def notes_template_bad_parts
     return [] if notes_template.blank?
 
     notes_template.split(",").each_with_object([]) do |part, a|
@@ -999,12 +1049,10 @@ class User < AbstractModel
   #
   # 'other' plus other words is valid, e.g.,
   # notes_template = "Cap color, Cap size, Cap other"
-  # :nodoc
   def notes_template_reserved_words
     [Observation.other_notes_part.downcase].concat(notes_other_translations)
   end
 
-  # :nodoc
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
   end

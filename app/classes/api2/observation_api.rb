@@ -143,7 +143,7 @@ class API2
 
     def create_naming(obs)
       naming = obs.namings.new(name: @name)
-      naming.get_reasons.each do |reason|
+      naming.reasons_array.each do |reason|
         if @reasons[reason.num].nil?
           reason.delete
         else

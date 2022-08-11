@@ -21,6 +21,9 @@ var HTML_ENTITY_MAP = {
   "/": '&#x2F;'
 };
 
+// Polyfill to enable older jQuery to work without modification in jQuery3
+jQuery.fn.load = function (callback) { $(window).on("load", callback) };
+
 String.prototype.escapeHTML = function() {
   return String(this).replace(/[&<>"'\/]/g, function (s) {
     return HTML_ENTITY_MAP[s];
@@ -96,7 +99,7 @@ jQuery.fn.getScrollBarWidth = function() {
 
   if (scroll_bar_width != null)
     return scroll_bar_width;
-  
+
   var inner = document.createElement('p');
   inner.style.width = "100%";
   inner.style.height = "200px";

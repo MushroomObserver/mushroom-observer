@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::Primers
   # Get list of names for autocompletion in mobile app.
   def name_primer
     render(json: name_list)
@@ -18,14 +18,13 @@ class AjaxController
     name_ids = Observation.select(:name_id).distinct
     fields = [:id, :text_name, :author, :deprecated, :synonym_id]
     names = Name.where(id: name_ids).select(*fields)
-    synonyms = names.to_a.map(&:synonym_id).reject(&:nil?).uniq
+    synonyms = names.to_a.filter_map(&:synonym_id).uniq
     names | Name.where(deprecated: false, synonym_id: synonyms).select(*fields)
   end
 
   def location_list
-    Observation.where.not(location: nil).
-      select(:location_id, :where).distinct.map do |obs|
-      { id: obs.location_id, name: obs.where }
+    Location.all.select(:id, :name).map do |loc|
+      { id: loc.id, name: loc.name }
     end
   end
 end

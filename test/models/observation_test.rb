@@ -582,9 +582,9 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.users_vote(namg1, rolf))
     assert_nil(obs.users_vote(namg1, mary))
     assert_nil(obs.users_vote(namg1, dick))
-    assert_not(obs.is_users_favorite?(namg1, rolf))
-    assert_not(obs.is_users_favorite?(namg1, mary))
-    assert_not(obs.is_users_favorite?(namg1, dick))
+    assert_not(obs.users_favorite?(namg1, rolf))
+    assert_not(obs.users_favorite?(namg1, mary))
+    assert_not(obs.users_favorite?(namg1, dick))
 
     # They're all the same, none with votes yet, so first apparently wins.
     obs.calc_consensus
@@ -599,22 +599,22 @@ class ObservationTest < UnitTestCase
     assert(vote = obs.owners_vote(namg1))
     assert_equal(vote, obs.users_vote(namg1, rolf))
     assert_equal(vote, namg1.users_vote(rolf))
-    assert(obs.is_owners_favorite?(namg1))
-    assert(obs.is_users_favorite?(namg1, rolf))
-    assert(namg1.is_users_favorite?(rolf))
+    assert(obs.owners_favorite?(namg1))
+    assert(obs.users_favorite?(namg1, rolf))
+    assert(namg1.users_favorite?(rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, 0.01, rolf)
     namg1.reload
-    assert(obs.is_owners_favorite?(namg1))
+    assert(obs.owners_favorite?(namg1))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, -0.01, rolf)
     namg1.reload
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert_not(namg1.is_users_favorite?(rolf))
+    assert_not(obs.owners_favorite?(namg1))
+    assert_not(namg1.users_favorite?(rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
@@ -623,36 +623,36 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 1, rolf)
     namings.each(&:reload)
     namg2.reload
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert(obs.is_owners_favorite?(namg2))
-    assert_not(obs.is_owners_favorite?(namg3))
+    assert_not(obs.owners_favorite?(namg1))
+    assert(obs.owners_favorite?(namg2))
+    assert_not(obs.owners_favorite?(namg3))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, obs.consensus_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
     obs.change_vote(namg3, 2, rolf)
     namings.each(&:reload)
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert_not(obs.is_owners_favorite?(namg2))
-    assert(obs.is_owners_favorite?(namg3))
+    assert_not(obs.owners_favorite?(namg1))
+    assert_not(obs.owners_favorite?(namg2))
+    assert(obs.owners_favorite?(namg3))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
 
     # Make votes namg1: 3, namg2: 1, namg3: 2
     obs.change_vote(namg1, 3, rolf)
     namings.each(&:reload)
-    assert(obs.is_owners_favorite?(namg1))
-    assert_not(obs.is_owners_favorite?(namg2))
-    assert_not(obs.is_owners_favorite?(namg3))
+    assert(obs.owners_favorite?(namg1))
+    assert_not(obs.owners_favorite?(namg2))
+    assert_not(obs.owners_favorite?(namg3))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     # Make votes namg1: 1, namg2: 1, namg3: 2
     obs.change_vote(namg1, 1, rolf)
     namings.each(&:reload)
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert_not(obs.is_owners_favorite?(namg2))
-    assert(obs.is_owners_favorite?(namg3))
+    assert_not(obs.owners_favorite?(namg1))
+    assert_not(obs.owners_favorite?(namg2))
+    assert(obs.owners_favorite?(namg3))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
 
@@ -664,9 +664,9 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 2, mary)
     obs.change_vote(namg3, -1, mary)
     namings.each(&:reload)
-    assert_not(namg1.is_users_favorite?(mary))
-    assert(namg2.is_users_favorite?(mary))
-    assert_not(namg3.is_users_favorite?(mary))
+    assert_not(namg1.users_favorite?(mary))
+    assert(namg2.users_favorite?(mary))
+    assert_not(namg3.users_favorite?(mary))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, obs.consensus_naming)
 
@@ -675,23 +675,23 @@ class ObservationTest < UnitTestCase
     # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
     obs.change_vote(namg2, 0.01, mary)
     namings.each(&:reload)
-    assert(namg1.is_users_favorite?(mary))
-    assert_not(namg2.is_users_favorite?(mary))
-    assert_not(namg3.is_users_favorite?(mary))
+    assert(namg1.users_favorite?(mary))
+    assert_not(namg2.users_favorite?(mary))
+    assert_not(namg3.users_favorite?(mary))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, -0.01, mary)
     namings.each(&:reload)
-    assert_not(namg1.is_users_favorite?(mary))
-    assert(namg2.is_users_favorite?(mary))
-    assert_not(namg3.is_users_favorite?(mary))
-    assert_not(namg1.is_users_favorite?(rolf))
-    assert_not(namg2.is_users_favorite?(rolf))
-    assert(namg3.is_users_favorite?(rolf))
-    assert_not(namg1.is_users_favorite?(dick))
-    assert_not(namg2.is_users_favorite?(dick))
-    assert_not(namg3.is_users_favorite?(dick))
+    assert_not(namg1.users_favorite?(mary))
+    assert(namg2.users_favorite?(mary))
+    assert_not(namg3.users_favorite?(mary))
+    assert_not(namg1.users_favorite?(rolf))
+    assert_not(namg2.users_favorite?(rolf))
+    assert(namg3.users_favorite?(rolf))
+    assert_not(namg1.users_favorite?(dick))
+    assert_not(namg2.users_favorite?(dick))
+    assert_not(namg3.users_favorite?(dick))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
   end
@@ -737,7 +737,7 @@ class ObservationTest < UnitTestCase
     votes = "#{obs.namings.first.id} Agaricus campestris L.: " \
               "mary=3.0(*), rolf=-3.0\n" \
             "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: " \
-              "mary=1.0(*), rolf=2.0(*)\n"\
+              "mary=1.0(*), rolf=2.0(*)\n" \
             "#{no_votes_naming.id} Fungi: no votes"
 
     assert_equal(votes, obs.dump_votes)
@@ -919,7 +919,7 @@ class ObservationTest < UnitTestCase
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       # Note that 'when' gets automagically converted to Date
-      Observation.create!(name_id: fungi.id, when: Time.zone.now + 2.days)
+      Observation.create!(name_id: fungi.id, when: 2.days.from_now)
     end
     assert_match(:validate_future_time.t, exception.message)
   end
@@ -1028,5 +1028,236 @@ class ObservationTest < UnitTestCase
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
     assert_operator(obs.old_last_viewed_by(dick), :>=, time - 2.seconds)
     assert_operator(obs.old_last_viewed_by(dick), :<=, time + 2.seconds)
+  end
+
+  def test_destroy_orphans_log
+    obs = observations(:detailed_unknown_obs)
+    log = obs.rss_log
+    assert_not_nil(log)
+    obs.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
+  # ----------------------------------------------------------
+  #  Scopes: Tests of scopes not completely covered elsewhere
+  # ----------------------------------------------------------
+
+  def start_of_time
+    Date.jd(0).strftime("%Y-%m-%d")
+  end
+
+  def a_century_from_now
+    (Time.zone.today + 100.years).strftime("%Y-%m,-%d")
+  end
+
+  def two_centuries_from_now
+    (Time.zone.today + 200.years).strftime("%Y-%m-%d")
+  end
+
+  def test_scope_found_on
+    obs = observations(:minimal_unknown_obs)
+    assert_includes(Observation.found_on(obs.when), obs)
+    assert_empty(Observation.found_on(two_centuries_from_now))
+  end
+
+  def test_scope_found_after
+    assert_equal(Observation.count,
+                 Observation.found_after(start_of_time).count)
+    assert_empty(Observation.found_after(two_centuries_from_now))
+  end
+
+  def test_scope_found_before
+    assert_equal(Observation.count,
+                 Observation.found_before(two_centuries_from_now).count)
+    assert_empty(Observation.found_before(start_of_time))
+  end
+
+  def test_scope_found_between
+    assert_equal(
+      Observation.count,
+      Observation.found_between(start_of_time, two_centuries_from_now).count
+    )
+    assert_empty(
+      Observation.found_between(two_centuries_from_now, start_of_time)
+    )
+  end
+
+  def test_scope_without_confident_name
+    assert_includes(Observation.without_confident_name,
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.without_confident_name,
+                        observations(:peltigera_obs))
+  end
+
+  def test_scope_needs_identification
+    assert_includes(Observation.needs_identification,
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.needs_identification,
+                        observations(:peltigera_obs))
+  end
+
+  def test_scope_of_name
+    assert_includes(Observation.of_name(names(:peltigera).id),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.of_name(names(:fungi)),
+                        observations(:peltigera_obs))
+  end
+
+  def test_scope_by_user
+    assert_includes(Observation.by_user(users(:mary)),
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.by_user(users(:mary)),
+                        observations(:coprinus_comatus_obs))
+    assert_empty(Observation.by_user(users(:zero_user)))
+  end
+
+  def test_scope_of_name_of_look_alikes
+    # Prove that Observations of look-alikes of <Name> include
+    # Observations of other Names proposed for Observations of <Name>
+    # NOTE: `of_look_alikes` is (currently) asymmetric / noncommunative. I.e.,
+    # Observations of look-alikes of <Name> does NOT necessarily include
+    # Observations of other Names suggested for Observations of <Name>
+
+    # Ensure fixtures aren't broken before testing Observations of look-alikes
+    tremella_obs = observations(:owner_only_favorite_ne_consensus)
+    t_mesenterica_obs = observations(:sortable_obs_users_second_obs)
+    assert_equal(names(:tremella), tremella_obs.name,
+                 "Test needs different fixture")
+    assert_equal(names(:tremella_mesenterica), t_mesenterica_obs.name,
+                 "Test needs different fixture")
+    # T. mesenterica was proposed for an Observation of Tremella
+    assert_equal(namings(:tremella_mesenterica_naming).observation,
+                 tremella_obs,
+                 "Test needs different fixture")
+    assert_includes(
+      Observation.of_name(names(:tremella_mesenterica), of_look_alikes: true),
+      tremella_obs,
+      "Observations of look-alikes of <Name> should include " \
+      "Observations of other Names for which <Name> was proposed"
+    )
+  end
+
+  def test_scope_in_box
+    cal = locations(:california)
+    obss_in_cal_box = Observation.in_box(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+    nybg = locations(:nybg_location)
+    obss_in_nybg_box = Observation.in_box(
+      n: nybg.north, s: nybg.south, e: nybg.east, w: nybg.west
+    )
+    obss_in_ecuador_box = Observation.in_box(
+      n: 1.49397, s: -5.06906, e: -75.1904, w: -92.6038
+    )
+    quito_obs =
+      Observation.create!(
+        user: users(:rolf),
+        lat: -0.1865944,
+        long: -78.4305382,
+        where: "Quito, Ecuador"
+      )
+    wrangel = locations(:east_lt_west_location)
+    wrangel_obs =
+      Observation.create!(
+        user: users(:rolf),
+        lat: (wrangel.north + wrangel.south) / 2,
+        long: (wrangel.east + wrangel.west) / 2 + wrangel.west
+      )
+    obss_in_wrangel_box = Observation.in_box(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+
+    # boxes not straddling 180 deg
+    assert_includes(obss_in_cal_box,
+                    observations(:unknown_with_lat_long))
+    assert_includes(obss_in_ecuador_box,
+                    quito_obs)
+    assert_not_includes(obss_in_nybg_box,
+                        observations(:unknown_with_lat_long))
+    assert_not_includes(obss_in_cal_box,
+                        observations(:minimal_unknown_obs),
+                        "Observation without lat/lon should not be in box")
+
+    # box straddling 180 deg
+    assert_includes(obss_in_wrangel_box, wrangel_obs)
+    assert_not_includes(obss_in_wrangel_box,
+                        observations(:unknown_with_lat_long))
+
+    assert_empty(Observation.where(lat: 0.001), "Test needs different fixture")
+    assert_empty(Observation.in_box(n: 0.0001, s: 0.0001, e: 0.0001, w: 0),
+                 "Observation.in_box should be empty if " \
+                 "there are no Observations in the box")
+
+    # invalid arguments
+    assert_empty(
+      Observation.in_box(n: cal.north, s: cal.south, e: cal.east),
+      "`Observation.in_box` should be empty if an argument is missing"
+    )
+    assert_empty(
+      Observation.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      "`Observation.in_box` should be empty if an argument is out of bounds"
+    )
+    assert_empty(
+      Observation.in_box(n: cal.south - 10,
+                         s: cal.south, e: cal.east, w: cal.west),
+      "`Observation.in_box` should be empty if N < S"
+    )
+  end
+
+  def test_scope_is_collection_location
+    assert_includes(Observation.is_collection_location,
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.is_collection_location,
+                        observations(:displayed_at_obs))
+  end
+
+  def test_scope_has_notes_field
+    assert_includes(Observation.has_notes_field("substrate"),
+                    observations(:substrate_notes_obs))
+    obs_substrate_in_plain_text =
+      Observation.create!(notes: "The substrate is wood",
+                          user: users(:rolf))
+    assert_not_includes(Observation.has_notes_field("substrate"),
+                        obs_substrate_in_plain_text)
+    assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
+  end
+
+  def test_scope_without_sequence
+    assert_includes(Observation.without_sequence,
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.without_sequence,
+                        observations(:genbanked_obs))
+  end
+
+  def test_scope_confidence
+    assert_includes(Observation.confidence(0, 0),
+                    observations(:minimal_unknown_obs))
+    assert_includes(Observation.confidence(0),
+                    observations(:minimal_unknown_obs))
+    assert_includes(Observation.confidence(0, 1),
+                    observations(:minimal_unknown_obs))
+    assert_includes(Observation.confidence(75, 100),
+                    observations(:peltigera_obs))
+    assert_equal(Observation.count, Observation.confidence(-100, 100).count)
+    assert_empty(Observation.confidence(102, 103))
+  end
+
+  def test_scope_without_comments
+    assert_includes(Observation.without_comments,
+                    observations(:unlisted_rolf_obs))
+    assert_not_includes(Observation.without_comments,
+                        observations(:minimal_unknown_obs))
+  end
+
+  def test_scope_herbarium_record_notes_include
+    obss_with_hr_notes =
+      Observation.herbarium_record_notes_include("cleaned & dried at 115°")
+    assert_includes(obss_with_hr_notes,
+                    observations(:minimal_unknown_obs))
+    assert_includes(obss_with_hr_notes,
+                    observations(:detailed_unknown_obs))
+    assert_not_includes(obss_with_hr_notes,
+                        observations(:imageless_unvouchered_obs))
+    assert_empty(Observation.herbarium_record_notes_include("ARBITRARY_SHA"))
   end
 end

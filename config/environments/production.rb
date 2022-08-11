@@ -8,7 +8,7 @@ MushroomObserver::Application.configure do
   # ----------------------------
 
   config.domain      = "mushroomobserver.org"
-  config.http_domain = "http://mushroomobserver.org"
+  config.http_domain = "https://mushroomobserver.org"
 
   # List of alternate server domains.
   # We redirect from each of these to the real one.
@@ -33,11 +33,11 @@ MushroomObserver::Application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.image_precedence = {
-    default: [:cdmr, :local]
+    default: [:mycolab, :local]
     # For use when testing live server in parallel with production server.
-    # :default   => [:cdmr, :local, :mo]
+    # :default   => [:mycolab, :local, :mo]
   }
-  config.image_fallback_source = :cdmr
+  config.image_fallback_source = :mycolab
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
@@ -121,6 +121,10 @@ MushroomObserver::Application.configure do
   # the I18n.default_locale when a translation can not be found)
   config.i18n.fallbacks = [I18n.default_locale]
 
+  # Allow YAML deserializer to deserialize symbols
+  # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
+  config.active_record.yaml_column_permitted_classes = [Symbol]
+
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
@@ -133,6 +137,9 @@ MushroomObserver::Application.configure do
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
+
+  # Rails 5.2 credentials - add the master.key in production
+  # config.require_master_key = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

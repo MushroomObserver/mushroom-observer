@@ -38,10 +38,10 @@ class AutoComplete
   private
 
   def truncate_matches
-    if matches.length > limit
-      matches.slice!(limit..-1)
-      matches.push("...")
-    end
+    return unless matches.length > limit
+
+    matches.slice!(limit..-1)
+    matches.push("...")
   end
 
   def clean_matches
@@ -69,7 +69,7 @@ class AutoCompleteByString < AutoComplete
 
     # Apply characters in order until matches fits within limit.
     used = ""
-    for letter in string.split("")
+    string.chars.each do |letter|
       used += letter
       regex = /(^|#{PUNCTUATION})#{used}/i
       matches.select! { |m| m.match(regex) }
@@ -90,17 +90,17 @@ class AutoCompleteByWord < AutoComplete
     words = string.split
     used  = ""
     n     = 0
-    for word in words
+    words.each do |word|
       n += 1
       part = ""
-      for letter in word.split("")
+      word.chars.each do |letter|
         part += letter
         regex = /(^|#{PUNCTUATION})#{part}/i
         matches.select! { |m| m.match(regex) }
         return used + part if matches.length <= limit
       end
       if n < words.length
-        used += word + " "
+        used += "#{word} "
         regex = /(^|#{PUNCTUATION})#{word}(#{PUNCTUATION}|$)/i
         matches.select! { |m| m.match(regex) }
         return used if matches.length <= limit
@@ -112,6 +112,14 @@ class AutoCompleteByWord < AutoComplete
   end
 end
 
+# Nimmo note: Is it desirable to make `rough_matches` a scope for these models?
+# Doing that, plus a method to pluck the values, would solve the ABC violation.
+# Any caching advantage in that? Then below, it'd be something like:
+#   Observation.rough_matches(letter).pluck_matches
+# Or would this scatter the code?
+# Thinking the scope could be useful for graphQL, or it could use this class.
+#
+# rubocop:disable Metrics/AbcSize
 class AutoCompleteLocation < AutoCompleteByWord
   attr_accessor :reverse
 
@@ -121,15 +129,14 @@ class AutoCompleteLocation < AutoCompleteByWord
   end
 
   def rough_matches(letter)
-    matches = Observation.connection.select_values(%(
-      SELECT DISTINCT `where` FROM observations
-      WHERE `where` LIKE '#{letter}%' OR
-            `where` LIKE '% #{letter}%'
-    )) + Location.connection.select_values(%(
-      SELECT DISTINCT `name` FROM locations
-      WHERE `name` LIKE '#{letter}%' OR
-            `name` LIKE '% #{letter}%'
-    ))
+    matches =
+      Observation.select(:where).distinct.
+      where(Observation[:where].matches("#{letter}%").
+        or(Observation[:where].matches("% #{letter}%"))).pluck(:where) +
+      Location.select(:name).distinct.
+      where(Location[:name].matches("#{letter}%").
+        or(Location[:name].matches("% #{letter}%"))).pluck(:name)
+
     matches.map! { |m| Location.reverse_name(m) } if reverse
     matches.sort.uniq
   end
@@ -137,62 +144,60 @@ end
 
 class AutoCompleteName < AutoCompleteByString
   def rough_matches(letter)
-    Name.connection.select_values(%(
-      SELECT DISTINCT text_name FROM names
-      WHERE text_name LIKE '#{letter}%'
-      AND correct_spelling_id IS NULL
-    )).sort_by { |x| (x.match?(" ") ? "b" : "a") + x }.uniq
     # (this sort puts genera and higher on top, everything else
     # on bottom, and sorts alphabetically within each group)
+    Name.with_correct_spelling.select(:text_name).distinct.
+      where(Name[:text_name].matches("#{letter}%")).
+      pluck(:text_name).sort_by { |x| (x.match?(" ") ? "b" : "a") + x }.uniq
   end
 end
 
 class AutoCompleteProject < AutoCompleteByWord
   def rough_matches(letter)
-    Project.connection.select_values(%(
-      SELECT DISTINCT title FROM projects
-      WHERE title LIKE '#{letter}%'
-         OR title LIKE '% #{letter}%'
-      ORDER BY title ASC
-    ))
+    Project.select(:title).distinct.
+      where(Project[:title].matches("#{letter}%").
+        or(Project[:title].matches("% #{letter}%"))).
+      order(title: :asc).pluck(:title)
   end
 end
 
 class AutoCompleteSpeciesList < AutoCompleteByWord
   def rough_matches(letter)
-    SpeciesList.connection.select_values(%(
-      SELECT DISTINCT title FROM species_lists
-      WHERE title LIKE '#{letter}%'
-         OR title LIKE '% #{letter}%'
-      ORDER BY title ASC
-    ))
+    SpeciesList.select(:title).distinct.
+      where(SpeciesList[:title].matches("#{letter}%").
+        or(SpeciesList[:title].matches("% #{letter}%"))).
+      order(title: :asc).pluck(:title)
   end
 end
 
 class AutoCompleteUser < AutoCompleteByString
   def rough_matches(letter)
-    User.connection.select_values(%(
-      SELECT DISTINCT CONCAT(
-        users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">"))
-      )
-      FROM users
-      WHERE login LIKE '#{letter}%'
-         OR name LIKE '#{letter}%'
-         OR name LIKE '% #{letter}%'
-      ORDER BY login ASC
-    ))
+    users = User.select(:login, :name).distinct.
+            where(User[:login].matches("#{letter}%").
+              or(User[:name].matches("#{letter}%")).
+              or(User[:name].matches("% #{letter}%"))).
+            order(login: :asc).pluck(:login, :name)
+
+    users.map do |login, name|
+      name.empty? ? login : "#{login} <#{name}>"
+    end.sort
   end
 end
 
 class AutoCompleteHerbarium < AutoCompleteByWord
   def rough_matches(letter)
-    Herbarium.connection.select_values(%(
-      SELECT IF(code = '', name, CONCAT(code, ' - ', name))
-      FROM herbaria
-      WHERE name LIKE '#{letter}%'
-         OR name LIKE '% #{letter}%'
-         OR code LIKE '#{letter}%'
-      ORDER BY IF(code = '', '~', code) ASC, name ASC
-    ))
+    herbaria =
+      Herbarium.select(:code, :name).distinct.
+      where(Herbarium[:name].matches("#{letter}%").
+        or(Herbarium[:name].matches("% #{letter}%")).
+        or(Herbarium[:code].matches("#{letter}%"))).
+      order(Herbarium[:code].
+        when(nil).then(name: :asc).else(code: :asc, name: :asc)).
+      pluck(:code, :name)
+
+    herbaria.map do |code, name|
+      code.empty? ? name : "#{code} - #{name}"
+    end.sort
   end
+  # rubocop:enable Metrics/AbcSize
 end

@@ -52,16 +52,20 @@ class Sequence < AbstractModel
   # matchers for bases
   BLANK_LINE_IN_MIDDLE = /(\s*)\S.*\n       # non-blank line
                           ^\s*\n            # followed by blank line
-                          (\s*)\S/x.freeze  # and later non-whitespace character
+                          (\s*)\S/x         # and later non-whitespace character
 
-  DESCRIPTION          = /\A>.*$/.freeze
+  DESCRIPTION          = /\A>.*$/
 
   # nucleotide codes from http://www.bioinformatics.org/sms2/iupac.html
-  VALID_CODES          = /ACGTURYSWKMBDHVN.\-/i.freeze
+  # RuboCop 0.89.0 Style/RedundantRegexpEscape cop gives false positive.
+  # (In Ruby a hyphen (-) in a character class is a metacharacter.)
+  # rubocop:disable Style/RedundantRegexpEscape
+  VALID_CODES          = /ACGTURYSWKMBDHVN.\-/i
+  # rubocop:enable Style/RedundantRegexpEscape
 
   # FASTA allows interspersed numbers, whitespace. See https://goo.gl/NYbptK
-  VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i.freeze
-  INVALID_BASE_CHARS   = /[^#{VALID_BASE_CHARS}]/i.freeze
+  VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i
+  INVALID_BASE_CHARS   = /[^#{VALID_BASE_CHARS}]/i
   # rubocop:enable Layout/ExtraSpacing
 
   ##############################################################################
@@ -143,32 +147,33 @@ class Sequence < AbstractModel
   end
 
   ##############################################################################
-
-  protected
-
-  ##############################################################################
   #
   #  :section: Logging
   #
   ##############################################################################
 
-  # Callbacks to log Sequence modifications in associated Observation
+  protected
 
   def log_add_sequence
-    observation.log_add_sequence(self)
+    observation.log(:log_sequence_added, name: log_name, touch: true)
   end
 
   def log_update_sequence
     if accession_added?
-      # Log accession and put at top of RSS feed
-      observation.log_accession_sequence(self)
+      observation.log(:log_sequence_accessioned, name: log_name, touch: true)
     else
-      observation.log_update_sequence(self)
+      observation.log(:log_sequence_updated, name: log_name, touch: false)
     end
   end
 
   def log_destroy_sequence
-    observation.log_destroy_sequence(self)
+    observation.log(:log_sequence_destroyed, name: log_name, touch: true)
+  end
+
+  private
+
+  def log_name
+    "#{:SEQUENCE.t} ##{id || "?"}"
   end
 
   def accession_added?
@@ -188,6 +193,8 @@ class Sequence < AbstractModel
   #  :section: Validation
   #
   ##############################################################################
+
+  protected
 
   # Validations, in order that error messages should appear in flash
   validates :locus, :observation, :user, presence: true

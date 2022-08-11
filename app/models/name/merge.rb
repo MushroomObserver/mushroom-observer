@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Combine two Name objects (and associations) into one
-class Name < AbstractModel
+module Name::Merge
   # Would merger into another Name destroy data in the sense that the
   # merger could not be uncrambled? If any information will get
   # lost we return true.
@@ -21,8 +21,6 @@ class Name < AbstractModel
   # saved.
   def merge(old_name)
     return if old_name == self
-
-    xargs = {}
 
     # Move all observations over to the new name.
     old_name.observations.each do |obs|
@@ -77,18 +75,12 @@ class Name < AbstractModel
     end
 
     # Move over any remaining descriptions.
-    old_name.descriptions.each do |desc|
-      xargs = {
-        id: desc,
-        set_name: self
-      }
-      desc.name_id = id
-      desc.save
-    end
+    NameDescription.where(name_id: old_name.id).update_all(name_id: id)
 
     # Log the action.
     old_name.rss_log&.orphan(old_name.display_name, :log_name_merged,
                              this: old_name.display_name, that: display_name)
+    old_name.rss_log = nil
 
     # Destroy past versions.
     editors = []
@@ -114,7 +106,7 @@ class Name < AbstractModel
     # Save any notes the old name had.
     if old_name.has_notes? && (old_name.notes != notes)
       if has_notes?
-        self.notes += "\n\nThese notes come from #{old_name.format_name} "\
+        self.notes += "\n\nThese notes come from #{old_name.format_name} " \
                       "when it was merged with this name:\n\n #{old_name.notes}"
       else
         self.notes = old_name.notes

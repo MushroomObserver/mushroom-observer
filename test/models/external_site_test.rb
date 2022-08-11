@@ -10,6 +10,13 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_not_nil(site)
     assert_empty(site.errors)
+
+    assert_raises("Name has already been taken") do
+      ExternalSite.create!(
+        name: "genbank",
+        project: Project.first
+      )
+    end
   end
 
   def test_create_missing_attributes
@@ -45,7 +52,7 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_not_empty(site2.errors)
     site3 = ExternalSite.create(
-      name: site1.name + " two",
+      name: "#{site1.name} two",
       project: site1.project
     )
     assert_empty(site3.errors)

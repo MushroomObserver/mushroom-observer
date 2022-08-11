@@ -15,6 +15,7 @@ conic_glossary_term:
   description: Cute little cone head. # This should be a symbol
   thumb_image: conic_image # The image for the index
   images: conic_image # all thumb_images should also be in images
+  rss_log: glossary_term_rss_log
 
 convex_glossary_term:
   <<: *DEFAULTS
@@ -28,7 +29,7 @@ plane_glossary_term:
   name: Plane
   description: Three points define a plane & be sure to test unsafe html
   thumb_image: plane_image_thumb
-  images: plane_image_example
+  images: plane_image_thummb, plane_image_example
 
 square_glossary_term:
   <<: *DEFAULTS
@@ -42,4 +43,4 @@ no_images_glossary_term:
 unused_thumb_and_used_image_glossary_term:
   <<: *DEFAULTS
   thumb_image: unused_image # not used elsewhere
-  images: conic_image # used elsewhere (conic_glossary_term)
+  images: conic_image, unused_image # used elsewhere (conic_glossary_term)

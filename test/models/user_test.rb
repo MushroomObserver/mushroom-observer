@@ -34,6 +34,11 @@ class UserTest < UnitTestCase
     assert_not(u.save)
     assert(u.errors[:password].any?)
 
+    u.password = "unconfirmed_password"
+    u.password_confirmation = ""
+    assert_not(u.save)
+    assert(u.errors[:password].any?)
+
     # This is allowed now to let API create users without a password chosen yet.
     u.password = u.password_confirmation = "bobs_secure_password"
     assert(u.save)
@@ -224,12 +229,15 @@ class UserTest < UnitTestCase
     num_name_descriptions = NameDescription.count
     assert(user.name_descriptions.length > 1)
     sample_name_description_id = user.name_descriptions.first.id
+    herbarium = user.personal_herbarium
+    assert_not_nil(herbarium.personal_user)
     User.erase_user(user.id)
     assert_equal(num_comments - 1, Comment.count)
     assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
     assert_equal(num_name_descriptions, NameDescription.count)
     desc = NameDescription.find(sample_name_description_id)
     assert_equal(0, desc.user_id)
+    assert_equal(0, herbarium.reload.personal_user_id)
   end
 
   def test_erase_user_with_observation
@@ -294,12 +302,12 @@ class UserTest < UnitTestCase
     end
   end
 
-  def test_is_successful_contributor?
-    assert(rolf.is_successful_contributor?)
+  def test_successful_contributor?
+    assert(rolf.successful_contributor?)
   end
 
   def test_is_unsuccessful_contributor?
-    assert_false(users(:spammer).is_successful_contributor?)
+    assert_false(users(:spammer).successful_contributor?)
   end
 
   def test_notes_template_validation

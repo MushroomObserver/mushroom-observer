@@ -10,8 +10,8 @@ class Query::ImageForProject < Query::ImageBase
   def initialize_flavor
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
-    where << "images_projects.project_id = '#{project.id}'"
-    add_join(:images_projects)
+    where << "project_images.project_id = '#{project.id}'"
+    add_join(:project_images)
     super
   end
 end

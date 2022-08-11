@@ -2,12 +2,12 @@
 
 module PaginationHelper
   # Letters used as text in pagination links
-  LETTERS = ("A".."Z").freeze
+  LETTERS = ("A".."Z")
 
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
   #   <%= paginate_block(@pages) do %>
-  #     <% for object in @objects %>
+  #     <% @objects.each do |object| %>
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>
@@ -27,7 +27,7 @@ module PaginationHelper
   #   def action
   #     query = create_query(:Name)
   #     @pages = paginate_letters(:letter, :page, 50)
-  #     @names = query.paginate(@pages, letter_field: 'names.sort_name')
+  #     @names = query.paginate(@pages)
   #   end
   #
   #   # In view:
@@ -41,7 +41,7 @@ module PaginationHelper
     args[:params] = (args[:params] || {}).dup
     args[:params][pages.number_arg] = nil
     str = LETTERS.map do |letter|
-      if !pages.used_letters || pages.used_letters.include?(letter)
+      if pages.used_letters.include?(letter)
         pagination_link(letter, letter, pages.letter_arg, args)
       else
         content_tag(:li, content_tag(:span, letter), class: "disabled")
@@ -55,7 +55,7 @@ module PaginationHelper
 
     pages.letter_arg &&
       (pages.letter || pages.num_total > pages.num_per_page) &&
-      (!pages.used_letters || pages.used_letters.length > 1)
+      (pages.used_letters && pages.used_letters.length > 1)
   end
 
   # Insert numbered pagination links.  I've thrown out the Rails plugin
@@ -97,7 +97,7 @@ module PaginationHelper
       if from > 2
         result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
       end
-      for n in from..to
+      (from..to).each do |n|
         if n == this
           result << content_tag(:li, content_tag(:span, n), class: "active")
         elsif n.positive? && n <= num
@@ -124,7 +124,7 @@ module PaginationHelper
     url = reload_with_args(params)
     if args[:anchor]
       url.sub!(/#.*/, "")
-      url += "#" + args[:anchor]
+      url += "##{args[:anchor]}"
     end
     content_tag(:li, link_to(label, url))
   end

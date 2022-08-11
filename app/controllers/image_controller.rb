@@ -32,18 +32,19 @@
 #  process_image::         (helper for add_image)
 #
 class ImageController < ApplicationController
-  before_action :login_required, except: [
-    :advanced_search,
-    :image_search,
-    :images_by_user,
-    :images_for_project,
-    :index_image,
-    :list_images,
-    :next_image,
-    :prev_image,
-    :show_image,
-    :show_original
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :image_search,
+  #   :images_by_user,
+  #   :images_for_project,
+  #   :index_image,
+  #   :list_images,
+  #   :next_image,
+  #   :prev_image,
+  #   :show_image,
+  #   :show_original
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :add_image,
@@ -120,7 +121,7 @@ class ImageController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search")
+    redirect_to(controller: :observations, action: :advanced_search)
   end
 
   # Show selected search results as a matrix with "list_images" template.
@@ -136,7 +137,8 @@ class ImageController < ApplicationController
     args = {
       action: "list_images",
       matrix: true,
-      include: [:user, { observations: :name }]
+      include: [:user, { observations: :name }, :subjects, :best_glossary_terms,
+                :glossary_terms, :image_votes]
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -158,16 +160,14 @@ class ImageController < ApplicationController
     @links << coerced_query_link(query, Observation)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") ||
-       (query.params[:by] == "reverse_user")
+    case query.params[:by]
+    when "user", "reverse_user"
       args[:letters] = "users.login"
     # Paginate by letter if sorting by copyright holder.
-    elsif (query.params[:by] == "copyright_holder") ||
-          (query.params[:by] == "reverse_copyright_holder")
+    when "copyright_holder", "reverse_copyright_holder"
       args[:letters] = "images.copyright_holder"
     # Paginate by letter if sorting by name.
-    elsif (query.params[:by] == "name") ||
-          (query.params[:by] == "reverse_name")
+    when "name", "reverse_name"
       args[:letters] = "names.sort_name"
     end
 
@@ -226,7 +226,7 @@ class ImageController < ApplicationController
       cur = @image.users_vote
       if cur != val
         anon = @user.votes_anonymous == :yes
-        @image.change_vote(@user, val, anon)
+        @image.change_vote(@user, val, anon: anon)
       end
 
       # Advance to next image automatically if "next" parameter set.
@@ -283,7 +283,7 @@ class ImageController < ApplicationController
   ##############################################################################
 
   # Form for uploading and adding images to an observation.
-  # Linked from: show_observation, reuse_image,
+  # Linked from: observations/show, reuse_image,
   #   naming/create, and naming/edit (via _show_images partial)
   # Inputs: params[:id] (observation)
   #   params[:upload][:image1-4]
@@ -293,15 +293,15 @@ class ImageController < ApplicationController
   #   params[:image][:notes]
   # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def add_image
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
 
     if !check_permission!(@observation)
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
     elsif request.method != "POST"
       @image = Image.new
       @image.license = @user.license
@@ -314,8 +314,8 @@ class ImageController < ApplicationController
       init_project_vars_for_add_or_edit(@observation)
     elsif params[:upload].blank?
       flash_warning(:runtime_no_changes.t)
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
     else
       args = params[:image]
       i = 1
@@ -323,8 +323,8 @@ class ImageController < ApplicationController
         process_image(args, params[:upload]["image#{i}"])
         i += 1
       end
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
     end
   end
 
@@ -341,22 +341,21 @@ class ImageController < ApplicationController
     # The 1st save (or !save) puts the image's original filename in the db,
     # whether or not the user wants it.  So if we don't want it,
     # we must empty it and save a 2nd time.
-    @image.original_name = "" if @user.keep_filenames == :toss
+    @image.original_name = "" if @user.keep_filenames == "toss"
     return flash_object_errors(@image) unless @image.save
 
-    if !@image.process_image(@observation.gps_hidden)
-      logger.error("Unable to upload image")
-      name = @image.original_name
-      name = "???" if name.empty?
-      flash_error(:runtime_image_invalid_image.t(name: name))
-      flash_object_errors(@image)
-    else
+    if @image.process_image(strip: @observation.gps_hidden)
       @observation.add_image(@image)
-      @observation.log_create_image(@image)
+      @image.log_create_for(@observation)
       name = @image.original_name
       name = "##{@image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded_image.t(name: name))
       update_projects(@image, params[:project])
+    else
+      name = @image.original_name
+      name = "???" if name.empty?
+      flash_error(:runtime_image_invalid_image.t(name: name))
+      flash_object_errors(@image)
     end
   end
 
@@ -499,9 +498,7 @@ class ImageController < ApplicationController
       this_state.current = @image
       next_state = this_state.next
     end
-    if !check_permission!(@image)
-      redirect_with_query(action: "show_image", id: @image.id)
-    else
+    if check_permission!(@image)
       @image.log_destroy
       @image.destroy
       flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
@@ -511,13 +508,15 @@ class ImageController < ApplicationController
       else
         redirect_to(action: "list_images")
       end
+    else
+      redirect_with_query(action: "show_image", id: @image.id)
     end
   end
 
   # Callback to remove a single image from an observation.
-  # Linked from: observer/edit_observation
+  # Linked from: observations/edit
   # Inputs: params[:image_id], params[:observation_id]
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def remove_image
     pass_query_params
     @image = find_or_goto_index(Image, params[:image_id])
@@ -528,15 +527,15 @@ class ImageController < ApplicationController
 
     if !check_permission!(@observation)
       flash_error(:runtime_image_remove_denied.t(id: @image.id))
-    elsif !@observation.images.include?(@image)
+    elsif @observation.images.exclude?(@image)
       flash_error(:runtime_image_remove_missing.t(id: @image.id))
     else
       @observation.remove_image(@image)
-      @observation.log_remove_image(@image)
+      @image.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
-    redirect_with_query(controller: "observer",
-                        action: "show_observation", id: @observation.id)
+    redirect_with_query(controller: :observations,
+                        action: :show, id: @observation.id)
   end
 
   def serve_reuse_form(params)
@@ -568,7 +567,7 @@ class ImageController < ApplicationController
     if image &&
        @object.add_image(image) &&
        @object.save
-      @object.log_reuse_image(image)
+      image.log_reuse_for(@object)
       redirect_with_query(glossary_term_path(@object.id))
     else
       flash_error(:runtime_no_save.t(:glossary_term)) if image
@@ -578,7 +577,7 @@ class ImageController < ApplicationController
 
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
-  # Linked from: observer/show_observation and account/profile
+  # Linked from: observations/show and account/profile
   # Inputs:
   #   params[:mode]       "observation" or "profile"
   #   params[:obs_id]     (observation)
@@ -603,8 +602,8 @@ class ImageController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) &&
        !check_permission!(@observation)
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -617,13 +616,13 @@ class ImageController < ApplicationController
       elsif @mode == :observation
         # Add image to observation.
         @observation.add_image(image)
-        @observation.log_reuse_image(image)
+        image.log_reuse_for(@observation)
         if @observation.gps_hidden
           error = image.strip_gps!
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
         end
-        redirect_with_query(controller: "observer",
-                            action: "show_observation", id: @observation.id)
+        redirect_with_query(controller: :observations,
+                            action: :show, id: @observation.id)
         done = true
 
       else
@@ -634,8 +633,7 @@ class ImageController < ApplicationController
           @user.update(image: image)
           flash_notice(:runtime_image_changed_your_image.t(id: image.id))
         end
-        redirect_to(controller: "observer", action: "show_user",
-                    id: @user.id)
+        redirect_to(user_path(@user.id))
         done = true
       end
     end
@@ -655,12 +653,12 @@ class ImageController < ApplicationController
   end
 
   # Form used to remove one or more images from an observation (not destroy!)
-  # Linked from: show_observation
+  # Linked from: observations/show
   # Inputs:
   #   params[:id]                  (observation)
   #   params[:selected][image_id]  (value of "yes" means delete)
   # Outputs: @observation
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def remove_images
     remove_images_from_object(Observation, params)
   end
@@ -678,7 +676,7 @@ class ImageController < ApplicationController
           next unless (image = Image.safe_find(image_id))
 
           @object.remove_image(image)
-          @object.log_remove_image(image)
+          image.log_remove_from(@object)
           flash_notice(:runtime_image_remove_success.t(id: image_id))
         end
         redirect_with_query(controller: target_class.show_controller,
@@ -701,13 +699,14 @@ class ImageController < ApplicationController
     return unless image
 
     if check_permission!(image)
-      if params[:op] == "rotate_left"
+      case params[:op]
+      when "rotate_left"
         image.transform(:rotate_left)
         flash_notice(:image_show_transform_note.t)
-      elsif params[:op] == "rotate_right"
+      when "rotate_right"
         image.transform(:rotate_right)
         flash_notice(:image_show_transform_note.t)
-      elsif params[:op] == "mirror"
+      when "mirror"
         image.transform(:mirror)
         flash_notice(:image_show_transform_note.t)
       else
@@ -770,13 +769,8 @@ class ImageController < ApplicationController
       update_licenses_history(images_to_update, row[:old_holder], row[:old_id])
 
       # Update the license info in the images
-      # Disable cop because we want to update all relevant records with
-      # a single SELECT. Otherwise license updating would take too long
-      # for users with many (e.g. thousands) of images
-      # rubocop:disable Rails/SkipsModelValidations
       images_to_update.update_all(license_id: row[:new_id],
                                   copyright_holder: row[:new_holder])
-      # rubocop:enable Rails/SkipsModelValidations
     end
   end
 
@@ -785,27 +779,20 @@ class ImageController < ApplicationController
       row[:old_holder] != row[:new_holder]
   end
 
-  # Add license change records with raw SQL in order to use a single INSERT.
+  # Add license change records with a single insert to the db.
   # Otherwise updating would take too long for many (e.g. thousands) of images
   def update_licenses_history(images_to_update, old_holder, old_license_id)
-    data = images_to_update.pluck(:id, :when)
-
-    # Prevent SQL injection
-    safe_old_holder = Image.connection.quote(old_holder)
-    safe_old_license_id = old_license_id.to_i
-    values = data.map do |img_id, img_when|
-      "(#{@user.id}, NOW(), 'Image', #{img_id}, #{img_when.year}, "\
-      "#{safe_old_holder}, #{safe_old_license_id})"
-    end.join(",\n")
-
-    # brakeman generates what appears to be a false positive SQL injection
-    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, updated_at, target_type, target_id, year, name, license_id)
-      VALUES
-        #{values}
-    ))
+    CopyrightChange.insert_all(
+      images_to_update.map do |image|
+        { user_id: @user.id,
+          updated_at: Time.current,
+          target_type: "Image",
+          target_id: image.id,
+          year: image.when.year,
+          name: old_holder,
+          license_id: old_license_id }
+      end
+    )
   end
 
   public # end private methods used by license updater #########################

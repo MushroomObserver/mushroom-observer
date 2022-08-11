@@ -11,9 +11,9 @@
 #
 #  Observation#change_vote::         Change a User's Vote for a given Naming.
 #  Observation#calc_consensus::  Decide which Name is winner for an Observation.
-#  Observation#is_owners_favorite?:: Is a given Naming the Observation owner's
+#  Observation#owners_favorite?::    Is a given Naming the Observation owner's
 #                                    favorite?
-#  Observation#is_users_favorite?::  Is a given Naming the given User's
+#  Observation#users_favorite?::     Is a given Naming the given User's
 #                                    favorite?
 #  Observation#refresh_vote_cache::  Refresh vote cache for all Observation's.
 #
@@ -21,7 +21,7 @@
 #  Naming#user_voted?::         Has a given User voted for this Naming?
 #  Naming#users_vote::          Get a given User's Vote for this Naming.
 #  Naming#vote_percent::        Convert score for this Naming into a percentage.
-#  Naming#is_users_favorite?::  Is this Naming the given User's favorite?
+#  Naming#users_favorite?::     Is this Naming the given User's favorite?
 #  Naming#calc_vote_table::     Gather Vote info for this Naming.
 #
 #  == Attributes
@@ -92,7 +92,7 @@ class Vote < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    :observations
   end
 
   # This is used to mean "delete my vote".
@@ -214,7 +214,7 @@ class Vote < AbstractModel
   def user_weight
     contrib = user ? user.contribution : 0
     contrib = contrib < 1 ? 0 : Math.log(contrib) / LOG10
-    contrib += 1 if observation && user == observation.user
+    contrib += 1 if observation && user_id == observation.user_id
     contrib
   end
 
@@ -222,9 +222,9 @@ class Vote < AbstractModel
   # This is the first step: abstracting it as a method on Vote instance.
   # Now we are free to change the implementation later.
   def anonymous?
-    (user.votes_anonymous == :no) ||
+    (user.votes_anonymous == "yes") ||
       (user.votes_anonymous == :old &&
-       updated_at > Time.zone.parse(MO.vote_cutoff))
+       updated_at <= Time.zone.parse(MO.vote_cutoff))
   end
 
   ##############################################################################
@@ -234,7 +234,7 @@ class Vote < AbstractModel
   # Find label of closest value in a given enumerated lists.
   def self.lookup_value(val, list) # :nodoc:
     last_pair = nil
-    for pair in list
+    list.each do |pair|
       next unless pair[1] != 0
       if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
         return last_pair[0]
@@ -265,7 +265,7 @@ class Vote < AbstractModel
 
   def self.translate_menu(menu)
     result = []
-    for k, v in menu
+    menu.each do |k, v|
       result << [(k.is_a?(Symbol) ? k.l : k.to_s), v]
     end
     result

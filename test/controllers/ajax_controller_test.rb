@@ -13,15 +13,15 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def ajax_request(action, params, status)
-    get(action, params.dup)
-    if @response.response_code != status
+    get(action, params: params.dup)
+    if @response.response_code == status
+      pass
+    else
       url = ajax_request_url(action, params)
       msg = "Expected #{status} from: #{url}\n"
       msg += "Got #{@response.response_code}:\n"
       msg += @response.body
       flunk(msg)
-    else
-      pass
     end
   end
 
@@ -42,7 +42,7 @@ class AjaxControllerTest < FunctionalTestCase
   def test_filters
     @request.env["HTTP_ACCEPT_LANGUAGE"] = "pt-pt,pt;q=0.5"
     good_ajax_request(:test)
-    assert_nil(@controller.instance_variable_get("@user"))
+    assert_nil(@controller.instance_variable_get(:@user))
     assert_nil(User.current)
     assert_equal(:pt, I18n.locale)
     assert_equal(0, cookies.count)
@@ -74,7 +74,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_activate_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = nil
     key.user = katrina
@@ -98,7 +98,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_edit_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = Time.zone.now
     key.user = katrina
@@ -360,7 +360,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     # Act
     File.stub(:rename, false) do
-      post(:create_image_object, params)
+      post(:create_image_object, params: params)
     end
     @json_response = JSON.parse(@response.body)
 
@@ -476,13 +476,13 @@ class AjaxControllerTest < FunctionalTestCase
     site = external_sites(:mycoportal)
     obs  = observations(:coprinus_comatus_obs)
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
-    @controller.instance_variable_set("@user", rolf)
+    @controller.instance_variable_set(:@user, rolf)
     assert_link_allowed(link)
     assert_link_allowed(obs, site)
-    @controller.instance_variable_set("@user", mary)
+    @controller.instance_variable_set(:@user, mary)
     assert_link_allowed(link)
     assert_link_allowed(obs, site)
-    @controller.instance_variable_set("@user", dick)
+    @controller.instance_variable_set(:@user, dick)
     assert_link_forbidden(link)
     assert_link_forbidden(obs, site)
 
@@ -568,9 +568,9 @@ class AjaxControllerTest < FunctionalTestCase
   def build_name_primer_item(name)
     { id: name.id,
       text_name: name.text_name,
+      author: name.author,
       deprecated: name.deprecated,
-      synonym_id: name.synonym_id,
-      author: name.author }.to_json
+      synonym_id: name.synonym_id }.to_json
   end
 
   def test_location_primer

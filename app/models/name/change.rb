@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
+module Name::Change
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
   # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!
   #
@@ -15,13 +15,13 @@ class Name < AbstractModel
                                         name: in_str))
     end
     if parse.parent_name &&
-       !Name.find_by_text_name(parse.parent_name)
+       !Name.find_by(text_name: parse.parent_name)
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
       if parents.last.nil?
         raise(:runtime_unable_to_create_name.t(name: parse.parent_name))
-      elsif save_parents
-        parents.each { |n| n.save if n&.new_record? }
       end
+
+      parents.each { |n| n.save if n&.new_record? } if save_parents
     end
     self.attributes = parse.params
   end
@@ -32,9 +32,9 @@ class Name < AbstractModel
   #   name.save
   #
   def change_author(new_author)
-    return if rank == :Group
+    return if rank == "Group"
 
-    new_author2 = new_author.blank? ? "" : " " + new_author
+    new_author2 = new_author.blank? ? "" : " #{new_author}"
     self.author = new_author.to_s
     self.search_name  = text_name + new_author2
     self.sort_name    = Name.format_sort_name(text_name, new_author)
@@ -90,9 +90,6 @@ class Name < AbstractModel
   # Super quick and low-level update to make sure no observation names are
   # misspellings.
   def change_misspelled_consensus_names
-    Observation.connection.execute(%(
-      UPDATE observations SET name_id = #{correct_spelling_id}
-      WHERE name_id = #{id}
-    ))
+    Observation.where(name_id: id).update_all(name_id: correct_spelling_id)
   end
 end

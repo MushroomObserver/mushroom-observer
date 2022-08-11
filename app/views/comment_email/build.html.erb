@@ -47,8 +47,13 @@
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  links.push([:email_links_show_object.t(type: @target.type_tag),
-    "#{MO.http_domain}#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
+  if @target.class.controller_normalized?
+    links.push([:email_links_show_object.t(type: @target.type_tag),
+      "#{MO.http_domain}/#{@target.show_controller}/#{@target.id}"])
+  else
+    links.push([:email_links_show_object.t(type: @target.type_tag),
+      "#{MO.http_domain}/#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
+  end
   links.push([:email_links_post_comment.t,
     "#{MO.http_domain}/comment/add_comment?id=#{@comment.target_id}&type=#{@comment.target_type}"])
   links.push([:email_links_not_interested.t(type: @target.type_tag),
@@ -71,15 +76,15 @@ if @user.email_html %>
 <%= intro.tp %>
 <%= fields.tp %>
 <% if @comment.comment %>
-  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-    <%= @comment.comment.tp %>
-  </div>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+<%= @comment.comment.tp %>
+</div>
 <% end %>
 <%= handy_links.tp %>
 <ul type=none>
-  <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
-  <% end %>
+<% links.each do |label, url| %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
 </ul>
 <%= report_abuse.tp %>
 <br/>
@@ -95,7 +100,7 @@ if @user.email_html %>
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = "".html_safe
-  for label, url in links
+  links.each do |label, url|
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>

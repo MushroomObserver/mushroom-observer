@@ -20,4 +20,14 @@
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   # Rails thinks all words ending in "men" are already plural
   inflect.irregular("specimen", "specimens")
+  inflect.acronym("API")
+  inflect.acronym("API2")
+  inflect.acronym("GM")
+  inflect.acronym("HTTP")
+  inflect.acronym("URL")
+  inflect.acronym("EXIF")
+  inflect.acronym("CSV")
+  inflect.acronym("TSV")
+  inflect.irregular("bonus", "bonuses")
+  inflect.irregular("info", "info")
 end

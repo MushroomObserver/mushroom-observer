@@ -41,20 +41,30 @@
 ################################################################################
 #
 class Project < AbstractModel
-  belongs_to :admin_group, class_name: "UserGroup",
-                           foreign_key: "admin_group_id"
+  belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :admin_group_users, through: :admin_group, source: :users
+  has_many :member_group_users, through: :user_group, source: :users
 
-  has_and_belongs_to_many :images
-  has_and_belongs_to_many :observations
-  has_and_belongs_to_many :species_lists
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
+
+  has_many :project_images, dependent: :destroy
+  has_many :images, through: :project_images
+
+  has_many :project_observations, dependent: :destroy
+  has_many :observations, through: :project_observations
+
+  has_many :project_species_lists, dependent: :destroy
+  has_many :species_lists, through: :project_species_lists
 
   before_destroy :orphan_drafts
+
+  # Project handles all of its own logging.
+  self.autolog_events = []
 
   # Various debugging things require all models respond to +text_name+.  Just
   # returns +title+.
@@ -146,24 +156,39 @@ class Project < AbstractModel
   def remove_observation(obs)
     return unless observations.include?(obs)
 
-    imgs = obs.images.select { |img| img.user_id == obs.user_id }
-    if imgs.any?
-      img_ids = imgs.map(&:id).map(&:to_s).join(",")
-      # Leave images which are attached to other observations
-      # still attached to this project.
-      leave_these_img_ids = Image.connection.select_values(%(
-        SELECT io.image_id FROM images_observations io, observations_projects op
-        WHERE io.image_id IN (#{img_ids})
-          AND io.observation_id != #{obs.id}
-          AND io.observation_id = op.observation_id
-          AND op.project_id = #{id}
-      )).map(&:to_i)
-      imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
-    end
+    imgs_to_delete(obs).each { |img| images.delete(img) }
     observations.delete(obs)
-    imgs.each { |img| images.delete(img) }
     update_attribute(:updated_at, Time.zone.now)
   end
+
+  def imgs_to_delete(obs)
+    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    return imgs if imgs.none?
+
+    # Do not delete images which are attached to other observations
+    # still attached to this project.
+    leave_these_img_ids = Image.connection.select_values(
+      arel_select_leave_these_img_ids(obs, imgs).to_sql
+    ).map(&:to_i)
+    imgs.reject { |img| leave_these_img_ids.include?(img.id) }
+  end
+
+  # NOTE: Arel is definitely more efficient than AR for this join.
+  # rubocop:disable Metrics/AbcSize
+  def arel_select_leave_these_img_ids(obs, imgs)
+    img_ids = imgs.map(&:id)
+
+    ObservationImage.arel_table.join(ProjectObservation.arel_table).on(
+      ObservationImage[:image_id].in(img_ids).and(
+        ObservationImage[:observation_id].not_eq(obs.id).and(
+          ObservationImage[:observation_id].eq(
+            ProjectObservation[:observation_id]
+          )
+        ).and(ProjectObservation[:project_id].eq(id))
+      )
+    ).project(ObservationImage[:image_id])
+  end
+  # rubocop:enable Metrics/AbcSize
 
   # Add species_list to this project if not already done so.  Saves it.
   def add_species_list(spl)

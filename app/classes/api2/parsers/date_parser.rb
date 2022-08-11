@@ -39,9 +39,9 @@ class API2
       end
 
       def range_yyyymmdd_x2(str)
-        match = str.match(/^(#{YYYYMMDD1})\s*-\s*(#{YYYYMMDD1})$/) ||
-                str.match(/^(#{YYYYMMDD2})\s*-\s*(#{YYYYMMDD2})$/) ||
-                str.match(/^(#{YYYYMMDD3})\s*-\s*(#{YYYYMMDD3})$/)
+        match = str.match(/^(#{YYYYMMDD1})\s*-\s*(#{YYYYMMDD1})$/o) ||
+                str.match(/^(#{YYYYMMDD2})\s*-\s*(#{YYYYMMDD2})$/o) ||
+                str.match(/^(#{YYYYMMDD3})\s*-\s*(#{YYYYMMDD3})$/o)
         return unless match
 
         from = strip_time(match[1])
@@ -52,9 +52,9 @@ class API2
       end
 
       def range_yyyymm_x2(str)
-        match = str.match(/^(#{YYYYMM1})\s*-\s*(#{YYYYMM1})$/) ||
-                str.match(/^(#{YYYYMM2})\s*-\s*(#{YYYYMM2})$/) ||
-                str.match(/^(#{YYYYMM3})\s*-\s*(#{YYYYMM3})$/)
+        match = str.match(/^(#{YYYYMM1})\s*-\s*(#{YYYYMM1})$/o) ||
+                str.match(/^(#{YYYYMM2})\s*-\s*(#{YYYYMM2})$/o) ||
+                str.match(/^(#{YYYYMM3})\s*-\s*(#{YYYYMM3})$/o)
         return unless match
 
         from = "#{strip_time(match[1])}01"
@@ -65,7 +65,7 @@ class API2
       end
 
       def range_yyyy_x2(str)
-        match = str.match(/^(#{YYYY})\s*-\s*(#{YYYY})$/)
+        match = str.match(/^(#{YYYY})\s*-\s*(#{YYYY})$/o)
         return unless match
 
         from = strip_time(match[1])
@@ -78,9 +78,9 @@ class API2
       end
 
       def range_mmdd_x2(str)
-        match = str.match(/^#{MMDD1}\s*-\s*#{MMDD1}$/) ||
-                str.match(/^#{MMDD2}\s*-\s*#{MMDD2}$/) ||
-                str.match(/^#{MMDD3}\s*-\s*#{MMDD3}$/)
+        match = str.match(/^#{MMDD1}\s*-\s*#{MMDD1}$/o) ||
+                str.match(/^#{MMDD2}\s*-\s*#{MMDD2}$/o) ||
+                str.match(/^#{MMDD3}\s*-\s*#{MMDD3}$/o)
         return unless match
 
         from = match[1].to_i * 100 + match[2].to_i
@@ -89,7 +89,7 @@ class API2
       end
 
       def range_mm_x2(str)
-        match = str.match(/^#{MM}\s*-\s*#{MM}$/)
+        match = str.match(/^#{MM}\s*-\s*#{MM}$/o)
         return unless match
 
         from = match[1].to_i
@@ -98,9 +98,9 @@ class API2
       end
 
       def range_yyyymmdd(str)
-        match = str.match(/^#{YYYYMMDD1}$/) ||
-                str.match(/^#{YYYYMMDD2}$/) ||
-                str.match(/^#{YYYYMMDD3}$/)
+        match = str.match(/^#{YYYYMMDD1}$/o) ||
+                str.match(/^#{YYYYMMDD2}$/o) ||
+                str.match(/^#{YYYYMMDD3}$/o)
         return unless match
 
         str  = strip_time(str)
@@ -109,9 +109,9 @@ class API2
       end
 
       def range_yyyymm(str)
-        match = str.match(/^#{YYYYMM1}$/) ||
-                str.match(/^#{YYYYMM2}$/) ||
-                str.match(/^#{YYYYMM3}$/)
+        match = str.match(/^#{YYYYMM1}$/o) ||
+                str.match(/^#{YYYYMM2}$/o) ||
+                str.match(/^#{YYYYMM3}$/o)
         return unless match
 
         str  = strip_time(str)
@@ -121,7 +121,7 @@ class API2
       end
 
       def range_yyyy(str)
-        match = str.match(/^#{YYYY}$/)
+        match = str.match(/^#{YYYY}$/o)
         return unless match
         return if str < "1500"
 
@@ -131,9 +131,9 @@ class API2
       end
 
       def range_mmdd(str)
-        match = str.match(/^#{MMDD1}$/) ||
-                str.match(/^#{MMDD2}$/) ||
-                str.match(/^#{MMDD3}$/)
+        match = str.match(/^#{MMDD1}$/o) ||
+                str.match(/^#{MMDD2}$/o) ||
+                str.match(/^#{MMDD3}$/o)
         return unless match
 
         monthday = match[1].to_i * 100 + match[2].to_i
@@ -141,7 +141,7 @@ class API2
       end
 
       def range_mm(str)
-        match = str.match(/^#{MM}$/)
+        match = str.match(/^#{MM}$/o)
         return unless match
 
         month = str.to_i
@@ -149,9 +149,9 @@ class API2
       end
 
       def scalar_yyyymmdd(str)
-        match = str.match(/^#{YYYYMMDD1}$/) ||
-                str.match(/^#{YYYYMMDD2}$/) ||
-                str.match(/^#{YYYYMMDD3}$/)
+        match = str.match(/^#{YYYYMMDD1}$/o) ||
+                str.match(/^#{YYYYMMDD2}$/o) ||
+                str.match(/^#{YYYYMMDD3}$/o)
         raise(ArgumentError) unless match
 
         str = strip_time(str)

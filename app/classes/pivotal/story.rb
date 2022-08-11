@@ -2,16 +2,8 @@
 
 class Pivotal
   class Story
-    attr_accessor :id
-    attr_accessor :type
-    attr_accessor :time
-    attr_accessor :state
-    attr_accessor :user
-    attr_accessor :name
-    attr_accessor :description
-    attr_accessor :labels
-    attr_accessor :comments
-    attr_accessor :votes
+    attr_accessor :id, :type, :time, :state, :user, :name, :description,
+                  :labels, :comments, :votes
 
     LABEL_VALUE = {
       "critical" => 4,
@@ -47,10 +39,10 @@ class Pivotal
       @description = parse_description(data["description"])
       @labels =
         data["labels"] == [] ? ["other"] : data["labels"].map { |l| l["name"] }
-      @comments = if !data["comments"]
-                    []
-                  else
+      @comments = if data["comments"]
                     data["comments"].map { |c| Pivotal::Comment.new(c) }
+                  else
+                    []
                   end
     end
 
@@ -74,7 +66,7 @@ class Pivotal
     end
 
     def parse_description(str)
-      str.to_s.split(/\n/).select do |line|
+      str.to_s.split("\n").select do |line|
         if line =~ /USER:\s*(\d+)\s+(\S.*\S)/
           id   = Regexp.last_match[1]
           name = Regexp.last_match[2]
@@ -93,20 +85,20 @@ class Pivotal
 
     def activity
       @activity ||= begin
-        result = "none"
-        if @comments.any?
-          comment = @comments.last
-          time = Time.zone.parse(comment.time)
-          if time > 1.day.ago
-            result = "day"
-          elsif time > 1.week.ago
-            result = "week"
-          elsif time > 1.month.ago
-            result = "month"
-          end
-        end
-        result
-      end
+                      result = "none"
+                      if @comments.any?
+                        comment = @comments.last
+                        time = Time.zone.parse(comment.time)
+                        if time > 1.day.ago
+                          result = "day"
+                        elsif time > 1.week.ago
+                          result = "week"
+                        elsif time > 1.month.ago
+                          result = "month"
+                        end
+                      end
+                      result
+                    end
     end
 
     def story_order
@@ -145,7 +137,7 @@ class Pivotal
     def user_vote(user)
       if user
         user_id = user.id
-        for vote in votes
+        votes.each do |vote|
           return vote.value if vote.id == user_id
         end
       end

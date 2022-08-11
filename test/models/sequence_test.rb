@@ -284,16 +284,16 @@ class SequenceTest < UnitTestCase
     # Prove that BLAST url for bare sequence
     # excludes digits and whitespace
     expected_query = "" \
-    "ggaagtaaaagtcgtaacaaggtttccgtaggtgaacctgcggaaggatcattacacaat"\
-    "actctgtattatccacacacaccttctgtgatccatttacctggttgcttcccgtggcat"\
-    "ctcgcttgcttcagaggcccctgccttcctgcgggagggcaggtgtgagctgctgctggc"\
-    "cccccgggaccacgggaaggtccaatgaaaccctggttttttgatgccttcaagtctgaa"\
-    "attattgaatacaagaaaactgttaaaactttcaacaacggatctcttggttctcgcatc"\
-    "gatgaagaacgcagcgaaatgcgataagtagtgtgaattgcagaattcagtgaatcatcg"\
-    "aatctttgaacgcacattgcgccccctggcattccggggggcacgcctgttcgagcgtca"\
-    "ttaagtcaaccctcaagcctcctttggtttggtcatggaactgaacggccggacccgctt"\
-    "gggatccggtcggtctactccgaaatgcattgttgcggaatgccccagtcggcacaggcg"\
-    "tagtgaattttctatcatcgtctgtttgtccgcgaggcgttcccgcccaccgaacccaat"\
+    "ggaagtaaaagtcgtaacaaggtttccgtaggtgaacctgcggaaggatcattacacaat" \
+    "actctgtattatccacacacaccttctgtgatccatttacctggttgcttcccgtggcat" \
+    "ctcgcttgcttcagaggcccctgccttcctgcgggagggcaggtgtgagctgctgctggc" \
+    "cccccgggaccacgggaaggtccaatgaaaccctggttttttgatgccttcaagtctgaa" \
+    "attattgaatacaagaaaactgttaaaactttcaacaacggatctcttggttctcgcatc" \
+    "gatgaagaacgcagcgaaatgcgataagtagtgtgaattgcagaattcagtgaatcatcg" \
+    "aatctttgaacgcacattgcgccccctggcattccggggggcacgcctgttcgagcgtca" \
+    "ttaagtcaaccctcaagcctcctttggtttggtcatggaactgaacggccggacccgctt" \
+    "gggatccggtcggtctactccgaaatgcattgttgcggaatgccccagtcggcacaggcg" \
+    "tagtgaattttctatcatcgtctgtttgtccgcgaggcgttcccgcccaccgaacccaat" \
     "aaacctttctcctagttgacctcgaatcaggtggggB"
 
     assert_equal(

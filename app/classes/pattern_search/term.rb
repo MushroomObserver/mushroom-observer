@@ -6,7 +6,6 @@ module PatternSearch
   #   elsif term.var == :specimen
   #     args[:has_specimen] = term.parse_boolean_string
   class Term
-    require_dependency "pattern_search/term/dates"
     include Dates
 
     attr_accessor :var, :vals
@@ -17,7 +16,7 @@ module PatternSearch
     end
 
     CONTAINS_QUOTES =
-      /^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/.freeze
+      /^("([^"\\]+|\\.)*"|'([^"\\]+|\\.)*'|[^"',]*)(\s*,\s*|$)/
 
     def <<(val)
       while val.to_s =~ CONTAINS_QUOTES
@@ -29,7 +28,7 @@ module PatternSearch
 
     def quote(val)
       if /['" \\]/.match?(val.to_s)
-        '"' + val.to_s.gsub(/(['"\\])/) { |v| '\\' + v } + '"'
+        %("#{val.to_s.gsub(/(['"\\])/) { |v| "\\#{v}" }}")
       else
         val.to_s
       end
@@ -74,11 +73,12 @@ module PatternSearch
     def parse_list_of_names
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           ::Name.safe_find(val) ||
             raise(BadNameError.new(var: var, val: val))
         else
-          ::Name.find_by_text_name(val) || ::Name.find_by_search_name(val) ||
+          ::Name.find_by(text_name: val) || ::Name.find_by(search_name: val) ||
             raise(BadNameError.new(var: var, val: val))
         end
       end.flatten.map(&:id).uniq
@@ -87,7 +87,8 @@ module PatternSearch
     def parse_list_of_herbaria
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           Herbarium.safe_find(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         else
@@ -101,7 +102,8 @@ module PatternSearch
     def parse_list_of_locations
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
@@ -115,7 +117,8 @@ module PatternSearch
     def parse_list_of_projects
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           Project.safe_find(val) ||
             raise(BadProjectError.new(var: var, val: val))
         else
@@ -128,7 +131,8 @@ module PatternSearch
     def parse_list_of_species_lists
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           SpeciesList.safe_find(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         else
@@ -152,7 +156,7 @@ module PatternSearch
         User.safe_find(val) ||
           raise(BadUserError.new(var: var, val: val))
       else
-        User.find_by_login(val) ||
+        User.find_by(login: val) ||
           User.find_by_name(val) ||
           raise(BadUserError.new(var: var, val: val))
       end
@@ -222,7 +226,7 @@ module PatternSearch
     end
 
     def alt_rank_check(rank, val)
-      if [:Phylum, :Group].include?(rank)
+      if %w[Phylum Group].include?(rank)
         ranks = :"rank_alt_#{rank.to_s.downcase}".l.split(",")
         ranks.map(&:strip).include?(val)
       else

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Image
-  class Url
+  class URL
     SUBDIRECTORIES = {
       full_size: "orig",
       huge: "1280",
@@ -33,7 +33,7 @@ class Image
     end
 
     def url
-      for source in source_order
+      source_order.each do |source|
         return source_url(source) if source_exists?(source)
       end
       source_url(fallback_source)
@@ -46,12 +46,10 @@ class Image
         transferred
       when /^file:/
         local_file_exists?(spec)
-      when /^http:/
-        remote_file_exists?(spec)
-      when /^https:/
+      when /^https?:/
         remote_file_exists?(spec)
       else
-        raise("Invalid image source test spec for "\
+        raise("Invalid image source test spec for " \
               "#{source.inspect}: #{spec.inspect}")
       end
     end

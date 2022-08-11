@@ -2,7 +2,7 @@
 
 module Report
   # Darwin Core Archive format.
-  class Dwca < Report::ZipReport
+  class Dwca < ZipReport
     attr_accessor :images, :observations
 
     def initialize(args)
@@ -19,7 +19,7 @@ module Report
     # generate CSV & meta.xml and bundle into a Zip
     def render
       filename = "#{::Rails.root}/public/dwca/gbif_meta.xml"
-      content << ["meta.xml", File.open(filename).read]
+      content << ["meta.xml", File.read(filename)]
       content << ["observations.csv", observations.render]
       content << ["multimedia.csv", images.render]
       super

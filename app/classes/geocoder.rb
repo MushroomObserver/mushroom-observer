@@ -8,14 +8,10 @@ require("rexml/document")
 #  Wraps a call to the Google Geocoding webservice
 #
 class Geocoder < BlankSlate
-  attr_reader :north
-  attr_reader :south
-  attr_reader :east
-  attr_reader :west
-  attr_reader :valid
+  attr_reader :north, :south, :east, :west, :valid
 
   GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
-  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
+  GMAPS_API_KEYS = YAML.load_file("#{::Rails.root}/#{GMAPS_CONFIG_FILE}")
 
   def initialize(place_name)
     @place_name = place_name
@@ -71,7 +67,7 @@ class Geocoder < BlankSlate
   end
 
   def ajax_response
-    [north, south, east, west].join("\n") + "\n"
+    "#{[north, south, east, west].join("\n")}\n"
   end
 
   def request_url(place_name)
@@ -114,7 +110,7 @@ class Geocoder < BlankSlate
         north: 41.6592100,
         east: -70.6022670
       },
-      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, "\
+      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, " \
       "Ohio, USA" => {
         north: 39.3043,
         west: -82.1067,

@@ -50,7 +50,7 @@ module SessionExtensions
   # Dump out a list of all the links on the last page rendered.
   def dump_links
     assert_select("a[href]") do |links|
-      for link in links
+      links.each do |link|
         puts("link: #{link.attributes["href"]}")
       end
     end
@@ -59,20 +59,18 @@ module SessionExtensions
   # Save response from last request so you can look at it in a browser.
   def save_page(file = nil)
     file ||= "#{::Rails.root}/public/test.html"
-    File.open(file, "w") do |fh|
-      fh.write(response.body)
-    end
+    File.write(file, response.body)
   end
 
   # Call follow_redirect!, checking for 500 errors and missing language
   # tags.  Saves body of all successful responses for debugging, too.
-  def process_with_error_checking(method, url, *args)
+  def process_with_error_checking(method, url, *args, **kwargs)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send(method.downcase.to_s, url, *args)
+    send(method.downcase.to_s, url, *args, **kwargs)
     follow_redirect! while response.redirect?
     if status == 500
-      msg = if error = controller.instance_variable_get("@error")
+      msg = if (error = controller.instance_variable_get(:@error))
               "#{error}\n#{error.backtrace.join("\n")}"
             else
               "Got unknown 500 error from outside our application?!\n" \
@@ -88,35 +86,62 @@ module SessionExtensions
   end
 
   # Override all 'get' calls and do a bunch of extra error checking.
-  def get(*args)
-    if !@doing_with_error_checking
-      process_with_error_checking("get", *args)
-    else
+  def get(action, **args)
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("get", action, **args)
     end
   end
 
   # Override all 'post' calls and do a bunch of extra error checking.
-  def post(*args)
-    if !@doing_with_error_checking
-      process_with_error_checking("POST", *args)
-    else
+  def post(action, **args)
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("POST", action, **args)
+    end
+  end
+
+  # Override all 'put' calls and do a bunch of extra error checking.
+  def put(action, **args)
+    if @doing_with_error_checking
+      super
+    else
+      process_with_error_checking("PUT", action, **args)
+    end
+  end
+
+  # Override all 'patch' calls and do a bunch of extra error checking.
+  def patch(action, **args)
+    if @doing_with_error_checking
+      super
+    else
+      process_with_error_checking("PATCH", action, **args)
+    end
+  end
+
+  # Override all 'delete' calls and do a bunch of extra error checking.
+  def delete(action, **args)
+    if @doing_with_error_checking
+      super
+    else
+      process_with_error_checking("DELETE", action, **args)
     end
   end
 
   # Call the original +get+.
-  def get_without_redirecting(*args)
+  def get_without_redirecting(action, **args)
     @doing_with_error_checking = true
-    get(*args)
+    get(action, **args)
   ensure
     @doing_with_error_checking = false
   end
 
   # Call the original +post+.
-  def post_without_redirecting(*args)
+  def post_without_redirecting(action, **args)
     @doing_with_error_checking = true
-    post(*args)
+    post(action, **args)
   ensure
     @doing_with_error_checking = false
   end
@@ -156,7 +181,7 @@ module SessionExtensions
 
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
-      for key, value in expected_values
+      expected_values.each do |key, value|
         if value == true
           form.assert_checked(key)
         elsif value == false
@@ -191,6 +216,13 @@ module SessionExtensions
     form = nil
     if args == []
       action = path.sub(/\?.*/, "")
+      if action.end_with?("/new", "/edit")
+        action = if action.end_with?("/new")
+                   action.delete_suffix("/new")
+                 elsif action.end_with?("/edit")
+                   action.delete_suffix("/edit")
+                 end
+      end
       args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
@@ -242,68 +274,118 @@ module SessionExtensions
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
   # Sample use:
-  #   click(label: "Show Observation")
-  #   click(href: /show_name/)
-  #   click(label: "User", in: :sort_tabs)
-  def click(args = {})
-    select = "a[href]"
-    sargs  = []
+  #   click_mo_link(label: "Show Observation")
+  #   click_mo_link(href: /show_name/)
+  #   click_mo_link(label: "User", in: :sort_tabs)
+  def click_mo_link(args = {})
+    return true if try_finding_matching_anchor(args)
+    return true if try_finding_matching_button(args)
 
-    # Filter links based on URL.
-    if arg = args[:href]
-      if arg.is_a?(Regexp)
-        select = "a:match('href',?)"
-        sargs << arg
-      else
-        select = "a[href^='#{arg}']"
-      end
-    end
+    assert(false, "Expected a link matching: #{args.inspect}")
+  end
 
-    # Filter links by parent element types.
-    if arg = args[:in]
-      if arg == :left_tabs
-        arg = "div#left_tabs"
-      elsif arg == :right_tabs
-        arg = "div#right_tabs"
-      elsif arg == :sort_tabs
-        arg = "div#sorts"
-      elsif arg == :left_panel
-        arg = "div#navigation"
-      elsif arg == :results
-        arg = "div.results"
-      elsif arg == :title
-        arg = "div#title"
-      end
-      select = "#{arg} #{select}"
-    end
-
-    done = false
-    assert_select(select, *sargs) do |links|
-      for link in links
-        match = true
-
-        # Filter based on link "label" (can be an image too, for example).
-        if arg = args[:label]
-          if arg == :image
-            match = false unless /img /.match?(link.to_s)
-          elsif arg.is_a?(Regexp)
-            match = false unless arg.match?(link.to_s)
-          else
-            match = false unless link.to_s.index(arg)
-          end
-        end
-
-        # Click on first link that matches everything.
-        next unless match
+  def try_finding_matching_anchor(args)
+    extra_args = []
+    select = anchor_url_select_spec(args[:href], extra_args)
+    select = "#{section_select_spec(args[:in])} #{select}" if args[:in]
+    assert_select(select, *extra_args) do |links|
+      links.each do |link|
+        next unless match_link_by_label(link, args[:label])
 
         url = CGI.unescapeHTML(link.attributes["href"])
         get(url)
-        done = true
-        break
+        return true
       end
     end
+    false
+  end
 
-    assert(done, "Expected a link matching: #{args.inspect}")
+  def try_finding_matching_button(args)
+    extra_args = []
+    select = button_url_select_spec(args[:href], extra_args)
+    select = "#{section_select_spec(args[:in])} #{select}" if args[:in]
+    assert_select(select, *extra_args) do |forms|
+      forms.each do |form|
+        form.css("input[type=submit]").each do |button|
+          next unless match_link_by_label(button, args[:label])
+
+          url = CGI.unescapeHTML(form.attributes["action"])
+          params = button_link_form_values(form, button)
+          post(url, params: params)
+          return true
+        end
+      end
+    end
+    false
+  end
+
+  # Filter anchor links based on URL.
+  def anchor_url_select_spec(*args)
+    url_select_spec("a", "href", *args)
+  end
+
+  # Filter button links based on URL.
+  def button_url_select_spec(*args)
+    url_select_spec("form", "action", *args)
+  end
+
+  def url_select_spec(elem, attr, arg, select_args)
+    case arg
+    when Regexp
+      select_args << arg
+      "#{elem}:match('#{attr}',?)"
+    when String
+      "#{elem}[#{attr}^='#{arg}']"
+    else
+      "#{elem}[#{attr}]"
+    end
+  end
+
+  # Restrict search to a certain section on the page.
+  def section_select_spec(arg)
+    case arg
+    when :left_tabs
+      "div#left_tabs"
+    when :right_tabs
+      "div#right_tabs"
+    when :sort_tabs
+      "div#sorts"
+    when :left_panel
+      "div#navigation"
+    when :results
+      "div.results"
+    when :title
+      "div#title"
+    else
+      arg
+    end
+  end
+
+  # Filter based on button label.
+  def match_link_by_label(elem, arg)
+    case arg
+    when :image
+      /img /.match?(elem.to_s)
+    when Regexp
+      arg.match?(elem.to_s)
+    when String
+      elem.to_s.index(arg)
+    else
+      true
+    end
+  end
+
+  def button_link_form_values(form, button)
+    params = {}
+    form.css("input").each do |input|
+      next unless input.attributes["type"].to_s == "hidden"
+
+      name = CGI.unescapeHTML(input.attributes["name"])
+      val  = CGI.unescapeHTML(input.attributes["value"])
+      params[name] = val
+    end
+    params["submit"] = CGI.unescapeHTML(button.attributes["value"])
+    params
   end
 
   ##############################################################################

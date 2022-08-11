@@ -11,15 +11,7 @@ require("test_helper")
 # Test image_vote API
 # See https://www.pivotaltracker.com/story/show/174886806
 
-class Hash
-  def remove(*keys)
-    reject do |key, _val|
-      keys.include?(key)
-    end
-  end
-end
-
-class Api2Test < UnitTestCase
+class API2Test < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
     super
@@ -61,7 +53,7 @@ class Api2Test < UnitTestCase
   end
 
   def assert_api_results(expect)
-    msg = "API2 results wrong.\nQuery args: #{@api.query.params.inspect}\n"\
+    msg = "API2 results wrong.\nQuery args: #{@api.query.params.inspect}\n" \
           "Query sql: #{@api.query.query}"
     assert_obj_list_equal(expect, @api.results, :sort, msg)
   end
@@ -113,7 +105,7 @@ class Api2Test < UnitTestCase
   end
 
   def assert_last_api_key_correct
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
@@ -172,13 +164,13 @@ class Api2Test < UnitTestCase
     assert_nil(img.last_view)
     assert_equal(@width, img.width)
     assert_equal(@height, img.height)
-    assert(@vote == img.vote_cache)
+    assert_equal_even_if_nil(@vote, img.vote_cache)
     assert_equal(true, img.ok_for_export)
-    assert(@orig == img.original_name)
+    assert_equal_even_if_nil(@orig, img.original_name)
     assert_equal(false, img.transferred)
-    assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
-    assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
-    assert(@vote == img.users_vote(@user))
+    assert_obj_list_equal([@proj].compact, img.projects)
+    assert_obj_list_equal([@obs].compact, img.observations)
+    assert_equal_even_if_nil(@vote, img.users_vote(@user))
   end
 
   def assert_last_location_correct
@@ -228,7 +220,7 @@ class Api2Test < UnitTestCase
   end
 
   def assert_last_reasons_correct(naming)
-    naming.get_reasons.each do |reason|
+    naming.reasons_array.each do |reason|
       expect = @reasons[reason.num]
       if expect.nil?
         assert_false(reason.used?)
@@ -248,7 +240,7 @@ class Api2Test < UnitTestCase
     assert_equal(@specimen, obs.specimen)
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
-    assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
+    assert_obj_list_equal([@img1, @img2].compact, obs.images)
     assert_equal(@loc.name, obs.where)
     assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
@@ -259,8 +251,8 @@ class Api2Test < UnitTestCase
     assert(@lat == obs.lat)
     assert(@long == obs.long)
     assert(@alt == obs.alt)
-    assert_obj_list_equal([@proj].reject(&:nil?), obs.projects)
-    assert_obj_list_equal([@spl].reject(&:nil?), obs.species_lists)
+    assert_obj_list_equal([@proj].compact, obs.projects)
+    assert_obj_list_equal([@spl].compact, obs.species_lists)
     assert_names_equal(@name, obs.name)
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
@@ -352,6 +344,20 @@ class Api2Test < UnitTestCase
     assert_true(vote.favorite)
   end
 
+  # Used to be we could just used assert_equal, but now it complains that that
+  # assertion will soon no longer work if expect is nil.  We can change it to
+  # just assert(expect == actual), but that doesn't show as nice diagnostics
+  # when it fails.  So I'm restoring the old behavior of assert_equal here.
+  # This should probably move into a more general set of extensions, but for
+  # now this is the only place it is used.  -JPH 20220519
+  def assert_equal_even_if_nil(expect, actual)
+    if expect.nil?
+      assert_nil(actual)
+    else
+      assert_equal(expect, actual)
+    end
+  end
+
   ##############################################################################
 
   def test_basic_comment_get
@@ -415,7 +421,7 @@ class Api2Test < UnitTestCase
   end
 
   # ----------------------------
-  #  :section: ApiKey Requests
+  #  :section: APIKey Requests
   # ----------------------------
 
   def test_getting_api_keys
@@ -442,10 +448,10 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:app))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:app))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
@@ -463,10 +469,10 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:app))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:app))
     assert_api_fail(params.merge(app: ""))
     assert_api_fail(params.merge(for_user: 123_456))
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
@@ -487,7 +493,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.merge(password: "bogus"))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
@@ -550,12 +556,12 @@ class Api2Test < UnitTestCase
   def test_getting_collection_numbers
     params = { method: :get, action: :collection_number }
 
-    nums = CollectionNumber.where("year(created_at) = 2006")
+    nums = CollectionNumber.where(CollectionNumber[:created_at].year == 2006)
     assert_not_empty(nums)
     assert_api_pass(params.merge(created_at: "2006"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("year(updated_at) = 2005")
+    nums = CollectionNumber.where(CollectionNumber[:updated_at].year == 2005)
     assert_not_empty(nums)
     assert_api_pass(params.merge(updated_at: "2005"))
     assert_api_results(nums)
@@ -576,7 +582,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(collector: "Mary Newbie"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("name LIKE '%mary%'")
+    nums = CollectionNumber.where(CollectionNumber[:name].matches("%mary%"))
     assert_not_empty(nums)
     assert_api_pass(params.merge(collector_has: "Mary"))
     assert_api_results(nums)
@@ -586,7 +592,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(number: "174"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("number LIKE '%17%'")
+    # nums = CollectionNumber.where("number LIKE '%17%'")
+    nums = CollectionNumber.where(CollectionNumber[:number].matches("%17%"))
     assert_not_empty(nums)
     assert_api_pass(params.merge(number_has: "17"))
     assert_api_results(nums)
@@ -607,9 +614,9 @@ class Api2Test < UnitTestCase
       collector: @name,
       number: @number
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:observation))
-    assert_api_fail(params.remove(:number))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:observation))
+    assert_api_fail(params.except(:number))
     assert_api_fail(params.merge(observation: marys_obs.id))
     assert_api_pass(params)
     assert_last_collection_number_correct
@@ -635,7 +642,7 @@ class Api2Test < UnitTestCase
       set_number: "42"
     }
     assert_equal("Rolf Singer 1", rolfs_rec.accession_number)
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_num.id))
     assert_api_pass(params)
     assert_equal("New", rolfs_num.reload.name)
@@ -688,7 +695,7 @@ class Api2Test < UnitTestCase
       api_key: @api_key.key,
       id: rolfs_num.id
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_num.id))
     assert_api_pass(params)
     assert_nil(CollectionNumber.safe_find(rolfs_num.id))
@@ -730,6 +737,9 @@ class Api2Test < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     assert_api_pass(params.merge(target: "observation ##{obs.id}"))
     assert_api_results(obs.comments.sort_by(&:id))
+
+    # APIKeys don't have comments
+    assert_api_fail(params.merge(type: APIKey.name))
   end
 
   def test_posting_comments
@@ -745,9 +755,9 @@ class Api2Test < UnitTestCase
       summary: @summary,
       content: @content
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:target))
-    assert_api_fail(params.remove(:summary))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:target))
+    assert_api_fail(params.except(:summary))
     assert_api_fail(params.merge(target: "foo #1"))
     assert_api_fail(params.merge(target: "observation #1"))
     assert_api_pass(params)
@@ -765,7 +775,7 @@ class Api2Test < UnitTestCase
       set_summary: "new summary",
       set_content: "new comment"
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: com2.id))
     assert_api_fail(params.merge(set_summary: ""))
     assert_api_pass(params)
@@ -783,7 +793,7 @@ class Api2Test < UnitTestCase
       api_key: @api_key.key,
       id: com1.id
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: com2.id))
     assert_api_pass(params)
     assert_nil(Comment.safe_find(com1.id))
@@ -841,10 +851,10 @@ class Api2Test < UnitTestCase
       url: "http://blah.blah"
     }
     assert_api_pass(params)
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:observation))
-    assert_api_fail(params.remove(:external_site))
-    assert_api_fail(params.remove(:url))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:observation))
+    assert_api_fail(params.except(:external_site))
+    assert_api_fail(params.except(:url))
     assert_api_fail(params.merge(api_key: "spammer"))
     assert_api_fail(params.merge(observation: "spammer"))
     assert_api_fail(params.merge(external_site: "spammer"))
@@ -925,7 +935,7 @@ class Api2Test < UnitTestCase
       method: :get,
       action: :external_site
     }
-    sites = ExternalSite.where("name like '%inat%'")
+    sites = ExternalSite.where(ExternalSite[:name].matches("%inat%"))
     assert_not_empty(sites)
     assert_api_pass(params.merge(name: "inat"))
     assert_api_results(sites)
@@ -941,7 +951,7 @@ class Api2Test < UnitTestCase
       action: :herbarium
     }
 
-    herbs = Herbarium.where("date(created_at) = '2012-10-21'")
+    herbs = Herbarium.created_on("2012-10-21")
     assert_not_empty(herbs)
     assert_api_pass(params.merge(created_at: "2012-10-21"))
     assert_api_results(herbs)
@@ -956,17 +966,17 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(code: "NY"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("name like '%personal%'")
+    herbs = Herbarium.where(Herbarium[:name].matches("%personal%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(name: "personal"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("description like '%awesome%'")
+    herbs = Herbarium.where(Herbarium[:description].matches("%awesome%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(description: "awesome"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("mailing_address like '%New York%'")
+    herbs = Herbarium.where(Herbarium[:mailing_address].matches("%New York%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(address: "New York"))
     assert_api_results(herbs)
@@ -979,12 +989,12 @@ class Api2Test < UnitTestCase
   def test_getting_herbarium_records
     params = { method: :get, action: :herbarium_record }
 
-    recs = HerbariumRecord.where("year(created_at) = 2012")
+    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year == 2012)
     assert_not_empty(recs)
     assert_api_pass(params.merge(created_at: "2012"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("year(updated_at) = 2017")
+    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year == 2017)
     assert_not_empty(recs)
     assert_api_pass(params.merge(updated_at: "2017"))
     assert_api_results(recs)
@@ -1006,17 +1016,17 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(observation: obs.id))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("notes LIKE '%dried%'")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].matches("%dried%"))
     assert_not_empty(recs)
     assert_api_pass(params.merge(notes_has: "dried"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("COALESCE(notes, '') = ''")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].blank)
     assert_not_empty(recs)
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("CONCAT(notes, '') != ''")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].not_blank)
     assert_not_empty(recs)
     assert_api_pass(params.merge(has_notes: "yes"))
     assert_api_results(recs)
@@ -1026,7 +1036,9 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(initial_det: "Coprinus comatus"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("initial_det LIKE '%coprinus%'")
+    recs = HerbariumRecord.where(
+      HerbariumRecord[:initial_det].matches("%coprinus%")
+    )
     assert_not_empty(recs)
     assert_api_pass(params.merge(initial_det_has: "coprinus"))
     assert_api_results(recs)
@@ -1036,7 +1048,9 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(accession_number: "1234"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("accession_number LIKE '%23%'")
+    recs = HerbariumRecord.where(
+      HerbariumRecord[:accession_number].matches("%23%")
+    )
     assert_not_empty(recs)
     assert_api_pass(params.merge(accession_number_has: "23"))
     assert_api_results(recs)
@@ -1061,9 +1075,9 @@ class Api2Test < UnitTestCase
       accession_number: @accession_number,
       notes: @notes
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:observation))
-    assert_api_fail(params.remove(:herbarium))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:observation))
+    assert_api_fail(params.except(:herbarium))
     assert_api_fail(params.merge(observation: marys_obs.id))
     assert_api_pass(params)
     assert_last_herbarium_record_correct
@@ -1076,18 +1090,18 @@ class Api2Test < UnitTestCase
                           HerbariumRecord.last.observations, :sort)
 
     # Make sure it gives correct default for initial_det.
-    assert_api_pass(params.remove(:initial_det).merge(accession_number: "2"))
+    assert_api_pass(params.except(:initial_det).merge(accession_number: "2"))
     assert_equal(rolfs_obs.name.text_name, HerbariumRecord.last.initial_det)
 
     # Check default accession number if obs has no collection number.
-    assert_api_pass(params.remove(:accession_number))
+    assert_api_pass(params.except(:accession_number))
     assert_equal("MO #{rolfs_obs.id}", HerbariumRecord.last.accession_number)
 
     # Check default accession number if obs has one collection number.
     obs = observations(:coprinus_comatus_obs)
     num = obs.collection_numbers.first
     assert_operator(obs.collection_numbers.count, :==, 1)
-    assert_api_pass(params.remove(:accession_number).
+    assert_api_pass(params.except(:accession_number).
                            merge(observation: obs.id))
     assert_equal(num.format_name, HerbariumRecord.last.accession_number)
 
@@ -1096,7 +1110,7 @@ class Api2Test < UnitTestCase
     nybg = herbaria(:nybg_herbarium)
     assert_true(nybg.curator?(rolf))
     assert_operator(marys_obs.collection_numbers.count, :>, 1)
-    assert_api_pass(params.remove(:accession_number).
+    assert_api_pass(params.except(:accession_number).
                       merge(observation: marys_obs.id, herbarium: nybg.id))
     assert_equal("MO #{marys_obs.id}", HerbariumRecord.last.accession_number)
   end
@@ -1118,7 +1132,7 @@ class Api2Test < UnitTestCase
       set_accession_number: " 1234 ",
       set_notes: " new notes "
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_rec.id))
     assert_api_fail(params.merge(set_herbarium: ""))
     assert_api_fail(params.merge(set_initial_det: ""))
@@ -1131,7 +1145,7 @@ class Api2Test < UnitTestCase
 
     # This should fail because we don't allow merges via API2.
     assert_api_fail(params.merge(id: nybgs_rec.id))
-    assert_api_pass(params.merge(id: nybgs_rec.id).remove(:set_herbarium))
+    assert_api_pass(params.merge(id: nybgs_rec.id).except(:set_herbarium))
     assert_equal("New name", nybgs_rec.reload.initial_det)
     assert_equal("1234", nybgs_rec.accession_number)
     assert_equal("new notes", nybgs_rec.notes)
@@ -1167,7 +1181,7 @@ class Api2Test < UnitTestCase
       action: :herbarium_record,
       api_key: @api_key.key
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_pass(params.merge(id: rolfs_rec.id))
     assert_api_pass(params.merge(id: nybgs_rec.id))
     assert_api_fail(params.merge(id: marys_rec.id))
@@ -1188,13 +1202,15 @@ class Api2Test < UnitTestCase
     assert_api_results([img])
 
     assert_api_pass(params.merge(created_at: "2006"))
-    assert_api_results(Image.where("year(created_at) = 2006"))
+    assert_api_results(Image.where(Image[:created_at].year == 2006))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
-    assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
+    assert_api_results(Image.created_on("2006-05-22"))
 
     assert_api_pass(params.merge(date: "2007-03"))
-    assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
+    assert_api_results(
+      Image.where((Image[:when].year == 2007).and(Image[:when].month == 3))
+    )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
     assert_api_results(Image.where(user: [mary, katrina]))
@@ -1265,9 +1281,9 @@ class Api2Test < UnitTestCase
     # assert_api_pass(params.merge(has_observation: "no"))
     # assert_api_results(unattached)
 
-    imgs = Image.where("width >= 1280 || height >= 1280")
+    imgs = Image.where((Image[:width] >= 1280).or(Image[:height] >= 1280))
     assert_empty(imgs)
-    imgs = Image.where("width >= 960 || height >= 960")
+    imgs = Image.where((Image[:width] >= 960).or(Image[:height] >= 960))
     assert_not_empty(imgs)
     assert_api_pass(params.merge(size: "huge"))
     assert_api_results([])
@@ -1287,25 +1303,30 @@ class Api2Test < UnitTestCase
     assert_api_results([pretty_img])
 
     assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
-    assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
+    assert_api_results(
+      Image.where(Image[:copyright_holder].matches("%insil choi%"))
+    )
     assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
-    assert_api_results(Image.where("copyright_holder like '%nathan%'"))
+    assert_api_results(
+      Image.where(Image[:copyright_holder].matches("%nathan%"))
+    )
 
     pd = licenses(:publicdomain)
     assert_api_pass(params.merge(license: pd.id))
     assert_api_results(Image.where(license: pd))
 
     assert_api_pass(params.merge(has_votes: "yes"))
-    assert_api_results(Image.where("vote_cache IS NOT NULL"))
+    assert_api_results(Image.where(Image[:vote_cache].not_eq(nil)))
     assert_api_pass(params.merge(has_votes: "no"))
-    assert_api_results(Image.where("vote_cache IS NULL"))
+    assert_api_results(Image.where(Image[:vote_cache].eq(nil)))
 
     assert_api_pass(params.merge(quality: "2-3"))
-    assert_api_results(Image.where("vote_cache > 2.0"))
+    assert_api_results(Image.where(Image[:vote_cache] > 2.0))
     assert_api_pass(params.merge(quality: "1-2"))
     assert_api_results([])
 
-    imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
+    imgs = Observation.where(Observation[:vote_cache] >= 2.0).
+           map(&:images).flatten
     assert_not_empty(imgs)
     assert_api_pass(params.merge(confidence: "2-3"))
     assert_api_results(imgs)
@@ -1358,8 +1379,10 @@ class Api2Test < UnitTestCase
       method: :post,
       action: :image,
       api_key: @api_key.key,
-      upload_file: "#{::Rails.root}/test/images/sticky.jpg"
+      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      original_name: "strip_this"
     }
+    assert_equal("toss", @user.keep_filenames)
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
         api = API2.execute(params)
@@ -1372,6 +1395,8 @@ class Api2Test < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
+    rolf.update(keep_filenames: "keep_and_show")
+    rolf.reload
     @user   = rolf
     @proj   = projects(:eol_project)
     @date   = date("20120626")
@@ -1404,8 +1429,8 @@ class Api2Test < UnitTestCase
       end
     end
     assert_last_image_correct
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:upload_file))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:upload_file))
     assert_api_fail(params.merge(original_name: "x" * 1000))
     assert_api_fail(params.merge(vote: "-5"))
 
@@ -1417,7 +1442,7 @@ class Api2Test < UnitTestCase
 
   def test_posting_image_via_url
     setup_image_dirs
-    url = "http://mushroomobserver.org/images/thumb/459340.jpg"
+    url = "https://mushroomobserver.org/images/thumb/459340.jpg"
     stub_request(:any, url).
       to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
     params = {
@@ -1438,6 +1463,8 @@ class Api2Test < UnitTestCase
   end
 
   def test_patching_images
+    rolf.update(keep_filenames: "keep_and_show")
+    rolf.reload
     rolfs_img = images(:rolf_profile_image)
     marys_img = images(:in_situ_image)
     eol = projects(:eol_project)
@@ -1501,12 +1528,12 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: loc.id))
     assert_api_results([loc])
 
-    locs = Location.where("year(created_at) = 2008")
+    locs = Location.where(Location[:created_at].year == 2008)
     assert_not_empty(locs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
 
-    locs = Location.where("date(created_at) = '2012-01-01'")
+    locs = Location.updated_on("2012-01-01")
     assert_not_empty(locs)
     assert_api_pass(params.merge(updated_at: "2012-01-01"))
     assert_api_results(locs)
@@ -1516,8 +1543,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.where("south >= 39 and north <= 40 and
-                           west >= -124 and east <= -123 and west <= east")
+    locs = Location.in_box(n: 40, s: 39, e: -123, w: -124)
+
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
     assert_api_fail(params.merge(north: 40, east: -123, west: -124))
@@ -1562,14 +1589,14 @@ class Api2Test < UnitTestCase
     assert_api_fail(params.merge(name: name4))
     assert_api_fail(params.merge(name: name5))
     params[:name] = @name = name2
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:name))
-    assert_api_fail(params.remove(:north))
-    assert_api_fail(params.remove(:south))
-    assert_api_fail(params.remove(:east))
-    assert_api_fail(params.remove(:west))
-    assert_api_fail(params.remove(:north, :south, :east, :west))
-    assert_api_pass(params.remove(:high, :low, :notes))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:name))
+    assert_api_fail(params.except(:north))
+    assert_api_fail(params.except(:south))
+    assert_api_fail(params.except(:east))
+    assert_api_fail(params.except(:west))
+    assert_api_fail(params.except(:north, :south, :east, :west))
+    assert_api_pass(params.except(:high, :low, :notes))
     @high = @low = @notes = nil
     assert_last_location_correct
   end
@@ -1653,7 +1680,7 @@ class Api2Test < UnitTestCase
     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
     # is, make sure api key is required, and that name is valid and not already
     # taken.
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(set_name: ""))
     assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
     assert_api_fail(params.merge(set_name: burbank.display_name))
@@ -1691,30 +1718,26 @@ class Api2Test < UnitTestCase
   def test_getting_names
     params = { method: :get, action: :name }
 
-    name = Name.where(correct_spelling: nil).sample
+    name = Name.with_correct_spelling.sample
     assert_api_pass(params.merge(id: name.id))
     assert_api_results([name])
 
-    names = Name.where("year(created_at) = 2008").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.where(Name[:created_at].year == 2008)
     assert_not_empty(names)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
 
-    names = Name.where("date(updated_at) = '2008-09-05'").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.updated_on("2008-09-05")
     assert_not_empty(names)
     assert_api_pass(params.merge(updated_at: "2008-09-05"))
     assert_api_results(names)
 
-    names = Name.where(user: mary).
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.where(user: mary)
     assert_not_empty(names)
     assert_api_pass(params.merge(user: "mary"))
     assert_api_results(names)
 
-    names = Name.where(text_name: "Lentinellus ursinus").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.where(text_name: "Lentinellus ursinus")
     assert_not_empty(names)
     assert_api_fail(params.merge(name: "Lentinellus ursinus"))
     assert_api_pass(params.merge(name: "Lentinellus ursinus Kühner,
@@ -1731,23 +1754,23 @@ class Api2Test < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.where("classification like '%Fungi%'").map do |n|
+    names = Name.with_correct_spelling.classification_includes("Fungi").
+            map do |n|
       genus = n.text_name.split.first
-      Name.where("text_name like '#{genus} %'") + [n]
-    end.flatten.uniq.sort_by(&:id).reject(&:correct_spelling_id)
+      Name.where(Name[:text_name].matches("#{genus} %")) + [n]
+    end.flatten.uniq.sort_by(&:id)
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
     assert_api_results(names)
     assert_api_pass(params.merge(name: "Fungi", include_subtaxa: "yes"))
     assert_api_results(names << names(:fungi))
 
-    names = Name.where(deprecated: true).
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.deprecated
     assert_not_empty(names)
     assert_api_pass(params.merge(is_deprecated: "true"))
     assert_api_results(names)
 
-    names = Name.where("date(updated_at) = '2009-10-12'")
+    names = Name.updated_on("2009-10-12")
     goods = names.reject(&:correct_spelling_id)
     bads  = names.select(&:correct_spelling_id)
     assert_not_empty(names)
@@ -1762,9 +1785,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(updated_at: "20091012"))
     assert_api_results(goods)
 
-    without = Name.where(synonym_id: nil)
-    with    = Name.where.not(synonym_id: nil).
-              reject(&:correct_spelling_id)
+    without = Name.without_synonyms
+    with    = Name.with_correct_spelling.with_synonyms
     assert_not_empty(without)
     assert_not_empty(with)
     assert_api_pass(params.merge(has_synonyms: "no"))
@@ -1788,15 +1810,13 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.id))
     assert_api_results(names)
 
-    names = Name.with_rank(:Variety).reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.with_rank("Variety")
     assert_not_empty(names)
     assert_api_pass(params.merge(rank: "variety"))
     assert_api_results(names)
 
-    with    = Name.where.not("author is null or author = ''").
-              reject(&:correct_spelling_id)
-    without = Name.where("author is null or author = ''").
-              reject(&:correct_spelling_id)
+    with    = Name.with_correct_spelling.with_author
+    without = Name.with_correct_spelling.without_author
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_author: "yes"))
@@ -1804,10 +1824,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_author: "no"))
     assert_api_results(without)
 
-    with    = Name.where.not("citation is null or citation = ''").
-              reject(&:correct_spelling_id)
-    without = Name.where("citation is null or citation = ''").
-              reject(&:correct_spelling_id)
+    with    = Name.with_correct_spelling.with_citation
+    without = Name.with_correct_spelling.without_citation
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_citation: "yes"))
@@ -1815,10 +1833,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_citation: "no"))
     assert_api_results(without)
 
-    with    = Name.where.not("classification is null or classification = ''").
-              reject(&:correct_spelling_id)
-    without = Name.where("classification is null or classification = ''").
-              reject(&:correct_spelling_id)
+    with    = Name.with_correct_spelling.with_classification
+    without = Name.with_correct_spelling.without_classification
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_classification: "yes"))
@@ -1826,10 +1842,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_classification: "no"))
     assert_api_results(without)
 
-    with    = Name.where.not("notes is null or notes = ''").
-              reject(&:correct_spelling_id)
-    without = Name.where("notes is null or notes = ''").
-              reject(&:correct_spelling_id)
+    with    = Name.with_correct_spelling.with_notes
+    without = Name.with_correct_spelling.without_notes
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -1843,10 +1857,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(names)
 
-    with    = Name.where.not(description_id: nil).
-              reject(&:correct_spelling_id)
-    without = Name.where(description_id: nil).
-              reject(&:correct_spelling_id)
+    with    = Name.with_correct_spelling.with_description
+    without = Name.with_correct_spelling.without_description
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_description: "yes"))
@@ -1854,47 +1866,40 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_description: "no"))
     assert_api_results(without)
 
-    names = Name.where("text_name like '%bunny%'").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.text_name_includes("bunny")
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
-    names = Name.where("author like '%peck%'").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.author_includes("peck")
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
-    names = Name.where("citation like '%lichenes%'").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.citation_includes("lichenes")
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
-    names = Name.where("classification like '%lecanorales%'").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.classification_includes("lecanorales")
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
 
-    names = Name.where("notes like '%known%'").
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.notes_include("known")
     assert_not_empty(names)
     assert_api_pass(params.merge(notes_has: "known"))
     assert_api_results(names)
 
-    names = Comment.where("target_type = 'Name' and comment like '%mess%'").
-            map(&:target).uniq.sort_by(&:id).
-            reject(&:correct_spelling_id)
+    names = Comment.where(
+      Comment[:target_type].eq("name").and(Comment[:comment].matches("%mess%"))
+    ).map(&:target).uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(comments_has: "mess"))
     assert_api_results(names)
 
-    Name.where(correct_spelling: nil).sample.
-      update!(ok_for_export: true)
-    names = Name.where(ok_for_export: true).
-            reject(&:correct_spelling_id)
+    Name.with_correct_spelling.sample.update!(ok_for_export: true)
+    names = Name.with_correct_spelling.ok_for_export
     assert_not_empty(names)
     assert_api_pass(params.merge(ok_for_export: "yes"))
     assert_api_results(names)
@@ -1903,7 +1908,7 @@ class Api2Test < UnitTestCase
   def test_creating_names
     @name           = "Parmeliaceae"
     @author         = ""
-    @rank           = :Family
+    @rank           = "Family"
     @deprecated     = true
     @citation       = ""
     @classification = ""
@@ -1917,9 +1922,9 @@ class Api2Test < UnitTestCase
       rank: @rank,
       deprecated: @deprecated
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:name))
-    assert_api_fail(params.remove(:rank))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:name))
+    assert_api_fail(params.except(:rank))
     assert_api_fail(params.merge(name: "Agaricus"))
     assert_api_fail(params.merge(rank: "Species"))
     assert_api_fail(params.merge(classification: "spam spam spam"))
@@ -1928,7 +1933,7 @@ class Api2Test < UnitTestCase
 
     @name           = "Anzia ornata"
     @author         = "(Zahlbr.) Asahina"
-    @rank           = :Species
+    @rank           = "Species"
     @deprecated     = false
     @citation       = "Jap. Bot. 13: 219-226"
     @classification = "Kingdom: _Fungi_\r\nFamily: _Parmeliaceae_"
@@ -2016,14 +2021,14 @@ class Api2Test < UnitTestCase
 
     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
     # is, make sure api key is required, and that classification is valid.
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(set_classification: "spam spam spam"))
     assert_api_pass(params)
 
     agaricus.reload
     assert_equal("new notes", agaricus.notes)
     assert_equal("new citation", agaricus.citation)
-    assert_equal(Name.validate_classification(:Genus, new_classification),
+    assert_equal(Name.validate_classification("Genus", new_classification),
                  agaricus.classification)
   end
 
@@ -2041,7 +2046,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(set_author: "L."))
     assert_equal("Suciraga L.", agaricus.reload.search_name)
     assert_api_pass(params.merge(set_rank: "order"))
-    assert_equal(:Order, agaricus.reload.rank)
+    assert_equal("Order", agaricus.reload.rank)
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(set_name: "Agaricus bitorquis",
@@ -2049,7 +2054,7 @@ class Api2Test < UnitTestCase
                                  set_rank: "species"))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
-    assert_equal(:Species, agaricus.rank)
+    assert_equal("Species", agaricus.rank)
     parent = Name.where(text_name: "Agaricus").to_a
     assert_not_empty(parent)
     assert_not_equal(agaricus.id, parent[0].id)
@@ -2134,17 +2139,17 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: obs.id))
     assert_api_results([obs])
 
-    obses = Observation.where("year(created_at) = 2010")
+    obses = Observation.where(Observation[:created_at].year == 2010)
     assert_not_empty(obses)
     assert_api_pass(params.merge(created_at: "2010"))
     assert_api_results(obses)
 
-    obses = Observation.where("date(updated_at) = '2007-06-24'")
+    obses = Observation.updated_on("2007-06-24")
     assert_not_empty(obses)
     assert_api_pass(params.merge(updated_at: "20070624"))
     assert_api_results(obses)
 
-    obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
+    obses = Observation.where(Observation[:when].year.between(2012..2014))
     assert_not_empty(obses)
     assert_api_pass(params.merge(date: "2012-2014"))
     assert_api_results(obses)
@@ -2178,7 +2183,7 @@ class Api2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    ssp_obs = Observation.of_name_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -2221,13 +2226,13 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses)
 
-    obses = Observation.where(is_collection_location: false)
+    obses = Observation.not_collection_location
     assert(obses.length > 1)
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses)
 
-    with    = Observation.where.not(thumb_image_id: nil)
-    without = Observation.where(thumb_image_id: nil)
+    with    = Observation.with_image
+    without = Observation.without_image
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
@@ -2235,8 +2240,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without)
 
-    with    = Observation.where.not(location: nil)
-    without = Observation.where(location: nil)
+    with    = Observation.with_location
+    without = Observation.without_location
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_location: "yes"))
@@ -2246,7 +2251,7 @@ class Api2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
+    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -2262,8 +2267,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(obses)
 
-    with    = Observation.where(specimen: true)
-    without = Observation.where(specimen: false)
+    with    = Observation.with_specimen
+    without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_specimen: "yes"))
@@ -2271,9 +2276,13 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without)
 
-    no_notes = Observation.no_notes_persisted
-    with = Observation.where("notes != ?", no_notes)
-    without = Observation.where("notes = ?", no_notes)
+    # no_notes = Observation.no_notes_persisted
+    # with = Observation.where("notes != ?", no_notes)
+    # without = Observation.where("notes = ?", no_notes)
+    # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
+    # Observation.no_notes, not the above, works for comparison in Arel here.
+    with = Observation.with_notes
+    without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -2281,27 +2290,27 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(without)
 
-    obses = Observation.where("notes like '%:substrate:%'").
+    obses = Observation.notes_include(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.where("notes like '%orphan%'")
+    obses = Observation.notes_include("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(notes_has: "orphan"))
     assert_api_results(obses)
 
-    obses = Comment.where("concat(summary, comment) like \"%let's%\"").
-            map(&:target).uniq.sort_by(&:id)
+    obses = Comment.where(
+      Comment[:summary].concat(Comment[:comment]).matches("%let's%")
+    ).map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
     assert_api_pass(params.merge(comments_has: "let's"))
     assert_api_results(obses)
 
-    obses = Observation.where("`lat` >= 34 and `lat` <= 35 and
-                               `long` >= -119 and `long` <= -118")
-    locs  = Location.where("south >= 34 and north <= 35 and west >= -119 and
-                            east <= -118 and west <= east")
+    obses = Observation.where(lat: [34..35], long: [-119..-118])
+    locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
+
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
     assert_api_fail(params.merge(south: 34, east: -118, west: -119))
@@ -2311,8 +2320,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
     assert_api_results(obses)
 
-    obses = Observation.where("`where` like '%, California, USA' OR " \
-                              "`where` = 'California, USA'")
+    obses = Observation.in_region("California, USA")
     assert_not_empty(obses)
     assert_api_pass(params.merge(region: "California, USA"))
     assert_api_results(obses)
@@ -2344,7 +2352,7 @@ class Api2Test < UnitTestCase
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
-    assert_api_fail(params.remove(:location))
+    assert_api_fail(params.except(:location))
   end
 
   def test_post_maximal_observation
@@ -2405,12 +2413,12 @@ class Api2Test < UnitTestCase
     assert_last_observation_correct
     assert_last_naming_correct
     assert_last_vote_correct
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(api_key: "this should fail"))
     assert_api_fail(params.merge(date: "yesterday"))
     assert_api_pass(params.merge(location: "This is a bogus location")) # ???
     assert_api_pass(params.merge(location: "New Place, Oregon, USA")) # ???
-    assert_api_fail(params.remove(:latitude)) # need to supply both or neither
+    assert_api_fail(params.except(:latitude)) # need to supply both or neither
     assert_api_fail(params.merge(longitude: "bogus"))
     assert_api_fail(params.merge(altitude: "bogus"))
     assert_api_fail(params.merge(has_specimen: "bogus"))
@@ -2450,7 +2458,7 @@ class Api2Test < UnitTestCase
       action: :observation,
       api_key: @api_key.key
     }
-    assert_equal(:postal, rolf.location_format)
+    assert_equal("postal", rolf.location_format)
 
     params[:location] = "New Place, California, USA"
     api = API2.execute(params)
@@ -2470,8 +2478,8 @@ class Api2Test < UnitTestCase
     # is supposed to make it more consistent for apps.  It would be a real
     # problem because apps don't have access to the user's prefs, so they have
     # no way of knowing how to pass in locations on the behalf of the user.
-    User.update(rolf.id, location_format: :scientific)
-    assert_equal(:scientific, rolf.reload.location_format)
+    User.update(rolf.id, location_format: "scientific")
+    assert_equal("scientific", rolf.reload.location_format)
 
     # params[:location] = "USA, California, Somewhere Else"
     params[:location] = "Somewhere Else, California, USA"
@@ -2537,7 +2545,7 @@ class Api2Test < UnitTestCase
       set_has_specimen: "no",
       set_is_collection_location: "no"
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_obs.id))
     assert_api_fail(params.merge(set_date: ""))
     assert_api_fail(params.merge(set_location: ""))
@@ -2558,8 +2566,8 @@ class Api2Test < UnitTestCase
       set_longitude: "-56.78",
       set_altitude: "901"
     }
-    assert_api_fail(params.remove(:set_latitude))
-    assert_api_fail(params.remove(:set_longitude))
+    assert_api_fail(params.except(:set_latitude))
+    assert_api_fail(params.except(:set_longitude))
     assert_api_pass(params)
     rolfs_obs.reload
     assert_in_delta(12.34, rolfs_obs.lat, 0.0001)
@@ -2670,13 +2678,14 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: proj.id))
     assert_api_results([proj])
 
-    projs = Project.where("year(created_at) = 2008")
+    projs = Project.where(Project[:created_at].year == 2008)
     assert_not_empty(projs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(projs)
 
-    projs = Project.where("year(updated_at) = 2008 and
-                           month(updated_at) = 9")
+    projs = Project.where(
+      (Project[:updated_at].year == 2008).and(Project[:updated_at].month == 9)
+    )
     assert_not_empty(projs)
     assert_api_pass(params.merge(updated_at: "2008-09"))
     assert_api_results(projs)
@@ -2707,8 +2716,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(projs)
 
-    with    = Project.where("summary is not null and summary != ''")
-    without = Project.where("summary is null or summary = ''")
+    with    = Project.where(Project[:summary].not_blank)
+    without = Project.where(Project[:summary].blank)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_summary: "yes"))
@@ -2716,12 +2725,12 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_summary: "no"))
     assert_api_results(without)
 
-    projs = Project.where("title like '%bolete%'")
+    projs = Project.where(Project[:title].matches("%bolete%"))
     assert_not_empty(projs)
     assert_api_pass(params.merge(title_has: "bolete"))
     assert_api_results(projs)
 
-    projs = Project.where("summary like '%article%'")
+    projs = Project.where(Project[:summary].matches("%article%"))
     assert_not_empty(projs)
     assert_api_pass(params.merge(summary_has: "article"))
     assert_api_results(projs)
@@ -2742,8 +2751,8 @@ class Api2Test < UnitTestCase
       api_key: @api_key.key,
       title: @title
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:title))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:title))
     assert_api_pass(params)
     assert_last_project_correct
 
@@ -2779,7 +2788,7 @@ class Api2Test < UnitTestCase
     }
 
     assert_api_fail(params)
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     @api_key.update!(user: katrina)
     assert_api_fail(params.merge(set_title: "new title"))
     @api_key.update!(user: rolf)
@@ -2859,13 +2868,14 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: seq.id))
     assert_api_results([seq])
 
-    seqs = Sequence.where("date(created_at) = '2017-01-01'")
+    seqs = Sequence.created_on("2017-01-01")
     assert_not_empty(seqs)
     assert_api_pass(params.merge(created_at: "2017-01-01"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("year(updated_at) = 2017 and
-                           month(updated_at) = 2")
+    seqs = Sequence.where(
+      Sequence[:updated_at].year.eq(2017).and(Sequence[:updated_at].month.eq(2))
+    )
     assert_not_empty(seqs)
     assert_api_pass(params.merge(updated_at: "2017-02"))
     assert_api_results(seqs)
@@ -2893,17 +2903,17 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(accession: "KT968605"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("locus like '%its%'")
+    seqs = Sequence.where(Sequence[:locus].matches("%its%"))
     assert_not_empty(seqs)
     assert_api_pass(params.merge(locus_has: "ITS"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("accession like '%kt%'")
+    seqs = Sequence.where(Sequence[:accession].matches("%kt%"))
     assert_not_empty(seqs)
     assert_api_pass(params.merge(accession_has: "KT"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("notes like '%formatted%'")
+    seqs = Sequence.where(Sequence[:notes].matches("%formatted%"))
     assert_not_empty(seqs)
     assert_api_pass(params.merge(notes_has: "formatted"))
     assert_api_results(seqs)
@@ -2916,7 +2926,9 @@ class Api2Test < UnitTestCase
                        archive: "GenBank", accession: "MO#{obs2.id}")
     end
 
-    obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
+    obses = Observation.where(
+      (Observation[:when].year >= 2012).and(Observation[:when].year <= 2014)
+    )
     assert_not_empty(obses)
     assert_api_pass(params.merge(obs_date: "2012-2014"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -2926,7 +2938,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(observer: "dick"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where(name: names(:fungi))
+    obses = Observation.without_name
     assert_not_empty(obses)
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -2950,7 +2962,7 @@ class Api2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    ssp_obs = Observation.of_name_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -2963,7 +2975,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(ssp_sequences << agaricus_sequence)
 
-    obses = Observation.where(location: locations(:burbank))
+    obses = Observation.at_location(locations(:burbank))
     assert(obses.length > 1)
     assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -2997,10 +3009,9 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where("`lat` >= 34 and `lat` <= 35 and
-                               `long` >= -119 and `long` <= -118")
-    locs  = Location.where("south >= 34 and north <= 35 and west >= -119 and
-                            east <= -118 and west <= east")
+    obses = Observation.where(lat: [34..35], long: [-119..-118])
+    locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
+
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
     assert_api_fail(params.merge(south: 34, east: -118, west: -119))
@@ -3010,13 +3021,13 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where(is_collection_location: false)
+    obses = Observation.not_collection_location
     assert(obses.length > 1)
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    with    = Observation.where.not(thumb_image_id: nil)
-    without = Observation.where(thumb_image_id: nil)
+    with    = Observation.with_image
+    without = Observation.without_image
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
@@ -3024,9 +3035,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    genus = Name.ranks[:Genus]
-    group = Name.ranks[:Group]
-    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
+    names = Name.with_rank_at_or_below_genus
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -3036,8 +3045,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_name: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    with    = Observation.where(specimen: true)
-    without = Observation.where(specimen: false)
+    with    = Observation.with_specimen
+    without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_specimen: "yes"))
@@ -3045,9 +3054,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    no_notes = Observation.no_notes_persisted
-    with = Observation.where("notes != ?", no_notes)
-    without = Observation.where("notes = ?", no_notes)
+    with = Observation.with_notes
+    without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_obs_notes: "yes"))
@@ -3055,13 +3063,13 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_obs_notes: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where("notes like '%:substrate:%'").
+    obses = Observation.notes_include(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where("notes like '%orphan%'")
+    obses = Observation.notes_include("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -3088,12 +3096,12 @@ class Api2Test < UnitTestCase
       accession: @accession,
       notes: @notes
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:observation))
-    assert_api_fail(params.remove(:locus))
-    assert_api_fail(params.remove(:observation))
-    assert_api_fail(params.remove(:archive))
-    assert_api_fail(params.remove(:accession))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:observation))
+    assert_api_fail(params.except(:locus))
+    assert_api_fail(params.except(:observation))
+    assert_api_fail(params.except(:archive))
+    assert_api_fail(params.except(:accession))
     assert_api_pass(params.merge(observation: marys_obs.id))
     assert_api_fail(params.merge(archive: "bogus"))
     assert_api_fail(params.merge(bases: "funky stuff!"))
@@ -3198,12 +3206,12 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: spl.id))
     assert_api_results([spl])
 
-    spls = SpeciesList.where("date(created_at) = '2012-07-06'")
+    spls = SpeciesList.created_on("2012-07-06")
     assert_not_empty(spls)
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where("year(updated_at) = 2008")
+    spls = SpeciesList.where(SpeciesList[:updated_at].year == 2008)
     assert_not_empty(spls)
     assert_api_pass(params.merge(updated_at: "2008"))
     assert_api_results(spls)
@@ -3213,8 +3221,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where("`when` >= '2006-03-01' and
-                              `when` <= '2006-03-02'")
+    spls = SpeciesList.where(SpeciesList[:when] >= "2006-03-01").
+           where(SpeciesList[:when] <= "2006-03-02")
     assert_not_empty(spls)
     assert_api_pass(params.merge(date: "2006-03-01-2006-03-02"))
     assert_api_results(spls)
@@ -3248,7 +3256,7 @@ class Api2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    obses = Observation.of_name_like("Agaricus")
     ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
     assert_not_empty(ssp_lists)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
@@ -3275,8 +3283,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(project: "#{proj1.id}, #{proj2.id}"))
     assert_api_results(spls)
 
-    with    = SpeciesList.where("COALESCE(notes,'') != ''")
-    without = SpeciesList.where("COALESCE(notes,'') = ''")
+    with    = SpeciesList.where(SpeciesList[:notes].not_blank)
+    without = SpeciesList.where(SpeciesList[:notes].blank)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -3290,12 +3298,12 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results([spl])
 
-    spls = SpeciesList.where("title like '%mysteries%'")
+    spls = SpeciesList.where(SpeciesList[:title].matches("%mysteries%"))
     assert_not_empty(spls)
     assert_api_pass(params.merge(title_has: "mysteries"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where("notes like '%skunk%'")
+    spls = SpeciesList.where(SpeciesList[:notes].matches("%skunk%"))
     assert_not_empty(spls)
     assert_api_pass(params.merge(notes_has: "skunk"))
     assert_api_results(spls)
@@ -3320,8 +3328,8 @@ class Api2Test < UnitTestCase
       location: @location.id,
       notes: @notes
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:title))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:title))
     assert_api_fail(params.merge(title: SpeciesList.first.title))
     assert_api_fail(params.merge(location: "bogus location"))
     assert_api_pass(params)
@@ -3377,7 +3385,7 @@ class Api2Test < UnitTestCase
       set_location: @location.display_name,
       set_notes: @notes
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_spl.id))
     assert_api_fail(params.merge(set_title: SpeciesList.first.title))
     assert_api_fail(params.merge(set_location: "bogus location"))
@@ -3437,9 +3445,9 @@ class Api2Test < UnitTestCase
     assert_last_user_correct
     assert_api_fail(params)
     params[:login] = "miles"
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:login))
-    assert_api_fail(params.remove(:email))
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:login))
+    assert_api_fail(params.except(:email))
     assert_api_fail(params.merge(login: "x" * 1000))
     assert_api_fail(params.merge(email: "x" * 1000))
     assert_api_fail(params.merge(email: "bogus address @ somewhere dot com"))
@@ -3497,7 +3505,7 @@ class Api2Test < UnitTestCase
       set_location: locations(:burbank).id,
       set_image: images(:peltigera_image).id
     }
-    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(set_image: mary.images.first.id))
     assert_api_fail(params.merge(set_locale: ""))
     assert_api_fail(params.merge(set_license: ""))
@@ -4009,7 +4017,7 @@ class Api2Test < UnitTestCase
       api_key: @api_key.key,
       location: "Anywhere"
     }
-    ApiKey.update(@api_key.id, verified: nil)
+    APIKey.update(@api_key.id, verified: nil)
     assert_api_fail(params)
     @api_key.verify!
     assert_api_pass(params)
@@ -4165,7 +4173,7 @@ class Api2Test < UnitTestCase
     }
     params[:api_key] = @api_key.key if method != :get
     api = API2.execute(params)
-    others = api.errors.reject { |e| e.class.name == "API2::HelpMessage" }
+    others = api.errors.reject { |e| e.instance_of?(API2::HelpMessage) }
     assert_equal(1, api.errors.length, others.map(&:to_s))
     if fail
       assert_equal("API2::NoMethodForAction", api.errors.first.class.name)

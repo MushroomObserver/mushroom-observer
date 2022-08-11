@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
-  class << self
+module Name::PropagateGenericClassifications
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
+  module ClassMethods
     # This is used only by script/refresh_caches.  I have placed it here in
     # order to make it easily accessible to unit testing.  As a separate file,
     # it should never be loaded by the web server, so it's safe from causing
@@ -37,33 +42,33 @@ class Name < AbstractModel
     end
 
     def build_accepted_names_lookup_table
-      Name.where(rank: 0..Name.ranks[:Genus], deprecated: false).
-        where.not(synonym_id: nil).
+      Name.not_deprecated.where.not(synonym_id: nil).
+        where(rank: 0..Name.ranks[:Genus]).
         pluck(:synonym_id, :text_name).
         to_h
     end
 
     def accepted_generic_classification_strings
-      Name.where(rank: Name.ranks[:Genus], deprecated: false).
-        where("author NOT LIKE 'sensu lato%'").
-        where("LENGTH(classification) > 2").
-        pluck(:text_name, :classification).
-        each_with_object({}) do |vals, classifications|
-          text_name, classification = vals
-          if classifications[text_name].present?
-            warn("Multiple accepted non-sensu lato genera for #{text_name}!")
-          else
-            classifications[text_name] = classification
-          end
+      geni = Name.not_deprecated.with_rank("Genus").
+             where(Name[:author].does_not_match("sensu lato%")).
+             where(Name[:classification].length > 2).
+             pluck(:text_name, :classification)
+      geni.each_with_object({}) do |vals, classifications|
+        text_name, classification = vals
+        if classifications[text_name].present?
+          warn("Multiple accepted non-sensu lato genera for #{text_name}!")
+        else
+          classifications[text_name] = classification
         end
+      end
     end
 
+    public
+
     def hash_of_names_with_observations
-      Hash[
-        Observation.distinct.pluck(:text_name).collect do |text_name|
-          [text_name, true]
-        end
-      ]
+      Observation.distinct.pluck(:text_name).to_h do |text_name|
+        [text_name, true]
+      end
     end
 
     def execute_propagation_fixes(fixes, dry_run)
@@ -80,15 +85,12 @@ class Name < AbstractModel
     end
 
     def execute_bundled_propagation_fixes(bundles, dry_run)
-      # Deliberately skip validations
-      # rubocop:disable Rails/SkipsModelValidations
       bundles.each_with_object([]) do |bundle, msgs|
         classification, ids = bundle
         msgs << "Setting classifications for #{ids.join(",")}"
         Name.where(id: ids).update_all(classification: classification) \
           unless dry_run
       end
-      # rubocop:enable Rails/SkipsModelValidations
     end
 
     def describe_propagation_fix(name, old_class, new_class)

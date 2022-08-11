@@ -6,30 +6,31 @@ require("geocoder")
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_action :login_required, except: [
-    :advanced_search,
-    :help,
-    :index_location,
-    :index_location_description,
-    :list_by_country,
-    :list_countries,
-    :list_location_descriptions,
-    :list_locations,
-    :location_descriptions_by_author,
-    :location_descriptions_by_editor,
-    :location_search,
-    :locations_by_editor,
-    :locations_by_user,
-    :map_locations,
-    :next_location,
-    :prev_location,
-    :next_location_description,
-    :prev_location_description,
-    :show_location,
-    :show_location_description,
-    :show_past_location,
-    :show_past_location_description
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :help,
+  #   :index_location,
+  #   :index_location_description,
+  #   :list_by_country,
+  #   :list_countries,
+  #   :list_location_descriptions,
+  #   :list_locations,
+  #   :location_descriptions_by_author,
+  #   :location_descriptions_by_editor,
+  #   :location_search,
+  #   :locations_by_editor,
+  #   :locations_by_user,
+  #   :map_locations,
+  #   :next_location,
+  #   :prev_location,
+  #   :next_location_description,
+  #   :prev_location_description,
+  #   :show_location,
+  #   :show_location_description,
+  #   :show_past_location,
+  #   :show_past_location_description
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_location,
@@ -118,7 +119,7 @@ class LocationController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observer, action: :advanced_search_form)
+    redirect_to(controller: :search, action: :advanced)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -359,7 +360,7 @@ class LocationController < ApplicationController
     @location = find_or_goto_index(Location, loc_id)
     return unless @location
 
-    @canonical_url = "#{MO.http_domain}/location/show_location/"\
+    @canonical_url = "#{MO.http_domain}/location/show_location/" \
                      "#{@location.id}"
 
     # Load default description if user didn't request one explicitly.
@@ -389,7 +390,7 @@ class LocationController < ApplicationController
     @description = find_or_goto_index(LocationDescription, params[:id].to_s)
     return unless @description
 
-    @canonical_url = "#{MO.http_domain}/location/show_location_description/"\
+    @canonical_url = "#{MO.http_domain}/location/show_location_description/" \
                      "#{@description.id}"
     # Public or user has permission.
     if in_admin_mode? || @description.is_reader?(@user)
@@ -402,7 +403,7 @@ class LocationController < ApplicationController
       end
 
     # User doesn't have permission to see this description.
-    elsif @description.source_type == :project
+    elsif @description.source_type == "project"
       flash_error(:runtime_show_draft_denied.t)
       if (project = @description.project)
         redirect_to(controller: :project, action: :show_project,
@@ -440,22 +441,7 @@ class LocationController < ApplicationController
     return unless @description
 
     @location = @description.location
-    if params[:merge_source_id].blank?
-      @description.revert_to(params[:version].to_i)
-    else
-      @merge_source_id = params[:merge_source_id]
-      version = LocationDescription::Version.find(@merge_source_id)
-      @old_parent_id = version.location_description_id
-      subversion = params[:version]
-      if subversion.present? &&
-         (version.version != subversion.to_i)
-        version = LocationDescription::Version.
-                  find_by_version_and_location_description_id(
-                    params[:version], @old_parent_id
-                  )
-      end
-      @description.clone_versioned_model(version, @description)
-    end
+    @description.revert_to(params[:version].to_i)
   end
 
   # Go to next location: redirects to show_location.
@@ -511,30 +497,7 @@ class LocationController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
 
     # Render a blank form.
-    if request.method != "POST"
-      user_name = Location.user_name(@user, @display_name)
-      if @display_name
-        @dubious_where_reasons = Location.
-                                 dubious_name?(user_name, true)
-      end
-      @location = Location.new
-      geocoder = Geocoder.new(user_name)
-      if geocoder.valid
-        @location.display_name = @display_name
-        @location.north = geocoder.north
-        @location.south = geocoder.south
-        @location.east = geocoder.east
-        @location.west = geocoder.west
-      else
-        @location.display_name = ""
-        @location.north = 80
-        @location.south = -80
-        @location.east = 89
-        @location.west = -89
-      end
-
-    # Submit form.
-    else
+    if request.method == "POST"
       # Set to true below if created successfully, or if a matching location
       # already exists.  In either case, we're done with this form.
       done = false
@@ -581,13 +544,9 @@ class LocationController < ApplicationController
           SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          if unshown_notifications?(@user, :naming)
-            redirect_to(controller: :observer, action: :show_notifications)
-          else
-            redirect_to(controller: :observer,
-                        action: :show_observation,
-                        id: @set_observation)
-          end
+          redirect_to(controller: :observations,
+                      action: :show,
+                      id: @set_observation)
         elsif @set_species_list
           redirect_to(controller: :species_list, action: :show_species_list,
                       id: @set_species_list)
@@ -601,9 +560,7 @@ class LocationController < ApplicationController
           if (user = User.safe_find(@set_user))
             user.location = @location
             user.save
-            redirect_to(controller: :observer,
-                        action: :show_user,
-                        id: @set_user)
+            redirect_to(user_path(@set_user.id))
           end
         else
           redirect_to(controller: :location,
@@ -611,6 +568,29 @@ class LocationController < ApplicationController
                       id: @location.id)
         end
       end
+    else
+      user_name = Location.user_name(@user, @display_name)
+      if @display_name
+        @dubious_where_reasons = Location.
+                                 dubious_name?(user_name, true)
+      end
+      @location = Location.new
+      geocoder = Geocoder.new(user_name)
+      if geocoder.valid
+        @location.display_name = @display_name
+        @location.north = geocoder.north
+        @location.south = geocoder.south
+        @location.east = geocoder.east
+        @location.west = geocoder.west
+      else
+        @location.display_name = ""
+        @location.north = 80
+        @location.south = -80
+        @location.east = 89
+        @location.west = -89
+      end
+
+      # Submit form.
     end
   end
 
@@ -662,8 +642,8 @@ class LocationController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(controller: :observer,
-                          action: :email_merge_request,
+      redirect_with_query(controller: :emails,
+                          action: :merge_request,
                           type: :Location,
                           old_id: @location.id,
                           new_id: merge.id)
@@ -803,9 +783,6 @@ class LocationController < ApplicationController
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
            (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
-          v = @description.versions.latest
-          v.merge_source_id = old_desc.versions.latest.id
-          v.save
           if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
@@ -872,7 +849,7 @@ class LocationController < ApplicationController
     @matches, @others = (
       split_out_matches(all, @where) ||
       split_out_matches(all, @where.split(",").first) ||
-      split_out_matches(all, @where.split(" ").first) ||
+      split_out_matches(all, @where.split.first) ||
       [nil, all]
     )
   end

@@ -7,7 +7,7 @@
   fields += "*#{:Name.l}:* #{@naming.format_name}\n"
   fields += "*#{:Time.l}:* #{@naming.created_at.email_time}\n"
   fields += "*#{:By.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
-  for reason in @naming.get_reasons
+  @naming.reasons_array.each do |reason|
     if reason.used?
       if reason.notes.blank?
         fields += "*#{reason.label.l}*\n"
@@ -41,9 +41,9 @@ if @user.email_html %>
 <%= fields.tp %>
 <%= handy_links.tp %>
 <ul type=none>
-  <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
-  <% end %>
+<% links.each do |label, url| %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
 </ul>
 <br/>
 </body>
@@ -55,7 +55,7 @@ if @user.email_html %>
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = "".html_safe
-  for label, url in links
+  links.each do |label, url|
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>

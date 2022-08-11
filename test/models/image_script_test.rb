@@ -3,7 +3,7 @@
 require("test_helper")
 
 class ScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML.safe_load(IO.
+  DATABASE_CONFIG = YAML.safe_load(File.
     read("#{::Rails.root}/config/database.yml"))["test"]
 
   def script_file(cmd)
@@ -69,12 +69,12 @@ class ScriptTest < UnitTestCase
   end
 
   def clear_image_transferred_state_externally(id)
-    system("mysql --defaults-extra-file=#{mysql_config_file} -e "\
+    system("mysql --defaults-extra-file=#{mysql_config_file} -e " \
            "'update images set transferred=false where id = #{id}'")
   end
 
   def get_image_transferred_state_externally(id)
-    result = `mysql --defaults-extra-file=#{mysql_config_file} -e '\
+    result = `mysql --defaults-extra-file=#{mysql_config_file} -e ' \
              '"select transferred from images where id = #{id}"`
     result.split("\n").last.strip == "1"
   end
@@ -174,39 +174,17 @@ class ScriptTest < UnitTestCase
     script = script_file("retransfer_images")
     tempfile = Tempfile.new("test").path
 
-    File.open("#{local_root}/orig/#{in_situ_id}.tiff", "w") do |f|
-      f.write("A")
-    end
-    File.open("#{local_root}/orig/#{in_situ_id}.jpg", "w") do |f|
-      f.write("B")
-    end
-    File.open("#{local_root}/1280/#{in_situ_id}.jpg", "w") do |f|
-      f.write("C")
-    end
-    File.open("#{local_root}/960/#{in_situ_id}.jpg", "w") do |f|
-      f.write("D")
-    end
-    File.open("#{local_root}/640/#{in_situ_id}.jpg", "w") do |f|
-      f.write("E")
-    end
-    File.open("#{local_root}/320/#{in_situ_id}.jpg", "w") do |f|
-      f.write("F")
-    end
-    File.open("#{local_root}/thumb/#{in_situ_id}.jpg", "w") do |f|
-      f.write("G")
-    end
-    File.open("#{local_root}/960/#{turned_over_id}.jpg", "w") do |f|
-      f.write("H")
-    end
-    File.open("#{local_root}/640/#{turned_over_id}.jpg", "w") do |f|
-      f.write("I")
-    end
-    File.open("#{local_root}/320/#{turned_over_id}.jpg", "w") do |f|
-      f.write("J")
-    end
-    File.open("#{local_root}/thumb/#{turned_over_id}.jpg", "w") do |f|
-      f.write("K")
-    end
+    File.write("#{local_root}/orig/#{in_situ_id}.tiff", "A")
+    File.write("#{local_root}/orig/#{in_situ_id}.jpg", "B")
+    File.write("#{local_root}/1280/#{in_situ_id}.jpg", "C")
+    File.write("#{local_root}/960/#{in_situ_id}.jpg", "D")
+    File.write("#{local_root}/640/#{in_situ_id}.jpg", "E")
+    File.write("#{local_root}/320/#{in_situ_id}.jpg", "F")
+    File.write("#{local_root}/thumb/#{in_situ_id}.jpg", "G")
+    File.write("#{local_root}/960/#{turned_over_id}.jpg", "H")
+    File.write("#{local_root}/640/#{turned_over_id}.jpg", "I")
+    File.write("#{local_root}/320/#{turned_over_id}.jpg", "J")
+    File.write("#{local_root}/thumb/#{turned_over_id}.jpg", "K")
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
@@ -289,93 +267,35 @@ class ScriptTest < UnitTestCase
   test "verify_images" do
     script = script_file("verify_images")
     tempfile = Tempfile.new("test").path
-    File.open("#{local_root}/orig/#{turned_over_id}.tiff", "w") do |f|
-      f.write("A")
-    end
-    File.open("#{local_root}/orig/#{turned_over_id}.jpg", "w") do |f|
-      f.write("AB")
-    end
-    File.open("#{local_root}/960/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABC")
-    end
-    File.open("#{local_root}/640/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABCD")
-    end
-    File.open("#{local_root}/320/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABCDE")
-    end
-    File.open("#{local_root}/960/#{commercial_id}.jpg", "w") do |f|
-      f.write("ABCDEF")
-    end
-    File.open("#{local_root}/640/#{commercial_id}.jpg", "w") do |f|
-      f.write("ABCDEFG")
-    end
-    File.open("#{local_root}/320/#{commercial_id}.jpg", "w") do |f|
-      f.write("ABCDEFGH")
-    end
-    File.open("#{local_root}/960/#{disconnected_id}.jpg", "w") do |f|
-      f.write("ABCDEFGHI")
-    end
-    File.open("#{local_root}/640/#{disconnected_id}.jpg", "w") do |f|
-      f.write("ABCDEFGHIJ")
-    end
-    File.open("#{local_root}/320/#{disconnected_id}.jpg", "w") do |f|
-      f.write("ABCDEFGHIJK")
-    end
-    File.open("#{remote_root}1/960/#{in_situ_id}.jpg", "w") do |f|
-      f.write("correct")
-    end
-    File.open("#{remote_root}1/640/#{in_situ_id}.jpg", "w") do |f|
-      f.write("correct")
-    end
-    File.open("#{remote_root}1/320/#{in_situ_id}.jpg", "w") do |f|
-      f.write("correct")
-    end
-    File.open("#{remote_root}1/960/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABC")
-    end
-    File.open("#{remote_root}1/640/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABCD")
-    end
-    File.open("#{remote_root}1/320/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABCDE")
-    end
-    File.open("#{remote_root}1/960/#{commercial_id}.jpg", "w") do |f|
-      f.write("ABCDEF")
-    end
-    File.open("#{remote_root}1/640/#{commercial_id}.jpg", "w") do |f|
-      f.write("ABCDEFG")
-    end
-    File.open("#{remote_root}1/320/#{commercial_id}.jpg", "w") do |f|
-      f.write("ABCDEFGH")
-    end
-    File.open("#{remote_root}1/960/#{disconnected_id}.jpg", "w") do |f|
-      f.write("allcorrupted!")
-    end
-    File.open("#{remote_root}1/640/#{disconnected_id}.jpg", "w") do |f|
-      f.write("allcorrupted!")
-    end
-    File.open("#{remote_root}1/320/#{disconnected_id}.jpg", "w") do |f|
-      f.write("allcorrupted!")
-    end
-    File.open("#{remote_root}2/640/#{in_situ_id}.jpg", "w") do |f|
-      f.write("correct")
-    end
-    File.open("#{remote_root}2/320/#{in_situ_id}.jpg", "w") do |f|
-      f.write("correct")
-    end
-    File.open("#{remote_root}2/640/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABCD")
-    end
-    File.open("#{remote_root}2/320/#{turned_over_id}.jpg", "w") do |f|
-      f.write("ABCDE")
-    end
-    File.open("#{remote_root}2/640/#{commercial_id}.jpg", "w") do |f|
-      f.write("allcorrupted!")
-    end
-    File.open("#{remote_root}2/320/#{commercial_id}.jpg", "w") do |f|
-      f.write("allcorrupted!")
-    end
+    File.write("#{local_root}/orig/#{turned_over_id}.tiff", "A")
+    File.write("#{local_root}/orig/#{turned_over_id}.jpg", "AB")
+    File.write("#{local_root}/960/#{turned_over_id}.jpg", "ABC")
+    File.write("#{local_root}/640/#{turned_over_id}.jpg", "ABCD")
+    File.write("#{local_root}/320/#{turned_over_id}.jpg", "ABCDE")
+    File.write("#{local_root}/960/#{commercial_id}.jpg", "ABCDEF")
+    File.write("#{local_root}/640/#{commercial_id}.jpg", "ABCDEFG")
+    File.write("#{local_root}/320/#{commercial_id}.jpg", "ABCDEFGH")
+    File.write("#{local_root}/960/#{disconnected_id}.jpg", "ABCDEFGHI")
+    File.write("#{local_root}/640/#{disconnected_id}.jpg", "ABCDEFGHIJ")
+    File.write("#{local_root}/320/#{disconnected_id}.jpg", "ABCDEFGHIJK")
+    File.write("#{remote_root}1/960/#{in_situ_id}.jpg", "correct")
+    File.write("#{remote_root}1/640/#{in_situ_id}.jpg", "correct")
+    File.write("#{remote_root}1/320/#{in_situ_id}.jpg", "correct")
+    File.write("#{remote_root}1/960/#{turned_over_id}.jpg", "ABC")
+    File.write("#{remote_root}1/640/#{turned_over_id}.jpg", "ABCD")
+    File.write("#{remote_root}1/320/#{turned_over_id}.jpg", "ABCDE")
+    File.write("#{remote_root}1/960/#{commercial_id}.jpg", "ABCDEF")
+    File.write("#{remote_root}1/640/#{commercial_id}.jpg", "ABCDEFG")
+    File.write("#{remote_root}1/320/#{commercial_id}.jpg", "ABCDEFGH")
+    File.write("#{remote_root}1/960/#{disconnected_id}.jpg", "allcorrupted!")
+    File.write("#{remote_root}1/640/#{disconnected_id}.jpg", "allcorrupted!")
+    File.write("#{remote_root}1/320/#{disconnected_id}.jpg", "allcorrupted!")
+    File.write("#{remote_root}2/640/#{in_situ_id}.jpg", "correct")
+    File.write("#{remote_root}2/320/#{in_situ_id}.jpg", "correct")
+    File.write("#{remote_root}2/640/#{turned_over_id}.jpg", "ABCD")
+    File.write("#{remote_root}2/320/#{turned_over_id}.jpg", "ABCDE")
+    File.write("#{remote_root}2/640/#{commercial_id}.jpg", "allcorrupted!")
+    File.write("#{remote_root}2/320/#{commercial_id}.jpg", "allcorrupted!")
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)

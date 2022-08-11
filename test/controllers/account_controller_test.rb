@@ -14,7 +14,7 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_auth_rolf
     @request.session["return-to"] = "http://localhost/bogus/location"
-    post(:login, user: { login: "rolf", password: "testpassword" })
+    post(:login, params: { user: { login: "rolf", password: "testpassword" } })
     assert_response("http://localhost/bogus/location")
     assert_flash_text(:runtime_login_success.t)
     assert(@request.session[:user_id],
@@ -26,7 +26,7 @@ class AccountControllerTest < FunctionalTestCase
   def test_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
-    post(:signup, new_user: {
+    post(:signup, params: { new_user: {
            login: "newbob",
            password: "newpassword",
            password_confirmation: "newpassword",
@@ -34,7 +34,7 @@ class AccountControllerTest < FunctionalTestCase
            email_confirmation: "webmaster@mushroomobserver.org",
            name: "needs a name!",
            theme: "NULL"
-         })
+         } })
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
     assert_equal(num_users + 1, User.count)
     user = User.last
@@ -65,35 +65,37 @@ class AccountControllerTest < FunctionalTestCase
     }
 
     # Missing password.
-    post(:signup, new_user: params.except(:password))
+    post(:signup, params: { new_user: params.except(:password) })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
-    post(:signup, new_user: params.merge(password_confirmation: "wrong"))
+    post(:signup,
+         params: { new_user: params.merge(password_confirmation: "wrong") })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
-    post(:signup, new_user: params.except(:email))
+    post(:signup, params: { new_user: params.except(:email) })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?,
            assigns("new_user").dump_errors)
 
     # Email doesn't match.
-    post(:signup, new_user: params.merge(email_confirmation: "wrong"))
+    post(:signup,
+         params: { new_user: params.merge(email_confirmation: "wrong") })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?)
 
     # Make sure correct request would have succeeded!
-    post(:signup, new_user: params)
+    post(:signup, params: { new_user: params })
     assert_flash_success
     assert_response(:redirect)
-    assert_not_nil(User.find_by_login("newbob"))
+    assert_not_nil(User.find_by(login: "newbob"))
   end
 
   def test_signup_theme_errors
@@ -109,18 +111,58 @@ class AccountControllerTest < FunctionalTestCase
     }
 
     @request.session["return-to"] = referrer
-    post(:signup, new_user: params.merge(theme: ""))
+    post(:signup, params: { new_user: params.merge(theme: "") })
     assert_no_flash
-    assert_nil(User.find_by_login("spammer"))
+    assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
     assert_redirected_to(referrer)
 
     @request.session["return-to"] = referrer
-    post(:signup, new_user: params.merge(theme: "spammer"))
+    post(:signup, params: { new_user: params.merge(theme: "spammer") })
     assert_no_flash
-    assert_nil(User.find_by_login("spammer"))
+    assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
     assert_redirected_to(referrer)
+  end
+
+  def test_anon_user_login
+    get(:login)
+
+    assert_response(:success)
+    assert_head_title(:login_please_login.l)
+  end
+
+  def test_anon_user_signup
+    get(:signup)
+
+    assert_response(:success)
+    assert_head_title(:signup_title.l)
+  end
+
+  def test_anon_user_verify
+    get(:verify)
+
+    assert_redirected_to(users_path)
+  end
+
+  def test_anon_user_send_verify
+    get(:send_verify)
+
+    assert_redirected_to(users_path)
+  end
+
+  def test_anon_user_welcome
+    get(:welcome)
+
+    assert_response(:success)
+    assert_head_title(:welcome_no_user_title.l)
+  end
+
+  def test_anon_user_email_new_password
+    get(:email_new_password)
+
+    assert_response(:success)
+    assert_head_title(:email_new_password_title.l)
   end
 
   def test_block_known_evil_signups
@@ -136,22 +178,24 @@ class AccountControllerTest < FunctionalTestCase
     }
     html_client_error = 400..499
 
-    post(:signup, new_user: params.merge(login: "xUplilla"))
+    post(:signup, params: { new_user: params.merge(login: "xUplilla") })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
-    post(:signup, new_user: params.merge(email: "foo@xxx.xyz"))
+    post(:signup, params: { new_user: params.merge(email: "foo@xxx.xyz") })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
     post(:signup,
-         new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n"))
+         params: {
+           new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n")
+         })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
   end
 
   def test_invalid_login
-    post(:login, user: { login: "rolf", password: "not_correct" })
+    post(:login, params: { user: { login: "rolf", password: "not_correct" } })
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
@@ -159,17 +203,18 @@ class AccountControllerTest < FunctionalTestCase
       login: "api",
       email: "foo@bar.com"
     )
-    post(:login, user: { login: "api", password: "" })
+    post(:login, params: { user: { login: "api", password: "" } })
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.update(verified: Time.zone.now)
-    post(:login, user: { login: "api", password: "" })
+    post(:login, params: { user: { login: "api", password: "" } })
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.change_password("try_this_for_size")
-    post(:login, user: { login: "api", password: "try_this_for_size" })
+    post(:login,
+         params: { user: { login: "api", password: "try_this_for_size" } })
     assert(@request.session["user_id"])
   end
 
@@ -177,13 +222,12 @@ class AccountControllerTest < FunctionalTestCase
     get(:email_new_password)
     assert_no_flash
 
-    post(:email_new_password,
-         new_user: {
+    post(:email_new_password, params: { new_user: {
            login: "brandnewuser",
            password: "brandnewpassword",
            password_confirmation: "brandnewpassword",
            name: "brand new name"
-         })
+         } })
     assert_flash_error(
       "email_new_password should flash error if user doesn't already exist"
     )
@@ -205,7 +249,9 @@ class AccountControllerTest < FunctionalTestCase
 
     # Make sure cookie is not set if clear remember_me box in login.
     post(:login,
-         user: { login: "rolf", password: "testpassword", remember_me: "" })
+         params: {
+           user: { login: "rolf", password: "testpassword", remember_me: "" }
+         })
     assert(session[:user_id])
     assert_not(cookies["mo_user"])
 
@@ -215,7 +261,9 @@ class AccountControllerTest < FunctionalTestCase
 
     # Now clear session and try again with remember_me box set.
     post(:login,
-         user: { login: "rolf", password: "testpassword", remember_me: "1" })
+         params: {
+           user: { login: "rolf", password: "testpassword", remember_me: "1" }
+         })
     assert(session[:user_id])
     assert(cookies["mo_user"])
 
@@ -236,23 +284,23 @@ class AccountControllerTest < FunctionalTestCase
     assert(user.auth_code.present?)
     assert(user.auth_code.length > 10)
 
-    get(:verify, id: user.id, auth_code: "bogus_code")
+    get(:verify, params: { id: user.id, auth_code: "bogus_code" })
     assert_template("reverify")
     assert_not(@request.session[:user_id])
 
-    get(:verify, id: user.id, auth_code: user.auth_code)
+    get(:verify, params: { id: user.id, auth_code: user.auth_code })
     assert_template("verify")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
 
-    get(:verify, id: user.id, auth_code: user.auth_code)
+    get(:verify, params: { id: user.id, auth_code: user.auth_code })
     assert_redirected_to(action: :welcome)
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
 
     login("rolf")
-    get(:verify, id: user.id, auth_code: user.auth_code)
+    get(:verify, params: { id: user.id, auth_code: user.auth_code })
     assert_redirected_to(action: :login)
     assert_not(@request.session[:user_id])
   end
@@ -263,11 +311,11 @@ class AccountControllerTest < FunctionalTestCase
       email: "mm@disney.com"
     )
 
-    get(:verify, id: user.id, auth_code: "bogus_code")
+    get(:verify, params: { id: user.id, auth_code: "bogus_code" })
     assert_template("reverify")
     assert_not(@request.session[:user_id])
 
-    get(:verify, id: user.id, auth_code: user.auth_code)
+    get(:verify, params: { id: user.id, auth_code: user.auth_code })
     assert_flash_warning
     assert_template("choose_password")
     assert_not(@request.session[:user_id])
@@ -275,31 +323,42 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
 
-    post(:verify, id: user.id, auth_code: user.auth_code,
-                  user: {})
+    post(:verify, params: { id: user.id, auth_code: user.auth_code, user: {} })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
 
     # Password and confirmation don't match
-    post(:verify, id: user.id, auth_code: user.auth_code,
-                  user: { password: "mouse", password_confirmation: "moose" })
+    post(:verify,
+         params: {
+           id: user.id,
+           auth_code: user.auth_code,
+           user: { password: "mouse", password_confirmation: "moose" }
+         })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "mouse")
     assert_input_value("user_password_confirmation", "")
 
     # Password invalid (too short)
-    post(:verify, id: user.id, auth_code: user.auth_code,
-                  user: { password: "mo", password_confirmation: "mo" })
+    post(:verify,
+         params: {
+           id: user.id,
+           auth_code: user.auth_code,
+           user: { password: "mo", password_confirmation: "mo" }
+         })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "mo")
     assert_input_value("user_password_confirmation", "")
 
-    post(:verify, id: user.id, auth_code: user.auth_code,
-                  user: { password: "mouse", password_confirmation: "mouse" })
+    post(:verify,
+         params: {
+           id: user.id,
+           auth_code: user.auth_code,
+           user: { password: "mouse", password_confirmation: "mouse" }
+         })
     assert_template("verify")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
@@ -307,7 +366,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_not_equal("", user.password)
 
     login("rolf")
-    get(:verify, id: user.id, auth_code: user.auth_code)
+    get(:verify, params: { id: user.id, auth_code: user.auth_code })
     assert_redirected_to(action: :login)
     assert_not(@request.session[:user_id])
   end
@@ -321,7 +380,7 @@ class AccountControllerTest < FunctionalTestCase
       login: "micky",
       email: "mm@disney.com"
     )
-    post(:send_verify, id: user.id)
+    post(:send_verify, params: { id: user.id })
     assert_flash_success
   end
 
@@ -330,7 +389,7 @@ class AccountControllerTest < FunctionalTestCase
       login: "micky",
       email: "mm@hotmail.com"
     )
-    post(:send_verify, id: user.id)
+    post(:send_verify, params: { id: user.id })
     assert_flash_success
   end
 
@@ -378,17 +437,17 @@ class AccountControllerTest < FunctionalTestCase
       email_observations_all: "",
       email_observations_consensus: "1",
       email_observations_naming: "1",
-      hide_authors: :above_species,
-      keep_filenames: :keep_but_hide,
+      hide_authors: "above_species",
+      keep_filenames: "keep_but_hide",
       license_id: licenses(:publicdomain).id.to_s,
       layout_count: "100",
       locale: "el",
-      location_format: :scientific,
+      location_format: "scientific",
       notes_template: "Collector's #",
       theme: "Agaricus",
       thumbnail_maps: "",
       view_owner_id: "",
-      votes_anonymous: :yes,
+      votes_anonymous: "yes",
       has_images: "1",
       has_specimen: "1",
       lichen: "yes",
@@ -397,7 +456,7 @@ class AccountControllerTest < FunctionalTestCase
     }
 
     # Prove that all the values are initialized correctly if reloading form.
-    post(:prefs, user: params.merge(password_confirmation: "bogus"))
+    post(:prefs, params: { user: params.merge(password_confirmation: "bogus") })
     assert_flash_error
     assert_response(:success)
     assert_input_value(:user_password, "")
@@ -422,17 +481,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_email_observations_all, "")
     assert_input_value(:user_email_observations_consensus, "1")
     assert_input_value(:user_email_observations_naming, "1")
-    assert_input_value(:user_hide_authors, :above_species)
-    assert_input_value(:user_keep_filenames, :keep_but_hide)
+    assert_input_value(:user_hide_authors, "above_species")
+    assert_input_value(:user_keep_filenames, "keep_but_hide")
     assert_input_value(:user_license_id, licenses(:publicdomain).id.to_s)
     assert_input_value(:user_layout_count, "100")
     assert_input_value(:user_locale, "el")
-    assert_input_value(:user_location_format, :scientific)
+    assert_input_value(:user_location_format, "scientific")
     assert_textarea_value(:user_notes_template, "Collector's #")
     assert_input_value(:user_theme, "Agaricus")
     assert_input_value(:user_thumbnail_maps, "")
     assert_input_value(:user_view_owner_id, "")
-    assert_input_value(:user_votes_anonymous, :yes)
+    assert_input_value(:user_votes_anonymous, "yes")
     assert_input_value(:user_has_images, "1")
     assert_input_value(:user_has_specimen, "1")
     assert_input_value(:user_lichen, "yes")
@@ -440,7 +499,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_clade, "Ascomycota")
 
     # Now do it correctly, and make sure changes were made.
-    post(:prefs, user: params)
+    post(:prefs, params: { user: params })
     assert_flash_text(:runtime_prefs_success.t)
     user = rolf.reload
     assert_equal("new@email.com", user.email)
@@ -463,17 +522,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(false, user.email_observations_all)
     assert_equal(true, user.email_observations_consensus)
     assert_equal(true, user.email_observations_naming)
-    assert_equal(:above_species, user.hide_authors)
-    assert_equal(:keep_but_hide, user.keep_filenames)
+    assert_equal("above_species", user.hide_authors)
+    assert_equal("keep_but_hide", user.keep_filenames)
     assert_equal(100, user.layout_count)
     assert_equal(licenses(:publicdomain), user.license)
     assert_equal("el", user.locale)
-    assert_equal(:scientific, user.location_format)
+    assert_equal("scientific", user.location_format)
     assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(false, user.view_owner_id)
-    assert_equal(:yes, user.votes_anonymous)
+    assert_equal("yes", user.votes_anonymous)
     assert_equal("yes", user.content_filter[:has_images])
     assert_equal("yes", user.content_filter[:has_specimen])
     assert_equal("yes", user.content_filter[:lichen])
@@ -486,27 +545,27 @@ class AccountControllerTest < FunctionalTestCase
     # reset locale to get less incomprehensible error messages
     user.locale = "en"
     user.save
-    post(:prefs, user: params.merge(notes_template: "Size, Other"))
+    post(:prefs, params: { user: params.merge(notes_template: "Size, Other") })
     assert_flash_error
     assert_equal(old_notes_template, user.reload.notes_template)
 
     # Prove user cannot have duplicate headings in notes template
-    post(:prefs, user: params.merge(notes_template: "Yadda, Yadda"))
+    post(:prefs, params: { user: params.merge(notes_template: "Yadda, Yadda") })
     assert_flash_error
     assert_equal(old_notes_template, user.reload.notes_template)
 
     # Prove login can't already exist.
-    post(:prefs, user: params.merge(login: "mary"))
+    post(:prefs, params: { user: params.merge(login: "mary") })
     assert_flash_error
     assert_equal("rolf", user.reload.login)
 
     # But does work if it's new!
-    post(:prefs, user: params.merge(login: "steve"))
+    post(:prefs, params: { user: params.merge(login: "steve") })
     assert_equal("steve", user.reload.login)
 
     # Prove password was changed correctly somewhere along the line.
     logout
-    post(:login, user: { login: "steve", password: "new_password" })
+    post(:login, params: { user: { login: "steve", password: "new_password" } })
     assert_equal(rolf.id, @request.session["user_id"])
   end
 
@@ -524,7 +583,7 @@ class AccountControllerTest < FunctionalTestCase
         mailing_address: ""
       }
     }
-    post_with_dump(:profile, params)
+    post(:profile, params: params)
     assert_flash_text(:runtime_profile_success.t)
 
     # Make sure changes were made.
@@ -564,7 +623,7 @@ class AccountControllerTest < FunctionalTestCase
       login("rolf", "testpassword")
       post_with_dump(:profile, params)
     end
-    assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
+    assert_redirected_to(user_path(rolf.id))
     assert_flash_success
 
     rolf.reload
@@ -606,8 +665,8 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_api_key_manager
-    ApiKey.all.each(&:destroy)
-    assert_equal(0, ApiKey.count)
+    APIKey.all.each(&:destroy)
+    assert_equal(0, APIKey.count)
 
     # Get initial (empty) form.
     requires_login(:api_keys)
@@ -617,42 +676,51 @@ class AccountControllerTest < FunctionalTestCase
 
     # Try to create key with no name.
     login("mary")
-    post(:api_keys, commit: :account_api_keys_create_button.l)
+    post(:api_keys, params: { commit: :account_api_keys_create_button.l })
     assert_flash_error
-    assert_equal(0, ApiKey.count)
+    assert_equal(0, APIKey.count)
     assert_select("a[data-role*=edit_api_key]", count: 0)
 
     # Create good key.
-    post(:api_keys, commit: :account_api_keys_create_button.l,
-                    key: { notes: "app name" })
+    post(:api_keys,
+         params: {
+           commit: :account_api_keys_create_button.l,
+           key: { notes: "app name" }
+         })
     assert_flash_success
-    assert_equal(1, ApiKey.count)
+    assert_equal(1, APIKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key1 = mary.api_keys.first
     assert_equal("app name", key1.notes)
     assert_select("a[data-role*=edit_api_key]", count: 1)
 
     # Create another key.
-    post(:api_keys, commit: :account_api_keys_create_button.l,
-                    key: { notes: "another name" })
+    post(:api_keys,
+         params: {
+           commit: :account_api_keys_create_button.l,
+           key: { notes: "another name" }
+         })
     assert_flash_success
-    assert_equal(2, ApiKey.count)
+    assert_equal(2, APIKey.count)
     assert_equal(2, mary.reload.api_keys.length)
     key2 = mary.api_keys.last
     assert_equal("another name", key2.notes)
     assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Press "remove" without selecting anything.
-    post(:api_keys, commit: :account_api_keys_remove_button.l)
+    post(:api_keys, params: { commit: :account_api_keys_remove_button.l })
     assert_flash_warning
-    assert_equal(2, ApiKey.count)
+    assert_equal(2, APIKey.count)
     assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Remove first key.
-    post(:api_keys, commit: :account_api_keys_remove_button.l,
-                    "key_#{key1.id}" => "1")
+    post(:api_keys,
+         params: {
+           commit: :account_api_keys_remove_button.l,
+           "key_#{key1.id}" => "1"
+         })
     assert_flash_success
-    assert_equal(1, ApiKey.count)
+    assert_equal(1, APIKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key = mary.api_keys.last
     assert_objs_equal(key, key2)
@@ -660,7 +728,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_activate_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = nil
     key.notes = "Testing"
@@ -668,12 +736,12 @@ class AccountControllerTest < FunctionalTestCase
     key.save
     assert_nil(key.verified)
 
-    get(:activate_api_key, id: 12_345)
+    get(:activate_api_key, params: { id: 12_345 })
     assert_redirected_to(action: :login)
     assert_nil(key.verified)
 
     login("dick")
-    get(:activate_api_key, id: key.id)
+    get(:activate_api_key, params: { id: key.id })
     assert_flash_error
     assert_redirected_to(action: :api_keys)
     assert_nil(key.verified)
@@ -684,7 +752,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_select("a[data-role*=edit_api_key]", count: 1)
     assert_select("a[data-role*=activate_api_key]", count: 1)
 
-    get(:activate_api_key, id: key.id)
+    get(:activate_api_key, params: { id: key.id })
     assert_flash_success
     assert_redirected_to(action: :api_keys)
     key.reload
@@ -699,33 +767,34 @@ class AccountControllerTest < FunctionalTestCase
     key = mary.api_keys.create(notes: "app name")
 
     # Try without logging in.
-    get(:edit_api_key, id: key.id)
+    get(:edit_api_key, params: { id: key.id })
     assert_response(:redirect)
 
     # Try to edit another user's key.
     login("dick")
-    get(:edit_api_key, id: key.id)
+    get(:edit_api_key, params: { id: key.id })
     assert_response(:redirect)
 
     # Have Mary edit her own key.
     login("mary")
-    get(:edit_api_key, id: key.id)
+    get(:edit_api_key, params: { id: key.id })
     assert_response(:success)
     assert_input_value(:key_notes, "app name")
 
     # Cancel form.
-    post(:edit_api_key, commit: :CANCEL.l, id: key.id)
+    post(:edit_api_key, params: { commit: :CANCEL.l, id: key.id })
     assert_response(:redirect)
     assert_equal("app name", key.reload.notes)
 
     # Try to change notes to empty string.
-    post(:edit_api_key, commit: :UPDATE.l, id: key.id, key: { notes: "" })
+    post(:edit_api_key,
+         params: { commit: :UPDATE.l, id: key.id, key: { notes: "" } })
     assert_flash_error
     assert_response(:success) # means failure
 
     # Change notes correctly.
     post(:edit_api_key,
-         commit: :UPDATE.l, id: key.id, key: { notes: "new name" })
+         params: { commit: :UPDATE.l, id: key.id, key: { notes: "new name" } })
     assert_flash_success
     assert_redirected_to(action: :api_keys)
     assert_equal("new name", key.reload.notes)
@@ -784,15 +853,23 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_includes(@response.body, api_key.key)
 
-    get(:blocked_ips, add_bad: "garbage")
+    get(:blocked_ips, params: { add_bad: "garbage" })
     assert_flash_error
 
-    get(:blocked_ips, add_bad: new_ip)
+    time = 1.minute.ago
+    File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
+    get(:blocked_ips, params: { add_bad: new_ip })
     assert_no_flash
+    assert(time < File.mtime(MO.blocked_ips_file))
+    IpStats.reset!
     assert_true(IpStats.blocked?(new_ip))
 
-    get(:blocked_ips, remove_bad: new_ip)
+    time = 1.minute.ago
+    File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
+    get(:blocked_ips, params: { remove_bad: new_ip })
     assert_no_flash
+    assert(time < File.mtime(MO.blocked_ips_file))
+    IpStats.reset!
     assert_false(IpStats.blocked?(new_ip))
   end
 

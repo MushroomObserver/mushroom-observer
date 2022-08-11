@@ -16,6 +16,7 @@ DEFAULTS: &DEFAULTS
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   verified:       <%= Time.now.strftime("%F %T")%>
   user_groups:    all_users, $LABEL_only
+  votes_anonymous: <%= User.votes_anonymous[:no] %>
 
 # Rolf is an experienced user
 # Also the default user for Images fixtures
@@ -25,6 +26,7 @@ rolf:
   license: ccwiki30
   image: rolf_profile_image
   view_owner_id: true
+  layout_count: 24 # >= # of rolf's Observations
   user_groups: all_users, eol_users, eol_admins, reviewers, rolf_only
 
 # Mary has no images and no herbaria
@@ -96,7 +98,7 @@ public_voter:
 
 # Has multiple Observations whose sortable attributes are unique
 # Need for tests in which sort order is predictable, e.g.,
-# ObserverControllerIntegrationTest#test_destroy_observation_from_search
+# ObservationsControllerIntegrationTest#test_destroy_observation_from_search
 sortable_obs_user:
   <<: *DEFAULTS
 
@@ -142,4 +144,12 @@ antilichenologist:
 californian:
   <<: *DEFAULTS
   content_filter: <%= { region: "California, USA" }.to_yaml.inspect %>
+  layout_count: 24 # >= # of California Observations
 
+unverified:
+  <<: *DEFAULTS
+  verified: nil
+
+admin:
+  <<: *DEFAULTS
+  admin: true
