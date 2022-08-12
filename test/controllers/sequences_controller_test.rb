@@ -129,7 +129,8 @@ class SequencesControllerTest < FunctionalTestCase
                     "to someone else's Observation")
     assert_select(
       "form[action^='#{sequence_path(obs.id)}']", true,
-      "Sequence form submit action should start with path that includes Obs id")
+      "Sequence form submit action should start with path that includes Obs id"
+    )
     assert_select("form[action*='?q=#{q}']", true,
                   "Sequence form submit action missing 'q' param")
   end
