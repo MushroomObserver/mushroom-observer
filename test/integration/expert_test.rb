@@ -302,7 +302,7 @@ class ExpertTest < IntegrationTestCase
 
     click_mo_link(href: new_sequence_path(id: obs.id))
     open_form do |form|
-      form.change("locus", "test")
+      form.change("locus", "New locus")
       form.change("bases", "catcatcatcatcatcatcatcatcat")
       form.submit("Submit")
     end
@@ -316,7 +316,7 @@ class ExpertTest < IntegrationTestCase
       form.submit("Submit")
     end
     assert_equal("Edited locus", new_sequence.locus,
-                 "Sequence should have been edited")
+                 "Sequence should have been updated")
 
     # click the show sequence link on the Observation page
     click_mo_link(href: sequence_path(new_sequence.id))
