@@ -198,10 +198,13 @@ Style/EmptyHeredoc: # new in 1.32
   Exclude:
     - script/refresh_sitemap
 Style/FormatStringToken:
-  Enabled: true
+  # Rubocop default: true
+  # It doesn't seem like we gain much by doing this.
+  Enabled: false
+  # The commented-out lines below are in case we re-enable the cop
   # # This doesn't work for redirect in config/routes.rb.
-  AllowedMethods:
-    - "redirect"
+  # AllowedMethods:
+    # - "redirect"
 Style/MethodCallWithArgsParentheses:
   # Rubocop default: false
   # MO uses parentheses (except for some macro-style methods)
