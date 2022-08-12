@@ -200,7 +200,7 @@ Style/EmptyHeredoc: # new in 1.32
 Style/FormatStringToken:
   Enabled: true
   # # This doesn't work for redirect in config/routes.rb.
-  IgnoredMethods:
+  AllowedMethods:
     - "redirect"
 Style/MethodCallWithArgsParentheses:
   # Rubocop default: false
