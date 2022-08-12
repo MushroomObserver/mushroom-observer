@@ -190,7 +190,7 @@ GEM
       io-console (~> 0.5)
     rexml (3.2.5)
     rtf (0.3.3)
-    rubocop (1.32.0)
+    rubocop (1.33.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.0.0)
