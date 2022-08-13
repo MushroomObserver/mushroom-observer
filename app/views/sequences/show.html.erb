@@ -9,10 +9,11 @@
     tabs << link_with_query(:edit_object.t(type: :sequence),
                             action: :edit, id: @sequence.id,
                             back: :show)
-    tabs << link_with_query(:destroy_object.t(type: :sequence),
-                            {action: :destroy, id: @sequence.id,
-                            back: :index},
-                            data: {confirm: :are_you_sure.t})
+    tabs << link_with_query(
+      :destroy_object.t(type: :sequence),
+      { action: :destroy, id: @sequence.id, back: :index },
+      data: { method: :delete, confirm: :are_you_sure.t }
+    )
   end
 
   @tabsets = {
