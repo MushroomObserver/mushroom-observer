@@ -119,7 +119,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
-    params = { id: obs.id, q: q  }
+    params = { obs_id: obs.id, q: q }
 
     login("zero") # This user has no Observations
     get(:new, params: params)
@@ -128,11 +128,14 @@ class SequencesControllerTest < FunctionalTestCase
                     "A user should be able to get form to add Sequence " \
                     "to someone else's Observation")
     assert_select(
-      "form[action^='#{sequence_path(obs.id)}']", true,
-      "Sequence form submit action should start with path that includes Obs id"
+      "form[action^='sequence_path(params: {obs_id: obs.id})']", true,
+      "Sequence form has missing/incorrect `obs_id`` query param"
     )
-    assert_select("form[action*='?q=#{q}']", true,
-                  "Sequence form submit action missing 'q' param")
+    assert_select(
+      # "form[action*='?q=#{q}']", true,
+      "form:match('action', ?)", /\?.*q=/, true,
+      "Sequence form submit action missing/incorrect 'q' query param"
+    )
   end
 
   def test_new_login_required
