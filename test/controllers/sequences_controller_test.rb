@@ -128,7 +128,7 @@ class SequencesControllerTest < FunctionalTestCase
                     "A user should be able to get form to add Sequence " \
                     "to someone else's Observation")
     assert_select(
-      "form[action^='sequence_path(params: {obs_id: obs.id})']", true,
+      "form[action^='sequence_path(params: { obs_id: obs.id })']", true,
       "Sequence form has missing/incorrect `obs_id`` query param"
     )
     assert_select(
