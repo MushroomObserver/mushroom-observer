@@ -6,9 +6,11 @@
 #
 #    create::   Create new sequence and add to Observation
 #    destroy::  Destroy sequence
-#    edit::     Show form to edit a sequence
-#    index::    List selected sequences, based on index flavor and current Query
-#    show::     Display sequence details
+#    edit::     Show form to edit a Sequence
+#    new::      Show form to create new Sequence for an Observation
+#    index::    List selected Sequences, based on index flavor and current Query
+#    show::     Display Sequence details
+#    update::   Update a Sequence
 #
 # Table: (updated 2022-08-07)
 # legacy Sequence action (method)   updated Sequences action (method)
@@ -18,12 +20,12 @@
 # destroy_sequence (delete)         destroy (delete)
 # edit_sequence (get)               edit (get)
 # *edit_sequence (post)             update (patch)
-# index_sequence (get)              index (get) - lists query results
-# list_sequences (get)              index (get, flavor: all) - all sequences
+# index_sequence (get)              index (get) -- lists query results
+# list_sequences (get)              index (get, flavor: all) -- all Sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
-# observation_index (get)           index (get, flavor: observation) - list
-#                                   sequences for one Observation
+# observation_index (get)           index (get, flavor: observation)
+#                                   -- list Sequences for one Observation
 # sequence_search (get)             index (get, pattern: present)
 # show_sequence (get)               show (get)
 # * == legacy action is not redirected
@@ -75,7 +77,10 @@ class SequencesController < ApplicationController
   ################# Actions that modify data
 
   def new
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    # pass the Obs as a query param to avoid an extra, non-standard route
+    return if params[:obs_id].blank?
+
+    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
     return unless @observation
   end
 
