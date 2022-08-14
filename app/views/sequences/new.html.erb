@@ -11,7 +11,7 @@
            locals: { observation: @observation }) %>
 <%= form_for(
       :sequence,
-      url: add_query_param(sequence_path(id: @observation.id))
+      url: add_query_param(sequences_path(params: { obs_id: @observation.id }))
     ) do |form| %>
   <%= render(partial: "form", locals: { form: form }) %>
 <% end %>
