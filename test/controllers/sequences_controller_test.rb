@@ -140,9 +140,11 @@ class SequencesControllerTest < FunctionalTestCase
   def test_new_login_required
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs = observations(:minimal_unknown_obs)
+    params = { obs_id: obs.id }
 
     # Prove method requires login
-    requires_login(:new, id: obs.id)
+    get(:new, params: params)
+    assert_response(:redirect)
   end
 
   def test_create
