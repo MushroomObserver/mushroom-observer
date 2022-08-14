@@ -300,7 +300,7 @@ class ExpertTest < IntegrationTestCase
     sequence_original_count = Sequence.count
     get("/#{obs.id}")
 
-    click_mo_link(href: new_sequence_path(id: obs.id))
+    click_mo_link(href: new_sequence_path(params: { obs_id: obs.id }))
     open_form do |form|
       form.change("locus", "New locus")
       form.change("bases", "catcatcatcatcatcatcatcatcat")
