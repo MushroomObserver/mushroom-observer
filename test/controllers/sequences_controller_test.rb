@@ -145,25 +145,6 @@ class SequencesControllerTest < FunctionalTestCase
     requires_login(:new, id: obs.id)
   end
 
-  def test_create_routing
-    assert_generates(
-      "/sequences/1",
-      { controller: "sequences", action: "create", id: "1" },
-      {}, # default (unused)
-      {}, # extras (none)
-      "`/sequences/1` failed to generate " \
-      "`create` route with route parameter `1`"
-    )
-    # id is the Observation id
-    assert_recognizes(
-      { controller: "sequences", action: "create", id: "1" },
-      { path: "/sequences/1", method: :post },
-      {}, # extras (none)
-      "POSTING to `/sequences/1` failed to call " \
-      "`Sequences#create` with an id of `1`"
-    )
-  end
-
   def test_create
     # Normal happy path
     # Prove logged-in user can add sequence to someone else's Observation
