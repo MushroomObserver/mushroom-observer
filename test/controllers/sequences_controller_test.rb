@@ -154,7 +154,7 @@ class SequencesControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = ITS_BASES
     params = {
-      id: obs.id,
+      obs_id: obs.id,
       sequence: { locus: locus,
                   bases: bases }
     }
@@ -183,7 +183,7 @@ class SequencesControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"
     params = {
-      id: obs.id,
+      obs_id: obs.id,
       sequence: { locus: locus,
                   bases: bases }
     }
@@ -210,7 +210,7 @@ class SequencesControllerTest < FunctionalTestCase
     archive =   "GenBank"
     accession = "KY366491.1"
     params = {
-      id: obs.id,
+      obs_id: obs.id,
       sequence: { locus: locus,
                   archive: archive,
                   accession: accession }
@@ -232,7 +232,7 @@ class SequencesControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = ITS_BASES
     params = {
-      id: obs.id,
+      obs_id: obs.id,
       sequence: { locus: locus,
                   bases: bases }
     }
@@ -243,7 +243,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_no_locus
     # Prove that locus is required.
     obs = observations(:coprinus_comatus_obs)
-    params = { id: obs.id,
+    params = { obs_id: obs.id,
                sequence: { locus: "",
                            bases: "actgct" } }
     login(obs.user.login)
@@ -256,7 +256,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_no_bases_or_equivalent
     # Prove that bases or archive+accession required.
     obs = observations(:coprinus_comatus_obs)
-    params = { id: obs.id,
+    params = { obs_id: obs.id,
                sequence: { locus: "ITS" } }
     login(obs.user.login)
 
@@ -268,7 +268,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_archive_without_accession
     # Prove that accession required if archive present.
     obs = observations(:coprinus_comatus_obs)
-    params = { id: obs.id,
+    params = { obs_id: obs.id,
                sequence: { locus: "ITS", archive: "GenBank" } }
     login(obs.user.login)
 
@@ -279,7 +279,7 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_create_accession_without_archive
     obs = observations(:coprinus_comatus_obs)
-    params = { id: obs.id,
+    params = { obs_id: obs.id,
                sequence: { locus: "ITS", accession: "KY133294.1" } }
     login(obs.user.login)
 
@@ -292,7 +292,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
-    params = { id: obs.id,
+    params = { obs_id: obs.id,
                sequence: { locus: "ITS", bases: "atgc" },
                q: q }
 
