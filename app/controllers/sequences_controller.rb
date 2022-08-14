@@ -85,7 +85,7 @@ class SequencesController < ApplicationController
   end
 
   def create
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
     return unless @observation
 
     build_sequence
