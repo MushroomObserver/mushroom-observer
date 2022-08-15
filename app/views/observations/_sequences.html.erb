@@ -45,9 +45,10 @@
                 :EDIT.t, edit_sequence_path(id: sequence.id,
                                             params: { back: observation.id })
               )
-              links << link_with_query(
-                :DESTROY.t, sequence_path(sequence.id),
-                { method: :delete, data: { confirm: :are_you_sure.t } }
+              links << destroy_button(
+                name: :destroy_object.t(type: :sequence),
+                target: sequence_path(sequence,
+                                      back: url_after_delete(sequence))
               )
             end
             if sequence.blastable?
