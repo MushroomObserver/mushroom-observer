@@ -1,4 +1,5 @@
-  <%# sequence form_with contents %>
+<%= form_with(model: @sequence, url: url) do |form| %>
+
   <%# locus %>
   <div class="row push-down">
     <div class="form-group col-xs-12 col-md-6 max-width-text">
@@ -78,3 +79,4 @@
   <div class="form-group row">
     <%= form.submit(:SUBMIT.t, class: "btn center-block push-down") %>
   </div>
+<% end %>

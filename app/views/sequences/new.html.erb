@@ -10,9 +10,9 @@
 <%= render(partial: "observation_title",
            locals: { observation: @observation }) %>
 
-<%= form_with(
-  model: Sequence.new,
-  url: add_query_param(sequences_path(params: { obs_id: @observation.id }))
-) do |form| %>
-  <%= render(partial: "form", locals: { form: form }) %>
-<% end %>
+<%= render(
+  partial: "form",
+  locals: {
+    url: add_query_param(sequences_path(params: { obs_id: @observation.id }))
+  }
+) %>
