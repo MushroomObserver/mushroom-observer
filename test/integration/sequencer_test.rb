@@ -35,9 +35,8 @@ class SequencerTest < IntegrationTestCase
     assert_equal(new_locus, new_sequence.reload.locus,
                  "Sequence should have been updated")
 
-    # Clicking on Destroy Sequence causes InvalidAuthenticityToken error
-    # click_on(new_locus)
-    # click_on("Destroy Sequence")
+    # Clicking on Destroy Sequence causes Capybara::NotSupportedByDriverError
+    # accept_confirm { click_button("Destroy Sequence") }
     # assert(new_sequence.destroyed?, "Sequence should have been destroyed")
   end
 end
