@@ -76,8 +76,10 @@ class SequencesController < ApplicationController
 
   ################# Actions that modify data
 
-    # # The Obs is a query param in order to avoid an extra, non-standard route
-    def new
+  def new
+    # Observation.id is passed as a query param (rather than route :id param)
+    # in order to give :id param a consistent meaning (the sequence id)
+    # in this controller and in order to avoid an extra, non-standard route
     return if params[:obs_id].blank?
 
     @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
