@@ -11,11 +11,13 @@
           observation.user.try(&:hide_specimen_stuff?) %>
   <% if @user || sequences.any? %>
     <div>
-      <%= sequences.any? ? :Sequences.t + ":".html_safe :
-                           :show_observation_no_sequences.t %> <%=
-          link = link_with_query(:show_observation_add_sequence.t,
-                                 new_sequence_path(obs_id: observation.id))
-          "[#{link}]".html_safe if @user
+      <%= sequences.any? ? :Sequences.t + ":".html_safe : :show_observation_no_sequences.t %>
+      <%=
+          add_sequence_link = link_with_query(
+            :show_observation_add_sequence.t,
+            new_sequence_path(params: { obs_id: observation.id })
+          )
+          "[#{add_sequence_link}]".html_safe if @user
       %>
     </div>
   <% end %>
