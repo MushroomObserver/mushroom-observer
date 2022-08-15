@@ -213,7 +213,7 @@ class SequencesController < ApplicationController
   def save_edits
     @sequence.attributes = sequence_params
     if @sequence.save
-      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
       redirect_with_query(@back_object.show_link_args)
     else
       flash_object_errors(@sequence)
