@@ -25,13 +25,13 @@
       <% sequences.each do |sequence| %>
         <li>
           <%= locus = sequence.locus.truncate(sequence.locus_width)
-          if sequence.deposit?
-            link_to("#{locus} - #{sequence.archive} ##{sequence.accession}".t,
-                    add_query_param(sequence.show_link_args, query))
-          else
-            link_to("#{locus} - MO ##{sequence.id}".t,
-                    add_query_param(sequence.show_link_args, query))
-          end %>
+            if sequence.deposit?
+              link_to("#{locus} - #{sequence.archive} ##{sequence.accession}".t,
+                      add_query_param(sequence.show_link_args, query))
+            else
+              link_to("#{locus} - MO ##{sequence.id}".t,
+                      add_query_param(sequence.show_link_args, query))
+            end %>
           <%=
             links = []
             if sequence.deposit?
@@ -39,12 +39,14 @@
                                sequence.accession_url, target: "_blank")
             end
             if in_admin_mode? || sequence.can_edit?(@user)
-              links << link_with_query(:EDIT.t, controller: :sequences,
-                                       action: :edit, id: sequence.id,
-                                       back: observation.id)
-              links << link_with_query(:DESTROY.t, { controller: :sequences,
-                                       action: :destroy, id: sequence.id },
-                                       { data: { confirm: :are_you_sure.t } })
+              links << link_with_query(
+                :EDIT.t, edit_sequence_path(id: sequence.id,
+                                            params: { back: observation.id })
+              )
+              links << link_with_query(
+                :DESTROY.t, sequence_path(sequence.id),
+                { data: { confirm: :are_you_sure.t } }
+              )
             end
             if sequence.blastable?
               links << link_to(:show_observation_blast_link.t,
