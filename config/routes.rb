@@ -680,7 +680,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
 
-
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
