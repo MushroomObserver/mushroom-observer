@@ -337,7 +337,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_advanced_search_2
+  def test_advanced_search2
     login
     get(:index,
         params: { name: "Agaricus",
@@ -348,7 +348,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(4, results.length)
   end
 
-  def test_advanced_search_3
+  def test_advanced_search3
     login
     # Fail to include notes.
     get(:index,
@@ -426,7 +426,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_match(/unexpected term/i, @response.body)
   end
 
-  def test_observation_search_1
+  def test_observation_search1
     login
     pattern = "Boletus edulis"
     get_with_dump(:index, pattern: pattern)
@@ -438,7 +438,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_observation_search_2
+  def test_observation_search2
     login
     pattern = "Boletus edulis"
     get_with_dump(:index, pattern: pattern, page: 2)
@@ -928,7 +928,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
-
     get(:show, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
                     obs3.collection_numbers.map { |x| [x.id, true] },
@@ -937,8 +936,8 @@ class ObservationsControllerTest < FunctionalTestCase
                     obs3.herbarium_records.map { |x| [x.id, false] },
                     true)
     assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
-      { count: 1 }, "Observation page missing an Add Sequence link")
-
+                  { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     # Rolf owns obs1 and owns one herbarium record for both obs2 and obs3,
     # and he is a curator at NYBG.
@@ -968,7 +967,8 @@ class ObservationsControllerTest < FunctionalTestCase
       true
     )
     assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
-      { count: 1 }, "Observation page missing an Add Sequence link")
+                  { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     # Mary owns obs2 and obs3, but has nothing to do with obs1.
     login("mary")
