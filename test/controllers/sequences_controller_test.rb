@@ -548,13 +548,11 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
-    q     = query.id.alphabetize
-    params = {id: sequence.id,
-              sequence: { locus: sequence.locus,
-                          bases: sequence.bases,
-                          archive: sequence.archive,
-                          accession: sequence.accession } }
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: sequence.archive,
+                           accession: sequence.accession } }
     # Prove by default POST goes back to observation.
     login(obs.user.login)
     patch(:update, params: params)
@@ -567,11 +565,11 @@ class SequencesControllerTest < FunctionalTestCase
     sequence = obs.sequences[2]
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     q     = query.id.alphabetize
-    params = {id: sequence.id,
-              sequence: { locus: sequence.locus,
-                          bases: sequence.bases,
-                          archive: sequence.archive,
-                          accession: sequence.accession } }
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: sequence.archive,
+                           accession: sequence.accession } }
     # Prove that POST keeps query param when returning to observation.
     login(obs.user.login)
     patch(:update, params: params.merge(q: q))
@@ -584,11 +582,11 @@ class SequencesControllerTest < FunctionalTestCase
     sequence = obs.sequences[2]
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     q     = query.id.alphabetize
-    params = {id: sequence.id,
-              sequence: { locus: sequence.locus,
-                          bases: sequence.bases,
-                          archive: sequence.archive,
-                          accession: sequence.accession } }
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: sequence.archive,
+                           accession: sequence.accession } }
 
     # Prove that POST keeps query param when returning to sequence.
     login(obs.user.login)
@@ -615,8 +613,6 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_destroy_no_login
     sequence = sequences(:local_sequence)
-    obs      = sequence.observation
-    observer = obs.user
 
     # Prove user must be logged in to destroy Sequence.
     assert_no_difference("Sequence.count") do
@@ -627,7 +623,6 @@ class SequencesControllerTest < FunctionalTestCase
   def test_destroy_by_other_user
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
-    observer = obs.user
 
     # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
     login("zero")
@@ -656,8 +651,6 @@ class SequencesControllerTest < FunctionalTestCase
   def test_destroy_redirect
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
-    q     = query.id.alphabetize
 
     # Prove by default it goes back to observation.
     login(obs.user.login)
