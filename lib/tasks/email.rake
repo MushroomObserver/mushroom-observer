@@ -35,9 +35,6 @@ namespace :email do
           if result
             e.destroy
             count += 1
-            if count >= MO.email_per_minute
-              # break
-            end
 
           # After a few tries give up and delete it.
           elsif e.num_attempts && (e.num_attempts >= MO.email_num_attempts - 1)
@@ -60,9 +57,6 @@ namespace :email do
         else
           e.destroy
           count += 1
-          if count >= MO.email_per_minute
-            # break
-          end
 
         end
       end
