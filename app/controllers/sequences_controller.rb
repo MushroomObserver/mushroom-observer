@@ -207,6 +207,7 @@ class SequencesController < ApplicationController
       redirect_with_query(@observation.show_link_args)
     else
       flash_object_errors(@sequence)
+      render("new")
     end
   end
 
@@ -217,6 +218,7 @@ class SequencesController < ApplicationController
       redirect_with_query(@back_object.show_link_args)
     else
       flash_object_errors(@sequence)
+      render("edit")
     end
   end
 

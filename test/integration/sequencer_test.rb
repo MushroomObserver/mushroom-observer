@@ -21,6 +21,10 @@ class SequencerTest < IntegrationTestCase
     visit(observation_path(obs))
     click_on("Add Sequence")
     fill_in("sequence[locus]", with: "New locus")
+    click_on("Submit")
+    assert_equal(sequence_original_count, Sequence.count,
+                 "Sequence without Bases should not have been created")
+
     fill_in("sequence[bases]", with: "catcatcat")
     click_on("Submit")
     assert_equal(sequence_original_count + 1, Sequence.count,
