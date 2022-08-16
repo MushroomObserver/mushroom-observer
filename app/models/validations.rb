@@ -36,7 +36,7 @@ module Validations
 
   def check_year(when_date, errors)
     return true unless !when_date.respond_to?(:year) || when_date.year < 1500 ||
-                       when_date.year > (1.day.from_now).year
+                       when_date.year > 1.day.from_now.year
 
     errors.add(:when, when_message(when_date))
     errors.add(:when, :validate_invalid_year.t)
