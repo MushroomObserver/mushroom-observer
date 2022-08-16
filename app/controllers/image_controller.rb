@@ -6,26 +6,31 @@
 #  == Actions
 #
 #  ==== Searches and Indexes
-#  list_images::
-#  images_by_user::
-#  image_search::
-#  advanced_search::
-#  index_image::
-#  show_selected_images::
+#                          Display a matrix of images:
+#  list_images::           all images, by creation date descending
+#  images_by_user::        by a given user
+#  images_for_project      attached to a given project
+#  image_search::          whose attributes match a string pattern
+#  advanced_search::       matching Advanced Search results
+#  index_image::           current query
+#  show_selected_images::  search results
 #
 #  ==== Show Images
 #  show_image::
+#  show_original::         show full_size image (for backwards compatibility)
 #  next_image::
 #  prev_image::
-#  cast_vote::
+#  cast_vote::             change user's vote & go to next image
 #
 #  ==== Work With Images
 #  add_image::             Upload images for observation.
 #  edit_image::            Edit notes, etc. for image.
+#  transform_image         Rotate or flip image
 #  destroy_image::         Callback: destroy image.
 #  remove_image::          Callback: remove image from observation.
 #  reuse_image::           Choose images to add to observation.
 #  remove_images::         Choose images to remove from observation.
+#  remove_images_for_glossary_term Choose images to remove from GlossaryTerm.
 #  license_updater::       Change copyright of many images.
 #  bulk_vote_anonymity_updater:: Change anonymity of image votes in bulk.
 #  bulk_filename_purge::   Purge all original image filenames from the database.
