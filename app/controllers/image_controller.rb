@@ -416,7 +416,7 @@ class ImageController < ApplicationController
     end
   end
 
-  def init_project_vars_for_add_or_edit(obs_or_img)
+  private def init_project_vars_for_add_or_edit(obs_or_img)
     @projects = User.current.projects_member(order: :title)
     @project_checks = {}
     obs_or_img.projects.each do |proj|
@@ -425,7 +425,7 @@ class ImageController < ApplicationController
     end
   end
 
-  def init_project_vars_for_reload(obs_or_img)
+  private def init_project_vars_for_reload(obs_or_img)
     # (Note: In practice, this is never called for add_image,
     # so obs_or_img is always an image.)
     @projects = User.current.projects_member(order: :title)
@@ -442,7 +442,7 @@ class ImageController < ApplicationController
     end
   end
 
-  def update_projects(img, checks)
+  private def update_projects(img, checks)
     any_changes = false
     if checks
 
@@ -543,7 +543,7 @@ class ImageController < ApplicationController
                         action: :show, id: @observation.id)
   end
 
-  def serve_reuse_form(params)
+  private def serve_reuse_form(params)
     if params[:all_users] == "1"
       @all_users = true
       query = create_query(:Image, :all, by: :updated_at)
@@ -556,7 +556,7 @@ class ImageController < ApplicationController
                               include: [:user, { observations: :name }])
   end
 
-  def look_for_image(method, params)
+  private def look_for_image(method, params)
     return nil unless (method == "POST") || params[:img_id].present?
 
     unless (img = Image.safe_find(params[:img_id]))
@@ -668,7 +668,7 @@ class ImageController < ApplicationController
     remove_images_from_object(Observation, params)
   end
 
-  def remove_images_from_object(target_class, params)
+  private def remove_images_from_object(target_class, params)
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s)
     return unless @object
