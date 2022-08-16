@@ -820,7 +820,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # get("/sequence/index_sequence", to: redirect("/sequences"))
   get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
   get("/sequence/observation_index",
-      # Disable cops because Rails doesn't allow do/end syntax in redirect blocks
+      # Disable cops; Rails doesn't allow do/end syntax in redirect blocks
       # https://api.rubyonrails.org/classes/ActionDispatch/Routing/Redirection.html#method-i-redirect
       to: redirect { |_params, request| # rubocop:disable Style/BlockDelimiters
             # Does original request have params?
@@ -832,7 +832,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
               "/sequences"
           })
   get("/sequence/sequence_search",
-      # Disable cops because Rails doesn't allow do/end syntax in redirect blocks
+      # Disable cops; Rails doesn't allow do/end syntax in redirect blocks
       # https://api.rubyonrails.org/classes/ActionDispatch/Routing/Redirection.html#method-i-redirect
       to: redirect { |_params, request| # rubocop:disable Style/BlockDelimiters
             # Does original request have params?
