@@ -282,6 +282,18 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("small", user.reload.image_size)
   end
 
+  def test_show_image_change_user_vote
+    image = images(:in_situ_image)
+    user = users(:rolf)
+    changed_vote = Image.minimum_vote
+
+    login(user.login)
+    get(:show_image, params: { id: image.id, vote: changed_vote, next: true })
+
+    assert_equal(changed_vote, image.reload.users_vote(user),
+                 "Failed to change user's vote for image")
+  end
+
   def test_image_search
     login
     get_with_dump(:image_search, pattern: "Notes")
