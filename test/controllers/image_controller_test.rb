@@ -313,8 +313,6 @@ class ImageControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-
-
   def test_add_image
     requires_login(:add_image, id: observations(:coprinus_comatus_obs).id)
     assert_form_action(action: "add_image",

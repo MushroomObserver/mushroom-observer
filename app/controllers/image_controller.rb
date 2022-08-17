@@ -126,7 +126,7 @@ class ImageController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observations, action: :advanced_search)
+    redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a matrix with "list_images" template.
