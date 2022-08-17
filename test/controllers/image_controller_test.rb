@@ -305,10 +305,12 @@ class ImageControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
+    ImageController.any_instance.expects(:show_selected_images).
+      raises(StandardError)
     login
 
     get(:advanced_search, params: @controller.query_params(query))
-    assert_template("list_images")
+    assert_redirected_to(search_advanced_path)
   end
 
 
