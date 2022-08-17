@@ -25,8 +25,7 @@
 # list_sequences (get)              index (get, flavor: all) -- all Sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
-# observation_index (get)           index (get, flavor: observation)
-#                                   -- list Sequences for one Observation
+# *observation_index (get)          n.a (unused, listed Seqs for one Obs)
 # *sequence_search (get)            n.a (unused, listed Seqs matching Pattern)
 # show_sequence (get)               show (get)
 #
@@ -40,9 +39,7 @@ class SequencesController < ApplicationController
   ################# Actions that show data without modifying it
 
   # display a list of Sequences, depending on flavor & params
-  # Examples:
-  #  https://mushroomobserver.org/sequences?flavor=observation&id=205345
-  #    => displays a list of sequences for Observation 205345
+  # Example:
   #  https://mushroomobserver.org/sequences?flavor=all
   #    => displays a list of all sequences in MO
   #
@@ -50,8 +47,6 @@ class SequencesController < ApplicationController
     case params[:flavor]
     when "all"
       index_all
-    when "observation"
-      index_observation
     else
       query = find_or_create_query(:Sequence, by: params[:by])
       show_selected_sequences(query, id: params[:id].to_s, always_index: true)
@@ -147,19 +142,6 @@ class SequencesController < ApplicationController
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
-  end
-
-  def index_observation
-    store_location
-    query = create_query(:Sequence, :for_observation,
-                         observation: params[:id].to_s)
-    @links = [
-      [:show_object.l(type: :observation),
-       Observation.show_link_args(params[:id])],
-      [:show_observation_add_sequence.l,
-       { action: :create, id: params[:id] }]
-    ]
-    show_selected_sequences(query, always_index: true)
   end
 
   def show_selected_sequences(query, args = {})

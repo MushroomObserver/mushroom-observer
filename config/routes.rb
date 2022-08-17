@@ -818,18 +818,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # get("/sequence/index", to: redirect("/sequences"))
   # get("/sequence/index_sequence", to: redirect("/sequences"))
   get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
-  get("/sequence/observation_index",
-      # Disable cops; Rails doesn't allow do/end syntax in redirect blocks
-      # https://api.rubyonrails.org/classes/ActionDispatch/Routing/Redirection.html#method-i-redirect
-      to: redirect { |_params, request| # rubocop:disable Style/BlockDelimiters
-            # Does original request have params?
-            URI.parse(request.original_url).query ? # rubocop:disable Style/MultilineTernaryOperator
-              # preserve original id param (and any others)
-              "/sequences?#{URI.parse(request.original_url).query}" \
-              "&flavor=observation"
-            :
-              "/sequences"
-          })
 
   # ----- Users: legacy action redirects  ----------------------------------
   get("/observer/user_search", to: redirect(path: "/users"))

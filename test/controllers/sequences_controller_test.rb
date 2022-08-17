@@ -47,22 +47,6 @@ class SequencesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_observation_index
-    login
-    obs = observations(:genbanked_obs)
-    assert(obs.sequences.size.positive?,
-           "Use a fixture withn >= 1 sequence")
-
-    get(:index, params: { flavor: :observation, id: obs.id })
-
-    assert_response(:success)
-    obs.sequences.each do |sequence|
-      assert_select("a[href ^= '#{sequence_path(sequence.id)}']",
-                    { count: 1 },
-                    "Page missing a link to Sequence")
-    end
-  end
-
   def test_show
     login
     # Prove sequence displayed if called with id of sequence in db
