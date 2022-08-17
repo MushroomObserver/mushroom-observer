@@ -23,6 +23,25 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
   end
 
+  def test_index_image_by_user
+    login
+    get(:index_image, params: { by: "user" })
+    assert_select("title", text: "Mushroom Observer: Images by User")
+  end
+
+  def test_index_image_by_copyright_holder
+    login
+    get(:index_image, params: { by: "copyright_holder" })
+    assert_select("title",
+                  text: "Mushroom Observer: Images by Copyright Holder")
+  end
+
+  def test_index_image_by_name
+    login
+    get(:index_image, params: { by: "name" })
+    assert_select("title", text: "Mushroom Observer: Images by Name")
+  end
+
   def test_images_for_project
     login
     get_with_dump(:images_for_project, id: projects(:bolete_project).id)
