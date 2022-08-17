@@ -815,6 +815,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   )
   get("/sequence/create_sequence/:id",
       to: redirect("/sequences/new?obs_id=%{id}"))
+  get("/sequence/edit_sequence/:id", to: redirect("/sequences/%{id}/edit"))
   # ----- Sequences: nonstandard legacy action redirects
   get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
 
