@@ -811,12 +811,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Sequences: legacy action redirects
   redirect_legacy_actions(
     old_controller: "sequence", new_controller: "sequences",
-    # actions: [:show, :list, :index]
     actions: [:show, :index]
   )
+  get("/sequence/create_sequence/:id",
+      to: redirect("/sequences/new?obs_id=%{id}"))
   # ----- Sequences: nonstandard legacy action redirects
-  # get("/sequence/index", to: redirect("/sequences"))
-  # get("/sequence/index_sequence", to: redirect("/sequences"))
   get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
 
   # ----- Users: legacy action redirects  ----------------------------------
