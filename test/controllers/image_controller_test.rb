@@ -9,6 +9,14 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
   end
 
+  def test_list_images_too_many_pages
+    login
+    get(:list_images, params: { page: 1_000_000 })
+    # 429 == :too_many_requests. The symbolic response code does not work.
+    # Perhaps we're not loading that part of Rack. JDC 2022-08-17
+    assert_response(429)
+  end
+
   def test_images_by_user
     login
     get_with_dump(:images_by_user, id: rolf.id)
@@ -290,6 +298,20 @@ class ImageControllerTest < FunctionalTestCase
     assert_flash_text(:advanced_search_bad_q_error.l)
     assert_redirected_to(search_advanced_path)
   end
+
+  def test_advanced_search_error
+    query = Query.lookup_and_save(:Image, :advanced_search,
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma")
+    login
+
+    get(:advanced_search, params: @controller.query_params(query))
+    assert_template("list_images")
+  end
+
+
 
   def test_add_image
     requires_login(:add_image, id: observations(:coprinus_comatus_obs).id)
