@@ -272,6 +272,16 @@ class ImageControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
+  def test_show_image_change_user_default_size
+    image = images(:in_situ_image)
+    user = users(:rolf)
+    assert_equal("medium", user.image_size, "Need different fixture for test")
+    login(user.login)
+
+    get(:show_image, params: { id: image.id, size: :small, make_default: "1"})
+    assert_equal("small", user.reload.image_size)
+  end
+
   def test_image_search
     login
     get_with_dump(:image_search, pattern: "Notes")
