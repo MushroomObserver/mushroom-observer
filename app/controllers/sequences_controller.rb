@@ -12,8 +12,9 @@
 #    show::     Display Sequence details
 #    update::   Update a Sequence
 #
-# Table: (updated 2022-08-07)
+# Table: (updated 2022-08-17)
 # legacy Sequence action (method)   updated Sequences action (method)
+# * == legacy action not redirected
 # --------------------------------  ---------------------------------
 # create_sequence (get)             new (get)
 # *create_sequence (post)           create (post)
@@ -26,10 +27,8 @@
 # *prev_sequence (get)              show { flow: :prev } (get)
 # observation_index (get)           index (get, flavor: observation)
 #                                   -- list Sequences for one Observation
-# sequence_search (get)             index (get, pattern: present)
+# *sequence_search (get)            n.a (unused, listed Seqs matching Pattern)
 # show_sequence (get)               show (get)
-# * == legacy action is not redirected
-# Cf. https://tinyurl.com/ynapvpt7
 #
 class SequencesController < ApplicationController
   before_action :login_required
@@ -46,12 +45,8 @@ class SequencesController < ApplicationController
   #    => displays a list of sequences for Observation 205345
   #  https://mushroomobserver.org/sequences?flavor=all
   #    => displays a list of all sequences in MO
-  #  https://mushroomobserver.org/sequences?pattern=LSU
-  #    => displays a list of all sequences that include "LSU"
   #
   def index
-    return patterned_index if params[:pattern].present?
-
     case params[:flavor]
     when "all"
       index_all
@@ -165,17 +160,6 @@ class SequencesController < ApplicationController
        { action: :create, id: params[:id] }]
     ]
     show_selected_sequences(query, always_index: true)
-  end
-
-  def patterned_index
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (sequence = Sequence.safe_find(pattern))
-      redirect_to(sequence_path(sequence.id))
-    else
-      show_selected_sequences(
-        create_query(:Sequence, :pattern_search, pattern: pattern)
-      )
-    end
   end
 
   def show_selected_sequences(query, args = {})

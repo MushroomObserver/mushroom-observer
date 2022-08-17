@@ -47,18 +47,6 @@ class SequencesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_search_pattern_id
-    login
-    get(:index, params: { pattern: Sequence.last.id })
-    assert_redirected_to(Sequence.last.show_link_args)
-  end
-
-  def test_search_pattern_text
-    login
-    get(:index, params: { pattern: "ITS" })
-    assert(:success)
-  end
-
   def test_observation_index
     login
     obs = observations(:genbanked_obs)
