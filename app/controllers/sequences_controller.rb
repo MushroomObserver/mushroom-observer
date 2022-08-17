@@ -159,7 +159,7 @@ class SequencesController < ApplicationController
       ["updated_at",  :sort_by_updated_at.t],
       ["user",        :USER.t],
       ["observation", :OBSERVATION.t]
-    ]
+    ].freeze
   end
 
   # ---------- Create, Edit ----------------------------------------------------
