@@ -240,6 +240,26 @@ class ImageControllerTest < FunctionalTestCase
     end
   end
 
+  def test_show_image_with_bad_vote
+    image = images(:peltigera_image)
+    assert(ImageVote.where(image: image).count > 1,
+           "Use Image fixture with multiple votes for better coverage")
+    # create invalid vote in order to cover line that rescues an error
+    bad_vote = ImageVote.new(image: image, user: nil, value: Image.minimum_vote)
+    bad_vote.save!(validate: false)
+    num_views = image.num_views
+
+    login
+    get(:show_image, params: { id: image.id })
+
+    assert_template("show_image", partial: "_form_ccbyncsa25")
+    assert_equal(num_views + 1, image.reload.num_views)
+    (Image.all_sizes + [:original]).each do |size|
+      get(:show_image, params: { id: image.id, size: size })
+      assert_template("show_image", partial: "_form_ccbyncsa25")
+    end
+  end
+
   def test_show_image_edit_links
     img = images(:in_situ_image)
     proj = projects(:bolete_project)
