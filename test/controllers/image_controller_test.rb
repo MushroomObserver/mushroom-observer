@@ -811,6 +811,30 @@ class ImageControllerTest < FunctionalTestCase
     assert_true(img.gps_stripped)
   end
 
+  def test_add_images_process_image_fail
+    login("rolf")
+    obs = observations(:coprinus_comatus_obs)
+    setup_image_dirs
+    fixture = "#{MO.root}/test/images/geotagged.jpg"
+    fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+    Image.any_instance.stubs(:process_image).returns(false)
+
+    post(:add_image,
+         params: { id: obs.id,
+                   image: { "when(1i)" => "2007",
+                            "when(2i)" => "3",
+                            "when(3i)" => "29",
+                            copyright_holder: "Douglas Smith",
+                            notes: "Some notes." },
+                   upload: { image1: fixture,
+                             image2: "",
+                             image3: "",
+                             image4: "" } })
+
+    assert_flash_error("image.process_image failure should cause flash error")
+    assert_redirected_to(controller: :observations, action: :show, id: obs.id)
+  end
+
   # This is what would happen when user first opens form.
   def test_reuse_image_for_user
     requires_login(:reuse_image, mode: "profile")
