@@ -309,6 +309,24 @@ class ImageControllerTest < FunctionalTestCase
            "Vote not cast correctly")
   end
 
+  def test_cast_vote_next
+    user = users(:mary)
+    image = images(:in_situ_image)
+    value = Image.maximum_vote
+    login(user.login)
+
+    assert_difference("ImageVote.count", 1, "Failed to cast vote") do
+      get(:cast_vote, params: { id: image.id, value: value, next: true })
+    end
+    assert_redirected_to(
+      "#{image_show_image_path}/#{image.id}" \
+      "?q=#{QueryRecord.last.id.alphabetize}"
+    )
+    vote = ImageVote.last
+    assert(vote.image == image && vote.user == user && vote.value == value,
+           "Vote not cast correctly")
+  end
+
   def test_image_search
     login
     get_with_dump(:image_search, pattern: "Notes")
