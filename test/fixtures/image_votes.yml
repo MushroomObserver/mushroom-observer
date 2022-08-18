@@ -3,20 +3,23 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# NOTE: Do not have any votes for in_situ_image
+# ImageTest#test_votes expects in_situ_image votes to be empty
+
 DEFAULTS: &DEFAULTS
-  image: in_situ_image
+  image: peltigera_image
   user: rolf
   value: <%= Image.maximum_vote %>
   anonymous: false
 
 in_situ_image_rolf_vote:
   <<: *DEFAULTS
-  image: in_situ_image
+  image: peltigera_image
   user: rolf
   value: <%= Image.maximum_vote %>
 
 in_situ_image_mary_vote:
   <<: *DEFAULTS
-  image: in_situ_image
+  image: peltigera_image
   user: mary
   value: <%= Image.minimum_vote %>

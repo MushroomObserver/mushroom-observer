@@ -283,7 +283,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_show_image_change_user_vote
-    image = images(:in_situ_image)
+    image = images(:peltigera_image)
     user = users(:rolf)
     changed_vote = Image.minimum_vote
 
