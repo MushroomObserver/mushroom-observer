@@ -277,7 +277,7 @@ class ImageController < ApplicationController
     if params[:next]
       redirect_to_next_object(:next, Image, params[:id].to_s)
     else
-      redirect_with_query(action: "show_image", id: id)
+      redirect_with_query(action: "show_image", id: params[:id])
     end
   end
 
