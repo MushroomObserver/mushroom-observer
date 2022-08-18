@@ -225,7 +225,9 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_show_image
-    image = images(:in_situ_image)
+    image = images(:peltigera_image)
+    assert(ImageVotes.where(image: image).count > 1,
+           "Use Image fixture with multiple votes for better coverage")
     num_views = image.num_views
     login
     get_with_dump(:show_image, id: image.id)
