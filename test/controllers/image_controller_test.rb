@@ -226,11 +226,11 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_show_image
     image = images(:peltigera_image)
-    assert(ImageVotes.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).count > 1,
            "Use Image fixture with multiple votes for better coverage")
     num_views = image.num_views
     login
-    get_with_dump(:show_image, id: image.id)
+    get(:show_image, params: { id: image.id })
     assert_template("show_image", partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
