@@ -564,6 +564,25 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(obs.reload.images.member?(image))
   end
 
+  # Prove that destroying image with query redirects to next image
+  def test_destroy_image_with_query
+    user = users(:mary)
+    assert(user.images.size > 1, "Need different fixture for test")
+    image = user.images.second
+    next_image = user.images.first
+    obs = image.observations.first
+    assert(obs.images.member?(image))
+    query = Query.lookup_and_save(:Image, :by_user, user: user)
+    q = query.id.alphabetize
+    params = { id: image.id.to_s, q: q }
+
+    requires_user(:destroy_image, :show_image, params, user.login)
+
+    assert_redirected_to(action: :show_image, id: next_image.id, q: q)
+    assert_equal(0, user.reload.contribution)
+    assert_not(obs.reload.images.member?(image))
+  end
+
   def test_edit_image
     image = images(:connected_coprinus_comatus_image)
     params = { "id" => image.id.to_s }
