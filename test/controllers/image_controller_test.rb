@@ -603,6 +603,28 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal(new_name, image.reload.original_name)
   end
 
+  def test_update_image_no_changes
+    image = images(:agaricus_campestris_image)
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => image.when.year.to_s,
+        "when(2i)" => image.when.month.to_s,
+        "when(3i)" => image.when.day.to_s,
+        "copyright_holder" => image.copyright_holder,
+        "notes" => image.notes,
+        "original_name" => image.original_name,
+        "license" => image.license
+      }
+    }
+
+    post_requires_login(:edit_image, params)
+
+    assert_flash_text(:runtime_no_changes.l,
+                      "Flash should say no changes " \
+                      "if no changes made when editing image")
+  end
+
   def test_remove_images
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
