@@ -866,6 +866,17 @@ class ImageControllerTest < FunctionalTestCase
     assert_false(img.gps_stripped)
   end
 
+  def test_reuse_image_bad_image_id
+    obs = observations(:agaricus_campestris_obs)
+    params = { mode: "observation", obs_id: obs.id, img_id: "bad_id"}
+
+    login(obs.user.login)
+    get(:reuse_image, params: params)
+
+    assert_flash_text(
+      :runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+  end
+
   def test_add_images_empty
     login("rolf")
     obs = observations(:coprinus_comatus_obs)
