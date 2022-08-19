@@ -625,6 +625,35 @@ class ImageControllerTest < FunctionalTestCase
                       "if no changes made when editing image")
   end
 
+  # Prove that user can remove image from project
+  # by updating image without changes
+  def test_update_image_unchanged_remove_from_project
+    project = projects(:bolete_project)
+    assert(project.images.present?,
+           "Test needs Project fixture that has an Image")
+    image = project.images.first
+    user = image.user
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => image.when.year.to_s,
+        "when(2i)" => image.when.month.to_s,
+        "when(3i)" => image.when.day.to_s,
+        "copyright_holder" => image.copyright_holder,
+        "notes" => image.notes,
+        "original_name" => image.original_name,
+        "license" => image.license
+      },
+      project: project
+    }
+    login(user.login)
+
+    post(:edit_image, params: params)
+
+    assert(project.reload.images.exclude?(image),
+           "Failed to remove image from project")
+  end
+
   def test_remove_images
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
