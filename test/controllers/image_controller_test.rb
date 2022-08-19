@@ -685,6 +685,23 @@ class ImageControllerTest < FunctionalTestCase
     assert_form_action(action: "remove_images", id: obs.id)
   end
 
+  def test_remove_images_post
+    obs = observations(:detailed_unknown_obs)
+    images = obs.images
+    assert(images.size > 1,
+           "Use Observation fixture with multiple images for best coverage")
+    user = obs.user
+    selected = images.ids.each_with_object({}) do |item, hash|
+      hash[item.to_s] = "yes" # "img_id" => "yes" (yes means delete that image˝)
+    end
+    params = { id: obs.id, selected: selected }
+
+    login(user.login)
+    post(:remove_images, params: params)
+
+    assert_empty(obs.reload.images)
+  end
+
   def test_remove_images_for_glossary_term
     glossary_term = glossary_terms(:plane_glossary_term)
     params = { id: glossary_term.id }
