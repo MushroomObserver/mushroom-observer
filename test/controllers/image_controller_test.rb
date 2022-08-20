@@ -949,6 +949,7 @@ class ImageControllerTest < FunctionalTestCase
     login(obs.user.login)
     get(:reuse_image, params: params)
 
+    assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
   end
 
   # Prove there is no change when user tries to change profile image to itself
@@ -1296,5 +1297,3 @@ class ImageControllerTest < FunctionalTestCase
     assert_redirected_to("#{image_show_image_path}/#{image.id}?size=#{size}")
   end
 end
-e_show_transform_note.l)
-    assert_redirected_to("#{image_show_image_path}/#{
