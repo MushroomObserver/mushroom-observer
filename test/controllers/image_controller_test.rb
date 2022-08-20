@@ -1055,7 +1055,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_bulk_vote_anonymity_updater_bad_commit_param
     login("rolf")
-    post(:bulk_vote_anonymity_updater, params: { commit: "bad commit"})
+    post(:bulk_vote_anonymity_updater, params: { commit: "bad commit" })
 
     assert_flash_error
     assert_redirected_to(account_prefs_path)
