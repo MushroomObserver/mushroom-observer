@@ -798,6 +798,17 @@ class ImageControllerTest < FunctionalTestCase
                        id: glossary_term.id)
   end
 
+  def test_reuse_image_for_glossary_term_all_images
+    glossary_term = glossary_terms(:conic_glossary_term)
+    params = { all_users: 1, id: glossary_term.id }
+    requires_login(:reuse_image_for_glossary_term, params)
+
+    assert_form_action(action: "reuse_image_for_glossary_term",
+                       id: glossary_term.id)
+    assert_select("a", { text: :image_reuse_just_yours.l },
+                  "Form should have a link to show only the user's images.")
+  end
+
   def test_reuse_image_by_id
     obs = observations(:agaricus_campestris_obs)
     updated_at = obs.updated_at
