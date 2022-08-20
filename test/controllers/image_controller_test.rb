@@ -732,6 +732,19 @@ class ImageControllerTest < FunctionalTestCase
                        obs_id: obs.id)
   end
 
+  def test_reuse_image_all_images
+    obs = observations(:agaricus_campestris_obs)
+    params = { all_users: 1, mode: "observation", obs_id: obs.id }
+
+    login(obs.user.login)
+    get(:reuse_image, params: params)
+
+    assert_form_action(action: :reuse_image, mode: "observation",
+                       obs_id: obs.id)
+    assert_select("a", { text: :image_reuse_just_yours.l },
+                  "Form should have a link to show only the user's images.")
+  end
+
   def test_reuse_image_for_glossary_term
     glossary_term = glossary_terms(:conic_glossary_term)
     params = { id: glossary_term.id }
