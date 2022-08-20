@@ -883,6 +883,15 @@ class ImageControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_reuse_image_for_glossary_bad_image_id
+    glossary_term = glossary_terms(:conic_glossary_term)
+    params = { id: glossary_term.id, img_id: "bad_id" }
+
+    requires_login(:reuse_image_for_glossary_term, params)
+
+    assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+  end
+
   def test_upload_image
     setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
