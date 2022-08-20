@@ -240,6 +240,24 @@ class ImageControllerTest < FunctionalTestCase
     end
   end
 
+  # Prove show works when params include obs
+  def test_show_with_obs_param
+    obs = observations(:peltigera_obs)
+    assert((image = obs.images.first), "Test needs Obs fixture with images")
+
+    login(obs.user.login)
+
+    assert_difference("QueryRecord.count", 2,
+                      "show_image from obs-type page should add 2 Query's") do
+      get(:show_image, params: { id: image.id, obs: obs.id })
+    end
+    assert_template("show_image", partial: "_form_ccbyncsa25")
+    first_query = Query.find(QueryRecord.first.id)
+    second_query = Query.find(QueryRecord.second.id)
+    assert_equal(Observation, first_query.model)
+    assert_equal(Image, second_query.model)
+  end
+
   def test_show_image_with_bad_vote
     image = images(:peltigera_image)
     assert(ImageVote.where(image: image).count > 1,
