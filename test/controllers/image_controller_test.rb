@@ -691,6 +691,33 @@ class ImageControllerTest < FunctionalTestCase
            "Failed to remove image from project")
   end
 
+  def test_update_image_save_fail
+    image = images(:turned_over_image)
+    assert_not_empty(image.projects,
+                     "Use Image fixture with a Project for best coverage")
+    assert(obs = image.observations.first,
+           "Test needs Image fixture having Observations")
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => "2001",
+        "when(2i)" => "5",
+        "when(3i)" => "12",
+        "copyright_holder" => "Rolf Singer",
+        "notes" => "",
+        "original_name" => "new name"
+      }
+    }
+
+    login(image.user.login)
+    Image.any_instance.stubs(:save).returns(false)
+    post(:edit_image, params: params)
+
+    assert(assert_select("span#title-caption").
+             text.start_with?("Editing Image"),
+           "It should return to form if image save fails")
+  end
+
   def test_remove_images
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
