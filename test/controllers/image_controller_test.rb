@@ -1054,6 +1054,14 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
   end
 
+  def test_bulk_vote_anonymity_updater_bad_commit_param
+    login("rolf")
+    post(:bulk_vote_anonymity_updater, params: { commit: "bad commit"})
+
+    assert_flash_error
+    assert_redirected_to(account_prefs_path)
+  end
+
   def test_original_filename_visibility
     # Rolf's image, original name: "Name with áč€εиts.gif"
     img_id = images(:agaricus_campestris_image).id
