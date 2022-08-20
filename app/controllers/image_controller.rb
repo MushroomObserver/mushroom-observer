@@ -416,7 +416,11 @@ class ImageController < ApplicationController
     end
   end
 
-  private def init_project_vars_for_add_or_edit(obs_or_img)
+  ##############################################################################
+
+  private
+
+  def init_project_vars_for_add_or_edit(obs_or_img)
     @projects = User.current.projects_member(order: :title)
     @project_checks = {}
     obs_or_img.projects.each do |proj|
@@ -425,7 +429,7 @@ class ImageController < ApplicationController
     end
   end
 
-  private def init_project_vars_for_reload(obs_or_img)
+  def init_project_vars_for_reload(obs_or_img)
     # (Note: In practice, this is never called for add_image,
     # so obs_or_img is always an image.)
     @projects = User.current.projects_member(order: :title)
@@ -442,7 +446,7 @@ class ImageController < ApplicationController
     end
   end
 
-  private def update_projects(img, checks)
+  def update_projects(img, checks)
     any_changes = false
     if checks
 
@@ -487,6 +491,10 @@ class ImageController < ApplicationController
     end
     any_changes
   end
+
+  public
+
+  ##############################################################################
 
   # Callback to destroy an image.
   # Linked from: show_image/original
@@ -543,7 +551,11 @@ class ImageController < ApplicationController
                         action: :show, id: @observation.id)
   end
 
-  private def serve_reuse_form(params)
+  ##############################################################################
+
+  private
+
+  def serve_reuse_form(params)
     if params[:all_users] == "1"
       @all_users = true
       query = create_query(:Image, :all, by: :updated_at)
@@ -556,7 +568,7 @@ class ImageController < ApplicationController
                               include: [:user, { observations: :name }])
   end
 
-  private def look_for_image(method, params)
+  def look_for_image(method, params)
     return nil unless (method == "POST") || params[:img_id].present?
 
     unless (img = Image.safe_find(params[:img_id]))
@@ -564,6 +576,10 @@ class ImageController < ApplicationController
     end
     img
   end
+
+  public
+
+  ##############################################################################
 
   def reuse_image_for_glossary_term
     pass_query_params
@@ -617,7 +633,6 @@ class ImageController < ApplicationController
       image = Image.safe_find(params[:img_id])
       if !image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-
       elsif @mode == :observation
         # Add image to observation.
         @observation.add_image(image)
@@ -668,7 +683,11 @@ class ImageController < ApplicationController
     remove_images_from_object(Observation, params)
   end
 
-  private def remove_images_from_object(target_class, params)
+  ##############################################################################
+
+  private
+
+  def remove_images_from_object(target_class, params)
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s)
     return unless @object
@@ -692,6 +711,10 @@ class ImageController < ApplicationController
                           action: target_class.show_action, id: @object.id)
     end
   end
+
+  public
+
+  ##############################################################################
 
   def remove_images_for_glossary_term
     remove_images_from_object(GlossaryTerm, params)
@@ -762,7 +785,9 @@ class ImageController < ApplicationController
     end
   end
 
-  private # private methods used by license updater ############################
+  ##############################################################################
+
+  private # private methods used by license updater
 
   def process_license_changes
     params[:updates].values.each do |row|
@@ -800,7 +825,9 @@ class ImageController < ApplicationController
     )
   end
 
-  public # end private methods used by license updater #########################
+  public # end private methods used by license updater
+
+  ##############################################################################
 
   # Bulk update anonymity of user's image votes.
   # Input: params[:commit] - which button user pressed

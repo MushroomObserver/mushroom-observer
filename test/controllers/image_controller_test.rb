@@ -300,7 +300,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("medium", user.image_size, "Need different fixture for test")
     login(user.login)
 
-    get(:show_image, params: { id: image.id, size: :small, make_default: "1"})
+    get(:show_image, params: { id: image.id, size: :small, make_default: "1" })
     assert_equal("small", user.reload.image_size)
   end
 
@@ -881,13 +881,12 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_reuse_image_bad_image_id
     obs = observations(:agaricus_campestris_obs)
-    params = { mode: "observation", obs_id: obs.id, img_id: "bad_id"}
+    params = { mode: "observation", obs_id: obs.id, img_id: "bad_id" }
 
     login(obs.user.login)
     get(:reuse_image, params: params)
 
-    assert_flash_text(
-      :runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+    assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
   end
 
   # Prove there is no change when user tries to change profile image to itself
