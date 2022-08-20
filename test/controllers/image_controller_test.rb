@@ -777,7 +777,7 @@ class ImageControllerTest < FunctionalTestCase
                        obs_id: obs.id)
   end
 
-  def test_reuse_image_all_images
+  def test_reuse_image_for_observation_all_images
     obs = observations(:agaricus_campestris_obs)
     params = { all_users: 1, mode: "observation", obs_id: obs.id }
 
@@ -944,7 +944,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_false(img.gps_stripped)
   end
 
-  def test_reuse_image_bad_image_id
+  def test_reuse_image_for_observation_bad_image_id
     obs = observations(:agaricus_campestris_obs)
     params = { mode: "observation", obs_id: obs.id, img_id: "bad_id" }
 
