@@ -877,6 +877,19 @@ class ImageControllerTest < FunctionalTestCase
       :runtime_image_reuse_invalid_id.t(id: params[:img_id]))
   end
 
+  # Prove there is no change when user tries to change profile image to itself
+  def test_reuse_user_profile_image_as_itself
+    user = users(:rolf)
+    assert((img = user.image), "Test needs User fixture with profile image")
+    params = { mode: "profile", img_id: img.id }
+
+    login(user.login)
+    get(:reuse_image, params: params)
+
+    assert_equal(img, user.image)
+    assert_flash_text(:runtime_no_changes.l)
+  end
+
   def test_add_images_empty
     login("rolf")
     obs = observations(:coprinus_comatus_obs)
