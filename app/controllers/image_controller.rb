@@ -719,7 +719,7 @@ class ImageController < ApplicationController
       end
     end
     if params[:size].blank? ||
-       params[:size].to_sym == (@user ? @user.image_size : :medium)
+       params[:size].to_sym == (@user ? @user.image_size.to_sym : :medium)
       redirect_with_query(action: "show_image", id: image)
     else
       redirect_with_query(action: "show_image", id: image,
