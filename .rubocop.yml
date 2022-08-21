@@ -193,6 +193,10 @@ Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it
   # Is this still true? JDC 2020-08-17
   Enabled: false
+Style/DoubleNegation:
+  # Rubocop default: true
+  # Allow double bang. In the rare places we do this, its use is justified.
+  Enabled: false
 Style/EmptyHeredoc: # new in 1.32
   # Empty Heredoc is usedful as a placeholder in script/refresh_sitemap
   Exclude:
