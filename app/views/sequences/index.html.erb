@@ -8,7 +8,8 @@
 %>
 
 <%= paginate_block(@pages) do %>
-  <div class="list-group")>
+  <div class="list-group">
+    <%# Following is a loop rather than a partial for performance reasons %>
     <% @objects.each do |object| %>
       <div class="list-group-item">
         <%= link_with_query(object.unique_format_name, object.show_link_args) %><br/>
