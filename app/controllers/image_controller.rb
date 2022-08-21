@@ -526,34 +526,9 @@ class ImageController < ApplicationController
     end
   end
 
-  # Callback to remove a single image from an observation.
-  # Linked from: observations/edit
-  # Inputs: params[:image_id], params[:observation_id]
-  # Redirects to observations/show.
-  def remove_image
-    pass_query_params
-    @image = find_or_goto_index(Image, params[:image_id])
-    return unless @image
-
-    @observation = find_or_goto_index(Observation, params[:observation_id])
-    return unless @observation
-
-    if !check_permission!(@observation)
-      flash_error(:runtime_image_remove_denied.t(id: @image.id))
-    elsif @observation.images.exclude?(@image)
-      flash_error(:runtime_image_remove_missing.t(id: @image.id))
-    else
-      @observation.remove_image(@image)
-      @image.log_remove_from(@observation)
-      flash_notice(:runtime_image_remove_success.t(id: @image.id))
-    end
-    redirect_with_query(controller: :observations,
-                        action: :show, id: @observation.id)
-  end
-
   ##############################################################################
 
-  private
+  private # helpers for reuse_image_for_glossary_term
 
   def serve_reuse_form(params)
     if params[:all_users] == "1"
