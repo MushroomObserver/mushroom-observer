@@ -655,6 +655,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("download")
       post("download")
       get("print_labels")
+      post("print_labels")
     end
   end
 
