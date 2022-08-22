@@ -9,10 +9,37 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
   end
 
+  def test_list_images_too_many_pages
+    login
+    get(:list_images, params: { page: 1_000_000 })
+    # 429 == :too_many_requests. The symbolic response code does not work.
+    # Perhaps we're not loading that part of Rack. JDC 2022-08-17
+    assert_response(429)
+  end
+
   def test_images_by_user
     login
     get_with_dump(:images_by_user, id: rolf.id)
     assert_template("list_images", partial: "_image")
+  end
+
+  def test_index_image_by_user
+    login
+    get(:index_image, params: { by: "user" })
+    assert_select("title", text: "Mushroom Observer: Images by User")
+  end
+
+  def test_index_image_by_copyright_holder
+    login
+    get(:index_image, params: { by: "copyright_holder" })
+    assert_select("title",
+                  text: "Mushroom Observer: Images by Copyright Holder")
+  end
+
+  def test_index_image_by_name
+    login
+    get(:index_image, params: { by: "name" })
+    assert_select("title", text: "Mushroom Observer: Images by Name")
   end
 
   def test_images_for_project
@@ -198,13 +225,53 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_show_image
-    image = images(:in_situ_image)
+    image = images(:peltigera_image)
+    assert(ImageVote.where(image: image).count > 1,
+           "Use Image fixture with multiple votes for better coverage")
     num_views = image.num_views
     login
-    get_with_dump(:show_image, id: image.id)
+    get(:show_image, params: { id: image.id })
     assert_template("show_image", partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
+    (Image.all_sizes + [:original]).each do |size|
+      get(:show_image, params: { id: image.id, size: size })
+      assert_template("show_image", partial: "_form_ccbyncsa25")
+    end
+  end
+
+  # Prove show works when params include obs
+  def test_show_with_obs_param
+    obs = observations(:peltigera_obs)
+    assert((image = obs.images.first), "Test needs Obs fixture with images")
+
+    login(obs.user.login)
+
+    assert_difference("QueryRecord.count", 2,
+                      "show_image from obs-type page should add 2 Query's") do
+      get(:show_image, params: { id: image.id, obs: obs.id })
+    end
+    assert_template("show_image", partial: "_form_ccbyncsa25")
+    first_query = Query.find(QueryRecord.first.id)
+    second_query = Query.find(QueryRecord.second.id)
+    assert_equal(Observation, first_query.model)
+    assert_equal(Image, second_query.model)
+  end
+
+  def test_show_image_with_bad_vote
+    image = images(:peltigera_image)
+    assert(ImageVote.where(image: image).count > 1,
+           "Use Image fixture with multiple votes for better coverage")
+    # create invalid vote in order to cover line that rescues an error
+    bad_vote = ImageVote.new(image: image, user: nil, value: Image.minimum_vote)
+    bad_vote.save!(validate: false)
+    num_views = image.num_views
+
+    login
+    get(:show_image, params: { id: image.id })
+
+    assert_template("show_image", partial: "_form_ccbyncsa25")
+    assert_equal(num_views + 1, image.reload.num_views)
     (Image.all_sizes + [:original]).each do |size|
       get(:show_image, params: { id: image.id, size: size })
       assert_template("show_image", partial: "_form_ccbyncsa25")
@@ -243,6 +310,61 @@ class ImageControllerTest < FunctionalTestCase
     assert_response(:success)
     get(:destroy_image, params: { id: img.id })
     assert_flash_success
+  end
+
+  def test_show_image_change_user_default_size
+    image = images(:in_situ_image)
+    user = users(:rolf)
+    assert_equal("medium", user.image_size, "Need different fixture for test")
+    login(user.login)
+
+    get(:show_image, params: { id: image.id, size: :small, make_default: "1" })
+    assert_equal("small", user.reload.image_size)
+  end
+
+  def test_show_image_change_user_vote
+    image = images(:peltigera_image)
+    user = users(:rolf)
+    changed_vote = Image.minimum_vote
+
+    login(user.login)
+    get(:show_image, params: { id: image.id, vote: changed_vote, next: true })
+
+    assert_equal(changed_vote, image.reload.users_vote(user),
+                 "Failed to change user's vote for image")
+  end
+
+  def test_cast_vote
+    user = users(:mary)
+    image = images(:in_situ_image)
+    value = Image.maximum_vote
+    login(user.login)
+
+    assert_difference("ImageVote.count", 1, "Failed to cast vote") do
+      get(:cast_vote, params: { id: image.id, value: value })
+    end
+    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    vote = ImageVote.last
+    assert(vote.image == image && vote.user == user && vote.value == value,
+           "Vote not cast correctly")
+  end
+
+  def test_cast_vote_next
+    user = users(:mary)
+    image = images(:in_situ_image)
+    value = Image.maximum_vote
+    login(user.login)
+
+    assert_difference("ImageVote.count", 1, "Failed to cast vote") do
+      get(:cast_vote, params: { id: image.id, value: value, next: true })
+    end
+    assert_redirected_to(
+      "#{image_show_image_path}/#{image.id}" \
+      "?q=#{QueryRecord.last.id.alphabetize}"
+    )
+    vote = ImageVote.last
+    assert(vote.image == image && vote.user == user && vote.value == value,
+           "Vote not cast correctly")
   end
 
   def test_image_search
@@ -288,6 +410,20 @@ class ImageControllerTest < FunctionalTestCase
     get(:advanced_search, params: { q: "xxxxx" })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  def test_advanced_search_error
+    query = Query.lookup_and_save(:Image, :advanced_search,
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma")
+    ImageController.any_instance.expects(:show_selected_images).
+      raises(StandardError)
+    login
+
+    get(:advanced_search, params: @controller.query_params(query))
     assert_redirected_to(search_advanced_path)
   end
 
@@ -446,6 +582,25 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(obs.reload.images.member?(image))
   end
 
+  # Prove that destroying image with query redirects to next image
+  def test_destroy_image_with_query
+    user = users(:mary)
+    assert(user.images.size > 1, "Need different fixture for test")
+    image = user.images.second
+    next_image = user.images.first
+    obs = image.observations.first
+    assert(obs.images.member?(image))
+    query = Query.lookup_and_save(:Image, :by_user, user: user)
+    q = query.id.alphabetize
+    params = { id: image.id.to_s, q: q }
+
+    requires_user(:destroy_image, :show_image, params, user.login)
+
+    assert_redirected_to(action: :show_image, id: next_image.id, q: q)
+    assert_equal(0, user.reload.contribution)
+    assert_not(obs.reload.images.member?(image))
+  end
+
   def test_edit_image
     image = images(:connected_coprinus_comatus_image)
     params = { "id" => image.id.to_s }
@@ -485,6 +640,82 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal(new_name, image.reload.original_name)
   end
 
+  def test_update_image_no_changes
+    image = images(:agaricus_campestris_image)
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => image.when.year.to_s,
+        "when(2i)" => image.when.month.to_s,
+        "when(3i)" => image.when.day.to_s,
+        "copyright_holder" => image.copyright_holder,
+        "notes" => image.notes,
+        "original_name" => image.original_name,
+        "license" => image.license
+      }
+    }
+
+    post_requires_login(:edit_image, params)
+
+    assert_flash_text(:runtime_no_changes.l,
+                      "Flash should say no changes " \
+                      "if no changes made when editing image")
+  end
+
+  # Prove that user can remove image from project
+  # by updating image without changes
+  def test_update_image_unchanged_remove_from_project
+    project = projects(:bolete_project)
+    assert(project.images.present?,
+           "Test needs Project fixture that has an Image")
+    image = project.images.first
+    user = image.user
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => image.when.year.to_s,
+        "when(2i)" => image.when.month.to_s,
+        "when(3i)" => image.when.day.to_s,
+        "copyright_holder" => image.copyright_holder,
+        "notes" => image.notes,
+        "original_name" => image.original_name,
+        "license" => image.license
+      },
+      project: project
+    }
+    login(user.login)
+
+    post(:edit_image, params: params)
+
+    assert(project.reload.images.exclude?(image),
+           "Failed to remove image from project")
+  end
+
+  def test_update_image_save_fail
+    image = images(:turned_over_image)
+    assert_not_empty(image.projects,
+                     "Use Image fixture with a Project for best coverage")
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => "2001",
+        "when(2i)" => "5",
+        "when(3i)" => "12",
+        "copyright_holder" => "Rolf Singer",
+        "notes" => "",
+        "original_name" => "new name"
+      }
+    }
+
+    login(image.user.login)
+    Image.any_instance.stubs(:save).returns(false)
+    post(:edit_image, params: params)
+
+    assert(assert_select("span#title-caption").
+             text.start_with?("Editing Image"),
+           "It should return to form if image save fails")
+  end
+
   def test_remove_images
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
@@ -495,6 +726,23 @@ class ImageControllerTest < FunctionalTestCase
       params
     )
     assert_form_action(action: "remove_images", id: obs.id)
+  end
+
+  def test_remove_images_post
+    obs = observations(:detailed_unknown_obs)
+    images = obs.images
+    assert(images.size > 1,
+           "Use Observation fixture with multiple images for best coverage")
+    user = obs.user
+    selected = images.ids.each_with_object({}) do |item, hash|
+      hash[item.to_s] = "yes" # "img_id" => "yes" (yes means delete that image˝)
+    end
+    params = { id: obs.id, selected: selected }
+
+    login(user.login)
+    post(:remove_images, params: params)
+
+    assert_empty(obs.reload.images)
   end
 
   def test_remove_images_for_glossary_term
@@ -527,12 +775,36 @@ class ImageControllerTest < FunctionalTestCase
                        obs_id: obs.id)
   end
 
+  def test_reuse_image_for_observation_all_images
+    obs = observations(:agaricus_campestris_obs)
+    params = { all_users: 1, mode: "observation", obs_id: obs.id }
+
+    login(obs.user.login)
+    get(:reuse_image, params: params)
+
+    assert_form_action(action: :reuse_image, mode: "observation",
+                       obs_id: obs.id)
+    assert_select("a", { text: :image_reuse_just_yours.l },
+                  "Form should have a link to show only the user's images.")
+  end
+
   def test_reuse_image_for_glossary_term
     glossary_term = glossary_terms(:conic_glossary_term)
     params = { id: glossary_term.id }
     requires_login(:reuse_image_for_glossary_term, params)
     assert_form_action(action: "reuse_image_for_glossary_term",
                        id: glossary_term.id)
+  end
+
+  def test_reuse_image_for_glossary_term_all_images
+    glossary_term = glossary_terms(:conic_glossary_term)
+    params = { all_users: 1, id: glossary_term.id }
+    requires_login(:reuse_image_for_glossary_term, params)
+
+    assert_form_action(action: "reuse_image_for_glossary_term",
+                       id: glossary_term.id)
+    assert_select("a", { text: :image_reuse_just_yours.l },
+                  "Form should have a link to show only the user's images.")
   end
 
   def test_reuse_image_by_id
@@ -609,6 +881,15 @@ class ImageControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_reuse_image_for_glossary_bad_image_id
+    glossary_term = glossary_terms(:conic_glossary_term)
+    params = { id: glossary_term.id, img_id: "bad_id" }
+
+    requires_login(:reuse_image_for_glossary_term, params)
+
+    assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+  end
+
   def test_upload_image
     setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
@@ -661,6 +942,29 @@ class ImageControllerTest < FunctionalTestCase
     assert_false(img.gps_stripped)
   end
 
+  def test_reuse_image_for_observation_bad_image_id
+    obs = observations(:agaricus_campestris_obs)
+    params = { mode: "observation", obs_id: obs.id, img_id: "bad_id" }
+
+    login(obs.user.login)
+    get(:reuse_image, params: params)
+
+    assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+  end
+
+  # Prove there is no change when user tries to change profile image to itself
+  def test_reuse_user_profile_image_as_itself
+    user = users(:rolf)
+    assert((img = user.image), "Test needs User fixture with profile image")
+    params = { mode: "profile", img_id: img.id }
+
+    login(user.login)
+    get(:reuse_image, params: params)
+
+    assert_equal(img, user.image)
+    assert_flash_text(:runtime_no_changes.l)
+  end
+
   def test_add_images_empty
     login("rolf")
     obs = observations(:coprinus_comatus_obs)
@@ -691,6 +995,30 @@ class ImageControllerTest < FunctionalTestCase
 
     img = Image.last
     assert_true(img.gps_stripped)
+  end
+
+  def test_add_images_process_image_fail
+    login("rolf")
+    obs = observations(:coprinus_comatus_obs)
+    setup_image_dirs
+    fixture = "#{MO.root}/test/images/geotagged.jpg"
+    fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+    Image.any_instance.stubs(:process_image).returns(false)
+
+    post(:add_image,
+         params: { id: obs.id,
+                   image: { "when(1i)" => "2007",
+                            "when(2i)" => "3",
+                            "when(3i)" => "29",
+                            copyright_holder: "Douglas Smith",
+                            notes: "Some notes." },
+                   upload: { image1: fixture,
+                             image2: "",
+                             image3: "",
+                             image4: "" } })
+
+    assert_flash_error("image.process_image failure should cause flash error")
+    assert_redirected_to(controller: :observations, action: :show, id: obs.id)
   end
 
   # This is what would happen when user first opens form.
@@ -786,6 +1114,14 @@ class ImageControllerTest < FunctionalTestCase
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert_not(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
     assert_not(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
+  end
+
+  def test_bulk_vote_anonymity_updater_bad_commit_param
+    login("rolf")
+    post(:bulk_vote_anonymity_updater, params: { commit: "bad commit" })
+
+    assert_flash_error
+    assert_redirected_to(account_prefs_path)
   end
 
   def test_original_filename_visibility
@@ -912,5 +1248,52 @@ class ImageControllerTest < FunctionalTestCase
     image.update(ok_for_ml: false)
     get(:show_image, params: { id: image.id })
     assert_true(@response.body.include?("type=image&amp;value=1"))
+  end
+
+  def test_transform_rotate_left
+    run_transform(opr: "rotate_left")
+  end
+
+  def test_transform_rotate_right
+    run_transform(opr: "rotate_right")
+  end
+
+  def test_transform_mirror
+    run_transform(opr: "mirror")
+  end
+
+  def test_transform_bad_op
+    run_transform(opr: "bad_op", flash: %(Invalid operation "bad_op"))
+  end
+
+  def run_transform(opr:, flash: :image_show_transform_note.l)
+    image = images(:in_situ_image)
+    user = image.user
+    params = { id: image.id, op: opr, size: user.image_size }
+
+    login(user.login)
+    get(:transform_image, params: params)
+
+    # Asserting the flash text is the best I can do because Image.transform
+    # does not transform images in the text environment. 2022-08-19 JDC
+    assert_flash_text(flash)
+    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+  end
+
+  # Prove that if size is provided and is
+  def test_transform_show_with_size
+    image = images(:in_situ_image)
+    user = image.user
+    size = "huge"
+    assert_not_equal(size, user.image_size, "Test needs a different size value")
+    params = { id: image.id, op: "rotate_left", size: size }
+
+    login(user.login)
+    get(:transform_image, params: params)
+
+    # Asserting the flash text is the best I can do because Image.transform
+    # does not transform images in the text environment. 2022-08-19 JDC
+    assert_flash_text(:image_show_transform_note.l)
+    assert_redirected_to("#{image_show_image_path}/#{image.id}?size=#{size}")
   end
 end
