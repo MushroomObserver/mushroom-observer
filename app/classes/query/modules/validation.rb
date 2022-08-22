@@ -100,7 +100,8 @@ module Query
         if hash.keys.length != 1
           raise(
             "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
-            "query! (wrong number of keys in hash)")
+            "query! (wrong number of keys in hash)"
+          )
         end
 
         arg_type = hash.keys.first

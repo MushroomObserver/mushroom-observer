@@ -193,15 +193,22 @@ Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it
   # Is this still true? JDC 2020-08-17
   Enabled: false
+Style/DoubleNegation:
+  # Rubocop default: true
+  # Allow double bang. In the rare places we do this, its use is justified.
+  Enabled: false
 Style/EmptyHeredoc: # new in 1.32
   # Empty Heredoc is usedful as a placeholder in script/refresh_sitemap
   Exclude:
     - script/refresh_sitemap
 Style/FormatStringToken:
-  Enabled: true
+  # Rubocop default: true
+  # It doesn't seem like we gain much by doing this.
+  Enabled: false
+  # The commented-out lines below are in case we re-enable the cop
   # # This doesn't work for redirect in config/routes.rb.
-  IgnoredMethods:
-    - "redirect"
+  # AllowedMethods:
+    # - "redirect"
 Style/MethodCallWithArgsParentheses:
   # Rubocop default: false
   # MO uses parentheses (except for some macro-style methods)
