@@ -386,6 +386,8 @@ class Name < AbstractModel
   has_many :namings
   has_many :observations
 
+  has_one :visual_group
+
   acts_as_versioned(
     table_name: "names_versions",
     if_changed: %w[
