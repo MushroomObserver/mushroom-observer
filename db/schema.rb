@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_23_194140) do
+ActiveRecord::Schema.define(version: 2022_08_21_175714) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -387,6 +387,7 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.boolean "locked", default: false, null: false
     t.integer "icn_id"
+    t.integer "visual_group_id"
   end
 
   create_table "names_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -406,6 +407,7 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
+    t.integer "visual_group_id"
   end
 
   create_table "naming_reasons", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -683,6 +685,13 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.boolean "view_owner_id", default: false, null: false
     t.string "content_filter"
     t.text "notes_template"
+  end
+
+  create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "name_id"
+    t.boolean "reviewed", default: false, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
