@@ -1,0 +1,27 @@
+<%= form_with(model: visual_group) do |form| %>
+  <% if visual_group.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(visual_group.errors.count, "error") %> prohibited this visual_group from being saved:</h2>
+
+      <ul>
+        <% visual_group.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name_id %>
+    <%= form.number_field :name_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :reviewed %>
+    <%= form.check_box :reviewed %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

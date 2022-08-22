@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @visual_group.name_id %>
+</p>
+
+<p>
+  <strong>Reviewed:</strong>
+  <%= @visual_group.reviewed %>
+</p>
+
+<%= link_to 'Edit', edit_visual_group_path(@visual_group) %> |
+<%= link_to 'Back', visual_groups_path %>

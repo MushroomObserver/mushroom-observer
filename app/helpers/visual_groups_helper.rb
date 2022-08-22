@@ -1,0 +1,2 @@
+module VisualGroupsHelper
+end

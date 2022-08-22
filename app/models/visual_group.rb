@@ -1,0 +1,2 @@
+class VisualGroup < ApplicationRecord
+end
