@@ -564,7 +564,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
   match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
-  get("/admin/w3c_tests", to: "admin#w3c_tests")
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/

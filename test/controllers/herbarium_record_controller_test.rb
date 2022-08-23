@@ -17,30 +17,30 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_herbarium_index
     login
-    get_with_dump(:herbarium_index,
-                  params: { id: herbaria(:nybg_herbarium).id })
+    get(:herbarium_index,
+        params: { id: herbaria(:nybg_herbarium).id })
     assert_template(:list_herbarium_records)
   end
 
   def test_herbarium_with_no_herbarium_records_index
     login
-    get_with_dump(:herbarium_index,
-                  params: { id: herbaria(:dick_herbarium).id })
+    get(:herbarium_index,
+        params: { id: herbaria(:dick_herbarium).id })
     assert_template(:list_herbarium_records)
     assert_flash_text(/No matching fungarium records found/)
   end
 
   def test_observation_index
     login
-    get_with_dump(:observation_index,
-                  params: { id: observations(:coprinus_comatus_obs).id })
+    get(:observation_index,
+        params: { id: observations(:coprinus_comatus_obs).id })
     assert_template(:list_herbarium_records)
   end
 
   def test_observation_with_no_herbarium_records_index
     login
-    get_with_dump(:observation_index,
-                  params: { id: observations(:strobilurus_diminutivus_obs).id })
+    get(:observation_index,
+        params: { id: observations(:strobilurus_diminutivus_obs).id })
     assert_template(:list_herbarium_records)
     assert_flash_text(/No matching fungarium records found/)
   end
@@ -59,7 +59,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_herbarium_record_search_with_one_herbarium_record_index
     login
     params = { pattern: herbarium_records(:interesting_unknown).id }
-    get_with_dump(:herbarium_record_search, params: params)
+    get(:herbarium_record_search, params: params)
     assert_response(:redirect)
     assert_no_flash
   end
@@ -77,7 +77,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
     login
-    get_with_dump(:show_herbarium_record, params: { id: herbarium_record.id })
+    get(:show_herbarium_record, params: { id: herbarium_record.id })
     assert_template(:show_herbarium_record)
     assert_template("shared/_matrix_box")
   end
@@ -86,7 +86,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:interesting_unknown)
     assert(herbarium_record)
     login
-    get_with_dump(:show_herbarium_record, params: { id: herbarium_record.id })
+    get(:show_herbarium_record, params: { id: herbarium_record.id })
     assert_template(:show_herbarium_record)
     assert_template("shared/_matrix_box")
   end
@@ -112,8 +112,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:create_herbarium_record,
-                  params: { id: observations(:coprinus_comatus_obs).id })
+    get(:create_herbarium_record,
+        params: { id: observations(:coprinus_comatus_obs).id })
     assert_template("create_herbarium_record")
     assert_template("shared/_matrix_box")
     assert(assigns(:herbarium_record))
@@ -217,20 +217,20 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_record
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-    get_with_dump(:edit_herbarium_record, params: { id: nybg.id })
+    get(:edit_herbarium_record, params: { id: nybg.id })
     assert_response(:redirect)
 
     login("mary") # Non-curator
-    get_with_dump(:edit_herbarium_record, params: { id: nybg.id })
+    get(:edit_herbarium_record, params: { id: nybg.id })
     assert_flash_text(/permission denied/i)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit_herbarium_record, params: { id: nybg.id })
+    get(:edit_herbarium_record, params: { id: nybg.id })
     assert_template(:edit_herbarium_record)
 
     make_admin("mary") # Non-curator, but an admin
-    get_with_dump(:edit_herbarium_record, params: { id: nybg.id })
+    get(:edit_herbarium_record, params: { id: nybg.id })
     assert_template(:edit_herbarium_record)
   end
 

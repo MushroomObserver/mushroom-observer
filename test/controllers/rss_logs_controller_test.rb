@@ -3,17 +3,17 @@
 class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
     login
-    get_with_dump(:index)
+    get(:index)
     assert_template("shared/_matrix_box")
     assert_link_in_html(:app_intro.t, controller: :info, action: :intro)
 
-    get_with_dump(:index)
+    get(:index)
     assert_template("shared/_matrix_box")
 
-    get_with_dump(:rss)
+    get(:rss)
     assert_template(:rss)
 
-    get_with_dump(:show, params: { id: rss_logs(:observation_rss_log).id })
+    get(:show, params: { id: rss_logs(:observation_rss_log).id })
     assert_template(:show)
   end
 

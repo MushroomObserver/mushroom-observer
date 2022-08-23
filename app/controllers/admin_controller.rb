@@ -21,12 +21,6 @@ class AdminController < ApplicationController
     end
   end
 
-  # Simple list of all the files in public/html that are linked to the W3C
-  # validator to make testing easy.
-  def w3c_tests
-    render(layout: false)
-  end
-
   # Update banner across all translations.
   def change_banner
     if !in_admin_mode?
@@ -35,27 +29,41 @@ class AdminController < ApplicationController
     elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
-      time = Time.zone.now
-      Language.all.each do |lang|
-        if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
-          str.update!(
-            text: @val,
-            updated_at: (str.language.official ? time : time - 1.minute)
-          )
-        else
-          str = lang.translation_strings.create!(
-            tag: "app_banner_box",
-            text: @val,
-            updated_at: time - 1.minute
-          )
-        end
-        str.update_localization
-        str.language.update_localization_file
-        str.language.update_export_file
-      end
+      update_banner_languages
       redirect_to("/")
     else
       @val = :app_banner_box.l.to_s
     end
+  end
+
+  private
+
+  def update_banner_languages
+    time = Time.zone.now
+    Language.all.each do |lang|
+      if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
+        update_string(str, time)
+      else
+        str = create_string(lang, time)
+      end
+      str.update_localization
+      str.language.update_localization_file
+      str.language.update_export_file
+    end
+  end
+
+  def update_string(str, time)
+    str.update!(
+      text: @val,
+      updated_at: (str.language.official ? time : time - 1.minute)
+    )
+  end
+
+  def create_string(lang, time)
+    lang.translation_strings.create!(
+      tag: "app_banner_box",
+      text: @val,
+      updated_at: time - 1.minute
+    )
   end
 end

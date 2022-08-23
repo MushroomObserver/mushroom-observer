@@ -141,7 +141,7 @@ class VoteControllerTest < FunctionalTestCase
   def test_show_votes
     login
     # First just make sure the page displays.
-    get_with_dump(
+    get(
       :show_votes, params: { id: namings(:coprinus_comatus_naming).id }
     )
     assert_template(:show_votes)

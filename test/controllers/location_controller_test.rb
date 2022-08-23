@@ -92,7 +92,7 @@ class LocationControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_location_help
-    get_with_dump(:help)
+    get(:help)
   end
 
   def test_show_location
@@ -100,7 +100,7 @@ class LocationControllerTest < FunctionalTestCase
     updated_at = location.updated_at
     log_updated_at = location.rss_log.updated_at
     login
-    get_with_dump(:show_location, params: { id: location.id })
+    get(:show_location, params: { id: location.id })
     assert_template("show_location")
     assert_template("location/_location")
     assert_template("comment/_show_comments")
@@ -115,26 +115,26 @@ class LocationControllerTest < FunctionalTestCase
     login("mary")
     make_admin("mary")
     location = locations(:albion)
-    get_with_dump(:show_location, params: { id: location.id })
+    get(:show_location, params: { id: location.id })
   end
 
   def test_show_past_location
     location = locations(:albion)
     login
-    get_with_dump(:show_past_location,
-                  params: { id: location.id, version: location.version - 1 })
+    get(:show_past_location,
+        params: { id: location.id, version: location.version - 1 })
     assert_template("show_past_location", partial: "_location")
   end
 
   def test_show_past_location_no_version
     location = locations(:albion)
-    get_with_dump(:show_past_location, params: { id: location.id })
+    get(:show_past_location, params: { id: location.id })
     assert_response(:redirect)
   end
 
   def test_list_locations
     login
-    get_with_dump(:list_locations)
+    get(:list_locations)
     assert_template("list_locations")
   end
 
@@ -175,19 +175,19 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_list_countries
     login
-    get_with_dump(:list_countries)
+    get(:list_countries)
     assert_template("list_countries")
   end
 
   def test_list_by_country
     login
-    get_with_dump(:list_by_country, params: { country: "USA" })
+    get(:list_by_country, params: { country: "USA" })
     assert_template("list_locations")
   end
 
   def test_list_by_country_with_quote
     login
-    get_with_dump(:list_by_country, params: { country: "Cote d'Ivoire" })
+    get(:list_by_country, params: { country: "Cote d'Ivoire" })
     assert_template("list_locations")
   end
 
@@ -233,13 +233,13 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_locations_by_user
     login
-    get_with_dump(:locations_by_user, params: { id: rolf.id })
+    get(:locations_by_user, params: { id: rolf.id })
     assert_template("list_locations")
   end
 
   def test_locations_by_editor
     login
-    get_with_dump(:locations_by_editor, params: { id: rolf.id })
+    get(:locations_by_editor, params: { id: rolf.id })
     assert_template("list_locations")
   end
 
@@ -250,14 +250,14 @@ class LocationControllerTest < FunctionalTestCase
       location_id: burbank.id,
       source_type: "public"
     )
-    get_with_dump(:list_location_descriptions)
+    get(:list_location_descriptions)
     assert_template("list_location_descriptions")
   end
 
   def test_location_descriptions_by_author
     desc = location_descriptions(:albion_desc)
     login
-    get_with_dump(:location_descriptions_by_author, params: { id: rolf.id })
+    get(:location_descriptions_by_author, params: { id: rolf.id })
     assert_redirected_to(
       %r{/location/show_location_description/#{desc.id}}
     )
@@ -265,7 +265,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_location_descriptions_by_editor
     login
-    get_with_dump(:location_descriptions_by_editor, params: { id: rolf.id })
+    get(:location_descriptions_by_editor, params: { id: rolf.id })
     assert_template("list_location_descriptions")
   end
 
@@ -273,7 +273,7 @@ class LocationControllerTest < FunctionalTestCase
     # happy path
     desc = location_descriptions(:albion_desc)
     login
-    get_with_dump(:show_location_description, params: { id: desc.id })
+    get(:show_location_description, params: { id: desc.id })
     assert_template("show_location_description")
     assert_template("location/_location_description")
 
@@ -282,7 +282,7 @@ class LocationControllerTest < FunctionalTestCase
 
     # description is private and belongs to a project
     desc = location_descriptions(:bolete_project_private_location_desc)
-    get_with_dump(:show_location_description, params: { id: desc.id })
+    get(:show_location_description, params: { id: desc.id })
     assert_flash_error
     assert_redirected_to(controller: :project, action: :show_project,
                          id: desc.project.id)
@@ -290,13 +290,13 @@ class LocationControllerTest < FunctionalTestCase
     # description is private, for a project, project doesn't exist
     # but project doesn't existb
     desc = location_descriptions(:non_ex_project_private_location_desc)
-    get_with_dump(:show_location_description, params: { id: desc.id })
+    get(:show_location_description, params: { id: desc.id })
     assert_flash_error
     assert_redirected_to(action: :show_location, id: desc.location_id)
 
     # description is private, not for a project
     desc = location_descriptions(:user_private_location_desc)
-    get_with_dump(:show_location_description, params: { id: desc.id })
+    get(:show_location_description, params: { id: desc.id })
     assert_flash_error
     assert_redirected_to(action: :show_location, id: desc.location_id)
   end
@@ -309,7 +309,7 @@ class LocationControllerTest < FunctionalTestCase
     desc.reload
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
-    get_with_dump(:show_past_location_description, params: { id: desc.id })
+    get(:show_past_location_description, params: { id: desc.id })
     assert_template("show_past_location_description",
                     partial: "_location_description")
   end
@@ -350,7 +350,7 @@ class LocationControllerTest < FunctionalTestCase
     loc = locations(:albion)
     user = login(users(:spammer).name)
     assert_false(user.successful_contributor?)
-    get_with_dump(:create_location_description, params: { id: loc.id })
+    get(:create_location_description, params: { id: loc.id })
     assert_response(:redirect)
   end
 
@@ -690,7 +690,7 @@ class LocationControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     make_admin("rolf")
-    post_with_dump(:edit_location, params: params)
+    post(:edit_location, params: params)
 
     # assert_template(action: "show_location")
     assert_redirected_to(action: :show_location, id: to_stay.id)
@@ -843,15 +843,15 @@ class LocationControllerTest < FunctionalTestCase
   def test_map_locations
     login
     # test_map_locations - map everything
-    get_with_dump(:map_locations)
+    get(:map_locations)
     assert_template("map_locations")
 
     # test_map_locations_empty - map nothing
-    get_with_dump(:map_locations, params: { pattern: "Never Never Land" })
+    get(:map_locations, params: { pattern: "Never Never Land" })
     assert_template("map_locations")
 
     # test_map_locations_some - map something
-    get_with_dump(:map_locations, params: { pattern: "California" })
+    get(:map_locations, params: { pattern: "California" })
     assert_template("map_locations")
   end
 

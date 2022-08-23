@@ -13,20 +13,15 @@ class SupportControllerTest < FunctionalTestCase
       :wrapup_2011,
       :wrapup_2012
     ].each do |template|
-      assert_template_with_dump(template)
-      get_with_dump(template)
+      get(template)
       assert_template(template)
     end
   end
 
-  def assert_template_with_dump(template)
-    get_with_dump(template)
-    assert_template(template)
-  end
-
   def test_donate
     login("rolf")
-    assert_template_with_dump(:donate)
+    get(:donate)
+    assert_template(:donate)
     assert_select("form input[value=\"#{users(:rolf).name}\"]")
   end
 
@@ -89,7 +84,8 @@ class SupportControllerTest < FunctionalTestCase
     get(:create_donation)
     assert_response(:redirect)
     make_admin
-    assert_template_with_dump(:create_donation)
+    get(:create_donation)
+    assert_template(:create_donation)
   end
 
   def test_create_donation_post
@@ -113,7 +109,8 @@ class SupportControllerTest < FunctionalTestCase
     get(:review_donations)
     assert_response(:redirect)
     make_admin
-    assert_template_with_dump(:review_donations)
+    get(:review_donations)
+    assert_template(:review_donations)
   end
 
   def test_review_donations_post

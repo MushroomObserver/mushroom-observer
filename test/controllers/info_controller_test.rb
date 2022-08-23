@@ -6,22 +6,22 @@ require("test_helper")
 class InfoControllerTest < FunctionalTestCase
   def test_page_loads
     login
-    get_with_dump(:how_to_help)
+    get(:how_to_help)
     assert_template(:how_to_help)
 
-    get_with_dump(:how_to_use)
+    get(:how_to_use)
     assert_template(:how_to_use)
 
-    get_with_dump(:intro)
+    get(:intro)
     assert_template(:intro)
 
     get(:search_bar_help)
     assert_response(:success)
 
-    get_with_dump(:news)
+    get(:news)
     assert_template(:news)
 
-    get_with_dump(:textile_sandbox)
+    get(:textile_sandbox)
     assert_template(:textile_sandbox)
   end
 
