@@ -58,8 +58,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_herbarium_record_search_with_one_herbarium_record_index
     login
-    get_with_dump(:herbarium_record_search,
-                  params: { pattern: herbarium_records(:interesting_unknown).id })
+    params = { pattern: herbarium_records(:interesting_unknown).id }
+    get_with_dump(:herbarium_record_search, params: params)
     assert_response(:redirect)
     assert_no_flash
   end
