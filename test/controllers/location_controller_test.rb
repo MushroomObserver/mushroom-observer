@@ -356,7 +356,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_edit_location_description
     desc = location_descriptions(:albion_desc)
-    requires_login(:edit_location_description, params: { id: desc.id })
+    requires_login(:edit_location_description, { id: desc.id })
     assert_form_action(action: :edit_location_description, id: desc.id)
   end
 
@@ -690,7 +690,7 @@ class LocationControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     make_admin("rolf")
-    post_with_dump(:edit_location, params)
+    post_with_dump(:edit_location, params: params)
 
     # assert_template(action: "show_location")
     assert_redirected_to(action: :show_location, id: to_stay.id)

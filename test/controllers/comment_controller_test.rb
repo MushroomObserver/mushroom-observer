@@ -12,7 +12,7 @@ class CommentControllerTest < FunctionalTestCase
   def test_show_comment
     login
     get_with_dump(:show_comment,
-                  id: comments(:minimal_unknown_obs_comment_1).id)
+                  params: { id: comments(:minimal_unknown_obs_comment_1).id })
     assert_template("show_comment")
   end
 

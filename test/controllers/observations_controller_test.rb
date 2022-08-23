@@ -513,7 +513,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_where_search_next_page
     login
     params = { place_name: "Burbank", page: 2 }
-    get_with_dump(:index, params)
+    get_with_dump(:index, params: params)
     assert_template(:index)
   end
 
@@ -522,7 +522,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_where_search_pattern
     login
     params = { place_name: "Burbank" }
-    get_with_dump(:index, params)
+    get_with_dump(:index, params: params)
     assert_template("shared/_matrix_box")
   end
 

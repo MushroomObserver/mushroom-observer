@@ -607,7 +607,7 @@ class NameControllerTest < FunctionalTestCase
     desc = name_descriptions(:peltigera_desc)
     params = { "id" => desc.id.to_s }
     login
-    get_with_dump(:show_name_description, params)
+    get_with_dump(:show_name_description, params: params)
     assert_template(:show_name_description)
     assert_template("name/_name_description")
   end

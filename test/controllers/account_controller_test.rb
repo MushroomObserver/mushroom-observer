@@ -621,7 +621,7 @@ class AccountControllerTest < FunctionalTestCase
     }
     File.stub(:rename, false) do
       login("rolf", "testpassword")
-      post_with_dump(:profile, params)
+      post_with_dump(:profile, params: params)
     end
     assert_redirected_to(user_path(rolf.id))
     assert_flash_success

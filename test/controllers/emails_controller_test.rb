@@ -122,7 +122,7 @@ class EmailsControllerTest < FunctionalTestCase
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
-    post_with_dump(page, params)
+    post_with_dump(page, params: params)
     assert_redirected_to(users_path(by: "name"))
   end
 
@@ -191,7 +191,7 @@ class EmailsControllerTest < FunctionalTestCase
     get(:merge_request, params: params.merge(new_id: -456))
     assert_response(:redirect)
 
-    get_with_dump(:merge_request, params)
+    get_with_dump(:merge_request, params: params)
     assert_response(:success)
     assert_names_equal(name1, assigns(:old_obj))
     assert_names_equal(name2, assigns(:new_obj))

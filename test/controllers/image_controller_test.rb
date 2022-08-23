@@ -772,7 +772,7 @@ class ImageControllerTest < FunctionalTestCase
                          id: obs.id)
 
     login("rolf", "testpassword")
-    send(:get_with_dump, :reuse_image, params)
+    send(:get_with_dump, :reuse_image, params: params)
     assert_response(:success)
     assert_form_action(action: :reuse_image, mode: "observation",
                        obs_id: obs.id)
@@ -829,7 +829,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(obs.reload.images.member?(image))
 
     login(owner)
-    get_with_dump(:reuse_image, params)
+    get_with_dump(:reuse_image, params: params)
     # assert_template(controller: :observations, action: :show)
     assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
@@ -846,7 +846,7 @@ class ImageControllerTest < FunctionalTestCase
       img_id: image.id.to_s
     }
     login("mary")
-    get_with_dump(:reuse_image_for_glossary_term, params)
+    get_with_dump(:reuse_image_for_glossary_term, params: params)
     assert_redirected_to(glossary_term_path(glossary_term.id))
     assert(glossary_term.reload.images.member?(image))
   end
@@ -929,7 +929,7 @@ class ImageControllerTest < FunctionalTestCase
     }
     File.stub(:rename, false) do
       login("rolf", "testpassword")
-      post_with_dump(:add_image, params)
+      post_with_dump(:add_image, params: params)
     end
     assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
