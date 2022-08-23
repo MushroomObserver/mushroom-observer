@@ -42,9 +42,9 @@ class AdminController < ApplicationController
     time = Time.zone.now
     Language.all.each do |lang|
       if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
-        update_string(str, time)
+        update_banner_string(str, time)
       else
-        str = create_string(lang, time)
+        str = create_banner_string(lang, time)
       end
       str.update_localization
       str.language.update_localization_file
@@ -52,14 +52,14 @@ class AdminController < ApplicationController
     end
   end
 
-  def update_string(str, time)
+  def update_banner_string(str, time)
     str.update!(
       text: @val,
       updated_at: (str.language.official ? time : time - 1.minute)
     )
   end
 
-  def create_string(lang, time)
+  def create_banner_string(lang, time)
     lang.translation_strings.create!(
       tag: "app_banner_box",
       text: @val,
