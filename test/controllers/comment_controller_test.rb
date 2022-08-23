@@ -18,13 +18,13 @@ class CommentControllerTest < FunctionalTestCase
 
   def test_show_comments_for_user
     login
-    get_with_dump(:show_comments_for_user, id: rolf.id)
+    get_with_dump(:show_comments_for_user, params: { id: rolf.id })
     assert_template("list_comments")
   end
 
   def test_show_comments_by_user
     login
-    get_with_dump(:show_comments_by_user, id: rolf.id)
+    get_with_dump(:show_comments_by_user, params: { id: rolf.id })
     assert_redirected_to(action: "show_comment",
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))

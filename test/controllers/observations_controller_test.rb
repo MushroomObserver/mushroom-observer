@@ -94,12 +94,12 @@ class ObservationsControllerTest < FunctionalTestCase
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
     assert(obs.images.member?(img))
-    get_with_dump(:show, id: obs.id)
+    get_with_dump(:show, params: { id: obs.id })
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
-    get_with_dump(:show, id: obs.id)
+    get_with_dump(:show, params: { id: obs.id })
   end
 
   def test_show_observation_change_thumbnail_size
@@ -422,14 +422,14 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_observation_search_help
     login
-    get_with_dump(:index, pattern: "help:me")
+    get_with_dump(:index, params: { pattern: "help:me" })
     assert_match(/unexpected term/i, @response.body)
   end
 
   def test_observation_search1
     login
     pattern = "Boletus edulis"
-    get_with_dump(:index, pattern: pattern)
+    get_with_dump(:index, params: { pattern: pattern })
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -441,7 +441,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_observation_search2
     login
     pattern = "Boletus edulis"
-    get_with_dump(:index, pattern: pattern, page: 2)
+    get_with_dump(:index, params: { pattern: pattern, page: 2 })
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -455,7 +455,7 @@ class ObservationsControllerTest < FunctionalTestCase
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
     pattern = "no hits"
-    get_with_dump(:index, pattern: pattern)
+    get_with_dump(:index, params: { pattern: pattern })
     assert_template(:index)
 
     # Change 2022/07 : Now setting @title explicitly for refactored indexes
@@ -469,7 +469,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
-    get_with_dump(:index, pattern: obs.id)
+    get_with_dump(:index, params: { pattern: obs.id })
     assert_redirected_to(action: :show, id: Observation.first.id)
   end
 
@@ -631,7 +631,7 @@ class ObservationsControllerTest < FunctionalTestCase
     num_views = obs.num_views
     last_view = obs.last_view
     # obs.update_view_stats
-    get_with_dump(:show, id: obs.id)
+    get_with_dump(:show, params: { id: obs.id })
     obs.reload
     assert_equal(num_views + 1, obs.num_views)
     assert_not_equal(last_view, obs.last_view)
@@ -654,27 +654,27 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # Test it on obs with no namings first.
     obs_id = observations(:unknown_with_no_naming).id
-    get_with_dump(:show, id: obs_id)
+    get_with_dump(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get_with_dump(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with owner logged in.
     login("rolf")
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get_with_dump(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get_with_dump(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
@@ -694,11 +694,11 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     user = login(users(:public_voter).name)
 
-    get_with_dump(:show, id: obs.id, go_private: 1)
+    get_with_dump(:show, params: { id: obs.id, go_private: 1 })
     user.reload
     assert_equal("yes", user.votes_anonymous)
 
-    get_with_dump(:show, id: obs.id, go_public: 1)
+    get_with_dump(:show, params: { id: obs.id, go_public: 1 })
     user.reload
     assert_equal("no", user.votes_anonymous)
   end
@@ -706,14 +706,15 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_owner_id
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
-    get_with_dump(:show, id: obs.id)
+    get_with_dump(:show, params: { id: obs.id })
     assert_select("div[class *= 'owner-id']",
                   { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show Observer ID")
 
-    get_with_dump(:show,
-                  id: observations(:owner_multiple_favorites).id)
+    get_with_dump(
+      :show, params: { id: observations(:owner_multiple_favorites).id }
+    )
     assert_select("div[class *= 'owner-id']",
                   { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
@@ -722,16 +723,18 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_show_owner_id_view_owner_id_false
     login(user_with_view_owner_id_false)
-    get_with_dump(:show,
-                  id: observations(:owner_only_favorite_ne_consensus).id)
+    get_with_dump(
+      :show, params: { id: observations(:owner_only_favorite_ne_consensus).id }
+    )
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when user has not opted for it")
   end
 
   def test_show_owner_id_noone_logged_in
     logout
-    get_with_dump(:show,
-                  id: observations(:owner_only_favorite_ne_consensus).id)
+    get_with_dump(
+      :show, params: { id: observations(:owner_only_favorite_ne_consensus).id }
+    )
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when nobody logged in")
   end
@@ -747,7 +750,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_observation_external_links_exist
     login
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get_with_dump(:show, params: { id: obs_id })
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")

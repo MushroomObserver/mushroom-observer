@@ -13,7 +13,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get_with_dump(:rss)
     assert_template(:rss)
 
-    get_with_dump(:show, id: rss_logs(:observation_rss_log).id)
+    get_with_dump(:show, params: { id: rss_logs(:observation_rss_log).id })
     assert_template(:show)
   end
 
