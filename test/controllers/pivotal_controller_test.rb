@@ -7,7 +7,7 @@ class PivotalControllerTest < FunctionalTestCase
     login
     enabled = MO.pivotal_enabled
     MO.pivotal_enabled = false
-    get_with_dump(:index)
+    get(:index)
     assert_response("index")
     MO.pivotal_enabled = enabled
   end
@@ -48,7 +48,7 @@ class PivotalControllerTest < FunctionalTestCase
                   headers: {})
     enabled = MO.pivotal_enabled
     MO.pivotal_enabled = true
-    get_with_dump(:index)
+    get(:index)
     assert_response("index")
     MO.pivotal_enabled = enabled
   end
