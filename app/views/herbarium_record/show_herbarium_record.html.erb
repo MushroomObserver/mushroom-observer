@@ -38,10 +38,10 @@
                collection: @herbarium_record.observations, as: :object) %>
   </div>
 
-  <center>
+  <div class="text-center">
     <p>
       <%= :CREATED_AT.t %>: <%= @herbarium_record.created_at.web_date %><br/>
       <%= :UPDATED_AT.t %>: <%= @herbarium_record.updated_at.web_date %><br/>
     </p>
-  </center>
+  </div><!-- .text-center -->
 </div>

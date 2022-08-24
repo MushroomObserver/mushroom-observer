@@ -36,9 +36,9 @@
         <% end %>
         <% if original && image && !image.original_name.blank? &&
               (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show") %>
-          <center>
+          <div class="text-center">
             <span><%= image.original_name %></span>
-          </center>
+          </div><!-- .text-center -->
         <% end %>
       </div>
     </div>

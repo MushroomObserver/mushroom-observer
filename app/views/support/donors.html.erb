@@ -14,7 +14,7 @@
 %>
 
 <div class="max-width-text">
-  <center>
+  <div class="text-center">
     <table class="table-striped table-donors push-down push-up">
       <% @donor_list.each do |donor| %>
         <tr>
@@ -24,6 +24,6 @@
         </tr>
       <% end %>
     </table>
-  </center>
+  </div><!-- .text-center -->
   <%= :donors_order.tp %>
 </div>

@@ -50,7 +50,7 @@ form_tag(action: :merge_descriptions, id: description.id) do %>
   end
   if button %>
     <br/><br/>
-    <center><%= submit_tag(button, class: "btn") %></center>
+    <div class="text-center"><%= submit_tag(button, class: "btn") %></div><!-- .text-center -->
     <br/>
   <% end %>
 <% end %>

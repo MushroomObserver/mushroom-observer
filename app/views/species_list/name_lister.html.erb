@@ -52,12 +52,12 @@
       <td colspan="3">
         <div id="word">&nbsp;</div>
         <%= form_tag({action: :name_lister}, {}) %>
-          <center>
+          <div class="text-center">
             <%= submit_tag(:name_lister_submit_spl.l, class: "btn", disabled: !@user) %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_txt.l, class: "btn") %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_rtf.l, class: "btn") %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_csv.l, class: "btn") %>
-          </center>
+          </div><!-- .text-center -->
           <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
           <% if false %>
             <br/>

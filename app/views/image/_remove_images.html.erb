@@ -20,10 +20,10 @@
   <%= render(layout: "shared/matrix_table", locals: {objects: @object.images}) do |image| %>
     <div class="push-down push-up">
       <%= thumbnail(image, votes: true, original: true) %>
-      <center>
+      <div class="text-center">
         <%= check_box(:selected, image.id, {}, "yes", "no") %>
         <label for="selected_#{image.id}"><%= :image.t %> #<%= image.id %></label>
-      </center>
+      </div><!-- .text-center -->
     </div>
   <% end %>
 

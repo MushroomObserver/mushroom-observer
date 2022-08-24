@@ -44,54 +44,54 @@
         <div class="col-sm-8">
           <div class="row vcenter">
             <div class="col-xs-4 col-xs-offset-4">
-              <center>
+              <div class="text-center">
                 <div class="form-group">
                   <%= label_tag(:location_north, :NORTH.t + ":") %>
                   <%= form.text_field(:north, class: "form-control") %>
                   <% inject_javascript_at_end("jQuery('#location_north').keypress(startKeyPressTimer);") %>
                 </div>
-              </center>
+              </div><!-- .text-center -->
             </div>
           </div>
           <div class="row push-down vcenter">
             <div class="col-xs-4">
-              <center>
+              <div class="text-center">
                 <div class="form-group">
                   <%= label_tag(:location_west, :WEST.t + ":") %>
                   <%= form.text_field(:west, class: "form-control") %>
                   <% inject_javascript_at_end("jQuery('#location_west').keypress(startKeyPressTimer);") %>
                 </div>
-              </center>
+              </div><!-- .text-center -->
             </div>
             <div class="col-xs-4 small" style="padding:0">
-              <center>
+              <div class="text-center">
                 <%= :form_locations_lat_long_help.t %>
-              </center>
+              </div><!-- .text-center -->
             </div>
             <div class="col-xs-4">
-              <center>
+              <div class="text-center">
                 <div class="form-group">
                   <%= label_tag(:location_east, :EAST.t + ":") %>
                   <%= form.text_field(:east, class: "form-control") %>
                   <% inject_javascript_at_end("jQuery('#location_east').keypress(startKeyPressTimer);") %>
                 </div>
-              </center>
+              </div><!-- .text-center -->
             </div>
           </div>
           <div class="row push-down vcenter">
             <div class="col-xs-4 col-xs-offset-4">
-              <center>
+              <div class="text-center">
                 <div class="form-group">
                   <%= label_tag(:location_south, :SOUTH.t + ":") %>
                   <%= form.text_field(:south, class: "form-control") %>
                   <% inject_javascript_at_end("jQuery('#location_south').keypress(startKeyPressTimer);") %>
                 </div>
-              </center>
+              </div><!-- .text-center -->
             </div>
           </div>
         </div>
         <div class="col-sm-4">
-          <center>
+          <div class="text-center">
             <div class="form-group push-down">
               <%= label_tag(:location_high, :show_location_highest.t + ":") %>
               <%= form.text_field(:high, class: "form-control") %>
@@ -101,7 +101,7 @@
               <%= form.text_field(:low, class: "form-control") %>
               (<%= :units_meters.t %>)
             </div>
-          </center>
+          </div><!-- .text-center -->
         </div>
       </div>
     </div>
