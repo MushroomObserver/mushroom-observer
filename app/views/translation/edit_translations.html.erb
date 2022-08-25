@@ -31,9 +31,9 @@
           <%= case item.class.name
           when /MajorHeader/
             content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "major_header")
-          when /MinorHeader/                                                    
+          when /MinorHeader/
             content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "minor_header")
-          when /Comment/                                                        
+          when /Comment/
             content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "comment")
           when /TagField/
             tag = item.tag
