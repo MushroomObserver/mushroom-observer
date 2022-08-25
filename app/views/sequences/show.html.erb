@@ -35,12 +35,12 @@
       </thead>
       <tbody>
         <tr>
-          <td class="bold"><%= :LOCUS.t %>:</td>
+          <td class="font-weight-bold"><%= :LOCUS.t %>:</td>
           <td><%= @sequence.locus %></td>
         </tr>
         <% if @sequence.bases.present? %>
           <tr>
-            <td class="bold align-top"><%= :BASES.t %>:</td>
+            <td class="font-weight-bold align-top"><%= :BASES.t %>:</td>
           </tr>
           <tr>
             <td colspan="2" class="text-monospace max-width-text">
@@ -50,7 +50,7 @@
         <% end %>
         <% if @sequence.deposit? %>
           <tr>
-            <td class="bold"><%= :DEPOSIT.t %>:</td>
+            <td class="font-weight-bold"><%= :DEPOSIT.t %>:</td>
             <td>
                 <%= sequence_archive_link(@sequence) %>:
                 <%= sequence_accession_link(@sequence) %>
@@ -66,7 +66,7 @@
           </td>
         </tr>
         <tr>
-          <td class="bold"><%= :NOTES.t %>:</td>
+          <td class="font-weight-bold"><%= :NOTES.t %>:</td>
           <td><%= @sequence.notes.try(&:tp) %></td>
         </tr>
       </tbody>
@@ -75,7 +75,7 @@
 </div>
 <br>
 <div class="small">
-  <span class="bold"><%= :CREATED_BY.t %>:</span>
+  <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
   <%= user_link(@sequence.user) %>
 </div>
 <%= show_object_footer(@sequence) %>

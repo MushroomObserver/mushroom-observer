@@ -4,7 +4,7 @@
 <!-- --------------------------- -->
 
 <% unless @lang.official %>
-  <h3 class="bold"><%= Language.official.name %>:</h3>
+  <h3 class="font-weight-bold"><%= Language.official.name %>:</h3>
 
   <% @edit_tags.each do |tag| %>
     <% if record = @official_records[tag] %>
@@ -22,7 +22,7 @@
 <!-- Show form for this language's translations -->
 <!-- ------------------------------------------ -->
 
-<h3 class="bold"><%= @lang.name %>:</h3>
+<h3 class="font-weight-bold"><%= @lang.name %>:</h3>
 
 <% @edit_tags.each do |tag| %>
   <%

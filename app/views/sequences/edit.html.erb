@@ -17,7 +17,7 @@
            locals: { url: add_query_param(action: :update, back: @back) } ) %>
 
 <div class="small">
-  <span class="bold"><%= :CREATED_BY.t %>:</span>
+  <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
   <%= user_link(@sequence.user) %>
 </div>
 <%= show_object_footer(@sequence) %>

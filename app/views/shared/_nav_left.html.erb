@@ -10,7 +10,7 @@
               { class: "list-group-item" }) %>
 
   <% if in_admin_mode? %>
-    <div class="list-group-item disabled bold"><%= :app_admin.t %>: </div>
+    <div class="list-group-item disabled font-weight-bold"><%= :app_admin.t %>: </div>
     <%= link_to(:app_blocked_ips.t, account_blocked_ips_path,
                 { class: "list-group-item list-group-item-danger indent" }) %>
     <%= link_to(:app_switch_users.t, account_switch_users_path,
@@ -30,7 +30,7 @@
   <% end %>
 
   <% if @user.nil? %>
-    <div class="list-group-item disabled bold">
+    <div class="list-group-item disabled font-weight-bold">
       <i class="glyphicon glyphicon-user"> </i>
       <span> <%= :app_account.t %>:</span>
     </div>
@@ -67,7 +67,7 @@
     <% end %>
   <% end %>
 
-  <div class="list-group-item disabled bold">
+  <div class="list-group-item disabled font-weight-bold">
     <%= :app_observations_left.t %>
   </div>
   <%= link_to(:app_create_observation.t, new_observation_path,
@@ -78,7 +78,7 @@
   <%= link_to(:app_sort_by_date_obs.t, observations_path,
               { class: "list-group-item indent" }) %>
 
-  <div class="list-group-item disabled bold">
+  <div class="list-group-item disabled font-weight-bold">
     <%= :app_latest.t %>
   </div>
   <%= link_to(:app_latest_changes.t, activity_logs_path,
@@ -88,7 +88,7 @@
   <%= link_to(:app_comments.t, comment_list_comments_path,
                 { class: "list-group-item indent" }) %>
 
-  <div class="list-group-item disabled bold">
+  <div class="list-group-item disabled font-weight-bold">
     <%= :app_species_list.t %>
   </div>
   <% unless @user.nil? %>
@@ -103,7 +103,7 @@
   <%= link_to(:app_sort_by_title.t, species_list_species_lists_by_title_path,
                 { class: "list-group-item indent" }) %>
 
-  <div class="list-group-item disabled bold">
+  <div class="list-group-item disabled font-weight-bold">
     <%= :INDEXES.t %>
   </div>
   <%= link_to(:GLOSSARY.t, glossary_terms_path,
@@ -119,7 +119,7 @@
   <%= link_to(:PROJECTS.t, project_list_projects_path,
               { class: "list-group-item indent" }) %>
 
-  <div class="list-group-item disabled bold">
+  <div class="list-group-item disabled font-weight-bold">
     <%= :app_more.t %>
   </div>
   <%= link_to(:app_how_to_help.t, info_how_to_help_path,

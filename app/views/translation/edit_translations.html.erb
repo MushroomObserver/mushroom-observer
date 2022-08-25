@@ -47,7 +47,7 @@
               # Mark as translated if there is nothing to actually translate!
               up_to_date = true
             end
-            span_class = up_to_date ? "faint" : "bold bright"
+            span_class = up_to_date ? "faint" : "font-weight-bold bright"
             str = content_tag(:span, h(str), class: span_class, id: "str_#{tag}")
             label = content_tag(:span, h(tag) + ":", class: "tag")
             label = link_to(label, {page: @page, tag: tag}, data: {tag: tag, role: "show_tag"})
