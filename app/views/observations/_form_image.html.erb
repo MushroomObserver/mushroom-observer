@@ -8,7 +8,7 @@
 
 <div id="image_<%= index %>_box" class="form_image">
 
-  <p style="white-space:nowrap">
+  <p class="text-nowrap">
   <%= radio_button(:observation, :thumb_image_id, -index) %>
   <%= custom_file_field(:image, :image, index: index, onchange: "auto_image_new(#{index})") %>
 

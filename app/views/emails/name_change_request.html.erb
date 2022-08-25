@@ -10,24 +10,24 @@
 <div class="max-width-text">
   <%= :email_name_change_request_help.tp %>
   <%= form_tag(name_id: @name.id, new_name: @new_name) do %>
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:name, :NAME.t) %>:
           <%= @name.unique_search_name %>
           [#<%= @name.icn_id.to_s %>]
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_name.t) %>: <%= @new_name_with_icn_id %>
       <%# pass it back to the action, else it's clobbered there %>
       <%= hidden_field_tag(:new_name_with_icn_id, @new_name_with_icn_id) %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:notes, "#{:Notes.t}:") %>
       <%= text_area_tag(:notes, "", rows: 10, class: "form-control",
                         data: { autofocus: true }) %>
     </div>
 
-    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:SEND.l, class: "btn center-block mt-3") %>
   <% end %>
 </div>

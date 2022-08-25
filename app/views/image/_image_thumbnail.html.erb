@@ -14,8 +14,8 @@
 
 %>
 
-<div style="position:relative">
-  <div style="display:inline">
+<div class="position-relative">
+  <div class="d-inline">
     <div data-toggle="expand-icon" class="text-center">
       <% style = "max-width: 100%; height: auto; margin: auto;" if responsive
       img_class = "img-unresponsive #{img_class}" if !responsive
@@ -30,7 +30,7 @@
         link_to("", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
                 data: {lightbox: lightbox_id, title: caption})
       %>
-      <div class="push-down">
+      <div class="mt-3">
         <% if User.current and votes and image %>
           <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
         <% end %>

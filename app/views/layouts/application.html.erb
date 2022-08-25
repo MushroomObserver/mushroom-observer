@@ -108,14 +108,14 @@
 
       <!--HAMBURGER_BUTTONS-->
       <div class="row visible-xs hidden-print">
-        <div class="col-xs-12 kill-padding">
+        <div class="col-xs-12 p-0">
           <p class="pull-left">
-            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1000" data-toggle="offcanvas">
+            <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed" style="z-index: 1000" data-toggle="offcanvas">
               <span class="glyphicon glyphicon-align-justify"></span>
             </button>
           </p>
           <p class="pull-right">
-            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
+            <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed" style="z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
               <span class="glyphicon glyphicon-search"></span>
             </button>
           </p>
@@ -140,7 +140,7 @@
               end
               content_tag(:div, flash_get_notices,
                           id: "flash-notices",
-                          class: "alert push-down #{klass}")
+                          class: "alert mt-3 #{klass}")
             %>
           </div>
         </div>
@@ -150,10 +150,10 @@
       <div id="content" class="row">
         <% unless @user&.verified? %>
           <div class="max-width-text">
-            <p class="align-center hidden-sm hidden-md hidden-lg">
+            <p class="text-center hidden-sm hidden-md hidden-lg">
               <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
             </p>
-            <p class="sub-caption align-center">Mushroom Observer (MO)</p>
+            <p class="sub-caption text-center">Mushroom Observer (MO)</p>
             <p><%= :login_layout_description.t %></p>
           </div>
         <% end %>

@@ -4,13 +4,13 @@
         { method: :get, class: "navbar-form navbar-left" }
       ) do %>
       <div>
-        <div class="inline align-top icon-addon addon-sm">
+        <div class="d-inline-block align-top icon-addon addon-sm">
           <%= text_field(:search, :pattern, value: session[:pattern],
                          class: "form-control", placeholder: :app_find.t) %>
           <label for="search_pattern" class="glyphicon glyphicon-search"
                  title="search"> </label>
         </div>
-        <div class="inline align-top nowrap">
+        <div class="d-inline-block align-top text-nowrap">
           <%=
             options = [
               [:COMMENTS.l, :comment],
@@ -44,14 +44,14 @@
 
         <%
           adv_search = link_to(content_tag(:span, :app_advanced_search.l,
-                                           style: "white-space:nowrap"),
+                                           class: "text-nowrap"),
                        search_advanced_path)
           @timer_end ||= Time.zone.now
           secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
           timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"
         %>
         <% if @timer_start %>
-          <div class="inline hidden-xs" style="font-size:80%">
+          <div class="d-inline-block hidden-xs" style="font-size:80%">
             <span id="timer"><%= timer %></span><br/>
             <%= adv_search %>
           </div>
@@ -61,7 +61,7 @@
           </p>
         <% end %>
         <div class="visible-xs">
-          <%= content_tag(:span, timer, id: "timer", class: "nowrap") if @timer_start %>
+          <%= content_tag(:span, timer, id: "timer", class: "text-nowrap") if @timer_start %>
           <%= adv_search %>
         </div>
       </div>

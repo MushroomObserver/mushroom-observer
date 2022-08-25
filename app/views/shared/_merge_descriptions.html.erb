@@ -6,7 +6,7 @@ moves.reject!(&:is_misspelling?)
 form_tag(action: :merge_descriptions, id: description.id) do %>
   <br/><br/>
 
-  <p><big><%= :merge_descriptions_merge_header.t %>:</big><br/>
+  <p><span class="text-larger"><%= :merge_descriptions_merge_header.t %>:</span><!-- .text-larger --><br/>
     <span class="HelpNote"><%= :merge_descriptions_merge_help.t %></span></p>
 
   <ul type="none">
@@ -21,7 +21,7 @@ form_tag(action: :merge_descriptions, id: description.id) do %>
   </ul>
 
   <% if moves.any? %>
-    <p><big><%= :merge_descriptions_move_header.t %>:</big><br/>
+    <p><span class="text-larger"><%= :merge_descriptions_move_header.t %>:</span><!-- .text-larger --><br/>
       <span class="HelpNote"><%= :merge_descriptions_move_help.t %></span></p>
 
     <ul type="none">

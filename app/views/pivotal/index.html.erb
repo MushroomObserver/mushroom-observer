@@ -71,7 +71,7 @@
             other
           ).each do |label| %>
             <tr>
-              <td align="right" style="font-size:120%; white-space:nowrap"><%=
+              <td align="right" class="text-nowrap" style="font-size:120%;"><%=
                 if label == "-"
                   safe_nbsp
                 else
@@ -112,7 +112,7 @@
           <span class="pivotal_name"><%=
             link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
           %></span><br/>
-          <span style="white-space:nowrap">
+          <span class="text-nowrap">
             <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
               pivotal_vote_controls(story)
             %></span>

@@ -8,7 +8,7 @@
 
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
   <%= content_tag(:div, safe_nbsp, class: "hidden-print visible-xs visible-sm
-                                           push-below-buttons") %>
+                                           mt-4") %>
 
   <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
     <!-- Pager -->
@@ -24,7 +24,7 @@
     <%= content_tag(:span, @title, id: "title-caption") -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
-                                       class: "align-1px"),
+                                       class: "context-help"),
                            :rss_filtered_mouseover.t)
         end -%>
     <%= content_tag_if(@owner_id, :div, @owner_id, class: "owner-id") %>
@@ -33,7 +33,7 @@
   <!-- Tabsets -->
   <%= content_tag_if(@tabsets[:right], :div, @tabsets[:right],
                      id: "right_tabs",
-                     class: "hidden-print align-right col-sm-4 push-up") %>
+                     class: "hidden-print text-right col-sm-4 mb-3") %>
 
   <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
                      class: "hidden-print col-xs-12") %>
@@ -41,7 +41,7 @@
   <!-- Sorter -->
   <% if @sorts %>
     <div class="hidden-print col-xs-12">
-      <div class="pad-top">
+      <div class="pt-3">
         <%= content_tag(:span, :sort_by_header.t) %>
         <div id="sorts" class="btn-group btn-group-xs" role="group">
           <% @sorts.each do |title, action| %>

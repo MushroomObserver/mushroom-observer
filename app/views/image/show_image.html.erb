@@ -87,7 +87,7 @@
           jQuery(document).ready(load_huge);
         ) %>
 
-        <div class="push-down text-center">
+        <div class="mt-3 text-center">
           <% if User.current %>
             <%= render(partial: "image/image_vote_links", locals: {image: @image}) %>
           <% end %>
@@ -156,7 +156,7 @@
       <div class="panel-heading">
         <b><%= :NOTES.t %></b>:
       </div>
-      <div class="panel-body slight-padding">
+      <div class="panel-body py-5pxding">
         <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
         <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
         <% @image.projects.each do |proj| %>
@@ -188,13 +188,13 @@
     <!-- /INFO_PANEL -->
 
     <% if reviewer? %>
-      <div class="push-up text-center">
+      <div class="mb-3 text-center">
         <%= set_export_status_controls(@image) %>
       </div>
     <% end %>
 
     <% if reviewer? %>
-      <div class="push-up text-center">
+      <div class="mb-3 text-center">
         <%= set_ml_status_controls(@image) %>
       </div>
     <% end %>
@@ -213,15 +213,15 @@
         </div>
         <!-- /CURRENT_VOTE -->
 
-        <div class="panel-body slight-padding">
+        <div class="panel-body py-5pxding">
 
           <!-- YOUR_VOTE -->
           <% if @user
             current = @image.users_vote(@user).to_i %>
-            <div class="text-center push-up">
+            <div class="text-center mb-3">
               <%= :image_show_your_vote.t %>:
               <span class="small"><%= image_vote_as_long_string(current).t %></span>
-              <div class="push-down">
+              <div class="mt-3">
                 <% args = add_query_param(id: @image.id)
                 args[:size] = @size if @size != @default_size
                 ([0] + Image.all_votes).each do |value|
@@ -255,7 +255,7 @@
           <!-- VOTE_TABLE -->
           <div id="show_votes_container">
             <% if @votes.any? %>
-              <table id="show_votes_table" class="table table-striped push-down" style="margin-bottom:0">
+              <table id="show_votes_table" class="table table-striped mt-3" style="margin-bottom:0">
                 <thead>
                   <tr>
                     <th><%= :USER.t %></th>
@@ -290,7 +290,7 @@
       <div>
         <%= image_copyright(@image) %>
       </div>
-      <div class="slight-pad push-up">
+      <div class="py-5px mb-3">
         <%= render(partial: "shared/form_#{@image.license.form_name}") %>
       </div>
     </div>

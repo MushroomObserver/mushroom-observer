@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
+<div class="row mt-3">
   <div class="col-xs-12 max-width-text">
     <%= form_tag(add_query_param(action: :edit_classification, id: @name.id)) do %>
       <%= label_tag(:classification, :"form_names_classification".t + ":") %>
@@ -19,7 +19,7 @@
                         rows: 10, class: "form-control",
                         data: {autofocus: true}) %>
 
-      <%= submit_tag(:SAVE.t, class: "btn center-block push-down") %>
+      <%= submit_tag(:SAVE.t, class: "btn center-block mt-3") %>
     <% end %>
   </div>
 </div>

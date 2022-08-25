@@ -3,12 +3,12 @@
 %>
 
 <%= form_tag do %>
-  <div class="push-down">
+  <div class="mt-3">
     <%= :image_vote_anonymity_num_anonymous.t %>: <%= @num_anonymous %><br/>
     <%= :image_vote_anonymity_num_public.t %>: <%= @num_public %><br/>
   </div>
 
-  <div class="push-down">
+  <div class="mt-3">
     <%= submit_tag(:image_vote_anonymity_make_anonymous.l, class: "btn") %><br/>
     <%= submit_tag(:image_vote_anonymity_make_public.l, class: "btn") %><br/>
   </div>

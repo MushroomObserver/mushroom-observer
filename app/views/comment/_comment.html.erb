@@ -30,19 +30,19 @@
     <div class="max-width-text">
       <%= :BY.t %>: <%= user_link(user) %>
       <% if check_permission(comment) %>
-        <span class="nowrap">
+        <span class="text-nowrap">
           [<%= link_with_query(:EDIT.t, controller: :comment, action: :edit_comment, id: comment.id) %> |
           <%= link_with_query(:DESTROY.t, {controller: :comment, action: :destroy_comment, id: comment.id},
                               {data: {confirm: :are_you_sure.l}}) %>]
         </span>
       <% end %>
-      <div class="pull-right nowrap small" style="margin:0 1em">
+      <div class="pull-right text-nowrap small" style="margin:0 1em">
         <%= comment.created_at.web_time %>
       </div>
     </div>
 
     <% unless comment.comment.blank? %>
-      <div class="pad-box max-width-text">
+      <div class="p-5px max-width-text">
         <%= comment.comment.tpl %>
       </div>
     <% end %>

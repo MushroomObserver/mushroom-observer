@@ -8,13 +8,13 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
+<div class="row mt-3">
   <div class="hidden-xs col-md-3">
     <% obs_length = @observations ? @observations.length : 0
     if obs_length > 0 %>
       <div class="row">
         <% @observations[0,3].each do |obs| %>
-          <div class="col-xs-12 pad-bottom">
+          <div class="col-xs-12 pb-1">
             <%= thumbnail(obs.thumb_image,
                           link: { controller: :observations,
                                   action: :show, id: obs.id},
