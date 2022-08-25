@@ -84,7 +84,7 @@
 
         <b><%= :show_project_drafts.t %>:</b>
         <%= @drafts.any? ? @drafts.length : :NONE.t %><br/>
-        <div style="margin-left:1em">
+        <div class="ml-3">
           <% @drafts.each do |draft| %>
             <%= link_with_query(draft.name&.display_name&.t,
                                 { controller: :name,

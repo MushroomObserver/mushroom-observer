@@ -33,8 +33,7 @@
                    { class: "form-control inline align-top",
                      style: "width: auto;" })
           %>
-          <%= submit_tag(:app_search.l, class: "btn align-top",
-                         style: "margin-right:0.5em") %>
+          <%= submit_tag(:app_search.l, class: "btn align-top mr-2") %>
         </div>
         <%=
             link_to(content_tag(:span, :search_bar_help.t),
@@ -68,8 +67,7 @@
     <% end %>
 
   <% if @user.nil? %>
-    <div class="nav navbar-nav navbar-form navbar-right hidden-xs"
-         style="margin:0">
+    <div class="nav navbar-nav navbar-form navbar-right hidden-xs m-0">
       <p class="form-control-static">
         <%= link_to(
               :app_login.t, account_login_path,
@@ -82,7 +80,7 @@
       </p>
     </div>
   <% else ##user is logged in %>
-    <ul class="nav navbar-nav navbar-right hidden-xs" style="margin-right:0">
+    <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
       <% if @user.admin %>
         <li>
           <%= link_to(

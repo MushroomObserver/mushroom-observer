@@ -11,7 +11,7 @@
 
     <%= form_for(:name, url: add_query_param(action: :create_name)) do |form| %>
         <%= render(partial: "form_name", locals: { form: form }) %>
-        <div style="text-align: center">
+        <div class="text-center">
           <%= submit_tag(:CREATE.l, class: "btn") %>
         </div>
     <% end %>

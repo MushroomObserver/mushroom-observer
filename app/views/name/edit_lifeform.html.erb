@@ -17,8 +17,7 @@
             <td>
               <%= check_box_tag("lifeform_#{word}", "1",
                                 @name.lifeform.include?(" #{word} "),
-                                class: "form-control-xxx",
-                                style: "margin-top:0.5em") %>
+                                class: "form-control-xxx mt-2") %>
               <%= label_tag("lifeform_#{word}", :"lifeform_#{word}".t) %>
             </td>
             <td class="max-width-text">

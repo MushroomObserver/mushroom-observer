@@ -1511,16 +1511,24 @@ table.table-namings {
 // generally useful classes
 // --------------------------------------------------
 
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
 .position-relative {
   position: relative;
 }
 
-.position-fixed {
-  position: fixed;
+.position-absolute {
+  position: absolute;
 }
 
-.text-larger {
-  font-size: larger;
+.position-fixed {
+  position: fixed;
 }
 
 .d-inline {
@@ -1531,6 +1539,10 @@ table.table-namings {
   display: inline-block;
 }
 
+.align-middle {
+  vertical-align: middle !important;
+}
+
 .align-bottom {
   vertical-align: bottom !important;
 }
@@ -1539,12 +1551,24 @@ table.table-namings {
   vertical-align: top !important;
 }
 
+.align-text-top {
+  vertical-align: text-top !important;
+}
+
+.text-larger {
+  font-size: larger;
+}
+
 .text-center {
   text-align: center;
 }
 
 .text-right {
   text-align: right;
+}
+
+.text-monospace {
+  font-family: monospace;
 }
 
 .bold {
@@ -1559,12 +1583,35 @@ table.table-namings {
   border-radius: 0 !important;
 }
 
-.text-monospace {
-  font-family: monospace;
+.m-0 {
+  margin: 0 !important;
 }
 
 .m-3 {
   margin: 1em;
+}
+
+.mx-0 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.mx-3 {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.my-4 {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.mt-0 {
+  margin-top: 0 !important;
+}
+
+.mt-2 {
+  margin-top: 0.5em;
 }
 
 .mt-3 {
@@ -1575,16 +1622,45 @@ table.table-namings {
   margin-top: 1.5em;
 }
 
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.mb-2 {
+  margin-bottom: 0.5em;
+}
+
 .mb-3 {
   margin-bottom: 1em;
 }
 
-.indent {
-  padding-left: 10px !important;
+.ml-3 {
+  margin-left: 1em;
 }
 
-.pl-3 {
-  padding-left: 1em;
+.mr-0 {
+  margin-right: 0;
+}
+
+.mr-2 {
+  margin-right: 0.5em;
+}
+
+.p-0 {
+  padding: 0 !important;
+}
+
+.p-3 {
+  padding: 1em;
+}
+
+.p-5px {
+  padding: 5px;
+}
+
+.py-0 {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .py-5px {
@@ -1592,12 +1668,12 @@ table.table-namings {
   padding-bottom: 5px;
 }
 
-.p-5px {
-  padding: 5px;
+.pt-0 {
+  padding-top: 0;
 }
 
-.p-3 {
-  padding: 1em;
+.pt-3 {
+  padding-top: 1em;
 }
 
 .pb-1 {
@@ -1608,12 +1684,12 @@ table.table-namings {
   padding-bottom: 0.5em;
 }
 
-.pt-3 {
-  padding-top: 1em;
+.indent {
+  padding-left: 10px !important;
 }
 
-.p-0 {
-  padding: 0 !important;
+.pl-3 {
+  padding-left: 1em;
 }
 
 .text-nowrap {

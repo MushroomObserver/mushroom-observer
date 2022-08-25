@@ -1,7 +1,7 @@
 <% if observation.images.any? || check_permission(observation) %>
   <div class="row">
     <div class="col-sm-4">
-      <%= content_tag(:h4, :IMAGES.t, style: "margin-top: 0") %>
+      <%= content_tag(:h4, :IMAGES.t, class: "mt-0") %>
     </div>
     <% if check_permission(observation) %>
       <div class="col-sm-8 float-md-right">
