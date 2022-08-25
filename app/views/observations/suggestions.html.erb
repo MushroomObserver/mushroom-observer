@@ -12,7 +12,7 @@
 %>
 
 <div class="row">
-  <div class="col-sm-8 float-md-left">
+  <div class="col-sm-8 float-sm-left">
 
     <% last_level = nil
        @suggestions.reject(&:useless?).sort_by(&:max).reverse.each do |sugg| %>
@@ -70,7 +70,7 @@
     </tbody></table>
 
   </div>
-  <div class="col-sm-4 float-md-right">
+  <div class="col-sm-4 float-sm-right">
     <%= render(partial: "show_images", locals: { observation: @observation }) %>
   </div>
 </div>

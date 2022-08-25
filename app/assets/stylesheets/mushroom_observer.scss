@@ -1893,13 +1893,13 @@ input[type=checkbox] {
 // --------------------------------------------------
 
 @media screen and (min-width: 767px) {
-  .float-md-left {
+  .float-sm-left {
     float: left;
   }
-  .float-md-right {
+  .float-sm-right {
     float: right;
   }
-  .mt-md-3 {
+  .mt-sm-3 {
     margin-top: 1em;
   }
 }
@@ -1963,15 +1963,18 @@ input[type=checkbox] {
   position:    relative;
   margin-bottom: 1em;
 }
+
 .thumbnail-map {
   position:    relative;
 }
+
 .thumbnail-map-box {
   position:    absolute;
   margin-top:  -2px;
   margin-left: -2px;
   border:      2px solid rgb(0, 255, 192);
 }
+
 .pin-offset {
   position:    absolute;
   width:       100%;
@@ -1979,12 +1982,14 @@ input[type=checkbox] {
   margin-top:  2px;
   margin-left: -11px;
 }
+
 .red-pin {
   position:    absolute;
   width:       40px;
   height:      40px;
   background:  image-url("red_pin.png");
 }
+
 .thumbnail-buttons {
   z-index:     2;
   position:    absolute;
@@ -1992,11 +1997,13 @@ input[type=checkbox] {
   left:        0px;
   bottom:      0px;
 }
+
 .plus-button, .minus-button {
   width:       16px;
   height:      16px;
   background:  image-url("thumbnail-map-buttons.png");
 }
+
 .minus-button {
   height:      15px;
   background-position: 0px 15px;
