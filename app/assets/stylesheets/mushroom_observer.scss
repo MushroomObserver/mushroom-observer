@@ -566,8 +566,8 @@ ul.tight-list {
 // --------------------------------------------------
 
 .pagination {
-    margin-top: 5px;
-    margin-bottom: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .pagination > li > a,
@@ -578,8 +578,8 @@ ul.tight-list {
 .pagination-sm > li:first-child > span,
 .pagination-sm > li:last-child > a,
 .pagination-sm > li:last-child > span {
-    border: 0 !important;
-    border-radius: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
 }
 
 .pagination > .disabled > span,
@@ -588,7 +588,7 @@ ul.tight-list {
 .pagination > .disabled > a,
 .pagination > .disabled > a:hover,
 .pagination > .disabled > a:focus {
-    cursor: default;
+  cursor: default;
 }
 
 
