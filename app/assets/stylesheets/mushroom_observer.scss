@@ -1699,19 +1699,14 @@ table.table-namings {
   margin: 1em;
 }
 
-.mx-0 {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-.mx-3 {
-  margin-left: 1em;
-  margin-right: 1em;
-}
-
 .my-4 {
   margin-top: 1.5em;
   margin-bottom: 1.5em;
+}
+
+.my-5px {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .mt-0 {
@@ -1742,8 +1737,14 @@ table.table-namings {
   margin-bottom: 1em;
 }
 
-.ml-3 {
+.mx-0 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.mx-3 {
   margin-left: 1em;
+  margin-right: 1em;
 }
 
 .mr-0 {
@@ -1752,6 +1753,14 @@ table.table-namings {
 
 .mr-2 {
   margin-right: 0.5em;
+}
+
+.ml-10px {
+  margin-left: 10px;
+}
+
+.ml-3 {
+  margin-left: 1em;
 }
 
 .p-0 {
@@ -1774,6 +1783,11 @@ table.table-namings {
 .py-5px {
   padding-top: 5px;
   padding-bottom: 5px;
+}
+
+.py-10px {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .pt-0 {
