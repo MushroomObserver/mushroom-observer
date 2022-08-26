@@ -21,7 +21,8 @@
     <li>
       <%= radio_button_tag(:format, :darwin, @format == "darwin") %>
       <%= :download_observations_darwin.t %>
-      (<%= link_to(:download_observations_what_is_this.t, "http://rs.tdwg.org/dwc/index.htm",
+      (<%= link_to(:download_observations_what_is_this.t,
+                   "http://rs.tdwg.org/dwc/index.htm",
                    target: "_new") %>)
     </li>
     <li>
@@ -57,6 +58,6 @@
   <%= submit_tag(:DOWNLOAD.l, class: "btn") %>
   <%= submit_tag(:CANCEL.l, class: "btn") %>
 
-  <p style="margin-top:2em"><%= :download_observations_print_labels_header.t %>:</p>
+  <p class="mt-5"><%= :download_observations_print_labels_header.t %>:</p>
   <%= submit_tag(:download_observations_print_labels.l, class: "btn") %>
 </form>

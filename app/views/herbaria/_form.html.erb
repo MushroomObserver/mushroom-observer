@@ -26,7 +26,7 @@
         </div>
         <% if button_name != :CREATE %>
           <div class="well well-sm mt-3 help-block">
-            <div class="arrow-up" style="margin-top:6px"></div>
+            <div class="arrow-up mt-2"></div>
             <% top_users = herbarium_top_users(@herbarium)
                top_users.each do |name, login, count| %>
               <%= :edit_herbarium_user_records.t(
@@ -67,7 +67,7 @@
   <% end %>
 
   <% if !@herbarium.personal_user_id %>
-    <div class="row form-group" style="margin-bottom:-1em">
+    <div class="row form-group mb-n3">
       <div class="col-xs-12">
         <div class="form-inline">
           <%= f.label(:code, "#{:create_herbarium_code.t}:") %>
@@ -75,7 +75,7 @@
           <span class="HelpNote">(<%= :optional.t %>)</span>
         </div>
         <div class="well well-sm mt-3 help-block">
-          <div class="arrow-up" style="margin-top:6px"></div>
+          <div class="arrow-up mt-2"></div>
           <%= :create_herbarium_code_help.t %>
         </div>
       </div>

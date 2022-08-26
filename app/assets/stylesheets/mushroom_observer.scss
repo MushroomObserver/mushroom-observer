@@ -1619,6 +1619,10 @@ table.table-namings {
 // generally useful classes
 // --------------------------------------------------
 
+.w-auto {
+  width: auto !important;
+}
+
 .w-100 {
   width: 100%;
 }
@@ -1683,6 +1687,10 @@ table.table-namings {
   font-weight: 800;
 }
 
+.smaller {
+  font-size: 80%;
+}
+
 .border-none {
   border: none;
 }
@@ -1693,6 +1701,10 @@ table.table-namings {
 
 .m-0 {
   margin: 0 !important;
+}
+
+.m-10px {
+  margin: 10px;
 }
 
 .m-3 {
@@ -1725,6 +1737,14 @@ table.table-namings {
   margin-top: 1.5em;
 }
 
+.mt-5 {
+  margin-top: 2em;
+}
+
+.mt-n2 {
+  margin-top: -0.5em;
+}
+
 .mb-0 {
   margin-bottom: 0 !important;
 }
@@ -1735,6 +1755,14 @@ table.table-namings {
 
 .mb-3 {
   margin-bottom: 1em;
+}
+
+.mb-n3 {
+  margin-bottom: -1em;
+}
+
+.mb-5 {
+  margin-bottom: 2em;
 }
 
 .mx-0 {
@@ -1761,6 +1789,10 @@ table.table-namings {
 
 .ml-3 {
   margin-left: 1em;
+}
+
+.ml-4 {
+  margin-left: 1.5em;
 }
 
 .p-0 {
@@ -1794,6 +1826,10 @@ table.table-namings {
   padding-top: 0;
 }
 
+.pt-10px {
+  padding-top: 10px;
+}
+
 .pt-3 {
   padding-top: 1em;
 }
@@ -1814,8 +1850,24 @@ table.table-namings {
   padding-left: 1em;
 }
 
+.pr-10px {
+  padding-right: 10px;
+}
+
 .text-nowrap {
   white-space: nowrap;
+}
+
+.overflow-visible {
+  overflow: visible;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-ellipsis {
+  text-overflow: ellipsis;
 }
 
 .nowrap-ellipsis {
@@ -1828,6 +1880,12 @@ table.table-namings {
   display: flex;
   align-items: center;
 }
+
+.ls-50 {
+  letter-spacing: 0.5em;
+}
+
+// Specific text elements
 
 form.button_to {
   display: inline;

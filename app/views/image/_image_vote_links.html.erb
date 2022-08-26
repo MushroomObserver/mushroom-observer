@@ -12,7 +12,7 @@
 <% end %>
 
 <div id="vote_buttons">
-  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>" style="margin-top:-5px">
+  <div class="image_vote_links_container mt-n2" id="image_vote_links_<%= image.id %>">
     <div class="text-center">
       <small>
         <%= if user && !image.users_vote(user).blank?
