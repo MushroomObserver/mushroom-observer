@@ -14,7 +14,7 @@ class UsersControllerTest < FunctionalTestCase
 
   def test_page_loads
     login
-    get_with_dump(:show, id: rolf.id)
+    get(:show, params: { id: rolf.id })
     assert_template(:show)
   end
 
@@ -32,7 +32,7 @@ class UsersControllerTest < FunctionalTestCase
   #     assert_flash_text(/denied|only.*admin/i)
 
   #     make_admin("rolf")
-  #     get_with_dump(page, params)
+  #     get(page, params)
   #     assert_template(response) # 1
   #   end
   # end
