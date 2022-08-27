@@ -686,6 +686,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
 
+  # ----- VisualGroups: standard actions ---------------------------------------
+  resources :visual_groups, id: /\d+/
+
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   ACTIONS[:ajax].each_key do |action|

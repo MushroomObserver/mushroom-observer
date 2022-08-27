@@ -374,6 +374,7 @@ class Name < AbstractModel
   belongs_to :synonym
 
   belongs_to :user
+  belongs_to :visual_group
 
   has_many :misspellings, class_name: "Name",
                           foreign_key: "correct_spelling_id",
@@ -386,7 +387,6 @@ class Name < AbstractModel
   has_many :namings
   has_many :observations
 
-  has_one :visual_group
 
   acts_as_versioned(
     table_name: "names_versions",

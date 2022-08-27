@@ -1,9 +1,9 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name_id: 1
+  group_name_id: 1
   reviewed: false
 
 two:
-  name_id: 1
+  group_name_id: 1
   reviewed: false
