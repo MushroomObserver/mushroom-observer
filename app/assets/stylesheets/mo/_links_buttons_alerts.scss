@@ -1,0 +1,97 @@
+//
+// link, button, alert themed styles
+// --------------------------------------------------
+
+a {
+  background-color: $LINK_BG_COLOR;
+  font-weight: $LINK_WEIGHT;
+}
+
+a:visited {
+  color: $LINK_VISITED_FG_COLOR;
+  background-color: $LINK_VISITED_BG_COLOR;
+}
+
+a:hover {
+  color: $LINK_HOVER_FG_COLOR;
+  background-color: $LINK_HOVER_BG_COLOR;
+}
+
+.btn, .btn:visited,
+.btn-default, .btn-default:visited {
+  color: $BUTTON_FG_COLOR;
+  @if $BUTTON_BG_COLOR1 == $BUTTON_BG_COLOR2 {
+    background-color: $BUTTON_BG_COLOR1;
+  } @else {
+    @include gradient-vertical($BUTTON_BG_COLOR1, $BUTTON_BG_COLOR2);
+  }
+  border-color: $BUTTON_BORDER_COLOR;
+  border-width: $BUTTON_BORDER_WIDTH;
+  border-style: $BUTTON_BORDER_STYLE;
+  border-radius: $BUTTON_BORDER_RADIUS;
+  padding: $padding-small-vertical $padding-small-horizontal;
+}
+
+.btn:hover, .btn-default:hover {
+  color: $BUTTON_HOVER_FG_COLOR;
+  @if $BUTTON_HOVER_BG_COLOR1 == $BUTTON_HOVER_BG_COLOR2 {
+    background-color: $BUTTON_HOVER_BG_COLOR1;
+  } @else {
+    @include gradient-vertical($BUTTON_HOVER_BG_COLOR1, $BUTTON_HOVER_BG_COLOR2);
+  }
+  border-color: $BUTTON_HOVER_BORDER_COLOR;
+}
+
+.btn-primary {
+  color: $BUTTON_PRIMARY_FG_COLOR !important;
+  @if $BUTTON_PRIMARY_BG_COLOR1 == $BUTTON_PRIMARY_BG_COLOR2 {
+    background-color: $BUTTON_PRIMARY_BG_COLOR1 !important;
+  } @else {
+    @include gradient-vertical($BUTTON_PRIMARY_BG_COLOR1, $BUTTON_PRIMARY_BG_COLOR2);
+  }
+  border-color: $BUTTON_PRIMARY_BORDER_COLOR;
+}
+
+.btn-primary:hover {
+  color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
+  @if $BUTTON_PRIMARY_HOVER_BG_COLOR1 == $BUTTON_PRIMARY_HOVER_BG_COLOR2 {
+    background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1 !important;
+  } @else {
+    @include gradient-vertical($BUTTON_PRIMARY_HOVER_BG_COLOR1, $BUTTON_PRIMARY_HOVER_BG_COLOR2);
+  }
+  border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
+}
+
+.form-control {
+  border-width: $INPUT_BORDER_WIDTH;
+  border-style: $INPUT_BORDER_STYLE;
+  border-radius: $INPUT_BORDER_RADIUS;
+  padding: $padding-small-vertical $padding-small-horizontal;
+}
+
+//
+// alerts
+// --------------------------------------------------
+
+.alert {
+  margin: 0.5em 1.0em;
+  border-width: $ALERT_BORDER_WIDTH;
+  border-style: $ALERT_BORDER_STYLE;
+  border-radius: $ALERT_BORDER_RADIUS;
+  padding: 0.5em 1.0em;
+  text-align: left;
+}
+
+//
+// message banner at top
+// --------------------------------------------------
+
+.alert.message-banner {
+  margin: 0.5em 1.0em;
+  border-width: $BANNER_BORDER_WIDTH;
+  border-style: $BANNER_BORDER_STYLE;
+  border-radius: $BANNER_BORDER_RADIUS;
+  padding: 0.5em 1.0em;
+  font-size: 150%;
+  text-align: center;
+}

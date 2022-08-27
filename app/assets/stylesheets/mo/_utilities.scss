@@ -1,0 +1,316 @@
+//
+// generally useful classes
+// --------------------------------------------------
+
+.w-auto {
+  width: auto !important;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
+.position-fixed {
+  position: fixed;
+}
+
+.d-inline {
+  display: inline;
+}
+
+.d-inline-block {
+  display: inline-block;
+}
+
+.align-middle {
+  vertical-align: middle !important;
+}
+
+.align-bottom {
+  vertical-align: bottom !important;
+}
+
+.align-top {
+  vertical-align: top !important;
+}
+
+.align-text-top {
+  vertical-align: text-top !important;
+}
+
+.text-larger {
+  font-size: larger;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-monospace {
+  font-family: monospace;
+}
+
+.font-weight-bold {
+  font-weight: 800;
+}
+
+.smaller {
+  font-size: 80%;
+}
+
+.border-none {
+  border: none;
+}
+
+.rounded-0 {
+  border-radius: 0 !important;
+}
+
+.m-0 {
+  margin: 0 !important;
+}
+
+.m-10px {
+  margin: 10px;
+}
+
+.m-3 {
+  margin: 1em;
+}
+
+.my-4 {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.my-5px {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.mt-0 {
+  margin-top: 0 !important;
+}
+
+.mt-2 {
+  margin-top: 0.5em;
+}
+
+.mt-3 {
+  margin-top: 1em;
+}
+
+.mt-4 {
+  margin-top: 1.5em;
+}
+
+.mt-5 {
+  margin-top: 2em;
+}
+
+.mt-n2 {
+  margin-top: -0.5em;
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.mb-2 {
+  margin-bottom: 0.5em;
+}
+
+.mb-3 {
+  margin-bottom: 1em;
+}
+
+.mb-n3 {
+  margin-bottom: -1em;
+}
+
+.mb-5 {
+  margin-bottom: 2em;
+}
+
+.mx-0 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.mx-3 {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.mr-0 {
+  margin-right: 0;
+}
+
+.mr-2 {
+  margin-right: 0.5em;
+}
+
+.ml-10px {
+  margin-left: 10px;
+}
+
+.ml-3 {
+  margin-left: 1em;
+}
+
+.ml-4 {
+  margin-left: 1.5em;
+}
+
+.p-0 {
+  padding: 0 !important;
+}
+
+.p-3 {
+  padding: 1em;
+}
+
+.p-5px {
+  padding: 5px;
+}
+
+.py-0 {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.py-5px {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.py-10px {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.pt-0 {
+  padding-top: 0;
+}
+
+.pt-10px {
+  padding-top: 10px;
+}
+
+.pt-3 {
+  padding-top: 1em;
+}
+
+.pb-1 {
+  padding-bottom: .25em;
+}
+
+.pb-2 {
+  padding-bottom: 0.5em;
+}
+
+.indent {
+  padding-left: 10px !important;
+}
+
+.pl-3 {
+  padding-left: 1em;
+}
+
+.pr-10px {
+  padding-right: 10px;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.overflow-visible {
+  overflow: visible;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-ellipsis {
+  text-overflow: ellipsis;
+}
+
+.nowrap-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vcenter {
+  display: flex;
+  align-items: center;
+}
+
+.ls-50 {
+  letter-spacing: 0.5em;
+}
+
+
+// Most browsers allow you to zoom in or out: let the user decide what
+// an optimal width for a line of text should be.  There is no way for us
+// to decide for them intelligently, since browsers differ so much in how
+// they deal with print views.
+@media screen {
+  .max-width-text {
+    max-width: 600px;
+  }
+
+  .max-width-text-plus-padding {
+    max-width: 650px;
+  }
+
+  .max-width-text-plus-image {
+    max-width: 850px; // 600px text column + 160pm max thumbnail
+  }
+
+  .max-width-text-times-two {
+    max-width: 1200px;
+  }
+}
+
+
+//
+// larger devices
+// --------------------------------------------------
+
+@media screen and (min-width: 767px) {
+  .float-sm-left {
+    float: left;
+  }
+
+  .float-sm-right {
+    float: right;
+  }
+
+  .mt-sm-3 {
+    margin-top: 1em;
+  }
+}
+
+.dashed-border {
+  border: 5px dashed;
+}
+
