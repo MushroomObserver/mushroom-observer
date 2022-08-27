@@ -14,7 +14,7 @@
   <tbody>
     <% @visual_groups.each do |visual_group| %>
       <tr>
-        <td><%= visual_group.group_name.text_name %></td>
+        <td><%= visual_group.group_name&.text_name %></td>
         <td><%= visual_group.reviewed %></td>
         <td><%= link_to 'Show', visual_group %></td>
         <td><%= link_to 'Edit', edit_visual_group_path(visual_group) %></td>
