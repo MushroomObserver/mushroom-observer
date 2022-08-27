@@ -21,18 +21,18 @@ $polyozellus_dark:              #5167b2;
 
 $BODY_FG_COLOR:               $cornucopioides_dark_hymenium;
 $BODY_BG_COLOR:               $californicus_stipe;
-                             
+
 $LINK_FG_COLOR:               $cinnabarinus_light_cap;
 $LINK_VISITED_FG_COLOR:       $cinnabarinus_dark_cap;
 $LINK_HOVER_FG_COLOR:         $cinnabarinus_light_cap;
 $LINK_HOVER_BG_COLOR:         $californicus_cap;
-                             
+
 $LOGO_BORDER_COLOR:           $cornucopioides_dark_hymenium;
 $LOGO_FG_COLOR:               $cornucopioides_dark_hymenium;
 $LOGO_BG_COLOR:               $californicus_cap;
 $LOGO_HOVER_FG_COLOR:         $cornucopioides_dark_hymenium;
 $LOGO_HOVER_BG_COLOR:         $californicus_stipe;
-                             
+
 $LEFT_BAR_BORDER_COLOR:       $californicus_cap;
 $LEFT_BAR_HEADER_FG_COLOR:    $cornucopioides_dark_hymenium;
 $LEFT_BAR_HEADER_BG_COLOR:    $californicus_cap;
@@ -56,20 +56,20 @@ $LIST_BG_COLOR:               mix($californicus_stipe, white, 50%);
 
 $TOOLTIP_FG_COLOR:            $californicus_stipe;
 $TOOLTIP_BG_COLOR:            $cornucopioides_dark_hymenium;
-                             
+
 $VOTE_METER_FG_COLOR:         $cornucopioides_dark_hymenium;
 $VOTE_METER_BG_COLOR:         $californicus_cap;
-                             
+
 $PROGRESS_BG_COLOR:           $californicus_stipe;
 $PROGRESS_FG_COLOR:           $cornucopioides_dark_hymenium;
 $PROGRESS_BAR_COLOR:          $cinnabarinus_light_cap;
-                             
+
 $PAGER_FG_COLOR:              $cornucopioides_dark_hymenium;
 $PAGER_HOVER_FG_COLOR:        $cornucopioides_dark_hymenium;
 $PAGER_HOVER_BG_COLOR:        $californicus_cap;
 $PAGER_ACTIVE_FG_COLOR:       $californicus_stipe;
 $PAGER_ACTIVE_BG_COLOR:       $cornucopioides_dark_hymenium;
-                             
+
 $MENU_BORDER_COLOR:           $cornucopioides_dark_hymenium;
 $MENU_FG_COLOR:               black;
 $MENU_BG_COLOR:               white;
@@ -92,11 +92,6 @@ $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 @import "mushroom_observer";
-
-#navigation {
-    border-left-width: $LEFT_BAR_BORDER_WIDTH;
-}
-
 
 .btn.active {
   background-color: $californicus_cap

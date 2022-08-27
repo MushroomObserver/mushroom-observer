@@ -1,4 +1,5 @@
-// Prior to this file, Rails imports one of the theme files.
+// The theme files import mushroom_observer.scss
+
 // This map sets Bootstrap's variables with those theme color variables.
 @import "mo/map_theme_vars_to_bootstrap_vars";
 

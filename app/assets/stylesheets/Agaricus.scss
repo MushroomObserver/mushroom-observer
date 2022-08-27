@@ -13,18 +13,18 @@ $polyozellus_dark:     #5167b2;
 
 $BODY_FG_COLOR:               $cupreobrunneus_gills;
 $BODY_BG_COLOR:               $campestris_cap;
-                             
+
 $LINK_FG_COLOR:               $brasiliensis_gills_1;
 $LINK_VISITED_FG_COLOR:       $cupreobrunneus_gills;
 $LINK_HOVER_FG_COLOR:         $brasiliensis_gills_2;
 $LINK_HOVER_BG_COLOR:         $campestris_cap;
-                             
+
 $LOGO_BORDER_COLOR:           $cupreobrunneus_gills;
 $LOGO_FG_COLOR:               $cupreobrunneus_gills;
 $LOGO_BG_COLOR:               $semotus_cap;
 $LOGO_HOVER_FG_COLOR:         $brasiliensis_gills_2;
 $LOGO_HOVER_BG_COLOR:         $campestris_cap;
-                             
+
 $LEFT_BAR_BORDER_COLOR:       $augustus_cap;
 $LEFT_BAR_HEADER_FG_COLOR:    $cupreobrunneus_gills;
 $LEFT_BAR_HEADER_BG_COLOR:    $augustus_cap;
@@ -48,13 +48,13 @@ $LIST_BG_COLOR:               mix($campestris_cap, white, 50%);
 
 $TOOLTIP_FG_COLOR:            $campestris_cap;
 $TOOLTIP_BG_COLOR:            $cupreobrunneus_gills;
-                             
+
 $PAGER_FG_COLOR:              $cupreobrunneus_gills;
 $PAGER_HOVER_FG_COLOR:        $brasiliensis_gills_2;
 $PAGER_HOVER_BG_COLOR:        $campestris_cap;
 $PAGER_ACTIVE_FG_COLOR:       $campestris_cap;
 $PAGER_ACTIVE_BG_COLOR:       $brasiliensis_gills_2;
-                             
+
 $MENU_BORDER_COLOR:           $brasiliensis_gills_2;
 $MENU_FG_COLOR:               black;
 $MENU_BG_COLOR:               white;
@@ -77,7 +77,3 @@ $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 @import "mushroom_observer";
-
-#navigation {
-    border-left-width: $LEFT_BAR_BORDER_WIDTH;
-}

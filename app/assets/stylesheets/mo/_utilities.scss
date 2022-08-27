@@ -7,31 +7,31 @@
 }
 
 .w-100 {
-  width: 100%;
+  width: 100% !important;
 }
 
 .h-100 {
-  height: 100%;
+  height: 100% !important;
 }
 
 .position-relative {
-  position: relative;
+  position: relative !important;
 }
 
 .position-absolute {
-  position: absolute;
+  position: absolute !important;
 }
 
 .position-fixed {
-  position: fixed;
+  position: fixed !important;
 }
 
 .d-inline {
-  display: inline;
+  display: inline !important;
 }
 
 .d-inline-block {
-  display: inline-block;
+  display: inline-block !important;
 }
 
 .align-middle {
@@ -55,11 +55,11 @@
 }
 
 .text-center {
-  text-align: center;
+  text-align: center !important;
 }
 
 .text-right {
-  text-align: right;
+  text-align: right !important;
 }
 
 .text-monospace {
