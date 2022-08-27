@@ -10,15 +10,10 @@
 #  login::                      Login a user.
 #  logout::                     Logout current user.
 #  make_admin::                 Make current user an admin & turn on admin mode.
-#  get_with_dump::              Send GET, no login required.
 #  requires_login::             Send GET, login required.
 #  requires_user::              Send GET, certain user must be logged in.
-#  post_with_dump::             Send POST, no login required.
 #  post_requires_login::        Send POST, login required.
 #  post_requires_user::         Send POST, certain user must be logged in.
-#  html_dump::                  Dump response body to file for W3C validation.
-#  save_response::              Dump response body to public/test.html
-#                               for debugging.
 #  get_without_clearing_flash::  Wrapper: calls +get+
 #                                without clearing flash errors.
 #  post_without_clearing_flash:: Wrapper: calls +post+
@@ -99,42 +94,6 @@ module ControllerExtensions
       user.save
     end
     user
-  end
-
-  # Send a GET request, and save the result in a file for w3c validation.
-  #
-  #   # Send request, but ignore response.
-  #   get(:action, params)
-  #
-  #   # Send request, and save response in ../html/action_0.html.
-  #   get_with_dump(:action, params)
-  #
-  def get_with_dump(page, params = {})
-    get(page, params: params)
-    html_dump(page, @response.body, params)
-  end
-
-  # Send a POST request, and save the result in a file for w3c validation.
-  #
-  #   # Send request, but ignore response.
-  #   post(:action, params)
-  #
-  #   # Send request, and save response in ../html/action_0.html.
-  #   post_with_dump(:action, params)
-  #
-  def post_with_dump(page, params = {})
-    post(page, params: params)
-    html_dump(page, @response.body, params)
-  end
-
-  def put_with_dump(page, params = {})
-    put(page, params: params)
-    html_dump(page, @response.body, params)
-  end
-
-  def patch_with_dump(page, params = {})
-    patch(page, params: params)
-    html_dump(page, @response.body, params)
   end
 
   # Send GET request to a page that should require login.
@@ -246,58 +205,6 @@ module ControllerExtensions
       require_login: :login,
       require_user: altpage ? [altpage].flatten : nil
     )
-  end
-
-  # The whole purpose of this is to create a directory full of sample HTML
-  # files that we can run the W3C validator on -- this has nothing to do with
-  # debugging!  This happens automatically if following directory exists:
-  #
-  #   ::Rails.root.to_s/../html
-  #
-  # Files are created:
-  #
-  #   show_user_0.html
-  #   show_user_1.html
-  #   show_user_2.html
-  #   etc.
-  #
-  def html_dump(label, html, _params)
-    html_dir = "../html"
-    return unless File.directory?(html_dir) && html[0..11] != "<html><body>"
-
-    file_name = "#{html_dir}/#{label}.html"
-    count = 0
-    while File.exist?(file_name)
-      file_name = "#{html_dir}/#{label}_#{count}.html"
-      count += 1
-      next unless count > 100
-
-      raise(
-        RangeError.new("More than 100 files found with a label of '#{label}'")
-      )
-    end
-    print("Creating html_dump file: #{file_name}\n")
-    file = File.new(file_name, "w")
-    # show_params(file, params, "params")
-    file.write(html)
-    file.close
-  end
-
-  # Add the hash of parameters to the dump file for diagnostics.
-  def show_params(file, hash, prefix)
-    if hash.is_a?(Hash)
-      hash.each { |k, v| show_params(file, v, "#{prefix}[#{k}]") }
-    else
-      file.write("#{prefix} = [#{hash}]<br>\n")
-    end
-  end
-
-  # This writes @response.body to the given file
-  # (relative to <tt>::Rails.root.to_s</tt>).
-  def save_response(file = "public/test.html")
-    File.open("#{::Rails.root}/#{file}", "w:utf-8") do |fh|
-      fh.write(@response.body)
-    end
   end
 
   ##############################################################################
@@ -499,7 +406,7 @@ module ControllerExtensions
 
     # Finally, login correct user and let it do its thing.
     login(user, password)
-    send("#{method}_with_dump", action, params)
+    send(method, action, params: params)
     assert_response(args[:result])
   end
 

@@ -178,7 +178,7 @@ class TranslationControllerTest < FunctionalTestCase
 
   def test_edit_translation_form_get_tag_two
     login("rolf")
-    get_with_dump(:edit_translations, locale: "en", tag: "two")
+    get(:edit_translations, params: { locale: "en", tag: "two" })
     assert_no_flash
     assert_response(:success)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)

@@ -4,15 +4,6 @@ require("test_helper")
 
 # Controller tests for info pages
 class AdminControllerTest < FunctionalTestCase
-  # Prove w3c_tests renders html, with all content within the <body>
-  # (and therefore without MO's layout).
-  def test_w3c_tests
-    login
-    expect_start = "<html><head></head><body>"
-    get(:w3c_tests)
-    assert_equal(expect_start, @response.body[0..(expect_start.size - 1)])
-  end
-
   def test_change_banner
     use_test_locales do
       # Oops!  One of these tags actually exists now!
