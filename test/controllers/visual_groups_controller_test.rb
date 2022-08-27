@@ -7,9 +7,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   test "should get index" do
     login
-    # debugger
     get(:index)
-    # get visual_groups_url
     assert_response :success
   end
 
