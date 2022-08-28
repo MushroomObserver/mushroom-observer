@@ -39,12 +39,12 @@ $table-border-color: $MENU_BORDER_COLOR;
 
 $btn-font-weight: bold;
 $btn-default-color: $BUTTON_FG_COLOR;
-$btn-default-bg: $BUTTON_BG_COLOR2;
+$btn-default-bg: $BUTTON_BG_COLOR;
 $btn-default-border: $BUTTON_BORDER_COLOR;
 $btn-primary-color: $BUTTON_PRIMARY_FG_COLOR;
-$btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR2;
+$btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR;
 $btn-primary-border: $BUTTON_PRIMARY_BORDER_COLOR;
-$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR2, 75%);
+$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR, 75%);
 
 $input-bg: $INPUT_BG_COLOR;
 $input-bg-disabled: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
