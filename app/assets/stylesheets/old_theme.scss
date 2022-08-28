@@ -4,27 +4,30 @@
 // $LINK_WEIGHT:                       normal;
 
 // Commented-out vars are assigned values in all the color themes
+// TODO: Consolidate bg colors in defaults, eliminate them here
 // $BUTTON_FG_COLOR:                   #000000;
-$BUTTON_BG_COLOR1:                  #FFFFFF;
-$BUTTON_BG_COLOR2:                  #C0C0C0;
-$BUTTON_BORDER_COLOR:               #DDDDDD;
+// $BUTTON_BG_COLOR1:                  #FFFFFF;
+// $BUTTON_BG_COLOR2:                  #C0C0C0;
+// $BUTTON_BORDER_COLOR:               #DDDDDD;
 // $BUTTON_HOVER_FG_COLOR:             #000000;
-$BUTTON_HOVER_BG_COLOR1:            #FFFFFF;
-$BUTTON_HOVER_BG_COLOR2:            #C0C0C0;
-$BUTTON_HOVER_BORDER_COLOR:         #000000;
+// $BUTTON_HOVER_BG_COLOR1:            #FFFFFF;
+// $BUTTON_HOVER_BG_COLOR2:            #C0C0C0;
+// $BUTTON_HOVER_BORDER_COLOR:         #000000;
 // $BUTTON_PRIMARY_FG_COLOR:           #FFFFFF;
-$BUTTON_PRIMARY_BG_COLOR1:          #3F98E4;
+// $BUTTON_PRIMARY_BG_COLOR1:          #3F98E4;
 // $BUTTON_PRIMARY_BG_COLOR2:          #337AB7;
 // $BUTTON_PRIMARY_BORDER_COLOR:       #286192;
 // $BUTTON_PRIMARY_HOVER_FG_COLOR:     #FFFFFF;
-$BUTTON_PRIMARY_HOVER_BG_COLOR1:    #3F98E4;
+// $BUTTON_PRIMARY_HOVER_BG_COLOR1:    #3F98E4;
 // $BUTTON_PRIMARY_HOVER_BG_COLOR2:    #337AB7;
-$BUTTON_PRIMARY_HOVER_BORDER_COLOR: #FFFFFF;
+// $BUTTON_PRIMARY_HOVER_BORDER_COLOR: #FFFFFF;
 // $BUTTON_BORDER_WIDTH:               1px;
-$BUTTON_BORDER_STYLE:               outset; // vs solid in default
+// TODO: remove these two, negligible impact and should be consistent
+// $BUTTON_BORDER_STYLE:               outset; // vs solid in default
 // $BUTTON_BORDER_RADIUS:              5px;
 
-$INPUT_BORDER_STYLE:                inset; // vs solid in default
+// TODO: remove these two, negligible impact and should be consistent
+// $INPUT_BORDER_STYLE:                inset; // vs solid in default
 
 // Commented-out vars are assigned values in all the color themes
 // $INFO_BG_COLOR:                     transparent;
@@ -36,13 +39,16 @@ $INPUT_BORDER_STYLE:                inset; // vs solid in default
 // $DANGER_BG_COLOR:                   transparent;
 // $DANGER_BORDER_COLOR:               #FF0000;
 
-$BANNER_BORDER_RADIUS:              0px; // vs 5px in default
-$ALERT_BORDER_RADIUS:               0px; // vs 5px in default
+// TODO: remove these, negligible impact and should be consistent
+// $BANNER_BORDER_RADIUS:              0px; // vs 5px in default
+// $ALERT_BORDER_RADIUS:               0px; // vs 5px in default
 
-$LOGO_BORDER_WIDTH:                 2px; // vs 1px in default
+// $LOGO_BORDER_WIDTH:                 2px; // vs 1px in default
 
-$LEFT_BAR_BORDER_WIDTH:             2px; // vs 1px in default
-$LEFT_BAR_BORDER_RADIUS:            0px; // vs 5px in default
-$LEFT_BAR_ITEM_BORDER_WIDTH:        0px; // vs 1px in default
+// $LEFT_BAR_BORDER_WIDTH:             2px; // vs 1px in default
+// $LEFT_BAR_BORDER_RADIUS:            0px; // vs 5px in default
+// TODO: Use left bar item border color:transparent instead of 0px width
+// $LEFT_BAR_ITEM_BORDER_WIDTH:        0px; // vs 1px in default
 
-$TOP_BAR_BORDER_WIDTH:              0px; // vs 1px in default
+// TODO: Use top bar border color:transparent instead of 0px width
+// $TOP_BAR_BORDER_WIDTH:              0px; // vs 1px in default
