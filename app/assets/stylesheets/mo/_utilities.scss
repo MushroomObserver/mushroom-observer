@@ -51,7 +51,7 @@
 }
 
 .text-larger {
-  font-size: larger;
+  font-size: larger !important;
 }
 
 .text-center {
@@ -63,19 +63,19 @@
 }
 
 .text-monospace {
-  font-family: monospace;
+  font-family: monospace !important;
 }
 
 .font-weight-bold {
-  font-weight: 800;
+  font-weight: 800 !important;
 }
 
 .smaller {
-  font-size: 80%;
+  font-size: 80% !important;
 }
 
 .border-none {
-  border: none;
+  border: none !important;
 }
 
 .rounded-0 {
@@ -87,21 +87,21 @@
 }
 
 .m-10px {
-  margin: 10px;
+  margin: 10px !important;
 }
 
 .m-3 {
-  margin: 1em;
+  margin: 1em !important;
 }
 
 .my-4 {
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.5em !important;
 }
 
 .my-5px {
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
 }
 
 .mt-0 {
@@ -109,23 +109,23 @@
 }
 
 .mt-2 {
-  margin-top: 0.5em;
+  margin-top: 0.5em !important;
 }
 
 .mt-3 {
-  margin-top: 1em;
+  margin-top: 1em !important;
 }
 
 .mt-4 {
-  margin-top: 1.5em;
+  margin-top: 1.5em !important;
 }
 
 .mt-5 {
-  margin-top: 2em;
+  margin-top: 2em !important;
 }
 
 .mt-n2 {
-  margin-top: -0.5em;
+  margin-top: -0.5em !important;
 }
 
 .mb-0 {
@@ -133,19 +133,19 @@
 }
 
 .mb-2 {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.5em !important;
 }
 
 .mb-3 {
-  margin-bottom: 1em;
+  margin-bottom: 1em !important;
 }
 
 .mb-n3 {
-  margin-bottom: -1em;
+  margin-bottom: -1em !important;
 }
 
 .mb-5 {
-  margin-bottom: 2em;
+  margin-bottom: 2em !important;
 }
 
 .mx-0 {
@@ -154,28 +154,28 @@
 }
 
 .mx-3 {
-  margin-left: 1em;
-  margin-right: 1em;
+  margin-left: 1em !important;
+  margin-right: 1em !important;
 }
 
 .mr-0 {
-  margin-right: 0;
+  margin-right: 0 !important;
 }
 
 .mr-2 {
-  margin-right: 0.5em;
+  margin-right: 0.5em !important;
 }
 
 .ml-10px {
-  margin-left: 10px;
+  margin-left: 10px !important;
 }
 
 .ml-3 {
-  margin-left: 1em;
+  margin-left: 1em !important;
 }
 
 .ml-4 {
-  margin-left: 1.5em;
+  margin-left: 1.5em !important;
 }
 
 .p-0 {
@@ -183,11 +183,11 @@
 }
 
 .p-3 {
-  padding: 1em;
+  padding: 1em !important;
 }
 
 .p-5px {
-  padding: 5px;
+  padding: 5px !important;
 }
 
 .py-0 {
@@ -196,33 +196,33 @@
 }
 
 .py-5px {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
 }
 
 .py-10px {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
 }
 
 .pt-0 {
-  padding-top: 0;
+  padding-top: 0 !important;
 }
 
 .pt-10px {
-  padding-top: 10px;
+  padding-top: 10px !important;
 }
 
 .pt-3 {
-  padding-top: 1em;
+  padding-top: 1em !important;
 }
 
 .pb-1 {
-  padding-bottom: .25em;
+  padding-bottom: .25em !important;
 }
 
 .pb-2 {
-  padding-bottom: 0.5em;
+  padding-bottom: 0.5em !important;
 }
 
 .indent {
@@ -230,27 +230,27 @@
 }
 
 .pl-3 {
-  padding-left: 1em;
+  padding-left: 1em !important;
 }
 
 .pr-10px {
-  padding-right: 10px;
+  padding-right: 10px !important;
 }
 
 .text-nowrap {
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
 .overflow-visible {
-  overflow: visible;
+  overflow: visible !important;
 }
 
 .overflow-hidden {
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
 .overflow-ellipsis {
-  text-overflow: ellipsis;
+  text-overflow: ellipsis !important;
 }
 
 .nowrap-ellipsis {
@@ -268,6 +268,9 @@
   letter-spacing: 0.5em;
 }
 
+.dashed-border {
+  border: 5px dashed;
+}
 
 // Most browsers allow you to zoom in or out: let the user decide what
 // an optimal width for a line of text should be.  There is no way for us
@@ -298,19 +301,15 @@
 
 @media screen and (min-width: 767px) {
   .float-sm-left {
-    float: left;
+    float: left !important;
   }
 
   .float-sm-right {
-    float: right;
+    float: right !important;
   }
 
   .mt-sm-3 {
-    margin-top: 1em;
+    margin-top: 1em !important;
   }
-}
-
-.dashed-border {
-  border: 5px dashed;
 }
 
