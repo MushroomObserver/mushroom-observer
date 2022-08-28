@@ -47,7 +47,8 @@
     </div>
     <div class="col-xs-5 col-md-2">
       <%= form.label(:sequence_archive, :ARCHIVE.t) %>
-      <%= form.select(:archive, archive_dropdown, { include_blank: true }) %>
+      <%= form.select(:archive, archive_dropdown,
+                      { include_blank: true }, { class: "form-control" }) %>
     </div>
     <div class="col-xs-6 col-md-3">
       <span class="font-weight-bold"><%= :form_sequence_accession.t %></span>

@@ -7,6 +7,7 @@
         filter.prefs_vals.map do |val|
           [ :"prefs_filters_#{filter.sym}_#{val}".t, val ]
         end
-      form.select(filter.sym, options, class: "form-control",
-                  selected: @user.content_filter[filter.sym]) %>
+      form.select(filter.sym, options,
+                  { selected: @user.content_filter[filter.sym] },
+                  { class: "form-control" }) %>
 <% end %>

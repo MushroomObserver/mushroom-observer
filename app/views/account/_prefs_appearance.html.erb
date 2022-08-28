@@ -8,20 +8,20 @@
   <%= form.select(:hide_authors,
                   [[:prefs_hide_authors_none.l, "none"],
                    [:prefs_hide_authors_above_species.l, "above_species"]],
-                  class: "form-control") %><br/>
+                  {}, { class: "form-control" }) %><br/>
 
   <%= label_tag(:user_location_format, :prefs_location_format.t + ":") %>
   <%= form.select(:location_format,
                   [[:prefs_location_format_postal.l, "postal"],
                    [:prefs_location_format_scientific.l, "scientific"]],
-                  class: "form-control") %><br/>
+                  {}, { class: "form-control" }) %><br/>
 
   <%= label_tag(:user_theme, :prefs_theme.t + ":") %>
   <%= form.select(:theme,
                   [
                    [:theme_random.l, "NULL"]
                   ] + MO.themes.map { |t| [t.to_sym.l, t] },
-                  class: "form-control") %>
+                  {}, { class: "form-control" }) %>
   <%= link_to(:prefs_themes_about.t, controller: :theme,
                                      action: :color_themes) %><br/>
 
@@ -31,7 +31,7 @@
                   name += " (beta)" if lang.beta
                   [name, lang.locale]
                 end
-      form.select(:locale, locales, class: "form-control") %><br/>
+      form.select(:locale, locales, {}, { class: "form-control" }) %><br/>
 
   <%= form.check_box(:thumbnail_maps, class: "form-control") %>
 
