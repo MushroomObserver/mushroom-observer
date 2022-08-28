@@ -236,9 +236,11 @@ blockquote {
 }
 
 .form-control {
+    color: $BUTTON_FG_COLOR;
     border-width: $INPUT_BORDER_WIDTH;
     border-style: $INPUT_BORDER_STYLE;
     border-radius: $INPUT_BORDER_RADIUS;
+    border-color: $BUTTON_FG_COLOR;
     padding: 4px 8px 3px 8px;
 }
 
