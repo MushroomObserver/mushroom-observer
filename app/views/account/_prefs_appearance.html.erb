@@ -23,7 +23,7 @@
                   [
                    [:theme_random.l, "NULL"]
                   ] + MO.themes.map { |t| [t.to_sym.l, t] },
-                  {}, { class: "form-control" }) %>
+                  {}, { class: "form-control mr-3" }) %>
   <%= link_to(:prefs_themes_about.t, controller: :theme,
                                      action: :color_themes) %><br/>
 </div>
