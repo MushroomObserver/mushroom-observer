@@ -47,9 +47,11 @@ a:hover {
 }
 
 .form-control {
+  color: $BUTTON_FG_COLOR;
   border-width: $INPUT_BORDER_WIDTH;
   border-style: $INPUT_BORDER_STYLE;
   border-radius: $INPUT_BORDER_RADIUS;
+  border-color: $BUTTON_FG_COLOR;
   padding: $padding-small-vertical $padding-small-horizontal;
 }
 
