@@ -2,31 +2,29 @@
 // pivotal tracker
 // --------------------------------------------------
 
-#pivotal_index {
-  #pivotal_labels {
+#pivotal_labels {
+  background: none;
+  margin: 5px 1em;
+
+  td {
+    vertical-align: top;
+  }
+
+  table {
     background: none;
-    margin: 5px 1em;
 
-    td {
-      vertical-align: top;
-    }
-
-    table {
-      background: none;
-
-      td:first-child {
-        a {
-          margin-right: 0.5em;
-          padding: 0 5px;
-          font-size: 80%;
-          font-weight: bold;
-          white-space: nowrap;
-        }
-      }
-
-      td:last-child {
+    td:first-child {
+      a {
+        margin-right: 0.5em;
+        padding: 0 5px;
+        font-size: 80%;
+        font-weight: bold;
         white-space: nowrap;
       }
+    }
+
+    td:last-child {
+      white-space: nowrap;
     }
   }
 
