@@ -25,7 +25,7 @@ a:hover {
   border-width: $BUTTON_BORDER_WIDTH;
   border-style: $BUTTON_BORDER_STYLE;
   border-radius: $BUTTON_BORDER_RADIUS;
-  padding: $padding-small-vertical $padding-small-horizontal;
+  // padding: $padding-vertical $padding-horizontal;
 }
 
 .btn:hover, .btn-default:hover {
