@@ -26,6 +26,7 @@ a:hover {
 .btn.active {
   color: $BUTTON_ACTIVE_FG_COLOR;
   background-color: $BUTTON_ACTIVE_BG_COLOR;
+  box-shadow: none;
 }
 
 .btn-primary:hover {
