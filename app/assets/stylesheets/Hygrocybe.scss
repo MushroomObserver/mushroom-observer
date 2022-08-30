@@ -21,6 +21,8 @@ $polyozellus_light:     #a5bffa;
 $polyozellus_dark:      #5167b2;
 
 $BUTTON_FG_COLOR:             $conica_stain;
+$BUTTON_ACTIVE_FG_COLOR:      $conica_stain;
+$BUTTON_ACTIVE_BG_COLOR:      $miniata_cap_yellow;
 
 $BODY_FG_COLOR:               $conica_stain;
 $BODY_BG_COLOR:               $punicea_light_stipe;
@@ -85,23 +87,6 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
+$WELL_FG_COLOR:                     $conica_stain;
+
 @import "mushroom_observer";
-
-.form-control, .btn {
-  border-style: solid;
-}
-
-.btn.active {
-  background-color:$miniata_cap_yellow
-}
-
-//The button group at the top of the page
-.btn-group {
-  .btn {
-    border-style: solid;
-
-    a:hover {
-      background-color: transparent;
-    }
-  }
-}

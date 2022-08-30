@@ -3,7 +3,17 @@
 // ------------------------------------------
 $help-block-max-width: 600px;
 
+.well {
+  background-color: $WELL_BG_COLOR;
+
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 .help-block {
+  color: $WELL_FG_COLOR;
   max-width: $help-block-max-width;
 }
 

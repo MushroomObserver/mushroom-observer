@@ -49,11 +49,6 @@
 // style tweaks
 // --------------------------------------------------
 
-.well p {
-  margin: 0;
-  padding: 0;
-}
-
 .name-section p {
   margin: 0;
   padding-left: 1em;
@@ -70,4 +65,11 @@ ul.tight-list {
   list-style: none;
   margin-bottom: 0.5em;
   padding-left: 1em;
+}
+
+.Admin {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px;
 }

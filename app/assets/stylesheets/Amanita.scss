@@ -24,6 +24,7 @@ $polyozellus_light:               #a5bffa;
 $polyozellus_dark:                #5167b2;
 
 $BUTTON_FG_COLOR:             $pachycolea_background;
+$BUTTON_ACTIVE_FG_COLOR:      $muscaria_background;
 
 $BODY_FG_COLOR:               $pachycolea_foreground;
 $BODY_BG_COLOR:               $pachycolea_background;
@@ -98,37 +99,7 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   black;
 
+$WELL_BG_COLOR:                     $pachycolea_light_stipe;
+$WELL_FG_COLOR:                     black !important;
+
 @import "mushroom_observer";
-
-.btn.active {
-  color: $muscaria_background;
-}
-
-.well {
-  background:  $pachycolea_light_stipe;
-}
-
-//
-// panels
-// note: it doesn't look like there is a variable to set the border width
-//       via the bootstrap sass
-// --------------------------------------------------
-
-.panel {
-  border: 0px !important;
-}
-
-//
-// list-groups
-// note: it doesn't look like there is a variable to set the border width
-//       via the bootstrap sass
-// --------------------------------------------------
-
-.list-group-item {
-  border: 0px !important;
-}
-
-// Some error messages are invisible!
-div.alert p.help-block {
-  color: black !important;
-}

@@ -12,19 +12,21 @@ $LINK_HOVER_BG_COLOR:               transparent;
 // TODO: Consolidate bg colors in defaults
 // eliminate bg gradient conditionals in links buttons alerts
 $BUTTON_FG_COLOR:                   #000000;
-$BUTTON_BG_COLOR:                  #F6F6F6;
+$BUTTON_BG_COLOR:                   #F6F6F6;
 // $BUTTON_BG_COLOR2:                  #F6F6F6;
 $BUTTON_BORDER_COLOR:               #CCCCCC;
 $BUTTON_HOVER_FG_COLOR:             #000000;
-$BUTTON_HOVER_BG_COLOR:            #F6F6F6;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
 // $BUTTON_HOVER_BG_COLOR2:            #F6F6F6;
 $BUTTON_HOVER_BORDER_COLOR:         #CCCCCC;
+$BUTTON_ACTIVE_FG_COLOR:            #111111;
+$BUTTON_ACTIVE_BG_COLOR:            #CCCCCC;
 $BUTTON_PRIMARY_FG_COLOR:           #FFFFFF;
-$BUTTON_PRIMARY_BG_COLOR:          #337AB7;
+$BUTTON_PRIMARY_BG_COLOR:           #337AB7;
 // $BUTTON_PRIMARY_BG_COLOR2:          #337AB7;
 $BUTTON_PRIMARY_BORDER_COLOR:       #286192;
 $BUTTON_PRIMARY_HOVER_FG_COLOR:     #FFFFFF;
-$BUTTON_PRIMARY_HOVER_BG_COLOR:    #337AB7;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     #337AB7;
 // $BUTTON_PRIMARY_HOVER_BG_COLOR2:    #337AB7;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: #286192;
 $BUTTON_BORDER_WIDTH:               1px;
@@ -133,3 +135,6 @@ $LIST_BG_COLOR:                     #FFFFFF;
   $MENU_HOT_BG_COLOR:                 #FFFF88;
   $MENU_WARM_FG_COLOR:                #000000;
   $MENU_WARM_BG_COLOR:                #FF8888;
+
+  $WELL_FG_COLOR:                     inherit;
+  $WELL_BG_COLOR:                     #F5F5F5;

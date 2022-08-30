@@ -34,6 +34,11 @@ a:hover {
   border-color: $BUTTON_HOVER_BORDER_COLOR;
 }
 
+.btn.active {
+  color: $BUTTON_ACTIVE_FG_COLOR;
+  background-color: $BUTTON_ACTIVE_BG_COLOR;
+}
+
 .btn-primary {
   color: $BUTTON_PRIMARY_FG_COLOR !important;
   background-color: $BUTTON_PRIMARY_BG_COLOR !important;
