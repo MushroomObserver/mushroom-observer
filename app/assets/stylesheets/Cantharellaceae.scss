@@ -94,5 +94,7 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
+$WELL_FG_COLOR:                     lighten($cornucopioides_dark_hymenium, 25%);
+
 @import "mushroom_observer";
 
