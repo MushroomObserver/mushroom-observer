@@ -19,7 +19,7 @@
 
     <%= form_tag(add_query_param(action: :edit, id: @params.naming.id,
                                  approved_name: @params.what)) do %>
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block mt-5") %>
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default center-block mt-5") %>
 
       <div class="mt-3">
         <%= render(partial: "form", locals: { action: :edit,

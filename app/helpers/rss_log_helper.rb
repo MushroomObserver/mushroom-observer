@@ -20,7 +20,7 @@ module RssLogHelper
   def tab_for_type(type)
     label = :"rss_one_#{type}".t
     link = activity_logs_path(params: { type: type })
-    help = { title: :rss_one_help.t(type: type.to_sym) }
+    help = { title: :rss_one_help.t(type: type.to_sym), class: "filter-only" }
     @types == [type] ? label : link_with_query(label, link, help)
   end
 end

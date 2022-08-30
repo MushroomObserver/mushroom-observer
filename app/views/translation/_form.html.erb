@@ -59,13 +59,13 @@
 <% end %>
 
 <div class="center-text">
-  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn pad-left-2x") %>
-  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn pad-left-2x",
+  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn btn-default pl-4") %>
+  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn btn-default pl-4",
                  type: "cancel") %>
-  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn pad-left-2x",
+  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn btn-default pl-4",
                  type: "button", data: {tag: @tag}) %>
   <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale),
-                 class: "pad-left-2x", data: {tag: @tag}) %>
+                 class: "pl-4", data: {tag: @tag}) %>
 </div>
 
 <!-- Show past versions of translations -->

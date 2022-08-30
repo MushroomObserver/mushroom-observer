@@ -30,7 +30,7 @@
     <strong><%= :sandbox_enter.t %>:</strong>
     <%= text_area_tag(:code, @code, class: "form-control", rows: 8) %>
     <% if @code.nil? %>
-      <%= submit_tag(:sandbox_test.l, class: "btn center-block mt-3") %>
+      <%= submit_tag(:sandbox_test.l, class: "btn btn-default center-block mt-3") %>
     <% end %>
   </form>
 

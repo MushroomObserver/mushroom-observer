@@ -1,6 +1,6 @@
 <!--[form:observation]-->
 
-<%= submit_tag(button_name, class: "btn center-block mt-3") %>
+<%= submit_tag(button_name, class: "btn btn-default center-block mt-3") %>
 
 <!-- WHEN -->
 <div class="row">
@@ -86,7 +86,7 @@
     <div id="observationFormMap" class="form-observation-map hidden"></div>
     <div>
       <span class="map-open map-btn"><%= :form_observations_open_map.t %></span>
-      <span class="map-clear map-btn hidden"><%= :form_observations_clear_map.t %></span>
+      <span class="map-clear map-btn btn-default hidden"><%= :form_observations_clear_map.t %></span>
     </div>
   </div>
   <div class="col-sm-6">
@@ -372,7 +372,7 @@
 <% end # if include_images %>
 
 <% if @projects.any? || @lists.any? %>
-  <%= submit_tag(button_name, class: "btn center-block mt-3") %>
+  <%= submit_tag(button_name, class: "btn btn-default center-block mt-3") %>
 <% end %>
 
 <% ##########################################################################     %>
@@ -420,7 +420,7 @@
   </div>
 <% end %>
 
-<%= submit_tag(button_name, class: "btn center-block mt-3") %>
+<%= submit_tag(button_name, class: "btn btn-default center-block mt-3") %>
 
 <% if logging_optional %>
   <div class="form-inline">

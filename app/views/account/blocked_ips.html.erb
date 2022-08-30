@@ -37,7 +37,7 @@
           <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
           <%= text_field_tag(:add_bad, "", size: 20, data: { autofocus: true },
                              class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn ml-3") %>
+          <%= submit_tag(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
                  "Clear List", account_blocked_ips_path(clear_bad: 1)
                ) %>]

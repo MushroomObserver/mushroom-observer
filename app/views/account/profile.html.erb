@@ -13,7 +13,7 @@
 <div class="max-width-text">
   <%= form_for(:user, url: {action: :profile}, html: {multipart: true}) do |form| %>
 
-    <%= submit_tag(:profile_button.l, class: "btn center-block mt-3") %>
+    <%= submit_tag(:profile_button.l, class: "btn btn-default center-block mt-3") %>
 
     <div class="form-group mt-3">
       <%= label_tag(:user_name, :profile_name.t + ":") %>
@@ -63,7 +63,7 @@
       <%= form.text_area(:mailing_address, rows: 5, class: "form-control") %>
     </div>
 
-    <%= submit_tag(:profile_button.l, class: "btn center-block mt-3") %>
+    <%= submit_tag(:profile_button.l, class: "btn btn-default center-block mt-3") %>
 
   <% end %>
 </div>

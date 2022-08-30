@@ -17,17 +17,6 @@ a:hover {
   background-color: $LINK_HOVER_BG_COLOR;
 }
 
-.btn, .btn:visited,
-.btn-default, .btn-default:visited {
-  color: $BUTTON_FG_COLOR;
-  background-color: $BUTTON_BG_COLOR;
-  border-color: $BUTTON_BORDER_COLOR;
-  border-width: $BUTTON_BORDER_WIDTH;
-  border-style: $BUTTON_BORDER_STYLE;
-  border-radius: $BUTTON_BORDER_RADIUS;
-  // padding: $padding-vertical $padding-horizontal;
-}
-
 .btn:hover, .btn-default:hover {
   color: $BUTTON_HOVER_FG_COLOR;
   background-color: $BUTTON_HOVER_BG_COLOR;
@@ -39,12 +28,6 @@ a:hover {
   background-color: $BUTTON_ACTIVE_BG_COLOR;
 }
 
-.btn-primary {
-  color: $BUTTON_PRIMARY_FG_COLOR !important;
-  background-color: $BUTTON_PRIMARY_BG_COLOR !important;
-  border-color: $BUTTON_PRIMARY_BORDER_COLOR;
-}
-
 .btn-primary:hover {
   color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
   background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR !important;
@@ -52,12 +35,12 @@ a:hover {
 }
 
 .form-control {
-  color: $BUTTON_FG_COLOR;
-  border-width: $INPUT_BORDER_WIDTH;
-  border-style: $INPUT_BORDER_STYLE;
-  border-radius: $INPUT_BORDER_RADIUS;
+//   color: $BUTTON_FG_COLOR;
+//   border-width: $INPUT_BORDER_WIDTH;
+//   border-style: $INPUT_BORDER_STYLE;
+//   border-radius: $INPUT_BORDER_RADIUS;
   border-color: $BUTTON_FG_COLOR;
-  padding: $padding-small-vertical $padding-small-horizontal;
+//   padding: $padding-small-vertical $padding-small-horizontal;
 }
 
 //

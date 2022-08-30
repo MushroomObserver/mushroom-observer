@@ -63,7 +63,7 @@
             </tr>
           <% end %>
         </table>
-        <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn center-block") %>
+        <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn btn-default center-block") %>
       </form>
     <% end %>
   </div>
@@ -76,7 +76,7 @@
         <%= label_tag(:user_notes, :account_api_keys_notes_label.t) %>
         <%= form.text_field(:notes, class: "form-control") %>
       </div>
-      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn center-block mt-3") %>
+      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn btn-default center-block mt-3") %>
     <% end %>
   </div>
 </div>
