@@ -12,6 +12,7 @@
 
 <%= form_tag(add_query_param(action: :create, id: @observation.id,
                              approved_name: @params.what)) do %>
+
   <div class="row">
     <div class="col-xs-12 col-sm-8 max-width-text">
       <div class="push-down">
@@ -20,17 +21,16 @@
       </div>
 
       <%= submit_tag(:CREATE.l, class: "btn center-block", style: "margin-top:2em") %>
-
       <div class="push-down">
         <%= render(partial: "form", locals: { action: :create,
                    button_name: :CREATE.l, show_reasons: true }) %>
       </div>
-    </div>
 
-    <div class="col-xs-12 col-sm-4">
-      <%= render(partial: "observations/show_images",
-                 locals: { observation: @observation,
-                           thumb_size_control: false }) %>
+      <div class="col-xs-12 col-sm-4">
+        <%= render(partial: "observations/show_images",
+                   locals: { observation: @observation,
+                             thumb_size_control: false }) %>
+      </div>
     </div>
   </div>
 <% end %>
