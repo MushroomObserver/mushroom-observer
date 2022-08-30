@@ -87,6 +87,6 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
-$WELL_FG_COLOR:                     $conica_stain;
+$WELL_FG_COLOR:                     lighten($conica_stain, 25%);
 
 @import "mushroom_observer";
