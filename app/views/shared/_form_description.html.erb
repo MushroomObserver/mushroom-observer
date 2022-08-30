@@ -21,14 +21,14 @@
         [:form_description_source_project.l, "project"],
         [:form_description_source_source.l,  "source"],
         [:form_description_source_user.l,    "user"],
-      ], class: "form-control") %>
+      ], {}, { class: "form-control" }) %>
     <% elsif new_record && ["public", "source", "user"].include?(type) %>
       <% need_help = true %>
       <%= form.select(:source_type, [
         [:form_description_source_public.l, "public"],
         [:form_description_source_source.l, "source"],
         [:form_description_source_user.l,   "user"],
-      ], class: "form-control") %>
+      ], {}, { class: "form-control" }) %>
     <% else %>
       <%= form.hidden_field(:source_type, value: type) %>
       <%= :"form_description_source_#{type}".l %>
@@ -65,7 +65,7 @@
 
   <div class="form-group">
     <%= label_tag(:description_license_id, :License.t + ":") %>
-    <%= form.select(:license_id, @licenses, class: "form-control") %>
+    <%= form.select(:license_id, @licenses, {}, { class: "form-control" }) %>
     <p class="help-block"><%= :form_description_license_help.t %></p>
   </div>
 
