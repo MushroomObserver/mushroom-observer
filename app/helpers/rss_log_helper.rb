@@ -12,7 +12,7 @@ module RssLogHelper
   def tab_for_everything
     label = :rss_all.t
     link = activity_logs_path(params: { type: :all })
-    help = { title: :rss_all_help.t }
+    help = { title: :rss_all_help.t, class: "filter-only" }
     @types == ["all"] ? label : link_with_query(label, link, help)
   end
 

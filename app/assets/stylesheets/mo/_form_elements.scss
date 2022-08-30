@@ -62,6 +62,10 @@ form.button_to {
   }
 }
 
-a.filter-only:hover {
-  background-color: transparent;
+a.filter-only {
+  color: darken($link-color, 25%) !important;
+
+  &:hover {
+    background-color: transparent;
+  }
 }
