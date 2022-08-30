@@ -13,7 +13,7 @@
           <span class="text-larger">Okay IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
           <%= text_field_tag(:add_okay, "", size: 20, data: { autofocus: true },
                              class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn", class: "ml-3") %>
+          <%= submit_tag(:ADD.l, class: "btn btn-default", class: "ml-3") %>
           [<%= link_to(
                  "Clear List", account_blocked_ips_path(clear_okay: 1)
                ) %>]

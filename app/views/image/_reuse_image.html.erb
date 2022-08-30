@@ -14,7 +14,7 @@
       <div class="form-group mt-3">
         <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
                             url_args.merge(all_users: @all_users ? 0 : 1),
-                            class: "btn") %>
+                            class: "btn btn-default") %>
       </div>
     </div>
   </div>

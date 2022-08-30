@@ -6,7 +6,7 @@
     <input id="approved_names" name="approved_names" type="hidden" value="<%= val.html_safe %>"/>
   <% end %>
 
-  <br/><div class="text-center"><%= submit_tag(:SAVE.l, class: "btn") %></div><!-- .text-center -->
+  <br/><div class="text-center"><%= submit_tag(:SAVE.l, class: "btn btn-default") %></div><!-- .text-center -->
 
   <%= render(partial: "shared/form_list_feedback") %>
 

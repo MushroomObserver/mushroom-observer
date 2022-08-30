@@ -35,7 +35,7 @@
                  "(#{:show_namings_no_votes.t})").html_safe,
       menu:    [select(:vote, :value, menu, {},
                  { index: naming.id, data: { role: "change_vote", id: naming.id } }),
-                (can_do_ajax? ? "" : submit_tag(:show_namings_cast.l, class: "btn"))].safe_join,
+                (can_do_ajax? ? "" : submit_tag(:show_namings_cast.l, class: "btn btn-default"))].safe_join,
       eyes:    [(observation.owners_favorite?(naming) ? image_tag("eye3.png") : ""),
                 (naming == consensus ? image_tag("eyes3.png") : "")].safe_join,
       reasons: naming.reasons_array.select(&:used?).map do |reason|
@@ -48,11 +48,11 @@
   buttons = []
   buttons << link_with_query(:show_namings_propose_new_name.t,
                { controller: :naming, action: :create, id: observation.id },
-               { class: "btn" })
+               { class: "btn btn-default" })
   buttons << link_to(:show_namings_suggest_names.l, "#",
-               { data: {role: "suggest_names"}, class: "btn" }) if do_suggestions
+               { data: {role: "suggest_names"}, class: "btn btn-default" }) if do_suggestions
   buttons << submit_tag(:show_namings_update_votes.l,
-               { data: {role: "save_votes"}, class: "btn" }) if logged_in && any_names
+               { data: {role: "save_votes"}, class: "btn btn-default" }) if logged_in && any_names
   help = logged_in ? :show_namings_consensus_help.t : :show_namings_please_login.t
   eye  = "#{image_tag("eye3.png")} = #{:show_namings_eye_help.t}".html_safe
   eyes = "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe

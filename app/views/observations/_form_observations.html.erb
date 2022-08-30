@@ -345,7 +345,7 @@
               <% i += 1 %>
             <% end %>
           </div>
-          <input id="new_image_button" onclick="image_new();" type="button" value="<%= :form_observations_upload_another.t %>" class="btn"/>
+          <input id="new_image_button" onclick="image_new();" type="button" value="<%= :form_observations_upload_another.t %>" class="btn btn-default"/>
           <% javascript_include("single_image_uploader") %>
           <%= javascript_tag %(
             var x = String.fromCharCode(60);
