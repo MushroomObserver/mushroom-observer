@@ -31,8 +31,10 @@
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
               link_with_query(:DESTROY.t,
-                              {action: :destroy_collection_number, id: collection_number.id},
-                              data: { confirm: :are_you_sure.t }, class: "btn btn-default btn-sm")
+                              { action: :destroy_collection_number,
+                                id: collection_number.id },
+                              data: { confirm: :are_you_sure.t },
+                              class: "btn btn-default btn-sm")
             end %>
           </td>
         </tr>

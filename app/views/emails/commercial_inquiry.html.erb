@@ -7,7 +7,8 @@
     </div>
     <div>
       <%= :commercial_inquiry_header.tp(user: @image.user.legal_name) %>
-      <%= text_area(:commercial_inquiry, :content, rows: 10, class: "form-control") %>
+      <%= text_area(:commercial_inquiry, :content, rows: 10,
+                    class: "form-control") %>
       <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
     </div>
   <% end %>

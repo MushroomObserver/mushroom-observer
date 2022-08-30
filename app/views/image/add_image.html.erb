@@ -11,13 +11,15 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:image, url: add_query_param(action: :add_image, id: @observation.id),
-               html: {multipart: true}) do |form| %>
+  <%= form_for( :image,
+        url: add_query_param(action: :add_image, id: @observation.id),
+        html: {multipart: true}) do |form| %>
     <%= hidden_field(:observation, :id) %>
 
     <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
 
-    <%= submit_tag(:image_add_upload.l, class: "btn btn-default center-block mt-3") %>
+    <%= submit_tag(:image_add_upload.l,
+                   class: "btn btn-default center-block mt-3") %>
 
     <div class="form-group form-inline mt-3">
       <%= label_tag(:upload_image1, :image_add_image.t + " 1:") %>
@@ -34,8 +36,11 @@
         (<%= :image_add_optional.t %>)<br/>
     </div>
 
-    <%= render(partial: "form_images", locals: {form: form, width: 80, leave_out_original_file_name: true}) %>
+    <%= render(partial: "form_images",
+               locals: { form: form, width: 80,
+                         leave_out_original_file_name: true }) %>
 
-    <%= submit_tag(:image_add_upload.l, class: "btn btn-default center-block mt-3") %>
+    <%= submit_tag(:image_add_upload.l,
+                   class: "btn btn-default center-block mt-3") %>
   <% end %>
 </div>

@@ -9,7 +9,7 @@
     tabs << link_with_query(:delete_herbarium_record.t,
                             { action: :destroy_herbarium_record,
                               id: @herbarium_record.id },
-                            data: {confirm: :are_you_sure.t})
+                            data: { confirm: :are_you_sure.t })
   end
   tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
 

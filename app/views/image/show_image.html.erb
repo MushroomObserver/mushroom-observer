@@ -22,7 +22,7 @@
       link_with_query(:edit_object.t(type: :image),
                       action: :edit_image, id: @image.id),
       link_with_query(:destroy_object.t(type: :image),
-                      {action: :destroy_image, id: @image.id},
+                      { action: :destroy_image, id: @image.id },
                       data: {confirm: :are_you_sure.l})
     ]
   end
@@ -45,14 +45,18 @@
         <div class="row">
           <div class="col-xs-12 text-center small image-controls">
             <% if check_permission(@image) %>
-              <%= link_with_query(:image_show_rotate_left.t, action: :transform_image,
-                op: :rotate_left, id: @image.id, size: @size) %> |
-              <%= link_with_query(:image_show_rotate_right.t, action: :transform_image,
-                op: :rotate_right, id: @image.id, size: @size) %> |
-              <%= link_with_query(:image_show_mirror.t, action: :transform_image,
-                op: :mirror, id: @image.id, size: @size) %> |
+              <%= link_with_query(:image_show_rotate_left.t,
+                    action: :transform_image,
+                    op: :rotate_left, id: @image.id, size: @size) %> |
+              <%= link_with_query(:image_show_rotate_right.t,
+                    action: :transform_image,
+                    op: :rotate_right, id: @image.id, size: @size) %> |
+              <%= link_with_query(:image_show_mirror.t,
+                    action: :transform_image,
+                    op: :mirror, id: @image.id, size: @size) %> |
             <% end %>
-            <%= link_to(:image_show_original.t, Image.url(:original, @image.id)) %>
+            <%= link_to(:image_show_original.t,
+                        Image.url(:original, @image.id)) %>
             <% inject_javascript_at_end %(
               jQuery(".image-controls").append(
                 " | <a href='javascript:popup_exif(#{@image.id})'>#{j :image_show_exif.t}</a>"
@@ -63,13 +67,16 @@
       </div>
       <div class="panel-body">
 
-        <div class="hidden-lg" style="max-width:640px; max-height:640px; margin:auto">
+        <div class="hidden-lg"
+             style="max-width:640px; max-height:640px; margin:auto">
           <%= thumbnail(@image, size: :medium, link: {}, votes: false,
                         style: "max-width:100%; max-height:100%",
                         responsive: true, theater_on_click: true) %>
         </div>
-        <div class="visible-lg" style="max-width:1280px; max-height:1280px; margin:auto">
-          <%= thumbnail(@image, size: :medium, link: {}, votes: false, img_class: "huge-image",
+        <div class="visible-lg"
+             style="max-width:1280px; max-height:1280px; margin:auto">
+          <%= thumbnail(@image, size: :medium, link: {}, votes: false,
+                        img_class: "huge-image",
                         responsive: true, theater_on_click: true) %>
         </div>
 
@@ -89,7 +96,8 @@
 
         <div class="mt-3 text-center">
           <% if User.current %>
-            <%= render(partial: "image/image_vote_links", locals: {image: @image}) %>
+            <%= render(partial: "image/image_vote_links",
+                       locals: { image: @image }) %>
           <% end %>
           <% if !@image.original_name.blank? &&
                 (check_permission(@image) || @image.user && @image.user.keep_filenames == "keep_and_show") %>
@@ -233,16 +241,19 @@
                   <div class="row">
                     <div class="col-sm-6">
                       <div class="pt-10px">
-                      <%= link_to(value == 0 ? str2 : str1, args.merge(vote: value),
+                      <%= link_to(value == 0 ? str2 : str1,
+                                  args.merge(vote: value),
                                   class: css_class, title: str2,
-                                  data: {toggle: "tooltip", placement: "left",
-                                         role: "image_vote", val: value, id: @image.id}) %>
+                                  data: { toggle: "tooltip", placement: "left",
+                                          role: "image_vote", val: value,
+                                          id: @image.id }) %>
                       </div>
                     </div>
                     <div class="col-sm-6 hidden-xs">
                       <div class="pt-10px">
-                      <%= link_to(str3, {vote: value, next: true}.merge(args),
-                                  class: css_class, title: str2, data: {toggle: "tooltip"}) %>
+                      <%= link_to(str3, { vote: value, next: true }.merge(args),
+                                  class: css_class, title: str2,
+                                  data: { toggle: "tooltip" }) %>
                        </div>
                     </div>
                   </div>
