@@ -7,14 +7,13 @@ class VisualGroupsController < ApplicationController
   def index
     @visual_groups = VisualGroup.joins(
       "LEFT JOIN names ON visual_groups.group_name_id = names.id"
-    ).order(
-      "names.text_name"
-    )
+    ).order(:text_name)
   end
 
-  #   # GET /visual_groups/1 or /visual_groups/1.json
-  #   def show
-  #   end
+  # GET /visual_groups/1 or /visual_groups/1.json
+  def show
+    @visual_group = VisualGroup.find(params[:id])
+  end
 
   #   # GET /visual_groups/new
   #   def new

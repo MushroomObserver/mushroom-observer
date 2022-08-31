@@ -28,10 +28,11 @@ class VisualGroupsControllerTest < FunctionalTestCase
   #   assert_redirected_to visual_group_url(VisualGroup.last)
   # end
 
-  # test "should show visual_group" do
-  #   get visual_group_url(@visual_group)
-  #   assert_response :success
-  # end
+  test "should show visual_group" do
+    login
+    get(:show, params: { id: visual_groups(:one).id }) #  visual_group_url(@visual_group)
+    assert_response :success
+  end
 
   # test "should get edit" do
   #   get edit_visual_group_url(@visual_group)
