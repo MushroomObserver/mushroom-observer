@@ -30,7 +30,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   test "should show visual_group" do
     login
-    get(:show, params: { id: visual_groups(:one).id }) #  visual_group_url(@visual_group)
+    get(:show, params: { id: visual_groups(:one).id })
     assert_response :success
   end
 
