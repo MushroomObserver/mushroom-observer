@@ -34,14 +34,14 @@ module ExporterHelper
     return unless reviewer?
 
     if status
-      content_tag(:b, ok_msg, class: "nowrap")
+      content_tag(:b, ok_msg, class: "text-nowrap")
     else
       link_with_query(ok_msg,
                       { controller: :export,
                         action: action,
                         type: obj.type_tag,
                         id: obj.id, value: 1 },
-                      class: "nowrap")
+                      class: "text-nowrap")
     end + " | " +
       if status
         link_with_query(not_ok_msg,
@@ -49,7 +49,7 @@ module ExporterHelper
                           action: action,
                           type: obj.type_tag,
                           id: obj.id, value: 0 },
-                        class: "nowrap")
+                        class: "text-nowrap")
       else
         content_tag(:b, not_ok_msg)
       end

@@ -59,7 +59,7 @@
         <div class="row">
           <div class="col-sm-7 name-section">
             <%= tag.p(:show_observations_of.t) %>
-            <div class="indent-one-em">
+            <div class="pl-3">
               <%= # Observations of this name
                 tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
               <%= # Observations of taxon under other names

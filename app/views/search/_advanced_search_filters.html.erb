@@ -2,8 +2,8 @@
 <% javascript_include "advanced_search" %>
 <div id="advanced_search_filters">
   <div class="form-group">
-    <div class="push-down">
-      <span class="bold"><%= :advanced_search_filters.t %></span>
+    <div class="mt-3">
+      <span class="font-weight-bold"><%= :advanced_search_filters.t %></span>
       <p><%= :advanced_search_filters_explain.t %>.<p>
     </div>
     <% ContentFilter.all.each do |filter| %>

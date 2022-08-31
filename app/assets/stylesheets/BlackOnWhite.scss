@@ -1,22 +1,11 @@
+// This theme is newer than the genus-color themes,
+// and does not use the "old_theme" defaults.
 @import "defaults";
+
+$LOGO_BORDER_COLOR:                 #DDDDDD;
+$LEFT_BAR_BORDER_COLOR:             #DDDDDD;
+$TOP_BAR_BORDER_COLOR:              #DDDDDD;
+$LIST_BORDER_COLOR:                 #DDDDDD;
+$BUTTON_HOVER_BORDER_COLOR:         #CCCCCC;
+
 @import "mushroom_observer";
-
-//
-// panels
-// note: it doesn't look like there is a variable to set the border width
-//       via the bootstrap sass
-// --------------------------------------------------
-
-.panel {
-  border: 0px !important;
-}
-
-//
-// list-groups
-// note: it doesn't look like there is a variable to set the border width
-//       via the bootstrap sass
-// --------------------------------------------------
-
-.list-group-item {
-  border: 0px !important;
-}

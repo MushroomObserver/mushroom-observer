@@ -9,8 +9,8 @@
 %>
 
 <div class="max-width-text-plus-image">
-  <center>
-    <%= 
+  <div class="text-center">
+    <%=
       if @locations.any?
         gmap = make_map(@locations)
         finish_map(gmap)
@@ -19,5 +19,5 @@
         :runtime_map_nothing_to_map.t
       end
     %>
-  </center>
+  </div><!-- .text-center -->
 </div>

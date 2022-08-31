@@ -3,7 +3,7 @@
 <%= hidden_field(:observation, :thumb_image_id) %>
 <div class="row">
   <div class="col-sm-6">
-    <input type="file" multiple id="multiple_images_button" accept="image/*" class="push-down"/>
+    <input type="file" multiple id="multiple_images_button" accept="image/*" class="mt-3"/>
   </div>
   <div class="col-sm-6">
     <div class="well well-sm max-width-text">
@@ -26,9 +26,9 @@
         <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
         <div id="observation_date_radio_container"></div>
       </div>
-      <div class="col-sm-12" style="margin-top: 15px;">
-        <button id="fix_dates" type="button" class="btn"><%= :form_observations_use_date.t %></button>
-        <button id="ignore_dates" type="button" class="btn"><%= :IGNORE.t %></button>
+      <div class="col-sm-12 mt-3">
+        <button id="fix_dates" type="button" class="btn btn-default"><%= :form_observations_use_date.t %></button>
+        <button id="ignore_dates" type="button" class="btn btn-default"><%= :IGNORE.t %></button>
       </div>
     </div>
   </div>
@@ -45,9 +45,9 @@
 
         </div>
       </div>
-      <div class="col-sm-12" style="margin-top: 15px;">
-        <button id="set_geocode" type="button" class="btn"><%= :UPDATE.t %></button>
-        <button id="ignore_geocode" type="button" class="btn"><%= :IGNORE.t %></button>
+      <div class="col-sm-12 mt-3">
+        <button id="set_geocode" type="button" class="btn btn-default"><%= :UPDATE.t %></button>
+        <button id="ignore_geocode" type="button" class="btn btn-default"><%= :IGNORE.t %></button>
       </div>
   </div>
   <div class="col-sm-4">

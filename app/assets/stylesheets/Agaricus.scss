@@ -1,4 +1,4 @@
-@import "old_theme";
+@import "defaults";
 
 $augustus_cap:         #ECCF95;
 $brasiliensis_gills_1: #A06463;
@@ -78,8 +78,6 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
-@import "mushroom_observer";
+$WELL_FG_COLOR:                     lighten($cupreobrunneus_gills, 25%);
 
-#navigation {
-    border-left-width: $LEFT_BAR_BORDER_WIDTH;
-}
+@import "mushroom_observer";

@@ -1,25 +1,25 @@
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:publication_full, :publication_full.t + ":") %>
   <span class="HelpNote"><%= :publication_full_help.t %></span>
   <%= form.text_area(:full, rows: 10, class: "form-control") %>
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:publication_link, :publication_link.t + ":") %>
   <%= form.text_field(:link, class: "form-control") %>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= form.check_box(:peer_reviewed, class: "form-control") %>
   <%= label_tag(:publication_peer_reviewed, :publication_peer_reviewed.t) %>
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:publication_how_helped, :publication_how_helped.t) %>
   <%= form.text_area(:how_helped, rows: 10, class: "form-control") %>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= form.check_box(:mo_mentioned, class: "form-control") %>
   <%= label_tag(:publication_mo_mentioned, :publication_mo_mentioned.t) %>
 </div>

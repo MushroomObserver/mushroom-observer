@@ -1,0 +1,38 @@
+//
+// rss log
+// --------------------------------------------------
+
+.rss-log-item {
+  padding: 5px;
+  text-align: center;
+  height: 350px;
+}
+
+.rss-fancy-time {
+  position: absolute;
+  top: -10px;
+  right: 2px;
+  color: mix($LIST_FG_COLOR, $LIST_BG_COLOR);
+}
+
+.rss-detail {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.rss-where,
+.rss-what {
+  text-align: center;
+}
+
+.rss-what {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media screen and (max-width: 767px) {
+  .rss-box-details {
+    height: auto !important;
+  }
+}

@@ -17,11 +17,11 @@
   </div>
 </div>
 
-<div class="row push-down">
+<div class="row mt-3">
   <div class="col-xs-12">
     <% if @user.api_keys.any? %>
-      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
-        <table class="table table-striped slight-pad">
+      <%= form_tag({}, { class: "pb-2"}) %>
+        <table class="table table-striped py-5px">
           <tr>
             <th></th>
             <th><%= :CREATED.t %></th>
@@ -51,8 +51,8 @@
               <td id="key_notes_<%= key.id %>">
                 <div class="edit_key_notes_container" data-target-key="<%= key.id %>" style="display:none">
                   <%=text_field_tag("key_notes_#{key.id}", key.notes, data:{role: "key_notes_input", id: key.id}) %><br/>
-                  <%=button_tag(:SAVE.l, type: "button", class: "btn", data: {role: "key_notes_save", id: key.id}) %>
-                  <%=button_tag(:CANCEL.l, type: "button", class: "btn", data: {role: "key_notes_cancel", id: key.id}) %>
+                  <%=button_tag(:SAVE.l, type: "button", class: "btn btn-default", data: {role: "key_notes_save", id: key.id}) %>
+                  <%=button_tag(:CANCEL.l, type: "button", class: "btn btn-default", data: {role: "key_notes_cancel", id: key.id}) %>
                 </div>
                 <div class="view_key_notes_container" data-target-key="<%= key.id %>">
                   <span class="current_notes"><%= key.notes.t %></span>
@@ -63,20 +63,20 @@
             </tr>
           <% end %>
         </table>
-        <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn center-block") %>
+        <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn btn-default center-block") %>
       </form>
     <% end %>
   </div>
 </div>
 
-<div class="row push-down">
+<div class="row mt-3">
   <div class="col-xs-12 max-width-text">
     <%= form_for(:key) do |form| %>
-      <div class="form-group push-down">
+      <div class="form-group mt-3">
         <%= label_tag(:user_notes, :account_api_keys_notes_label.t) %>
         <%= form.text_field(:notes, class: "form-control") %>
       </div>
-      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn center-block push-down") %>
+      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn btn-default center-block mt-3") %>
     <% end %>
   </div>
 </div>

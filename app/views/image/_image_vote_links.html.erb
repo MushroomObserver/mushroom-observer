@@ -12,8 +12,8 @@
 <% end %>
 
 <div id="vote_buttons">
-  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>" style="margin-top:-5px">
-    <center>
+  <div class="image_vote_links_container mt-n2" id="image_vote_links_<%= image.id %>">
+    <div class="text-center">
       <small>
         <%= if user && !image.users_vote(user).blank?
           image_vote_link(image, 0) + "&nbsp;".html_safe
@@ -21,7 +21,7 @@
           image_vote_link(image, vote)
         end.safe_join("|") %>
       </small>
-    </center>
+    </div><!-- .text-center -->
     <span class="hidden data_container" data-id="<%= image.id %>"
           data-percentage="<%= vote_percentage %>" data-role="image_vote_percentage"></span>
   </div>

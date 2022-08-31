@@ -1,4 +1,4 @@
-<div class="ThinBox" style="margin-top:1em">
+<div class="ThinBox mt-3">
   <%= :WHEN.t %>: <span class="Data"><%= species_list.when.web_date %></span>
   </br/>
   <%= :WHERE.t %>: <%= location_link(species_list.place_name,
@@ -7,7 +7,7 @@
   <%= :WHO.t %>: <span class="Data"><%= user_link(species_list.user) %></span>
   <br/>
   <% if species_list.notes.present? %>
-    <div style="margin-top:1em; margin-bottom:-1em">
+    <div class="mt-3 mb-n3">
       <%= "#{:NOTES.l}: #{species_list.notes.to_s.html_safe}".tpl %>
     </div>
   <% end %>

@@ -21,7 +21,7 @@
   <div class="col-xs-12 col-sm-7 max-width-text">
     <%= form_tag(add_query_param(action: :edit_herbarium_record,
                                  id: @herbarium_record.id, back: @back)) do %>
-      <%= render(partial: "form", locals: {button: :SAVE}) %>
+      <%= render(partial: "form", locals: { button: :SAVE }) %>
     <% end %>
   </div>
 

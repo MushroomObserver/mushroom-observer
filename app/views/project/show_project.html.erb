@@ -84,7 +84,7 @@
 
         <b><%= :show_project_drafts.t %>:</b>
         <%= @drafts.any? ? @drafts.length : :NONE.t %><br/>
-        <div style="margin-left:1em">
+        <div class="ml-3">
           <% @drafts.each do |draft| %>
             <%= link_with_query(draft.name&.display_name&.t,
                                 { controller: :name,
@@ -106,7 +106,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12 push-down">
+  <div class="col-xs-12 mt-3">
     <%= show_object_footer(@project) %>
   </div>
 </div>

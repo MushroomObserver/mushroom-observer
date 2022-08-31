@@ -4,13 +4,13 @@
         { method: :get, class: "navbar-form navbar-left" }
       ) do %>
       <div>
-        <div class="inline align-top icon-addon addon-sm">
+        <div class="d-inline-block align-top icon-addon addon-sm">
           <%= text_field(:search, :pattern, value: session[:pattern],
                          class: "form-control", placeholder: :app_find.t) %>
           <label for="search_pattern" class="glyphicon glyphicon-search"
                  title="search"> </label>
         </div>
-        <div class="inline align-top nowrap">
+        <div class="d-inline-block align-top text-nowrap">
           <%=
             options = [
               [:COMMENTS.l, :comment],
@@ -30,11 +30,9 @@
                    options_for_select(options,
                                       session[:search_type] || :observation),
                    { },
-                   { class: "form-control inline align-top",
-                     style: "width: auto;" })
+                   { class: "form-control inline align-top w-auto" })
           %>
-          <%= submit_tag(:app_search.l, class: "btn align-top",
-                         style: "margin-right:0.5em") %>
+          <%= submit_tag(:app_search.l, class: "btn btn-default align-top mr-2") %>
         </div>
         <%=
             link_to(content_tag(:span, :search_bar_help.t),
@@ -44,14 +42,14 @@
 
         <%
           adv_search = link_to(content_tag(:span, :app_advanced_search.l,
-                                           style: "white-space:nowrap"),
+                                           class: "text-nowrap"),
                        search_advanced_path)
           @timer_end ||= Time.zone.now
           secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
           timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"
         %>
         <% if @timer_start %>
-          <div class="inline hidden-xs" style="font-size:80%">
+          <div class="d-inline-block hidden-xs smaller">
             <span id="timer"><%= timer %></span><br/>
             <%= adv_search %>
           </div>
@@ -61,15 +59,14 @@
           </p>
         <% end %>
         <div class="visible-xs">
-          <%= content_tag(:span, timer, id: "timer", class: "nowrap") if @timer_start %>
+          <%= content_tag(:span, timer, id: "timer", class: "text-nowrap") if @timer_start %>
           <%= adv_search %>
         </div>
       </div>
     <% end %>
 
   <% if @user.nil? %>
-    <div class="nav navbar-nav navbar-form navbar-right hidden-xs"
-         style="margin:0">
+    <div class="nav navbar-nav navbar-form navbar-right hidden-xs m-0">
       <p class="form-control-static">
         <%= link_to(
               :app_login.t, account_login_path,
@@ -82,7 +79,7 @@
       </p>
     </div>
   <% else ##user is logged in %>
-    <ul class="nav navbar-nav navbar-right hidden-xs" style="margin-right:0">
+    <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
       <% if @user.admin %>
         <li>
           <%= link_to(
@@ -148,10 +145,9 @@
       </li>
       <li> <%= link_to("",
                        account_logout_user_path,
-                       { class: "glyphicon glyphicon-log-out",
+                       { class: "glyphicon glyphicon-log-out pr-10px",
                           title: :app_logout.t,
-                          data: { toggle: "tooltip", placement: "bottom" },
-                          style: "padding-right: 10px" }) %>
+                          data: { toggle: "tooltip", placement: "bottom" } }) %>
       </li>
     </ul>
   <% end %>

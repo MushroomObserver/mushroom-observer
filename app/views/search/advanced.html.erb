@@ -8,7 +8,7 @@
   <%= form_tag(action: :advanced, method: :get) do %>
     <p>
       <%= submit_tag(:advanced_search_submit.l,
-                     class: "btn center-block") %>
+                     class: "btn btn-default center-block") %>
     </p>
 
     <div class="form-group">
@@ -58,6 +58,6 @@
 
     <%= render partial: "advanced_search_filters" %>
 
-    <%= submit_tag(:advanced_search_submit.l, class: "btn center-block") %>
+    <%= submit_tag(:advanced_search_submit.l, class: "btn btn-default center-block") %>
   <% end %>
 </div>

@@ -379,7 +379,8 @@ module ApplicationHelper
         max_upload_size: max_size
       )
     )
-    content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
+    content_tag(:span, :select_file.t + file_field,
+                class: "file-field btn btn-default") +
       content_tag(:span, :no_file_selected.t)
   end
 
