@@ -178,7 +178,7 @@ module ActionDispatch
     # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
     # Make `assert_*` methods behave like Minitest assertions
-    include Capybara::Minitest::Assertions
+    # include Capybara::Minitest::Assertions
 
     # Reset sessions and driver between tests
     teardown do
