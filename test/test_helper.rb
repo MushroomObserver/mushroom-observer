@@ -177,6 +177,11 @@ module ActionDispatch
   class IntegrationTest
     # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
+
+    # Including the below assertions causes many integration test
+    # failures currently, and we don't really need them.
+    # They're just aliases of Capybara methods. (Nimmo - 09/2022)
+    #
     # Make `assert_*` methods behave like Minitest assertions
     # include Capybara::Minitest::Assertions
 
