@@ -74,6 +74,7 @@ end
 
 # Allow simuluation of user-browser interaction with capybara
 require("capybara/rails")
+require("capybara/minitest")
 
 I18n.enforce_available_locales = true
 
@@ -172,9 +173,17 @@ module ActiveSupport
   end
 end
 
-# Make the Capybara DSL available in all integration tests
 module ActionDispatch
   class IntegrationTest
+    # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
+    # Make `assert_*` methods behave like Minitest assertions
+    include Capybara::Minitest::Assertions
+
+    # Reset sessions and driver between tests
+    teardown do
+      Capybara.reset_sessions!
+      Capybara.use_default_driver
+    end
   end
 end
