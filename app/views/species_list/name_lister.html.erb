@@ -12,7 +12,7 @@
 
 <noscript>
   <div class="row">
-    <div class="col-xs-12 max-width-text push-down">
+    <div class="col-xs-12 max-width-text mt-3">
       <%= :name_lister_no_js.tp %>
     </div>
   </div>
@@ -20,13 +20,13 @@
 
 <% if !can_do_ajax? %>
   <div class="row">
-    <div class="col-xs-12 max-width-text push-down">
+    <div class="col-xs-12 max-width-text mt-3">
       <%= :name_lister_bad_browser.tp %>
     </div>
   </div>
 <% end %>
 
-<table cols="3" width="100%" class="scroller push-down">
+<table cols="3" width="100%" class="scroller mt-3">
   <thead>
     <tr>
       <th width="20%"><%= :name_lister_genera.t %></th>
@@ -52,12 +52,12 @@
       <td colspan="3">
         <div id="word">&nbsp;</div>
         <%= form_tag({action: :name_lister}, {}) %>
-          <center>
-            <%= submit_tag(:name_lister_submit_spl.l, class: "btn", disabled: !@user) %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_txt.l, class: "btn") %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_rtf.l, class: "btn") %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_csv.l, class: "btn") %>
-          </center>
+          <div class="text-center">
+            <%= submit_tag(:name_lister_submit_spl.l, class: "btn btn-default", disabled: !@user) %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_txt.l, class: "btn btn-default") %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_rtf.l, class: "btn btn-default") %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_csv.l, class: "btn btn-default") %>
+          </div><!-- .text-center -->
           <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
           <% if false %>
             <br/>
@@ -71,7 +71,7 @@
   </tbody>
 </table>
 
-<div id="log" style="margin-top:1em"></div>
+<div id="log mt-3"></div>
 
 <% inject_javascript_at_end %(
   nl_initialize_names();
@@ -85,7 +85,7 @@
 ) %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text push-down">
+  <div class="col-xs-12 max-width-text mt-3">
     <div class="HelpNote"><%= :name_lister_help.tp %></div>
   </div>
 </div>

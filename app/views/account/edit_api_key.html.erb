@@ -31,15 +31,15 @@
       </tr>
     </table>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:user_notes, :NOTES.t + ":") %>
       <%= form.text_field(:notes, class: "form-control") %>
     </div>
 
-    <center class="push-down">
-      <%= submit_tag(:UPDATE.l, class: "btn") %>
+    <div class="text-center mt-3">
+      <%= submit_tag(:UPDATE.l, class: "btn btn-default") %>
       <span style="margin-left:5em"></span>
-      <%= submit_tag(:CANCEL.l, class: "btn") %>
-    </center>
+      <%= submit_tag(:CANCEL.l, class: "btn btn-default") %>
+    </div><!-- .text-center -->
   <% end %>
 </div>

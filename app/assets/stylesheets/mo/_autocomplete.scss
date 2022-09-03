@@ -1,0 +1,36 @@
+//
+// autocompletion
+// --------------------------------------------------
+
+div.auto_complete {
+  position: absolute;
+  color: $MENU_FG_COLOR;
+  background-color: $MENU_BG_COLOR;
+  margin: 0px;
+  border: 1px solid $MENU_BORDER_COLOR;
+  padding: 0px;
+  overflow-x: hidden;
+  display: none;
+  text-align: left;
+  z-index: 100;
+
+  ul {
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    list-style: none;
+    overflow-x: hidden;
+
+    li {
+      margin: 0px;
+      border: 0px;
+      padding: 2px 4px 2px 4px;
+      white-space: nowrap;
+    }
+
+    li.selected {
+      color: $MENU_HOT_FG_COLOR;
+      background-color: $MENU_HOT_BG_COLOR;
+    }
+  }
+}

@@ -1,7 +1,7 @@
 <% approved_name = @name.approved_name %>
 <% parents = approved_name.all_parents %>
 <% if approved_name.classification.present? && parents.any? %>
-  <div style="margin-bottom:0.5em">
+  <div class="mb-2">
     <% ([approved_name] + parents).reverse.each do |n| %>
       <p>
         <%= rank_as_string(n.rank) %>:

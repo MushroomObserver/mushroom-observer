@@ -7,13 +7,13 @@
     <p><%= link_to("Refresh Stats", account_blocked_ips_path) %></p>
 
     <%# ----- Okay IPs ----- %>
-    <div style="padding:1em; margin:1em; background:#f7f">
-      <%= form_tag({}, { class: "pad-bottom-2x" }) %>
+    <div class="m-3 p-3" style="background:#f7f">
+      <%= form_tag({}, { class: "pb-2" }) %>
         <div class="form-group form-inline">
-          <big>Okay IPs:</big> &nbsp;&nbsp;
+          <span class="text-larger">Okay IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
           <%= text_field_tag(:add_okay, "", size: 20, data: { autofocus: true },
                              class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+          <%= submit_tag(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
                  "Clear List", account_blocked_ips_path(clear_okay: 1)
                ) %>]
@@ -31,13 +31,13 @@
     </div>
 
     <%# ----- Blocked IPs ----- %>
-    <div style="padding:1em; margin:1em; background:#f7f">
-      <%= form_tag({}, { class: "pad-bottom-2x" }) %>
+    <div class="m-3 p-3" style="background:#f7f">
+      <%= form_tag({}, { class: "pb-2" }) %>
         <div class="form-group form-inline">
-          <big>Blocked IPs:</big> &nbsp;&nbsp;
+          <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
           <%= text_field_tag(:add_bad, "", size: 20, data: { autofocus: true },
                              class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+          <%= submit_tag(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
                  "Clear List", account_blocked_ips_path(clear_bad: 1)
                ) %>]

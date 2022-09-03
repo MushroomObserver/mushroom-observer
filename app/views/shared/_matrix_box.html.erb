@@ -19,7 +19,7 @@
                 <small><strong><%= presenter.where %></strong></small>
               </div>
               <div class="rss-what">
-                <small style="text-overflow: ellipsis; white-space: nowrap;">
+                <small class="nowrap-ellipsis">
                   <% unless presenter.when.blank? %>
                       <%= presenter.when %>: <%= presenter.who %>
                   <% end %>

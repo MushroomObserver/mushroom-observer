@@ -12,7 +12,7 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7 max-width-text">
-    <big style="margin-bottom:1em"><%= :Observation.t %> #<%= @observation.id %></big>
+    <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
 
     <%= form_tag(
           add_query_param(action: :create_herbarium_record, id: @observation.id)

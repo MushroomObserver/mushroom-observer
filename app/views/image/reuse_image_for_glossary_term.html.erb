@@ -10,7 +10,7 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
-  url_args = {action: :reuse_image_for_glossary_term, id: @object.id}
+  url_args = { action: :reuse_image_for_glossary_term, id: @object.id }
 %>
 
-<%= render(partial: "reuse_image", locals: {url_args: url_args}) %>
+<%= render(partial: "reuse_image", locals: { url_args: url_args }) %>

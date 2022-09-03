@@ -342,7 +342,7 @@ function nl_draw(s, list) {
       name = name.substr(0,x);
     }
     if (name.charAt(0) == '=') {
-      name = '<span style="margin-left:10px">&nbsp;</span>= <b>' +
+      name = '<span class="ml-10px">&nbsp;</span>= <b>' +
         name.substr(2).escapeHTML() + '</b>';
     } else if (star) {
       name = '<b>' + name.escapeHTML() + '</b>';

@@ -29,7 +29,7 @@ plane_glossary_term:
   name: Plane
   description: Three points define a plane & be sure to test unsafe html
   thumb_image: plane_image_thumb
-  images: plane_image_thummb, plane_image_example
+  images: plane_image_thumb, plane_image_example
 
 square_glossary_term:
   <<: *DEFAULTS

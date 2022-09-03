@@ -3,7 +3,7 @@
 #
 #  = API2 Inline Partials
 #
-#  These "inline partials" speed up tests by half an order of magnitude.
+#  These "d-inline-block partials" speed up tests by half an order of magnitude.
 #  (High detail observations query with 1000 results went from 7.7 seconds
 #  to under 2 seconds.)
 #

@@ -28,12 +28,12 @@
 %>
 
 <div class="row">
-  <div class="col-sm-4 push-up">
+  <div class="col-sm-4 mb-3">
     <%= show_previous_version(@location) %>
     <%= set_export_status_controls(@location) %>
   </div>
 
-  <div class="col-sm-8 push-up">
+  <div class="col-sm-8 mb-3">
     <%= show_alt_descriptions(@location, @projects) %>
   </div>
 
@@ -56,7 +56,7 @@
       <hr/>
     <% end %>
 
-    <div class="push-down">
+    <div class="mt-3">
       <%= show_object_footer(@location) %>
     </div>
   </div>

@@ -36,7 +36,7 @@
 <% end %>
 
 <%= paginate_block(@pages) do %>
-  <div class="row results push-down">
+  <div class="row results mt-3">
     <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
                collection: @objects, as: :object) %>
     <div style="clear: left"></div>

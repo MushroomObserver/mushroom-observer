@@ -1220,7 +1220,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "**Please do not re-click a link while waiting for a page to load.** (It's slower and degrades site speed for all users.)\nTo get images for machine learning, see \"+MO Images for Machine Learning+\":/articles/20"
+  app_banner_box: "**Please do not re-click a link while waiting for a page to load.** (It's slower and degrades site speed for all users.)"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction

@@ -12,7 +12,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
+<div class="row mt-3">
   <% if @glossary_term.thumb_image %>
     <div class="col-sm-8 max-width-text">
       <%= @glossary_term.description.tpl %>
@@ -28,7 +28,7 @@
   <%# Form should have links to MycoBank thesaurus and maybe Wikipedia
       See https://www.pivotaltracker.com/story/show/76992734 %>
 
-  <div class="col-xs-12 max-width-text" style="margin-bottom:1em">
+  <div class="col-xs-12 max-width-text mb-3">
     <%= link_with_query(:show_glossary_term_reuse_image.t,
                         controller: :image,
                         action: :reuse_image_for_glossary_term,
@@ -40,12 +40,12 @@
   </div>
 
   <% @objects.each do |image|  %>
-    <div class="col-sm-4 color-block-item slight-pad">
+    <div class="col-sm-4 color-block-item py-5px">
       <%= thumbnail(image, votes: true) %>
     </div>
   <% end %>
 
-  <div class="col-xs-12 push-down">
+  <div class="col-xs-12 mt-3">
     <%= show_previous_version(@glossary_term) %>
     <p class="Date">
       <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
