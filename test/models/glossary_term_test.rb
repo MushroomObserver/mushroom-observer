@@ -91,7 +91,7 @@ class GlossaryTermTest < UnitTestCase
     assert(thumb)
     images_length = glossary_term.images.length
     assert(images_length >= 2)
-    first_non_thumb = (glossary_term.images - thumb).first
+    first_non_thumb = (glossary_term.images - [thumb]).first
     assert(first_non_thumb)
     glossary_term.remove_image(first_non_thumb)
     glossary_term.reload
