@@ -9,21 +9,25 @@ $LINK_VISITED_BG_COLOR:             transparent;
 $LINK_HOVER_FG_COLOR:               #23527C;
 $LINK_HOVER_BG_COLOR:               transparent;
 
+// TODO: Consolidate bg colors in defaults
+// eliminate bg gradient conditionals in links buttons alerts
 $BUTTON_FG_COLOR:                   #000000;
-$BUTTON_BG_COLOR1:                  #F6F6F6;
-$BUTTON_BG_COLOR2:                  #F6F6F6;
+$BUTTON_BG_COLOR:                   #F6F6F6;
+// $BUTTON_BG_COLOR2:                  #F6F6F6;
 $BUTTON_BORDER_COLOR:               #CCCCCC;
 $BUTTON_HOVER_FG_COLOR:             #000000;
-$BUTTON_HOVER_BG_COLOR1:            #F6F6F6;
-$BUTTON_HOVER_BG_COLOR2:            #F6F6F6;
-$BUTTON_HOVER_BORDER_COLOR:         #CCCCCC;
+$BUTTON_HOVER_BG_COLOR:             #F6F6F6;
+// $BUTTON_HOVER_BG_COLOR2:            #F6F6F6;
+$BUTTON_HOVER_BORDER_COLOR:         black;
+$BUTTON_ACTIVE_FG_COLOR:            #111111;
+$BUTTON_ACTIVE_BG_COLOR:            #CCCCCC;
 $BUTTON_PRIMARY_FG_COLOR:           #FFFFFF;
-$BUTTON_PRIMARY_BG_COLOR1:          #337AB7;
-$BUTTON_PRIMARY_BG_COLOR2:          #337AB7;
+$BUTTON_PRIMARY_BG_COLOR:           #337AB7;
+// $BUTTON_PRIMARY_BG_COLOR2:          #337AB7;
 $BUTTON_PRIMARY_BORDER_COLOR:       #286192;
 $BUTTON_PRIMARY_HOVER_FG_COLOR:     #FFFFFF;
-$BUTTON_PRIMARY_HOVER_BG_COLOR1:    #337AB7;
-$BUTTON_PRIMARY_HOVER_BG_COLOR2:    #337AB7;
+$BUTTON_PRIMARY_HOVER_BG_COLOR:     #337AB7;
+// $BUTTON_PRIMARY_HOVER_BG_COLOR2:    #337AB7;
 $BUTTON_PRIMARY_HOVER_BORDER_COLOR: #286192;
 $BUTTON_BORDER_WIDTH:               1px;
 $BUTTON_BORDER_STYLE:               solid;
@@ -38,7 +42,7 @@ $INPUT_BORDER_STYLE:                solid;
 $INPUT_BORDER_RADIUS:               5px;
 
 $INFO_BG_COLOR:                     #E0F8FF;
-$INFO_BORDER_COLOR:                  #E0FFE0;
+$INFO_BORDER_COLOR:                 #E0FFE0;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
 $SUCCESS_BG_COLOR:                  #E0FFE0;
 $SUCCESS_BORDER_COLOR:              #70C070;
@@ -58,7 +62,8 @@ $ALERT_BORDER_WIDTH:                2px;
 $ALERT_BORDER_STYLE:                solid;
 $ALERT_BORDER_RADIUS:               5px;
 
-$LOGO_BORDER_COLOR:                 #DDDDDD;
+// Note this border color is for BlackOnWhite only.
+$LOGO_BORDER_COLOR:                 transparent;
 $LOGO_BORDER_WIDTH:                 1px;
 $LOGO_BORDER_STYLE:                 solid;
 $LOGO_BORDER_RADIUS:                0px;
@@ -67,7 +72,8 @@ $LOGO_BG_COLOR:                     #CC2616;
 $LOGO_HOVER_FG_COLOR:               #FAEBD4;
 $LOGO_HOVER_BG_COLOR:               #CC2616;
 
-$LEFT_BAR_BORDER_COLOR:             #DDDDDD;
+// Note #ddd border color is for BlackOnWhite only.
+$LEFT_BAR_BORDER_COLOR:             transparent;
 $LEFT_BAR_BORDER_WIDTH:             1px;
 $LEFT_BAR_BORDER_STYLE:             solid;
 $LEFT_BAR_BORDER_RADIUS:            5px;
@@ -79,7 +85,8 @@ $LEFT_BAR_BG_COLOR:                 #FFFFFF;
 $LEFT_BAR_HOVER_FG_COLOR:           #23529C;
 $LEFT_BAR_HOVER_BG_COLOR:           #EEEEEE;
 
-$TOP_BAR_BORDER_COLOR:              #DDDDDD;
+// Note #ddd border color is for BlackOnWhite only. Use transparent here
+$TOP_BAR_BORDER_COLOR:              transparent;
 $TOP_BAR_BORDER_WIDTH:              1px;
 $TOP_BAR_BORDER_STYLE:              solid;
 $TOP_BAR_BORDER_RADIUS:             0;
@@ -91,7 +98,7 @@ $TOP_BAR_LINK_HOVER_FG_COLOR:       $LINK_HOVER_FG_COLOR;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       $LINK_HOVER_BG_COLOR;
 
   // The indented ones have not been tested thoroughly.
-  $LIST_BORDER_COLOR:                 #DDDDDD;
+  $LIST_BORDER_COLOR:                 transparent;
   $LIST_HEADER_FG_COLOR:              #000000;
   $LIST_HEADER_BG_COLOR:              #F0F0F0;
 $LIST_FG_COLOR:                     #333333;
@@ -128,3 +135,6 @@ $LIST_BG_COLOR:                     #FFFFFF;
   $MENU_HOT_BG_COLOR:                 #FFFF88;
   $MENU_WARM_FG_COLOR:                #000000;
   $MENU_WARM_BG_COLOR:                #FF8888;
+
+  $WELL_FG_COLOR:                     inherit;
+  $WELL_BG_COLOR:                     #F5F5F5;

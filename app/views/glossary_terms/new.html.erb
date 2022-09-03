@@ -13,12 +13,12 @@
 
   <%= render "form", button_name: :edit_glossary_term_save do |f| %>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:glossary_term_upload_image, "#{:Image.t}:") %>
       <%= custom_file_field(:glossary_term, :upload_image) %>
     </div>
 
-    <div class="form-group push-down form-inline">
+    <div class="form-group mt-3 form-inline">
 
       <%= label_tag(:copyright_holder,
                     "#{:glossary_term_copyright_holder.t}:") %><br/>

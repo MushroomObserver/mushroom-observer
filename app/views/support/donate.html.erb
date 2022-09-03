@@ -21,52 +21,50 @@
 
   <div id="main_container" class="container-fluid">
     <%= form_tag(action: :confirm) do %>
-      <p>
-        <div class="row">
-          <% [25.00, 50.00, 100.00, 200.00].each do |a| %>
-            <div class="col-xs-3">
-              <%= radio_button(:donation, :amount, a) %>
-              $<%= a.to_i %>
+      <div class="row">
+        <% [25.00, 50.00, 100.00, 200.00].each do |a| %>
+          <div class="col-xs-3">
+            <div class="radio">
+              <label>
+                <%= radio_button(:donation, :amount, a) %>
+                $<%= a.to_i %>
+              </label>
             </div>
-          <% end %>
+          </div>
+        <% end %>
+      </div>
+      <div class="form-inline">
+        <div class="radio">
+          <label>
+            <%= radio_button(:donation, :amount, "other") %>
+            <%= :donate_other.t %>:
+          </label>
         </div>
-      </p>
-      <p>
-        <div class="row col-xs-12">
-          <%= radio_button(:donation, :amount, "other") %>
-          <%= :donate_other.t %>:
-          $<%= text_field(:donation, :other_amount, size: 7) %>
-        </div>
-      </p>
-      <p>
-        <div class="row col-xs-12">
+        $<%= text_field(:donation, :other_amount, size: 7, class: "form-control") %>
+      </div>
+      <div class="checkbox">
+        <label>
           <%= check_box(:donation, :recurring) %>
           <%= :donate_recurring.t %>
-          <br/><br/>
-        </div>
-      </p>
-      <p>
-        <div class="row col-xs-12">
-          <%= :donate_who.t %>:
-          <%= text_field(:donation, :who, size: 30) %>
-        </div>
-      </p>
-      <p>
-        <div class="row col-xs-12">
+        </label>
+      </div>
+      <div class="form-inline">
+        <%= :donate_who.t %>:
+        <%= text_field(:donation, :who, size: 30, class: "form-control") %>
+      </div>
+      <div class="checkbox">
+        <label>
           <%= check_box(:donation, :anonymous) %>
           <%= :donate_anonymous.t %>
-          <br/><br/>
-        </div>
-      </p>
-      <p>
-        <div class="row col-xs-12">
-          <%= :donate_email.t %>:
-          <%= text_field(:donation, :email, size: 30) %>
-          <br/><br/>
-        </div>
-      </p>
-      <%= submit_tag(:donate_confirm.t) %>
-      <br/><br/>
+        </label>
+      </div>
+      <div class="form-inline">
+        <%= :donate_email.t %>:
+        <%= text_field(:donation, :email, size: 30, class: "form-control") %>
+      </div>
+      <div class="my-3">
+        <%= submit_tag(:donate_confirm.t, class: "btn btn-default center-block") %>
+      </div>
     <% end %>
   </div>
   <%= :donate_snail_mail.tp %>

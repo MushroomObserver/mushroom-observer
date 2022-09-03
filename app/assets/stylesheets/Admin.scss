@@ -3,7 +3,7 @@
 $BODY_BG_COLOR:               #DD00DD;
 
 $LOGO_BORDER_COLOR:           black;
-$LOGO_BORDER_WIDTH:           2px;
+$LOGO_BORDER_WIDTH:           2px; // vs 1px in default
 $LOGO_FG_COLOR:               black;
 $LOGO_BG_COLOR:               yellow;
 $LOGO_HOVER_FG_COLOR:         purple;
@@ -30,10 +30,3 @@ $TOP_BAR_BG_COLOR:            $BODY_BG_COLOR;
 $VOTE_METER_FG_COLOR:         #000000;
 
 @import "mushroom_observer";
-
-.Admin {
-  font-size: 26px;
-  font-weight: bold;
-  text-align: center;
-  padding: 7px;
-}

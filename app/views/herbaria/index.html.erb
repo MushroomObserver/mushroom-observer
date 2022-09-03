@@ -8,7 +8,7 @@
 %>
 
 <% if @merge %>
-  <div class="alert alert-warning max-width-text push-down">
+  <div class="alert alert-warning max-width-text mt-3">
     <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
                                        url: reload_with_args(merge: nil)) %>
   </div>
@@ -16,7 +16,7 @@
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <table class="table-striped table-herbarium push-down">
+    <table class="table-striped table-herbarium mt-3">
       <thead>
         <tr>
           <th><%= :herbarium_index_records.t %></th>
