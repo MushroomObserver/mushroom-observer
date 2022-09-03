@@ -688,7 +688,7 @@ ActiveRecord::Schema.define(version: 2022_08_21_175927) do
   end
 
   create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.integer "group_name_id"
+    t.string "name", null: false
     t.boolean "reviewed", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

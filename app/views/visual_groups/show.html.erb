@@ -1,5 +1,5 @@
 <%
-  @title = :show_visual_group_title.t(name: @visual_group.group_name.display_name)
+  @title = :show_visual_group_title.t(name: @visual_group.name)
 %>
 
 <p id="notice"><%= notice %></p>
@@ -13,8 +13,8 @@
   <ul>
     <% @visual_group.names.each do |name|
        link = link_to(name.display_name_brief_authors.t,
-                              controller: :name,
-                              action: :show_name, id: name.id) %>
+                      controller: :name,
+                      action: :show_name, id: name.id) %>
       <li>
 	<%= content_tag(:p, link + " (#{name.observations.count})") %>
       </li>

@@ -21,7 +21,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
   # test "should create visual_group" do
   #   assert_difference('VisualGroup.count') do
   #     post visual_groups_url, params: { visual_group: {
-  # group_name_id: @visual_group.group_name_id,
+  # name: @visual_group.name,
   # reviewed: @visual_group.reviewed } }
   #   end
 
@@ -41,7 +41,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   # test "should update visual_group" do
   #   patch visual_group_url(@visual_group), params: { visual_group:
-  # { group_name_id: @visual_group.group_name_id,
+  # { name: @visual_group.name,
   # reviewed: @visual_group.reviewed } }
   #   assert_redirected_to visual_group_url(@visual_group)
   # end

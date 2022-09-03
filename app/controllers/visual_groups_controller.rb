@@ -5,9 +5,7 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups or /visual_groups.json
   def index
-    @visual_groups = VisualGroup.joins(
-      "LEFT JOIN names ON visual_groups.group_name_id = names.id"
-    ).order(:text_name)
+    @visual_groups = VisualGroup.all.order(:name)
   end
 
   # GET /visual_groups/1 or /visual_groups/1.json
@@ -76,6 +74,6 @@ class VisualGroupsController < ApplicationController
 
   #     # Only allow a list of trusted parameters through.
   #     def visual_group_params
-  #       params.require(:visual_group).permit(:name_id, :reviewed)
+  #       params.require(:visual_group).permit(:name, :reviewed)
   #     end
 end
