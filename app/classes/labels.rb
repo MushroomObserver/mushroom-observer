@@ -4,7 +4,12 @@ require "rtf"
 
 # Format observations as fancy labels in RTF format.
 class Labels
-  FUNDIS_HERBARIUM = "Fungal Diversity Survey".freeze
+  FUNDIS_HERBARIUM = "Fungal Diversity Survey"
+  PARAGRAPH_PREFIX = "\\pard\\plain \\s0\\dbch\\af8\\langfe1081\\dbch\\af8" \
+                     "\\afs24\\alang1081\\ql\\keep\\nowidctlpar\\sb0\\sa720" \
+                     "\\ltrpar\\hyphpar0\\aspalpha\\cf0\\loch\\f6\\fs24" \
+                     "\\lang1033\\kerning1\\ql\\tx4320"
+  PARAGRAPH_SUFFIX = "\\par "
 
   attr_accessor :query
   attr_accessor :document
@@ -44,11 +49,11 @@ class Labels
   end
 
   def format_observations
-    observations.map { |obs| format_observation(obs) }.join("")
+    observations.map { |obs| format_observation(obs) }.join
   end
 
   def format_observation(obs)
-    @para = RTF::CommandNode.new(document, "\\pard\\plain \\s0\\dbch\\af8\\langfe1081\\dbch\\af8\\afs24\\alang1081\\ql\\keep\\nowidctlpar\\sb0\\sa720\\ltrpar\\hyphpar0\\aspalpha\\cf0\\loch\\f6\\fs24\\lang1033\\kerning1\\ql\\tx4320", "\\par ")
+    @para = RTF::CommandNode.new(document, PARAGRAPH_PREFIX, PARAGRAPH_SUFFIX)
     @obs = obs
     format_number
     format_name
@@ -86,7 +91,7 @@ class Labels
   end
 
   def fundis_number
-    return nil unless fundis_herbarium_id = fundis_herbarium&.id
+    return nil unless (fundis_herbarium_id = fundis_herbarium&.id)
 
     @obs.herbarium_records.each do |rec|
       return "FunDiS #{rec.accession_number}" \
@@ -109,10 +114,12 @@ class Labels
     italic = false
     @para.bold do |bold|
       @obs.name.display_name.gsub("**", "").split("__").each do |part|
-        if italic
-          bold.italic { |i| i << part } if part.present?
-        else
-          bold << part if part.present?
+        if part.present?
+          if italic
+            bold.italic { |i| i << part } if part.present?
+          else
+            bold << part
+          end
         end
         italic = !italic
       end
@@ -157,12 +164,12 @@ class Labels
     end
   end
 
-  def format_lat(v)
-    v < 0 ? "#{-v}°S" : "#{v}°N"
+  def format_lat(val)
+    val.negative? ? "#{-val}°S" : "#{val}°N"
   end
 
-  def format_long(v)
-    v < 0 ? "#{-v}°W" : "#{v}°E"
+  def format_long(val)
+    val.negative? ? "#{-val}°W" : "#{val}°E"
   end
 
   # --------------------
@@ -205,7 +212,7 @@ class Labels
     @obs.notes.each do |key, val|
       next unless val.present? && key != Observation.other_notes_key
 
-      label(key.to_s.downcase.gsub("_", " "))
+      label(key.to_s.downcase.tr("_", " "))
       @para << val
       @para.line_break
     end
