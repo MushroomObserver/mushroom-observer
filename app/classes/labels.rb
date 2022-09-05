@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rtf"
+
 # Format observations as fancy labels in RTF format.
 class Labels
   FUNDIS_HERBARIUM = "Fungal Diversity Survey".freeze
@@ -7,9 +9,9 @@ class Labels
   attr_accessor :query
   attr_accessor :document
 
-  def self.new(query)
+  def initialize(query)
     @query = query
-    @document = RTF::Document.new
+    @document = RTF::Document.new(RTF::Font::SWISS)
   end
 
   def header
@@ -29,7 +31,7 @@ class Labels
   end
 
   def body
-    header + format_observations + footer
+    File.read(MO.label_rtf_header_file) + format_observations + "}"
   end
 
   # ----------------------------------------------------------------------
@@ -37,16 +39,8 @@ class Labels
   private
 
   def observations
-    query.includes(:user, :name, :location, :sequences, :projects,
-                   :herbarium_records, :collection_numbers).results
-  end
-
-  def header
-    File.read(MO.label_rtf_header_file)
-  end
-
-  def footer
-    "}"
+    query.results(include: [:user, :name, :location, :sequences, :projects,
+                            :herbarium_records, :collection_numbers])
   end
 
   def format_observations
@@ -54,23 +48,22 @@ class Labels
   end
 
   def format_observation(obs)
-    document.paragraph do |para|
-      @para = para
-      @obs = obs
-      format_number
-      format_name
-      format_location
-      format_date
-      format_sequences
-      format_project
-      format_notes
-    end.to_rtf
+    @para = RTF::CommandNode.new(document, "\\pard\\plain \\s0\\dbch\\af8\\langfe1081\\dbch\\af8\\afs24\\alang1081\\ql\\keep\\nowidctlpar\\sb0\\sa720\\ltrpar\\hyphpar0\\aspalpha\\cf0\\loch\\f6\\fs24\\lang1033\\kerning1\\ql\\tx4320", "\\par ")
+    @obs = obs
+    format_number
+    format_name
+    format_location
+    format_date
+    format_sequences
+    format_project
+    format_notes
+    @para.to_rtf
   end
 
   # RTF class doesn't support smallcaps, but it's really easy.
   def label(str)
     node = RTF::CommandNode.new(@para, "\\rtlch \\ltrch\\scaps\\loch")
-    node << str
+    node << "#{str}: "
     @para.store(node)
   end
 
@@ -89,14 +82,14 @@ class Labels
   end
 
   def mo_number
-    "MO ##{obs.id}"
+    "MO #{@obs.id}" + (@obs.specimen ? "" : " (no specimen)")
   end
 
   def fundis_number
     return nil unless fundis_herbarium_id = fundis_herbarium&.id
 
-    observation.herbarium_records.each do |rec|
-      return "FunDiS ##{fundis_record.accession_number}" \
+    @obs.herbarium_records.each do |rec|
+      return "FunDiS #{rec.accession_number}" \
         if rec.herbarium_id == fundis_herbarium_id
     end
     nil
@@ -132,7 +125,7 @@ class Labels
   # Location (scientific order) + GPS.
   def format_location
     label("location")
-    @para << Location.reverse_name(loc&.name || @obs.where)
+    @para << Location.reverse_name(@obs.location&.name || @obs.where)
     @para << format_lat_long
     @para << format_alt
     @para.line_break
@@ -156,7 +149,7 @@ class Labels
     if @obs.alt.present?
       ", #{@obs.alt} m"
     elsif loc&.low.present?
-      if loc.low < loc.high
+      if loc.high.present? && loc.low < loc.high
         ", #{loc.low}–#{loc.high} m"
       else
         ", #{loc.low} m"
@@ -177,7 +170,7 @@ class Labels
   # Date in format: "5 Dec 2021".
   def format_date
     label("date")
-    @para << @obs.when.strftime("%D %b %Y")
+    @para << @obs.when.strftime("%e %b %Y").strip
     @para.line_break
   end
 
@@ -212,7 +205,7 @@ class Labels
     @obs.notes.each do |key, val|
       next unless val.present? && key != Observation.other_notes_key
 
-      label(key)
+      label(key.to_s.downcase.gsub("_", " "))
       @para << val
       @para.line_break
     end
