@@ -32,7 +32,7 @@ module ObservationsController::Download
     elsif params[:commit] == :DOWNLOAD.l
       create_and_render_report
     elsif params[:commit] == :download_observations_print_labels.l
-      render_labels
+      render_report(Labels.new(@query))
     end
   end
 
