@@ -9,6 +9,9 @@ class StudentTest < IntegrationTestCase
   # -----------------------------------
 
   def test_creating_drafts
+    puts("Hiye")
+    binding.break
+
     name = Name.find_by(text_name: "Strobilurus diminutivus")
     gen_desc = "Mary wrote this draft text."
 
