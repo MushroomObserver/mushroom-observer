@@ -18,6 +18,9 @@ class Labels
     @document = RTF::Document.new(RTF::Font::SWISS)
   end
 
+  # --------------------
+  # These are all things expected by ObserverController#render_report.
+
   def header
     {}
   end
@@ -38,8 +41,7 @@ class Labels
     File.read(MO.label_rtf_header_file) + format_observations + "}"
   end
 
-  # ----------------------------------------------------------------------
-
+  # --------------------
   private
 
   def observations
@@ -165,11 +167,17 @@ class Labels
   end
 
   def format_lat(val)
+    val = val.round(1) unless coordinates_visible?
     val.negative? ? "#{-val}°S" : "#{val}°N"
   end
 
   def format_long(val)
+    val = val.round(1) unless coordinates_visible?
     val.negative? ? "#{-val}°W" : "#{val}°E"
+  end
+
+  def coordinates_visible?
+    @obs.user_id == User.current_id || !@obs.gps_hidden
   end
 
   # --------------------
