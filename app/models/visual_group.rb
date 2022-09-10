@@ -21,4 +21,14 @@ class VisualGroup < ApplicationRecord
     end
     total
   end
+
+  def total_images
+    total = 0
+    names.each do |name|
+      name.observations.each do |obs|
+        total += obs.images.count
+      end
+    end
+    total
+  end
 end
