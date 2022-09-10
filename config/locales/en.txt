@@ -2602,6 +2602,9 @@
   show_visual_group_back_to_index: Back to Visual Group Index
   show_visual_group_edit: Edit Visual Group
 
+  # visual_groups/destroy
+  destroy_visual_group_success: "[:VISUAL_GROUP] [:destroyed]"
+
   ##############################################################################
 
   # LESS POPULAR PAGES

@@ -55,19 +55,19 @@ class VisualGroupsController < ApplicationController
   #     end
   #   end
 
-    # DELETE /visual_groups/1 or /visual_groups/1.json
-    def destroy
-      @visual_group = VisualGroup.find(params[:id])
-      @visual_group.destroy
+  # DELETE /visual_groups/1 or /visual_groups/1.json
+  def destroy
+    @visual_group = VisualGroup.find(params[:id])
+    @visual_group.destroy
 
-      respond_to do |format|
-        format.html {
-          redirect_to(visual_groups_url,
-                      notice: "Visual group was successfully destroyed.")
-        }
-        format.json { head :no_content }
+    respond_to do |format|
+      format.html do
+        redirect_to(visual_groups_url,
+                    notice: :destroy_visual_group_success.t)
       end
+      format.json { head(:no_content) }
     end
+  end
 
   #   private
   #     # Use callbacks to share common setup or constraints between actions.
