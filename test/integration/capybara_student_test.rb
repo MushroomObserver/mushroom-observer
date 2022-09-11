@@ -21,10 +21,13 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
     dick_session    = Capybara::Session.new(:rack_test, Rails.application)
     lurker_session  = Capybara::Session.new(:rack_test, Rails.application)
 
-    using_session(rolf_session) { login(as: rolf) }
-    using_session(mary_session) { login(as: mary) }
-    using_session(katrina_session) { login(as: katrina) }
-    using_session(dick_session) { login(as: dick) }
+    using_session(rolf_session) { login_user(rolf) }
+    using_session(mary_session) do
+      login_user(mary)
+      binding.break
+    end
+    using_session(katrina_session) { login_user(katrina) }
+    using_session(dick_session) { login_user(dick) }
 
     # assert_not_equal(mary_session.session[:session_id],
     #                  dick_session.session[:session_id])
@@ -35,9 +38,9 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       get("/")
 
       within("#navigation") { click_link("Names") }
+      # binding.break
 
       click_link(name.text_name)
-      binding.break
 
       # puts(url)
     end
@@ -86,7 +89,6 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       within("#navigation") { click_link("Names") }
 
       click_link(label: name.text_name)
-      binding.break
       # url = request.url
       # assert_match(/there are no descriptions/i, response.body)
       # click_link(label: project.title)

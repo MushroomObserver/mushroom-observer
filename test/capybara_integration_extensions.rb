@@ -11,25 +11,21 @@
 #
 module CapybaraIntegrationExtensions
   # Login the given user in the current session.
-  def login(login = users(:zero_user).login, password = "testpassword",
-            _remember_me = true)
+  def login_user(login = users(:zero_user).login, password = "testpassword",
+                 remember_me = true)
     login = login.login if login.is_a?(User)
     visit("/account/login")
-    # open_form do |form|
-    #   form.change("login", login)
-    #   form.change("password", password)
-    #   form.change("remember_me", remember_me)
-    #   form.submit("Login")
-    # end
+
     fill_in("user_login", with: login)
     fill_in("user_password", with: password)
-    check("user_remember_me")
+    check("user_remember_me") if remember_me == true
+
     click_button("Login")
   end
 
   # Login the given user, testing to make sure it was successful.
-  def login!(user, *args)
-    login(user, *args)
+  def login_user!(user, *args)
+    login_user(user, *args)
     assert_flash(/success/i)
     user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
