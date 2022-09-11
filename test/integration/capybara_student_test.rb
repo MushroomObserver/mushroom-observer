@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Test typical sessions of university student who is writing descriptions.
-class CapybaraStudentTest < IntegrationTestCase
+class CapybaraStudentTest < CapybaraIntegrationTestCase
   # -----------------------------------
   #  Test creating draft for project.
   # -----------------------------------
@@ -15,11 +15,11 @@ class CapybaraStudentTest < IntegrationTestCase
     project = projects(:eol_project)
     project.admin_group.users.delete(mary)
 
-    rolf_session    = Capybara::Session.new(:rack_test, Rails.application) # .extend(AdminDsl)
-    mary_session    = Capybara::Session.new(:rack_test, Rails.application) # .extend(CreatorDsl)
-    katrina_session = Capybara::Session.new(:rack_test, Rails.application) # .extend(StudentDsl)
-    dick_session    = Capybara::Session.new(:rack_test, Rails.application) # .extend(UserDsl)
-    lurker_session  = Capybara::Session.new(:rack_test, Rails.application) # .extend(UserDsl)
+    rolf_session    = Capybara::Session.new(:rack_test, Rails.application)
+    mary_session    = Capybara::Session.new(:rack_test, Rails.application)
+    katrina_session = Capybara::Session.new(:rack_test, Rails.application)
+    dick_session    = Capybara::Session.new(:rack_test, Rails.application)
+    lurker_session  = Capybara::Session.new(:rack_test, Rails.application)
 
     using_session(rolf_session) { login(as: rolf) }
     using_session(mary_session) { login(as: mary) }
@@ -32,7 +32,7 @@ class CapybaraStudentTest < IntegrationTestCase
     using_session(mary_session) do
       assert_nil(NameDescription.find_by(gen_desc: gen_desc))
       # url = create_draft(name, gen_desc, project)
-      visit("/")
+      get("/")
 
       within("#navigation") { click_link("Names") }
 

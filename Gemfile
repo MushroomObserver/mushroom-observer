@@ -280,10 +280,11 @@ group :test do
   # restore `assigns` and `assert_template` to tests
   gem("rails-controller-testing")
 
-  # gem("action_dispatch-testing-integration-capybara",
-  #     github: "thoughtbot/action_dispatch-testing-integration-capybara",
-  #     tag: "v0.1.0",
-  #     require: "action_dispatch/testing/integration/capybara/minitest")
+  # Use Capybara from within ActionDispatch::IntegrationTest
+  gem("action_dispatch-testing-integration-capybara",
+      github: "thoughtbot/action_dispatch-testing-integration-capybara",
+      tag: "v0.1.0",
+      require: "action_dispatch/testing/integration/capybara/minitest")
 
   # Performance tests for Rails >= 4.0
   # See https://github.com/rails/rails-perftest
