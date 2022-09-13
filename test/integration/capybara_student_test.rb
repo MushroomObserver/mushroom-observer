@@ -32,10 +32,11 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
     # assert_not_equal(mary_session.session[:session_id],
     #                  dick_session.session[:session_id])
     # url = mary_session.create_draft(name, gen_desc, project)
+    assert_nil(NameDescription.find_by(gen_desc: gen_desc))
+
     using_session(mary_session) do
-      assert_nil(NameDescription.find_by(gen_desc: gen_desc))
       # url = create_draft(name, gen_desc, project)
-      get("/")
+      visit("/")
 
       within("#navigation") { click_link("Names") }
 
@@ -53,8 +54,8 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       has_no_checked_field?("description_public_write", type: :hidden)
       has_no_checked_field?("description_public", type: :hidden)
 
-      # click_button("Create") # not unique, capybara won't click
-      all("input[value=Create][type=submit]")[0].click
+      # click_button("Create") # is not unique, capybara won't click
+      all("input[type=submit][name='commit'][value='Create']")[0].click
       assert_flash_success
       assert_template("name/show_name_description")
 
@@ -72,8 +73,13 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       has_no_checked_field?("description_public_write", type: :hidden)
       has_no_checked_field?("description_public", type: :hidden)
       fill_in("description_gen_desc", with: gen_desc)
-      all("input[value=Edit][type=submit]")[0].click
+
+      # click_button("Save Edits") # is not unique, capybara won't click
+      all("input[type=submit][name='commit'][value='Save Edits']")[0].click
+      assert_flash_success
     end
+
+    assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))
 
     # rolf_session.check_admin(url, gen_desc, project)
     # katrina_session.check_another_student(url)
@@ -112,56 +118,46 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
   module CreatorDsl
     # Navigate to show name (no descriptions) and create draft.
     def create_draft(_name, _gen_desc, _project)
-      # can't do this here because assert_nil's not a session method
-      # assert_nil(NameDescription.find_by(gen_desc: gen_desc))
       visit("/")
-
       within("#navigation") { click_link("Names") }
 
-      click_link(label: name.text_name)
-      # path = current_path
-      # assert_text(/there are no descriptions/i)
-      # click_link(project.title)
-      # assert_text(:create_name_description_title.t(name: name.text_name))
+      click_link(name.text_name)
+      path = current_path
+      assert_text(/there are no descriptions/i)
+
+      click_link(project.title)
+      assert_text(:create_name_description_title.t(name: name.text_name))
 
       # Check that initial form is correct.
-      # open_form do |form|
-      #   form.assert_value("source_type", :project)
-      #   form.assert_value("source_name", project.title)
-      #   form.assert_value("project_id", project.id)
-      #   form.assert_value("public_write", false)
-      #   form.assert_value("public", false)
-      #   form.assert_hidden("source_type")
-      #   form.assert_hidden("source_name")
-      #   form.assert_enabled("public_write")
-      #   form.assert_enabled("public")
-      #   form.submit
-      # end
-      # assert_flash_success
-      # assert_template("name/show_name_description")
+      has_field?("description_source_type", type: :hidden, with: :project)
+      has_field?("description_source_name", type: :hidden, with: project.title)
+      has_field?("description_project_id", type: :hidden, with: project.id)
+      has_no_checked_field?("description_public_write", type: :hidden)
+      has_no_checked_field?("description_public", type: :hidden)
+
+      # click_button("Create") # is not unique, capybara won't click
+      all("input[type=submit][name='commit'][value='Create']")[0].click
+      assert_flash_success
+      assert_template("name/show_name_description")
 
       # Make sure it shows up on main show_name page and can edit it.
-      # visit(url)
-      # assert_selector("a[href*=edit_name_description]", 1)
-      # assert_selector("a[href*=destroy_name_description]", 1)
+      visit(path)
+      assert_link(href: /edit_name_description/)
+      assert_link(href: /destroy_name_description/)
 
       # Now give it some text to make sure it *can* (but doesn't) actually get
       # displayed (content, that is) on main show_name page.
-      # click_link(href: /edit_name_description/)
-      # open_form do |form|
-      #   form.assert_value("source_type", :project)
-      #   form.assert_value("source_name", project.title)
-      #   form.assert_value("public_write", false)
-      #   form.assert_value("public", false)
-      #   form.assert_hidden("source_type")
-      #   form.assert_hidden("source_name")
-      #   form.assert_enabled("public_write")
-      #   form.assert_enabled("public")
-      #   form.change("gen_desc", gen_desc)
-      #   form.submit
-      # end
-      # assert_flash_success
-      # assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))
+      click_link(href: /edit_name_description/)
+      has_field?("description_source_type", type: :hidden, with: :project)
+      has_field?("description_source_name", type: :hidden, with: project.title)
+      has_field?("description_project_id", type: :hidden, with: project.id)
+      has_no_checked_field?("description_public_write", type: :hidden)
+      has_no_checked_field?("description_public", type: :hidden)
+      fill_in("description_gen_desc", with: gen_desc)
+
+      # click_button("Save Edits") # is not unique, capybara won't click
+      all("input[type=submit][name='commit'][value='Save Edits']")[0].click
+      assert_flash_success
       # url
     end
   end
