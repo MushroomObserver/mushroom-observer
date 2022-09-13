@@ -24,7 +24,7 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
     using_session(rolf_session) { login_user(rolf) }
     using_session(mary_session) do
       login_user(mary)
-      binding.break
+      # binding.break
     end
     using_session(katrina_session) { login_user(katrina) }
     using_session(dick_session) { login_user(dick) }
@@ -38,11 +38,41 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       get("/")
 
       within("#navigation") { click_link("Names") }
-      # binding.break
 
       click_link(name.text_name)
+      path = current_path
+      assert_text(/there are no descriptions/i)
 
-      # puts(url)
+      click_link(project.title)
+      assert_text(:create_name_description_title.t(name: name.text_name))
+
+      # Check that initial form is correct.
+      has_field?("description_source_type", type: :hidden, with: :project)
+      has_field?("description_source_name", type: :hidden, with: project.title)
+      has_field?("description_project_id", type: :hidden, with: project.id)
+      has_no_checked_field?("description_public_write", type: :hidden)
+      has_no_checked_field?("description_public", type: :hidden)
+
+      # click_button("Create") # not unique, capybara won't click
+      all("input[value=Create][type=submit]")[0].click
+      assert_flash_success
+      assert_template("name/show_name_description")
+
+      # Make sure it shows up on main show_name page and can edit it.
+      visit(path)
+      assert_link(href: /edit_name_description/)
+      assert_link(href: /destroy_name_description/)
+
+      # Now give it some text to make sure it *can* (but doesn't) actually get
+      # displayed (content, that is) on main show_name page.
+      click_link(href: /edit_name_description/)
+      has_field?("description_source_type", type: :hidden, with: :project)
+      has_field?("description_source_name", type: :hidden, with: project.title)
+      has_field?("description_project_id", type: :hidden, with: project.id)
+      has_no_checked_field?("description_public_write", type: :hidden)
+      has_no_checked_field?("description_public", type: :hidden)
+      fill_in("description_gen_desc", with: gen_desc)
+      all("input[value=Edit][type=submit]")[0].click
     end
 
     # rolf_session.check_admin(url, gen_desc, project)
@@ -89,11 +119,10 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       within("#navigation") { click_link("Names") }
 
       click_link(label: name.text_name)
-      # url = request.url
-      # assert_match(/there are no descriptions/i, response.body)
-      # click_link(label: project.title)
-      # assert_match(:create_name_description_title.t(name: name.display_name),
-      #              response.body)
+      # path = current_path
+      # assert_text(/there are no descriptions/i)
+      # click_link(project.title)
+      # assert_text(:create_name_description_title.t(name: name.text_name))
 
       # Check that initial form is correct.
       # open_form do |form|

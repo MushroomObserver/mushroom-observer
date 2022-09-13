@@ -270,6 +270,8 @@ group :test do
   # Use capybara to simulate user-browser interaction
   gem("capybara")
 
+  # gem("selenium-webdriver")
+
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
   gem("minitest-reporters")
