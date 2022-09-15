@@ -80,8 +80,11 @@ class API2
       user.reload
     end
 
-    def delete
-      raise(NoMethodForAction.new("DELETE", action))
+    def build_deleter
+      lambda do |obj|
+        raise(CanOnlyDeleteYourOwnAccount.new) if user.id != obj.id
+        obj.delete_owned_objects
+      end
     end
   end
 end

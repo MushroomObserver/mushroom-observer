@@ -3931,6 +3931,7 @@
   api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
   api_bad_version: Invalid version number "[version]".
+  api_can_only_delete_your_own_account: Only the account owner can delete their account.
   api_can_only_synonymize_unsynonymized_names: Presently, we're only allowing API clients to synonymize unsynonymized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
   api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.

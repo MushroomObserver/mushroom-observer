@@ -940,6 +940,108 @@ class User < AbstractModel
 
   ##############################################################################
 
+  # This is intended to comply with Apple's requirement that we allow users
+  # to delete their account.  We do not want to let users remove everything,
+  # though, like for example, their comments within comment threads on other
+  # users' observations, as doing so may render those threads unintelligible.
+  # Legally speaking, as everything on MO is posted under Creative Commons
+  # licenses, we are perfectly within our rights to retain users' content.
+  # But we wish to comply with Apple where it will not otherwise detract from
+  # other users' experience.
+  def delete_owned_objects
+    disable_account
+    delete_observations
+    delete_unattached_images
+    delete_unattached_collection_numbers
+    delete_unattached_herbarium_records
+    delete_unattached_sequences
+    delete_private_descriptions
+    delete_private_species_lists
+    delete_private_projects
+    delete_queued_emails
+    delete_interests
+    delete_notifications
+    delete_api_keys
+    destroy! if no_references_left?
+  end
+
+  # Disable and remove all public information from account but leave it there
+  # in case there are still comments, etc. on the site by this user.
+  def disable_account
+    self.password = "" 
+    self.email = ""
+    self.blocked = true
+    self.location_id = nil
+    self.image_id = nil
+    self.notes = nil
+    self.mailing_address = nil
+    self.save
+  end
+
+  def delete_observations
+    # TODO
+    # comments
+    # external_links
+    # namings
+    # votes
+    # views
+    # rss_logs
+  end
+
+  def delete_unattached_images
+    # TODO
+    Image.delete_orphans
+  end
+
+  def delete_unattached_collection_numbers
+    # TODO
+    CollectionNumber.delete_orphans
+  end
+
+  def delete_unattached_herbarium_records
+    # TODO
+    HerbariumRecord.delete_orphans
+  end
+
+  def delete_unattached_sequences
+    # TODO
+    Sequence.delete_orphans
+  end
+
+  def delete_private_descriptions
+    # TODO
+  end
+
+  def delete_private_species_lists
+    # TODO
+  end
+
+  def delete_private_projects
+    # TODO
+  end
+
+  def delete_queued_emails
+    # TODO
+  end
+
+  def delete_interests
+    # TODO
+  end
+
+  def delete_notifications
+    # TODO
+  end
+
+  def delete_api_keys
+    # TODO
+  end
+
+  def no_references_left?
+    # TODO
+  end
+
+  ##############################################################################
+
   # Encrypt a password.
   def self.sha1(pass)
     Digest::SHA1.hexdigest("something__#{pass}__")
