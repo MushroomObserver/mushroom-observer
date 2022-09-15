@@ -71,12 +71,8 @@ require("mocha/minitest")
   integration_test_case
   capybara_integration_test_case
 ].each do |file|
-  require File.expand_path(File.dirname(__FILE__) + "/#{file}")
+  require_relative(file)
 end
-
-# Allow simuluation of user-browser interaction with capybara
-require("capybara/rails")
-require("capybara/minitest")
 
 I18n.enforce_available_locales = true
 
@@ -174,6 +170,10 @@ module ActiveSupport
     end
   end
 end
+
+# Allow simuluation of user-browser interaction with capybara
+require("capybara/rails")
+require("capybara/minitest")
 
 module ActionDispatch
   class IntegrationTest

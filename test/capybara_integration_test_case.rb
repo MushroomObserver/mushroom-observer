@@ -47,12 +47,12 @@
 ################################################################################
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
+  # Make `assert_*` methods behave like Minitest assertions
+  include Capybara::Minitest::Assertions
   include GeneralExtensions
   # include SessionExtensions
   include FlashExtensions
   include CapybaraIntegrationExtensions
-  # Make `assert_*` methods behave like Minitest assertions
-  include Capybara::Minitest::Assertions
 
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.

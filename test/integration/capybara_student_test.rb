@@ -47,36 +47,37 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       click_link(project.title)
       assert_text(:create_name_description_title.t(name: name.text_name))
 
+      binding.break
       # Check that initial form is correct.
-      has_field?("description_source_type", type: :hidden, with: :project)
-      has_field?("description_source_name", type: :hidden, with: project.title)
-      has_field?("description_project_id", type: :hidden, with: project.id)
-      has_no_checked_field?("description_public_write", type: :hidden)
-      has_no_checked_field?("description_public", type: :hidden)
+      assert_field("description_source_type", type: :hidden, with: :project)
+      # has_field?("description_source_name", type: :hidden, with: project.title)
+      # has_field?("description_project_id", type: :hidden, with: project.id)
+      # has_no_checked_field?("description_public_write", type: :hidden)
+      # has_no_checked_field?("description_public", type: :hidden)
 
-      # click_button("Create") # is not unique, capybara won't click
-      all("input[type=submit][name='commit'][value='Create']")[0].click
-      assert_flash_success
-      assert_template("name/show_name_description")
+      # # click_button("Create") # is not unique, capybara won't click
+      # all("input[type=submit][name='commit'][value='Create']")[0].click
+      # assert_flash_success
+      # assert_template("name/show_name_description")
 
-      # Make sure it shows up on main show_name page and can edit it.
-      visit(path)
-      assert_link(href: /edit_name_description/)
-      assert_link(href: /destroy_name_description/)
+      # # Make sure it shows up on main show_name page and can edit it.
+      # visit(path)
+      # assert_link(href: /edit_name_description/)
+      # assert_link(href: /destroy_name_description/)
 
-      # Now give it some text to make sure it *can* (but doesn't) actually get
-      # displayed (content, that is) on main show_name page.
-      click_link(href: /edit_name_description/)
-      has_field?("description_source_type", type: :hidden, with: :project)
-      has_field?("description_source_name", type: :hidden, with: project.title)
-      has_field?("description_project_id", type: :hidden, with: project.id)
-      has_no_checked_field?("description_public_write", type: :hidden)
-      has_no_checked_field?("description_public", type: :hidden)
-      fill_in("description_gen_desc", with: gen_desc)
+      # # Now give it some text to make sure it *can* (but doesn't) actually get
+      # # displayed (content, that is) on main show_name page.
+      # click_link(href: /edit_name_description/)
+      # has_field?("description_source_type", type: :hidden, with: :project)
+      # has_field?("description_source_name", type: :hidden, with: project.title)
+      # has_field?("description_project_id", type: :hidden, with: project.id)
+      # has_no_checked_field?("description_public_write", type: :hidden)
+      # has_no_checked_field?("description_public", type: :hidden)
+      # fill_in("description_gen_desc", with: gen_desc)
 
-      # click_button("Save Edits") # is not unique, capybara won't click
-      all("input[type=submit][name='commit'][value='Save Edits']")[0].click
-      assert_flash_success
+      # # click_button("Save Edits") # is not unique, capybara won't click
+      # all("input[type=submit][name='commit'][value='Save Edits']")[0].click
+      # assert_flash_success
     end
 
     assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))

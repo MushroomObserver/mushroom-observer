@@ -258,7 +258,7 @@ gem("graphql-batch")
 group :test, :development do
   # https://github.com/ruby/debug
   # NOTE: Remove this upon upgrade to Ruby 3.1. (It's included with Ruby 3.1)
-  gem "debug", ">= 1.0.0"
+  gem("debug", ">= 1.0.0")
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
@@ -268,7 +268,7 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara")
+  gem("capybara", "~> 3.37", ">= 3.37.1")
 
   # gem("selenium-webdriver")
 
