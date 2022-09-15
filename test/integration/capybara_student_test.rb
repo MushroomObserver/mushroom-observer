@@ -23,8 +23,11 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
 
     using_session(rolf_session) { login_user(rolf) }
     using_session(mary_session) do
+      visit("/account/login")
+      binding.break
+      assert_field("user_login")
+
       login_user(mary)
-      # binding.break
     end
     using_session(katrina_session) { login_user(katrina) }
     using_session(dick_session) { login_user(dick) }
@@ -47,7 +50,7 @@ class CapybaraStudentTest < CapybaraIntegrationTestCase
       click_link(project.title)
       assert_text(:create_name_description_title.t(name: name.text_name))
 
-      binding.break
+      # binding.break
       # Check that initial form is correct.
       assert_field("description_source_type", type: :hidden, with: :project)
       # has_field?("description_source_name", type: :hidden, with: project.title)
