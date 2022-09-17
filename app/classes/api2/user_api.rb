@@ -83,7 +83,8 @@ class API2
     def build_deleter
       lambda do |obj|
         raise(CanOnlyDeleteYourOwnAccount.new) if user.id != obj.id
-        obj.delete_owned_objects
+
+        obj.disable_account_and_delete_private_objects
       end
     end
   end

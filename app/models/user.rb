@@ -948,7 +948,7 @@ class User < AbstractModel
   # licenses, we are perfectly within our rights to retain users' content.
   # But we wish to comply with Apple where it will not otherwise detract from
   # other users' experience.
-  def delete_owned_objects
+  def disable_account_and_delete_private_objects
     disable_account
     delete_api_keys
     delete_interests
