@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+# frozen_string_literal
 
 #
 #  = User Model
@@ -950,18 +950,18 @@ class User < AbstractModel
   # other users' experience.
   def delete_owned_objects
     disable_account
-    delete_observations
-    delete_unattached_images
-    delete_unattached_collection_numbers
-    delete_unattached_herbarium_records
-    delete_unattached_sequences
-    delete_private_descriptions
-    delete_private_species_lists
-    delete_private_projects
-    delete_queued_emails
+    delete_api_keys
     delete_interests
     delete_notifications
-    delete_api_keys
+    delete_queued_emails
+    delete_observations
+    delete_private_name_descriptions
+    delete_private_location_descriptions
+    delete_private_projects
+    delete_private_species_lists
+    delete_unattached_collection_numbers
+    delete_unattached_herbarium_records
+    delete_unattached_images
     destroy! if no_references_left?
   end
 
@@ -978,66 +978,142 @@ class User < AbstractModel
     self.save
   end
 
-  def delete_observations
-    # TODO
-    # comments
-    # external_links
-    # namings
-    # votes
-    # views
-    # rss_logs
-  end
-
-  def delete_unattached_images
-    # TODO
-    Image.delete_orphans
-  end
-
-  def delete_unattached_collection_numbers
-    # TODO
-    CollectionNumber.delete_orphans
-  end
-
-  def delete_unattached_herbarium_records
-    # TODO
-    HerbariumRecord.delete_orphans
-  end
-
-  def delete_unattached_sequences
-    # TODO
-    Sequence.delete_orphans
-  end
-
-  def delete_private_descriptions
-    # TODO
-  end
-
-  def delete_private_species_lists
-    # TODO
-  end
-
-  def delete_private_projects
-    # TODO
-  end
-
-  def delete_queued_emails
-    # TODO
+  def delete_api_keys
+    api_keys.delete_all
   end
 
   def delete_interests
-    # TODO
+    interests.delete_all
   end
 
   def delete_notifications
-    # TODO
+    notifications.delete_all
   end
 
-  def delete_api_keys
-    # TODO
+  def delete_queued_emails
+    QueuedEmail.where(user_id: id).delete_all
+    QueuedEmail.where(to_user_id: id).delete_all
+  end
+
+  def delete_observations
+    [ Naming, Vote, RssLog ].each do |model|
+      model.joins(:observation).where(observation: { user_id: id }).delete_all
+    end
+    # (all the rest of the observations' dependents should autodestruct)
+    observations.delete_all
+  end
+
+  # Delete user's descriptions that don't have any other authors or # editors.
+  def delete_private_name_descriptions
+    (name_descriptions -
+      name_descriptions.joins(:name_description_authors).
+        where.not(name_description_authors: { user_id: id }) -
+      name_descriptions.joins(:name_description_editors).
+        where.not(name_description_editors: { user_id: id }))
+      delete_all
+  end
+
+  # Delete user's descriptions that don't have any other authors or # editors.
+  def delete_private_location_descriptions
+    (location_descriptions -
+      location_descriptions.joins(:location_description_authors).
+        where.not(location_description_authors: { user_id: id }) -
+      location_descriptions.joins(:location_description_editors).
+        where.not(location_description_editors: { user_id: id }))
+      delete_all
+  end
+
+  # Delete all the user's projects that don't have any other users on them.
+  def delete_private_projects
+    (projects.select do |project|
+      project.admin_group_users.
+        where.not(admin_group_users: { user_id: id }).none? &&
+      project.member_group_users.
+        where.not(member_group_users: { user_id: id }).none?
+    end).delete_all
+  end
+
+  # Delete all species lists the user created unless they belong to a project.
+  # (Private projects should already have been deleted by this point, so this
+  # in effect, really should read "unless they belong to a public project".)
+  # I think it's okay to delete observations even if they are attached to a
+  # project.  But species_lists are potentially a much more collaborative
+  # effort, so I don't think it's okay to delete lists that are attached to
+  # public projects just because the user happened to originally create them.
+  # -JPH 20220916
+  def delete_private_species_lists
+    (species_lists -
+      species_lists.joins(:project_species_lists)).
+      delete_all
+  end
+
+  def delete_unattached_collection_numbers
+    (collection_numbers -
+      collection_numbers.joins(:observation_collection_numbers)).
+      delete_all
+  end
+
+  def delete_unattached_herbarium_records
+    (herbarium_records -
+      herbarium_records.joins(:observation_herbarium_records)).
+      delete_all
+  end
+
+  def delete_unattached_images
+    (images -
+      images.joins(:glossary_term_images) -
+      images.joins(:observation_images) -
+      images.joins(:project_images) -
+      images.joins(:subjects)).
+      delete_all
   end
 
   def no_references_left?
-    # TODO
+    [
+      # ApiKey,                        (just deleted all of these)
+      Article,
+      CollectionNumber,
+      Comment,
+      # CopyrightChange,               (okay if these are all that's left)
+      # Donation,                      (okay if these are all that's left)
+      ExternalLink,
+      GlossaryTerm,
+      GlossaryTerm::Version,
+      # Herbarium, (personal_user_id)  (okay if these are all that's left)
+      # HerbariumCurator,              (okay if these are all that's left)
+      HerbariumRecord,
+      ImageVote,
+      Image,
+      # Interest,                      (just deleted all of these)
+      Location,
+      Location::Version,
+      LocationDescription,
+      LocationDescription::Version,
+      LocationDescriptionAuthor,
+      LocationDescriptionEditor,
+      Name,
+      Name::Version,
+      NameDescription,
+      NameDescription::Version,
+      NameDescriptionAuthor,
+      NameDescriptionEditor,
+      Naming,
+      # Notification,                  (just deleted all of these)
+      # ObservationView,               (okay if these are all that's left)
+      # Observation,                   (just deleted all of these)
+      Project,
+      Publication,
+      # QueuedEmail,                   (just deleted all of these)
+      # QueuedEmail, (to_user_id)      (just deleted all of these)
+      Sequence,
+      SpeciesList,
+      TranslationString,
+      TranslationString::Version,
+      # UserGroupUser,                 (okay if these are all that's left)
+      Vote
+    ].all? do |model|
+      model.where(user_id: id).none?
+    end
   end
 
   ##############################################################################
