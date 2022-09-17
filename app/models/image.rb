@@ -233,7 +233,7 @@ class Image < AbstractModel
   has_many :thumb_clients, class_name: "Observation",
                            foreign_key: "thumb_image_id",
                            inverse_of: :observation
-  has_many :image_votes
+  has_many :image_votes, dependent: :destroy
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, class_name: "User"
