@@ -126,6 +126,9 @@ gem("mail")
 # for detecting file type of uploaded images
 gem("mimemagic")
 
+
+#for monitoring
+gem('newrelic_rpm')
 # for creating zip files
 # RubyZip 3.0 is coming!
 # **********************
