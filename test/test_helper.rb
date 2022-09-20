@@ -51,28 +51,9 @@ require("rails/test_help")
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).
 require("mocha/minitest")
 
-%w[
-  bullet_helper
-
-  general_extensions
-  flash_extensions
-  controller_extensions
-  integration_extensions
-  capybara_integration_extensions
-  language_extensions
-  session_extensions
-  session_form_extensions
-
-  check_for_unsafe_html
-  uploaded_string
-
-  unit_test_case
-  functional_test_case
-  integration_test_case
-  capybara_integration_test_case
-].each do |file|
-  require_relative(file)
-end
+# Allow simuluation of user-browser interaction with capybara
+require("capybara/rails")
+require("capybara/minitest")
 
 I18n.enforce_available_locales = true
 
@@ -171,21 +152,17 @@ module ActiveSupport
   end
 end
 
-# Allow simuluation of user-browser interaction with capybara
-require("capybara/rails")
-require("capybara/minitest")
-
 module ActionDispatch
   class IntegrationTest
     # Make the Capybara DSL available in all integration tests
     include Capybara::DSL
 
-    # Including the below assertions causes many integration test
-    # failures currently, and we don't really need them.
-    # They're just aliases of Capybara methods. (Nimmo - 09/2022)
-    #
     # Make `assert_*` methods behave like Minitest assertions
-    # include Capybara::Minitest::Assertions
+    include Capybara::Minitest::Assertions
+    # NOTE: Including Capybara assertions in all IntegrationTests causes some
+    # assertions in existing integration tests (built on rails-dom-testing) to
+    # fail. For experimenting with Capybara+Integration i'm making a new class
+    # tests can inherit from: CapybaraIntegrationTestCase. (Nimmo - 09/2022)
 
     # Reset sessions and driver between tests
     teardown do
@@ -193,4 +170,27 @@ module ActionDispatch
       Capybara.use_default_driver
     end
   end
+end
+
+%w[
+  bullet_helper
+
+  general_extensions
+  flash_extensions
+  controller_extensions
+  integration_extensions
+  capybara_integration_extensions
+  language_extensions
+  session_extensions
+  session_form_extensions
+
+  check_for_unsafe_html
+  uploaded_string
+
+  unit_test_case
+  functional_test_case
+  integration_test_case
+  capybara_integration_test_case
+].each do |file|
+  require_relative(file)
 end

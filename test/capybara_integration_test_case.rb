@@ -48,7 +48,7 @@
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make `assert_*` methods behave like Minitest assertions
-  include Capybara::Minitest::Assertions
+  # include Capybara::Minitest::Assertions
   include GeneralExtensions
   # include SessionExtensions
   include FlashExtensions
