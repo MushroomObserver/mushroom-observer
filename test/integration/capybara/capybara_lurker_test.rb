@@ -4,7 +4,7 @@ require("test_helper")
 require("capybara_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
-class CapybarLurkerTest < IntegrationTestCase
+class CapybaraLurkerTest < CapybaraIntegrationTestCase
   # temporarily use these extensions until webdriver is installed
   # include here to avoid name conflict with MO extensions
   include CapybaraHelper

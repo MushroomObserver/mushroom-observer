@@ -11,46 +11,45 @@
 #      # methods are automatically delegated to a default session created at
 #      # setup.
 #      def test_simplest
-#        get('/controller/action?args=...')
-#        assert_template('controller/action')
-#        click_mo_link(:label => 'Post Comment')
-#        open_form do |form|
-#          form.edit_field('message', 'This is a test.')
-#          form.submit('Post')
-#        end
+#        visit('/controller/action?args=...')
+#        click_button('Post Comment')
+#        fill_in('message', 'This is a test.')
+#        click_button('Post')
 #      end
 #
-#      # More complicated session management.
+#      # More complicated session management, with CapybaraIntegrationExtensions
 #      def test_multiple_session
 #
 #        # Create two sessions: think "browser" - each session represents the
 #        # actions of a single user in one or more tabs of a single browser.
-#        rolf = login!('rolf')
-#        mary = login!('mary')
+#        rolf_session = Capybara::Session.new(:rack_test, Rails.application)
+#        using_session(rolf_session) { login_user('rolf') }
+#        mary_session = Capybara::Session.new(:rack_test, Rails.application)
+#        using_session(mary_session) { login_user('mary') }
 #
 #        # Have Rolf do some stuff.
-#        rolf.get('/edit_rolfs_stuff')
-#        rolf.assert_success
+#        using_session(rolf) { visit('/edit_rolfs_stuff') }
 #
 #        # Have Mary do stuff.
-#        mary.get('/edit_rolfs_stuff')
+#        using_session(mary) { visit('/edit_rolfs_stuff') }
 #        mary.assert_redirect
 #
 #        # You can also create anonymous sessions.
-#        open_session do
-#          get('/show_index')
-#          assert_select('span', :text => 'Rolfs Thing', :count => 0)
-#        end
+#        session = Capybara::Session.new(:rack_test, Rails.application)
+#        session.visit('/show_index')
+#        session.assert_selector('span', :text => 'Rolfs Thing', :count => 0)
 #      end
 #    end
 #
 ################################################################################
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
+  # Make the Capybara DSL available in these integration tests
+  include ::Capybara::DSL
   # Make `assert_*` methods behave like Minitest assertions
-  # include Capybara::Minitest::Assertions
+  include ::Capybara::Minitest::Assertions
+
   include GeneralExtensions
-  # include SessionExtensions
   include FlashExtensions
   include CapybaraIntegrationExtensions
 
@@ -59,12 +58,13 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   def setup
     ApplicationController.allow_forgery_protection = true
 
+    # NOTE: rails-dom-testing only?
     # This should be automatically removed at the beginning of each test,
     # but for some reason it is not nil before the very first test run.
     # If it is not removed, then all sessions opened in your test will have
     # the identical session instance, breaking some tests. This is probably
     # a bug in rails, but as of 20190101 it is required.
-    @integration_session = nil
+    # @integration_session = nil
 
     # Treat Rails html requests as coming from non-robots.
     # If it's a bot, controllers often do not serve the expected content.
@@ -74,6 +74,9 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   end
 
   def teardown
+    Capybara.reset_sessions!
+    Capybara.use_default_driver
+
     ApplicationController.allow_forgery_protection = false
   end
 end

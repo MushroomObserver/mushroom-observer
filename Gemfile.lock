@@ -299,7 +299,6 @@ DEPENDENCIES
   browser
   bullet
   bundler
-  capybara (~> 3.37, >= 3.37.1)
   coffee-rails
   date (>= 3.2.1)
   debug (>= 1.0.0)

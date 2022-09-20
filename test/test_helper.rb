@@ -152,25 +152,27 @@ module ActiveSupport
   end
 end
 
-module ActionDispatch
-  class IntegrationTest
-    # Make the Capybara DSL available in all integration tests
-    include Capybara::DSL
+# class ActionDispatch::IntegrationTest
+# Make the Capybara DSL available in all integration tests
+# include ::Capybara::DSL
+# Make `assert_*` methods behave like Minitest assertions
+# include ::Capybara::Minitest::Assertions
 
-    # Make `assert_*` methods behave like Minitest assertions
-    include Capybara::Minitest::Assertions
-    # NOTE: Including Capybara assertions in all IntegrationTests causes some
-    # assertions in existing integration tests (built on rails-dom-testing) to
-    # fail. For experimenting with Capybara+Integration i'm making a new class
-    # tests can inherit from: CapybaraIntegrationTestCase. (Nimmo - 09/2022)
+# NOTE: Including Capybara::Minitest::Assertions in all IntegrationTests
+# causes some assertions in existing integration tests (built on
+# rails-dom-testing) to fail, due to clashes in method names like
+# `assert_select`.
+#
+# There's now a CapybaraIntegrationTestCase class that tests can inherit
+# from, and including the assertions there. It does not include the
+# SessionExtensions for rails-dom-testing. (Nimmo - 09/2022)
 
-    # Reset sessions and driver between tests
-    teardown do
-      Capybara.reset_sessions!
-      Capybara.use_default_driver
-    end
-  end
-end
+# Reset sessions and driver between tests
+# teardown do
+#   Capybara.reset_sessions!
+#   Capybara.use_default_driver
+# end
+# end
 
 %w[
   bullet_helper

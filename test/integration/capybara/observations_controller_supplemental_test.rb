@@ -7,7 +7,7 @@
 require("test_helper")
 
 # Tests which supplement controller/observations_controller_test.rb
-class ObservationsControllerSupplementalTest < IntegrationTestCase
+class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
   def login(user = users(:zero_user))
     visit("/account/login")
     fill_in("User name or Email address:", with: user.login)
