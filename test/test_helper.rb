@@ -60,8 +60,7 @@ require("mocha/minitest")
   general_extensions
   flash_extensions
   controller_extensions
-  integration_extensions
-  capybara_integration_extensions
+  capybara_session_extensions
   language_extensions
   session_extensions
   session_form_extensions

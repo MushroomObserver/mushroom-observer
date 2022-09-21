@@ -3,24 +3,24 @@
 #
 #  = Integration High-Level Test Helpers
 #
-#  Methods in this class are available to all the integration tests.
+#  Methods in this class are available to Capybara integration tests.
 #
 #  login::   Create a session with a given user logged in.
 #  login!::  Same thing,but raise an error if it is unsuccessful.
 #
 #
-module IntegrationExtensions
+module CapybaraSessionExtensions
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
-    get("/account/login")
-    open_form do |form|
-      form.change("login", login)
-      form.change("password", password)
-      form.change("remember_me", remember_me)
-      form.submit("Login")
-    end
+    visit("/account/login")
+
+    fill_in("user_login", with: login)
+    fill_in("user_password", with: password)
+    check("user_remember_me") if remember_me == true
+
+    click_button("Login")
   end
 
   # Login the given user, testing to make sure it was successful.
