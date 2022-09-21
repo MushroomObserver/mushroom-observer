@@ -62,13 +62,8 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   def setup
     ApplicationController.allow_forgery_protection = true
 
-    # NOTE: rails-dom-testing only?
-    # This should be automatically removed at the beginning of each test,
-    # but for some reason it is not nil before the very first test run.
-    # If it is not removed, then all sessions opened in your test will have
-    # the identical session instance, breaking some tests. This is probably
-    # a bug in rails, but as of 20190101 it is required.
-    # @integration_session = nil
+    # NOTE: Shouldn't be necessary, but in case:
+    # Capybara.reset_sessions!
 
     # Treat Rails html requests as coming from non-robots.
     # If it's a bot, controllers often do not serve the expected content.
