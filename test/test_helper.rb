@@ -154,7 +154,7 @@ end
 
 class ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in all integration tests
-  include ::Capybara::DSL
+  # include ::Capybara::DSL
   # Make `assert_*` methods behave like Minitest assertions
   # include ::Capybara::Minitest::Assertions
 
