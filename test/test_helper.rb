@@ -100,7 +100,7 @@ module ActiveSupport
     # The only drawback to using transactional fixtures is when you
     # actually need to test transactions.  Since your test is
     # bracketed by a transaction, any transactions started in your
-    # code will be automatically rolled back.
+    # code will be automatically rolled back. Defaults to true.
     self.use_transactional_tests = true
 
     # Instantiated fixtures are slow, but give you @david where
@@ -108,7 +108,7 @@ module ActiveSupport
     # migrate your existing test cases which use the @david style and
     # don't mind the speed hit (each instantiated fixtures translates
     # to a database query per test method), then set this back to
-    # true.
+    # true. Defaults to false.
     self.use_instantiated_fixtures = false
     ##########################################################################
 
