@@ -15,10 +15,7 @@ class FilterTest < CapybaraIntegrationTestCase
                  where.not(thumb_image_id: nil)
 
     reset_session!
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
+    login(user)
 
     # search for Observations with same name as obs
     fill_in("search_pattern", with: obs.name.text_name)
@@ -135,10 +132,7 @@ class FilterTest < CapybaraIntegrationTestCase
     # Login a user who filters out imageless Observations
     user = users(:ignore_imageless_user)
     obs = observations(:imageless_unvouchered_obs)
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
+    login(user)
 
     # Verfy Advanced Search form
     click_on("Advanced Search", match: :first)
