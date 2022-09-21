@@ -2,6 +2,7 @@
 
 # Allow simuluation of user-browser interaction with capybara
 require("capybara/rails")
+require("capybara/minitest")
 
 #  = Capybara Integration Test Case
 #
@@ -50,7 +51,7 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests
   include Capybara::DSL
   # Make `assert_*` methods behave like Minitest assertions
-  # include Capybara::Minitest::Assertions
+  include Capybara::Minitest::Assertions
 
   include GeneralExtensions
   include FlashExtensions
