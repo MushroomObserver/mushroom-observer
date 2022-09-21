@@ -51,9 +51,6 @@ require("rails/test_help")
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).
 require("mocha/minitest")
 
-# Allow simuluation of user-browser interaction with capybara
-# require("capybara/rails")
-
 %w[
   bullet_helper
 
@@ -172,10 +169,3 @@ module ActiveSupport
     end
   end
 end
-
-# Make the Capybara DSL available in all integration tests
-# module ActionDispatch
-#   class IntegrationTest
-#     include Capybara::DSL
-#   end
-# end
