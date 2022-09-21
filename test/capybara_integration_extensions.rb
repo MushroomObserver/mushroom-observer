@@ -11,8 +11,8 @@
 #
 module CapybaraIntegrationExtensions
   # Login the given user in the current session.
-  def login_user(login = users(:zero_user).login, password = "testpassword",
-                 remember_me = true)
+  def login(login = users(:zero_user).login, password = "testpassword",
+            remember_me = true)
     login = login.login if login.is_a?(User)
     visit("/account/login")
 
@@ -24,8 +24,8 @@ module CapybaraIntegrationExtensions
   end
 
   # Login the given user, testing to make sure it was successful.
-  def login_user!(user, *args)
-    login_user(user, *args)
+  def login!(user, *args)
+    login(user, *args)
     assert_flash(/success/i)
     user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
