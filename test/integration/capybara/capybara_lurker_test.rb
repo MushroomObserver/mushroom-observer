@@ -49,7 +49,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     assert_match(/#{:app_title.l}: How to Use/, page.title, "Wrong page")
 
     click_on("Français")
-    subtitle = :how_title.has_translation?
+    subtitle = if :how_title.has_translation?
                  :how_title.t
                else
                  "How to Use"
