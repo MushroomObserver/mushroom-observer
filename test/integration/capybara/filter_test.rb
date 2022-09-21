@@ -4,7 +4,7 @@ require("test_helper")
 require("capybara_helper")
 
 # Test user filters
-class FilterTest < IntegrationTestCase
+class FilterTest < CapybaraIntegrationTestCase
   def test_user_content_filter
     ### :has_images filter
     ### Prove that :has_images filter excludes imageless Observations

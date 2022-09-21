@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests which supplement QueryTest
-class QuerySupplementalTest < IntegrationTestCase
+class QuerySupplementalTest < CapybaraIntegrationTestCase
   # Test deserialization of non-ascii characters
   # Observation and Show Location title include
   #               `             and ’

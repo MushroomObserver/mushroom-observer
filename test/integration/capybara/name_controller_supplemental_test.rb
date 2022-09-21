@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests which supplement controller/name_controller_test.rb
-class NameControllerSupplementalTest < IntegrationTestCase
+class NameControllerSupplementalTest < CapybaraIntegrationTestCase
   # Email tracking template should not contain ":mailing_address"
   # because, when email is sent, that will be interpreted as
   # recipient's mailing_address

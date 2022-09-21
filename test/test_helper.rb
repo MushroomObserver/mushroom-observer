@@ -51,6 +51,9 @@ require("rails/test_help")
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).
 require("mocha/minitest")
 
+# Allow simuluation of user-browser interaction with capybara
+require("capybara/rails")
+
 %w[
   bullet_helper
 
@@ -58,6 +61,7 @@ require("mocha/minitest")
   flash_extensions
   controller_extensions
   integration_extensions
+  capybara_integration_extensions
   language_extensions
   session_extensions
   session_form_extensions
@@ -68,12 +72,10 @@ require("mocha/minitest")
   unit_test_case
   functional_test_case
   integration_test_case
+  capybara_integration_test_case
 ].each do |file|
-  require File.expand_path(File.dirname(__FILE__) + "/#{file}")
+  require_relative(file)
 end
-
-# Allow simuluation of user-browser interaction with capybara
-require("capybara/rails")
 
 I18n.enforce_available_locales = true
 
@@ -173,8 +175,8 @@ module ActiveSupport
 end
 
 # Make the Capybara DSL available in all integration tests
-module ActionDispatch
-  class IntegrationTest
-    include Capybara::DSL
-  end
-end
+# module ActionDispatch
+#   class IntegrationTest
+#     include Capybara::DSL
+#   end
+# end
