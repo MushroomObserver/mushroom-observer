@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Allow simuluation of user-browser interaction with capybara
+require("capybara/rails")
+
 #  = Capybara Integration Test Case
 #
 #  The test case class that all Capybara integration tests currently derive

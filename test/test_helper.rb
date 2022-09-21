@@ -52,7 +52,7 @@ require("rails/test_help")
 require("mocha/minitest")
 
 # Allow simuluation of user-browser interaction with capybara
-require("capybara/rails")
+# require("capybara/rails")
 
 %w[
   bullet_helper
