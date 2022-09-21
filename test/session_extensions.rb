@@ -3,7 +3,8 @@
 #
 #  = Integration Session Test Helpers
 #
-#  Methods in this class are available to all the integration tests.
+#  Methods in this class are available to integration tests that inherit from
+#  MO's IntegrationTestCase (uses rails-dom-testing, not Capybara).
 #
 #  ==== Sessions
 #  login::   Create a session with a given user logged in.
@@ -45,6 +46,12 @@
 ################################################################################
 
 module SessionExtensions
+  ##############################################################################
+  #
+  #  :section: Sessions
+  #
+  ##############################################################################
+
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
