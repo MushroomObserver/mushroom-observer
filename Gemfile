@@ -268,7 +268,9 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara")
+  gem("capybara", "~> 3.37", ">= 3.37.1")
+
+  # gem("selenium-webdriver")
 
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
@@ -279,6 +281,12 @@ group :test do
 
   # restore `assigns` and `assert_template` to tests
   gem("rails-controller-testing")
+
+  # Use Capybara from within ActionDispatch::IntegrationTest
+  # gem("action_dispatch-testing-integration-capybara",
+  #     github: "thoughtbot/action_dispatch-testing-integration-capybara",
+  #     tag: "v0.1.0",
+  #     require: "action_dispatch/testing/integration/capybara/minitest")
 
   # Performance tests for Rails >= 4.0
   # See https://github.com/rails/rails-perftest
