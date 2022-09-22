@@ -165,23 +165,38 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
   def test_search
     login
+
+    # Search for a name.  (Only one.)
     fill_in("search_pattern", with: "Coprinus comatus")
     select("Names", from: "search_type")
     click_button("Search")
     assert_match(names(:coprinus_comatus).search_name,
                  page.title, "Wrong page")
 
+    # Search for observations of that name.  (Only one.)
     select("Observations", from: "search_type")
     click_button("Search")
     assert_match(/#{observations(:coprinus_comatus_obs).id}/,
                  page.title, "Wrong page")
 
+    # Image pattern searches temporarily disabled for performamce
+    # 2021-09-12 JDC
+    # Search for images of the same thing.  (Still only one.)
+    # select("Images", from: "search_type")
+    # click_button("Search")
+    # assert_match(
+    #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+    #   current_fullpath
+    # )
+
+    # There should be no locations of that name, though.
     select("Locations", from: "search_type")
     click_button("Search")
     assert_match("Location Search", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("div.results a[href]")
 
+    # This should give us just about all the locations.
     fill_in("search_pattern", with: "california OR canada")
     select("Locations", from: "search_type")
     click_button("Search")
@@ -197,6 +212,8 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
   def test_search_next
     login
+
+    # Search for a name.  (More than one.)
     fill_in("search_pattern", with: "Fungi")
     select("Observations", from: "search_type")
     click_button("Search")
@@ -209,7 +226,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
            "Found these: #{links.inspect}")
   end
 
-  # Note, benchmark this vs LurkerTest after this test is recreated here:
   def test_obs_at_location
     login
     # Start at distribution map for Fungi.
@@ -251,7 +267,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     within("#sorts") { click_link(text: "Name") }
     save_results = check_results_length(save_results)
-    # must do this here to avoid variable going stale... shown as
+    # must set `save_hrefs` here to avoid variable going stale...
     # Capybara::RackTest::Errors::StaleElementReferenceError
     save_hrefs = save_results.pluck(:href)
 
