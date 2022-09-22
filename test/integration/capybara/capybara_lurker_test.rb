@@ -165,6 +165,58 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
            "expected 2 Images in Observation, got #{image_count}")
   end
 
+  def test_search
+    visit(root_path)
+    login
+    fill_in("search_pattern", with: "Coprinus comatus")
+    select("Names", from: "search_type")
+    click_button("Search")
+    assert_match(names(:coprinus_comatus).search_name,
+                 page.title, "Wrong page")
+
+    select("Observations", from: "search_type")
+    click_button("Search")
+    assert_match(/#{observations(:coprinus_comatus_obs).id}/,
+                 page.title, "Wrong page")
+
+    select("Locations", from: "search_type")
+    click_button("Search")
+    assert_match("Location Search", page.title, "Wrong page")
+    assert_selector("div.alert", text: /no.*found/i)
+    refute_selector("div.results a[href]")
+
+    fill_in("search_pattern", with: "california OR canada")
+    select("Locations", from: "search_type")
+    click_button("Search")
+    # assert_selector("div.results a[href]")
+    labels = find_all("div.results a[href]").map(&:text)
+    assert(labels.any? { |l| l.end_with?("Canada") },
+           "Expected one of the results to be in Canada.\n" \
+           "Found these: #{labels.inspect}")
+    assert(labels.any? { |l| l.end_with?("USA") },
+           "Expected one of the results to be in the US.\n" \
+           "Found these: #{labels.inspect}")
+  end
+
+  def test_search_next
+    visit(root_path)
+    login
+    fill_in("search_pattern", with: "Fungi")
+    select("Observations", from: "search_type")
+    click_button("Search")
+
+    obs = observations(:detailed_unknown_obs).id.to_s
+    # assert_selector("a[href^='/#{obs}']")
+    links = find_all("a[href^='/#{obs}']")
+    assert(links.all? { |l| l[:href].match(/#{obs}\?q=/) },
+           "Expected a link to reference #{obs}\?q=??.\n" \
+           "Found these: #{links.inspect}")
+  end
+
+  # Note, benchmark this vs LurkerTest after this test is recreated here:
+  # def test_obs_at_location
+  # end
+
   ################
 
   private
@@ -172,8 +224,8 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
   def login(login = users(:zero_user).login)
     first(:link, "Login").click
     assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
-    fill_in("User name or Email address:", with: login)
-    fill_in("Password:", with: "testpassword")
+    fill_in("user_login", with: login)
+    fill_in("user_password", with: "testpassword")
     click_button("Login")
 
     # Following gives more informative error message than
