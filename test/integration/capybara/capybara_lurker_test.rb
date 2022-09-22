@@ -266,6 +266,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     check_results_length(save_results)
 
     within("#sorts") { click_link(text: "Name") }
+    # Last time through - reset `save_results` with current results
     save_results = check_results_length(save_results)
     # must set `save_hrefs` here to avoid variable going stale...
     # Capybara::RackTest::Errors::StaleElementReferenceError
@@ -321,6 +322,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
   end
 
+  # This returns results so you can reset a `results` variable within test scope
   def check_results_length(save_results)
     results = results_observation_links
     assert_equal(save_results.length, results.length)
