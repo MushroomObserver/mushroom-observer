@@ -30,4 +30,26 @@ module CapybaraSessionExtensions
     user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
   end
+
+  # The current_path plus the query, similar to @request.fullpath
+  def current_fullpath
+    URI.parse(current_url).request_uri
+  end
+
+  # Get string representing (our) query from the given URL.  Defaults to the
+  # current page's URL.  (In practice, for now, this is just the Query id.)
+  def parse_query_params(url = current_fullpath)
+    _path, query = url.split("?")
+    params = CGI.parse(query)
+    params["q"]
+  end
+
+  def assert_flash_text(text = "")
+    assert_selector("#flash-notices")
+    assert_selector("#flash-notices", text: text)
+  end
+
+  def assert_no_flash
+    refute_selector("#flash-notices")
+  end
 end

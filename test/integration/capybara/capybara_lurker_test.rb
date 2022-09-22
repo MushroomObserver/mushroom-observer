@@ -12,7 +12,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
   def test_poke_around
     # Start at index.
     reset_session!
-    visit(root_path)
     login
 
     # Click on first observation in feed results
@@ -89,7 +88,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # First login
     reset_session!
-    visit(root_path)
     login(lurker.login)
 
     visit("/#{obs.id}")
@@ -166,7 +164,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
   end
 
   def test_search
-    visit(root_path)
     login
     fill_in("search_pattern", with: "Coprinus comatus")
     select("Names", from: "search_type")
@@ -199,7 +196,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
   end
 
   def test_search_next
-    visit(root_path)
     login
     fill_in("search_pattern", with: "Fungi")
     select("Observations", from: "search_type")
@@ -215,7 +211,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
   # Note, benchmark this vs LurkerTest after this test is recreated here:
   def test_obs_at_location
-    visit(root_path)
     login
     # Start at distribution map for Fungi.
     visit("/name/map/#{names(:fungi).id}")
@@ -230,73 +225,75 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#right_tabs") { click_link(text: "Observations at this Location") }
-    print(page.title)
-    binding.break
     assert_match("Observations from Burbank, California, USA",
                  page.title, "Wrong page")
-    save_results = find_all("div.results a[href*='/#{/\d+/}']")
+    save_results = find_all("div.results a").select do |l|
+      l[:href].match(%r{^/\d+})
+    end
 
-    #   observations = @controller.instance_variable_get(:@objects)
-    #   if observations.size > MO.default_layout_count
-    #     skip("Test skipped because it bombs when search results > " \
-    #         "default layout size.
-    #         Please adjust the fixtures and re-run.")
-    #   end
+    # Bail if there are too many results — test will not work
+    if has_selector?(".results .pagination a", text: /Next/)
+      skip("Test skipped because it bombs when search results > " \
+          "default layout size.
+          Please adjust the fixtures and re-run.")
+    end
 
-    #   # Try sorting differently.
-    #   click_mo_link(label: "User", in: :sort_tabs)
-    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
-    #   assert_equal(save_results.length, results.length)
+    # Try sorting differently.
+    within("#sorts") { click_link(text: "User") }
+    check_results_length(save_results)
 
-    #   click_mo_link(label: "Date", in: :sort_tabs)
-    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
-    #   assert_equal(save_results.length, results.length)
+    # Date is ambiguous, there's also 'Date Posted'
+    within("#sorts") { click_link(exact_text: "Date") }
+    check_results_length(save_results)
 
-    #   click_mo_link(label: "Reverse Order", in: :sort_tabs)
-    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
-    #   assert_equal(save_results.length, results.length)
+    within("#sorts") { click_link(text: "Reverse Order") }
+    check_results_length(save_results)
 
-    #   click_mo_link(label: "Name", in: :sort_tabs)
-    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
-    #   assert_equal(save_results.length, results.length)
+    within("#sorts") { click_link(text: "Name") }
+    save_results = check_results_length(save_results)
+    # must do this here to avoid variable going stale... shown as
+    # Capybara::RackTest::Errors::StaleElementReferenceError
+    save_hrefs = save_results.pluck(:href)
 
-    #   save_results = results
-    #   query_params = parse_query_params(save_results.first.value)
+    query_params = parse_query_params(save_results.first[:href])
 
-    #   # Go to first observation, and try stepping back and forth.
-    #   click_mo_link(href: %r{^/\d+\?}, in: :results)
-    #   save_path = @request.fullpath
-    #   assert_equal(query_params, parse_query_params(save_path))
-    #   click_mo_link(label: "« Prev", in: :title)
-    #   assert_flash_text(/there are no more observations/i)
-    #   assert_equal(save_path, @request.fullpath)
-    #   assert_equal(query_params, parse_query_params(save_path))
-    #   click_mo_link(label: "Next »", in: :title)
-    #   assert_no_flash
-    #   assert_equal(query_params, parse_query_params(save_path))
-    #   save_path = @request.fullpath
-    #   click_mo_link(label: "Next »", in: :title)
-    #   assert_no_flash
-    #   assert_equal(query_params, parse_query_params(save_path))
-    #   click_mo_link(label: "« Prev", in: :title)
-    #   assert_no_flash
-    #   assert_equal(query_params, parse_query_params(save_path))
-    #   assert_equal(save_path, @request.fullpath,
-    #               "Went next then prev, should be back where we started.")
-    #   click_mo_link(label: "Index", href: /#{observations_path}/, in: :title)
-    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
-    #   assert_equal(query_params, parse_query_params(results.first.value))
-    #   assert_equal(save_results.map(&:value),
-    #               results.map(&:value),
-    #               "Went to show_obs, screwed around, then back to index. " \
-    #               "But the results were not the same when we returned.")
+    # Go to first observation, and try stepping back and forth.
+    results_observation_links.first.click
+    save_path = current_fullpath
+    assert_equal(query_params, parse_query_params(save_path))
+    within("#title") { click_link(text: "Prev") }
+    assert_flash_text(/there are no more observations/i)
+    assert_equal(save_path, current_fullpath)
+    assert_equal(query_params, parse_query_params(save_path))
+    within("#title") { click_link(text: "Next") }
+    assert_no_flash
+    assert_equal(query_params, parse_query_params(save_path))
+
+    save_path = current_fullpath
+    within("#title") { click_link(text: "Next") }
+    assert_no_flash
+    assert_equal(query_params, parse_query_params(save_path))
+    within("#title") { click_link(text: "Prev") }
+    assert_no_flash
+    assert_equal(query_params, parse_query_params(save_path))
+    assert_equal(save_path, current_fullpath,
+                 "Went next then prev, should be back where we started.")
+    within("#title") { click_link(text: "Index", href: /#{observations_path}/) }
+    results = results_observation_links
+    assert_equal(query_params, parse_query_params(results.first[:href]))
+    assert_equal(save_hrefs, results.pluck(:href),
+                 "Went to show_obs, screwed around, then back to index. " \
+                 "But the results were not the same when we returned.")
   end
 
   ################
 
   private
 
+  # Custom login method for this test. Consider adding the bells and whistles
+  # to the method in CapybaraSessionExtensions?
   def login(login = users(:zero_user).login)
+    visit(root_path)
     first(:link, "Login").click
     assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
     fill_in("user_login", with: login)
@@ -306,5 +303,17 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+  end
+
+  def check_results_length(save_results)
+    results = results_observation_links
+    assert_equal(save_results.length, results.length)
+    results
+  end
+
+  def results_observation_links
+    find_all("div.results a").select do |l|
+      l[:href].match(%r{^/\d+})
+    end
   end
 end
