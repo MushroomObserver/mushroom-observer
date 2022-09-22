@@ -214,8 +214,83 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
   end
 
   # Note, benchmark this vs LurkerTest after this test is recreated here:
-  # def test_obs_at_location
-  # end
+  def test_obs_at_location
+    visit(root_path)
+    login
+    # Start at distribution map for Fungi.
+    visit("/name/map/#{names(:fungi).id}")
+
+    # Get a list of locations shown on map. (One defined, one undefined.)
+    within("#right_tabs") { click_link("Show Locations") }
+    assert_match("Locations with Observations", page.title, "Wrong page")
+
+    # Click on the defined location.
+    click_link(text: /Burbank/)
+    assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
+
+    # Get a list of observations from there.  (Several so goes to index.)
+    within("#right_tabs") { click_link(text: "Observations at this Location") }
+    print(page.title)
+    binding.break
+    assert_match("Observations from Burbank, California, USA",
+                 page.title, "Wrong page")
+    save_results = find_all("div.results a[href*='/#{/\d+/}']")
+
+    #   observations = @controller.instance_variable_get(:@objects)
+    #   if observations.size > MO.default_layout_count
+    #     skip("Test skipped because it bombs when search results > " \
+    #         "default layout size.
+    #         Please adjust the fixtures and re-run.")
+    #   end
+
+    #   # Try sorting differently.
+    #   click_mo_link(label: "User", in: :sort_tabs)
+    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    #   assert_equal(save_results.length, results.length)
+
+    #   click_mo_link(label: "Date", in: :sort_tabs)
+    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    #   assert_equal(save_results.length, results.length)
+
+    #   click_mo_link(label: "Reverse Order", in: :sort_tabs)
+    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    #   assert_equal(save_results.length, results.length)
+
+    #   click_mo_link(label: "Name", in: :sort_tabs)
+    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    #   assert_equal(save_results.length, results.length)
+
+    #   save_results = results
+    #   query_params = parse_query_params(save_results.first.value)
+
+    #   # Go to first observation, and try stepping back and forth.
+    #   click_mo_link(href: %r{^/\d+\?}, in: :results)
+    #   save_path = @request.fullpath
+    #   assert_equal(query_params, parse_query_params(save_path))
+    #   click_mo_link(label: "« Prev", in: :title)
+    #   assert_flash_text(/there are no more observations/i)
+    #   assert_equal(save_path, @request.fullpath)
+    #   assert_equal(query_params, parse_query_params(save_path))
+    #   click_mo_link(label: "Next »", in: :title)
+    #   assert_no_flash
+    #   assert_equal(query_params, parse_query_params(save_path))
+    #   save_path = @request.fullpath
+    #   click_mo_link(label: "Next »", in: :title)
+    #   assert_no_flash
+    #   assert_equal(query_params, parse_query_params(save_path))
+    #   click_mo_link(label: "« Prev", in: :title)
+    #   assert_no_flash
+    #   assert_equal(query_params, parse_query_params(save_path))
+    #   assert_equal(save_path, @request.fullpath,
+    #               "Went next then prev, should be back where we started.")
+    #   click_mo_link(label: "Index", href: /#{observations_path}/, in: :title)
+    #   results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    #   assert_equal(query_params, parse_query_params(results.first.value))
+    #   assert_equal(save_results.map(&:value),
+    #               results.map(&:value),
+    #               "Went to show_obs, screwed around, then back to index. " \
+    #               "But the results were not the same when we returned.")
+  end
 
   ################
 
