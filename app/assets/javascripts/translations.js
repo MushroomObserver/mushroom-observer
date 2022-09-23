@@ -9,7 +9,8 @@ function TranslationsModule(localizedText) {
       $whirly = jQuery('#whirly'),
       $save_button = jQuery('#save_button'),
       $cancel_button = jQuery('#cancel_button'),
-      $translation_form = jQuery('#translation_form'),
+      $form_div = jQuery('#form_div'),
+      $post_form = jQuery('#translation_form'),
       $tag_links = jQuery('[data-role="show_tag"]')
 
     // EVENT LISTENERS (note the delegates!)
@@ -101,7 +102,7 @@ function TranslationsModule(localizedText) {
           },
           success: function (html) {
             hide_whirly();
-            $translation_form.html(html);
+            $form_div.html(html);
             CHANGED = false;
             LOADED = true;
           }
@@ -110,7 +111,7 @@ function TranslationsModule(localizedText) {
     }
 
     function clear_form() {
-      $translation_form.html('');
+      $form_div.html('');
       LOADED = false;
       CHANGED = false;
     }
