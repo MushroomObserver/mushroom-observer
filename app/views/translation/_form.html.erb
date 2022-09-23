@@ -1,6 +1,7 @@
 <%= form_tag({ action: :edit_translations, page: @page },
              id: "translation_form") %>
 
+  <!-- Everything within this div gets populated by translations.js -->
   <div id="live_fields">
     <% if @edit_tags.any? %>
       <%= hidden_field_tag(:tag, @tag) %>
