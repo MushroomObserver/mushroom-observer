@@ -20,7 +20,7 @@
   <%= :donate_explanation.tp %>
 
   <div id="main_container" class="container-fluid">
-    <%= form_tag(action: :confirm, id: "donate_initial_form") do %>
+    <%= form_tag(action: :confirm) do %>
       <div class="row">
         <% [25.00, 50.00, 100.00, 200.00].each do |a| %>
           <div class="col-xs-3">

@@ -149,7 +149,7 @@ class CuratorTest < IntegrationTestCase
     click_mo_link(label: :herbarium_index.l)
 
     assert_select(
-      "#title_caption", { text: :query_title_nonpersonal.l },
+      "#title-caption", { text: :query_title_nonpersonal.l },
       "Clicking #{:herbarium_index.l} should display " \
       "#{:query_title_nonpersonal.l} by Name"
     )
@@ -164,7 +164,7 @@ class CuratorTest < IntegrationTestCase
       form.submit("Search")
     end
     assert_select(
-      "#title_caption",
+      "#title-caption",
       { text: herbaria(:nybg_herbarium).format_name },
       "Fungaria pattern search with a single hit should land on " \
       "the show page for that Fungarium"
@@ -180,7 +180,7 @@ class CuratorTest < IntegrationTestCase
       form.submit("Search")
     end
     assert_select(
-      "#title_caption",
+      "#title-caption",
       { text: "Fungaria Matching ‘Personal’" },
       "Fungaria pattern search with multiple hits should land on " \
       "an index page for those Fungaria"
@@ -197,7 +197,7 @@ class CuratorTest < IntegrationTestCase
     end
     assert_template("herbarium_record/list_herbarium_records")
     assert_select(
-      "#title_caption",
+      "#title-caption",
       { text: "#{:HERBARIUM_RECORDS.l} Matching ‘Coprinus comatus’" },
       "Fungarium Record pattern search should display " \
       "#{:HERBARIUM_RECORDS.l} Matching ‘Coprinus comatus’"
@@ -222,7 +222,7 @@ class CuratorTest < IntegrationTestCase
 
     assert_equal(new_code, herbarium.reload.code)
     assert_select(
-      "#title_caption",
+      "#title-caption",
       { text: herbarium.format_name },
       "Changing Fungarium code should land on page for that Fungarium"
     )
@@ -252,7 +252,7 @@ class CuratorTest < IntegrationTestCase
     assert_not_empty(user.curated_herbaria)
 
     assert_select(
-      "#title_caption", { text: "Mary’s Herbarium" }, # smart apostrophe
+      "#title-caption", { text: "Mary’s Herbarium" }, # smart apostrophe
       "Creating a Fungarium should show the new Fungarium"
     )
 
@@ -261,7 +261,7 @@ class CuratorTest < IntegrationTestCase
       form.submit(:destroy_object.t(type: :herbarium))
     end
     assert_select(
-      "#title_caption", { text: :herbarium_index.l },
+      "#title-caption", { text: :herbarium_index.l },
       "Destroying a Fungarium should display #{:herbarium_index.l}"
     )
   end
@@ -299,14 +299,14 @@ class CuratorTest < IntegrationTestCase
     login!("mary", "testpassword", true)
     get(herbarium_path(nybg))
     click_mo_link(label: :show_herbarium_curator_request.l)
-    assert_select("#title_caption").text.
+    assert_select("#title-caption").text.
       starts_with?(:show_herbarium_curator_request.l)
     open_form("form[action^='#{herbaria_curator_requests_path(id: nybg)}']",
               &:submit)
 
     assert_flash_text(:show_herbarium_request_sent.t)
     assert_select(
-      "#title_caption", { text: nybg.format_name },
+      "#title-caption", { text: nybg.format_name },
       "Submitting a curator request should return to herbarium page"
     )
   end
@@ -326,6 +326,6 @@ class CuratorTest < IntegrationTestCase
     form.submit("#{mary.name} (#{mary.login}): Personal Fungarium")
 
     assert_response(:success) # Rails follows the redirect
-    assert_select("#title_caption", text: mary_herbarium.format_name, count: 1)
+    assert_select("#title-caption", text: mary_herbarium.format_name, count: 1)
   end
 end

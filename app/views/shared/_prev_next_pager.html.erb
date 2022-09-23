@@ -1,7 +1,7 @@
 <%# Accepts an object and renders prev/next/index buttons. %>
 <% if object %>
   <% type = object.type_tag %>
-  <div id="prev_next_pager">
+  <div>
     <%= link_prev(object) %> |
     <%= link_with_query(:INDEX.t, controller: object.show_controller,
                         action: object.index_action, id: object.id) %> |

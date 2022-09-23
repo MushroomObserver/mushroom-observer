@@ -95,8 +95,8 @@
 
     <!--NAVIGATION-->
     <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print">
-      <a class="logo-link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-        <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+      <a id="logo-link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+        <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
       </a>
       <div id="navigation">
         <%= render(partial: "/shared/nav_left") %>
@@ -151,9 +151,9 @@
         <% unless @user&.verified? %>
           <div class="max-width-text">
             <p class="text-center hidden-sm hidden-md hidden-lg">
-              <img class="logo-trim" alt="MO Logo" src="/logo-trim.png">
+              <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
             </p>
-            <h2 class="h3 text-center">Mushroom Observer (MO)</h2>
+            <p class="sub-caption text-center">Mushroom Observer (MO)</p>
             <p><%= :login_layout_description.t %></p>
           </div>
         <% end %>

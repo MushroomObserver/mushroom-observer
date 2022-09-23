@@ -10,8 +10,7 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:donation, url: {action: :create_donation},
-               id: "donation_create_form") do |form| %>
+  <%= form_for(:donation, url: {action: :create_donation}) do |form| %>
 
     <div class="form-group form-inline">
       <%= label_tag(:donation_amount, :confirm_amount.t + ":") %>

@@ -5,8 +5,7 @@
 <div class="max-width-text">
   <p class="help-block"><%= :advanced_search_caveat.t %></p>
 
-  <%= form_tag(action: :advanced, method: :get,
-               id: "search_advanced_form") do %>
+  <%= form_tag(action: :advanced, method: :get) do %>
     <p>
       <%= submit_tag(:advanced_search_submit.l,
                      class: "btn btn-default center-block") %>
