@@ -1,7 +1,8 @@
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-default" id="search_bar">
   <%= form_tag(
         search_pattern_path,
-        { method: :get, class: "navbar-form navbar-left" }
+        { method: :get, class: "navbar-form navbar-left",
+          id: "search_bar_form" }
       ) do %>
       <div>
         <div class="d-inline-block align-top icon-addon addon-sm">

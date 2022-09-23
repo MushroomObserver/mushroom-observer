@@ -53,7 +53,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_select("#title-caption", text: herbarium.format_name, count: 1)
+    assert_select("#title_caption", text: herbarium.format_name, count: 1)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -67,7 +67,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
-    assert_select("#title-caption", text: herbarium.format_name)
+    assert_select("#title_caption", text: herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
                     "Show Herbarium page is missing a destroy herbarium button")
@@ -124,7 +124,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { flavor: :all })
 
     assert_response(:success)
-    assert_select("#title-caption", { text: "#{:HERBARIA.l} by Name" },
+    assert_select("#title_caption", { text: "#{:HERBARIA.l} by Name" },
                   "index should display #{:HERBARIA.l} by Name")
     Herbarium.find_each do |herbarium|
       assert_select(
@@ -247,7 +247,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { flavor: :nonpersonal })
 
-    assert_select("#title-caption", text: :query_title_nonpersonal.l)
+    assert_select("#title_caption", text: :query_title_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -269,7 +269,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_select("#title-caption").text.start_with?(
+    assert_select("#title_caption").text.start_with?(
       :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
     )
     Herbarium.where.not(personal_user_id: nil).each do |herbarium|
@@ -304,7 +304,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select(
-      "#title-caption",
+      "#title_caption",
       { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
       "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
     )
@@ -347,7 +347,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
+    assert_select("#title_caption", text: :edit_herbarium_title.l, count: 1)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -364,7 +364,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
+    assert_select("#title_caption", text: :edit_herbarium_title.l, count: 1)
   end
 
   def test_edit_with_curators_by_admin
@@ -373,7 +373,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
+    assert_select("#title_caption", text: :edit_herbarium_title.l, count: 1)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------

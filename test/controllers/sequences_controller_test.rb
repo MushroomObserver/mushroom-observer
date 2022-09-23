@@ -37,7 +37,7 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index, params: { flavor: :all })
 
     assert_response(:success)
-    assert_select("#title-caption", { text: "#{:SEQUENCE.l} Index" },
+    assert_select("#title_caption", { text: "#{:SEQUENCE.l} Index" },
                   "index should display #{:SEQUENCES.l} Index")
     Sequence.find_each do |sequence|
       assert_select(
