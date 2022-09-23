@@ -9,7 +9,7 @@ function TranslationsModule(localizedText) {
       $whirly = jQuery('#whirly'),
       $save_button = jQuery('#save_button'),
       $cancel_button = jQuery('#cancel_button'),
-      $form_div = jQuery('#form_div'),
+      $form_div = jQuery('#live_fields'),
       $post_form = jQuery('#translation_form'),
       $tag_links = jQuery('[data-role="show_tag"]')
 
