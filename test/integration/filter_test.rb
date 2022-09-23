@@ -31,8 +31,7 @@ class FilterTest < IntegrationTestCase
     )
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
       assert_text(:filtered.t)
-
-    results = page.find("div.results", match: :first)
+    results = page.find("#results")
     # Number of hits should == number of **imaged** Observations of obs.name
     results.assert_text(obs.name.text_name, count: imged_obss.size)
     # And hits should not contain obs (which is imageless)
@@ -78,7 +77,7 @@ class FilterTest < IntegrationTestCase
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
       assert_no_text(:filtered.t)
 
-    results = page.find("div.results", match: :first)
+    results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
     results.assert_text(obs.name.text_name,
                         count: Observation.where(name: obs.name).size)
@@ -121,7 +120,7 @@ class FilterTest < IntegrationTestCase
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
       assert_text(:filtered.t)
 
-    results = page.find("div.results", match: :first)
+    results = page.find("#results")
     vouchered_obss = Observation.where(name: obs.name).where(specimen: true)
 
     # Number of hits should == number of **vouchered** Observations of obs.name
@@ -161,7 +160,7 @@ class FilterTest < IntegrationTestCase
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
       assert_no_text(:filtered.t)
 
-    results = page.find("div.results", match: :first)
+    results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
     results.assert_text(obs.name.text_name,
                         count: Observation.where(name: obs.name).size)
@@ -192,7 +191,7 @@ class FilterTest < IntegrationTestCase
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
       assert_no_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
-    results = page.find("div.results", match: :first)
+    results = page.find("#results")
     results.assert_text(obs.name.text_name, count: expect.size)
     # And hits should contain obs (which is imaged)
     results.assert_text(obs.id.to_s)
