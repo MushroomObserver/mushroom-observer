@@ -36,6 +36,10 @@ module CapybaraSessionExtensions
     URI.parse(current_url).request_uri
   end
 
+  def current_path_id
+    current_path.split("/").last
+  end
+
   # Get string representing (our) query from the given URL.  Defaults to the
   # current page's URL.  (In practice, for now, this is just the Query id.)
   def parse_query_params(url = current_fullpath)
@@ -51,5 +55,9 @@ module CapybaraSessionExtensions
 
   def assert_no_flash
     refute_selector("#flash-notices")
+  end
+
+  def assert_flash_success
+    assert_selector("#flash-notices.alert-success")
   end
 end

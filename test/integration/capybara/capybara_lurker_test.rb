@@ -268,7 +268,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     within("#sorts") { click_link(text: "Name") }
     # Last time through - reset `save_results` with current results
     save_results = check_results_length(save_results)
-    # must set `save_hrefs` here to avoid variable going stale...
+    # Must set `save_hrefs` here to avoid variable going stale...
     # Capybara::RackTest::Errors::StaleElementReferenceError
     save_hrefs = save_results.pluck(:href)
 
