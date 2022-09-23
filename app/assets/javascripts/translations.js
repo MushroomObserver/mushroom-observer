@@ -10,7 +10,7 @@ function TranslationsModule(localizedText) {
       $save_button = jQuery('#save_button'),
       $cancel_button = jQuery('#cancel_button'),
       $form_div = jQuery('#form_div'),
-      $post_form = jQuery('#post_form'),
+      $post_form = jQuery('#translations_edit_form'),
       $tag_links = jQuery('[data-role="show_tag"]')
 
     // EVENT LISTENERS (note the delegates!)
@@ -74,7 +74,7 @@ function TranslationsModule(localizedText) {
       var str = window.hidden_frame.str;
       if (tag != undefined) {
         // Make tag in left column gray because it's now been translated.
-        // Want only untranslated tags to be bold black to stand out better.  
+        // Want only untranslated tags to be bold black to stand out better.
         jQuery('#str_' + tag).html(str).addClass('translated faint');
       } else if (LOADED) {
         CHANGED = true;

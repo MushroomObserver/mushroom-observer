@@ -18,10 +18,10 @@
   end
 %>
 
-<p>
+<div id="description_partial" class="mb-3">
   <%= :TITLE.t %>: <%= description_title(description) %><br/>
   <%= type.to_s.upcase.to_sym.t %>: <%= description.parent.format_name.t %><br/>
   <%= :show_description_read_permissions.t %>: <%= read %><br/>
   <%= :show_description_write_permissions.t %>: <%= write %><br/>
   <%= show_previous_version(description) %>
-</p>
+</div>

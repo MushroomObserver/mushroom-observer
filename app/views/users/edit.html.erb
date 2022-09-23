@@ -1,7 +1,7 @@
 <% @title = :change_user_bonuses_title.t(user: @user2.legal_name) %>
 
 <div class="max-width-text">
-  <%= form_tag(action: :update, method: :patch) do %>
+  <%= form_tag(action: :update, method: :patch, id: "user_bonus_form") do %>
 
     <div class="HelpNote">
       <%= :change_user_bonuses_help.tp %>
