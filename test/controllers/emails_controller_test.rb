@@ -233,7 +233,7 @@ class EmailsControllerTest < FunctionalTestCase
 
     get(:name_change_request, params: params)
     assert_select(
-      "#title_caption", text: :email_name_change_request_title.l, count: 1
+      "#title", text: :email_name_change_request_title.l, count: 1
     )
   end
 

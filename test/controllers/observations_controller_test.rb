@@ -3004,7 +3004,7 @@ class ObservationsControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     assert_operator(query.num_results, :>=, 4)
     get(:print_labels, params: { q: query.id.alphabetize })
-    assert_select("div#labels td", query.num_results)
+    assert_select("#labels td", query.num_results)
     assert_match(/314159/, @response.body) # make sure fundis id in there!
     assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
@@ -3016,7 +3016,7 @@ class ObservationsControllerTest < FunctionalTestCase
         commit: "Print Labels"
       }
     )
-    assert_select("div#labels td", query.num_results)
+    assert_select("#labels td", query.num_results)
   end
 
   def test_external_sites_user_can_add_links_to

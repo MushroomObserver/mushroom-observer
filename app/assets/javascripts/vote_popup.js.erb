@@ -77,7 +77,7 @@ function VotePopupModule(translations) {
               var title = html.children().eq(0);
               var div   = html.children().eq(1);
               document.title = title.attr("title");
-              $("#title_caption").html(title.html());
+              $("#title").html(title.html());
               $("#naming_partial").html(div.html());
               attach_bindings();
               if (typeof SuggestionModule !== "undefined")

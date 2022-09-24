@@ -142,7 +142,7 @@ class FilterTest < IntegrationTestCase
 
     # Verfy Advanced Search form
     click_on("Advanced Search", match: :first)
-    within("div#advanced_search_filters") do
+    within("#advanced_search_filters") do
       # Verify Labels.
       assert_text(:advanced_search_filters.t)
       assert_text(:advanced_search_filter_has_images.t)
@@ -174,7 +174,7 @@ class FilterTest < IntegrationTestCase
 
     # Verify additional parts of Advanced Search form
     click_on("Advanced Search", match: :first)
-    filters = page.find("div#advanced_search_filters")
+    filters = page.find("#advanced_search_filters")
     within(filters) do
       assert(find("#content_filter_has_images_yes").checked?)
       assert(find("#content_filter_has_specimen_").checked?)

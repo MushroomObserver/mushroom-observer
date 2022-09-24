@@ -345,17 +345,17 @@ module SessionExtensions
   def section_select_spec(arg)
     case arg
     when :left_tabs
-      "div#left_tabs"
+      "#left_tabs"
     when :right_tabs
-      "div#right_tabs"
+      "#right_tabs"
     when :sort_tabs
-      "div#sorts"
+      "#sorts"
     when :left_panel
-      "div#navigation"
+      "#navigation"
     when :results
       "div.results"
     when :title
-      "div#title"
+      "#title"
     else
       arg
     end
