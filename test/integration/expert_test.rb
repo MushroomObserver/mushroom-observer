@@ -262,7 +262,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_success
     assert_template("species_list/show_species_list")
-    assert_select("div#title", text: /#{spl.title}/)
+    assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
 
     loc = Location.last
