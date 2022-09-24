@@ -7,8 +7,8 @@
 %>
 
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
-  <%= content_tag(:div, safe_nbsp, class: "hidden-print visible-xs visible-sm
-                                           mt-4") %>
+  <%= content_tag(:div, safe_nbsp,
+                  class: "hidden-print visible-xs visible-sm mt-4") %>
 
   <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title_bar">
     <!-- Pager -->
@@ -21,7 +21,7 @@
 
     <!-- Title Caption -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= content_tag(:h1, @title, class: "h3", id: "title_caption") -%>
+    <%= content_tag(:h1, @title, class: "h3", id: "title") -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
                                        class: "context-help"),
