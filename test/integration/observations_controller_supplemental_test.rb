@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# This cop doesn't understand that find_by_id is not being called on an
-# ActiveRecord instance, and therefore is not a rails dynamic finder.
-# rubocop:disable Rails/DynamicFindBy
-
 require("test_helper")
 
 # Tests which supplement controller/observations_controller_test.rb
@@ -34,7 +30,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     visit("/name/map/#{name.id}")
     click_link("Show Observations")
     click_link("Show Map")
-    title = page.find_by_id("title")
+    title = page.find("#title")
     title.assert_text("Map of Observation Index")
   end
 
@@ -59,7 +55,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     within("div#right_tabs") { click_button("Destroy") }
 
     # MO should show next Observation.
-    page.find_by_id("title")
+    page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
   end
@@ -130,10 +126,8 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
       fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
       fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
       click_button("fr:mo.SEND")
-      notices = page.find_by_id("flash-notices")
+      notices = page.find("#flash-notices")
       notices.assert_text("fr:mo.runtime_ask_user_question_success")
     end
   end
 end
-
-# rubocop:enable Rails/DynamicFindBy
