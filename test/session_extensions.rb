@@ -353,7 +353,7 @@ module SessionExtensions
     when :left_panel
       "#navigation"
     when :results
-      "div.results"
+      "#results"
     when :title
       "#title"
     else
