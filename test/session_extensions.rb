@@ -355,7 +355,7 @@ module SessionExtensions
     when :results
       "#results"
     when :title
-      "#title"
+      "#title_bar"
     else
       arg
     end
