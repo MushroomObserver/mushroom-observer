@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("capybara_helper")
 
 # Test user filters
 class FilterTest < CapybaraIntegrationTestCase
