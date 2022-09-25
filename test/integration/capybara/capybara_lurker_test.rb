@@ -278,24 +278,27 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     results_observation_links.first.click
     save_path = current_fullpath
     assert_equal(query_params, parse_query_params(save_path))
-    within("#title") { click_link(text: "Prev") }
+    within("#title_bar") { click_link(text: "Prev") }
     assert_flash_text(/there are no more observations/i)
     assert_equal(save_path, current_fullpath)
     assert_equal(query_params, parse_query_params(save_path))
-    within("#title") { click_link(text: "Next") }
+    within("#title_bar") { click_link(text: "Next") }
     assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
 
     save_path = current_fullpath
-    within("#title") { click_link(text: "Next") }
+    within("#title_bar") { click_link(text: "Next") }
     assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
-    within("#title") { click_link(text: "Prev") }
+    within("#title_bar") { click_link(text: "Prev") }
     assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
-    within("#title") { click_link(text: "Index", href: /#{observations_path}/) }
+    within("#title_bar") do
+      click_link(text: "Index",
+                 href: /#{observations_path}/)
+    end
     results = results_observation_links
     assert_equal(query_params, parse_query_params(results.first[:href]))
     assert_equal(save_hrefs, results.pluck(:href),
