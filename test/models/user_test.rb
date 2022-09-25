@@ -335,4 +335,194 @@ class UserTest < UnitTestCase
     assert(u.invalid?,
            "Notes template with duplication headings should be invalid")
   end
+
+  def test_disable_account
+    rolf.disable_account
+    rolf.reload
+    assert_blank(rolf.password)
+    assert_blank(rolf.email)
+    assert_blank(rolf.mailing_address)
+    assert_blank(rolf.notes)
+    assert_true(rolf.blocked)
+  end
+
+  def test_delete_api_keys
+    assert_not_zero(ApiKey.where(user: rolf).count)
+    rolf.delete_api_keys
+    assert_zero(ApiKey.where(user: rolf).count)
+  end
+
+  def test_delete_interests
+    assert_not_zero(Interest.where(user: junk).count)
+    junk.delete_interests
+    assert_zero(Interest.where(user: junk).count)
+  end
+
+  def test_delete_notifications
+    assert_not_zero(Notification.where(user: rolf).count)
+    rolf.delete_notifications
+    assert_zero(Notification.where(user: rolf).count)
+  end
+
+  def test_delete_queued_emails
+    QueuedEmail.create(user: rolf, to_user: mary)
+    QueuedEmail.create(user: mary, to_user: rolf)
+    assert_not_zero(QueuedEmail.where(user: rolf).count)
+    assert_not_zero(QueuedEmail.where(to_user: rolf).count)
+    rolf.delete_queued_emails
+    assert_zero(QueuedEmail.where(user: rolf).count)
+    assert_zero(QueuedEmail.where(to_user: rolf).count)
+  end
+
+  def test_delete_observations
+    assert_not_zero(Observation.where(user: rolf).count)
+    rolf.delete_observations
+    assert_not_zero(Observation.where(user: rolf).count)
+  end
+
+  def test_delete_private_name_descriptions
+    # All Rolf's descriptions should be "private" but these two:
+    # Created by rolf, but katrina is author and editor.
+    desc1 = name_descriptions(:coprinus_desc)
+    # Created and authored by rolf, but mary is also editor.
+    desc2 = name_descriptions(:coprinus_comatus_desc)
+
+    assert(NameDescription.where(user: rolf).count > 2)
+    rolf.delete_private_name_descriptions
+    assert_obj_list_equal(NameDescription.where(user: rolf).to_a,
+                          [desc1, desc2])
+
+    # All of Dick's should be deletable, and make sure all versions of
+    # Peltigera are also deleted.
+    desc3 = name_descriptions(:peltigera_desc)
+    versions = NameDescription::Version.where(name_description_id: desc3.id)
+    assert(versions.count > 1)
+    assert_not_zero(NameDescription.where(user: dick).count)
+    dick.delete_private_name_descriptions
+    assert_zero(NameDescription.where(user: dick).count)
+    versions = NameDescription::Version.where(name_description_id: desc3.id)
+    assert_zero(versions.count)
+  end
+
+  def test_delete_private_location_descriptions
+    albion = location_descriptions(:albion_desc)
+    albion.editors << dick
+    assert_users_equal(rolf, albion.user)
+    assert(albion.versions.count > 1)
+
+    # Can't delete while Dick is an editor.
+    rolf.delete_private_location_descriptions
+    assert_not_nil(LocationDescription.find(albion.id))
+
+    # Can delete if we take Dick off.
+    albion.editors.clear
+    rolf.delete_private_location_descriptions
+    assert_raises(ActiveRecord::RecordNotFound) \
+      { LocationDescription.find(albion.id) }
+    assert_zero(LocationDescription::Version.where(
+                  location_description_id: albion.id
+                ).count)
+  end
+
+  def test_delete_private_projects
+    # Dick created this (and several other) projects, but this one has
+    # a bunch of admins and members, so it should not be deletable.
+    bolete = projects(:bolete_project)
+    assert_users_equal(dick, bolete.user)
+    assert(Project.where(user: dick).count > 1)
+    dick.delete_private_projects
+    assert(Project.where(user: dick).count == 1)
+    assert_not_nil(Project.find(bolete.id))
+  end
+
+  def test_delete_private_species_lists
+    # Should be able to delete all of Mary's many lists except this one.
+    unknowns = species_lists(:unknown_species_list)
+    assert_users_equal(mary, unknowns.user)
+    assert_not_zero(unknowns.projects.count)
+    assert(SpeciesList.where(user: mary).count > 1)
+    mary.delete_private_species_lists
+    assert(SpeciesList.where(user: mary).count == 1)
+    assert_not_nil(SpeciesList.find(unknowns.id))
+  end
+
+  def test_delete_unattached_collection_numbers
+    num = collection_numbers(:minimal_unknown_coll_num)
+    assert(num.observations.count == 1)
+    obs = num.observations.first
+    assert_users_equal(mary, obs.user)
+
+    # Not unattached at this point.
+    mary.delete_unattached_collection_numbers
+    assert_not_nil(CollectionNumber.find(num.id))
+
+    # This should orphan but not delete the collection number.
+    obs.destroy
+    assert_not_nil(CollectionNumber.find(num.id))
+
+    # Should get deleted now.
+    mary.delete_unattached_collection_numbers
+    assert_raises(ActiveRecord::RecordNotFound) \
+      { CollectionNumber.find(num.id) }
+  end
+
+  def test_delete_unattached_herbarium_records
+    rec = herbarium_records(:interesting_unknown)
+    assert(rec.observations.count == 2)
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
+    assert_users_equal(mary, obs1.user)
+    assert(obs1.herbarium_records.include?(rec))
+    assert(obs2.herbarium_records.include?(rec))
+
+    # Used by two observations at first.
+    mary.delete_unattached_herbarium_records
+    assert_not_nil(HerbariumRecord.find(rec.id))
+
+    # Still used by one observation.
+    obs1.destroy
+    mary.delete_unattached_herbarium_records
+    assert_not_nil(HerbariumRecord.find(rec.id))
+
+    # Now unattached and deletable.
+    obs2.destroy
+    mary.delete_unattached_herbarium_records
+    assert_raises(ActiveRecord::RecordNotFound) \
+      { HerbariumRecord.find(rec.id) }
+  end
+
+  def test_delete_unattached_images
+    # This is supposedly unused by anything.
+    img1 = images(:convex_image)
+    assert_users_equal(rolf, img1.user)
+
+    # This is used by something.
+    img2 = images(:agaricus_campestris_image)
+    assert_users_equal(rolf, img2.user)
+
+    rolf.delete_unattached_images
+    assert_raises(ActiveRecord::RecordNotFound) { Image.find(img1.id) }
+    assert_not_nil(Image.find(img2.id))
+  end
+
+  def test_no_references_left
+    junk = users(:junk)
+    spam = users(:spammer)
+    zero = users(:zero_user)
+
+    assert_false(rolf.no_references_left?)
+    assert_false(junk.no_references_left?)
+    assert_false(spam.no_references_left?)
+    assert_true(zero.no_references_left?)
+
+    # Interests don't count.
+    assert_not_zero(junk.interests.count)
+    assert_not_zero(junk.namings.count)
+    junk.namings.first.destroy
+    assert_true(junk.reload.no_references_left?)
+
+    assert_not_zero(spammer.publications.count)
+    spammer.publications.first.destroy
+    assert_true(spam.reload.no_references_left?)
+  end
 end

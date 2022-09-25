@@ -962,13 +962,13 @@ class User < AbstractModel
     delete_unattached_collection_numbers
     delete_unattached_herbarium_records
     delete_unattached_images
-    destroy! if no_references_left?
+    User.erase_user(id) if no_references_left?
   end
 
   # Disable and remove all public information from account but leave it there
   # in case there are still comments, etc. on the site by this user.
   def disable_account
-    self.password = "" 
+    self.password = ""
     self.email = ""
     self.blocked = true
     self.location_id = nil
