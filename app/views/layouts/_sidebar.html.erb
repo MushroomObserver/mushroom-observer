@@ -10,13 +10,13 @@ classes = {
 }
 %>
 
-<div id="navigation" class="<%= classes[:wrapper] %>">
+<div id="navigation">
 
   <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
     <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
   </a><!-- #logo_link -->
 
-  <div class="navigation-themed">
+  <div class="navigation-themed" class="<%= classes[:wrapper] %>">
 
     <%= render(partial: "layouts/sidebar/info",
                 locals: { classes: classes }) %>
