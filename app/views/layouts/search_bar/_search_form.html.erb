@@ -1,5 +1,5 @@
 <%= form_tag(search_pattern_path,
-             { method: :get, class: "navbar-form navbar-left" }) do %>
+             { method: :get, class: "navbar-form navbar-left px-0" }) do %>
   <div>
     <div class="d-inline-block align-top icon-addon addon-sm">
       <%= text_field(:search, :pattern, value: session[:pattern],

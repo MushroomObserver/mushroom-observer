@@ -62,10 +62,10 @@
                       account_logout_user_path) %></li>
     </ul>
   </li>
-  <li> <%= link_to("",
-                    account_logout_user_path,
-                    { class: "glyphicon glyphicon-log-out pr-10px",
-                      title: :app_logout.t,
-                      data: { toggle: "tooltip", placement: "bottom" } }) %>
+  <li><%= link_to("",
+                  account_logout_user_path,
+                  { class: "glyphicon glyphicon-log-out",
+                    title: :app_logout.t,
+                    data: { toggle: "tooltip", placement: "bottom" } }) %>
   </li>
 </ul>

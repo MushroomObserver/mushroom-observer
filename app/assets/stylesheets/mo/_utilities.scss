@@ -266,7 +266,12 @@
 }
 
 .indent {
-  padding-left: 10px !important;
+  padding-left: 1em !important;
+}
+
+.px-0 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .pl-3 {

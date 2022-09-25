@@ -1,6 +1,5 @@
-<div class="<%= classes[:heading] %>">
-  <%= :INDEXES.t %>
-</div>
+<%= content_tag(:div, "#{:INDEXES.t}:",
+                class: classes[:heading]) %>
 <%= link_to(:GLOSSARY.t, glossary_terms_path,
             { class: classes[:indent] }) %>
 <%= link_to(:HERBARIA.t, herbaria_path(flavor: :all),

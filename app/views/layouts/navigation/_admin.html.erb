@@ -1,6 +1,5 @@
-<div class="<%= classes[:heading] %>">
-  <%= :app_admin.t %>:
-</div>
+<%= content_tag(:div, "#{:app_admin.t}:",
+                class: classes[:heading]) %>
 <%= link_to(:app_blocked_ips.t, account_blocked_ips_path,
             { class: classes[:admin] }) %>
 <%= link_to(:app_switch_users.t, account_switch_users_path,

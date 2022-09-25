@@ -29,24 +29,21 @@
       <% end %>
       <% flash_clear %>
 
-      <div id="content" class="row">
+      <main id="content">
 
         <% unless @user&.verified? %>
-          <%= render(partial: "layouts/login_layout") %>
+          <%= render(partial: "layouts/page/login_layout") %>
         <% end %>
 
-        <%= render(partial: "layouts/title_and_tab_sets") %>
+        <%= render(partial: "layouts/page/title_and_tab_sets") %>
 
         <!--MAIN_PAGE_CONTENT-->
-        <div class="col-xs-12">
-          <%= yield %>
-        </div>
+        <%= yield %>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <div class="col-xs-12 hidden-print">
-          <%= render(partial: "layouts/translator_credit") %>
-        </div>
-      </div>
+        <%= render(partial: "layouts/page/translator_credit") %>
+
+      </main>
 
     </div>
   </div>

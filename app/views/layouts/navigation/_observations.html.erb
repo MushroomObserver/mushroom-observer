@@ -1,10 +1,9 @@
-<div class="list-group-item disabled font-weight-bold">
-  <%= :app_observations_left.t %>
-</div>
+<%= content_tag(:div, "#{:app_observations_left.t}:",
+                class: classes[:heading]) %>
 <%= link_to(:app_create_observation.t, new_observation_path,
-            { class: "list-group-item indent" }) %>
+            { class: classes[:indent] }) %>
 <%= link_to(:app_your_observations.t,
             observations_path(user: @user.id),
-            { class: "list-group-item indent" }) if @user %>
+            { class: classes[:indent] }) if @user %>
 <%= link_to(:app_sort_by_date_obs.t, observations_path,
-            { class: "list-group-item indent" }) %>
+            { class: classes[:indent] }) %>
