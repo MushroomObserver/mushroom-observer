@@ -4,7 +4,7 @@ require("test_helper")
 require("capybara_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
-class CapybarLurkerTest < IntegrationTestCase
+class CapybaraLurkerTest < CapybaraIntegrationTestCase
   # temporarily use these extensions until webdriver is installed
   # include here to avoid name conflict with MO extensions
   include CapybaraHelper
@@ -24,14 +24,16 @@ class CapybarLurkerTest < IntegrationTestCase
     # push_page is a stop-gap until a js-enabled driver is installed and working
     go_back_after do
       click_link("« Prev")
-    end # back at Observation
+    end
+    # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on the first image.
     go_back_after do
       first(:xpath, observation_image_xpath).click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
-    end # back at Observation
+    end
+    # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Go back to observation and click on "About...".
@@ -116,13 +118,15 @@ class CapybarLurkerTest < IntegrationTestCase
 
       first(:link, owner.name).click
       assert_match(/Contribution Summary/, page.title, "Wrong page")
-    end # back at Observation
+    end
+    # back at Observation
 
     # Check out location.
     go_back_after do
       click_link(obs.location.name)
       assert_match(/^#{:app_title.l}: Location/, page.title, "Login failed")
-    end # back at Observation
+    end
+    # back at Observation
 
     # Check out species list.
     go_back_after do
@@ -135,7 +139,8 @@ class CapybarLurkerTest < IntegrationTestCase
       # (Make sure observation is shown somewhere.)
       assert(has_selector?("a[href^='/#{obs.id}']"),
              "Missing a link to Observation")
-    end # back at Observation
+    end
+    # back at Observation
 
     # Check out Name
     go_back_after do
@@ -150,7 +155,8 @@ class CapybarLurkerTest < IntegrationTestCase
           "#content a[href^='/name/create_name_description/#{name.id}']"
         )
       )
-    end # back at Observation
+    end
+    # back at Observation
 
     # Check out images
     # Observation has at least 2 images

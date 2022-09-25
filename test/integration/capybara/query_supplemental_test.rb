@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests which supplement QueryTest
-class QuerySupplementalTest < IntegrationTestCase
+class QuerySupplementalTest < CapybaraIntegrationTestCase
   # Test deserialization of non-ascii characters
   # Observation and Show Location title include
   #               `             and ’
@@ -13,11 +13,7 @@ class QuerySupplementalTest < IntegrationTestCase
   def test_deserialize
     obs = observations(:boletus_edulis_obs)
 
-    visit("/")
-    visit("/account/login")
-    fill_in("user_login", with: users(:zero_user).login)
-    fill_in("user_password", with: "testpassword")
-    click_button("Login")
+    login
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")

@@ -3,16 +3,7 @@
 require("test_helper")
 
 # Tests which supplement controller/observations_controller_test.rb
-class ObservationsControllerSupplementalTest < IntegrationTestCase
-  def login(user = users(:zero_user))
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
-  end
-
-  # ------------------------------------------------------------
-
+class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile

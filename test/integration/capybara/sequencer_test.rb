@@ -8,15 +8,12 @@ require("test_helper")
 # Use an integration test because click_mo_link needs an id, and
 # there's no  id (at least by default) for a form_with resource-oriented
 # form field.
-class SequencerTest < IntegrationTestCase
+class SequencerTest < CapybaraIntegrationTestCase
   def test_sequence
     obs = observations(:detailed_unknown_obs)
     sequence_original_count = Sequence.count
 
-    visit(account_login_path)
-    fill_in("User name or Email address:", with: "mary")
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
+    login(mary)
 
     visit(observation_path(obs))
     click_on("Add Sequence")
