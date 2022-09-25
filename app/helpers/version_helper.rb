@@ -75,7 +75,7 @@ module VersionHelper
       end
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
-      i = indent(1)
+      i = indent
       [date, i, user, i, link, i]
     end
 
