@@ -53,7 +53,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("list_herbarium_records")
     # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", 2)
+    assert_select("#results tr", 2)
   end
 
   def test_herbarium_record_search_with_one_herbarium_record_index
@@ -70,7 +70,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("list_herbarium_records")
     # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", HerbariumRecord.all.size)
+    assert_select("#results tr", HerbariumRecord.all.size)
   end
 
   def test_show_herbarium_record_without_notes

@@ -93,10 +93,10 @@
 
   <div class="row row-offcanvas row-offcanvas-left">
 
-    <!--NAVIGATION-->
+    <!--LOGO AND NAVIGATION-->
     <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print">
-      <a id="logo-link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-        <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+      <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+        <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
       </a>
       <div id="navigation">
         <%= render(partial: "/shared/nav_left") %>
@@ -139,7 +139,7 @@
                 when 2; "alert-danger"
               end
               content_tag(:div, flash_get_notices,
-                          id: "flash-notices",
+                          id: "flash_notices",
                           class: "alert mt-3 #{klass}")
             %>
           </div>
@@ -151,9 +151,9 @@
         <% unless @user&.verified? %>
           <div class="max-width-text">
             <p class="text-center hidden-sm hidden-md hidden-lg">
-              <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
+              <img class="logo-trim" alt="MO Logo" src="/logo-trim.png">
             </p>
-            <p class="sub-caption text-center">Mushroom Observer (MO)</p>
+            <h2 class="h3 text-center">Mushroom Observer (MO)</h2>
             <p><%= :login_layout_description.t %></p>
           </div>
         <% end %>

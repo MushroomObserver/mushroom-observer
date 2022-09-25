@@ -125,13 +125,13 @@ class LurkerTest < IntegrationTestCase
     form.submit("Search")
     assert_template("location/list_locations")
     assert_flash_text(/no.*found/i)
-    assert_select("div.results a[href]", false)
+    assert_select("#results a[href]", false)
 
     # This should give us just about all the locations.
     form.change("pattern", "california OR canada")
     form.select("type", "Locations")
     form.submit("Search")
-    assert_select("div.results a[href]") do |links|
+    assert_select("#results a[href]") do |links|
       labels = links.map { |l| l.to_s.html_to_ascii }
       assert(labels.any? { |l| l.end_with?("Canada") },
              "Expected one of the results to be in Canada.\n" \
@@ -174,7 +174,7 @@ class LurkerTest < IntegrationTestCase
     # Get a list of observations from there.  (Several so goes to index.)
     click_mo_link(label: "Observations at this Location", in: :right_tabs)
     assert_template("observations/index")
-    save_results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    save_results = get_links("#results a:match('href',?)", %r{^/\d+})
 
     observations = @controller.instance_variable_get(:@objects)
     if observations.size > MO.default_layout_count
@@ -185,19 +185,19 @@ class LurkerTest < IntegrationTestCase
 
     # Try sorting differently.
     click_mo_link(label: "User", in: :sort_tabs)
-    results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    results = get_links("#results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
 
     click_mo_link(label: "Date", in: :sort_tabs)
-    results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    results = get_links("#results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
 
     click_mo_link(label: "Reverse Order", in: :sort_tabs)
-    results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    results = get_links("#results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
 
     click_mo_link(label: "Name", in: :sort_tabs)
-    results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    results = get_links("#results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
 
     save_results = results
@@ -224,7 +224,7 @@ class LurkerTest < IntegrationTestCase
     assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")
     click_mo_link(label: "Index", href: /#{observations_path}/, in: :title)
-    results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    results = get_links("#results a:match('href',?)", %r{^/\d+})
     assert_equal(query_params, parse_query_params(results.first.value))
     assert_equal(save_results.map(&:value),
                  results.map(&:value),
