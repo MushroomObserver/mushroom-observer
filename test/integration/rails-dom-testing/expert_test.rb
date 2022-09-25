@@ -145,15 +145,15 @@ class ExpertTest < IntegrationTestCase
     assert_response(:success)
     assert_template("species_list/create_species_list")
 
-    assert_select("div#missing_names", /Caloplaca arnoldii ssp. obliterate/)
-    assert_select("div#deprecated_names", /Lactarius alpigenes/)
-    assert_select("div#deprecated_names", /Lactarius alpinus/)
-    assert_select("div#deprecated_names", /Petigera/)
-    assert_select("div#deprecated_names", /Peltigera/)
-    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Arora/)
-    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Borealis/)
-    assert_select("div#ambiguous_names", /Suillus.*Gray/)
-    assert_select("div#ambiguous_names", /Suillus.*White/)
+    assert_select("#missing_names", /Caloplaca arnoldii ssp. obliterate/)
+    assert_select("#deprecated_names", /Lactarius alpigenes/)
+    assert_select("#deprecated_names", /Lactarius alpinus/)
+    assert_select("#deprecated_names", /Petigera/)
+    assert_select("#deprecated_names", /Peltigera/)
+    assert_select("#ambiguous_names", /Amanita baccata.*sensu Arora/)
+    assert_select("#ambiguous_names", /Amanita baccata.*sensu Borealis/)
+    assert_select("#ambiguous_names", /Suillus.*Gray/)
+    assert_select("#ambiguous_names", /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
     open_form do |form|
@@ -214,9 +214,9 @@ class ExpertTest < IntegrationTestCase
     assert_response(:success)
     assert_template("species_list/edit_species_list")
 
-    assert_select("div#missing_names", /Agaricus nova/)
-    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Arora/)
-    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Borealis/)
+    assert_select("#missing_names", /Agaricus nova/)
+    assert_select("#ambiguous_names", /Amanita baccata.*sensu Arora/)
+    assert_select("#ambiguous_names", /Amanita baccata.*sensu Borealis/)
 
     # Fix the ambiguous name.
     open_form do |form|

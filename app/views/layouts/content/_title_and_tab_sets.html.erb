@@ -6,6 +6,7 @@
   @tabsets ||= {}
 %>
 
+<div class="row">
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
   <%= content_tag(:div, safe_nbsp,
                   class: "hidden-print visible-xs visible-sm mt-4") %>
@@ -14,8 +15,8 @@
     <!-- Pager -->
     <%= content_tag(:div, class: "hidden-print") do
           if @tabsets[:pager_for]
-            render(partial: "/shared/prev_next_pager",
-              locals: { object: @tabsets[:pager_for] })
+            render(partial: "layouts/content/prev_next_pager",
+                  locals: { object: @tabsets[:pager_for] })
           end
         end %>
 
@@ -24,19 +25,19 @@
     <%= content_tag(:h1, @title, class: "h3", id: "title") -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
-                                       class: "context-help"),
-                           :rss_filtered_mouseover.t)
+                                      class: "context-help"),
+                          :rss_filtered_mouseover.t)
         end -%>
     <%= content_tag_if(@owner_id, :h3, @owner_id, id: "owner_id") %>
   </div>
 
   <!-- Tabsets -->
   <%= content_tag_if(@tabsets[:right], :div, @tabsets[:right],
-                     id: "right_tabs",
-                     class: "hidden-print text-right col-sm-4 mb-3") %>
+                    id: "right_tabs",
+                    class: "hidden-print text-right col-sm-4 mb-3") %>
 
   <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
-                     class: "hidden-print col-xs-12") %>
+                    class: "hidden-print col-xs-12") %>
 
   <!-- Sorter -->
   <% if @sorts %>
@@ -47,7 +48,7 @@
           <% @sorts.each do |title, action| %>
             <%= if action.nil?
                   link_with_query(title, {}, class: "btn btn-default active",
-                                             disabled: true)
+                                              disabled: true)
                 else
                   link_with_query(title, action, class: "btn btn-default")
                 end %>
@@ -56,3 +57,4 @@
       </div>
     </div>
   <% end %>
+</div>
