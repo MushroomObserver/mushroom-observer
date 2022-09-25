@@ -1,7 +1,7 @@
 <!--SIDEBAR LOGO AND NAVIGATION-->
 <%
 classes = {
-  wrapper: "list-group list-group-compact",
+  wrapper: "navigation-themed list-group list-group-compact",
   heading: "list-group-item disabled font-weight-bold",
   item: "list-group-item",
   admin: "list-group-item list-group-item-danger indent",
@@ -16,7 +16,7 @@ classes = {
     <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
   </a><!-- #logo_link -->
 
-  <div class="navigation-themed" class="<%= classes[:wrapper] %>">
+  <div class="<%= classes[:wrapper] %>">
 
     <%= render(partial: "layouts/sidebar/info",
                 locals: { classes: classes }) %>

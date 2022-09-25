@@ -88,7 +88,7 @@ $sidebar-max-width: 15em;
     font-weight: normal;
   }
 
-  .list-group {
+  &.list-group {
     @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
       margin-bottom: 15px;
     } @else {
