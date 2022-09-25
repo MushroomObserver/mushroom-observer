@@ -1,0 +1,16 @@
+<!--SEARCH_BAR-->
+<div id="search_bar_row" class="row hidden-xs hidden-print">
+
+  <nav class="navbar navbar-default">
+
+    <%= render(partial: "layouts/search_bar/search_form") %>
+
+    <% if @user.nil? %>
+      <%= render(partial: "layouts/search_bar/login") %>
+    <% else ##user is logged in %>
+      <%= render(partial: "layouts/search_bar/user_nav") %>
+    <% end %>
+
+  </nav>
+</div>
+<!--/SEARCH_BAR-->

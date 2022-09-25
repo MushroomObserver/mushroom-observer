@@ -1,0 +1,9 @@
+<div class="list-group-item disabled font-weight-bold">
+  <%= :app_latest.t %>
+</div>
+<%= link_to(:app_latest_changes.t, activity_logs_path,
+              { class: "list-group-item indent" }) %>
+<%= link_to(:app_newest_images.t, image_list_images_path,
+              { class: "list-group-item indent" }) %>
+<%= link_to(:app_comments.t, comment_list_comments_path,
+              { class: "list-group-item indent" }) %>

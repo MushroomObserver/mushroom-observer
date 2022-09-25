@@ -1,0 +1,53 @@
+<!--SIDEBAR LOGO AND NAVIGATION-->
+<a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+  <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+</a><!-- #logo_link -->
+
+<%
+classes = {
+  wrapper: "list-group list-group-compact",
+  heading: "list-group-item disabled font-weight-bold",
+  item: "list-group-item",
+  admin: "list-group-item list-group-item-danger indent",
+  indent: "list-group-item indented",
+  mobile_only: "list-group-item visible-xs"
+}
+%>
+
+<div id="navigation" class="<%= classes[:wrapper] %>">
+  <%= render(partial: "layouts/navigation/info",
+              locals: { classes: classes }) %>
+
+  <% if in_admin_mode? %>
+    <%= render(partial: "layouts/navigation/admin",
+                locals: { classes: classes }) %>
+  <% end %>
+
+  <% if @user.nil? %>
+    <%= render(partial: "layouts/navigation/login",
+                locals: { classes: classes }) %>
+  <% else %>
+    <%= render(partial: "layouts/navigation/user",
+                locals: { classes: classes }) %>
+  <% end %>
+
+  <%= render(partial: "layouts/navigation/observations",
+              locals: { classes: classes }) %>
+
+  <%= render(partial: "layouts/navigation/latest",
+              locals: { classes: classes }) %>
+
+  <%= render(partial: "layouts/navigation/species_lists",
+              locals: { classes: classes }) %>
+
+  <%= render(partial: "layouts/navigation/indexes",
+              locals: { classes: classes }) %>
+
+  <%= render(partial: "layouts/navigation/more",
+              locals: { classes: classes }) %>
+
+  <%= render(partial: "layouts/navigation/languages",
+              locals: { classes: classes }) %>
+
+</div><!-- #navigation -->
+<!--/SIDEBAR LOGO AND NAVIGATION-->
