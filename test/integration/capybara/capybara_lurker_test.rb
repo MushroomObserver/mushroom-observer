@@ -158,7 +158,8 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # Check out images
     # Observation has at least 2 images
-    image_count = all(:xpath, observation_image_xpath).count
+    binding.break
+    image_count = all("#content .show_images a img").count
     assert(image_count == 2,
            "expected 2 Images in Observation, got #{image_count}")
   end
