@@ -158,7 +158,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # Check out images
     # Observation has at least 2 images
-    binding.break
     image_count = all("#content .show_images a img").count
     assert(image_count == 2,
            "expected 2 Images in Observation, got #{image_count}")
@@ -195,14 +194,14 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     click_button("Search")
     assert_match("Location Search", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
-    refute_selector("div.results a[href]")
+    refute_selector("#results a[href]")
 
     # This should give us just about all the locations.
     fill_in("search_pattern", with: "california OR canada")
     select("Locations", from: "search_type")
     click_button("Search")
-    # assert_selector("div.results a[href]")
-    labels = find_all("div.results a[href]").map(&:text)
+    # assert_selector("#results a[href]")
+    labels = find_all("#results a[href]").map(&:text)
     assert(labels.any? { |l| l.end_with?("Canada") },
            "Expected one of the results to be in Canada.\n" \
            "Found these: #{labels.inspect}")
@@ -244,12 +243,12 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     within("#right_tabs") { click_link(text: "Observations at this Location") }
     assert_match("Observations from Burbank, California, USA",
                  page.title, "Wrong page")
-    save_results = find_all("div.results a").select do |l|
+    save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end
 
     # Bail if there are too many results — test will not work
-    if has_selector?(".results .pagination a", text: /Next/)
+    if has_selector?("#results .pagination a", text: /Next/)
       skip("Test skipped because it bombs when search results > " \
           "default layout size.
           Please adjust the fixtures and re-run.")
@@ -331,7 +330,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
   end
 
   def results_observation_links
-    find_all("div.results a").select do |l|
+    find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end
   end
