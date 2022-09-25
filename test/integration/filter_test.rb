@@ -29,8 +29,7 @@ class FilterTest < IntegrationTestCase
       /#{:app_title.l}: Observations Matching ‘#{obs.name.text_name}/,
       page.title, "Wrong page"
     )
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_text(:filtered.t)
+    page.find("#title_bar").assert_text(:filtered.t)
     results = page.find("#results")
     # Number of hits should == number of **imaged** Observations of obs.name
     results.assert_text(obs.name.text_name, count: imged_obss.size)
@@ -39,13 +38,11 @@ class FilterTest < IntegrationTestCase
 
     # Show Locations should be filtered
     click_link("Show Locations")
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_text(:filtered.t)
+    page.find("#title_bar").assert_text(:filtered.t)
 
     # And mapping them should also be filtered.
     click_link("Map Locations")
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_text(:filtered.t)
+    page.find("#title_bar").assert_text(:filtered.t)
 
     ### Now prove that turning filter off stops filtering ###
     # Prove that preference page UI works
@@ -74,8 +71,7 @@ class FilterTest < IntegrationTestCase
     page.select("Observations", from: :search_type)
     click_button("Search")
 
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_no_text(:filtered.t)
+    page.find("#title_bar").assert_no_text(:filtered.t)
 
     results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
@@ -117,8 +113,7 @@ class FilterTest < IntegrationTestCase
     page.select("Observations", from: :search_type)
 
     click_button("Search")
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_text(:filtered.t)
+    page.find("#title_bar").assert_text(:filtered.t)
 
     results = page.find("#results")
     vouchered_obss = Observation.where(name: obs.name).where(specimen: true)
@@ -141,7 +136,7 @@ class FilterTest < IntegrationTestCase
 
     # Verfy Advanced Search form
     click_on("Advanced Search", match: :first)
-    within("div#advanced_search_filters") do
+    within("#advanced_search_filters") do
       # Verify Labels.
       assert_text(:advanced_search_filters.t)
       assert_text(:advanced_search_filter_has_images.t)
@@ -157,8 +152,7 @@ class FilterTest < IntegrationTestCase
     first(:button, :advanced_search_submit.l).click
 
     # Advance Search Filters should override user's { has_images: "yes" }
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_no_text(:filtered.t)
+    page.find("#title_bar").assert_no_text(:filtered.t)
 
     results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
@@ -173,7 +167,7 @@ class FilterTest < IntegrationTestCase
 
     # Verify additional parts of Advanced Search form
     click_on("Advanced Search", match: :first)
-    filters = page.find("div#advanced_search_filters")
+    filters = page.find("#advanced_search_filters")
     within(filters) do
       assert(find("#content_filter_has_images_yes").checked?)
       assert(find("#content_filter_has_specimen_").checked?)
@@ -188,8 +182,7 @@ class FilterTest < IntegrationTestCase
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-      assert_no_text(:filtered.t)
+    page.find("#title_bar").assert_no_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("#results")
     results.assert_text(obs.name.text_name, count: expect.size)
