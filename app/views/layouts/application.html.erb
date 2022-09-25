@@ -1,91 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <%= render(partial: "layouts/head") %>
+  <%= render(partial: "layouts/app/head") %>
 </head>
 <body>
   <% if Rails.env == "production" %>
-    <%= render(partial: "layouts/gtm_iframe") %>
+    <%= render(partial: "layouts/app/gtm_iframe") %>
   <% end %>
 
 <div id="main_container" class="container-fluid">
 
-  <%= render(partial: "layouts/banners") %>
+  <%= render(partial: "layouts/app/banners") %>
 
   <div class="row row-offcanvas row-offcanvas-left">
 
     <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
       <%= render(partial: "layouts/sidebar") %>
-    </nav>
+    </nav><!-- #sidebar -->
 
     <div id="right_side" class="col-xs-12 col-sm-10">
 
-      <%= render(partial: "layouts/hamburger") %>
+      <%= render(partial: "layouts/app/hamburger") %>
 
       <%= render(partial: "layouts/search_bar") %>
 
       <% if flash_notices? %>
-        <%= render(partial: "layouts/flash_notices") %>
+        <%= render(partial: "layouts/app/flash_notices") %>
       <% end %>
       <% flash_clear %>
 
       <main id="content">
 
         <% unless @user&.verified? %>
-          <%= render(partial: "layouts/page/login_layout") %>
+          <%= render(partial: "layouts/content/login_layout") %>
         <% end %>
 
-        <%= render(partial: "layouts/page/title_and_tab_sets") %>
+        <%= render(partial: "layouts/content/title_and_tab_sets") %>
 
         <!--MAIN_PAGE_CONTENT-->
         <%= yield %>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <%= render(partial: "layouts/page/translator_credit") %>
+        <%= render(partial: "layouts/content/translator_credit") %>
 
-      </main>
+      </main><!-- #content -->
 
-    </div>
-  </div>
-</div>
+    </div><!-- #right_side -->
+  </div><!-- .row-offcanvas -->
+</div><!-- #main_container -->
 
+<%= render(partial: "layouts/app/media_query_tests") %>
 
-
-<%
-  # The divs below are used by jquery to make helpers to determine current
-  # bootstrap size.  For example:
-  #   jQuery('[data-bootstrap-size]:visible').data('bootstrap-size')
-%>
-<div id="media_query_tests">
-  <div data-bootstrap-size="xs" class="visible-xs"></div>
-  <div data-bootstrap-size="sm" class="visible-sm"></div>
-  <div data-bootstrap-size="md" class="visible-md"></div>
-  <div data-bootstrap-size="lg" class="visible-lg"></div>
-</div>
-
-<!--JAVASCRIPT-->
-<%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
-<%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
-<% injected_javascripts.each do |script| %>
-  <%= javascript_tag(script) %>
-<% end %>
-<% if Rails.env == "production" %>
-  <script>(function (i, s, o, g, r, a, m) {
-    i['GoogleAnalyticsObject'] = r;
-    i[r] = i[r] || function () {
-        (i[r].q = i[r].q || []).push(arguments)
-    }, i[r].l = 1 * new Date();
-    a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-    a.async = 1;
-    a.src = g;
-    m.parentNode.insertBefore(a, m)
-  })
-  (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-  ga('create', 'UA-1916187-1', 'auto');
-  ga('send', 'pageview');
-  </script>
-<% end %>
-<!--/JAVASCRIPT-->
+<%= render(partial: "layouts/app/javascript_footer") %>
 
 </body>
 </html>

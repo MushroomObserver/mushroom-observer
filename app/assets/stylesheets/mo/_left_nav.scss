@@ -1,5 +1,5 @@
 //
-// left nav bar
+// sidebar
 // --------------------------------------------------
 $sidebar-max-width: 15em;
 
@@ -7,87 +7,12 @@ $sidebar-max-width: 15em;
   max-width: $sidebar-max-width;
 }
 
-#navigation {
-  background-color: $LEFT_BAR_BG_COLOR;
-  border-color: $LEFT_BAR_BORDER_COLOR;
-  border-width: $LEFT_BAR_BORDER_WIDTH;
-  border-style: $LEFT_BAR_BORDER_STYLE;
-  border-top-left-radius: $LOGO_BORDER_RADIUS;
-  border-top-right-radius: $LOGO_BORDER_RADIUS;
-  border-bottom-left-radius: $LEFT_BAR_BORDER_RADIUS;
-  border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
-  padding-left: 0px;
-  padding-right: 0px;
-  margin-bottom: 10em;
-
-  a {
-    font-weight: normal;
-  }
-
-  .list-group {
-    @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
-      margin-bottom: 15px;
-    } @else {
-      margin-bottom: 2px;
-    }
-  }
-
-  .list-group-item {
-    margin-top: 0px;
-    // border-color: $LEFT_BAR_BORDER_COLOR;
-    border-width: 0px;
-    // border-style: $LEFT_BAR_BORDER_STYLE;
-    // border-radius: 0px;
-    // @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
-    //   padding: 1px 5px;
-    // }
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    // &:last-child {
-    //   border-bottom-width: 0px;
-    // }
-
-    &:hover,
-    &:focus,
-    &:hover a.dropdown-toggle,
-    &:focus a.dropdown-toggle,
-    a.dropdown-toggle:hover {
-      color: $LEFT_BAR_HOVER_FG_COLOR;
-      background-color: $LEFT_BAR_HOVER_BG_COLOR;
-    }
-
-    &.disabled,
-    &.disabled:hover,
-    &.disabled:focus {
-      color: $LEFT_BAR_HEADER_FG_COLOR;
-      background-color: $LEFT_BAR_HEADER_BG_COLOR;
-      cursor: default;
-      @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
-        margin-top: 10px;
-      }
-      padding-left: 5px;
-    }
-  }
-
-  .list-group-item,
-  a.dropdown-toggle {
-    color: $LEFT_BAR_FG_COLOR;
-    background-color: $LEFT_BAR_BG_COLOR;
-  }
-}
-
-.list-group.list-group-compact .list-group-item {
-  padding: 4px;
-}
-
-
 //
 // small devices, tablets
 // --------------------------------------------------
 
 @media screen and (max-width: 767px) {
+
   .row-offcanvas {
     position: relative;
     -webkit-transition: all .25s ease-out;
@@ -139,5 +64,84 @@ $sidebar-max-width: 15em;
   .navbar-form {
     margin: 0;
     border: 0;
+  }
+}
+
+//
+// left nav bar
+// --------------------------------------------------
+
+.navigation-themed {
+  background-color: $LEFT_BAR_BG_COLOR;
+  border-color: $LEFT_BAR_BORDER_COLOR;
+  border-width: $LEFT_BAR_BORDER_WIDTH;
+  border-style: $LEFT_BAR_BORDER_STYLE;
+  border-top-left-radius: $LOGO_BORDER_RADIUS;
+  border-top-right-radius: $LOGO_BORDER_RADIUS;
+  border-bottom-left-radius: $LEFT_BAR_BORDER_RADIUS;
+  border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin-bottom: 10em;
+
+  a {
+    font-weight: normal;
+  }
+
+  .list-group {
+    @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
+      margin-bottom: 15px;
+    } @else {
+      margin-bottom: 2px;
+    }
+
+    &.list-group-compact .list-group-item {
+      padding: 4px;
+    }
+  }
+
+  .list-group-item {
+    margin-top: 0px;
+    // border-color: $LEFT_BAR_BORDER_COLOR;
+    border-width: 0px;
+    // border-style: $LEFT_BAR_BORDER_STYLE;
+    // border-radius: 0px;
+    // @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
+    //   padding: 1px 5px;
+    // }
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    // &:last-child {
+    //   border-bottom-width: 0px;
+    // }
+
+    &:hover,
+    &:focus,
+    &:hover a.dropdown-toggle,
+    &:focus a.dropdown-toggle,
+    a.dropdown-toggle:hover {
+      color: $LEFT_BAR_HOVER_FG_COLOR;
+      background-color: $LEFT_BAR_HOVER_BG_COLOR;
+    }
+
+    &.disabled,
+    &.disabled:hover,
+    &.disabled:focus {
+      color: $LEFT_BAR_HEADER_FG_COLOR;
+      background-color: $LEFT_BAR_HEADER_BG_COLOR;
+      cursor: default;
+      @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
+        margin-top: 10px;
+      }
+      padding-left: 5px;
+    }
+  }
+
+  .list-group-item,
+  a.dropdown-toggle {
+    color: $LEFT_BAR_FG_COLOR;
+    background-color: $LEFT_BAR_BG_COLOR;
   }
 }

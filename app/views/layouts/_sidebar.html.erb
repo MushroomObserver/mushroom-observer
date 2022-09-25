@@ -1,8 +1,4 @@
 <!--SIDEBAR LOGO AND NAVIGATION-->
-<a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-  <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
-</a><!-- #logo_link -->
-
 <%
 classes = {
   wrapper: "list-group list-group-compact",
@@ -15,39 +11,48 @@ classes = {
 %>
 
 <div id="navigation" class="<%= classes[:wrapper] %>">
-  <%= render(partial: "layouts/navigation/info",
-              locals: { classes: classes }) %>
 
-  <% if in_admin_mode? %>
-    <%= render(partial: "layouts/navigation/admin",
+  <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+    <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+  </a><!-- #logo_link -->
+
+  <div class="navigation-themed">
+
+    <%= render(partial: "layouts/sidebar/info",
                 locals: { classes: classes }) %>
-  <% end %>
 
-  <% if @user.nil? %>
-    <%= render(partial: "layouts/navigation/login",
+    <% if in_admin_mode? %>
+      <%= render(partial: "layouts/sidebar/admin",
+                  locals: { classes: classes }) %>
+    <% end %>
+
+    <% if @user.nil? %>
+      <%= render(partial: "layouts/sidebar/login",
+                  locals: { classes: classes }) %>
+    <% else %>
+      <%= render(partial: "layouts/sidebar/user",
+                  locals: { classes: classes }) %>
+    <% end %>
+
+    <%= render(partial: "layouts/sidebar/observations",
                 locals: { classes: classes }) %>
-  <% else %>
-    <%= render(partial: "layouts/navigation/user",
+
+    <%= render(partial: "layouts/sidebar/latest",
                 locals: { classes: classes }) %>
-  <% end %>
 
-  <%= render(partial: "layouts/navigation/observations",
-              locals: { classes: classes }) %>
+    <%= render(partial: "layouts/sidebar/species_lists",
+                locals: { classes: classes }) %>
 
-  <%= render(partial: "layouts/navigation/latest",
-              locals: { classes: classes }) %>
+    <%= render(partial: "layouts/sidebar/indexes",
+                locals: { classes: classes }) %>
 
-  <%= render(partial: "layouts/navigation/species_lists",
-              locals: { classes: classes }) %>
+    <%= render(partial: "layouts/sidebar/more",
+                locals: { classes: classes }) %>
 
-  <%= render(partial: "layouts/navigation/indexes",
-              locals: { classes: classes }) %>
+    <%= render(partial: "layouts/sidebar/languages",
+                locals: { classes: classes }) %>
 
-  <%= render(partial: "layouts/navigation/more",
-              locals: { classes: classes }) %>
-
-  <%= render(partial: "layouts/navigation/languages",
-              locals: { classes: classes }) %>
+  </div><!-- .navigation-themed -->
 
 </div><!-- #navigation -->
 <!--/SIDEBAR LOGO AND NAVIGATION-->
