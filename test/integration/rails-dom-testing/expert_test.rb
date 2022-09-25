@@ -262,7 +262,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_success
     assert_template("species_list/show_species_list")
-    assert_select("div#title", text: /#{spl.title}/)
+    assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
 
     loc = Location.last
@@ -279,7 +279,7 @@ class ExpertTest < IntegrationTestCase
     # Try adding a comment, just for kicks.
     click_mo_link(href: /add_comment/)
     assert_template("comment/add_comment")
-    assert_select("div#title", text: /#{spl.title}/)
+    assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
     open_form do |form|
       form.change("comment_summary", "Slartibartfast")
@@ -288,7 +288,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_success
     assert_template("species_list/show_species_list")
-    assert_select("div#title", text: /#{spl.title}/)
+    assert_select("#title", text: /#{spl.title}/)
     assert_select("div.comment", text: /Slartibartfast/)
     assert_select("div.comment", text: /Steatopygia/)
   end

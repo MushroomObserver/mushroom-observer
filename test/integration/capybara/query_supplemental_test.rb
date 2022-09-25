@@ -20,7 +20,7 @@ class QuerySupplementalTest < CapybaraIntegrationTestCase
     click_link("Show Locations")
     click_link("Map Locations")
 
-    title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
+    title = page.find("#title")
     title.assert_text("‘#{obs.name.text_name}’")
   end
 end

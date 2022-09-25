@@ -44,7 +44,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("list_collection_numbers")
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", numbers.count)
+    assert_select("#results tr", numbers.count)
   end
 
   def test_collection_number_search_by_number
@@ -73,7 +73,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("list_collection_numbers")
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", query.num_results)
+    assert_select("#results tr", query.num_results)
   end
 
   def test_show_collection_number
