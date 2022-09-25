@@ -49,24 +49,20 @@ a:hover {
 // --------------------------------------------------
 
 .alert {
-  margin: 0.5em 1.0em;
+  margin: 0.5em 0;
   border-width: $ALERT_BORDER_WIDTH;
   border-style: $ALERT_BORDER_STYLE;
   border-radius: $ALERT_BORDER_RADIUS;
   padding: 0.5em 1.0em;
   text-align: left;
-}
 
-//
-// message banner at top
-// --------------------------------------------------
-
-.alert.message-banner {
-  margin: 0.5em 1.0em;
-  border-width: $BANNER_BORDER_WIDTH;
-  border-style: $BANNER_BORDER_STYLE;
-  border-radius: $BANNER_BORDER_RADIUS;
-  padding: 0.5em 1.0em;
-  font-size: 150%;
-  text-align: center;
+  // message banner at top
+  // --------------------------------------------------
+  &.message-banner {
+    border-width: $BANNER_BORDER_WIDTH;
+    border-style: $BANNER_BORDER_STYLE;
+    border-radius: $BANNER_BORDER_RADIUS;
+    font-size: 150%;
+    text-align: center;
+  }
 }
