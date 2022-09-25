@@ -7,7 +7,7 @@ require("capybara_helper")
 class CapybaraLurkerTest < CapybaraIntegrationTestCase
   # temporarily use these extensions until webdriver is installed
   # include here to avoid name conflict with MO extensions
-  include CapybaraHelper
+  # include CapybaraHelper
 
   def test_poke_around
     # Start at index.
@@ -15,7 +15,8 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
     login
 
     # Click on first observation in feed results
-    first(:xpath, rss_observation_created_xpath).click
+    first(".rss-box-details .rss-detail", text: "Observation Created").
+      ancestor(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
@@ -29,7 +30,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # Click on the first image.
     go_back_after do
-      first(:xpath, observation_image_xpath).click
+      first("#content .show_images a img").ancestor("a").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation

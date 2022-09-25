@@ -60,4 +60,13 @@ module CapybaraSessionExtensions
   def assert_flash_success
     assert_selector("#flash-notices.alert-success")
   end
+
+  # Capybara has built-in go_back and go_forward methods for js-enabled drivers
+  # like :webkit or :selenium -- e.g., Capybara::Webkit::Driver#go_back
+  # This method provides a similar function for the built-in driver :rack_test
+  def go_back_after(&block)
+    @page_stack ? @page_stack.push(current_path) : @page_stack = [current_path]
+    yield(block)
+    visit(@page_stack.pop)
+  end
 end
