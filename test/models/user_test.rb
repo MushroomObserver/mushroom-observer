@@ -377,7 +377,7 @@ class UserTest < UnitTestCase
   def test_delete_observations
     assert_operator(0, "<", Observation.where(user: rolf).count)
     rolf.delete_observations
-    assert_operator(0, "<", Observation.where(user: rolf).count)
+    assert_equal(0, Observation.where(user: rolf).count)
   end
 
   def test_delete_private_name_descriptions

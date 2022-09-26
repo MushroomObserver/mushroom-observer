@@ -996,7 +996,7 @@ class User < AbstractModel
   end
 
   def delete_observations
-    [ Naming, Vote, RssLog ].each do |model|
+    [Naming, Vote, RssLog].each do |model|
       model.joins(:observation).where(observation: { user_id: id }).delete_all
     end
     # (all the rest of the observations' dependents should autodestruct)
@@ -1006,22 +1006,22 @@ class User < AbstractModel
   # Delete user's descriptions that don't have any other authors or # editors.
   def delete_private_name_descriptions
     ids = (name_descriptions -
-      name_descriptions.joins(:name_description_authors).
-        where.not(name_description_authors: { user_id: id }) -
-      name_descriptions.joins(:name_description_editors).
-        where.not(name_description_editors: { user_id: id })).
-      map(&:id)
+             name_descriptions.joins(:name_description_authors).
+               where.not(name_description_authors: { user_id: id }) -
+             name_descriptions.joins(:name_description_editors).
+               where.not(name_description_editors: { user_id: id })).
+          map(&:id)
     NameDescription.where(id: ids).delete_all
   end
 
   # Delete user's descriptions that don't have any other authors or # editors.
   def delete_private_location_descriptions
     ids = (location_descriptions -
-      location_descriptions.joins(:location_description_authors).
-        where.not(location_description_authors: { user_id: id }) -
-      location_descriptions.joins(:location_description_editors).
-        where.not(location_description_editors: { user_id: id })).
-      map(&:id)
+            location_descriptions.joins(:location_description_authors).
+              where.not(location_description_authors: { user_id: id }) -
+            location_descriptions.joins(:location_description_editors).
+              where.not(location_description_editors: { user_id: id })).
+          map(&:id)
     LocationDescription.where(id: ids).delete_all
   end
 
@@ -1046,27 +1046,27 @@ class User < AbstractModel
   # -JPH 20220916
   def delete_private_species_lists
     ids = (species_lists -
-      species_lists.joins(:project_species_lists)).
-      map(&:id)
-    Species_List.where(id: ids).delete_all
+            species_lists.joins(:project_species_lists)).
+          map(&:id)
+    SpeciesList.where(id: ids).delete_all
   end
 
   def delete_unattached_collection_numbers
-    (collection_numbers -
-      collection_numbers.joins(:observation_collection_numbers)).
-      map(&:id)
+    ids = (collection_numbers -
+            collection_numbers.joins(:observation_collection_numbers)).
+          map(&:id)
     CollectionNumber.where(id: ids).delete_all
   end
 
   def delete_unattached_herbarium_records
-    (herbarium_records -
-      herbarium_records.joins(:observation_herbarium_records)).
-      map(&:id)
+    ids = (herbarium_records -
+            herbarium_records.joins(:observation_herbarium_records)).
+          map(&:id)
     HerbariumRecord.where(id: ids).delete_all
   end
 
   def delete_unattached_images
-    (images -
+    ids = (images -
       images.joins(:glossary_term_images) -
       images.joins(:observation_images) -
       images.joins(:project_images) -
