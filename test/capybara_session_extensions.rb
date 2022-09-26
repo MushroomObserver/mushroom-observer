@@ -49,16 +49,16 @@ module CapybaraSessionExtensions
   end
 
   def assert_flash_text(text = "")
-    assert_selector("#flash-notices")
-    assert_selector("#flash-notices", text: text)
+    assert_selector("#flash_notices")
+    assert_selector("#flash_notices", text: text)
   end
 
   def assert_no_flash
-    refute_selector("#flash-notices")
+    refute_selector("#flash_notices")
   end
 
   def assert_flash_success
-    assert_selector("#flash-notices.alert-success")
+    assert_selector("#flash_notices.alert-success")
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers
