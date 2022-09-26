@@ -18,15 +18,16 @@
   </div>
 
   <ul class="row list-unstyled mt-3">
-    <%= render(partial: "shared/matrix_box",
-               locals: { objects: @object.images }) do |image| %>
-      <div class="mt-3 mb-3">
-        <%= thumbnail(image, votes: true, original: true) %>
-        <div class="text-center">
-          <%= check_box(:selected, image.id, {}, "yes", "no") %>
-          <label for="selected_#{image.id}"><%= :image.t %> #<%= image.id %></label>
-        </div><!-- .text-center -->
-      </div>
+    <%= @object.images.each_with_index do |image, idx| %>
+      <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
+        <div class="mt-3 mb-3">
+          <%= thumbnail(image, votes: true, original: true) %>
+          <div class="text-center">
+            <%= check_box(:selected, image.id, {}, "yes", "no") %>
+            <label for="selected_#{image.id}"><%= :image.t %> #<%= image.id %></label>
+          </div><!-- .text-center -->
+        </div>
+      </li>
     <% end %>
   </ul>
 
