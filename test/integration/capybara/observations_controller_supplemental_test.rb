@@ -1,22 +1,9 @@
 # frozen_string_literal: true
 
-# This cop doesn't understand that find_by_id is not being called on an
-# ActiveRecord instance, and therefore is not a rails dynamic finder.
-# rubocop:disable Rails/DynamicFindBy
-
 require("test_helper")
 
 # Tests which supplement controller/observations_controller_test.rb
-class ObservationsControllerSupplementalTest < IntegrationTestCase
-  def login(user = users(:zero_user))
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
-  end
-
-  # ------------------------------------------------------------
-
+class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
@@ -34,7 +21,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     visit("/name/map/#{name.id}")
     click_link("Show Observations")
     click_link("Show Map")
-    title = page.find_by_id("title")
+    title = page.find("#title")
     title.assert_text("Map of Observation Index")
   end
 
@@ -56,10 +43,10 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     # Show first Observation from Your Observations search.
     click_link(first_obs.id.to_s)
     # Destroy it.
-    within("div#right_tabs") { click_button("Destroy") }
+    within("#right_tabs") { click_button("Destroy") }
 
     # MO should show next Observation.
-    page.find_by_id("title")
+    page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
   end
@@ -130,10 +117,8 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
       fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
       fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
       click_button("fr:mo.SEND")
-      notices = page.find_by_id("flash-notices")
+      notices = page.find("#flash_notices")
       notices.assert_text("fr:mo.runtime_ask_user_question_success")
     end
   end
 end
-
-# rubocop:enable Rails/DynamicFindBy
