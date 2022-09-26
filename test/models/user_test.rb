@@ -347,9 +347,9 @@ class UserTest < UnitTestCase
   end
 
   def test_delete_api_keys
-    assert_operator(0, "<", ApiKey.where(user: rolf).count)
+    assert_operator(0, "<", APIKey.where(user: rolf).count)
     rolf.delete_api_keys
-    assert_equal(0, ApiKey.where(user: rolf).count)
+    assert_equal(0, APIKey.where(user: rolf).count)
   end
 
   def test_delete_interests
