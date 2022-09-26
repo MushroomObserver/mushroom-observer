@@ -1,22 +1,21 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("capybara_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
 class CapybaraLurkerTest < CapybaraIntegrationTestCase
   # temporarily use these extensions until webdriver is installed
   # include here to avoid name conflict with MO extensions
-  include CapybaraHelper
+  # include CapybaraHelper
 
   def test_poke_around
     # Start at index.
     reset_session!
-    visit(root_path)
     login
 
     # Click on first observation in feed results
-    first(:xpath, rss_observation_created_xpath).click
+    first(".rss-box-details .rss-detail", text: "Observation Created").
+      ancestor(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
@@ -30,7 +29,7 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # Click on the first image.
     go_back_after do
-      first(:xpath, observation_image_xpath).click
+      first("#content .show_images a img").ancestor("a").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation
@@ -89,7 +88,6 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # First login
     reset_session!
-    visit(root_path)
     login(lurker.login)
 
     visit("/#{obs.id}")
@@ -160,24 +158,182 @@ class CapybaraLurkerTest < CapybaraIntegrationTestCase
 
     # Check out images
     # Observation has at least 2 images
-    image_count = all(:xpath, observation_image_xpath).count
+    image_count = all("#content .show_images a img").count
     assert(image_count == 2,
            "expected 2 Images in Observation, got #{image_count}")
+  end
+
+  def test_search
+    login
+
+    # Search for a name.  (Only one.)
+    fill_in("search_pattern", with: "Coprinus comatus")
+    select("Names", from: "search_type")
+    click_button("Search")
+    assert_match(names(:coprinus_comatus).search_name,
+                 page.title, "Wrong page")
+
+    # Search for observations of that name.  (Only one.)
+    select("Observations", from: "search_type")
+    click_button("Search")
+    assert_match(/#{observations(:coprinus_comatus_obs).id}/,
+                 page.title, "Wrong page")
+
+    # Image pattern searches temporarily disabled for performamce
+    # 2021-09-12 JDC
+    # Search for images of the same thing.  (Still only one.)
+    # select("Images", from: "search_type")
+    # click_button("Search")
+    # assert_match(
+    #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+    #   current_fullpath
+    # )
+
+    # There should be no locations of that name, though.
+    select("Locations", from: "search_type")
+    click_button("Search")
+    assert_match("Location Search", page.title, "Wrong page")
+    assert_selector("div.alert", text: /no.*found/i)
+    refute_selector("#results a[href]")
+
+    # This should give us just about all the locations.
+    fill_in("search_pattern", with: "california OR canada")
+    select("Locations", from: "search_type")
+    click_button("Search")
+    # assert_selector("#results a[href]")
+    labels = find_all("#results a[href]").map(&:text)
+    assert(labels.any? { |l| l.end_with?("Canada") },
+           "Expected one of the results to be in Canada.\n" \
+           "Found these: #{labels.inspect}")
+    assert(labels.any? { |l| l.end_with?("USA") },
+           "Expected one of the results to be in the US.\n" \
+           "Found these: #{labels.inspect}")
+  end
+
+  def test_search_next
+    login
+
+    # Search for a name.  (More than one.)
+    fill_in("search_pattern", with: "Fungi")
+    select("Observations", from: "search_type")
+    click_button("Search")
+
+    obs = observations(:detailed_unknown_obs).id.to_s
+    # assert_selector("a[href^='/#{obs}']")
+    links = find_all("a[href^='/#{obs}']")
+    assert(links.all? { |l| l[:href].match(/#{obs}\?q=/) },
+           "Expected a link to reference #{obs}\?q=??.\n" \
+           "Found these: #{links.inspect}")
+  end
+
+  def test_obs_at_location
+    login
+    # Start at distribution map for Fungi.
+    visit("/name/map/#{names(:fungi).id}")
+
+    # Get a list of locations shown on map. (One defined, one undefined.)
+    within("#right_tabs") { click_link("Show Locations") }
+    assert_match("Locations with Observations", page.title, "Wrong page")
+
+    # Click on the defined location.
+    click_link(text: /Burbank/)
+    assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
+
+    # Get a list of observations from there.  (Several so goes to index.)
+    within("#right_tabs") { click_link(text: "Observations at this Location") }
+    assert_match("Observations from Burbank, California, USA",
+                 page.title, "Wrong page")
+    save_results = find_all("#results a").select do |l|
+      l[:href].match(%r{^/\d+})
+    end
+
+    # Bail if there are too many results — test will not work
+    if has_selector?("#results .pagination a", text: /Next/)
+      skip("Test skipped because it bombs when search results > " \
+          "default layout size.
+          Please adjust the fixtures and re-run.")
+    end
+
+    # Try sorting differently.
+    within("#sorts") { click_link(text: "User") }
+    check_results_length(save_results)
+
+    # Date is ambiguous, there's also 'Date Posted'
+    within("#sorts") { click_link(exact_text: "Date") }
+    check_results_length(save_results)
+
+    within("#sorts") { click_link(text: "Reverse Order") }
+    check_results_length(save_results)
+
+    within("#sorts") { click_link(text: "Name") }
+    # Last time through - reset `save_results` with current results
+    save_results = check_results_length(save_results)
+    # Must set `save_hrefs` here to avoid variable going stale...
+    # Capybara::RackTest::Errors::StaleElementReferenceError
+    save_hrefs = save_results.pluck(:href)
+
+    query_params = parse_query_params(save_results.first[:href])
+
+    # Go to first observation, and try stepping back and forth.
+    results_observation_links.first.click
+    save_path = current_fullpath
+    assert_equal(query_params, parse_query_params(save_path))
+    within("#title_bar") { click_link(text: "Prev") }
+    assert_flash_text(/there are no more observations/i)
+    assert_equal(save_path, current_fullpath)
+    assert_equal(query_params, parse_query_params(save_path))
+    within("#title_bar") { click_link(text: "Next") }
+    assert_no_flash
+    assert_equal(query_params, parse_query_params(save_path))
+
+    save_path = current_fullpath
+    within("#title_bar") { click_link(text: "Next") }
+    assert_no_flash
+    assert_equal(query_params, parse_query_params(save_path))
+    within("#title_bar") { click_link(text: "Prev") }
+    assert_no_flash
+    assert_equal(query_params, parse_query_params(save_path))
+    assert_equal(save_path, current_fullpath,
+                 "Went next then prev, should be back where we started.")
+    within("#title_bar") do
+      click_link(text: "Index", href: /#{observations_path}/)
+    end
+    results = results_observation_links
+    assert_equal(query_params, parse_query_params(results.first[:href]))
+    assert_equal(save_hrefs, results.pluck(:href),
+                 "Went to show_obs, screwed around, then back to index. " \
+                 "But the results were not the same when we returned.")
   end
 
   ################
 
   private
 
+  # Custom login method for this test. Consider adding the bells and whistles
+  # to the method in CapybaraSessionExtensions?
   def login(login = users(:zero_user).login)
+    visit(root_path)
     first(:link, "Login").click
     assert_equal("#{:app_title.l}: Please login", page.title, "Wrong page")
-    fill_in("User name or Email address:", with: login)
-    fill_in("Password:", with: "testpassword")
+    fill_in("user_login", with: login)
+    fill_in("user_password", with: "testpassword")
     click_button("Login")
 
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+  end
+
+  # This returns results so you can reset a `results` variable within test scope
+  def check_results_length(save_results)
+    results = results_observation_links
+    assert_equal(save_results.length, results.length)
+    results
+  end
+
+  def results_observation_links
+    find_all("#results a").select do |l|
+      l[:href].match(%r{^/\d+})
+    end
   end
 end
