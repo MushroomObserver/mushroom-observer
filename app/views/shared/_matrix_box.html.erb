@@ -5,34 +5,36 @@
 %>
 
 <% if presenter %>
-  <div class="panel panel-default" style="min-height: 200px;">
-    <div class="panel-body rss-box-details">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="thumbnail-container" style="min-height: 30px">
-            <%= presenter.thumbnail %>
-          </div>
-          <div class="rss-what">
-            <h5><%= presenter.what %></h5>
-          </div>
-          <div class="rss-where">
-            <small><strong><%= presenter.where %></strong></small>
-          </div>
-          <div class="rss-what">
-            <small class="nowrap-ellipsis">
-              <% unless presenter.when.blank? %>
-                  <%= presenter.when %>: <%= presenter.who %>
-              <% end %>
-            </small>
-          </div>
-          <div class="rss-detail">
-            <%= presenter.detail %>
-          </div>
-          <div class="rss-what">
-            <small><%= presenter.fancy_time %></small>
+  <div class="matrix-box col-xs-12 col-sm-6 col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-body rss-box-details">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="thumbnail-container">
+              <%= presenter.thumbnail %>
+            </div><!-- .thumbnail-container -->
+            <div class="rss-what">
+              <h5><%= presenter.what %></h5>
+            </div><!-- .rss-what -->
+            <div class="rss-where">
+              <small><strong><%= presenter.where %></strong></small>
+            </div><!-- .rss-where -->
+            <div class="rss-what">
+              <small class="nowrap-ellipsis">
+                <% unless presenter.when.blank? %>
+                    <%= presenter.when %>: <%= presenter.who %>
+                <% end %>
+              </small>
+            </div><!-- .rss-when -->
+            <div class="rss-detail">
+              <%= presenter.detail %>
+            </div><!-- .rss-detail -->
+            <div class="rss-what">
+              <small><%= presenter.fancy_time %></small>
+            </div><!-- .rss-fancy-time -->
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </div><!-- .matrix-box -->
 <% end %>
