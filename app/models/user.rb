@@ -1005,32 +1005,35 @@ class User < AbstractModel
 
   # Delete user's descriptions that don't have any other authors or # editors.
   def delete_private_name_descriptions
-    (name_descriptions -
+    ids = (name_descriptions -
       name_descriptions.joins(:name_description_authors).
         where.not(name_description_authors: { user_id: id }) -
       name_descriptions.joins(:name_description_editors).
-        where.not(name_description_editors: { user_id: id }))
-      delete_all
+        where.not(name_description_editors: { user_id: id })).
+      map(&:id)
+    NameDescription.where(id: ids).delete_all
   end
 
   # Delete user's descriptions that don't have any other authors or # editors.
   def delete_private_location_descriptions
-    (location_descriptions -
+    ids = (location_descriptions -
       location_descriptions.joins(:location_description_authors).
         where.not(location_description_authors: { user_id: id }) -
       location_descriptions.joins(:location_description_editors).
-        where.not(location_description_editors: { user_id: id }))
-      delete_all
+        where.not(location_description_editors: { user_id: id })).
+      map(&:id)
+    LocationDescription.where(id: ids).delete_all
   end
 
   # Delete all the user's projects that don't have any other users on them.
   def delete_private_projects
-    (projects.select do |project|
+    ids = (projects.select do |project|
       project.admin_group_users.
         where.not(admin_group_users: { user_id: id }).none? &&
       project.member_group_users.
         where.not(member_group_users: { user_id: id }).none?
-    end).delete_all
+    end).map(&:id)
+    Project.where(id: ids).delete_all
   end
 
   # Delete all species lists the user created unless they belong to a project.
@@ -1042,21 +1045,24 @@ class User < AbstractModel
   # public projects just because the user happened to originally create them.
   # -JPH 20220916
   def delete_private_species_lists
-    (species_lists -
+    ids = (species_lists -
       species_lists.joins(:project_species_lists)).
-      delete_all
+      map(&:id)
+    Species_List.where(id: ids).delete_all
   end
 
   def delete_unattached_collection_numbers
     (collection_numbers -
       collection_numbers.joins(:observation_collection_numbers)).
-      delete_all
+      map(&:id)
+    CollectionNumber.where(id: ids).delete_all
   end
 
   def delete_unattached_herbarium_records
     (herbarium_records -
       herbarium_records.joins(:observation_herbarium_records)).
-      delete_all
+      map(&:id)
+    HerbariumRecord.where(id: ids).delete_all
   end
 
   def delete_unattached_images
@@ -1065,7 +1071,8 @@ class User < AbstractModel
       images.joins(:observation_images) -
       images.joins(:project_images) -
       images.joins(:subjects)).
-      delete_all
+      map(&:id)
+    Image.where(id: ids).delete_all
   end
 
   def no_references_left?
