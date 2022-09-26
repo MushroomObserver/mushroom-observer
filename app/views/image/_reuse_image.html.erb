@@ -12,7 +12,8 @@
       <p class="help-block"><%= :image_reuse_id_help.tp %></p>
 
       <div class="form-group mt-3">
-        <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
+        <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
+                              :image_reuse_all_users.t),
                             url_args.merge(all_users: @all_users ? 0 : 1),
                             class: "btn btn-default") %>
       </div>
@@ -23,8 +24,10 @@
     <ul class="row list-unstyled mt-3">
       <%= @objects.each_with_index do |image, idx| %>
         <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
-          <div class="mt-3 mb-3">
-            <%= thumbnail(image, link: url_args.merge(img_id: image.id), original: true) %>
+          <div class="panel panel-default mt-3 mb-3">
+            <div class="panel-body">
+              <%= thumbnail(image, link: url_args.merge(img_id: image.id), original: true) %>
+            </div>
           </div>
         </li>
       <% end %>

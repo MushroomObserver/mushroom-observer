@@ -1,5 +1,9 @@
+// Patch to make matrix boxes in a row the same height
+// TODO: Completely remove this script and layouts/app/media_query_tests partial
+// if moving to Bootstrap 4+
+
 $(window).on('load', function () {
-  var boxes = jQuery('.rss-box-details');
+  var boxes = jQuery('.matrix-box .panel-body');
 
   //if there are matrix boxes
   if (boxes) {
