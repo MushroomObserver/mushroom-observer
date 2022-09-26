@@ -521,8 +521,8 @@ class UserTest < UnitTestCase
     junk.namings.first.destroy
     assert_true(junk.reload.no_references_left?)
 
-    assert_operator(0, "<", spammer.publications.count)
-    spammer.publications.first.destroy
+    assert_operator(0, "<", spam.publications.count)
+    spam.publications.first.destroy
     assert_true(spam.reload.no_references_left?)
   end
 end
