@@ -347,37 +347,37 @@ class UserTest < UnitTestCase
   end
 
   def test_delete_api_keys
-    assert_not_zero(ApiKey.where(user: rolf).count)
+    assert_operator(0, "<", ApiKey.where(user: rolf).count)
     rolf.delete_api_keys
-    assert_zero(ApiKey.where(user: rolf).count)
+    assert_equal(0, ApiKey.where(user: rolf).count)
   end
 
   def test_delete_interests
-    assert_not_zero(Interest.where(user: junk).count)
+    assert_operator(0, "<", Interest.where(user: junk).count)
     junk.delete_interests
-    assert_zero(Interest.where(user: junk).count)
+    assert_equal(0, Interest.where(user: junk).count)
   end
 
   def test_delete_notifications
-    assert_not_zero(Notification.where(user: rolf).count)
+    assert_operator(0, "<", Notification.where(user: rolf).count)
     rolf.delete_notifications
-    assert_zero(Notification.where(user: rolf).count)
+    assert_equal(0, Notification.where(user: rolf).count)
   end
 
   def test_delete_queued_emails
     QueuedEmail.create(user: rolf, to_user: mary)
     QueuedEmail.create(user: mary, to_user: rolf)
-    assert_not_zero(QueuedEmail.where(user: rolf).count)
-    assert_not_zero(QueuedEmail.where(to_user: rolf).count)
+    assert_operator(0, "<", QueuedEmail.where(user: rolf).count)
+    assert_operator(0, "<", QueuedEmail.where(to_user: rolf).count)
     rolf.delete_queued_emails
-    assert_zero(QueuedEmail.where(user: rolf).count)
-    assert_zero(QueuedEmail.where(to_user: rolf).count)
+    assert_equal(0, QueuedEmail.where(user: rolf).count)
+    assert_equal(0, QueuedEmail.where(to_user: rolf).count)
   end
 
   def test_delete_observations
-    assert_not_zero(Observation.where(user: rolf).count)
+    assert_operator(0, "<", Observation.where(user: rolf).count)
     rolf.delete_observations
-    assert_not_zero(Observation.where(user: rolf).count)
+    assert_operator(0, "<", Observation.where(user: rolf).count)
   end
 
   def test_delete_private_name_descriptions
@@ -397,11 +397,11 @@ class UserTest < UnitTestCase
     desc3 = name_descriptions(:peltigera_desc)
     versions = NameDescription::Version.where(name_description_id: desc3.id)
     assert(versions.count > 1)
-    assert_not_zero(NameDescription.where(user: dick).count)
+    assert_operator(0, "<", NameDescription.where(user: dick).count)
     dick.delete_private_name_descriptions
-    assert_zero(NameDescription.where(user: dick).count)
+    assert_equal(0, NameDescription.where(user: dick).count)
     versions = NameDescription::Version.where(name_description_id: desc3.id)
-    assert_zero(versions.count)
+    assert_equal(0, versions.count)
   end
 
   def test_delete_private_location_descriptions
@@ -419,7 +419,7 @@ class UserTest < UnitTestCase
     rolf.delete_private_location_descriptions
     assert_raises(ActiveRecord::RecordNotFound) \
       { LocationDescription.find(albion.id) }
-    assert_zero(LocationDescription::Version.where(
+    assert_equal(0, LocationDescription::Version.where(
                   location_description_id: albion.id
                 ).count)
   end
@@ -439,7 +439,7 @@ class UserTest < UnitTestCase
     # Should be able to delete all of Mary's many lists except this one.
     unknowns = species_lists(:unknown_species_list)
     assert_users_equal(mary, unknowns.user)
-    assert_not_zero(unknowns.projects.count)
+    assert_operator(0, "<", unknowns.projects.count)
     assert(SpeciesList.where(user: mary).count > 1)
     mary.delete_private_species_lists
     assert(SpeciesList.where(user: mary).count == 1)
@@ -516,12 +516,12 @@ class UserTest < UnitTestCase
     assert_true(zero.no_references_left?)
 
     # Interests don't count.
-    assert_not_zero(junk.interests.count)
-    assert_not_zero(junk.namings.count)
+    assert_operator(0, "<", junk.interests.count)
+    assert_operator(0, "<", junk.namings.count)
     junk.namings.first.destroy
     assert_true(junk.reload.no_references_left?)
 
-    assert_not_zero(spammer.publications.count)
+    assert_operator(0, "<", spammer.publications.count)
     spammer.publications.first.destroy
     assert_true(spam.reload.no_references_left?)
   end
