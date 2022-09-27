@@ -27,24 +27,27 @@
                 options_for_select(options,
                                   session[:search_type] || :observation),
                 { },
-                { class: "form-control inline align-top w-auto" })
+                { class: "form-control d-inline align-top w-auto" })
       %>
       <%= submit_tag(:app_search.l, class: "btn btn-default align-top mr-2") %>
     </div>
-    <%=
-        link_to(content_tag(:span, :search_bar_help.t),
-                info_search_bar_help_path)
-    %>
-    |
+    <div class="d-inline-block align-top text-nowrap">
+      <%=
+          link_to(content_tag(:span, :search_bar_help.t),
+                  info_search_bar_help_path)
+      %>
+      |
 
-    <%
-      adv_search = link_to(content_tag(:span, :app_advanced_search.l,
-                                        class: "text-nowrap"),
-                    search_advanced_path)
-      @timer_end ||= Time.zone.now
-      secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-      timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"
-    %>
+      <%
+        adv_search = link_to(content_tag(:span, :app_advanced_search.l,
+                                          class: "text-nowrap"),
+                      search_advanced_path)
+        @timer_end ||= Time.zone.now
+        secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
+        timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"
+      %>
+    </div>
+
     <% if @timer_start %>
       <div class="d-inline-block hidden-xs smaller">
         <span id="timer"><%= timer %></span><br/>
@@ -55,6 +58,7 @@
         <%= adv_search %>
       </p>
     <% end %>
+
     <div class="visible-xs">
       <%= content_tag(:span, timer, id: "timer", class: "text-nowrap") if @timer_start %>
       <%= adv_search %>
