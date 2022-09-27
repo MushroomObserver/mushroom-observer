@@ -3,7 +3,7 @@
   <div class="form-group">
     <div class="d-inline-block align-top icon-addon addon-sm">
       <%= text_field(:search, :pattern, value: session[:pattern],
-                     class: "form-control", placeholder: :app_find.t) %>
+                     class: "form-control mb-2", placeholder: :app_find.t) %>
       <label for="search_pattern" class="glyphicon glyphicon-search"
              title="search"> </label>
     </div>
@@ -34,7 +34,7 @@
   </div>
 <% end %>
 
-<p class="navbar-text align-top text-nowrap">
+<p class="navbar-text mx-2 align-top text-nowrap">
   <%=
       link_to(content_tag(:span, :search_bar_help.t),
               info_search_bar_help_path)
