@@ -605,8 +605,8 @@ class User < AbstractModel
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  # Return an ActiveRecord::Association of SpeciesList's that User owns or that
-  # are attached to a Project that the User is a member of.
+  # Return an ActiveRecord::Association of SpeciesList's that User created or
+  # that are attached to a Project that the User is a member of.
   def all_editable_species_lists
     @all_editable_species_lists ||=
       if projects_member.any?
@@ -912,7 +912,7 @@ class User < AbstractModel
     [:users,                          :id]
   ].freeze
 
-  # Delete records they own, culminating in the user record itself.
+  # Delete records they created, culminating in the user record itself.
   private_class_method def self.delete_own_records(id)
     OWN_RECORDS.each do |table, col|
       model = get_model_for_table(table)
