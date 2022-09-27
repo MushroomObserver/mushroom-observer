@@ -1012,6 +1012,7 @@ class User < AbstractModel
                where.not(name_description_editors: { user_id: id })).
           map(&:id)
     NameDescription.where(id: ids).delete_all
+    NameDescription::Version.where(name_description: ids).delete_all
   end
 
   # Delete user's descriptions that don't have any other authors or # editors.

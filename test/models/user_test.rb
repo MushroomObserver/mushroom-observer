@@ -388,11 +388,11 @@ class UserTest < UnitTestCase
     desc1 = name_descriptions(:coprinus_desc)
     # Created and authored by rolf, but mary is also editor.
     desc2 = name_descriptions(:coprinus_comatus_desc)
-
     assert(NameDescription.where(user: rolf).count > 2)
+
     rolf.delete_private_name_descriptions
     assert_obj_list_equal(NameDescription.where(user: rolf).to_a,
-                          [desc1, desc2])
+                          [desc1, desc2], :sort)
 
     # All of Dick's should be deletable, and make sure all versions of
     # Peltigera are also deleted.
@@ -400,6 +400,7 @@ class UserTest < UnitTestCase
     versions = NameDescription::Version.where(name_description_id: desc3.id)
     assert(versions.count > 1)
     assert_operator(0, "<", NameDescription.where(user: dick).count)
+
     dick.delete_private_name_descriptions
     assert_equal(0, NameDescription.where(user: dick).count)
     versions = NameDescription::Version.where(name_description_id: desc3.id)
