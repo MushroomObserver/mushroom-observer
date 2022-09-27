@@ -987,7 +987,7 @@ class User < AbstractModel
   end
 
   def delete_notifications
-    notifications.delete_all
+    Notification.where(user: self).delete_all
   end
 
   def delete_queued_emails
@@ -1051,7 +1051,8 @@ class User < AbstractModel
 
   def delete_unattached_collection_numbers
     ids = (CollectionNumber.where(user: self) -
-             CollectionNumber.where(user: self).joins(:observation_collection_numbers)).
+             CollectionNumber.where(user: self).
+               joins(:observation_collection_numbers)).
           map(&:id)
     CollectionNumber.where(id: ids).delete_all
   end

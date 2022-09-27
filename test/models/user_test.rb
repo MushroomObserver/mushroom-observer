@@ -360,6 +360,7 @@ class UserTest < UnitTestCase
 
   def test_delete_notifications
     assert_operator(0, "<", Notification.where(user: rolf).count)
+
     rolf.delete_notifications
     assert_equal(0, Notification.where(user: rolf).count)
   end
