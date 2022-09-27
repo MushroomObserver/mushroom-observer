@@ -1050,8 +1050,8 @@ class User < AbstractModel
   end
 
   def delete_unattached_collection_numbers
-    ids = (collection_numbers -
-            collection_numbers.joins(:observation_collection_numbers)).
+    ids = (CollectionNumber.where(user: self) -
+             CollectionNumber.where(user: self).joins(:observation_collection_numbers)).
           map(&:id)
     CollectionNumber.where(id: ids).delete_all
   end

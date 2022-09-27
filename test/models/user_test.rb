@@ -472,8 +472,7 @@ class UserTest < UnitTestCase
 
     # Should get deleted now.
     mary.delete_unattached_collection_numbers
-    assert_raises(ActiveRecord::RecordNotFound) \
-      { CollectionNumber.find(num.id) }
+    assert_empty(CollectionNumber.where(id: num.id))
   end
 
   def test_delete_unattached_herbarium_records
