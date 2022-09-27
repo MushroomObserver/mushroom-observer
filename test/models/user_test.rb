@@ -366,10 +366,11 @@ class UserTest < UnitTestCase
   end
 
   def test_delete_queued_emails
-    QueuedEmail.create(user: rolf, to_user: mary)
-    QueuedEmail.create(user: mary, to_user: rolf)
+    QueuedEmail.create(rolf, mary)
+    QueuedEmail.create(mary, rolf)
     assert_operator(0, "<", QueuedEmail.where(user: rolf).count)
     assert_operator(0, "<", QueuedEmail.where(to_user: rolf).count)
+
     rolf.delete_queued_emails
     assert_equal(0, QueuedEmail.where(user: rolf).count)
     assert_equal(0, QueuedEmail.where(to_user: rolf).count)
