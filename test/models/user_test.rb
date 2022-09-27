@@ -382,6 +382,13 @@ class UserTest < UnitTestCase
     assert_equal(0, Observation.where(user: rolf).count)
   end
 
+  # TODO: Fix this test and delete_private_name_descriptions
+  # In particular, a decription isn't "private" and should NOT be delected
+  # if any other user created a version of the description.
+  # Note that this can -- and I think typically does -- happen outside of
+  # Projects. Thus we can't use just NameDescription "authors" and "editors"
+  # to decided which Descriptions and ersions should be deleted.
+  # JDC 2022-09-27
   def test_delete_private_name_descriptions
     # All Rolf's descriptions should be "private" but these two:
     # Created by rolf, but katrina is author and editor.
@@ -394,17 +401,31 @@ class UserTest < UnitTestCase
     assert_obj_list_equal(NameDescription.where(user: rolf).to_a,
                           [desc1, desc2], :sort)
 
-    # All of Dick's should be deletable, and make sure all versions of
-    # Peltigera are also deleted.
-    desc3 = name_descriptions(:peltigera_desc)
-    versions = NameDescription::Version.where(name_description_id: desc3.id)
-    assert(versions.count > 1)
-    assert_operator(0, "<", NameDescription.where(user: dick).count)
+    # All of Dick's should be deletable,
+    # but v1 was created by someone else, so it should remain.
+    desc = name_descriptions(:peltigera_desc)
+    user = dick
+    before_versions = NameDescription::Version.
+                      where(name_description: desc).count
+    assert(before_versions > 1,
+           "Need NameDescription fixture with multiple versions")
+    assert(NameDescription.where(user: user).count > 1,
+           "Need User fixture with multiple NameDescriptions")
+    user_versions = NameDescription::Version.
+                    where(name_description: desc, user_id: user.id).count
+    assert(user_versions >= 0,
+           "Need NameDescription fixture where user created >= 1 version")
 
-    dick.delete_private_name_descriptions
-    assert_equal(0, NameDescription.where(user: dick).count)
-    versions = NameDescription::Version.where(name_description_id: desc3.id)
-    assert_equal(0, versions.count)
+    user.delete_private_name_descriptions
+    assert_equal(0, NameDescription.where(user: user).count,
+                 "Failed to delete NameDescription created by user")
+    assert_equal(0, NameDescription::Version.
+                 where(user_id: user.id).count,
+                 "Failed to delete all user's versions of NameDescriptions")
+    versions = NameDescription::Version.
+               where(name_description: desc).count
+    assert_equal(before_versions - user_versions, versions,
+                 "Deleted wrong number of versions")
   end
 
   def test_delete_private_location_descriptions
