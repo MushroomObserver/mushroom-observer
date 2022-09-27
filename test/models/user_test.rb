@@ -429,10 +429,20 @@ class UserTest < UnitTestCase
     # a bunch of admins and members, so it should not be deletable.
     bolete = projects(:bolete_project)
     assert_users_equal(dick, bolete.user)
-    assert(Project.where(user: dick).count > 1)
+    deleteable_proj_count = Project.joins(:admin_group, :user_group).
+                            where(user: dick,
+                                  admin_group: { name: "user #{dick.id}" },
+                                  user_group: { name: "user #{dick.id}" }).
+                            count
+    assert(deleteable_proj_count >= 1,
+           "user should have >= 1 project that's deleted when s/he's deleted")
+    old_proj_count = Project.where(user: dick).count
+
     dick.delete_private_projects
-    assert(Project.where(user: dick).count == 1)
-    assert_not_nil(Project.find(bolete.id))
+
+    assert(Project.where(user: dick).count ==
+             old_proj_count - deleteable_proj_count)
+    assert_not_empty(Project.where(id: bolete.id))
   end
 
   def test_delete_private_species_lists

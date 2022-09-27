@@ -1027,13 +1027,11 @@ class User < AbstractModel
 
   # Delete all the user's projects that don't have any other users on them.
   def delete_private_projects
-    ids = (projects.select do |project|
-      project.admin_group_users.
-        where.not(admin_group_users: { user_id: id }).none? &&
-      project.member_group_users.
-        where.not(member_group_users: { user_id: id }).none?
-    end).map(&:id)
-    Project.where(id: ids).delete_all
+    Project.joins(:admin_group, :user_group).
+      where(user: self,
+            admin_group: { name: "user #{id}" },
+            user_group: { name: "user #{id}" }).
+      delete_all
   end
 
   # Delete all species lists the user created unless they belong to a project.
