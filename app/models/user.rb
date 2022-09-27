@@ -975,7 +975,7 @@ class User < AbstractModel
     self.image_id = nil
     self.notes = nil
     self.mailing_address = nil
-    self.save
+    save
   end
 
   def delete_api_keys
@@ -1067,58 +1067,60 @@ class User < AbstractModel
 
   def delete_unattached_images
     ids = (images -
-      images.joins(:glossary_term_images) -
-      images.joins(:observation_images) -
-      images.joins(:project_images) -
-      images.joins(:subjects)).
-      map(&:id)
+            images.joins(:glossary_term_images) -
+            images.joins(:observation_images) -
+            images.joins(:project_images) -
+            images.joins(:subjects)).
+          map(&:id)
     Image.where(id: ids).delete_all
   end
 
+  REFERENCE_MODELS = [
+    # ApiKey,                        (just deleted all of these)
+    Article,
+    CollectionNumber,
+    Comment,
+    # CopyrightChange,               (okay if these are all that's left)
+    # Donation,                      (okay if these are all that's left)
+    ExternalLink,
+    GlossaryTerm,
+    GlossaryTerm::Version,
+    # Herbarium, (personal_user_id)  (okay if these are all that's left)
+    # HerbariumCurator,              (okay if these are all that's left)
+    HerbariumRecord,
+    ImageVote,
+    Image,
+    # Interest,                      (just deleted all of these)
+    Location,
+    Location::Version,
+    LocationDescription,
+    LocationDescription::Version,
+    LocationDescriptionAuthor,
+    LocationDescriptionEditor,
+    Name,
+    Name::Version,
+    NameDescription,
+    NameDescription::Version,
+    NameDescriptionAuthor,
+    NameDescriptionEditor,
+    Naming,
+    # Notification,                  (just deleted all of these)
+    # ObservationView,               (okay if these are all that's left)
+    # Observation,                   (just deleted all of these)
+    Project,
+    Publication,
+    # QueuedEmail,                   (just deleted all of these)
+    # QueuedEmail, (to_user_id)      (just deleted all of these)
+    Sequence,
+    SpeciesList,
+    TranslationString,
+    TranslationString::Version,
+    # UserGroupUser,                 (okay if these are all that's left)
+    Vote
+  ].freeze
+
   def no_references_left?
-    [
-      # ApiKey,                        (just deleted all of these)
-      Article,
-      CollectionNumber,
-      Comment,
-      # CopyrightChange,               (okay if these are all that's left)
-      # Donation,                      (okay if these are all that's left)
-      ExternalLink,
-      GlossaryTerm,
-      GlossaryTerm::Version,
-      # Herbarium, (personal_user_id)  (okay if these are all that's left)
-      # HerbariumCurator,              (okay if these are all that's left)
-      HerbariumRecord,
-      ImageVote,
-      Image,
-      # Interest,                      (just deleted all of these)
-      Location,
-      Location::Version,
-      LocationDescription,
-      LocationDescription::Version,
-      LocationDescriptionAuthor,
-      LocationDescriptionEditor,
-      Name,
-      Name::Version,
-      NameDescription,
-      NameDescription::Version,
-      NameDescriptionAuthor,
-      NameDescriptionEditor,
-      Naming,
-      # Notification,                  (just deleted all of these)
-      # ObservationView,               (okay if these are all that's left)
-      # Observation,                   (just deleted all of these)
-      Project,
-      Publication,
-      # QueuedEmail,                   (just deleted all of these)
-      # QueuedEmail, (to_user_id)      (just deleted all of these)
-      Sequence,
-      SpeciesList,
-      TranslationString,
-      TranslationString::Version,
-      # UserGroupUser,                 (okay if these are all that's left)
-      Vote
-    ].all? do |model|
+    REFERENCE_MODELS.all? do |model|
       model.where(user_id: id).none?
     end
   end

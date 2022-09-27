@@ -422,9 +422,10 @@ class UserTest < UnitTestCase
     rolf.delete_private_location_descriptions
     assert_raises(ActiveRecord::RecordNotFound) \
       { LocationDescription.find(albion.id) }
-    assert_equal(0, LocationDescription::Version.where(
-                  location_description_id: albion.id
-                ).count)
+    assert_equal(0,
+                 LocationDescription::Version.
+                   where(location_description_id: albion.id).
+                 count)
   end
 
   def test_delete_private_projects
