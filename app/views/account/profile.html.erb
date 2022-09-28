@@ -11,10 +11,11 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:user, url: { action: :profile }, html: { multipart: true })
-        do |form| %>
+  <%= form_for(:user, url: { action: :profile },
+               html: { multipart: true }) do |form| %>
 
-    <%= submit_tag(:profile_button.l, class: "btn btn-default center-block mt-3") %>
+    <%= submit_tag(:profile_button.l,
+                   class: "btn btn-default center-block mt-3") %>
 
     <div class="form-group mt-3">
       <%= label_tag(:user_name, :profile_name.t + ":") %>
@@ -23,7 +24,8 @@
 
     <div class="form-group mt-3">
       <%= label_tag(:user_place_name, :profile_location.t + ":") %> (33%)
-      <%= text_field(:user, :place_name, value: @place_name, class: "form-control") %>
+      <%= text_field(:user, :place_name,
+                     value: @place_name, class: "form-control") %>
       <% turn_into_location_auto_completer("user_place_name") %>
     </div>
 
@@ -45,7 +47,8 @@
       <%= label_tag(:copyright_holder, :profile_copyright_holder.t + ":") %>
       <div class="row">
         <div class="col-xs-8">
-          <%= text_field_tag(:copyright_holder, @copyright_holder, class: "form-control") %>
+          <%= text_field_tag(:copyright_holder, @copyright_holder,
+                             class: "form-control") %>
         </div>
         <div class="col-xs-4">
           <%= select_year(@copyright_year,
