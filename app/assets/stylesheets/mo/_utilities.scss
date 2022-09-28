@@ -12,6 +12,10 @@
   width: 100% !important;
 }
 
+.w-50 {
+  width: 50% !important;
+}
+
 .h-100 {
   height: 100% !important;
 }
@@ -104,12 +108,32 @@
   margin: 0 !important;
 }
 
+.mx-0 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.mx-1 {
+  margin-left: 0.25em !important;
+  margin-right: 0.25em !important;
+}
+
+.mx-2 {
+  margin-left: 0.5em !important;
+  margin-right: 0.5em !important;
+}
+
 .m-10px {
   margin: 10px !important;
 }
 
 .m-3 {
   margin: 1em !important;
+}
+
+.my-2 {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
 }
 
 .my-3 {

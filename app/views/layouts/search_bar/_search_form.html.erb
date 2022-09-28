@@ -1,9 +1,9 @@
 <%= form_with(url: search_pattern_path, method: :get,
               class: "navbar-form navbar-left px-0") do %>
-  <div>
+  <div class="form-group">
     <div class="d-inline-block align-top icon-addon addon-sm">
       <%= text_field(:search, :pattern, value: session[:pattern],
-                     class: "form-control", placeholder: :app_find.t) %>
+                     class: "form-control mb-2", placeholder: :app_find.t) %>
       <label for="search_pattern" class="glyphicon glyphicon-search"
              title="search"> </label>
     </div>
@@ -27,37 +27,43 @@
                 options_for_select(options,
                                   session[:search_type] || :observation),
                 { },
-                { class: "form-control inline align-top w-auto" })
+                { class: "form-control d-inline align-top w-auto" })
       %>
       <%= submit_tag(:app_search.l, class: "btn btn-default align-top mr-2") %>
     </div>
-    <%=
-        link_to(content_tag(:span, :search_bar_help.t),
-                info_search_bar_help_path)
-    %>
-    |
-
-    <%
-      adv_search = link_to(content_tag(:span, :app_advanced_search.l,
-                                        class: "text-nowrap"),
-                    search_advanced_path)
-      @timer_end ||= Time.zone.now
-      secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-      timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"
-    %>
-    <% if @timer_start %>
-      <div class="d-inline-block hidden-xs smaller">
-        <span id="timer"><%= timer %></span><br/>
-        <%= adv_search %>
-      </div>
-    <% else %>
-      <p class="form-control-static hidden-xs">
-        <%= adv_search %>
-      </p>
-    <% end %>
-    <div class="visible-xs">
-      <%= content_tag(:span, timer, id: "timer", class: "text-nowrap") if @timer_start %>
-      <%= adv_search %>
-    </div>
   </div>
 <% end %>
+
+<p class="navbar-text mx-2 align-top text-nowrap">
+  <%=
+      link_to(content_tag(:span, :search_bar_help.t),
+              info_search_bar_help_path)
+  %>
+  |
+
+  <%
+    adv_search = link_to(content_tag(:span, :app_advanced_search.l,
+                                      class: "text-nowrap"),
+                          search_advanced_path)
+    @timer_end ||= Time.zone.now
+    secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
+    timer = "(#{ :app_index_timer.t(seconds: secs,
+                                    num: @num_results.to_i) })"
+  %>
+</p>
+
+<% if @timer_start %>
+  <div class="d-inline-block hidden-xs smaller">
+    <span id="timer"><%= timer %></span><br/>
+    <%= adv_search %>
+  </div>
+<% else %>
+  <p class="form-control-static hidden-xs">
+    <%= adv_search %>
+  </p>
+<% end %>
+
+<div class="visible-xs">
+  <%= content_tag(:span, timer, id: "timer", class: "text-nowrap") if @timer_start %>
+  <%= adv_search %>
+</div>
