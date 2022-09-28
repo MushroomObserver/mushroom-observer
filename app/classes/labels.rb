@@ -154,13 +154,13 @@ class Labels
   def format_lat_long
     loc = @obs.location
     if @obs.lat.present?
-      " / #{format_lat(@obs.lat)} #{format_long(@obs.long)}"
+      "#{format_lat(@obs.lat)} #{format_long(@obs.long)}"
     elsif loc.present?
       n = format_lat(loc.north)
       s = format_lat(loc.south)
       e = format_lat(loc.east)
       w = format_lat(loc.west)
-      " / #{s}–#{n} #{w}–#{e}"
+      "#{s}–#{n} #{w}–#{e}"
     end
   end
 
