@@ -22,8 +22,7 @@
 
   <%= paginate_block(@pages) do %>
     <ul class="row list-unstyled mt-3">
-      <%= render(layout: "shared/matrix_grid",
-                 locals: {objects: @objects}) do |image| %>
+      <% @objects.each do |image| %>
         <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
           <div class="panel panel-default">
             <div class="panel-body">
