@@ -22,7 +22,8 @@
 
   <div class="col-xs-12 col-sm-5 max-width-text">
     <% @collection_number.observations.each do |obs| %>
-      <%= render(partial: "shared/matrix_box", locals: { object: obs.rss_log }) %>
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: obs.rss_log }) %>
     <% end %>
   </div>
 </div>

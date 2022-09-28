@@ -28,7 +28,7 @@
   <div class="col-xs-12 col-sm-5 max-width-text">
     <% @herbarium_record.observations.each do |obs| %>
       <%= render(partial: "shared/matrix_box",
-          locals: { object: obs.rss_log }) %>
+                 locals: { object: obs.rss_log }) %>
     <% end %>
   </div>
 </div>

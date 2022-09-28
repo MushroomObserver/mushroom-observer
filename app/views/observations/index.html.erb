@@ -36,9 +36,9 @@
 <% end %>
 
 <%= paginate_block(@pages) do %>
-  <div class="row mt-3">
-    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
-               collection: @objects, as: :object) %>
-    <div style="clear: left"></div>
-  </div>
+  <ul class="row list-unstyled mt-3">
+    <%= render(partial: "shared/matrix_box",
+               collection: @objects,
+               as: :object) %>
+  </ul>
 <% end %>
