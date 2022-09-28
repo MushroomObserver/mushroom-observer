@@ -42,7 +42,7 @@
     <% if @new_names && (@new_names != []) %>
       <div class="alert alert-danger">
         <%= :form_synonyms_missing_names.t %><br/>
-          <span class="indent">
+          <span class="pl-3">
             <% @new_names.each do |n| %>
             <%= h(n) %><br/>
             <% end %>

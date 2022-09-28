@@ -13,7 +13,7 @@
       <div class="alert-warning">
         <div><%= :list_observations_suggestions.t %>:</div>
         <% names.sort_by(&:sort_name).each do |name| %>
-          <div class="indent">
+          <div class="pl-3">
             <%= search = PatternSearch::Observation.new(name.text_name)
                 count = search.query.num_results
                 if count.zero?
@@ -36,7 +36,7 @@
 <% end %>
 
 <%= paginate_block(@pages) do %>
-  <div class="row results mt-3">
+  <div class="row mt-3">
     <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
                collection: @objects, as: :object) %>
     <div style="clear: left"></div>

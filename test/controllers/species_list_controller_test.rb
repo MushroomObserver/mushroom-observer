@@ -1932,23 +1932,23 @@ class SpeciesListControllerTest < FunctionalTestCase
     # make sure no checklist appears if no source set
     @request.session[:checklist_source] = nil
     get(:create_species_list)
-    assert_select("div#checklist_data", count: 0)
+    assert_select("#checklist_data", count: 0)
 
     @request.session[:checklist_source] = nil
     get(:edit_species_list, params: { id: spl2.id })
-    assert_select("div#checklist_data", count: 0)
+    assert_select("#checklist_data", count: 0)
 
     # make sure the source observations appear if source set
     @request.session[:checklist_source] = query2.id
     get(:create_species_list)
-    assert_select("div#checklist_data")
+    assert_select("#checklist_data")
     name1 = spl2.observations.first.name.id
     assert_select("input[name='checklist_data[#{name1}]']")
 
     login(spl1.user.login)
     @request.session[:checklist_source] = query2.id
     get(:edit_species_list, params: { id: spl1.id })
-    assert_select("div#checklist_data")
+    assert_select("#checklist_data")
     name2 = spl2.observations.last.name.id
     assert_select("input[name='checklist_data[#{name2}]']")
   end

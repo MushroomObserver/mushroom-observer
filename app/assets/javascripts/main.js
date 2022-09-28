@@ -13,6 +13,7 @@ jQuery(document).ready(function () {
 
     jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'});
 
+    // HAMBURGER HELPER
     jQuery('[data-toggle="offcanvas"]').click(function () {
         jQuery(document).scrollTop(0);
         jQuery('.row-offcanvas').toggleClass('active');
@@ -20,10 +21,11 @@ jQuery(document).ready(function () {
 
     });
 
+    // SEARCH BAR FINDER
     jQuery('[data-toggle="search"]').click(function () {
         jQuery(document).scrollTop(0);
         var target = jQuery(this).data().target;
-        jQuery(target).css('margin-top', '32px');
+        // jQuery(target).css('margin-top', '32px');
         jQuery(target).toggleClass('hidden-xs');
     });
 
