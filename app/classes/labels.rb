@@ -60,6 +60,7 @@ class Labels
     add_number
     add_name
     add_location
+    add_gps
     add_date
     add_observer_if_necessary
     add_sequences
