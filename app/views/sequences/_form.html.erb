@@ -9,7 +9,7 @@
         <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
     </div>
     <div class="col-xs-12 col-sm-6">
-      <div class="well well-sm max-width-text help-block">
+      <div class="well well-sm max-width-text help-block position-relative">
         <div class="arrow-left hidden-xs"></div>
         <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
       </div>
@@ -55,7 +55,7 @@
       <%= form.text_field(:accession, class: "form-control") %>
     </div>
     <div class="col-xs-12 col-md-6">
-      <div class="well well-sm max-width-text help-block">
+      <div class="well well-sm max-width-text help-block position-relative">
         <div class="arrow-left hidden-xs"></div>
         <%= :form_sequence_accession_help.t %>
       </div>
@@ -70,7 +70,7 @@
       <%= form.text_area(:notes, rows: 3, class: "form-control") %>
     </div>
     <div class="col-xs-12 col-md-6">
-      <div class="well well-sm max-width-text help-block mt-4">
+      <div class="well well-sm max-width-text help-block position-relative mt-4">
         <div class="arrow-left hidden-xs"></div>
         <%= :field_textile_link.t %>
       </div>
