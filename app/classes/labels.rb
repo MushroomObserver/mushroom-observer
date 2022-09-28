@@ -72,7 +72,9 @@ class Labels
   # RTF class doesn't support smallcaps, but it's really easy.
   def label(str)
     node = RTF::CommandNode.new(@para, "\\rtlch \\ltrch\\scaps\\loch")
-    node.underline { |node2| node2 << str }
+    node.underline do |node2|
+      node2.bold { |node3| node3 << str }
+    end
     node << ": "
     @para.store(node)
   end
@@ -81,7 +83,7 @@ class Labels
 
   # Collector's number, e.g.: "John Doe 1234 / MO 56789"
   def add_number
-    label("number")
+    label("Number")
     nums = collection_numbers + herbarium_records + [mo_number]
     @para << nums.join(" / ")
     @para << " #{specimen_available}" if nums.length == 1
@@ -112,7 +114,7 @@ class Labels
 
   # Mushroom name, in bold and italic.
   def add_name
-    label("name")
+    label("Name")
     italic = false
     @para.bold do |bold|
       @obs.name.display_name.gsub("**", "").split("__").each do |part|
@@ -131,10 +133,18 @@ class Labels
 
   # --------------------
 
-  # Location + GPS.
   def add_location
-    label("location")
+    label("Location")
     @para << @obs.place_name
+    @para.line_break
+  end
+
+  # --------------------
+
+  def add_gps
+    return unless @obs.lat.present? || @obs.alt.present?
+
+    label("Coordinates")
     @para << format_lat_long
     @para << format_alt
     @para.line_break
@@ -184,7 +194,7 @@ class Labels
 
   # Date in format: "5 Dec 2021".
   def add_date
-    label("date")
+    label("Date")
     @para << @obs.when.strftime("%e %b %Y").strip
     @para.line_break
   end
@@ -197,7 +207,7 @@ class Labels
     collector = @obs.collection_numbers.first&.name
     return if collector == observer
 
-    label("observer")
+    label("Observer")
     @para << observer
     @para.line_break
   end
@@ -208,7 +218,7 @@ class Labels
   def add_sequences
     return unless @obs.sequences.any?
 
-    label("sequences")
+    label("Sequences")
     @para << @obs.sequences.map do |seq|
       "#{seq.locus} #{seq.archive} #{seq.accession}".strip_squeeze
     end.join(" / ")
@@ -221,7 +231,7 @@ class Labels
   def add_projects
     return unless @obs.projects.any?
 
-    label("projects")
+    label("Projects")
     @para << @obs.projects.map(&:title).join(" / ")
     @para.line_break
   end
@@ -232,7 +242,7 @@ class Labels
   def add_species_lists
     return unless @obs.species_lists.any?
 
-    label("species lists")
+    label("Species Lists")
     @para << @obs.species_lists.map(&:title).join(" / ")
     @para.line_break
   end
@@ -245,9 +255,9 @@ class Labels
       next if val.blank?
 
       if key == Observation.other_notes_key
-        label("notes")
+        label("Notes")
       else
-        label(key.to_s.downcase.tr("_", " "))
+        label(key.to_s.tr("_", " "))
       end
       @para << val
       @para.line_break
