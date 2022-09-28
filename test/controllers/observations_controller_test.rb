@@ -3004,7 +3004,8 @@ class ObservationsControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     assert_operator(query.num_results, :>=, 4)
     get(:print_labels, params: { q: query.id.alphabetize })
-    assert_select("#labels td", query.num_results)
+    # \pard is paragraph command in rtf, one paragraph per result
+    assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
     assert_match(/314159/, @response.body) # make sure fundis id in there!
     assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
@@ -3016,7 +3017,15 @@ class ObservationsControllerTest < FunctionalTestCase
         commit: "Print Labels"
       }
     )
-    assert_select("#labels td", query.num_results)
+    assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+  end
+
+  # Print labels for all observations just to be sure all cases (more or less)
+  # are tested and at least not crashing.
+  def test_print_labels_all
+    login
+    query = Query.lookup_and_save(:Observation, :all)
+    get(:print_labels, params: { q: query.id.alphabetize })
   end
 
   def test_external_sites_user_can_add_links_to
