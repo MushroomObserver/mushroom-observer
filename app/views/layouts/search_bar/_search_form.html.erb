@@ -22,6 +22,8 @@ adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
 )
+
+# Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
 <%= form_with(url: search_pattern_path, method: :get,
@@ -36,6 +38,7 @@ adv_search = link_to(
                           placeholder: :app_find.t }) %>
     <% end %>
   </div><!--.form-group-->
+
   <div class="form-group text-nowrap">
     <%= fields_for :search do |search_form| %>
       <%= search_form.select(
@@ -44,6 +47,7 @@ adv_search = link_to(
             { }, { class: "form-control w-auto" }) %>
     <% end %>
   </div><!--.form-group-->
+
   <div class="form-group text-nowrap">
     <%= fields_for :search do |search_form| %>
       <%= search_form.submit(:app_search.l,
@@ -56,7 +60,7 @@ adv_search = link_to(
 <p class="navbar-text mx-2 text-nowrap">
   <%= link_to(content_tag(:span, :search_bar_help.t),
               info_search_bar_help_path) %>
-  <span class="hidden-xs"> |</span>
+  <span class=""> |</span>
 </p>
 
 <% if @timer_start %>
