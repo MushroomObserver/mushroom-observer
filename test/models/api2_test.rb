@@ -4182,7 +4182,7 @@ class API2Test < UnitTestCase
     do_help_test(:get, :user)
     do_help_test(:post, :user)
     do_help_test(:patch, :user)
-    do_help_test(:delete, :user, fail: true)
+    do_help_test(:delete, :user)
   end
 
   def do_help_test(method, action, fail: false)
