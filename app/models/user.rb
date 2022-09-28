@@ -78,6 +78,8 @@
 #  updated_at::         Date/time it was last updated.
 #  verified::           Date/time the account was verified.
 #  last_login::         Date/time the user last logged in.
+#  last_activity::      Date/time the user made last request (updated hourly).
+#  blocked::            Boolean: user blocked or deleted?
 #
 #  ==== Administrative
 #  login::              Login name (must be locally unique).
@@ -1003,26 +1005,32 @@ class User < AbstractModel
     observations.delete_all
   end
 
-  # Delete user's descriptions that don't have any other authors or # editors.
+  # Delete user's descriptions that don't have any other authors or editors.
+  # (Oops, editors never got "hooked up" so we have to use versions instead.)
   def delete_private_name_descriptions
     ids = (name_descriptions -
              name_descriptions.joins(:name_description_authors).
                where.not(name_description_authors: { user_id: id }) -
              name_descriptions.joins(:name_description_editors).
-               where.not(name_description_editors: { user_id: id })).
+               where.not(name_description_editors: { user_id: id }) -
+             name_descriptions.joins(:versions).
+               where.not(versions: { user_id: id })).
           map(&:id)
     NameDescription.where(id: ids).delete_all
     NameDescription::Version.
       where(name_description: ids, user_id: id).delete_all
   end
 
-  # Delete user's descriptions that don't have any other authors or # editors.
+  # Delete user's descriptions that don't have any other authors or editors.
+  # (Oops, editors never got "hooked up" so we have to use versions instead.)
   def delete_private_location_descriptions
     ids = (location_descriptions -
             location_descriptions.joins(:location_description_authors).
               where.not(location_description_authors: { user_id: id }) -
             location_descriptions.joins(:location_description_editors).
-              where.not(location_description_editors: { user_id: id })).
+              where.not(location_description_editors: { user_id: id }) -
+            location_descriptions.joins(:versions).
+              where.not(versions: { user_id: id })).
           map(&:id)
     LocationDescription.where(id: ids).delete_all
   end
