@@ -341,7 +341,7 @@ class ApplicationController < ActionController::Base
 
     try_user_autologin(session_user)
     make_logged_in_user_available_to_everyone
-    track_last_page_request_by_user
+    track_last_time_user_made_a_request
     block_suspended_users
   end
 
@@ -352,25 +352,23 @@ class ApplicationController < ActionController::Base
     User.current = nil
   end
 
-  def try_user_autologin(user)
-    # Do nothing if already logged in: if user asked us to remember him the
-    # cookie will already be there, if not then we want to leave it out.
-    if already_logged_in?(user)
+  def try_user_autologin(user_from_session)
+    if user_verified_and_allowed?(user = user_from_session)
+      # User was already logged in.
       refresh_logged_in_user_instance(user)
-
-    # Log in if cookie is valid, and autologin is enabled.
-    elsif (user = valid_user_from_cookie) && user.verified
+    elsif user_verified_and_allowed?(user = get_and_validate_user_from_cookie)
+      # User had "remember me" cookie set.
       login_valid_user(user)
     else
       delete_invalid_cookies
     end
   end
 
-  def already_logged_in?(user)
-    user&.verified
+  def user_verified_and_allowed?(user)
+    user && user.verified && !user.blocked?
   end
 
-  def valid_user_from_cookie
+  def get_and_validate_user_from_cookie
     return unless (cookie = cookies["mo_user"]) &&
                   (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
@@ -407,30 +405,20 @@ class ApplicationController < ActionController::Base
                 "ip=#{request.remote_ip}")
   end
 
-  # Track when user requested a page, but update at most once an hour.
-  def track_last_page_request_by_user
-    if @user && (
-        !@user.last_activity ||
-        @user.last_activity.to_s("%Y%m%d%H") != Time.current.to_s("%Y%m%d%H"))
-      @user.last_activity = Time.current
-      @user.save
-    end
+  # Track when user last requested a page, but update at most once an hour.
+  def track_last_time_user_made_a_request
+    last_activity = @user&.last_activity&.to_s("%Y%m%d%H") 
+    return if !@user || last_activity >= Time.current.to_s("%Y%m%d%H"))
+
+    @user.last_activity = Time.current
+    @user.save
   end
 
   def block_suspended_users
-    return true unless user_suspended? # Tell Rails to continue processing.
+    return true unless @user&.blocked # Tell Rails to continue processing.
 
-    block(user)
+    render(plain: "Your account has been deleted.", layout: false)
     false # Tell Rails to stop processing.
-  end
-
-  def user_suspended?
-    @user && @user.id == 2750 # Kick Byrain off the site.
-  end
-
-  def block_user
-    render(plain: "Your account has been temporarily suspended.",
-           layout: false)
   end
 
   public ##########
