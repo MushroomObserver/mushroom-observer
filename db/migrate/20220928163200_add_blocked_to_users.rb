@@ -8,7 +8,7 @@ class AddBlockedToUsers < ActiveRecord::Migration[6.1]
 
   # We used to have this hard-coded in application_controller.
   def block_byrain!
-    User.find(2750).update_attribute(blocked: true)
+    User.find(2750).update_attribute(:blocked, true)
   rescue ActiveRecord::RecordNotFound
   end
 end
