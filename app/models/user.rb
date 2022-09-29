@@ -1017,11 +1017,11 @@ class User < AbstractModel
   def private_name_descriptions
     name_descriptions -
       name_descriptions.joins(:name_description_authors).
-        where.not(name_description_authors: { user_id: id }) -
+      where.not(name_description_authors: { user_id: id }) -
       name_descriptions.joins(:name_description_editors).
-        where.not(name_description_editors: { user_id: id }) -
+      where.not(name_description_editors: { user_id: id }) -
       name_descriptions.joins(:versions).
-        where.not(versions: { user_id: id })
+      where.not(versions: { user_id: id })
   end
 
   # Delete user's descriptions that don't have any other authors or editors.
@@ -1035,20 +1035,20 @@ class User < AbstractModel
   def private_location_descriptions
     location_descriptions -
       location_descriptions.joins(:location_description_authors).
-        where.not(location_description_authors: { user_id: id }) -
+      where.not(location_description_authors: { user_id: id }) -
       location_descriptions.joins(:location_description_editors).
-        where.not(location_description_editors: { user_id: id }) -
+      where.not(location_description_editors: { user_id: id }) -
       location_descriptions.joins(:versions).
-        where.not(versions: { user_id: id })
+      where.not(versions: { user_id: id })
   end
 
   # Delete all the user's projects that don't have any other users on them.
   def delete_private_projects
     ids = (projects_created -
             projects_created.joins(:admin_group_users).
-              where.not(admin_group_users: { id: id }) -
+            where.not(admin_group_users: { id: id }) -
             projects_created.joins(:member_group_users).
-              where.not(member_group_users: { id: id })).
+            where.not(member_group_users: { id: id })).
           map(&:id)
     Project.where(id: ids).delete_all
   end
