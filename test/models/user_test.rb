@@ -429,7 +429,7 @@ class UserTest < UnitTestCase
 
     # Can't delete while Dick is an editor.
     rolf.delete_private_location_descriptions
-    assert_not_nil(LocationDescription.find(albion.id))
+    assert_not_empty(LocationDescription.where(id: albion.id))
 
     # Let's remove Dick from the editors, but give one of the versions to Dick.
     albion.editors.clear

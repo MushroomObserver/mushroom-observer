@@ -1009,31 +1009,37 @@ class User < AbstractModel
   # Delete user's descriptions that don't have any other authors or editors.
   # (Oops, editors never got "hooked up" so we have to use versions instead.)
   def delete_private_name_descriptions
-    ids = (name_descriptions -
-             name_descriptions.joins(:name_description_authors).
-               where.not(name_description_authors: { user_id: id }) -
-             # name_descriptions.joins(:name_description_editors).
-             #   where.not(name_description_editors: { user_id: id }) -
-             name_descriptions.joins(:versions).
-               where.not(versions: { user_id: id })).
-          map(&:id)
+    ids = private_name_descriptions.map(&:id)
     NameDescription.where(id: ids).delete_all
     NameDescription::Version.where(name_description_id: ids).delete_all
+  end
+
+  def private_name_descriptions
+    name_descriptions -
+      name_descriptions.joins(:name_description_authors).
+        where.not(name_description_authors: { user_id: id }) -
+      name_descriptions.joins(:name_description_editors).
+        where.not(name_description_editors: { user_id: id }) -
+      name_descriptions.joins(:versions).
+        where.not(versions: { user_id: id })
   end
 
   # Delete user's descriptions that don't have any other authors or editors.
   # (Oops, editors never got "hooked up" so we have to use versions instead.)
   def delete_private_location_descriptions
-    ids = (location_descriptions -
-            location_descriptions.joins(:location_description_authors).
-              where.not(location_description_authors: { user_id: id }) -
-            # location_descriptions.joins(:location_description_editors).
-            #   where.not(location_description_editors: { user_id: id }) -
-            location_descriptions.joins(:versions).
-              where.not(versions: { user_id: id })).
-          map(&:id)
+    ids = private_location_descriptions.map(&:id)
     LocationDescription.where(id: ids).delete_all
     LocationDescription::Version.where(location_description_id: ids).delete_all
+  end
+
+  def private_location_descriptions
+    location_descriptions -
+      location_descriptions.joins(:location_description_authors).
+        where.not(location_description_authors: { user_id: id }) -
+      location_descriptions.joins(:location_description_editors).
+        where.not(location_description_editors: { user_id: id }) -
+      location_descriptions.joins(:versions).
+        where.not(versions: { user_id: id })
   end
 
   # Delete all the user's projects that don't have any other users on them.
