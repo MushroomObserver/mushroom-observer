@@ -1012,8 +1012,8 @@ class User < AbstractModel
     ids = (name_descriptions -
              name_descriptions.joins(:name_description_authors).
                where.not(name_description_authors: { user_id: id }) -
-             name_descriptions.joins(:name_description_editors).
-               where.not(name_description_editors: { user_id: id }) -
+             # name_descriptions.joins(:name_description_editors).
+             #   where.not(name_description_editors: { user_id: id }) -
              name_descriptions.joins(:versions).
                where.not(versions: { user_id: id })).
           map(&:id)
@@ -1027,8 +1027,8 @@ class User < AbstractModel
     ids = (location_descriptions -
             location_descriptions.joins(:location_description_authors).
               where.not(location_description_authors: { user_id: id }) -
-            location_descriptions.joins(:location_description_editors).
-              where.not(location_description_editors: { user_id: id }) -
+            # location_descriptions.joins(:location_description_editors).
+            #   where.not(location_description_editors: { user_id: id }) -
             location_descriptions.joins(:versions).
               where.not(versions: { user_id: id })).
           map(&:id)

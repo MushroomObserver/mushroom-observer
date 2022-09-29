@@ -356,7 +356,7 @@ class ApplicationController < ActionController::Base
     if user_verified_and_allowed?(user = user_from_session)
       # User was already logged in.
       refresh_logged_in_user_instance(user)
-    elsif user_verified_and_allowed?(user = get_and_validate_user_from_cookie)
+    elsif user_verified_and_allowed?(user = validate_user_in_autologin_cookie)
       # User had "remember me" cookie set.
       login_valid_user(user)
     else
@@ -365,10 +365,10 @@ class ApplicationController < ActionController::Base
   end
 
   def user_verified_and_allowed?(user)
-    user && user.verified && !user.blocked?
+    user&.verified && !user.blocked?
   end
 
-  def get_and_validate_user_from_cookie
+  def validate_user_in_autologin_cookie
     return unless (cookie = cookies["mo_user"]) &&
                   (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
@@ -407,7 +407,7 @@ class ApplicationController < ActionController::Base
 
   # Track when user last requested a page, but update at most once an hour.
   def track_last_time_user_made_a_request
-    last_activity = @user&.last_activity&.to_s("%Y%m%d%H") 
+    last_activity = @user&.last_activity&.to_s("%Y%m%d%H")
     now = Time.current.to_s("%Y%m%d%H")
     return if !@user || last_activity && last_activity >= now
 

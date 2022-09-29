@@ -3544,7 +3544,7 @@ class API2Test < UnitTestCase
       user: zero,
       key: "whatever",
       notes: "blah",
-      verified: Time.now
+      verified: Time.zone.now
     )
 
     # Zero can also delete himself, and since he hasn't done anything,

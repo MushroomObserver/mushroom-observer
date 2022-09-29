@@ -451,7 +451,7 @@ class UserTest < UnitTestCase
     # Dick created several projects.  Most have the admin and member groups set
     # to dick_only, but one uses bolete_admins/bolete_users, and another uses
     # article_writers.  The latter group contains users other than Dick, and
-    # therefore that project (news_article_project) should not be deleted. 
+    # therefore that project (news_article_project) should not be deleted.
 
     # Prove that Dick owns a few projects using only dick_only.
     dick_only = user_groups(:dick_only)
@@ -477,7 +477,7 @@ class UserTest < UnitTestCase
     article_writers = user_groups(:article_writers)
     assert_users_equal(dick, news_articles.user)
     assert_operator(0, "<",
-                    article_writers.users.select {|user| user != dick}.count,
+                    article_writers.users.count { |user| user != dick },
                     "article_writers should have a user other than dick")
 
     # Prove that Dick doesn't own any other kinds of projects.
