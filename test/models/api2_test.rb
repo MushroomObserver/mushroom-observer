@@ -3540,9 +3540,12 @@ class API2Test < UnitTestCase
     assert_true(rolf.blocked)
 
     zero = users(:zero_user)
-    zeros_api_key = ApiKey.create(user: zero, key: "whatever")
-    zeros_api_key.verified = true
-    zeros_api_key.save
+    zeros_api_key = APIKey.create!(
+      user: zero,
+      key: "whatever",
+      notes: "blah",
+      verified: Time.now
+    )
 
     # Zero can also delete himself, and since he hasn't done anything,
     # it should actually fully destroy the account.

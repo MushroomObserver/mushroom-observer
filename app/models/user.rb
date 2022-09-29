@@ -277,6 +277,7 @@ class User < AbstractModel
   has_many :queued_emails
   has_many :sequences
   has_many :species_lists
+  has_many :collection_numbers
   has_many :herbarium_records
   has_many :test_add_image_logs
   has_many :votes
@@ -970,13 +971,13 @@ class User < AbstractModel
   # Disable and remove all public information from account but leave it there
   # in case there are still comments, etc. on the site by this user.
   def disable_account
-    self.password = ""
     self.email = ""
     self.blocked = true
     self.location_id = nil
     self.image_id = nil
     self.notes = nil
     self.mailing_address = nil
+    update_attribute(:password, "")
     save
   end
 
@@ -1017,8 +1018,7 @@ class User < AbstractModel
                where.not(versions: { user_id: id })).
           map(&:id)
     NameDescription.where(id: ids).delete_all
-    NameDescription::Version.
-      where(name_description: ids, user_id: id).delete_all
+    NameDescription::Version.where(name_description_id: ids).delete_all
   end
 
   # Delete user's descriptions that don't have any other authors or editors.
@@ -1033,15 +1033,18 @@ class User < AbstractModel
               where.not(versions: { user_id: id })).
           map(&:id)
     LocationDescription.where(id: ids).delete_all
+    LocationDescription::Version.where(location_description_id: ids).delete_all
   end
 
   # Delete all the user's projects that don't have any other users on them.
   def delete_private_projects
-    Project.joins(:admin_group, :user_group).
-      where(user: self,
-            admin_group: { name: "user #{id}" },
-            user_group: { name: "user #{id}" }).
-      delete_all
+    ids = (projects_created -
+            projects_created.joins(:admin_group_users).
+              where.not(admin_group_users: { id: id }) -
+            projects_created.joins(:member_group_users).
+              where.not(member_group_users: { id: id })).
+          map(&:id)
+    Project.where(id: ids).delete_all
   end
 
   # Delete all species lists the user created unless they belong to a project.
@@ -1053,16 +1056,14 @@ class User < AbstractModel
   # public projects just because the user happened to originally create them.
   # -JPH 20220916
   def delete_private_species_lists
-    ids = (species_lists -
-            species_lists.joins(:project_species_lists)).
+    ids = (species_lists - species_lists.joins(:project_species_lists)).
           map(&:id)
     SpeciesList.where(id: ids).delete_all
   end
 
   def delete_unattached_collection_numbers
-    ids = (CollectionNumber.where(user: self) -
-             CollectionNumber.where(user: self).
-               joins(:observation_collection_numbers)).
+    ids = (collection_numbers -
+            collection_numbers.joins(:observation_collection_numbers)).
           map(&:id)
     CollectionNumber.where(id: ids).delete_all
   end
@@ -1085,7 +1086,7 @@ class User < AbstractModel
   end
 
   REFERENCE_MODELS = [
-    # ApiKey,                        (just deleted all of these)
+    # APIKey,                        (just deleted all of these)
     Article,
     CollectionNumber,
     Comment,
