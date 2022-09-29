@@ -17,11 +17,13 @@
 
 .matrix-box {
   .panel {
-    min-height: 200px;
-
     .thumbnail-container {
       min-height: 30px;
     }
+  }
+  .panel-body {
+    min-height: 200px;
+    height: 515px;
   }
 }
 
