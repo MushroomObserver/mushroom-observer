@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_23_194140) do
+ActiveRecord::Schema.define(version: 2022_09_28_163200) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -683,6 +683,7 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.boolean "view_owner_id", default: false, null: false
     t.string "content_filter"
     t.text "notes_template"
+    t.boolean "blocked", default: false, null: false
   end
 
   create_table "votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
