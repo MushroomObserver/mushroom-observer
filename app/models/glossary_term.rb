@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Glossary of mycological terms, with illustrations
+# Glossary of mycological terms, with illustrations.
+#
+# NOTE: Glossary terms are attached to one or more images via the glue table
+# glossary_term_images.  This table includes the thumbnail!!!!
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
