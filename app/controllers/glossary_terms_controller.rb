@@ -66,13 +66,21 @@ class GlossaryTermsController < ApplicationController
       return redirect_to(glossary_term_path(@glossary_term.id))
     end
 
+    old_images = @glossary_term.images.to_a
     if @glossary_term.destroy
+      destroy_unused_images(old_images)
       flash_notice(
         :runtime_destroyed_id.t(type: GlossaryTerm, value: params[:id])
       )
       redirect_to(glossary_terms_path)
     else
       redirect_to(glossary_term_path(@glossary_term.id))
+    end
+  end
+
+  def destroy_unused_images(images)
+    images.each do |image|
+      image.destroy if image&.all_subjects.empty?
     end
   end
 

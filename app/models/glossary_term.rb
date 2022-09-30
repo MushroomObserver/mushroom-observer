@@ -29,8 +29,6 @@ class GlossaryTerm < AbstractModel
   # rubocop:enable Rails/UniqueValidationWithoutIndex
   validate :must_have_description_or_image
 
-  after_destroy(:destroy_unused_images)
-
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
     table_name: "glossary_terms_versions",
@@ -99,11 +97,5 @@ class GlossaryTerm < AbstractModel
     return if description.present? || thumb_image.present?
 
     errors.add(:base, :glossary_error_description_or_image.t)
-  end
-
-  def destroy_unused_images
-    images.each do |image|
-      image.destroy if image && !image.other_subjects?(self)
-    end
   end
 end

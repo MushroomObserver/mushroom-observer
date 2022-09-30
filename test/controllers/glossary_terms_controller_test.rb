@@ -271,7 +271,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_destroy_term_with_images
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
-    used_images = term.images - [unused_image]
+    used_image = term.other_images.first
+    assert_equal(1, unused_image.all_subjects.count,
+                 "unused_image should only be used by one subject")
+    assert_operator(1, "<", used_image.all_subjects.count,
+                    "used_image should be used by more than one subject")
 
     login
     make_admin
@@ -283,10 +287,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     assert_not(Image.exists?(unused_image.id),
                "Failed to destroy unused Image #{unused_image.id}")
-    used_images.each do |image|
-      assert(Image.exists?(image.id),
-             "Image #{image.id} which was used elsewhere was destroyed")
-    end
+    assert(Image.exists?(used_image.id),
+           "Image #{used_image.id} which was used elsewhere was destroyed")
   end
 
   def test_destroy_no_login
