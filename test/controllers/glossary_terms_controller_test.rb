@@ -271,7 +271,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_destroy_term_with_images
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
-    used_images = term.all_images - [unused_image]
+    used_images = term.images - [unused_image]
 
     login
     make_admin
