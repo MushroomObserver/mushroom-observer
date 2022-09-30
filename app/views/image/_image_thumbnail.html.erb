@@ -35,7 +35,7 @@ show_filename = original && image && !image.original_name.blank? &&
 
   <%= tag.div class: "image-lazy-sizer overflow-hidden",
               style: "padding-bottom: #{img_proportion}%;" do
-    image_tag(thumb_url, html_options)
+    image_tag("placeholder.svg", html_options) # was thumb_url
   end %>
 
   <%= link_to "", link, class: "stretched-link" %>

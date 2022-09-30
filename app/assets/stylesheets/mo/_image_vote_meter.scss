@@ -2,6 +2,11 @@
 // image interactions - theater and votes
 // --------------------------------------------------
 
+svg.placeholder {
+  rect {
+    fill: rgba($LIST_BG_COLOR, 0.3) !important;
+  }
+}
 //
 // theater view & vote section
 // --------------------------------------------------
@@ -27,10 +32,8 @@
 //     text-decoration: none;
 //   }
 // }
-
 .vote-section,
 .theater-btn {
-  @extend .top-right, .mr-2, .mt-2;
   z-index: 2;
   opacity: 0;
   background: rgba(0,0,0, 0.8);
@@ -40,9 +43,12 @@
   transition: opacity 0.3s ease-out;
 }
 
+.theater-btn {
+  @extend .top-right, .mr-2, .mt-2;
+}
+
 .vote-section {
   @extend .ab-bottom, .text-center;
-  z-index: 2;
 
   a {
     color: white;
