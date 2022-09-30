@@ -16,7 +16,7 @@
 
 // Initialize Verlok LazyLoad
 var lazyLoadInstance = new LazyLoad({
-  elements_selector: ".lazyload"
+  elements_selector: ".lazy"
   // ... more custom settings?
 });
 
