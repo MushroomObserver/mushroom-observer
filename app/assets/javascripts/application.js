@@ -1,7 +1,7 @@
 //= require jquery3
 //= require jquery_extensions
 //= require jquery_ujs
-//= require bootstrap
+//= require bootstrap-sprockets
 //= require jstz
 //= require autocomplete
 //= require box_resizer
