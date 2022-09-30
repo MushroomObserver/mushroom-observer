@@ -2,9 +2,12 @@
 //= require jquery_extensions
 //= require jquery_ujs
 //= require bootstrap-sprockets
+
 //= require jstz
 //= require autocomplete
 //= require box_resizer
+//= require lazyload_verlok
+
 //= require confirm
 //= require csrf_token
 //= require external_link
