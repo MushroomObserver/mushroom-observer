@@ -13,18 +13,105 @@ module ThumbnailHelper
   #   notes::            Show image notes??
   #
   def thumbnail(image, args = {})
-    image_id = image.is_a?(Integer) ? image : image.id
+    # image_id = image.is_a?(Integer) ? image : image.id
+    # locals = {
+    #   image: image,
+    #   link: Image.show_link_args(image_id),
+    #   size: :small,
+    #   votes: true,
+    #   original: false,
+    #   responsive: true,
+    #   theater_on_click: false,
+    #   html_options: {},
+    #   notes: ""
+    # }.merge(args)
+    # render(partial: "image/image_thumbnail", locals: locals)
+
+    # image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+    image = Image.find(image) if image.is_a?(Integer)
+
+    # these defaults could be passed instead
+    responsive = true,
+                 notes = "",
+
+                 # size_url   = Image.url(size, image_id)
+                 thumb_url = Image.url(:thumbnail, image.id)
+    small_url  = Image.url(:small, image.id)
+    medium_url = Image.url(:medium, image.id)
+    large_url  = Image.url(:large, image.id)
+    huge_url   = Image.url(:huge, image.id)
+    full_url   = Image.url(:full_size, image.id)
+    orig_url   = Image.url(:original, image.id)
+
+    # For lazy load content sizing: set img width and height,
+    # using proportional padding-bottom. Max is 3:1 h/w for thumbnail
+    img_width = image.width ? BigDecimal(image.width) : 100
+    img_height = image.height ? BigDecimal(image.height) : 100
+    img_proportion = format("%.1f",
+                            (BigDecimal(img_height / img_width) * 100))
+    img_proportion = "200" if img_proportion.to_i > 200
+
+    if responsive # This should be .img-fluid in bootstrap 4
+      img_class = "img-responsive w-100 lazy position-absolute object-fit-cover #{img_class}"
+    end
+    img_class = "img-unresponsive lazy #{img_class}" unless responsive
+
+    # Rails has trouble parsing this if we don't put it together as a string
+    # data_srcset = "#{small_url} 320w, #{medium_url} 640w, #{large_url} 960w".html_safe
+    data_srcset = [
+      "#{small_url} 320w",
+      "#{medium_url} 640w",
+      "#{large_url} 960w",
+      "#{huge_url} 1280w"
+    ].join(",")
+
+    if responsive
+      data_sizes = [
+        "(max-width: 575px) 100vw",
+        "(max-width: 991px) 50vw",
+        "(min-width: 992px) 30vw"
+      ].join(",")
+    end
+
+    unless responsive
+      data_sizes = [
+        "(max-width: 575px) 100vw",
+        "(max-width: 991px) 75vw",
+        "(min-width: 992px) 50vw"
+      ].join(",")
+    end
+
+    data = {
+      toggle: "tooltip",
+      placement: "bottom",
+      src: small_url,
+      srcset: data_srcset,
+      sizes: data_sizes
+    }
+
+    html_options = {
+      alt: notes,
+      class: img_class,
+      data: data
+    }
+
     locals = {
       image: image,
-      link: Image.show_link_args(image_id),
+      thumb_url: thumb_url,
+      large_url: large_url,
+      orig_url: orig_url,
+      srcset: data_srcset,
+      link: image_path(image.id),
       size: :small,
+      img_proportion: img_proportion,
       votes: true,
       original: false,
-      responsive: true,
+      responsive: responsive,
       theater_on_click: false,
-      html_options: {},
-      notes: ""
+      html_options: html_options,
+      notes: notes
     }.merge(args)
+
     render(partial: "image/image_thumbnail", locals: locals)
   end
 

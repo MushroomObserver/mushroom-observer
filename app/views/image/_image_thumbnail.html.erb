@@ -22,37 +22,44 @@ img_tag = image_tag(size_url, title: notes,
                     class: img_class,
                     data: { toggle: "tooltip", placement: "bottom" })
 
-# Lightbox attributes
+# Lightbox links
 lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
-show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
-caption = "#{show_orig} | #{show_exif}".html_safe
 %>
 
-<div class="position-relative">
-  <div class="d-inline">
-    <div data-toggle="expand-icon" class="text-center">
+<div class="image-sizer position-relative w-100">
 
-      <%= link_with_query(img_tag, link, html_options) %>
-      <%= link_to("", huge_url,
-                  class: "glyphicon glyphicon-fullscreen theater-btn",
-                  data: { lightbox: lightbox_id, title: caption }) %>
+  <%= tag.div class: "image-lazy-sizer overflow-hidden",
+              style: "padding-bottom: #{img_proportion}%;" do
+    image_tag(thumb_url, html_options)
+  end %>
 
-      <div class="mt-3">
+  <%= link_to "", link, class: "stretched-link" %>
 
-        <% if User.current and votes and image %>
-          <%= render(partial: "image/image_vote_links",
-                     locals: { image: image }) %>
-        <% end %>
+  <%=
+    show_orig = "<a href='' target='_blank' class='text-light lightbox_link'>#{:image_show_original.t}</a>"
+    show_exif = "<a href='javascript:popup_exif(#{image_id})' class='text-light lightbox_link'>#{:image_show_exif.t}</a>"
+    caption = "#{show_orig} | #{show_exif}".html_safe
+    icon = "<i class='glyphicon glyphicon-fullscreen'></i>".html_safe
+    link_to(icon,
+            large_url,
+            class: "theater-btn",
+            data: {
+              lightbox: lightbox_id,
+              title: caption
+            })
+  %>
 
-        <% if original && image && !image.original_name.blank? &&
-              (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show") %>
-          <div class="text-center">
-            <span><%= image.original_name %></span>
-          </div><!-- .text-center -->
-        <% end %>
+  <% if User.current && votes && image %>
+    <div class="vote-section position-absolute ab-bottom zindex-2 text-center">
+      <%= render(partial: "image/image_vote_links",
+                 locals: { image: image }) %>
+      <% if original && image && !image.original_name.blank? &&
+            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+        <div class="text-center">
+          <span><%= image.original_name %></span>
+        </div><!-- .text-center -->
+      <% end %>
+    </div><!-- .vote-section -->
+  <% end %>
 
-      </div>
-    </div>
-  </div>
 </div>

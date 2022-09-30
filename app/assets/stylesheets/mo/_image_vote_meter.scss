@@ -1,4 +1,70 @@
 //
+// image interactions - theater and votes
+// --------------------------------------------------
+
+//
+// theater view
+// --------------------------------------------------
+
+// .theater-btn {
+//   position: absolute;
+//   background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.59);
+//   color: black;
+//   padding: 5px;
+//   top: 0px;
+//   border: 1px solid;
+//   text-decoration: none;
+//   display: none;
+//   font-size: 18px;
+
+//   &:hover,
+//   &:focus {
+//     background: black;
+//     color: white;
+//     padding: 5px;
+//     top: 0px;
+//     border: 1px solid;
+//     text-decoration: none;
+//   }
+// }
+
+.vote-section,
+.theater-btn {
+  @extend .top-right, .mr-2, .mt-2;
+  z-index: 2;
+  opacity: 0;
+  background: rgba(0,0,0, 0.8);
+  // border-radius: $border-radius-sm;
+  padding: 0.25em;
+  color: white;
+  transition: opacity 0.3s ease-out;
+}
+
+.vote-section {
+  @extend .ab-bottom;
+  z-index: 2;
+
+  a {
+    color: white;
+
+    &:hover,
+    &:focus {
+      color: $text-color;
+      text-decoration: none;
+    }
+  }
+}
+
+.image-sizer:hover,
+.image-sizer:focus {
+  // .vote-section,
+  .theater-btn {
+    opacity: 1;
+    text-decoration: none;
+  }
+}
+
+//
 // image vote meter bar
 // --------------------------------------------------
 
@@ -28,3 +94,4 @@
   box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
   transition: width 0.6s ease 0s;
 }
+

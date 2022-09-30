@@ -13,7 +13,6 @@
 //= require external_link
 //= require image_vote
 //= require image_export
-//= require theater
 //= require validate_file_input_fields
 //= require main
 //= require observation_form_map

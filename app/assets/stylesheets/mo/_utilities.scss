@@ -382,6 +382,68 @@
   background-color: rgba(0, 0, 0, 0);
 }
 
+.top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.top-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.bottom-right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.bottom-left {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.ab-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.ab-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+}
+
+.ab-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.object-fit-cover {
+  @extend .w-100, .h-100;
+  object-fit: cover;
+}
+
+.object-fit-contain {
+  @extend .w-100, .h-100;
+  object-fit: contain;
+}
+
 
 // Most browsers allow you to zoom in or out: let the user decide what
 // an optimal width for a line of text should be.  There is no way for us

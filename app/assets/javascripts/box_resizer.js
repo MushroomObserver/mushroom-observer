@@ -21,8 +21,10 @@ $(window).on('load', function () {
           adjustHeightForEveryNth(arrayedObjects, 2);
           break;
         case "md":
-        case "lg":
           adjustHeightForEveryNth(arrayedObjects, 3);
+          break;
+        case "lg":
+          adjustHeightForEveryNth(arrayedObjects, 4);
           break;
         default:
           //no op
