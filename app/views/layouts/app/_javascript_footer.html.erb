@@ -1,4 +1,6 @@
 <!--JAVASCRIPT-->
+<!--Main initializers go in the footer-->
+<%= javascript_include_tag('initializers.js') %>
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <% injected_javascripts.each do |script| %>

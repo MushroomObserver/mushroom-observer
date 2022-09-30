@@ -2,11 +2,6 @@
 * This should be included on every page in the footer.
 */
 
-// With Turbolinks, jQuery(document).on('ready' doesn't fire after first load
-// because new content is loaded asynchronously and added to the existing page.
-// To achieve the same effect, we bind to jQuery(document).on('turbolinks:load'
-// https://github.com/turbolinks/turbolinks#installing-javascript-behavior
-
 // TODO: check these listeners
 
 // advanced_search
@@ -25,7 +20,13 @@ var lazyLoadInstance = new LazyLoad({
   // ... more custom settings?
 });
 
-$(document).on('turbolinks:load', function () {
+
+// With Turbolinks, jQuery(document).on('ready' doesn't fire after first load
+// because new content is loaded asynchronously and added to the existing page.
+// To achieve the same effect, bind to jQuery(document).on('turbolinks:load')
+// https://github.com/turbolinks/turbolinks#installing-javascript-behavior
+// $(document).on('turbolinks:load', function () {
+jQuery(document).ready(function () {
 
   // This works better than straight autofocus attribute in firefox.
   // Normal autofocus causes it to scroll window hiding title etc.
@@ -43,29 +44,20 @@ $(document).on('turbolinks:load', function () {
   $('[data-toggle="offcanvas"]').click(function () {
     $(document).scrollTop(0);
     $('.row-offcanvas').toggleClass('active');
-    $('#main_container').toggleClass('overflow-x-hidden');
+    $('#main_container').toggleClass('hidden-overflow-x'); // overflow-x-hidden
   });
 
   // Initialize search toggle
   $('[data-toggle="search"]').click(function () {
     $(document).scrollTop(0);
     var target = $(this).data().target;
-    $(target).css('margin-top', '32px');
-    $(target).toggleClass('d-none');
+    // $(target).css('margin-top', '32px');
+    $(target).toggleClass('hidden-xs'); // d-none
   });
 
   // Initialize alert dismiss
   $('[data-dismiss="alert"]').click(function() {
     setCookie('hideBanner2', BANNER_TIME, 30);
-  });
-
-  // Initialize bootstrap lightbox
-  $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-    event.preventDefault();
-    // console.log("lightbox clicked");
-    $(this).ekkoLightbox({
-      alwaysShowClose: true,
-    });
   });
 
   function setCookie(cname, cvalue, exdays) {
@@ -85,27 +77,36 @@ $(document).on('turbolinks:load', function () {
   // Update lazy loads
   lazyLoadInstance.update();
 
+  // Initialize bootstrap 4 lightbox
+  // $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+  //   event.preventDefault();
+  //   // console.log("lightbox clicked");
+  //   $(this).ekkoLightbox({
+  //     alwaysShowClose: true,
+  //   });
+  // });
+
   // Initialize validate_file_input_fields
-  $("input[type=file][multiple!=multiple]").each(function() {
-    apply_file_input_field_validation(this.id);
-  });
+  // $("input[type=file][multiple!=multiple]").each(function() {
+  //   apply_file_input_field_validation(this.id);
+  // });
 
   // Initialize bootstrap custom file inputs
-  bsCustomFileInput.init();
+  // bsCustomFileInput.init();
 
   // This bit simply makes it so that if someone clicks on the span that it checks the checkbox
   // Makes it easier to check and uncheck the filter checkboxes on _rss_log_tabset
-  jQuery("[data-toggle='checkbox']").click(function() {
-    var $checkbox = $(this).find('input[type="checkbox"]');
-    $checkbox.prop('checked', !$checkbox.prop('checked'));
-  });
+  // jQuery("[data-toggle='checkbox']").click(function() {
+  //   var $checkbox = $(this).find('input[type="checkbox"]');
+  //   $checkbox.prop('checked', !$checkbox.prop('checked'));
+  // });
 
-  jQuery("[data-toggle='checkbox'] input").click(function(e) {
-    e.stopPropagation();
-  });
+  // jQuery("[data-toggle='checkbox'] input").click(function(e) {
+  //   e.stopPropagation();
+  // });
 
-  jQuery("[data-toggle='checkbox'] a").click(function(e) {
-    e.stopPropagation();
-  });
+  // jQuery("[data-toggle='checkbox'] a").click(function(e) {
+  //   e.stopPropagation();
+  // });
 
 });
