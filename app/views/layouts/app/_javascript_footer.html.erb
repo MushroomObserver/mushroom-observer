@@ -1,11 +1,11 @@
 <!--JAVASCRIPT-->
-<!--Main initializers go in the footer-->
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <% injected_javascripts.each do |script| %>
   <%= javascript_tag(script) %>
 <% end %>
 
+<!--Main initializers go last-->
 <%= javascript_include_tag('initializers') %>
 <%= render(partial: "layouts/app/gtm_footer") %>
 <!--/JAVASCRIPT-->

@@ -57,7 +57,7 @@
 
 .image-sizer:hover,
 .image-sizer:focus {
-  // .vote-section,
+  .vote-section,
   .theater-btn {
     opacity: 1;
     text-decoration: none;
@@ -69,9 +69,7 @@
 // --------------------------------------------------
 
 .vote-meter {
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
+  @extend .mx-auto, .w-100;
   max-width: 200px;
   height: 7px;
   margin-bottom: 4px;
@@ -95,3 +93,37 @@
   transition: width 0.6s ease 0s;
 }
 
+//
+// image vote meter bar
+// --------------------------------------------------
+
+// .vote-meter {
+//   margin-left: auto;
+//   margin-right: auto;
+//   width: 100%;
+//   max-width: 200px;
+//   height: 7px;
+//   margin-bottom: 4px;
+//   overflow: hidden;
+//   // background-color: $VOTE_METER_BG_COLOR;
+//   background-color: rgba($secondary, 0.3);
+//   border-radius: 0px;
+//   // box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1) inset;
+//   // border: $VOTE_METER_BORDER_COLOR;
+//   border: 1px solid rgba($secondary, 0.5);
+
+// }
+
+// .vote-meter-bar {
+//   float: left;
+//   width: 0px;
+//   height: 100%;
+//   font-size: 12px;
+//   line-height: 5px;
+//   color: #FFF;
+//   text-align: center;
+//   // background-color: $VOTE_METER_FG_COLOR;
+//   background-color: rgba($primary-text, 0.6);
+//   // box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
+//   transition: width 0.6s ease 0s;
+// }

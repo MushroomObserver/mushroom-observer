@@ -14,10 +14,10 @@
 //= require image_vote
 //= require image_export
 //= require validate_file_input_fields
-//= require initializers
 //= require observation_form_map
 //= require lightbox
 //= require popup_exif
+//= require initializers
 
 lightbox.option({
   'fadeDuration': 0,
