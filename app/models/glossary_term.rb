@@ -76,16 +76,16 @@ class GlossaryTerm < AbstractModel
     images.push(image)
   end
 
-  def all_images
-    [thumb_image] + images
-  end
-
   def remove_image(image)
     images.delete(image) if images.member?(image)
     return unless thumb_image == image
 
     self.thumb_image = images.first
     save
+  end
+
+  def other_images
+    images.where.not(id: thumb_image_id)
   end
 
   ##############################################################################
@@ -99,7 +99,7 @@ class GlossaryTerm < AbstractModel
   end
 
   def destroy_unused_images
-    all_images.each do |image|
+    images.each do |image|
       image.destroy if image && !image.other_subjects?(self)
     end
   end
