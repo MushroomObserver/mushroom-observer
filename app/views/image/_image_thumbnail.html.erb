@@ -24,6 +24,11 @@ img_tag = image_tag(size_url, title: notes,
 
 # Lightbox links
 lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
+
+# Should we show the filename?
+show_filename = original && image && !image.original_name.blank? &&
+                (check_permission(image) ||
+                image.user && image.user.keep_filenames == :keep_and_show)
 %>
 
 <div class="image-sizer position-relative w-100">
@@ -50,16 +55,16 @@ lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
   %>
 
   <% if User.current && votes && image %>
-    <div class="vote-section position-absolute ab-bottom zindex-2 text-center">
+    <div class="vote-section">
       <%= render(partial: "image/image_vote_links",
                  locals: { image: image }) %>
-      <% if original && image && !image.original_name.blank? &&
-            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
-        <div class="text-center">
-          <span><%= image.original_name %></span>
-        </div><!-- .text-center -->
-      <% end %>
     </div><!-- .vote-section -->
   <% end %>
 
 </div>
+
+<% if show_filename %>
+  <div class="text-center">
+    <span><%= image.original_name %></span>
+  </div><!-- .text-center -->
+<% end %>

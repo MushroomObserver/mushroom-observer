@@ -3,7 +3,7 @@
 // --------------------------------------------------
 
 //
-// theater view
+// theater view & vote section
 // --------------------------------------------------
 
 // .theater-btn {
@@ -41,7 +41,7 @@
 }
 
 .vote-section {
-  @extend .ab-bottom;
+  @extend .ab-bottom, .text-center;
   z-index: 2;
 
   a {
