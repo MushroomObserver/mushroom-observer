@@ -370,6 +370,19 @@
   border: 5px dashed;
 }
 
+.stretched-link::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: auto;
+  content: "";
+  background-color: rgba(0, 0, 0, 0);
+}
+
+
 // Most browsers allow you to zoom in or out: let the user decide what
 // an optimal width for a line of text should be.  There is no way for us
 // to decide for them intelligently, since browsers differ so much in how
