@@ -165,15 +165,15 @@ module ApplicationHelper
 
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "/shared/tab_set", locals: { links: links })
+    render(partial: "layouts/content/tab_set", locals: { links: links })
   end
 
   # ----------------------------------------------------------------------------
 
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
-  def indent(count = 10)
-    "<span style='margin-left:#{count}px'>&nbsp;</span>".html_safe
+  def indent
+    "<span class='ml-10px'>&nbsp;</span>".html_safe
   end
 
   def content_tag_if(condition, name, content_or_options_with_block = nil,

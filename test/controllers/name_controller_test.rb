@@ -316,13 +316,13 @@ class NameControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)",
+      "#nomenclature a:match('href',?)",
       /#{index_fungorum_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to IF search"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
+      "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )
@@ -348,13 +348,13 @@ class NameControllerTest < FunctionalTestCase
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
-      "div#nomenclature a:match('href',?)",
+      "#nomenclature a:match('href',?)",
       /#{index_fungorum_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to IF search"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
+      "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )
@@ -747,7 +747,7 @@ class NameControllerTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
     assert_template(:list_names)
-    assert_select("div#content")
+    assert_select("#content")
     name_links = css_select(".table a")
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),

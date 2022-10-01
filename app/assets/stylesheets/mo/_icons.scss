@@ -1,6 +1,19 @@
 //
-// icons
+// icons - note that bootstrap 3 has the class
+// .has-feedback { position: relative; }
 // --------------------------------------------------
+
+.has-search .form-control-feedback {
+  right: initial;
+  left: 0;
+}
+
+.has-search .form-control {
+  padding-right: 12px;
+  padding-left: 30px;
+}
+
+// old classes, replace
 
 .icon-addon {
   position: relative;

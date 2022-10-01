@@ -7,13 +7,6 @@
   padding-bottom: 5em;
 }
 
-#title-caption,
-.sub-caption,
-.owner-id {
-  font-size: 170%;
-  margin-top: 5px;
-}
-
 //
 // specialized stuff for print view
 // --------------------------------------------------
@@ -65,11 +58,4 @@ ul.tight-list {
   list-style: none;
   margin-bottom: 0.5em;
   padding-left: 1em;
-}
-
-.Admin {
-  font-size: 26px;
-  font-weight: bold;
-  text-align: center;
-  padding: 7px;
 }
