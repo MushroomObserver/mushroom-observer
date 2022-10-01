@@ -714,8 +714,7 @@ class ImageControllerTest < FunctionalTestCase
     Image.any_instance.stubs(:save).returns(false)
     post(:edit_image, params: params)
 
-    assert(assert_select("span#title-caption").
-             text.start_with?("Editing Image"),
+    assert(assert_select("#title").text.start_with?("Editing Image"),
            "It should return to form if image save fails")
   end
 

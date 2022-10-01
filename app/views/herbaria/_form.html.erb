@@ -25,7 +25,7 @@
          <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
         </div>
         <% if button_name != :CREATE %>
-          <div class="well well-sm mt-3 help-block">
+          <div class="well well-sm mt-3 help-block position-relative">
             <div class="arrow-up mt-2"></div>
             <% top_users = herbarium_top_users(@herbarium)
                top_users.each do |name, login, count| %>
@@ -55,7 +55,7 @@
             <%= f.check_box(:personal, class: "form-control-xxx") %>
             <%= f.label(:personal, :create_herbarium_personal.t) %>
           </div>
-          <div class="well well-sm mt-3 help-block">
+          <div class="well well-sm mt-3 help-block position-relative">
             <div class="arrow-up"></div>
             <%= :create_herbarium_personal_help.t(
                   name: @user.personal_herbarium_name
@@ -74,7 +74,7 @@
           <%= f.text_field(:code, size: 8, class: "form-control") %>
           <span class="HelpNote">(<%= :optional.t %>)</span>
         </div>
-        <div class="well well-sm mt-3 help-block">
+        <div class="well well-sm mt-3 help-block position-relative">
           <div class="arrow-up mt-2"></div>
           <%= :create_herbarium_code_help.t %>
         </div>
@@ -95,7 +95,7 @@
   <div class="row form-group">
     <div class="col-xs-12">
       <%= f.label(:herbarium_email, "#{:create_herbarium_email.t}:") %>
-     <span class="HelpNote">(<%= :optional.t %>)</span>
+      <span class="HelpNote">(<%= :optional.t %>)</span>
       <%= f.text_field(:email, class: "form-control") %>
     </div>
   </div>

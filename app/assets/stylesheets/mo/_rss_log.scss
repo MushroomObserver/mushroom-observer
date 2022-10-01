@@ -2,17 +2,29 @@
 // rss log
 // --------------------------------------------------
 
-.rss-log-item {
-  padding: 5px;
-  text-align: center;
-  height: 350px;
-}
+// .rss-log-item {
+//   padding: 5px;
+//   text-align: center;
+//   height: 350px;
+// }
 
-.rss-fancy-time {
-  position: absolute;
-  top: -10px;
-  right: 2px;
-  color: mix($LIST_FG_COLOR, $LIST_BG_COLOR);
+// .rss-fancy-time {
+//   position: absolute;
+//   top: -10px;
+//   right: 2px;
+//   color: mix($LIST_FG_COLOR, $LIST_BG_COLOR);
+// }
+
+.matrix-box {
+  @extend .col-xs-12, .col-sm-6, .col-md-4;
+
+  .panel {
+    min-height: 200px;
+
+    .thumbnail-container {
+      min-height: 30px;
+    }
+  }
 }
 
 .rss-detail {
@@ -22,11 +34,15 @@
 }
 
 .rss-where,
-.rss-what {
+.rss-what,
+.rss-when,
+.rss-fancy-time {
   text-align: center;
 }
 
-.rss-what {
+.rss-what,
+.rss-when,
+.rss-fancy-time {
   overflow: hidden;
   text-overflow: ellipsis;
 }
