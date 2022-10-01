@@ -3830,6 +3830,7 @@
   runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
   runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
   runtime_user_bad_rank: "Invalid rank: '[rank]'"
+  runtime_visual_group_created_at: "[:runtime_created_at(type=:visual_group)]"
 
   # Longer messages.
   runtime_ask_webmaster_antispam: To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.

@@ -3,7 +3,7 @@
 class VisualGroup < ApplicationRecord
   has_many :visual_group_images, dependent: :destroy
   has_many :images, through: :visual_group_images
-  has_one :visual_model
+  belongs_to :visual_model
 
   def add_image(image)
     images << image
@@ -12,9 +12,7 @@ class VisualGroup < ApplicationRecord
 
   def add_images(new_images)
     new_images.each do |image|
-      if image.visual_group(visual_model) != self
-        add_image(image)
-      end
+      add_image(image) if image.visual_group(visual_model) != self
     end
   end
 end

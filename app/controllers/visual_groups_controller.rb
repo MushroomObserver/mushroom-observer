@@ -28,14 +28,20 @@ class VisualGroupsController < ApplicationController
 
     respond_to do |format|
       if @visual_group.save
-        format.html { redirect_to visual_group_url(@visual_group),
-                                  notice: "Visual group was successfully created." }
-        format.json { render :show, status: :created,
-                             location: @visual_group }
+        format.html do
+          redirect_to(visual_group_url(@visual_group),
+                      notice: runtime_visual_group_created_at.t)
+        end
+        format.json do
+          render(:show, status: :created,
+                        location: @visual_group)
+        end
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @visual_group.errors,
-                             status: :unprocessable_entity }
+        format.html { render(:new, status: :unprocessable_entity) }
+        format.json do
+          render(json: @visual_group.errors,
+                 status: :unprocessable_entity)
+        end
       end
     end
   end
