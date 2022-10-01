@@ -13,8 +13,10 @@
 <%= paginate_block(@pages) do %>
   <ul class="row list-unstyled mt-3">
     <%= render(partial: "shared/matrix_box",
+               layout: "shared/matrix_table",
                collection: @objects,
                as: :object) %>
+    <div style="clear:left"></div>
   </ul>
 <% end %>
 
