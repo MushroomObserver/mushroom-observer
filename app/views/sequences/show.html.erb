@@ -24,58 +24,57 @@
 <%= render(partial: "observation_title",
            locals: { observation: @sequence.observation }) %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <table class="table-namings">
-      <thead>
+<div class="max-width-text">
+  <table class="table-namings">
+    <thead>
+      <tr>
+        <th class="col-md-1"></th>
+        <th class="col-md-11"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="font-weight-bold"><%= :LOCUS.t %>:</td>
+        <td><%= @sequence.locus %></td>
+      </tr>
+      <% if @sequence.bases.present? %>
         <tr>
-          <th class="col-md-1"></th>
-          <th class="col-md-11"></th>
+          <td class="font-weight-bold align-top"><%= :BASES.t %>:</td>
         </tr>
-      </thead>
-      <tbody>
         <tr>
-          <td class="font-weight-bold"><%= :LOCUS.t %>:</td>
-          <td><%= @sequence.locus %></td>
-        </tr>
-        <% if @sequence.bases.present? %>
-          <tr>
-            <td class="font-weight-bold align-top"><%= :BASES.t %>:</td>
-          </tr>
-          <tr>
-            <td colspan="2" class="text-monospace max-width-text">
-              <pre><%= @sequence.bases %></pre>
-            </td>
-          </tr>
-        <% end %>
-        <% if @sequence.deposit? %>
-          <tr>
-            <td class="font-weight-bold"><%= :DEPOSIT.t %>:</td>
-            <td>
-                <%= sequence_archive_link(@sequence) %>:
-                <%= sequence_accession_link(@sequence) %>
-            </td>
-          </tr>
-        <% end %>
-        <tr align="center">
-          <td colspan="2">
-            <button type="button" class="btn btn-default">
-              <%= link_to(:show_observation_blast_link.t,
-                          @sequence.blast_url, target: "_blank") %>
-            </button>
+          <td colspan="2" class="text-monospace max-width-text">
+            <pre><%= @sequence.bases %></pre>
           </td>
         </tr>
+      <% end %>
+      <% if @sequence.deposit? %>
         <tr>
-          <td class="font-weight-bold"><%= :NOTES.t %>:</td>
-          <td><%= @sequence.notes.try(&:tp) %></td>
+          <td class="font-weight-bold"><%= :DEPOSIT.t %>:</td>
+          <td>
+              <%= sequence_archive_link(@sequence) %>:
+              <%= sequence_accession_link(@sequence) %>
+          </td>
         </tr>
-      </tbody>
-    </table>
-  </div>
+      <% end %>
+      <tr align="center">
+        <td colspan="2">
+          <button type="button" class="btn btn-default">
+            <%= link_to(:show_observation_blast_link.t,
+                        @sequence.blast_url, target: "_blank") %>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td class="font-weight-bold"><%= :NOTES.t %>:</td>
+        <td><%= @sequence.notes.try(&:tp) %></td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 <br>
 <div class="small">
   <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
   <%= user_link(@sequence.user) %>
 </div>
+
 <%= show_object_footer(@sequence) %>

@@ -98,15 +98,7 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col-xs-12">
-    <%= render(partial: "comment/show_comments",
-               locals: {object: @project, controls: true, limit: nil}) %>
-  </div>
-</div>
+<%= render(partial: "comment/show_comments",
+            locals: {object: @project, controls: true, limit: nil}) %>
 
-<div class="row">
-  <div class="col-xs-12 mt-3">
-    <%= show_object_footer(@project) %>
-  </div>
-</div>
+<%= show_object_footer(@project) %>

@@ -3,14 +3,12 @@
 <%= submit_tag(button_name, class: "btn btn-default center-block mt-3") %>
 
 <!-- WHEN -->
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= label_tag(:observation_when_li, :WHEN.t + ":") %>
-    <div class="form-group form-inline">
-      <%= date_select(:observation, :when, date_select_opts(@observation),
-          {class: "form-control mb-2"}) %>
-      <% turn_into_year_auto_completer(:observation_when_1i) %>
-    </div>
+<div class="max-width-text">
+  <%= label_tag(:observation_when_li, :WHEN.t + ":") %>
+  <div class="form-group form-inline">
+    <%= date_select(:observation, :when, date_select_opts(@observation),
+        {class: "form-control mb-2"}) %>
+    <% turn_into_year_auto_completer(:observation_when_1i) %>
   </div>
 </div>
 <!-- /WHEN -->
@@ -65,18 +63,16 @@
 <!-- /WHERE -->
 
 <!-- IS_COLLECTION_LOCATION -->
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <div class="form-inline">
-      <%= check_box(:observation, :is_collection_location,
-                    class: "form-control-xxx") %>
-      <%= label_tag(:observation_is_collection_location,
-                    :form_observations_is_collection_location.t) %>
-    </div>
-    <div class="well well-sm mt-3 max-width-text help-block position-relative">
-      <div class="arrow-up hidden-xs"></div>
-      <%= :form_observations_is_collection_location_help.t %>
-    </div>
+<div class="max-width-text">
+  <div class="form-inline">
+    <%= check_box(:observation, :is_collection_location,
+                  class: "form-control-xxx") %>
+    <%= label_tag(:observation_is_collection_location,
+                  :form_observations_is_collection_location.t) %>
+  </div>
+  <div class="well well-sm mt-3 max-width-text help-block position-relative">
+    <div class="arrow-up hidden-xs"></div>
+    <%= :form_observations_is_collection_location_help.t %>
   </div>
 </div>
 <!-- /IS_COLLECTION_LOCATION -->
@@ -132,10 +128,9 @@
 </div>
 <!-- /LAT_LONG_ALT -->
 
-<div class="row mt-3">
-  <div class="col-xs-12 max-width-text-times-two">
-<%= render(partial: "naming/form",
-            locals: {
+<div class="mt-3 max-width-text-times-two">
+  <%= render(partial: "naming/form",
+             locals: {
               action:       action,
               button_name:  button_name,
               show_reasons: false,
@@ -145,17 +140,15 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col-xs-12 mt-3 max-width-text">
-    <div class="form-inline">
-      <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
-      <%= label_tag(:observation_specimen,
-                    :form_observations_specimen_available.t) %>
-    </div>
-    <div class="well well-sm mt-3 max-width-text help-block position-relative">
-      <div class="arrow-up"></div>
-      <%= :form_observations_specimen_available_help.t %>
-    </div>
+<div class="mt-3 max-width-text">
+  <div class="form-inline">
+    <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
+    <%= label_tag(:observation_specimen,
+                  :form_observations_specimen_available.t) %>
+  </div>
+  <div class="well well-sm mt-3 max-width-text help-block position-relative">
+    <div class="arrow-up"></div>
+    <%= :form_observations_specimen_available_help.t %>
   </div>
 </div>
 
@@ -253,15 +246,13 @@
 <% ########################### Image Forms ############################## %>
 
 <% if include_images %>
-  <div class="row max-width-text-times-two">
+  <div class="max-width-text-times-two">
     <% # @observation.thumb_image_id ||= 0 %>
 
     <% if @good_images.any? %>
-      <div class="col-xs-12">
-        <b>Images:</b>
-      </div>
+      <p class="font-weight-bold"><b>Images:</b></p>
       <% @good_images.each do |image| %>
-        <div class="col-xs-12 mt-3">
+        <div class="mt-3">
           <div class="row form_image">
 
             <!-- GOOD_IMAGE -->
@@ -358,58 +349,55 @@
     <%= hidden_field_tag(:good_images, @good_images.map { |o| o.id }.join(" ")) %>
   </div>
 
-  <div class="row mt-3 max-width-text-times-two">
-    <div class="col-sm-12">
+  <div class="mt-3 max-width-text-times-two">
 
+    <strong><%= :form_observations_upload_images.t %>:</strong>
 
-      <strong><%= :form_observations_upload_images.t %>:</strong>
+    <!-- MULTIFILE_UPLOAD_FORM -->
+      <%= render(partial: "form_multi_image_upload") if can_do_multifile_upload? %>
+    <!-- /MULTIFILE_UPLOAD_FORM -->
 
-      <!-- MULTIFILE_UPLOAD_FORM -->
-        <%= render(partial: "form_multi_image_upload") if can_do_multifile_upload? %>
-      <!-- /MULTIFILE_UPLOAD_FORM -->
+    <!-- MONOFILE_UPLOAD_FORM -->
+      <% if !can_do_multifile_upload? %>
+        <%= javascript_tag %(
+          var NEXT_IMAGE_INDEX = #{@images.length+1};
+          var CHANGED_DATES = [];
+        ) %>
+        <div id="image_forms">
+          <% i = 0 %>
+          <% @images.push(@new_image) %>
+          <% while i < @images.length %>
+            <%= render(partial: "form_image", locals: {index: i}) %>
+            <% i += 1 %>
+          <% end %>
+        </div>
+        <input
+          id="new_image_button"
+          onclick="image_new();"
+          type="button"
+          value="<%= :form_observations_upload_another.t %>"
+          class="btn btn-default"/>
+        <% javascript_include("single_image_uploader") %>
+        <%= javascript_tag %(
+          var x = String.fromCharCode(60);
+          var y = String.fromCharCode(93);
+          var IMAGE_FORM = "#{
+            i = @images.length - 1 rescue 0
+            str = render(partial: "form_image", locals: {index: i})
+            str.gsub!("image_#{i}_", "image_XXX_")
+            str.gsub!("image_id_#{i}", "image_id_XXX")
+            str.gsub!("(#{i})", "(XXX)")
+            str.gsub!("[#{i}]", "[XXX]")
+            str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+            str.sub!("checked=\"checked\" ", "")
+            str = escape_javascript(str)
+            str.gsub("<", '"+x+"')
+            str.gsub("]", '"+y+"')
+          }";
+        ) %>
+      <% end %>
+    <!-- /MONOFILE_UPLOAD_FORM -->
 
-      <!-- MONOFILE_UPLOAD_FORM -->
-        <% if !can_do_multifile_upload? %>
-          <%= javascript_tag %(
-            var NEXT_IMAGE_INDEX = #{@images.length+1};
-            var CHANGED_DATES = [];
-          ) %>
-          <div id="image_forms">
-            <% i = 0 %>
-            <% @images.push(@new_image) %>
-            <% while i < @images.length %>
-              <%= render(partial: "form_image", locals: {index: i}) %>
-              <% i += 1 %>
-            <% end %>
-          </div>
-          <input
-            id="new_image_button"
-            onclick="image_new();"
-            type="button"
-            value="<%= :form_observations_upload_another.t %>"
-            class="btn btn-default"/>
-          <% javascript_include("single_image_uploader") %>
-          <%= javascript_tag %(
-            var x = String.fromCharCode(60);
-            var y = String.fromCharCode(93);
-            var IMAGE_FORM = "#{
-              i = @images.length - 1 rescue 0
-              str = render(partial: "form_image", locals: {index: i})
-              str.gsub!("image_#{i}_", "image_XXX_")
-              str.gsub!("image_id_#{i}", "image_id_XXX")
-              str.gsub!("(#{i})", "(XXX)")
-              str.gsub!("[#{i}]", "[XXX]")
-              str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
-              str.sub!("checked=\"checked\" ", "")
-              str = escape_javascript(str)
-              str.gsub("<", '"+x+"')
-              str.gsub("]", '"+y+"')
-            }";
-          ) %>
-        <% end %>
-      <!-- /MONOFILE_UPLOAD_FORM -->
-
-   </div>
  </div>
 <% end # if include_images %>
 
@@ -420,49 +408,45 @@
 <% ##########################################################################     %>
 
 <% if @projects.any? %>
-  <div class="row mt-3">
-    <div class="col-xs-12 max-width-text-times-two">
-      <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text help-block position-relative">
-          <div class="arrow-left hidden-xs"></div>
-          <%= :form_observations_project_help.t %>
-        </div>
+  <div class="mt-3 max-width-text-times-two">
+    <div class="col-xs-12 col-sm-6 pull-right">
+      <div class="well well-sm max-width-text help-block position-relative">
+        <div class="arrow-left hidden-xs"></div>
+        <%= :form_observations_project_help.t %>
       </div>
-      <strong><%= :PROJECTS.t %>:</strong>
-      <% @projects.each do |project| %>
-        <div class="form-inline max-width-text">
-          <%= check_box(:project, "id_#{project.id}",
-                        checked: @project_checks[project.id],
-                        disabled: @observation.user != @user &&
-                          !project.is_member?(@user),
-                        class: "form-control-xxx") %>
-          <%= link_to_object(project) %>
-        </div>
-      <% end %>
     </div>
+    <strong><%= :PROJECTS.t %>:</strong>
+    <% @projects.each do |project| %>
+      <div class="form-inline max-width-text">
+        <%= check_box(:project, "id_#{project.id}",
+                      checked: @project_checks[project.id],
+                      disabled: @observation.user != @user &&
+                        !project.is_member?(@user),
+                      class: "form-control-xxx") %>
+        <%= link_to_object(project) %>
+      </div>
+    <% end %>
   </div>
 <% end %>
 
 <% if @lists.any? %>
-  <div class="row mt-3">
-    <div class="col-xs-12 max-width-text-times-two">
-      <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text help-block position-relative">
-          <div class="arrow-left hidden-xs"></div>
-          <%= :form_observations_list_help.t %>
-        </div>
+  <div class="mt-3 max-width-text-times-two">
+    <div class="col-xs-12 col-sm-6 pull-right">
+      <div class="well well-sm max-width-text help-block position-relative">
+        <div class="arrow-left hidden-xs"></div>
+        <%= :form_observations_list_help.t %>
       </div>
-      <strong><%= :SPECIES_LISTS.t %>:</strong>
-      <% @lists.each do |list| %>
-        <div class="form-inline max-width-text">
-          <%= check_box(:list, "id_#{list.id}",
-                        checked: @list_checks[list.id],
-                        disabled: !check_permission(list),
-                        class: "form-control-xxx") %>
-          <%= link_to_object(list) %>
-        </div>
-      <% end %>
     </div>
+    <strong><%= :SPECIES_LISTS.t %>:</strong>
+    <% @lists.each do |list| %>
+      <div class="form-inline max-width-text">
+        <%= check_box(:list, "id_#{list.id}",
+                      checked: @list_checks[list.id],
+                      disabled: !check_permission(list),
+                      class: "form-control-xxx") %>
+        <%= link_to_object(list) %>
+      </div>
+    <% end %>
   </div>
 <% end %>
 

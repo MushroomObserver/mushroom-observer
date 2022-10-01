@@ -44,7 +44,7 @@
     </div>
   </div>
 
-</div>
+</div><!--.row-->
 
 <div class="row">
   <div class="col-sm-6">
@@ -76,9 +76,8 @@
       </div>
     <% end %>
 
-  </div>
-
-</div>
+  </div><!--.col-->
+</div><!--.row-->
 
 <%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
 <% inject_javascript_at_end %(

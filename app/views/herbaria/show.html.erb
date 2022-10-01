@@ -84,11 +84,7 @@
   <% end %>
 </div>
 
-<div class="row">
-  <div class="col-xs-12 mt-3" style="max-width:<%= map ? 930 : 600 %>px">
-    <div class="text-center">
-      <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
-      <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
-    </div><!-- .text-center -->
-  </div>
-</div>
+<div class="mt-3 text-center" style="max-width:<%= map ? 930 : 600 %>px">
+  <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
+  <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
+</div><!-- .text-center -->

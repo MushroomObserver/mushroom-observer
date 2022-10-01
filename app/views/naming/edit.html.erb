@@ -26,11 +26,11 @@
                    button_name: :SAVE_EDITS.l, show_reasons: true }) %>
       </div>
     <% end %>
-  </div>
+  </div><!--.col-->
 
   <div class="col-xs-12 col-sm-4">
     <%= render(partial: "observations/show_images",
                locals: { observation: @observation,
                          thumb_size_control: false }) %>
-  </div>
-</div>
+  </div><!--.col-->
+</div><!--.row-->

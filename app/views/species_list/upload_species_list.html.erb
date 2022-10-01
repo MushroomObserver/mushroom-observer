@@ -3,7 +3,8 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag({action: :upload_species_list, id: @species_list.id}, multipart: true) do %>
+  <%= form_tag({ action: :upload_species_list, id: @species_list.id },
+               multipart: true) do %>
     <div class="form-group mt-3">
       <%= :species_list_upload_label.t %>:
       <%= custom_file_field(:species_list, :file) %>

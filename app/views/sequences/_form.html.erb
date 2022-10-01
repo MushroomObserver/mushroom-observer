@@ -14,7 +14,7 @@
         <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
       </div>
     </div>
-  </div>
+  </div><!--.row-->
 
   <%# bases %>
   <div class="row mt-3">
@@ -35,7 +35,7 @@
       <div class="col-md-3">
       </div>
     </div>
-  </div>
+  </div><!--.row-->
 
   <%# deposit info %>
   <div class="row mt-3 form-group">
@@ -60,7 +60,7 @@
         <%= :form_sequence_accession_help.t %>
       </div>
     </div>
-  </div>
+  </div><!--.row-->
 
   <%# notes %>
   <div class="row mt-3">
@@ -75,9 +75,9 @@
         <%= :field_textile_link.t %>
       </div>
     </div>
-  </div>
+  </div><!--.row-->
 
   <div class="form-group row">
     <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
-  </div>
+  </div><!--.row-->
 <% end %>

@@ -49,7 +49,7 @@
     </div>
     <div class="list-group">
       <div class="list-group-item">
-	<%= show_authors_and_editors(@name) %>
+	      <%= show_authors_and_editors(@name) %>
       </div>
     </div>
   </div>
@@ -199,7 +199,5 @@
 %>
 <%= render(partial: "comment/show_comments",
            locals: {object: @name, controls: true, limit: nil}) %>
-<div class="col-xs-12">
-  <%= :show_name_num_notifications.t(num: @name.interests_plus_notifications) %><br/>
-  <%= show_object_footer(@name) %>
-</div>
+<%= :show_name_num_notifications.t(num: @name.interests_plus_notifications) %>
+<%= show_object_footer(@name) %>
