@@ -4,7 +4,7 @@
   <div class="row mt-3">
     <div class="form-group col-xs-12 col-md-6 max-width-text">
       <%= form.label(:locus, "#{:LOCUS.t}:") %>
-      <span class="HelpNote">(<%= :required.t %>)</span>
+      <span class="help-note">(<%= :required.t %>)</span>
         <%# style stops area from changing size on reload %>
         <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
     </div>
@@ -21,7 +21,7 @@
     <div class="form-group">
       <span class="col-md-6">
         <%= form.label(:sequence_bases, "#{:BASES.t}:") %>
-        <span class="HelpNote">
+        <span class="help-note">
         (<%= :form_sequence_bases_or_deposit_required.t %>)
         </span>
       </span>
@@ -41,7 +41,7 @@
   <div class="row mt-3 form-group">
     <div class="col-xs-12">
       <%= form.label(:sequence_nothing, "#{:DEPOSIT.t}:") %>
-      <span class="HelpNote">(<%= :form_sequence_valid_deposit.t %>)</span>
+      <span class="help-note">(<%= :form_sequence_valid_deposit.t %>)</span>
     </div>
     <div class="col-xs-1">
     </div>
@@ -66,7 +66,7 @@
   <div class="row mt-3">
     <div class="form-group col-xs-12 col-md-6">
       <%= form.label(:sequence_notes, "#{:NOTES.t}:") %>
-      <span class="HelpNote">(<%= :optional.t %>)</span>
+      <span class="help-note">(<%= :optional.t %>)</span>
       <%= form.text_area(:notes, rows: 3, class: "form-control") %>
     </div>
     <div class="col-xs-12 col-md-6">

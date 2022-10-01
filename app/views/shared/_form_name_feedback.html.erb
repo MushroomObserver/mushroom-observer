@@ -14,12 +14,11 @@
 # parent_deprecated - t/f
 # button_name - text: button to complete the action, e.g. Submit, Create
 
-
 if valid_names
   ##### Warnings #####
   flash_warning(:form_observations_there_is_a_problem_with_name.t) %>
 
-  <div class="alert alert-warning max-width-text" id="name_messages">
+  <div class="alert alert-warning" id="name_messages">
     <span class="Data"><%=
     if suggest_corrections || names.blank?
       :form_naming_not_recognized.t(name: what)
@@ -34,12 +33,12 @@ if valid_names
     </span><br/><%
     if valid_names.length > 0
       if suggest_corrections %>
-        <span class="HelpNote">
+        <span class="help-note">
           <%= :form_naming_correct_help.t(button: button_name,
                                           name: what) %>
         </span><br/><%
       else %>
-        <span class="HelpNote">
+        <span class="help-note">
           <%= :form_naming_deprecated_help.t(button: button_name,
                                              name: what) %>
         </span><br/><%
@@ -54,7 +53,7 @@ if valid_names
       end %>
       </span><%
     else %>
-      <span class="HelpNote">
+      <span class="help-note">
       <%= :form_naming_not_recognized_help.t(button: button_name) %>
       </span><br/><%
     end %>
@@ -65,11 +64,11 @@ elsif names&.length == 0
 
   flash_error(:form_observations_there_is_a_problem_with_name.t) %>
 
-  <div class="alert alert-danger max-width-text" id="name_messages">
+  <div class="alert alert-danger" id="name_messages">
     <span class="Data">
       <%= :form_naming_not_recognized.t(name: what) %>
     </span><br/>
-    <span class="HelpNote">
+    <span class="help-note">
       <%= :form_naming_not_recognized_help.t(button: button_name) %>
     </span><br/>
   </div><!--.alert.max-width-text--><%
@@ -78,7 +77,7 @@ elsif names&.length &.> 1
 
   flash_error(:form_observations_there_is_a_problem_with_name.t) %>
 
-  <div class="alert alert-danger max-width-text" id="name_messages">
+  <div class="alert alert-danger" id="name_messages">
     <span class="Data">
       <%= :form_naming_multiple_names.t(name: what) %>:<br/><%
       names.each do |n| %>
@@ -86,7 +85,7 @@ elsif names&.length &.> 1
         <%= n.display_name.t %> (<%= n.observations.size %>)<br/><%
       end %>
     </span>
-    <span class="HelpNote">
+    <span class="help-note">
       <%= :form_naming_multiple_names_help.t %>
     </span><br/>
   </div><!--.alert.max-width-text--><%

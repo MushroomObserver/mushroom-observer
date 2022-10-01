@@ -7,7 +7,7 @@ form_tag(action: :merge_descriptions, id: description.id) do %>
   <br/><br/>
 
   <p><span class="text-larger"><%= :merge_descriptions_merge_header.t %>:</span><!-- .text-larger --><br/>
-    <span class="HelpNote"><%= :merge_descriptions_merge_help.t %></span></p>
+    <span class="help-note"><%= :merge_descriptions_merge_help.t %></span></p>
 
   <ul type="none">
     <% merges.each do |desc| %>
@@ -22,7 +22,7 @@ form_tag(action: :merge_descriptions, id: description.id) do %>
 
   <% if moves.any? %>
     <p><span class="text-larger"><%= :merge_descriptions_move_header.t %>:</span><!-- .text-larger --><br/>
-      <span class="HelpNote"><%= :merge_descriptions_move_help.t %></span></p>
+      <span class="help-note"><%= :merge_descriptions_move_help.t %></span></p>
 
     <ul type="none">
       <% moves.sort_by.each do |name|
