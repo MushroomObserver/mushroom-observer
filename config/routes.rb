@@ -686,6 +686,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
 
+  # ----- VisualModels: standard actions ---------------------------------------
+  resources :visual_models, id: /\d+/
+
   # ----- VisualGroups: standard actions ---------------------------------------
   resources :visual_groups, id: /\d+/
 

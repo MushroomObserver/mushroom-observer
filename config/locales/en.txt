@@ -374,6 +374,10 @@
   visual_group: visual group
   VISUAL_GROUPS: Visual Groups
   visual_groups: visual groups
+  VISUAL_MODEL: Visual Model
+  visual_model: visual model
+  VISUAL_MODELS: Visual Models
+  visual_models: visual models
   VOTE: Vote
   vote: vote
   VOTES: Votes
@@ -2605,6 +2609,14 @@
   # visual_groups/destroy
   destroy_visual_group_success: "[:VISUAL_GROUP] [:destroyed]"
 
+  # visual_models/show
+  show_visual_model_title: "[name] [:VISUAL_MODEL]"
+  show_visual_model_back_to_index: Back to Visual Model Index
+  show_visual_model_edit: Edit Visual Model
+
+  # visual_models/destroy
+  destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
+
   ##############################################################################
 
   # LESS POPULAR PAGES
@@ -3831,6 +3843,7 @@
   runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
   runtime_user_bad_rank: "Invalid rank: '[rank]'"
   runtime_visual_group_created_at: "[:runtime_created_at(type=:visual_group)]"
+  runtime_visual_model_created_at: "[:runtime_created_at(type=:visual_model)]"
 
   # Longer messages.
   runtime_ask_webmaster_antispam: To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.
