@@ -13,32 +13,32 @@ class VisualGroupsController < ApplicationController
     @visual_group = VisualGroup.find(params[:id])
   end
 
-  #   # GET /visual_groups/new
-  #   def new
-  #     @visual_group = VisualGroup.new
-  #   end
+  # GET /visual_groups/new
+  def new
+    @visual_group = VisualGroup.new
+  end
 
   #   # GET /visual_groups/1/edit
   #   def edit
   #   end
 
-  #   # POST /visual_groups or /visual_groups.json
-  #   def create
-  #     @visual_group = VisualGroup.new(visual_group_params)
+  # POST /visual_groups or /visual_groups.json
+  def create
+    @visual_group = VisualGroup.new(visual_group_params)
 
-  #     respond_to do |format|
-  #       if @visual_group.save
-  #         format.html { redirect_to visual_group_url(@visual_group),
-  #            notice: "Visual group was successfully created." }
-  #         format.json { render :show, status: :created,
-  # location: @visual_group }
-  #       else
-  #         format.html { render :new, status: :unprocessable_entity }
-  #         format.json { render json: @visual_group.errors,
-  # status: :unprocessable_entity }
-  #       end
-  #     end
-  #   end
+    respond_to do |format|
+      if @visual_group.save
+        format.html { redirect_to visual_group_url(@visual_group),
+                                  notice: "Visual group was successfully created." }
+        format.json { render :show, status: :created,
+                             location: @visual_group }
+      else
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @visual_group.errors,
+                             status: :unprocessable_entity }
+      end
+    end
+  end
 
   #   # PATCH/PUT /visual_groups/1 or /visual_groups/1.json
   #   def update

@@ -4,7 +4,7 @@ require "test_helper"
 
 class VisualGroupsControllerTest < FunctionalTestCase
   setup do
-    @visual_group = visual_groups(:one)
+    @visual_group = visual_groups(:visual_group_one)
   end
 
   test "should get index" do
@@ -30,7 +30,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   test "should show visual_group" do
     login
-    get(:show, params: { id: visual_groups(:one).id })
+    get(:show, params: { id: visual_groups(:visual_group_one).id })
     assert_response :success
   end
 

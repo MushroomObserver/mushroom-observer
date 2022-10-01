@@ -5,24 +5,21 @@
 <p id="notice"><%= notice %></p>
 
 <p>
-  <strong><%= :REVIEWED.t %>:</strong>
-  <%= @visual_group.reviewed %>
+  <strong><%= :APPROVED.t %>:</strong>
+  <%= @visual_group.approved %>
 </p>
 <p>
   Members
   <ul>
-    <% @visual_group.names.each do |name|
-       link = link_to(name.display_name_brief_authors.t,
-                      controller: :name,
-                      action: :show_name, id: name.id) %>
+    <% @visual_group.images.each do |image|
+       link = link_to(image.unique_format_name.t,
+                      controller: :image,
+                      action: :show_image, id: image.id) %>
       <li>
-	<%= content_tag(:p, link + " (#{name.observations.count})") %>
+	<%= content_tag(:p, link) %>
       </li>
     <% end %>
   </ul>
-</p>
-<p>
-  Total observations: <%= @visual_group.total_observations %>
 </p>
 
 <%= link_to :show_visual_group_edit.t, edit_visual_group_path(@visual_group) %> |

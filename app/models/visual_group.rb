@@ -1,34 +1,20 @@
 # frozen_string_literal: true
 
 class VisualGroup < ApplicationRecord
-  has_many :names, dependent: :nullify
+  has_many :visual_group_images, dependent: :destroy
+  has_many :images, through: :visual_group_images
+  has_one :visual_model
 
-  def add_name(name)
-    name.visual_group = self
-    name.save
+  def add_image(image)
+    images << image
+    save
   end
 
-  def add_names(new_names)
-    new_names.each do |name|
-      add_name(name) if name.visual_group.blank?
-    end
-  end
-
-  def total_observations
-    total = 0
-    names.each do |name|
-      total += name.observations.count
-    end
-    total
-  end
-
-  def total_images
-    total = 0
-    names.each do |name|
-      name.observations.each do |obs|
-        total += obs.images.count
+  def add_images(new_images)
+    new_images.each do |image|
+      if image.visual_group(visual_model) != self
+        add_image(image)
       end
     end
-    total
   end
 end

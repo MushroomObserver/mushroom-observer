@@ -1,9 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  name: "Boletus edulis"
-  reviewed: false
+visual_group_one:
+  name: Visual Group One
+  approved: true
+  description: Visual Group One includes Agaricus campestris
+  images: agaricus_campestris_image
 
-two:
-  name: "Cantharellus cibarius"
-  reviewed: false
+visual_group_two:
+  name: Visual Group Two
+  approved: false
+  description: Visual Group Two includes Peltigera
+  images: peltigera_image

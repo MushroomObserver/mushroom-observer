@@ -6,7 +6,7 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>Reviewed</th>
+      <th>Approved</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -15,7 +15,7 @@
     <% @visual_groups.each do |visual_group| %>
       <tr>
         <td><%= link_to(visual_group.name, visual_group) %></td>
-        <td><%= visual_group.reviewed %></td>
+        <td><%= visual_group.approved %></td>
         <td><%= link_to 'Edit', edit_visual_group_path(visual_group) %></td>
         <td><%= link_to 'Destroy', visual_group, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
