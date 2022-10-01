@@ -21,8 +21,10 @@ locals = {
   suggest_corrections: suggest_corrections,
   parent_deprecated: parent_deprecated,
   names: names
-}
-render(partial: "shared/form_name_feedback", locals: locals) if what.present? %>
+} %>
+
+<%= render(partial: "shared/form_name_feedback",
+           locals: locals) if what.present? %>
 
 <div class="row">
   <div class="col-sm-6">

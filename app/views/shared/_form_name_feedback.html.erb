@@ -35,11 +35,13 @@ if valid_names
     if valid_names.length > 0
       if suggest_corrections %>
         <span class="HelpNote">
-          <%= :form_naming_correct_help.t(button: button_name, name: what) %>
+          <%= :form_naming_correct_help.t(button: button_name,
+                                          name: what) %>
         </span><br/><%
       else %>
         <span class="HelpNote">
-          <%= :form_naming_deprecated_help.t(button: button_name, name: what) %>
+          <%= :form_naming_deprecated_help.t(button: button_name,
+                                             name: what) %>
         </span><br/><%
       end %>
       <span class="Data"><%
