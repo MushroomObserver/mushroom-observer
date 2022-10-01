@@ -3523,11 +3523,34 @@ class API2Test < UnitTestCase
     params = {
       method: :delete,
       action: :user,
-      api_key: @api_key.key,
-      id: rolf.id
+      api_key: @api_key.key # (rolf's)
     }
-    # No DELETE requests should be allowed at all.
-    assert_api_fail(params)
+
+    # Rolf can't delete Mary.
+    assert_api_fail(params.merge(id: mary.id))
+
+    # Rolf can delete himself, but since he has a comment on one of Mary's
+    # observations, his account is just disabled, not destroyed.
+    assert_api_pass(params.merge(id: rolf.id))
+    assert_not_nil(User.find_by(id: rolf.id))
+    rolf.reload
+    assert_blank(rolf.password)
+    assert_blank(rolf.email)
+    assert_blank(rolf.mailing_address)
+    assert_true(rolf.blocked)
+
+    zero = users(:zero_user)
+    zeros_api_key = APIKey.create!(
+      user: zero,
+      key: "whatever",
+      notes: "blah",
+      verified: Time.zone.now
+    )
+
+    # Zero can also delete himself, and since he hasn't done anything,
+    # it should actually fully destroy the account.
+    assert_api_pass(params.merge(api_key: zeros_api_key.key, id: zero.id))
+    assert_nil(User.find_by(id: zero.id))
   end
 
   # --------------------
@@ -4162,7 +4185,7 @@ class API2Test < UnitTestCase
     do_help_test(:get, :user)
     do_help_test(:post, :user)
     do_help_test(:patch, :user)
-    do_help_test(:delete, :user, fail: true)
+    do_help_test(:delete, :user)
   end
 
   def do_help_test(method, action, fail: false)

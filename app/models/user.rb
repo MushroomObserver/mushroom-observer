@@ -78,6 +78,8 @@
 #  updated_at::         Date/time it was last updated.
 #  verified::           Date/time the account was verified.
 #  last_login::         Date/time the user last logged in.
+#  last_activity::      Date/time the user made last request (updated hourly).
+#  blocked::            Boolean: user blocked or deleted?
 #
 #  ==== Administrative
 #  login::              Login name (must be locally unique).
@@ -275,6 +277,7 @@ class User < AbstractModel
   has_many :queued_emails
   has_many :sequences
   has_many :species_lists
+  has_many :collection_numbers
   has_many :herbarium_records
   has_many :test_add_image_logs
   has_many :votes
@@ -573,7 +576,7 @@ class User < AbstractModel
     @preferred_herbarium ||= \
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
-                       order(created_at: :desc).
+                       order(created_at: :desc).limit(1).
                        pluck(:herbarium_id).first
         if herbarium_id.blank?
           personal_herbarium
@@ -605,8 +608,8 @@ class User < AbstractModel
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  # Return an ActiveRecord::Association of SpeciesList's that User owns or that
-  # are attached to a Project that the User is a member of.
+  # Return an ActiveRecord::Association of SpeciesList's that User created or
+  # that are attached to a Project that the User is a member of.
   def all_editable_species_lists
     @all_editable_species_lists ||=
       if projects_member.any?
@@ -912,7 +915,7 @@ class User < AbstractModel
     [:users,                          :id]
   ].freeze
 
-  # Delete records they own, culminating in the user record itself.
+  # Delete records they created, culminating in the user record itself.
   private_class_method def self.delete_own_records(id)
     OWN_RECORDS.each do |table, col|
       model = get_model_for_table(table)
@@ -936,6 +939,206 @@ class User < AbstractModel
 
     self.image = nil
     save
+  end
+
+  ##############################################################################
+
+  # This is intended to comply with Apple's requirement that we allow users
+  # to delete their account.  We do not want to let users remove everything,
+  # though, like for example, their comments within comment threads on other
+  # users' observations, as doing so may render those threads unintelligible.
+  # Legally speaking, as everything on MO is posted under Creative Commons
+  # licenses, we are perfectly within our rights to retain users' content.
+  # But we wish to comply with Apple where it will not otherwise detract from
+  # other users' experience.
+  def disable_account_and_delete_private_objects
+    disable_account
+    delete_api_keys
+    delete_interests
+    delete_notifications
+    delete_queued_emails
+    delete_observations
+    delete_private_name_descriptions
+    delete_private_location_descriptions
+    delete_private_projects
+    delete_private_species_lists
+    delete_unattached_collection_numbers
+    delete_unattached_herbarium_records
+    delete_unattached_images
+    User.erase_user(id) if no_references_left?
+  end
+
+  # Disable and remove all public information from account but leave it there
+  # in case there are still comments, etc. on the site by this user.
+  def disable_account
+    self.email = ""
+    self.blocked = true
+    self.location_id = nil
+    self.image_id = nil
+    self.notes = nil
+    self.mailing_address = nil
+    update_attribute(:password, "")
+    save
+  end
+
+  def delete_api_keys
+    api_keys.delete_all
+  end
+
+  def delete_interests
+    interests.delete_all
+  end
+
+  def delete_notifications
+    Notification.where(user: self).delete_all
+  end
+
+  def delete_queued_emails
+    QueuedEmail.where(user_id: id).delete_all
+    QueuedEmail.where(to_user_id: id).delete_all
+  end
+
+  def delete_observations
+    [Naming, Vote, RssLog].each do |model|
+      model.joins(:observation).where(observation: { user_id: id }).delete_all
+    end
+    # (all the rest of the observations' dependents should autodestruct)
+    observations.delete_all
+  end
+
+  # Delete user's descriptions that don't have any other authors or editors.
+  # (Oops, editors never got "hooked up" so we have to use versions instead.)
+  def delete_private_name_descriptions
+    ids = private_name_descriptions.map(&:id)
+    NameDescription.where(id: ids).delete_all
+    NameDescription::Version.where(name_description_id: ids).delete_all
+  end
+
+  def private_name_descriptions
+    name_descriptions -
+      name_descriptions.joins(:name_description_authors).
+      where.not(name_description_authors: { user_id: id }) -
+      name_descriptions.joins(:name_description_editors).
+      where.not(name_description_editors: { user_id: id }) -
+      name_descriptions.joins(:versions).
+      where.not(versions: { user_id: id })
+  end
+
+  # Delete user's descriptions that don't have any other authors or editors.
+  # (Oops, editors never got "hooked up" so we have to use versions instead.)
+  def delete_private_location_descriptions
+    ids = private_location_descriptions.map(&:id)
+    LocationDescription.where(id: ids).delete_all
+    LocationDescription::Version.where(location_description_id: ids).delete_all
+  end
+
+  def private_location_descriptions
+    location_descriptions -
+      location_descriptions.joins(:location_description_authors).
+      where.not(location_description_authors: { user_id: id }) -
+      location_descriptions.joins(:location_description_editors).
+      where.not(location_description_editors: { user_id: id }) -
+      location_descriptions.joins(:versions).
+      where.not(versions: { user_id: id })
+  end
+
+  # Delete all the user's projects that don't have any other users on them.
+  def delete_private_projects
+    ids = (projects_created -
+            projects_created.joins(:admin_group_users).
+            where.not(admin_group_users: { id: id }) -
+            projects_created.joins(:member_group_users).
+            where.not(member_group_users: { id: id })).
+          map(&:id)
+    Project.where(id: ids).delete_all
+  end
+
+  # Delete all species lists the user created unless they belong to a project.
+  # (Private projects should already have been deleted by this point, so this
+  # in effect, really should read "unless they belong to a public project".)
+  # I think it's okay to delete observations even if they are attached to a
+  # project.  But species_lists are potentially a much more collaborative
+  # effort, so I don't think it's okay to delete lists that are attached to
+  # public projects just because the user happened to originally create them.
+  # -JPH 20220916
+  def delete_private_species_lists
+    ids = (species_lists - species_lists.joins(:project_species_lists)).
+          map(&:id)
+    SpeciesList.where(id: ids).delete_all
+  end
+
+  def delete_unattached_collection_numbers
+    ids = (collection_numbers -
+            collection_numbers.joins(:observation_collection_numbers)).
+          map(&:id)
+    CollectionNumber.where(id: ids).delete_all
+  end
+
+  def delete_unattached_herbarium_records
+    ids = (herbarium_records -
+            herbarium_records.joins(:observation_herbarium_records)).
+          map(&:id)
+    HerbariumRecord.where(id: ids).delete_all
+  end
+
+  def delete_unattached_images
+    ids = (images -
+            images.joins(:glossary_term_images) -
+            images.joins(:observation_images) -
+            images.joins(:project_images) -
+            images.joins(:subjects)).
+          map(&:id)
+    Image.where(id: ids).delete_all
+  end
+
+  REFERENCE_MODELS = [
+    # APIKey,                        (just deleted all of these)
+    Article,
+    CollectionNumber,
+    Comment,
+    # CopyrightChange,               (okay if these are all that's left)
+    # Donation,                      (okay if these are all that's left)
+    ExternalLink,
+    GlossaryTerm,
+    GlossaryTerm::Version,
+    # Herbarium, (personal_user_id)  (okay if these are all that's left)
+    # HerbariumCurator,              (okay if these are all that's left)
+    HerbariumRecord,
+    ImageVote,
+    Image,
+    # Interest,                      (just deleted all of these)
+    Location,
+    Location::Version,
+    LocationDescription,
+    LocationDescription::Version,
+    LocationDescriptionAuthor,
+    LocationDescriptionEditor,
+    Name,
+    Name::Version,
+    NameDescription,
+    NameDescription::Version,
+    NameDescriptionAuthor,
+    NameDescriptionEditor,
+    Naming,
+    # Notification,                  (just deleted all of these)
+    # ObservationView,               (okay if these are all that's left)
+    # Observation,                   (just deleted all of these)
+    Project,
+    Publication,
+    # QueuedEmail,                   (just deleted all of these)
+    # QueuedEmail, (to_user_id)      (just deleted all of these)
+    Sequence,
+    SpeciesList,
+    TranslationString,
+    TranslationString::Version,
+    # UserGroupUser,                 (okay if these are all that's left)
+    Vote
+  ].freeze
+
+  def no_references_left?
+    REFERENCE_MODELS.all? do |model|
+      model.where(user_id: id).none?
+    end
   end
 
   ##############################################################################
