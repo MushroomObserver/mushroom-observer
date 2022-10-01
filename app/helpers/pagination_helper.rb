@@ -12,7 +12,7 @@ module PaginationHelper
   #     <% end %>
   #   <% end %>
   #
-  def paginate_block(pages, args = {}, &block) # #TODO: Depreciate / REMOVE
+  def paginate_block(pages, args = {}, &block)
     html_id = args[:html_id] ||= "results"
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)

@@ -16,6 +16,8 @@
 // }
 
 .matrix-box {
+  @extend .col-xs-12, .col-sm-6, .col-md-4;
+
   .panel {
     .thumbnail-container {
       min-height: 30px;
