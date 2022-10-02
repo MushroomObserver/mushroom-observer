@@ -686,6 +686,13 @@ ActiveRecord::Schema.define(version: 2022_09_28_163200) do
     t.boolean "blocked", default: false, null: false
   end
 
+  create_table "visual_groups", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "group_name_id"
+    t.boolean "reviewed", default: false, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
