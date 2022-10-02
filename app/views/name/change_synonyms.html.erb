@@ -7,8 +7,10 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(action: :change_synonyms, id: @name.id, approved_names: @new_names,
-            approved_synonyms: @synonym_name_ids) do %>
-  <%= render(partial: "form_synonyms") %>
-  <%= submit_tag(:name_change_synonyms_submit.l, class: "btn btn-default center-block") %>
-<% end %>
+<div class="max-width-text">
+  <%= form_tag(action: :change_synonyms, id: @name.id, approved_names: @new_names,
+              approved_synonyms: @synonym_name_ids) do %>
+    <%= render(partial: "form_synonyms") %>
+    <%= submit_tag(:name_change_synonyms_submit.l, class: "btn btn-default center-block") %>
+  <% end %>
+</div><!--.max-width-text-->

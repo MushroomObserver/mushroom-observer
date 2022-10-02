@@ -16,11 +16,15 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(:description, url: add_query_param(action: :edit_name_description,
-                                  id: @description.id)) do |form| %>
-  <%= render(partial: "form_name_description", locals: {form: form, button: :SAVE_EDITS.l}) %>
-  <% if @merge %>
-    <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
-    <%= hidden_field_tag(:delete_after, @delete_after) %>
+<div class="max-width-text">
+  <%= form_for(:description,
+               url: add_query_param(action: :edit_name_description,
+                                    id: @description.id)) do |form| %>
+    <%= render(partial: "form_name_description",
+               locals: {form: form, button: :SAVE_EDITS.l}) %>
+    <% if @merge %>
+      <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
+      <%= hidden_field_tag(:delete_after, @delete_after) %>
+    <% end %>
   <% end %>
-<% end %>
+</div><!--.max-width-text-->
