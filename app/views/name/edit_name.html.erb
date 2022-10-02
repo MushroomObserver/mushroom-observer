@@ -8,14 +8,18 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(:name, url: add_query_param(action: :edit_name, id: @name.id)) do |form| %>
-  <div class="text-center my-3">
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
-  </div><!-- .text-center -->
+<div class="max-width-text">
+  <%= form_for(
+        :name, url: add_query_param(action: :edit_name, id: @name.id)
+      ) do |form| %>
+    <div class="text-center my-3">
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
+    </div><!-- .text-center -->
 
-  <%= render(partial: "form_name", locals: { form: form }) %>
+    <%= render(partial: "form_name", locals: { form: form }) %>
 
-  <div class="text-center my-3">
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
-  </div><!-- .text-center -->
-<% end %>
+    <div class="text-center my-3">
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
+    </div><!-- .text-center -->
+  <% end %>
+</div><!--.max-width-text-->
