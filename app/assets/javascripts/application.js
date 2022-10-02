@@ -1,11 +1,10 @@
-//= require jquery3
+// = require jquery3
 //= require jquery_extensions
-//= require jquery_ujs
+//= require rails-ujs
 //= require bootstrap
 //= require jstz
 //= require autocomplete
 //= require box_resizer
-//= require confirm
 //= require csrf_token
 //= require external_link
 //= require image_vote
