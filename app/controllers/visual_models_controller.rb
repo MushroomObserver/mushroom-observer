@@ -18,9 +18,10 @@ class VisualModelsController < ApplicationController
     @visual_model = VisualModel.new
   end
 
-  #   # GET /visual_models/1/edit
-  #   def edit
-  #   end
+  # GET /visual_models/1/edit
+  def edit
+    @visual_model = VisualModel.find(params[:id])
+  end
 
   # POST /visual_models or /visual_models.json
   def create
@@ -30,7 +31,7 @@ class VisualModelsController < ApplicationController
       if @visual_model.save
         format.html do
           redirect_to(visual_model_url(@visual_model),
-                      notice: runtime_visual_model_created_at.t)
+                      notice: :runtime_visual_model_created_at.t)
         end
         format.json do
           render(:show, status: :created,
@@ -46,20 +47,26 @@ class VisualModelsController < ApplicationController
     end
   end
 
-  #   # PATCH/PUT /visual_models/1 or /visual_models/1.json
-  #   def update
-  #     respond_to do |format|
-  #       if @visual_model.update(visual_model_params)
-  #         format.html { redirect_to visual_model_url(@visual_model),
-  # notice: "Visual model was successfully updated." }
-  #         format.json { render :show, status: :ok, location: @visual_model }
-  #       else
-  #         format.html { render :edit, status: :unprocessable_entity }
-  #         format.json { render json: @visual_model.errors,
-  # status: :unprocessable_entity }
-  #       end
-  #     end
-  #   end
+  # PATCH/PUT /visual_models/1 or /visual_models/1.json
+  def update
+    @visual_model = VisualModel.find(params[:id])
+
+    respond_to do |format|
+      if @visual_model.update(visual_model_params)
+        format.html do
+          redirect_to(visual_model_url(@visual_model),
+                      notice: :runtime_visual_model_updated_at.t)
+        end
+        format.json { render(:show, status: :ok, location: @visual_model) }
+      else
+        format.html { render(:edit, status: :unprocessable_entity) }
+        format.json do
+          render(json: @visual_model.errors,
+                 status: :unprocessable_entity)
+        end
+      end
+    end
+  end
 
   # DELETE /visual_models/1 or /visual_models/1.json
   def destroy
@@ -75,14 +82,15 @@ class VisualModelsController < ApplicationController
     end
   end
 
-  #   private
-  #     # Use callbacks to share common setup or constraints between actions.
-  #     def set_visual_model
-  #       @visual_model = VisualModel.find(params[:id])
-  #     end
+  private
 
-  #     # Only allow a list of trusted parameters through.
-  #     def visual_model_params
-  #       params.require(:visual_model).permit(:name, :reviewed)
-  #     end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_visual_model
+    @visual_model = VisualModel.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def visual_model_params
+    params.require(:visual_model).permit(:name, :reviewed)
+  end
 end

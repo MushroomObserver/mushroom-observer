@@ -15,7 +15,7 @@
       <tr>
         <td><%= link_to(visual_model.name, visual_model) %></td>
         <td><%= link_to 'Edit', edit_visual_model_path(visual_model) %></td>
-        <td><%= link_to 'Destroy', visual_model, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to 'Destroy', visual_model, method: :delete, data: { confirm: :are_you_sure.t } %></td>
       </tr>
     <% end %>
   </tbody>

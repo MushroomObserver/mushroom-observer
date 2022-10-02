@@ -3844,6 +3844,7 @@
   runtime_user_bad_rank: "Invalid rank: '[rank]'"
   runtime_visual_group_created_at: "[:runtime_created_at(type=:visual_group)]"
   runtime_visual_model_created_at: "[:runtime_created_at(type=:visual_model)]"
+  runtime_visual_model_updated_at: "[:runtime_updated_at(type=:visual_model)]"
 
   # Longer messages.
   runtime_ask_webmaster_antispam: To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.

@@ -30,7 +30,7 @@ class VisualGroupsController < ApplicationController
       if @visual_group.save
         format.html do
           redirect_to(visual_group_url(@visual_group),
-                      notice: runtime_visual_group_created_at.t)
+                      notice: :runtime_visual_group_created_at.t)
         end
         format.json do
           render(:show, status: :created,
@@ -75,14 +75,15 @@ class VisualGroupsController < ApplicationController
     end
   end
 
-  #   private
-  #     # Use callbacks to share common setup or constraints between actions.
-  #     def set_visual_group
-  #       @visual_group = VisualGroup.find(params[:id])
-  #     end
+  private
 
-  #     # Only allow a list of trusted parameters through.
-  #     def visual_group_params
-  #       params.require(:visual_group).permit(:name, :reviewed)
-  #     end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_visual_group
+    @visual_group = VisualGroup.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def visual_group_params
+    params.require(:visual_group).permit(:name, :reviewed)
+  end
 end
