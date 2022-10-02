@@ -5,7 +5,8 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups or /visual_groups.json
   def index
-    @visual_groups = VisualGroup.all.order(:name)
+    @visual_model = VisualModel.find(params[:visual_model_id])
+    @visual_groups = @visual_model.visual_groups.order(:name)
   end
 
   # GET /visual_groups/1 or /visual_groups/1.json
@@ -25,6 +26,7 @@ class VisualGroupsController < ApplicationController
 
   # POST /visual_groups or /visual_groups.json
   def create
+    debugger
     @visual_group = VisualGroup.new(visual_group_params)
 
     respond_to do |format|
@@ -85,6 +87,6 @@ class VisualGroupsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def visual_group_params
-    params.require(:visual_group).permit(:name, :reviewed)
+    params.require(:visual_group).permit(:visual_model_id, :name, :approved, :description)
   end
 end
