@@ -10,7 +10,7 @@
 
 <div class="form-group mt-3 form-inline">
   <%= :prefs_email_comments.t %>:
-  <p class="help-block">(<%= :prefs_email_please_notify.t %>)</p><br/>
+  <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box(:email_comments_owner, class: "form-control") %>
   <%= label_tag(:user_email_comments_owner,
                 :prefs_email_comments_owner.t) %><br/>
