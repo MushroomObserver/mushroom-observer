@@ -48,10 +48,12 @@
   text-indent: -1em;
 }
 
-.obs-notes p {
-  margin: 0;
-  padding: 0;
-  text-indent: 0;
+.obs-notes {
+  .textile p {
+    margin: 0;
+    padding-left: 1em;
+    text-indent: -1em;
+  }
 }
 
 ul.tight-list {
