@@ -15,6 +15,7 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/new
   def new
+    @visual_model = VisualModel.find(params[:visual_model_id])
     @visual_group = VisualGroup.new
   end
 
