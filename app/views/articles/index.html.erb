@@ -6,8 +6,10 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
-  <div class="list-group">
-    <%= render(partial: "object", collection: @objects) %>
-  </div>
-<% end %>
+<div class="container-full">
+  <%= paginate_block(@pages) do %>
+    <div class="list-group">
+      <%= render(partial: "object", collection: @objects) %>
+    </div>
+  <% end %>
+</div><!--.container-full-->

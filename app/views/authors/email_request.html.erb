@@ -1,6 +1,6 @@
 <% @title = :author_request_title.t(title: @object.format_name) %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(add_query_param(action: :email_request, id: @object.id,
                                type: @object.type_tag)) do %>
     <%= :author_request_note.tp %>
@@ -17,4 +17,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn btn-default") %></div><!-- .text-center --><br/>
   <% end %>
-</div>
+</div><!--.container-text-->
