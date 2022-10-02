@@ -8,7 +8,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= :account_api_keys_help.tp %>
 
   <%= form_for(:key, url: {id: @key.id}) do |form| %>
@@ -42,4 +42,4 @@
       <%= submit_tag(:CANCEL.l, class: "btn btn-default") %>
     </div><!-- .text-center -->
   <% end %>
-</div>
+</div><!--.container-text-->

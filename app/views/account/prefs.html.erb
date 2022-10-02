@@ -3,7 +3,7 @@
   @tabsets = prefs_tabset
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for(:user, url: {action: :prefs}) do |form| %>
     <%= render partial: "prefs_login", locals: { form: form } %>
     <%= render partial: "prefs_privacy", locals: { form: form } %>
@@ -12,4 +12,4 @@
     <%= render partial: "prefs_notes", locals: { form: form } %>
     <%= render partial: "prefs_email", locals: { form: form } %>
   <% end %>
-</div>
+</div><!--.container-text-->

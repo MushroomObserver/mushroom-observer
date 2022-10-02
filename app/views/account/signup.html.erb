@@ -2,7 +2,7 @@
   @title = :signup_title.t
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(action: :signup) do %>
     <div class="form-group mt-3">
       <%= label_tag(:new_user_login, :signup_login.t + ":") %>
@@ -41,4 +41,4 @@
 
     <%= submit_tag(:signup_button.l, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div>
+</div><!--.container-text-->

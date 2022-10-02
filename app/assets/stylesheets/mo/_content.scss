@@ -7,6 +7,30 @@
   padding-bottom: 5em;
 }
 
+// Most browsers allow you to zoom in or out: let the user decide what
+// an optimal width for a line of text should be.  There is no way for us
+// to decide for them intelligently, since browsers differ so much in how
+// they deal with print views.
+@media screen {
+  .max-width-text,
+  .container-text {
+    max-width: 600px;
+  }
+
+  .max-width-text-plus-padding {
+    max-width: 650px;
+  }
+
+  .max-width-text-plus-image,
+  .container-text-image {
+    max-width: 850px; // 600px text column + 160pm max thumbnail
+  }
+
+  .max-width-text-times-two,
+  .container-full {
+    max-width: 1200px;
+  }
+}
 //
 // specialized stuff for print view
 // --------------------------------------------------

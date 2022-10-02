@@ -2,7 +2,7 @@
   @title = :login_please_login.t
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(action: :login) do %>
     <div class="form-group mt-3">
       <%= label_tag(:user_login, :login_user.t + ":") %>
@@ -27,4 +27,4 @@
       <%= :login_having_problems.tp %>
     </div>
   <% end %>
-</div>
+</div><!--.container-text-->

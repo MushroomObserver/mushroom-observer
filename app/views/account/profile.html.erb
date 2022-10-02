@@ -10,7 +10,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for(:user, url: { action: :profile },
                html: { multipart: true }) do |form| %>
 
@@ -74,4 +74,4 @@
                    class: "btn btn-default center-block mt-3") %>
 
   <% end %>
-</div>
+</div><!--.container-text-->

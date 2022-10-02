@@ -214,3 +214,14 @@ table.table-compact tr td {
   padding-top: 3px !important;
   padding-bottom: 3px !important;
 }
+
+table.ips tr td,
+table.ips tr th {
+  background: #f7f;
+  padding: 0 0.5em;
+}
+
+table.ips-lined tr td,
+table.ips-lined tr th {
+  border-left: 2px solid #d0d;
+}
