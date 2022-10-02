@@ -25,10 +25,10 @@
     <%= :collection_number_user.t %>: <%= user_link(@collection_number.user) %><br/>
   </p>
 
-  <div class="mt-3">
-    <%= render(partial: "shared/matrix_box",
+  <ul class="row list-unstyled mt-3">
+    <%= render(partial: "shared/matrix_box", locals: { columns: "col-xs-12" },
                collection: @collection_number.observations, as: :object) %>
-  </div>
+  </ul>
 
   <div class="text-center">
     <p>

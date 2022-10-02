@@ -125,8 +125,7 @@
   </div>
 <% end %>
 
-<div class="max-width-text mt-3">
-  <%= render(partial: "comment/show_comments",
-              locals: {object: @species_list, controls: true, limit: nil}) %>
-  <%= show_object_footer(@species_list) %>
-</div>
+<%= render(partial: "comment/show_comments",
+           locals: {object: @species_list, controls: true, limit: nil}) %>
+
+<%= show_object_footer(@species_list) %>

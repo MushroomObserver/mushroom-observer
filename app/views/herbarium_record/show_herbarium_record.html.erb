@@ -33,10 +33,10 @@
     <%= ( :NOTES.l + ":\n\n" + @herbarium_record.notes ).tpl %>
   <% end %>
 
-  <div class="mt-3">
-    <%= render(partial: "shared/matrix_box",
+  <ul class="row list-unstyled">
+    <%= render(partial: "shared/matrix_box", locals: { columns: "col-xs-12" },
                collection: @herbarium_record.observations, as: :object) %>
-  </div>
+  </ul>
 
   <div class="text-center">
     <p>

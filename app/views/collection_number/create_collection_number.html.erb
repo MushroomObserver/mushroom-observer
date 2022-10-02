@@ -15,7 +15,10 @@
   </div>
 
   <div class="col-xs-12 col-sm-5 max-width-text">
-    <%= render(partial: "shared/matrix_box",
-               locals: { object: @observation.rss_log }) %>
+    <ul class="row list-unstyled">
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: @observation.rss_log,
+                           columns: "col-xs-12" }) %>
+    </ul>
   </div>
 </div>
