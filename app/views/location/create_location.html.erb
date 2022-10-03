@@ -6,6 +6,7 @@
   ]
   tabs += location_search_links(@location.name)
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :full
 %>
 
 <%= form_for(:location, url: add_query_param(
