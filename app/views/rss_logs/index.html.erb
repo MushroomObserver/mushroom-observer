@@ -1,5 +1,6 @@
 <%
   @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
+  @container = :full
 
   if @links.any?
     tabs = create_links(@links)
@@ -7,6 +8,7 @@
   end
 
   @full_width_tab_set = render(partial: "rss_log_tabset")
+
   flash_error(@error) if @error && @objects.empty?
 %>
 

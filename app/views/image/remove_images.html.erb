@@ -1,9 +1,5 @@
-<% @container = :wide %>
+<% @container = :full %>
 
-<div class="my-3">
-
-  <%= render(partial: "remove_images",
-             locals: {target_class: Observation,
-                      form_action: :remove_images}) %>
-
-</div><!--.container-full-->
+<%= render(partial: "remove_images",
+            locals: {target_class: Observation,
+                    form_action: :remove_images}) %>
