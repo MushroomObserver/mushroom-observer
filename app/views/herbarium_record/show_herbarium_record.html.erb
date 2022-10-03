@@ -21,7 +21,7 @@
   herbarium = @herbarium_record.herbarium
 %>
 
-<div class="max-width-text mt-3">
+<div class="container-text mt-3">
   <p>
     <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium.show_link_args) %><br/>
     <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
@@ -44,4 +44,4 @@
       <%= :UPDATED_AT.t %>: <%= @herbarium_record.updated_at.web_date %><br/>
     </p>
   </div><!-- .text-center -->
-</div>
+</div><!-- .container-text -->

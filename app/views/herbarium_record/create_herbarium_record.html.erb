@@ -10,22 +10,24 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 col-sm-7 max-width-text">
-    <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
+<div class="container-full">
+  <div class="row">
+    <div class="col-xs-12 col-sm-7">
+      <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
 
-    <%= form_tag(
-          add_query_param(action: :create_herbarium_record, id: @observation.id)
-        ) do %>
-      <%= render(partial: "form", locals: { button: :ADD }) %>
-    <% end %>
-  </div>
+      <%= form_tag(
+            add_query_param(action: :create_herbarium_record, id: @observation.id)
+          ) do %>
+        <%= render(partial: "form", locals: { button: :ADD }) %>
+      <% end %>
+    </div>
 
-  <div class="col-xs-12 col-sm-5 max-width-text">
-    <ul class="row list-unstyled">
-      <%= render(partial: "shared/matrix_box",
-                 locals: { object: @observation.rss_log,
-                           columns: "col-xs-12" }) %>
-    </ul>
-  </div>
-</div>
+    <div class="col-xs-12 col-sm-5">
+      <ul class="row list-unstyled">
+        <%= render(partial: "shared/matrix_box",
+                  locals: { object: @observation.rss_log,
+                            columns: "col-xs-12" }) %>
+      </ul>
+    </div>
+  </div><!--.row-->
+</div><!--.container-full-->

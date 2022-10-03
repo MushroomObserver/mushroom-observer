@@ -10,7 +10,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for( :image,
         url: add_query_param(action: :add_image, id: @observation.id),
         html: {multipart: true}) do |form| %>
@@ -43,4 +43,4 @@
     <%= submit_tag(:image_add_upload.l,
                    class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div>
+</div><!--.container-text-->
