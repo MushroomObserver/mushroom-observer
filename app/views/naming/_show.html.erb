@@ -102,7 +102,7 @@ form_url = add_query_param(controller: :vote, action: :cast_votes,
       <div class="float-sm-right my-5px ml-10px mt-sm-3">
         <%= buttons.safe_join("<br/>".html_safe) %>
       </div>
-      <p class="help-block max-width-text"><%= help %></p>
+      <p class="help-block container-text"><%= help %></p>
       <div class="row">
         <div class="col-xs-6"><div class="p-5px"><%= eye %></div></div>
         <div class="col-xs-6"><div class="p-5px"><%= eyes %></div></div>
@@ -144,7 +144,7 @@ form_url = add_query_param(controller: :vote, action: :cast_votes,
 
       <!--HELP TEXT AND EYES FOR MOBILE-->
       <div class="float-sm-right mt-sm-3"><%= buttons.safe_join %></div>
-      <p class="help-block max-width-text my-3"><%= help %></p>
+      <p class="help-block container-text my-3"><%= help %></p>
       <div class="row">
         <div class="col-xs-6"><div class="p-5px"><%= eye %></div></div>
         <div class="col-xs-6"><div class="p-5px"><%= eyes %></div></div>

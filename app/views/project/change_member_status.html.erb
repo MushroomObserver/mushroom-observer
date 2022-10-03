@@ -15,7 +15,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(add_query_param(action: :change_member_status, id: @project.id,
                                candidate: @candidate.id)) do %>
 
@@ -36,4 +36,4 @@
   <% end %>
 
   <%= render(partial: "show_groups", locals: {project: @project}) %>
-</div>
+</div><!--.container-text-->

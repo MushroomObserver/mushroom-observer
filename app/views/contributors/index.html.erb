@@ -18,7 +18,7 @@
 
     <div class="col-md-6">
       <div class="list-group">
-        <div class="list-group-item max-width-text">
+        <div class="list-group-item">
 
           <%= :users_by_contribution_1.tp %>
           <% SiteData::ALL_FIELDS.select { |f| SiteData::FIELD_WEIGHTS[f] > 0}.each do |field| %>

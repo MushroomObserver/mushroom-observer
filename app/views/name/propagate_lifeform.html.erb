@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="mt-3">
+<div class="container-full">
   <%= form_tag(add_query_param(action: :propagate_lifeform, id: @name.id)) do %>
     <p><b><%= :ADD.t %>:</b> <%= :propagate_lifeform_add.t %></p>
     <table class="table-lifeform">
@@ -20,7 +20,7 @@
                               class: "form-control-xxx") %>
             <%= label_tag("add_#{word}", :"lifeform_#{word}".t) %>
           </td>
-          <td class="max-width-text">
+          <td class="container-text">
             <%= :"lifeform_help_#{word}".t %>
           </td>
         </tr>
@@ -39,7 +39,7 @@
                               class: "form-control-xxx") %>
             <%= label_tag("remove_#{word}", :"lifeform_#{word}".t) %>
           </td>
-          <td class="max-width-text">
+          <td class="container-text">
             <%= :"lifeform_help_#{word}".t %>
           </td>
         </tr>
@@ -48,4 +48,4 @@
 
     <%= submit_tag(:propagate_lifeform_apply.t, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div><!--.row-->
+</div><!--.container-full-->

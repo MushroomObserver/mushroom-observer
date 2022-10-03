@@ -11,13 +11,13 @@
 %>
 
 <noscript>
-  <div class="max-width-text mt-3">
+  <div class="container mt-3">
     <%= :name_lister_no_js.tp %>
   </div>
 </noscript>
 
 <% if !can_do_ajax? %>
-  <div class="max-width-text mt-3">
+  <div class="container mt-3">
     <%= :name_lister_bad_browser.tp %>
   </div>
 <% end %>
@@ -80,6 +80,6 @@
   nc("g", 0); // click on first genus
 ) %>
 
-<div class="max-width-text mt-3">
+<div class="container mt-3">
   <div class="help-note"><%= :name_lister_help.tp %></div>
 </div>

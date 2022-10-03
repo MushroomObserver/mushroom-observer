@@ -8,7 +8,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for(
         :name, url: add_query_param(action: :edit_name, id: @name.id)
       ) do |form| %>
@@ -22,4 +22,4 @@
       <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
     </div><!-- .text-center -->
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

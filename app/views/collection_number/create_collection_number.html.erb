@@ -9,13 +9,13 @@
 
 <div class="container-full">
   <div class="row">
-    <div class="col-xs-12 col-sm-7 max-width-text">
+    <div class="col-xs-12 col-sm-7">
       <%= form_tag(add_query_param(action: :create_collection_number, id: @observation.id)) do %>
         <%= render(partial: "form", locals: {button: :ADD}) %>
       <% end %>
     </div>
 
-    <div class="col-xs-12 col-sm-5 max-width-text">
+    <div class="col-xs-12 col-sm-5">
       <ul class="row list-unstyled">
         <%= render(partial: "shared/matrix_box",
                   locals: { object: @observation.rss_log,

@@ -23,63 +23,66 @@ locals = {
   names: names
 } %>
 
-<div class="row">
-  <div class="col-xs-12 col-sm-6 max-width-text">
-    <%= render(partial: "shared/form_name_feedback",
-            locals: locals) if what.present? %>
-  </div>
-</div><!--.row-->
-
-<div class="row mt-3" id="observation_naming">
-  <div class="col-sm-6 max-width-text">
-    <div class="form-group">
-      <%= label_tag(:name_name, :WHAT.t + ":") %>
-      <%= text_field(:name, :name, value: what, size: 40, class: "form-control",
-                     data: { autofocus: focus_on_name }) %>
-      <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
+<div class="container-full">
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <%= render(partial: "shared/form_name_feedback",
+              locals: locals) if what.present? %>
     </div>
-  </div>
+  </div><!--.row-->
 
-  <div class="col-sm-6 max-width-text">
-    <div class="well well-sm help-block position-relative">
-      <div class="arrow-left hidden-xs"></div>
-      <%= tag.p(:form_naming_name_help.t) %>
-    </div>
-  </div>
-</div><!--.row-->
-
-<div class="row">
-  <div class="col-sm-6 max-width-text">
-
-    <div class="form-group">
-      <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
-      <%= select(:vote, :value,
-                 options_for_select(Vote.confidence_menu, vote&.value),
-                 { include_blank: (action == :create) } ,
-                 class: "form-control",
-                 data: { autofocus: focus_on_vote }) %>
-    </div>
-
-    <% reason.values.sort_by(&:order).each do |r| %>
-      <div class="form-group form-inline m-0">
-        <label>
-          <%= check_box(:reason, :check,
-                        { index: r.num, checked: r.used?,
-                          data: { role: "collapser",
-                                  target: "#reason_#{r.num}_notes" },
-                          class: "" },
-                        "1") %>
-          <%= r.label.t %>
-        </label>
+  <div class="row mt-3" id="observation_naming_form">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <%= label_tag(:name_name, :WHAT.t + ":") %>
+        <%= text_field(:name, :name, value: what, size: 40,
+                       class: "form-control",
+                       data: { autofocus: focus_on_name }) %>
+        <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
       </div>
-      <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
-        <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
-                      class: "form-control") %>
-      </div>
-    <% end %>
+    </div>
 
-  </div><!--.col-->
-</div><!--.row-->
+    <div class="col-sm-6">
+      <div class="well well-sm help-block position-relative">
+        <div class="arrow-left hidden-xs"></div>
+        <%= tag.p(:form_naming_name_help.t) %>
+      </div>
+    </div>
+  </div><!--.row-->
+
+  <div class="row">
+    <div class="col-sm-6">
+
+      <div class="form-group">
+        <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
+        <%= select(:vote, :value,
+                  options_for_select(Vote.confidence_menu, vote&.value),
+                  { include_blank: (action == :create) } ,
+                  class: "form-control",
+                  data: { autofocus: focus_on_vote }) %>
+      </div>
+
+      <% reason.values.sort_by(&:order).each do |r| %>
+        <div class="form-group form-inline m-0">
+          <label>
+            <%= check_box(:reason, :check,
+                          { index: r.num, checked: r.used?,
+                            data: { role: "collapser",
+                                    target: "#reason_#{r.num}_notes" },
+                            class: "" },
+                          "1") %>
+            <%= r.label.t %>
+          </label>
+        </div>
+        <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
+          <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
+                        class: "form-control") %>
+        </div>
+      <% end %>
+
+    </div><!--.col-->
+  </div><!--.row-->
+</div><!--.container-full-->
 
 <%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
 <% inject_javascript_at_end %(

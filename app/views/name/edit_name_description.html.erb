@@ -16,7 +16,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for(:description,
                url: add_query_param(action: :edit_name_description,
                                     id: @description.id)) do |form| %>
@@ -27,4 +27,4 @@
       <%= hidden_field_tag(:delete_after, @delete_after) %>
     <% end %>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

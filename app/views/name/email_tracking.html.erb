@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= :email_tracking_help.tp %>
 
   <%= form_tag(action: :email_tracking, id: @name.id) do %>
@@ -24,4 +24,4 @@
     <%= text_area(:notification, :note_template, cols: 80, rows: 16,
                   value: @note_template, data: {autofocus: true}) %><br/>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

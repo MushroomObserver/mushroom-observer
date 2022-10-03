@@ -2,7 +2,7 @@
   @title = :admin_request_title.t(title: @project.title)
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(add_query_param(action: :admin_request, id: @project.id)) do %>
     <%= :admin_request_note.tp %>
 
@@ -18,4 +18,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div>
+</div><!--.container-text-->

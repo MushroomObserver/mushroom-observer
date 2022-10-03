@@ -57,7 +57,7 @@ if valid_names
       <%= :form_naming_not_recognized_help.t(button: button_name) %>
       </span><br/><%
     end %>
-  </div><!--.alert.max-width-text--><%
+  </div><!--.alert--><%
 
 ##### Errors #####
 elsif names&.length == 0
@@ -71,7 +71,7 @@ elsif names&.length == 0
     <span class="help-note">
       <%= :form_naming_not_recognized_help.t(button: button_name) %>
     </span><br/>
-  </div><!--.alert.max-width-text--><%
+  </div><!--.alert--><%
 
 elsif names&.length &.> 1
 
@@ -88,6 +88,6 @@ elsif names&.length &.> 1
     <span class="help-note">
       <%= :form_naming_multiple_names_help.t %>
     </span><br/>
-  </div><!--.alert.max-width-text--><%
+  </div><!--.alert--><%
 
 end %>

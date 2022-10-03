@@ -2,7 +2,7 @@
   @title = :app_advanced_search.t
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <p class="help-block"><%= :advanced_search_caveat.t %></p>
 
   <%= form_tag(action: :advanced, method: :get) do %>
@@ -60,4 +60,4 @@
 
     <%= submit_tag(:advanced_search_submit.l, class: "btn btn-default center-block") %>
   <% end %>
-</div>
+</div><!--.container-text-->

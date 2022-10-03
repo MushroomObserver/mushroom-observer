@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text mt-3">
+<div class="container-full mt-3">
   <%= form_tag(add_query_param(action: :edit_lifeform, id: @name.id)) do %>
     <p><%= :edit_lifeform_help.t %></p>
     <table class="table-lifeform">
@@ -19,7 +19,7 @@
                               class: "form-control-xxx mt-2") %>
             <%= label_tag("lifeform_#{word}", :"lifeform_#{word}".t) %>
           </td>
-          <td class="max-width-text">
+          <td class="container-text">
             <%= :"lifeform_help_#{word}".t %>
           </td>
         </tr>
@@ -28,4 +28,4 @@
 
     <%= submit_tag(:edit_lifeform_save.t, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-full-->

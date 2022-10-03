@@ -10,19 +10,21 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row mt-3">
-  <div class="col-sm-7 col-lg-9">
-    <%= render(partial: "nomenclature",
-               locals: { name: @name, synonyms: false }) %>
-    </div>
-  </div>
-  <div class="col-sm-5 col-lg-3">
-    <div class="list-group">
-      <div class="list-group-item name-section">
-        <%= show_past_versions(@name, bold: lambda {|v| !v.deprecated}) %>
+<div class="container-full">
+  <div class="row mt-3">
+    <div class="col-sm-7 col-lg-9">
+      <%= render(partial: "nomenclature",
+                locals: { name: @name, synonyms: false }) %>
       </div>
     </div>
-  </div>
-</div>
+    <div class="col-sm-5 col-lg-3">
+      <div class="list-group">
+        <div class="list-group-item name-section">
+          <%= show_past_versions(@name, bold: lambda {|v| !v.deprecated}) %>
+        </div>
+      </div>
+    </div>
+  </div><!--.row-->
 
-<%= show_object_footer(@name) %>
+  <%= show_object_footer(@name) %>
+</div><!--.container-full-->

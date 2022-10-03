@@ -13,7 +13,7 @@
   <table class="table table-striped">
     <% @glossary_terms.each do |term| %>
       <tr>
-        <td class="max-width-text">
+        <td class="">
           <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
           <%= term.description.tpl %>
         </td>

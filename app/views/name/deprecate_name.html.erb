@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
 
   <%= form_tag(action: :deprecate_name, id: @name.id, approved_name: @what) do %>
 
@@ -40,4 +40,4 @@
       <%= :field_textile_link.tp %>
     </div>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

@@ -7,9 +7,9 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(add_query_param(action: :add_project)) do %>
     <%= submit_tag(:CREATE.l, class: "btn btn-default center-block mt-3") %>
     <%= render(partial: "form_projects") %>
   <% end %>
-</div>
+</div><!--.container-text-->

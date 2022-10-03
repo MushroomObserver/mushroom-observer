@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(action: :approve_name, id: @name.id) do %>
     <br/><div class="text-center"><%= submit_tag(:APPROVE.l, class: "btn btn-default") %></div><!-- .text-center -->
 
@@ -28,4 +28,4 @@
 
     <br/><div class="text-center"><%= submit_tag(:APPROVE.l, class: "btn btn-default") %></div><!-- .text-center -->
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

@@ -15,7 +15,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <p>
     <b><%= :publication_full.t %>:</b><br/>
     <%= @publication.full.t.strip_links.html_safe %>
@@ -44,11 +44,11 @@
   </p>
 
   <p>
-    <b><%= :show_publication_added_by.t %></b>: 
+    <b><%= :show_publication_added_by.t %></b>:
     <%= user_link(@publication.user) %>
     <%= @publication.created_at.web_date %><br/>
     <%= if @publication.created_at.web_date != @publication.updated_at.web_date
       :footer_last_updated_at.t(date: @publication.updated_at.web_date)
     end %>
   </p>
-</div>
+</div><!--.container-text-->

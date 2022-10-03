@@ -2,13 +2,13 @@
 
 <% partial = render(partial: "shared/form_list_feedback")
 if !partial.blank? %>
-  <div class="max-width-text">
+  <div class="container-text">
     <%= partial %>
   </div>
 <% end %>
 
 <% if @checklist&.any? %>
-  <div class="max-width-text" id="checklist_data">
+  <div class="container-text" id="checklist_data">
     <p>
       <b class="text-nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
     </p>
@@ -22,7 +22,7 @@ if !partial.blank? %>
   </div>
 <% end %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= if !@new_names.blank?
     hidden_field_tag(:approved_names, @new_names.join("\n"))
   end %>
@@ -49,7 +49,7 @@ if !partial.blank? %>
   </div>
 </div>
 
-<div class="max-width-text">
+<div class="container-text">
   <div class="form-group form-inline">
     <%= label_tag(:species_list_when, :WHEN.t + ":") %>
     <%= date_select(:species_list, :when, date_select_opts(@species_list),

@@ -1,83 +1,85 @@
 <%= form_with(model: @sequence, url: url) do |form| %>
 
-  <%# locus %>
-  <div class="row mt-3">
-    <div class="form-group col-xs-12 col-md-6 max-width-text">
-      <%= form.label(:locus, "#{:LOCUS.t}:") %>
-      <span class="help-note">(<%= :required.t %>)</span>
-        <%# style stops area from changing size on reload %>
-        <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
-    </div>
-    <div class="col-xs-12 col-sm-6">
-      <div class="well well-sm max-width-text help-block position-relative">
-        <div class="arrow-left hidden-xs"></div>
-        <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
+  <div class="container-full">
+    <%# locus %>
+    <div class="row mt-3">
+      <div class="form-group col-xs-12 col-md-6">
+        <%= form.label(:locus, "#{:LOCUS.t}:") %>
+        <span class="help-note">(<%= :required.t %>)</span>
+          <%# style stops area from changing size on reload %>
+          <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
       </div>
-    </div>
-  </div><!--.row-->
+      <div class="col-xs-12 col-sm-6">
+        <div class="well well-sm help-block position-relative">
+          <div class="arrow-left hidden-xs"></div>
+          <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
+        </div>
+      </div>
+    </div><!--.row-->
 
-  <%# bases %>
-  <div class="row mt-3">
-    <div class="form-group">
-      <span class="col-md-6">
-        <%= form.label(:sequence_bases, "#{:BASES.t}:") %>
-        <span class="help-note">
-        (<%= :form_sequence_bases_or_deposit_required.t %>)
+    <%# bases %>
+    <div class="row mt-3">
+      <div class="form-group">
+        <span class="col-md-6">
+          <%= form.label(:sequence_bases, "#{:BASES.t}:") %>
+          <span class="help-note">
+          (<%= :form_sequence_bases_or_deposit_required.t %>)
+          </span>
         </span>
-      </span>
-      <span class="col-md-6">
-        <%= url = WebSequenceArchive.blast_format_help
-            :form_sequence_bases_format.t(help_url: url) %>
-      </span>
-      <div class="col-md-9 text-monospace">
-        <%= form.text_area(:bases, size: "80x3", class:"form-control") %>
+        <span class="col-md-6">
+          <%= url = WebSequenceArchive.blast_format_help
+              :form_sequence_bases_format.t(help_url: url) %>
+        </span>
+        <div class="col-md-9 text-monospace">
+          <%= form.text_area(:bases, size: "80x3", class:"form-control") %>
+        </div>
+        <div class="col-md-3">
+        </div>
       </div>
-      <div class="col-md-3">
-      </div>
-    </div>
-  </div><!--.row-->
+    </div><!--.row-->
 
-  <%# deposit info %>
-  <div class="row mt-3 form-group">
-    <div class="col-xs-12">
-      <%= form.label(:sequence_nothing, "#{:DEPOSIT.t}:") %>
-      <span class="help-note">(<%= :form_sequence_valid_deposit.t %>)</span>
-    </div>
-    <div class="col-xs-1">
-    </div>
-    <div class="col-xs-5 col-md-2">
-      <%= form.label(:sequence_archive, :ARCHIVE.t) %>
-      <%= form.select(:archive, archive_dropdown,
-                      { include_blank: true }, { class: "form-control" }) %>
-    </div>
-    <div class="col-xs-6 col-md-3">
-      <span class="font-weight-bold"><%= :form_sequence_accession.t %></span>
-      <%= form.text_field(:accession, class: "form-control") %>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <div class="well well-sm max-width-text help-block position-relative">
-        <div class="arrow-left hidden-xs"></div>
-        <%= :form_sequence_accession_help.t %>
+    <%# deposit info %>
+    <div class="row mt-3 form-group">
+      <div class="col-xs-12">
+        <%= form.label(:sequence_nothing, "#{:DEPOSIT.t}:") %>
+        <span class="help-note">(<%= :form_sequence_valid_deposit.t %>)</span>
       </div>
-    </div>
-  </div><!--.row-->
-
-  <%# notes %>
-  <div class="row mt-3">
-    <div class="form-group col-xs-12 col-md-6">
-      <%= form.label(:sequence_notes, "#{:NOTES.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%= form.text_area(:notes, rows: 3, class: "form-control") %>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <div class="well well-sm max-width-text help-block position-relative mt-4">
-        <div class="arrow-left hidden-xs"></div>
-        <%= :field_textile_link.t %>
+      <div class="col-xs-1">
       </div>
-    </div>
-  </div><!--.row-->
+      <div class="col-xs-5 col-md-2">
+        <%= form.label(:sequence_archive, :ARCHIVE.t) %>
+        <%= form.select(:archive, archive_dropdown,
+                        { include_blank: true }, { class: "form-control" }) %>
+      </div>
+      <div class="col-xs-6 col-md-3">
+        <span class="font-weight-bold"><%= :form_sequence_accession.t %></span>
+        <%= form.text_field(:accession, class: "form-control") %>
+      </div>
+      <div class="col-xs-12 col-md-6">
+        <div class="well well-sm help-block position-relative">
+          <div class="arrow-left hidden-xs"></div>
+          <%= :form_sequence_accession_help.t %>
+        </div>
+      </div>
+    </div><!--.row-->
 
-  <div class="form-group row">
-    <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
-  </div><!--.row-->
+    <%# notes %>
+    <div class="row mt-3">
+      <div class="form-group col-xs-12 col-md-6">
+        <%= form.label(:sequence_notes, "#{:NOTES.t}:") %>
+        <span class="help-note">(<%= :optional.t %>)</span>
+        <%= form.text_area(:notes, rows: 3, class: "form-control") %>
+      </div>
+      <div class="col-xs-12 col-md-6">
+        <div class="well well-sm help-block position-relative mt-4">
+          <div class="arrow-left hidden-xs"></div>
+          <%= :field_textile_link.t %>
+        </div>
+      </div>
+    </div><!--.row-->
+
+    <div class="form-group row">
+      <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
+    </div><!--.row-->
+  </div><!--.container-full-->
 <% end %>

@@ -42,7 +42,7 @@
   }
 %>
 
-<div class="max-width-text-plus-padding">
+<div class="container-text">
   <div class="list-group">
     <div class="list-group-item">
       <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
@@ -66,7 +66,7 @@
 <% if @pages.any?
   query_params_set(@query) %>
 
-  <div class="max-width-text-plus-image">
+  <div class="container-text-image">
     <%= paginate_block(@pages) do %>
       <div class="list-group">
 
@@ -120,7 +120,7 @@
   </div>
 
 <% else %>
-  <div class="max-width-text">
+  <div class="container-text">
     <%= :species_list_show_no_members.tp %>
   </div>
 <% end %>
