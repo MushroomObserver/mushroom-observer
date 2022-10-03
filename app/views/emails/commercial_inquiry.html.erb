@@ -1,6 +1,6 @@
 <% @title = :commercial_inquiry_title.t(name: @image.unique_format_name) %>
 
-<div class="max-width-text-plus_image">
+<div class="container-text-image">
   <%= form_tag(add_query_param(action: :commercial_inquiry, id: @image.id)) do %>
     <div>
       <%= thumbnail(@image, size: :medium, border: 0, votes: true) %>
@@ -12,4 +12,4 @@
       <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
     </div>
   <% end %>
-</div>
+</div><!--.container-text-image-->

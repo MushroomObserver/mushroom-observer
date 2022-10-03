@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= :email_merge_request_help.tp(type: @model.type_tag) %>
   <%= form_tag(type: @model.name, old_id: @old_obj.id, new_id: @new_obj.id) do %>
     <div class="form-group mt-3">
@@ -28,4 +28,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div>
+</div><!--.container-text-->

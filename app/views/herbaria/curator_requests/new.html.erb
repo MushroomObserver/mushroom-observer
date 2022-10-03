@@ -11,7 +11,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= :show_herbarium_curator_help.tp %>
 
   <%= form_with(
@@ -32,4 +32,4 @@
     <%= f.submit(:SEND.l, class: "btn btn-default center-block mt-3") %>
 
   <% end %>
-</div>
+</div><!--.container-text-->

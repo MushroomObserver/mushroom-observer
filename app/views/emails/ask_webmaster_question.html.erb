@@ -1,6 +1,6 @@
 <% @title = :ask_webmaster_title.t %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= :ask_webmaster_note.tp(todo_list: "/pivotal") %>
   <%= form_tag(action: :ask_webmaster_question) do %>
 
@@ -20,4 +20,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div>
+</div><!--.container-text-->

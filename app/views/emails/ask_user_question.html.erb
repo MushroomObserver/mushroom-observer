@@ -1,6 +1,6 @@
 <% @title = :ask_user_question_title.t(user: @target.legal_name) %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_tag(
         add_query_param(action: :ask_user_question, id: @target.id)
       ) do %>
@@ -19,4 +19,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn btn-default center-block mt-3") %>
   <% end %>
-</div>
+</div><!--.container-text-->

@@ -7,7 +7,7 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="max-width-text-plus-image">
+<div class="container-text-image">
   <%= paginate_block(@pages) do %>
     <% if @objects.any? %>
       <% @objects.each do |comment| %>
@@ -16,4 +16,4 @@
       <% end %>
     <% end %>
   <% end %>
-</div>
+</div><!--.container-text-image-->
