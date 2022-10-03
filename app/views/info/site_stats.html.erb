@@ -8,65 +8,67 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row mt-3">
-  <div class="hidden-xs col-md-3">
-    <% obs_length = @observations ? @observations.length : 0
-    if obs_length > 0 %>
-      <% @observations[0,3].each do |obs| %>
-        <div class="pb-1">
+<div class="container-text">
+  <div class="row mt-3">
+    <div class="hidden-xs col-md-3">
+      <% obs_length = @observations ? @observations.length : 0
+      if obs_length > 0 %>
+        <% @observations[0,3].each do |obs| %>
+          <div class="pb-1">
+            <%= thumbnail(obs.thumb_image,
+                          link: { controller: :observations,
+                                  action: :show, id: obs.id },
+                          votes: true) %><br/><br/>
+
+          </div>
+        <% end %>
+      <% end %>
+    </div><!--.row-->
+
+    <div class="col-md-6 center-block">
+      <table class="table">
+        <% fields = [
+          :images,
+          :observations,
+          :observations_with_voucher,
+          :observations_without_voucher,
+          :sequences,
+          :sequenced_observations,
+          :listed_taxa,
+          :observed_taxa,
+          :name_description_authors,
+          :locations,
+          :location_description_authors,
+          :species_lists,
+          :species_list_entries,
+          :namings,
+          :comments,
+          :votes,
+          :contributing_users
+        ].freeze
+
+        fields.each do |field|
+          label = "site_stats_#{field}".to_sym.t
+          count = @site_data[field]
+          if count && label.present? %>
+            <tr>
+              <td><%= "site_stats_#{field}".to_sym.t %></td>
+              <td class="text-right"><%= count %></td>
+            </tr>
+          <% end %>
+        <% end %>
+      </table>
+    </div>
+
+    <div class="hidden-xs col-md-3">
+      <% if obs_length > 3 %>
+        <% @observations[3,3].each do |obs| %>
           <%= thumbnail(obs.thumb_image,
                         link: { controller: :observations,
                                 action: :show, id: obs.id },
                         votes: true) %><br/><br/>
-
-        </div>
-      <% end %>
-    <% end %>
-  </div>
-
-  <div class="col-md-6 center-block">
-    <table class="table">
-      <% fields = [
-        :images,
-        :observations,
-        :observations_with_voucher,
-        :observations_without_voucher,
-        :sequences,
-        :sequenced_observations,
-        :listed_taxa,
-        :observed_taxa,
-        :name_description_authors,
-        :locations,
-        :location_description_authors,
-        :species_lists,
-        :species_list_entries,
-        :namings,
-        :comments,
-        :votes,
-        :contributing_users
-      ].freeze
-
-      fields.each do |field|
-        label = "site_stats_#{field}".to_sym.t
-        count = @site_data[field]
-        if count && label.present? %>
-          <tr>
-            <td><%= "site_stats_#{field}".to_sym.t %></td>
-            <td class="text-right"><%= count %></td>
-          </tr>
         <% end %>
       <% end %>
-    </table>
-  </div>
-
-  <div class="hidden-xs col-md-3">
-    <% if obs_length > 3 %>
-      <% @observations[3,3].each do |obs| %>
-        <%= thumbnail(obs.thumb_image,
-                      link: { controller: :observations,
-                              action: :show, id: obs.id },
-                      votes: true) %><br/><br/>
-      <% end %>
-    <% end %>
-  </div>
-</div><!--.row-->
+    </div>
+  </div><!--.row-->
+</div><!--.container-text-->
