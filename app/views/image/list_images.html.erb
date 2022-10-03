@@ -4,17 +4,16 @@
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
+  @container = :wide
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="container-full my-3">
-  <%= paginate_block(@pages) do %>
-    <ul class="row list-unstyled mt-3">
-      <%= render(partial: "shared/matrix_box",
-                 layout: "shared/matrix_table",
-                 collection: @objects,
-                 as: :object) %>
-      <div style="clear:left"></div>
-    </ul>
-  <% end %>
-</div><!--.container-full-->
+<%= paginate_block(@pages) do %>
+  <ul class="row list-unstyled mt-3">
+    <%= render(partial: "shared/matrix_box",
+                layout: "shared/matrix_table",
+                collection: @objects,
+                as: :object) %>
+    <div style="clear:left"></div>
+  </ul>
+<% end %>

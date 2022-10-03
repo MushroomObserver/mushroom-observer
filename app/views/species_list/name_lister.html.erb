@@ -5,19 +5,20 @@
     link_to(:name_lister_classic.t, action: :create_species_list)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   javascript_include "name_lister"
   javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline
 %>
 
 <noscript>
-  <div class="container mt-3">
+  <div class="container-text mt-3">
     <%= :name_lister_no_js.tp %>
   </div>
 </noscript>
 
 <% if !can_do_ajax? %>
-  <div class="container mt-3">
+  <div class="container-text mt-3">
     <%= :name_lister_bad_browser.tp %>
   </div>
 <% end %>
@@ -80,6 +81,6 @@
   nc("g", 0); // click on first genus
 ) %>
 
-<div class="container mt-3">
+<div class="container-text mt-3">
   <div class="help-note"><%= :name_lister_help.tp %></div>
 </div>

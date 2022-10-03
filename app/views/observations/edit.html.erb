@@ -6,6 +6,7 @@
                     action: :show, id: @observation.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
 <%= form_tag(add_query_param(action: :update, id: @observation,

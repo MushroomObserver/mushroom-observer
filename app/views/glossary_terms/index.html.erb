@@ -7,23 +7,21 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="container-text">
-  <%= :glossary_term_index_intro.tp %>
+<%= :glossary_term_index_intro.tp %>
 
-  <table class="table table-striped">
-    <% @glossary_terms.each do |term| %>
-      <tr>
-        <td class="">
-          <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
-          <%= term.description.tpl %>
-        </td>
-        <td>
-          <%= glossary_term_destroy_button(term) if in_admin_mode? %>
-          <%= if term&.thumb_image_id&.nonzero?
-            thumbnail(term.thumb_image, votes: true)
-          end %>
-        </td>
-      </tr>
-    <% end %>
-  </table>
-</div><!--.container-text-->
+<table class="table table-striped">
+  <% @glossary_terms.each do |term| %>
+    <tr>
+      <td class="">
+        <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
+        <%= term.description.tpl %>
+      </td>
+      <td>
+        <%= glossary_term_destroy_button(term) if in_admin_mode? %>
+        <%= if term&.thumb_image_id&.nonzero?
+          thumbnail(term.thumb_image, votes: true)
+        end %>
+      </td>
+    </tr>
+  <% end %>
+</table>

@@ -5,35 +5,34 @@
     link_to(:all_objects.t(type: :location), action: :list_locations)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
-<div class="container-full">
-  <div class="row">
-    <div class="col-xs-4">
-      <h4>
-        <%= :list_countries_known.t %> (<%= @cc.known_by_count.length %>)
-      </h4>
-      <% @cc.known_by_count.each do |country, count| %>
-        <%= country_link(country, count) %><br/>
-      <% end %>
-    </div>
+<div class="row">
+  <div class="col-xs-4">
+    <h4>
+      <%= :list_countries_known.t %> (<%= @cc.known_by_count.length %>)
+    </h4>
+    <% @cc.known_by_count.each do |country, count| %>
+      <%= country_link(country, count) %><br/>
+    <% end %>
+  </div>
 
-    <div class="col-xs-4">
-      <h4>
-        <%= :list_countries_missing.t %> (<%= @cc.missing.length %>)
-      </h4>
-      <% @cc.missing.each do |country, _count| %>
-        <%= country %><br/>
-      <% end %>
-    </div>
+  <div class="col-xs-4">
+    <h4>
+      <%= :list_countries_missing.t %> (<%= @cc.missing.length %>)
+    </h4>
+    <% @cc.missing.each do |country, _count| %>
+      <%= country %><br/>
+    <% end %>
+  </div>
 
-    <div class="col-xs-4">
-      <h4>
-        <%= :list_countries_unknown.t %> (<%= @cc.unknown_by_count.length %>)
-      </h4>
-      <% @cc.unknown_by_count.each do |country, count| %>
-        <%= country_link(country, count) %><br/>
-      <% end %>
-    </div>
-  </div><!--.row-->
-</div><!--.container-full-->
+  <div class="col-xs-4">
+    <h4>
+      <%= :list_countries_unknown.t %> (<%= @cc.unknown_by_count.length %>)
+    </h4>
+    <% @cc.unknown_by_count.each do |country, count| %>
+      <%= country_link(country, count) %><br/>
+    <% end %>
+  </div>
+</div><!--.row-->

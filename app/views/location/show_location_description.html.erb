@@ -6,19 +6,18 @@
     pager_for: @description,
     right: draw_tab_set(tabs)
   }
+  @container = :wide
 %>
 
-<div class="container-full">
-  <div class="row">
-    <div class="col-md-6">
-      <%= render(partial: "shared/show_description",
-                locals: {description: @description}) %>
-    </div>
-    <div class="col-md-6">
-      <%= show_alt_descriptions(@location, @projects) %>
-    </div>
-  </div><!--.row-->
-</div><!--.container-full-->
+<div class="row">
+  <div class="col-md-6">
+    <%= render(partial: "shared/show_description",
+              locals: {description: @description}) %>
+  </div>
+  <div class="col-md-6">
+    <%= show_alt_descriptions(@location, @projects) %>
+  </div>
+</div><!--.row-->
 
 <div class="container-text">
   <%= render(partial: "location_description", object: @description) %>

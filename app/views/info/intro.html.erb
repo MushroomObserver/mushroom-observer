@@ -1,17 +1,15 @@
 <% @title = :intro_title.t %>
 
-<div class="container-text">
-  <%= :intro_purpose.tp %>
+<%= :intro_purpose.tp %>
 
-  <%= :intro_image_sharing.tp %>
+<%= :intro_image_sharing.tp %>
 
-  <%= :intro_source_code.tp(
-        repo: MO.code_repository,
-        todo_list: "/pivotal",
-        readme: "#{MO.code_repository}/developer-startup"
-      ) %>
+<%= :intro_source_code.tp(
+      repo: MO.code_repository,
+      todo_list: "/pivotal",
+      readme: "#{MO.code_repository}/developer-startup"
+    ) %>
 
-  <%= :intro_governance.tp %>
+<%= :intro_governance.tp %>
 
-  <%= :intro_note.tp %>
-</div><!--.container-text-->
+<%= :intro_note.tp %>

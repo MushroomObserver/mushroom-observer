@@ -13,17 +13,15 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="container-text">
-  <div class="text-center">
-    <table class="table-striped table-donors mt-3 mb-3">
-      <% @donor_list.each do |donor| %>
-        <tr>
-          <td>
-            <%= donor["who"] %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-  </div><!-- .text-center -->
-  <%= :donors_order.tp %>
-</div>
+<div class="text-center">
+  <table class="table-striped table-donors mt-3 mb-3">
+    <% @donor_list.each do |donor| %>
+      <tr>
+        <td>
+          <%= donor["who"] %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div><!-- .text-center -->
+<%= :donors_order.tp %>

@@ -2,14 +2,13 @@
   @title ||= :ARTICLES.t
   tabs = index_tabs_for_user(@user) + create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="container-full">
-  <%= paginate_block(@pages) do %>
-    <div class="list-group">
-      <%= render(partial: "object", collection: @objects) %>
-    </div>
-  <% end %>
-</div><!--.container-full-->
+<%= paginate_block(@pages) do %>
+  <div class="list-group">
+    <%= render(partial: "object", collection: @objects) %>
+  </div>
+<% end %>

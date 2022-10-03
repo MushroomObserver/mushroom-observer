@@ -19,24 +19,22 @@
     </div>
   </div><!--.container-text-->
 
-  <div class="container-full">
-    <%= paginate_block(@pages) do %>
-      <ul class="row list-unstyled mt-3">
+  <%= paginate_block(@pages) do %>
+    <ul class="row list-unstyled mt-3">
 
-        <%= render(layout: "shared/matrix_table",
-                  locals: {objects: @objects}) do |image| %>
-          <li class="matrix-box">
-            <div class="panel panel-default">
-              <div class="panel-body">
-                <%= thumbnail(image,
-                              link: url_args.merge(img_id: image.id),
-                              original: true) %>
-              </div>
+      <%= render(layout: "shared/matrix_table",
+                locals: {objects: @objects}) do |image| %>
+        <li class="matrix-box">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <%= thumbnail(image,
+                            link: url_args.merge(img_id: image.id),
+                            original: true) %>
             </div>
-          </li>
-        <% end %>
+          </div>
+        </li>
+      <% end %>
 
-      </ul>
-    <% end %>
-  </div><!--.container-full-->
+    </ul>
+  <% end %>
 <% end %>

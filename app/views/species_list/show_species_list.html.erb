@@ -40,6 +40,7 @@
     pager_for: @species_list,
     right: draw_tab_set(tabs)
   }
+  @container = :text_image
 %>
 
 <div class="container-text">
@@ -66,58 +67,56 @@
 <% if @pages.any?
   query_params_set(@query) %>
 
-  <div class="container-text-image">
-    <%= paginate_block(@pages) do %>
-      <div class="list-group">
+  <%= paginate_block(@pages) do %>
+    <div class="list-group">
 
-        <div class="list-group-item default">
-          <%= :species_list_show_members.t %>:
-          <%= link_to(:species_list_show_regular_index.t,
-                      add_query_param({ controller: :observations,
-                                        action: :index },
-                                        @query),
-                      { help: :species_list_show_regular_index_help.t }) %> |
-          <%= link_to_coerced_query(@query, Location) %> |
-          <%= link_to_coerced_query(@query, Name) %> |
-          <%= link_to_coerced_query(@query, Image) %> |
-          <%= link_to(:app_checklist.t,
-                      checklist_path(species_list_id: @species_list.id)) %> |
-          <%= link_to(:show_object.t(type: :map),
-                      add_query_param({ controller: :observations,
-                                        action: :map },
-                                      @query)) %>
-        </div>
+      <div class="list-group-item default">
+        <%= :species_list_show_members.t %>:
+        <%= link_to(:species_list_show_regular_index.t,
+                    add_query_param({ controller: :observations,
+                                      action: :index },
+                                      @query),
+                    { help: :species_list_show_regular_index_help.t }) %> |
+        <%= link_to_coerced_query(@query, Location) %> |
+        <%= link_to_coerced_query(@query, Name) %> |
+        <%= link_to_coerced_query(@query, Image) %> |
+        <%= link_to(:app_checklist.t,
+                    checklist_path(species_list_id: @species_list.id)) %> |
+        <%= link_to(:show_object.t(type: :map),
+                    add_query_param({ controller: :observations,
+                                      action: :map },
+                                    @query)) %>
+      </div>
 
-        <% if @objects.any? %>
-          <% @objects.each do |observation| %>
-            <div class="list-group-item">
-              <div class="row">
-                <div class="col-sm-4 col-md-3 col-lg-2">
-                  <%= if observation.thumb_image_id
-                    thumbnail(observation.thumb_image,
-                              link: observation.show_link_args,
-                              votes: true)
-                  end %>
+      <% if @objects.any? %>
+        <% @objects.each do |observation| %>
+          <div class="list-group-item">
+            <div class="row">
+              <div class="col-sm-4 col-md-3 col-lg-2">
+                <%= if observation.thumb_image_id
+                  thumbnail(observation.thumb_image,
+                            link: observation.show_link_args,
+                            votes: true)
+                end %>
+              </div>
+              <div class="col-sm-8 col-md-9 col-lg-10">
+                <div class="font-weight-bold">
+                  <%= link_with_query(observation.unique_format_name.t,
+                                      observation.show_link_args) %>
                 </div>
-                <div class="col-sm-8 col-md-9 col-lg-10">
-                  <div class="font-weight-bold">
-                    <%= link_with_query(observation.unique_format_name.t,
-                                        observation.show_link_args) %>
-                  </div>
-                  <div>
-                    <b><%= location_link(observation.place_name, observation.location) %></b><br/>
-                    <span><%= user_link(observation.user) %></span>:
-                    <span><%= observation.when.web_date %></span>
-                  </div>
+                <div>
+                  <b><%= location_link(observation.place_name, observation.location) %></b><br/>
+                  <span><%= user_link(observation.user) %></span>:
+                  <span><%= observation.when.web_date %></span>
                 </div>
               </div>
             </div>
-          <% end %>
+          </div>
         <% end %>
+      <% end %>
 
-      </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 
 <% else %>
   <div class="container-text">
