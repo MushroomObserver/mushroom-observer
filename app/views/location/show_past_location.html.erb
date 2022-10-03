@@ -11,8 +11,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text-plus-padding">
+<div class="container-text">
   <%= show_past_versions(@location) %>
   <%= render(partial: "location", object: @location) %>
   <%= show_object_footer(@location) %>
-</div><!--.max-width-text-plus-padding-->
+</div><!--.container-text-->

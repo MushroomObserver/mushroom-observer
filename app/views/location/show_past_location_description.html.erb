@@ -13,8 +13,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= show_past_versions(@description) %>
   <%= render(partial: "location_description", object: @description) %>
   <%= show_object_footer(@description) %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

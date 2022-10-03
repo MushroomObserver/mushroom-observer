@@ -4,7 +4,7 @@ moves = description.parent.synonyms - [description.parent]
 moves.reject!(&:is_misspelling?)
 %>
 
-<div class="max-width-text"><%=
+<div class="container-text"><%=
   form_tag(action: :merge_descriptions, id: description.id) do %>
     <br/><br/>
 
@@ -56,4 +56,4 @@ moves.reject!(&:is_misspelling?)
       <br/>
     <% end %>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

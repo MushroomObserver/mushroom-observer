@@ -8,19 +8,21 @@
   }
 %>
 
-<div class="row">
-  <div class="col-md-6 max-width-text">
-    <%= render(partial: "shared/show_description",
-               locals: {description: @description}) %>
-  </div>
-  <div class="col-md-6 max-width-text">
-    <%= show_alt_descriptions(@location, @projects) %>
-  </div>
-</div><!--.row-->
+<div class="container-full">
+  <div class="row">
+    <div class="col-md-6">
+      <%= render(partial: "shared/show_description",
+                locals: {description: @description}) %>
+    </div>
+    <div class="col-md-6">
+      <%= show_alt_descriptions(@location, @projects) %>
+    </div>
+  </div><!--.row-->
+</div><!--.container-full-->
 
-<div class="max-width-text-plus-padding">
+<div class="container-text">
   <%= render(partial: "location_description", object: @description) %>
   <%= render(partial: "comment/show_comments",
               locals: {object: @description, controls: true, limit: 10}) %>
   <%= show_object_footer(@description) %>
-</div><!--.max-width-text-plus-padding-->
+</div><!--.container-text-->

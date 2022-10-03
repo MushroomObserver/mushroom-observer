@@ -8,7 +8,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for(:description,
                url: add_query_param(
                  action: :create_location_description,
@@ -17,4 +17,4 @@
     <%= render(partial: "form_location_description",
                locals: { form: form, button: :CREATE }) %>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->

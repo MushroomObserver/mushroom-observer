@@ -13,7 +13,7 @@
   }
 %>
 
-<div class="max-width-text">
+<div class="container-text">
   <%= form_for(:location, url: add_query_param(
         action: :edit_location,
         id: @location.id,
@@ -22,4 +22,4 @@
     <%= render(partial: "form_location",
               locals: { form: form, button: :UPDATE }) %>
   <% end %>
-</div><!--.max-width-text-->
+</div><!--.container-text-->
