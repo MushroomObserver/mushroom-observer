@@ -3,6 +3,7 @@
   @title = show_obs_title(@observation)
   @tabsets = show_observation_tabset(obs: @observation, user: @user,
                                      mappable: @mappable)
+  @container = :wide
 
   javascript_include("suggestions")
   javascript_include("vote_popup")
