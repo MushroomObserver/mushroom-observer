@@ -17,7 +17,7 @@
 </div><!--.container-text-->
 
 <% if @user.api_keys.any? %>
-  <%= form_with(url: "/account/api_keys") do |form| %>
+  <%= form_with(url: { action: :api_keys }) do |form| %>
     <table class="table table-striped py-5px">
       <tr>
         <th></th>
