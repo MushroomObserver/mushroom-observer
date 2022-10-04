@@ -26,7 +26,6 @@ class VisualGroupsController < ApplicationController
 
   # POST /visual_groups or /visual_groups.json
   def create
-    debugger
     @visual_group = VisualGroup.new(visual_group_params)
 
     respond_to do |format|
@@ -87,6 +86,7 @@ class VisualGroupsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def visual_group_params
-    params.require(:visual_group).permit(:visual_model_id, :name, :approved, :description)
+    params.require(:visual_group).permit(:visual_model_id, :name,
+                                         :approved, :description)
   end
 end
