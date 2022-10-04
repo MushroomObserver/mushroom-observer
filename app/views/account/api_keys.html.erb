@@ -18,6 +18,7 @@
 
 <% if @user.api_keys.any? %>
   <%= form_with(url: { action: :api_keys }) do |form| %>
+
     <table class="table table-striped py-5px">
       <tr>
         <th></th>
@@ -81,13 +82,16 @@
 
 <div class="container-text mt-3">
   <%= form_with(url: { action: :api_keys }) do |form| %>
+
     <%= fields_for(:key) do |fields| %>
       <div class="form-group mt-3">
         <%= fields.label(:notes, :account_api_keys_notes_label.t) %>
         <%= fields.text_field(:notes, class: "form-control") %>
       </div>
     <% end %>
+
     <%= form.submit(:account_api_keys_create_button.l, id: "create_button",
                     class: "btn btn-default center-block mt-3") %>
+
   <% end %>
 </div>
