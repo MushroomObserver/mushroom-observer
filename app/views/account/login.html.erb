@@ -2,7 +2,7 @@
   @title = :login_please_login.t
 %>
 
-<%= form_with(model: @user, url: { action: :login }) do |form| %>
+<%= form_with(url: { action: :login }) do |form| %>
 
   <%= fields_for(:user) do |f| %>
 
