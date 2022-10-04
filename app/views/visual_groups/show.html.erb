@@ -9,7 +9,7 @@
   <%= @visual_group.approved %>
 </p>
 <p>
-  Members
+  <%= :definitional_images.t %>
   <ul>
     <% @visual_group.images.each do |image|
        link = link_to(image.unique_format_name.t,

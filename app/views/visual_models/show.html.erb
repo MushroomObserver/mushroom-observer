@@ -5,11 +5,11 @@
 <p id="notice"><%= notice %></p>
 
 <p>
-  Members
+  <%= :MEMBERS.t %>
   <ul>
     <% @visual_model.visual_groups.each do |group|
        link = link_to(group.name.t,
-                      controller: :visual_group,
+                      controller: :visual_groups,
                       action: :show, id: group.id) %>
       <li>
 	<%= content_tag(:p, link) %>
