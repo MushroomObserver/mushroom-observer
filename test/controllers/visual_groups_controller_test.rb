@@ -9,7 +9,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   test "should get index" do
     login
-    get(:index)
+    get(:index, params: { visual_model_id: @visual_group.visual_model_id })
     assert_response :success
   end
 
@@ -30,7 +30,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   test "should show visual_group" do
     login
-    get(:show, params: { id: visual_groups(:visual_group_one).id })
+    get(:show, params: {
+          id: visual_groups(:visual_group_one).id,
+          visual_model_id: @visual_group.visual_model_id
+        })
     assert_response :success
   end
 
