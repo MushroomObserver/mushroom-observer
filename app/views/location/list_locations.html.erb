@@ -6,6 +6,7 @@
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   @known_pages = @pages
   @known_data  = @objects
@@ -14,8 +15,7 @@
   flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
-<div>
-  <br>
+<div class="mt-3">
   <%= :list_place_names_popularity.t %>
   <%= :list_place_names_parenthetical.t %>
 </div>
@@ -63,4 +63,4 @@
       <% end %>
     <% end %>
   </div>
-</div>
+</div><!--.row-->

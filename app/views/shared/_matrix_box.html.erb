@@ -1,11 +1,12 @@
 <%
-  ## TODO: Rename (RSS box?)
-  # Requires local variable object: RssLog, Observation, Image, etc. instance.
-  presenter = MatrixBoxPresenter.new(object, @view)
+## TODO: Rename (RSS box?)
+# Requires local variable object: RssLog, Observation, Image, etc. instance.
+presenter = MatrixBoxPresenter.new(object, @view)
+columns ||= "col-xs-12 col-sm-6 col-md-4"
 %>
 
 <% if presenter %>
-  <li class="matrix-box">
+  <li class="matrix-box <%= columns %>">
     <div class="panel panel-default">
       <div class="panel-body rss-box-details">
         <div class="thumbnail-container">

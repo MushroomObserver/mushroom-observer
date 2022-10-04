@@ -5,6 +5,7 @@
     link_to(:name_lister_title.t, action: :name_lister)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
 <%= form_tag(action: :create_species_list, approved_where: @place_name) do %>

@@ -5,6 +5,7 @@
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   flash_error(@error) if @error && @objects.empty?
 %>
