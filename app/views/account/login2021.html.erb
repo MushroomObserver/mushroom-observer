@@ -3,24 +3,29 @@
 %>
 
 <%= form_with(model: @user, url: { action: :login }) do |form| %>
-  <div class="form-group mt-3">
-    <%= form.label(:login, :login_user.t + ":") %>
-    <%= form.text_field(:login, value: @login,
+
+    <%= fields_for(:user) do |f| %>
+
+    <div class="form-group mt-3">
+      <%= f.label(:login, :login_user.t + ":") %>
+      <%= f.text_field(:login, value: @login,
                         data: { autofocus: @login.blank? },
                         class: "form-control") %>
-  </div>
+    </div>
 
-  <div class="form-group mt-3">
-    <%= form.label(:password, :login_password.t + ":") %>
-    <%= form.password_field(:password, value: "",
+    <div class="form-group mt-3">
+      <%= f.label(:password, :login_password.t + ":") %>
+      <%= f.password_field(:password, value: "",
                             data: { autofocus: !@login.blank? },
                             class: "form-control") %>
-  </div>
+    </div>
 
-  <div class="form-group mt-3 form-inline">
-    <%= form.check_box(:remember_me, checked: @remember) %>
-    <%= form.label(:remember_me, :login_remember_me.t) %>
-  </div>
+    <div class="form-group mt-3 form-inline">
+      <%= f.check_box(:remember_me, checked: @remember) %>
+      <%= f.label(:remember_me, :login_remember_me.t) %>
+    </div>
+
+  <% end %>
 
   <%= form.submit(:login_login.l, class: "btn btn-default center-block mt-3") %>
 

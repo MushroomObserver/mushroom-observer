@@ -27,10 +27,12 @@
         <th><%= :API_KEY.t %></th>
         <th><%= :NOTES.t %></th>
       </tr>
+
       <% @user.api_keys.sort_by do |key|
         last_use = Time.zone.now - key.last_used rescue 0
         [-key.num_uses, last_use, key.id]
       end.each do |key| %>
+
         <tr>
           <td><%= form.check_box("key_#{key.id}") %></td>
           <td><%= key.created_at.web_date %></td>
@@ -67,10 +69,13 @@
           </td>
         </tr>
       <% end %>
+
     </table>
+
     <%= form.submit(:account_api_keys_remove_button.l,
                     { id: "remove_button",
                       class: "btn btn-default center-block" }) %>
+
   <% end %>
 <% end %>
 

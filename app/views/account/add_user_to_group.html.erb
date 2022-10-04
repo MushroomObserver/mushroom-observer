@@ -3,6 +3,7 @@
 %>
 
 <%= form_with(url: { action: :add_user_to_group }) do |form| %>
+
   <div class="form-group mt-3">
     <%= form.label(:user_name, :add_user_to_group_user.t + ":") %>
     <%= form.text_field(:user_name, "", class: "form-control") %>
@@ -14,4 +15,5 @@
   </div>
 
   <%= form.submit(:ADD.t, class: "btn btn-default mt-3 center-block") %>
+
 <% end %>
