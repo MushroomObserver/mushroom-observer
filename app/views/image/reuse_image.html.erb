@@ -14,6 +14,7 @@
     @tabsets = { right: draw_tab_set(tabs) }
     url_args = { action: :reuse_image, mode: @mode, obs_id: obs_id }
   end
+  @container = :full
 %>
 
 <%= render(partial: "reuse_image", locals: { url_args: url_args }) %>

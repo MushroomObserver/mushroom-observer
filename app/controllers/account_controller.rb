@@ -856,7 +856,7 @@ class AccountController < ApplicationController
 
   def evil_signup_credentials?
     /(Vemslons|Uplilla)$/ =~ @new_user.login ||
-      /(\.xyz|namnerbca.com)$/ =~ @new_user.email ||
+      /namnerbca.com$/ =~ @new_user.email ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
       @new_user.email.remove(".").include?("blizkoyan2017")
   end

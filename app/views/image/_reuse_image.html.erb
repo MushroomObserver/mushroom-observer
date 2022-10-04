@@ -1,5 +1,5 @@
 <%= form_with(url: add_query_param(url_args)) do |form|%>
-  <div class="max-width-text">
+  <div class="container-text">
     <div class="form-group form-inline">
       <%= form.label(:img_id, "#{:image_reuse_id.t}:") %>
       <%= form.text_field(:img_id,
@@ -17,12 +17,13 @@
                           url_args.merge(all_users: @all_users ? 0 : 1),
                           class: "btn btn-default") %>
     </div>
-  </div>
+  </div><!--.container-text-->
 
   <%= paginate_block(@pages) do %>
     <ul class="row list-unstyled mt-3">
 
-      <% @objects.each do |image| %>
+      <%= render(layout: "shared/matrix_table",
+                locals: {objects: @objects}) do |image| %>
         <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
           <div class="panel panel-default">
             <div class="panel-body">

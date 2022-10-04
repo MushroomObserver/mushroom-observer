@@ -1,9 +1,5 @@
 <!--[form:image]-->
-<div class="row">
-  <div class="col-sm-12">
-    <%= :form_observations_upload_help.tp %>
-  </div>
-</div>
+<%= :form_observations_upload_help.tp %>
 <% @image = @images[index] %>
 
 <div id="image_<%= index %>_box" class="form_image">
@@ -41,6 +37,6 @@
     CHANGED_DATES[#{index}] = false;
   ) %>
 
-</div>
+</div><!--#form_image-->
 
 <!--[eoform:image]-->

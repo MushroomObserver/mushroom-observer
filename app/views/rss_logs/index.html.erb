@@ -1,5 +1,6 @@
 <%
   @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
+  @container = :full
 
   if @links.any?
     tabs = create_links(@links)
@@ -7,14 +8,17 @@
   end
 
   @full_width_tab_set = render(partial: "rss_log_tabset")
+
   flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
   <ul class="row list-unstyled mt-3">
     <%= render(partial: "shared/matrix_box",
+               layout: "shared/matrix_table",
                collection: @objects,
                as: :object) %>
+    <div style="clear:left"></div>
   </ul>
 <% end %>
 

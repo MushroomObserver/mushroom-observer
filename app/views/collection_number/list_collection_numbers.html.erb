@@ -9,7 +9,7 @@
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <table class="table table-striped">
+    <table class="table table-striped mt-3">
       <% @objects.each do |collection_number| %>
         <tr>
           <td>
@@ -21,7 +21,7 @@
           </td>
           <td>
             <i><%= link_with_query(collection_number.format_name.t,
-                                   collection_number.show_link_args) %></i>
+                                  collection_number.show_link_args) %></i>
           </td>
           <td>
             <%= collection_number.observations.map do |obs|
