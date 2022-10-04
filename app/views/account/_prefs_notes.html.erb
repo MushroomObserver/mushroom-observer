@@ -4,4 +4,4 @@
   <%= content_tag(:p, :prefs_notes_template_explanation.t) %>
   <%= form.text_area(:notes_template, rows: 1, class: "form-control") %>
 </div>
-<%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= form.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>

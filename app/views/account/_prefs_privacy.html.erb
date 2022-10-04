@@ -4,18 +4,20 @@
 </div>
 
 <div class="form-group mt-3">
-  <%= label_tag(:user_votes_anonymous,
+  <%= form.label(:votes_anonymous,
                 :prefs_votes_anonymous.t + ":") %><br/>
   <%= values = [
           [:prefs_votes_anonymous_no.l, :no],
           [:prefs_votes_anonymous_yes.l, :yes],
   ]
-      # Let old users grandfather old anonymous votes,
-      # but choose to go public from here forward.
-      if @user.created_at && @user.created_at < Time.zone.parse(MO.vote_cutoff)
-        values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
-      end
-      form.select(:votes_anonymous, values, {}, { class: "form-control d-inline-block w-auto mr-3" }) %>
+  # Let old users grandfather old anonymous votes,
+  # but choose to go public from here forward.
+  if @user.created_at && @user.created_at < Time.zone.parse(MO.vote_cutoff)
+    values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
+  end
+  form.select(:votes_anonymous, values, {},
+              { class: "form-control d-inline-block w-auto mr-3" }) %>
+
   <span class="help-note">
     <%= link_to(:prefs_change_image_vote_anonymity.t,
                 controller: :image,
@@ -25,26 +27,26 @@
 </div>
 
 <div class="form-group mt-3">
-  <%= label_tag(:user_keep_filenames,
-                :prefs_keep_image_filenames.t + ":") %><br/>
+  <%= form.label(:keep_filenames,
+                 :prefs_keep_image_filenames.t + ":") %><br/>
   <%= form.select(:keep_filenames,
-                   [[:prefs_keep_image_filenames_toss.l, "toss"],
-                    [:prefs_keep_image_filenames_keep_but_hide.l,
-                     "keep_but_hide"],
-                    [:prefs_keep_image_filenames_keep_and_show.l,
-                     "keep_and_show"]],
+                  [[:prefs_keep_image_filenames_toss.l, "toss"],
+                   [:prefs_keep_image_filenames_keep_but_hide.l,
+                    "keep_but_hide"],
+                   [:prefs_keep_image_filenames_keep_and_show.l,
+                    "keep_and_show"]],
                   {}, { class: "form-control d-inline-block w-auto mr-3" }) %>
+
   <span class="help-note">
     <%= link_to(:prefs_bulk_filename_purge.t,
-                 { controller: :image,
-                   action: :bulk_filename_purge },
+                 { controller: :image, action: :bulk_filename_purge },
                  { data:
                    { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>
   </span>
 </div>
 
 <div class="form-group mt-3">
-  <%= label_tag(:user_license_id, :License.t + ":") %>
+  <%= form.label(:license_id, :License.t + ":") %>
   <span class="help-note">(<%= :prefs_license_note.t %>)</span><br/>
   <%= form.select(:license_id, @licenses, {},
     { class: "form-control d-inline-block w-auto mr-3" }) %>
@@ -54,4 +56,4 @@
   </span>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= form.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
