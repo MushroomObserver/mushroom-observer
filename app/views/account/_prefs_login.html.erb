@@ -1,23 +1,27 @@
- <!-- Login Settings for Account Preferences Form -->
-<div class="form-group mt-3">
-  <%= form.label(:login, :prefs_login.t + ":") %>
-  <%= form.text_field(:login, class: "form-control") %>
-</div>
+<!-- Login Settings for Account Preferences Form -->
+<%= fields_for(:user) do |f| %>
 
-<div class="form-group mt-3">
-  <%= form.label(:email, :prefs_email.t + ":") %>
-  <%= form.text_field(:email, class: "form-control") %>
-</div>
+  <div class="form-group mt-3">
+    <%= f.label(:login, :prefs_login.t + ":") %>
+    <%= f.text_field(:login, class: "form-control") %>
+  </div>
 
-<div class="form-group mt-3">
-  <%= form.label(:password, :prefs_password_new.t + ":") %>
-  <%= form.password_field(:password, value: "", class: "form-control") %>
-</div>
+  <div class="form-group mt-3">
+    <%= f.label(:email, :prefs_email.t + ":") %>
+    <%= f.text_field(:email, class: "form-control") %>
+  </div>
 
-<div class="form-group mt-3">
-  <%= form.label(:password_confirmation, :prefs_password_confirm.t + ":") %>
-  <%= form.password_field(:password_confirmation, value: "",
-                          class: "form-control") %>
-</div>
+  <div class="form-group mt-3">
+    <%= f.label(:password, :prefs_password_new.t + ":") %>
+    <%= f.password_field(:password, value: "", class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label(:password_confirmation, :prefs_password_confirm.t + ":") %>
+    <%= f.password_field(:password_confirmation, value: "",
+                            class: "form-control") %>
+  </div>
+
+<% end %>
 
 <%= form.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
