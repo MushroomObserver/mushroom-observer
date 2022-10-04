@@ -12,21 +12,18 @@
 // to decide for them intelligently, since browsers differ so much in how
 // they deal with print views.
 @media screen {
-  .max-width-text,
   .container-text {
     max-width: 600px;
   }
 
-  .max-width-text-plus-padding {
-    max-width: 650px;
-  }
+  // .max-width-text-plus-padding {
+  //   max-width: 650px;
+  // }
 
-  .max-width-text-plus-image,
   .container-text-image {
     max-width: 850px; // 600px text column + 160pm max thumbnail
   }
 
-  .max-width-text-times-two,
   .container-wide {
     max-width: 1200px;
   }
