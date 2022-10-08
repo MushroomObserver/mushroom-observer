@@ -70,6 +70,7 @@ module MushroomObserver
     config.action_view.field_error_proc = proc { |html_tag, _instance|
       html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
     }
+    config.action_view.form_with_generates_ids = true
 
     # Rails 6.1+
     config.active_record.legacy_connection_handling = false
