@@ -208,7 +208,14 @@ Style/FormatStringToken:
   # The commented-out lines below are in case we re-enable the cop
   # # This doesn't work for redirect in config/routes.rb.
   # AllowedMethods:
-    # - "redirect"
+  # - "redirect"
+Style/HashSyntax:
+  # Ruby 3.1 supports a new JS-like shorthand hash key/val assignment
+  # as long as key names and value variable names are the same.
+  # e.g. { foo: } is evaluated like { foo: foo }
+  # This setting allows for a transition while we get used to the new style.
+  # AN 2022-10-09
+  EnforcedShorthandSyntax: either
 Style/MethodCallWithArgsParentheses:
   # Rubocop default: false
   # MO uses parentheses (except for some macro-style methods)
