@@ -133,6 +133,14 @@ Metrics/PerceivedComplexity:
   Exclude:
     - "test//**/*"
 
+Naming/BlockForwarding:
+  # In Ruby 3.1, anonymous block forwarding has been added.
+  # This cop identifies places where `do_something(&block)`
+  # can be replaced by `do_something(&)`.
+  # Default is `anonymous`
+  # Keeping it `explicit` until we're ready to switch.
+  EnforcedStyle: explicit
+
 Performance/Casecmp:
   # Rubocop default: true
   # Disable because it does not work with Unicode in Ruby 2.4
@@ -213,6 +221,7 @@ Style/HashSyntax:
   # Ruby 3.1 supports a new JS-like shorthand hash key/val assignment
   # as long as key names and value variable names are the same.
   # e.g. { foo: } is evaluated like { foo: foo }
+  # https://dev.to/baweaver/ruby-3-1-shorthand-hash-syntax-first-impressions-19op
   # This setting allows for a transition while we get used to the new style.
   # AN 2022-10-09
   EnforcedShorthandSyntax: either
