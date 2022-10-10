@@ -14,6 +14,7 @@
              method: :put, multipart: true, name: "observation_form") do %>
   <%= render(partial: "form_observations", locals: {
         action: :update,
+        method: :patch,
         logging_optional: true,
         include_naming: false,
         include_images: true,
