@@ -4,10 +4,10 @@
 %>
 
 <%= form_with(model: @user, url: { action: :prefs }, method: :post) do |form| %>
-  <%= render partial: "account/prefs/login", locals: { f: form } %>
-  <%= render partial: "account/prefs/privacy", locals: { f: form } %>
-  <%= render partial: "account/prefs/appearance", locals: { f: form } %>
-  <%= render partial: "account/prefs/filters", locals: { f: form } %>
-  <%= render partial: "account/prefs/notes", locals: { f: form } %>
-  <%= render partial: "account/prefs/email", locals: { f: form } %>
+  <%= render(partial: "account/prefs/login", locals: { f: form })%>
+  <%= render(partial: "account/prefs/privacy", locals: { f: form })%>
+  <%= render(partial: "account/prefs/appearance", locals: { f: form })%>
+  <%= render(partial: "account/prefs/filters", locals: { f: form })%>
+  <%= render(partial: "account/prefs/notes", locals: { f: form })%>
+  <%= render(partial: "account/prefs/email", locals: { f: form })%>
 <% end %>
