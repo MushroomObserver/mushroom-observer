@@ -1,0 +1,10 @@
+<% # Notes Settings of Account Preferences Form %>
+
+<div class="form-group mt-3">
+  <%= content_tag(:span, :prefs_notes_template.t,
+                  class: "font-weight-bold") %>
+  <%= content_tag(:p, :prefs_notes_template_explanation.t) %>
+  <%= f.text_area(:notes_template, rows: 1, class: "form-control") %>
+</div>
+
+<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>

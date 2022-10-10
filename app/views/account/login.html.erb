@@ -2,39 +2,35 @@
   @title = :login_please_login.t
 %>
 
-<%= form_with(url: { action: :login }) do |form| %>
-
-  <%= fields_for(:user) do |f| %>
-
-    <div class="form-group mt-3">
-      <%= f.label(:login, :login_user.t + ":") %>
-      <%= f.text_field(:login, value: @login,
-                        data: { autofocus: @login.blank? },
-                        class: "form-control") %>
-    </div>
-
-    <div class="form-group mt-3">
-      <%= f.label(:password, :login_password.t + ":") %>
-      <%= f.password_field(:password, value: "",
-                            data: { autofocus: !@login.blank? },
-                            class: "form-control") %>
-    </div>
-
-    <div class="form-group mt-3 form-inline">
-      <%= f.check_box(:remember_me, checked: @remember) %>
-      <%= f.label(:remember_me, :login_remember_me.t) %>
-    </div>
-
-  <% end %>
-
-  <%= form.submit(:login_login.l, class: "btn btn-default center-block mt-3") %>
+<%= form_with(model: @user, url: { action: :login }) do |f| %>
 
   <div class="form-group mt-3">
-    <%= :login_forgot_password.tp %>
-    <%= :login_having_problems.tp %>
+    <%= f.label(:login, :login_user.t + ":") %>
+    <%= f.text_field(:login, value: @login,
+                      data: { autofocus: @login.blank? },
+                      class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label(:password, :login_password.t + ":") %>
+    <%= f.password_field(:password, value: "",
+                          data: { autofocus: !@login.blank? },
+                          class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3 form-inline">
+    <%= f.check_box(:remember_me, checked: @remember) %>
+    <%= f.label(:remember_me, :login_remember_me.t) %>
   </div>
 
 <% end %>
+
+<%= f.submit(:login_login.l, class: "btn btn-default center-block mt-3") %>
+
+<div class="form-group mt-3">
+  <%= :login_forgot_password.tp %>
+  <%= :login_having_problems.tp %>
+</div>
 
 <div>
   <div class="h3">

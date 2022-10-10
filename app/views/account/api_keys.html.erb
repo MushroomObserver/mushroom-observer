@@ -81,17 +81,15 @@
 <% end %>
 
 <div class="container-text mt-3">
-  <%= form_with(url: { action: :api_keys }) do |form| %>
+  <%= form_with(scope: :key, url: { action: :api_keys }) do |f| %>
 
-    <%= fields_for(:key) do |fields| %>
-      <div class="form-group mt-3">
-        <%= fields.label(:notes, :account_api_keys_notes_label.t) %>
-        <%= fields.text_field(:notes, class: "form-control") %>
-      </div>
-    <% end %>
+    <div class="form-group mt-3">
+      <%= f.label(:notes, :account_api_keys_notes_label.t) %>
+      <%= f.text_field(:notes, class: "form-control") %>
+    </div>
 
-    <%= form.submit(:account_api_keys_create_button.l, id: "create_button",
-                    class: "btn btn-default center-block mt-3") %>
+    <%= f.submit(:account_api_keys_create_button.l, id: "create_button",
+                 class: "btn btn-default center-block mt-3") %>
 
   <% end %>
 </div>
