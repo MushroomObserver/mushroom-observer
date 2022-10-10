@@ -11,6 +11,7 @@
     pager_for: @image,
     right: draw_tab_set(tabs),
   }
+  @container = :full
 %>
 
 <%= form_for(:location, url: add_query_param(
@@ -19,5 +20,5 @@
       approved_where: @display_name
     )) do |form| %>
   <%= render(partial: "form_location",
-             locals: { form: form, button: :UPDATE }) %>
+            locals: { form: form, button: :UPDATE }) %>
 <% end %>

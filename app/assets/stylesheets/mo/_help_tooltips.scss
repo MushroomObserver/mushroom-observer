@@ -12,6 +12,10 @@ $help-block-max-width: 600px;
   }
 }
 
+.help-note {
+  color: $WELL_FG_COLOR;
+}
+
 .help-block {
   color: $WELL_FG_COLOR;
   max-width: $help-block-max-width;

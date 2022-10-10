@@ -7,6 +7,7 @@
   ]
 
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
 <%= render(partial: "observation_title",
@@ -20,4 +21,5 @@
   <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
   <%= user_link(@sequence.user) %>
 </div>
+
 <%= show_object_footer(@sequence) %>

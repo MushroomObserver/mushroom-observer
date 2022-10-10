@@ -5,76 +5,69 @@
     link_to(:create_publication.t, new_publication_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= :publication_index_intro.tp %>
-    <%= :publication_citation.tp %>
-    <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
-  </div>
-</div>
+<div class="container-text">
+  <%= :publication_index_intro.tp %>
+  <%= :publication_citation.tp %>
+  <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
+</div><!--.container-text-->
 
-<div class="row">
-  <div class="col-xs-12">
-    <table class="table-striped table-publications mb-3 mt-3">
+<table class="table-striped table-publications mb-3 mt-3">
 
-      <thead>
-        <tr>
-          <th>
-            <%= :publication_full.t %> (<%= @full_count %>)
-          </th>
-          <th>
-            <%= :publication_link.t %>
-          </th>
-          <th>
-            (<%= @peer_count %>)
-          </th>
-          <th>
-            (<%= @mo_count %>)
-          </th>
-          <th>
-          </th>
-        </tr>
-      </thead>
+  <thead>
+    <tr>
+      <th>
+        <%= :publication_full.t %> (<%= @full_count %>)
+      </th>
+      <th>
+        <%= :publication_link.t %>
+      </th>
+      <th>
+        (<%= @peer_count %>)
+      </th>
+      <th>
+        (<%= @mo_count %>)
+      </th>
+      <th>
+      </th>
+    </tr>
+  </thead>
 
-      <tbody>
-        <% @publications.each do |publication| %>
-          <tr>
-            <td>
-              <%= link_to(publication.full.t.strip_links.html_safe,
-                          publication) %>
-            </td>
-            <td>
-              <%= if publication.link
-                str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
-                link_to(str, publication.link.html_safe,
-                        title: publication.link, data: {toggle: "tooltip"})
-              end %>
-            </td>
-            <td>
-              <%= "P" if publication.peer_reviewed %>
-            </td>
-            <td>
-              <%= "M" if publication.mo_mentioned %>
-            </td>
-            <td>
-              <% if in_admin_mode? || publication.can_edit?(@user) %>
-                <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
-                <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
-                            {data: {confirm: :are_you_sure.t}}) %>
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
+  <tbody>
+    <% @publications.each do |publication| %>
+      <tr>
+        <td>
+          <%= link_to(publication.full.t.strip_links.html_safe,
+                      publication) %>
+        </td>
+        <td>
+          <%= if publication.link
+            str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
+            link_to(str, publication.link.html_safe,
+                    title: publication.link, data: {toggle: "tooltip"})
+          end %>
+        </td>
+        <td>
+          <%= "P" if publication.peer_reviewed %>
+        </td>
+        <td>
+          <%= "M" if publication.mo_mentioned %>
+        </td>
+        <td>
+          <% if in_admin_mode? || publication.can_edit?(@user) %>
+            <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
+            <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
+                        {data: {confirm: :are_you_sure.t}}) %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
 
-    </table>
-  </div>
-</div>
+</table>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= :publication_legend.tp %>
-  </div>
-</div>
+<div class="container-text">
+  <%= :publication_legend.tp %>
+</div><!--.container-text-->
