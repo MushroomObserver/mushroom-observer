@@ -587,7 +587,7 @@ class AccountController < ApplicationController
   end
 
   def create_api_key
-    @key = APIKey.new(params[:key]&.permit!)
+    @key = APIKey.new(params.permit(:key))
     @key.verified = Time.zone.now
     @key.save!
     @key = APIKey.new # blank out form for if they want to create another key
