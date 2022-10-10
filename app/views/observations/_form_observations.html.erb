@@ -53,7 +53,7 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <button class="map-locate btn btn-default mt-3">Locate on Map</button>
+    <span class="map-locate map-btn btn btn-default mt-3">Locate on Map</span>
     <div class="well well-sm mt-3 help-block position-relative">
       <div class="arrow-up hidden-xs"></div>
       <%= :form_observations_locate_on_map_help.t %>
@@ -85,8 +85,8 @@
     <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
     <div id="observationFormMap" class="form-observation-map hidden"></div>
     <div>
-      <span class="map-open map-btn"><%= :form_observations_open_map.t %></span>
-      <span class="map-clear map-btn btn-default hidden"><%= :form_observations_clear_map.t %></span>
+      <span class="map-open map-btn btn btn-default"><%= :form_observations_open_map.t %></span>
+      <span class="map-clear map-btn btn btn-default hidden"><%= :form_observations_clear_map.t %></span>
     </div>
   </div>
   <div class="col-sm-6">
