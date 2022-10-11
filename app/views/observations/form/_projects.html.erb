@@ -1,0 +1,22 @@
+<% # Projects section of create_observation form %>
+<div class="mt-3 row" id="observation_projects">
+  <div class="col-xs-12 col-sm-6 col-sm-push-6">
+    <div class="well well-sm help-block position-relative">
+      <div class="arrow-left hidden-xs"></div>
+      <%= :form_observations_project_help.t %>
+    </div>
+  </div><!--.col-->
+  <div class="col-xs-12 col-sm-6 col-sm-pull-6">
+    <strong><%= :PROJECTS.t %>:</strong>
+    <% @projects.each do |project| %>
+      <div class="form-inline">
+        <%= check_box(:project, "id_#{project.id}",
+                      checked: @project_checks[project.id],
+                      disabled: @observation.user != @user &&
+                        !project.is_member?(@user),
+                      class: "form-control-xxx") %>
+        <%= link_to_object(project) %>
+      </div>
+    <% end %>
+  </div><!--.col-->
+</div><!--.row-->

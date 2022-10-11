@@ -1,0 +1,53 @@
+<% # Images upload section of create_observation form %>
+
+<div class="mt-3" id="observation_images_upload">
+
+  <strong><%= :form_observations_upload_images.t %>:</strong>
+
+  <!-- MULTIFILE_UPLOAD_FORM -->
+  <%= render(partial: "observations/form/multi_image_upload") if can_do_multifile_upload? %>
+  <!-- /MULTIFILE_UPLOAD_FORM -->
+
+  <!-- MONOFILE_UPLOAD_FORM -->
+  <% if !can_do_multifile_upload? %>
+    <%= javascript_tag %(
+      var NEXT_IMAGE_INDEX = #{@images.length+1};
+      var CHANGED_DATES = [];
+    ) %>
+    <div id="image_forms">
+      <% i = 0 %>
+      <% @images.push(@new_image) %>
+      <% while i < @images.length %>
+        <%= render(partial: "observations/form/mono_image_upload",
+                    locals: { index: i }) %>
+        <% i += 1 %>
+      <% end %>
+    </div>
+    <input
+      id="new_image_button"
+      onclick="image_new();"
+      type="button"
+      value="<%= :form_observations_upload_another.t %>"
+      class="btn btn-default"/>
+    <% javascript_include("single_image_uploader") %>
+    <%= javascript_tag %(
+      var x = String.fromCharCode(60);
+      var y = String.fromCharCode(93);
+      var IMAGE_FORM = "#{
+        i = @images.length - 1 rescue 0
+        str = render(partial: "form_image", locals: {index: i})
+        str.gsub!("image_#{i}_", "image_XXX_")
+        str.gsub!("image_id_#{i}", "image_id_XXX")
+        str.gsub!("(#{i})", "(XXX)")
+        str.gsub!("[#{i}]", "[XXX]")
+        str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+        str.sub!("checked=\"checked\" ", "")
+        str = escape_javascript(str)
+        str.gsub("<", '"+x+"')
+        str.gsub("]", '"+y+"')
+      }";
+    ) %>
+  <% end %>
+  <!-- /MONOFILE_UPLOAD_FORM -->
+
+</div><!--#observation_images_upload-->

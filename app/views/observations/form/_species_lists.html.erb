@@ -1,0 +1,21 @@
+<% # Species Lists section of create_observation form %>
+<div class="row mt-3" id="observation_species_lists">
+  <div class="col-xs-12 col-sm-6 col-sm-push-6">
+    <div class="well well-sm help-block position-relative">
+      <div class="arrow-left hidden-xs"></div>
+      <%= :form_observations_list_help.t %>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-6 col-sm-pull-6">
+    <strong><%= :SPECIES_LISTS.t %>:</strong>
+    <% @lists.each do |list| %>
+      <div class="form-inline">
+        <%= check_box(:list, "id_#{list.id}",
+                      checked: @list_checks[list.id],
+                      disabled: !check_permission(list),
+                      class: "form-control-xxx") %>
+        <%= link_to_object(list) %>
+      </div>
+    <% end %>
+  </div><!--.col-->
+</div><!--.row-->

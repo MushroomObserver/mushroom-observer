@@ -1,0 +1,123 @@
+<%
+# Where (location) section of create_observation form
+# including location autocomplete, map, lat/long/alt
+%>
+
+<!-- WHERE_REASONS -->
+<% if @dubious_where_reasons.any? %>
+  <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
+  <div class="alert alert-warning container-text" id="location_messages">
+    <%= @dubious_where_reasons.safe_join(safe_br) %>
+    <p class="help-block">
+      <%= :form_observations_dubious_help.t(button: button_name) %>
+    </p>
+  </div><!--.container-text-->
+<% end %>
+<!-- /WHERE_REASONS -->
+
+<!-- WHERE -->
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
+    <div class="form-group">
+      <%= f.label(:place_name, "#{:WHERE.t}: (#{:required.t})") %>
+      <%= f.text_field(:place_name, class: "form-control") %>
+      <% turn_into_location_auto_completer(
+          :observation_place_name, primer: Location.primer
+        ) %>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-6">
+    <div class="well well-sm help-block position-relative">
+      <div class="arrow-left hidden-xs"></div>
+      <%=
+        loc1 = "Albion, Mendocino Co., California, USA"
+        loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+        if User.current_location_format == "scientific"
+          loc1 = Location.reverse_name(loc1)
+          loc2 = Location.reverse_name(loc2)
+        end
+        :form_observations_where_help.t(loc1: loc1, loc2: loc2)
+      %>
+    </div>
+  </div>
+</div><!--.row-->
+
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
+    <button type="button" class="map-locate btn btn-default mt-3">Locate on Map</button>
+    <div class="well well-sm mt-3 help-block position-relative">
+      <div class="arrow-up hidden-xs"></div>
+      <%= :form_observations_locate_on_map_help.t %>
+    </div>
+  </div>
+</div><!--.row-->
+<!-- /WHERE -->
+
+<!-- IS_COLLECTION_LOCATION -->
+<div class="row">
+  <div class="col-xs-12 col-sm-6">
+    <div class="form-inline">
+      <%= f.check_box(:is_collection_location,
+                      class: "form-control-xxx") %>
+      <%= f.label(:is_collection_location,
+                  :form_observations_is_collection_location.t) %>
+    </div>
+    <div class="well well-sm mt-3 help-block position-relative">
+      <div class="arrow-up hidden-xs"></div>
+      <%= :form_observations_is_collection_location_help.t %>
+    </div>
+  </div><!--.col-->
+</div><!--.row-->
+<!-- /IS_COLLECTION_LOCATION -->
+
+<!-- LAT_LONG_ALT -->
+<div class="row mt-3" id="observation_geolocation">
+  <div class="col-sm-6">
+    <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
+    <div id="observationFormMap" class="form-observation-map hidden"></div>
+    <div>
+      <button type="button" class="map-open map-btn btn-default"><%= :form_observations_open_map.t %></span>
+      <button type="button" class="map-clear map-btn btn-default hidden"><%= :form_observations_clear_map.t %></span>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="well well-sm help-block position-relative">
+      <div class="arrow-left hidden-xs"></div>
+      <%= :form_observations_lat_long_help.t %>
+    </div>
+  </div>
+</div><!--.row-->
+
+<div class="row mt-3" id="observation_lat_long_alt">
+  <div class="col-xs-12 col-sm-6">
+    <div class="row">
+      <div class="col-xs-12 col-sm-4">
+        <div class="form-group">
+          <%= f.label(:lat, :LATITUDE.t + ":") %>
+          <%= f.text_field(:lat, class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-4">
+        <div class="form-group">
+          <%= f.label(:long, :LONGITUDE.t + ":") %>
+          <%= f.text_field(:long, class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-4">
+        <div class="form-group">
+          <%= f.lab(:alt, :ALTITUDE.t + ":") %>
+          <%= f.text_field(:alt, class: "form-control") %>
+          (<%= :units_meters.t %>)
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-12">
+        <div class="form-inline">
+          <%= f.check_box(:gps_hidden, class: "form-control-xxx") %>
+          <%= f.label(:gps_hidden,
+                      :form_observations_gps_hidden.t) %>
+        </div>
+      </div>
+    </div><!--.row-->
+  </div>
+</div><!--.row-->
+<!-- /LAT_LONG_ALT -->
