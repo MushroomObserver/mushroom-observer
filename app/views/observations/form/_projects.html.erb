@@ -8,15 +8,19 @@
   </div><!--.col-->
   <div class="col-xs-12 col-sm-6 col-sm-pull-6">
     <strong><%= :PROJECTS.t %>:</strong>
-    <% @projects.each do |project| %>
-      <div class="form-inline">
-        <%= check_box(:project, "id_#{project.id}",
-                      checked: @project_checks[project.id],
-                      disabled: @observation.user != @user &&
-                        !project.is_member?(@user),
-                      class: "form-control-xxx") %>
-        <%= link_to_object(project) %>
-      </div>
+
+    <%= fields_for(:project) do |f_p| %>
+      <% @projects.each do |project| %>
+        <div class="form-inline">
+          <%= f_p.check_box("id_#{project.id}",
+                            checked: @project_checks[project.id],
+                            disabled: @observation.user != @user &&
+                              !project.is_member?(@user),
+                            class: "form-control-xxx") %>
+          <%= link_to_object(project) %>
+        </div>
+      <% end %>
     <% end %>
+
   </div><!--.col-->
 </div><!--.row-->

@@ -9,26 +9,20 @@
 
   <%= f.submit(button_name, class: "btn btn-default center-block mt-3") %>
 
-  <!-- WHEN -->
-  <div class="container-text">
-    <%= f.label(:when_li, :WHEN.t + ":") %>
-    <div class="form-group form-inline">
-      <%= f.date_select(:when, date_select_opts(@observation),
-          { class: "form-control mb-2" }) %>
-      <% turn_into_year_auto_completer(:observation_when_1i) %>
-    </div>
-  </div><!--.container-text-->
-  <!-- /WHEN -->
-
+  <%= render(partial: "observations/form/when", locals: { f: f }) %>
   <%= render(partial: "observations/form/where", locals: { f: f }) %>
 
-  <%= naming_locals = {
-        action:       action,
-        button_name:  button_name,
-        show_reasons: false,
-        unfocused:    true
-      }
-  render(partial: "naming/form", locals: naming_locals) if include_naming %>
+  <% if include_naming
+
+    naming_locals = {
+      action:       action,
+      button_name:  button_name,
+      show_reasons: false,
+      unfocused:    true
+    } %>
+    <%= render(partial: "naming/form", locals: naming_locals) %>
+
+  <% end # if include_naming %>
 
   <%= render(partial: "observations/form/specimen_info", locals: { f: f }) %>
   <%= render(partial: "observations/form/notes", locals: { f: f }) %>
