@@ -43,11 +43,11 @@ function MultiImageUploader(localized_text) {
     $obsRadioContainer = jQuery('#observation_date_radio_container'),
     $fixDateSubmit = jQuery('#fix_dates'),
     $ignoreDateSubmit = jQuery('#ignore_dates'),
-    $imgMessages = jQuery(".image_messages"),
+    $imgMessages = jQuery("#image_messages"),
     $geocodeRadioContainer = jQuery('#geocode_radio_container'),
     $setGeocodeBtn = jQuery('#set_geocode'),
     $ignoreGeocodeBtn = jQuery('#ignore_geocode'),
-    $geocodeMessages = jQuery('.geocode_messages'),
+    $geocodeMessages = jQuery('#geocode_messages'),
     $content = jQuery('#content');
 
 
@@ -130,7 +130,7 @@ function MultiImageUploader(localized_text) {
   DateUpdater.prototype.makeImageDateRadio = function (simpleDate) {
     var _this = this;
 
-    var html = "<div><label><input type='radio' data-target='observation' data-date='{{date}}' name='fix_date'/>{{dateStr}}</label></div>"
+    var html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='{{date}}' name='fix_date'/>{{dateStr}}</label></div>"
     html = html.replace('{{date}}', JSON.stringify(simpleDate));
     html = html.replace('{{dateStr}}', simpleDate.asDateString());
     $imgRadioContainer.append(jQuery(html));
@@ -139,7 +139,7 @@ function MultiImageUploader(localized_text) {
   DateUpdater.prototype.makeObservationDateRadio = function (simpleDate) {
     var _this = this;
 
-    var html = "<div><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
+    var html = "<div class='radio'><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
     html = html.replace('{{date}}', JSON.stringify(simpleDate));
     html = html.replace('{{dateStr}}',  simpleDate.asDateString());
 
@@ -614,8 +614,8 @@ function MultiImageUploader(localized_text) {
   /**Geocode Helpers**/
 
   function makeGeocodeRadioBtn(latLngObjct){
-    var html = "<div><label><input type='radio' data-geocode='{{geocode}}' name='fix_geocode'/>{{geoCodeStr}}</label> " +
-        "<a href='#geocode_map' data-role='show_on_map' data-geocode='{{geocodeForMap}}'>" + localized_text.show_on_map + "</a></div>";
+    var html = "<div class='radio'><label><input type='radio' data-geocode='{{geocode}}' name='fix_geocode'/>{{geoCodeStr}}</label> " +
+        "<a href='#geocode_map' data-role='show_on_map' class='ml-3' data-geocode='{{geocodeForMap}}'>" + localized_text.show_on_map + "</a></div>";
     html = html.replace('{{geocode}}', JSON.stringify(latLngObjct));
     html = html.replace('{{geocodeForMap}}', JSON.stringify(latLngObjct));
     html = html.replace('{{geoCodeStr}}', latLngObjct.latitude.toFixed(5) + ", " + latLngObjct.longitude.toFixed(5));
@@ -642,7 +642,7 @@ function MultiImageUploader(localized_text) {
   function showGeocodeonMap(latLngObj) {
       // Create a map object and specify the DOM element for display.
       var obsLatLongFormat = {lat: latLngObj.latitude, lng: latLngObj.longitude}
-      jQuery('#geocode_map').width('100%');
+      // jQuery('#geocode_map').width('100%'); // css class w-100 on the div
       jQuery('#geocode_map').height('250');
       var map = new google.maps.Map(document.getElementById('geocode_map'), {
         center: obsLatLongFormat,
@@ -782,12 +782,12 @@ function MultiImageUploader(localized_text) {
 
 jQuery(document).ready(function () {
   var uploader = new MultiImageUploader({
-    uploading_text: "#{j :form_observations_uploading_images.t}",
-    image_too_big_text:  "#{j :form_observations_image_too_big.t(max: (MO.image_upload_max_size.to_f/1024/1024).round)}",
-    creating_observation_text: "#{j :form_observations_creating_observation.t}",
-    months: "#{j :all_months.t}",
-    show_on_map: "#{j :show_on_map.t}",
-    something_went_wrong: "#{j :form_observations_upload_error.t}"
+    uploading_text: "<%= :form_observations_uploading_images.t %>",
+    image_too_big_text:  "<%= :form_observations_image_too_big.t(max: (MO.image_upload_max_size.to_f/1024/1024).round) %>",
+    creating_observation_text: "<%= :form_observations_creating_observation.t %>",
+    months: "<%= :all_months.t %>",
+    show_on_map: "<%= :show_on_map.t %>",
+    something_went_wrong: "<%= :form_observations_upload_error.t %>"
   })
   uploader.init();
 });

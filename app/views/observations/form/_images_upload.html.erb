@@ -6,7 +6,8 @@
 
   <% if can_do_multifile_upload? %>
 
-    <%= render(partial: "observations/form/images_upload/multi") %>
+    <%= render(partial: "observations/form/images_upload/multi",
+               locals: { f: f }) %>
 
   <% else %>
 
@@ -21,7 +22,7 @@
       <% @images.push(@new_image) %>
       <% while i < @images.length %>
         <%= render(partial: "observations/form/images_upload/mono",
-                   locals: { index: i }) %>
+                   locals: { f: f, index: i }) %>
         <% i += 1 %>
       <% end %>
     </div>

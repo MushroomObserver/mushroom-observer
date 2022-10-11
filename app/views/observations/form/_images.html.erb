@@ -9,7 +9,7 @@
       <div class="row mt-3 form_image">
         <!-- GOOD_IMAGE -->
         <div class="col-xs-1" style="max-width:30px">
-          <%= radio_button(:observation, :thumb_image_id, image.id) %>
+          <%= f.radio_button(:thumb_image_id, image.id) %>
         </div><!--.col-->
         <div class="col-xs-11 col-sm-3">
           <%= thumbnail(image, border: 0,
