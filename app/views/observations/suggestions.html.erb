@@ -71,6 +71,7 @@
 
   </div>
   <div class="col-sm-4 float-sm-right">
-    <%= render(partial: "show_images", locals: { observation: @observation }) %>
+    <%= render(partial: "observations/show/images",
+               locals: { observation: @observation }) %>
   </div>
 </div><!--.row-->
