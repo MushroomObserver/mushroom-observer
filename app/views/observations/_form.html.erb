@@ -10,7 +10,8 @@
   <%= f.submit(button_name, class: "btn btn-default center-block mt-3") %>
 
   <%= render(partial: "observations/form/when", locals: { f: f }) %>
-  <%= render(partial: "observations/form/where", locals: { f: f }) %>
+  <%= render(partial: "observations/form/where",
+             locals: { f: f, button_name: button_name }) %>
 
   <% if include_naming
 
@@ -24,7 +25,9 @@
 
   <% end # if include_naming %>
 
-  <%= render(partial: "observations/form/specimen_info", locals: { f: f }) %>
+  <%= render(partial: "observations/form/specimen_info",
+             locals: { f: f, button_name: button_name }) %>
+
   <%= render(partial: "observations/form/notes", locals: { f: f }) %>
 
   <% ########################### Image Forms ############################## %>

@@ -5,7 +5,7 @@
   <strong><%= :form_observations_upload_images.t %>:</strong>
 
   <!-- MULTIFILE_UPLOAD_FORM -->
-  <%= render(partial: "observations/form/multi_image_upload") if can_do_multifile_upload? %>
+  <%= render(partial: "observations/form/images_upload/multi_image_upload") if can_do_multifile_upload? %>
   <!-- /MULTIFILE_UPLOAD_FORM -->
 
   <!-- MONOFILE_UPLOAD_FORM -->
@@ -18,7 +18,7 @@
       <% i = 0 %>
       <% @images.push(@new_image) %>
       <% while i < @images.length %>
-        <%= render(partial: "observations/form/mono_image_upload",
+        <%= render(partial: "observations/form/images_upload/mono_image_upload",
                     locals: { index: i }) %>
         <% i += 1 %>
       <% end %>

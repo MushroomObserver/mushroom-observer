@@ -2,7 +2,7 @@
   @title = :login_please_login.t
 %>
 
-<%= form_with(model: @user, url: { action: :login }) do |f| %>
+<%= form_with(scope: :user, url: { action: :login }) do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label(:login, :login_user.t + ":") %>
@@ -30,22 +30,22 @@
     <%= :login_having_problems.tp %>
   </div>
 
-  <div>
-    <div class="h3">
-      <%= :login_create_account_caption.tp %>
-    </div>
-    <%= :login_no_account.tp %>
-    (<%= :login_explain_login_requirement.t %>)
-  </div>
-
-  <div>
-    <div class="h3">
-      <%= :login_data_without_login_caption.tp %>
-    </div>
-    <div>
-      <%= :login_images_without_login.tp %>
-      <%= :login_data_without_login.tp %>
-    </div>
-  </div>
-
 <% end %>
+
+<div>
+  <div class="h3">
+    <%= :login_create_account_caption.tp %>
+  </div>
+  <%= :login_no_account.tp %>
+  (<%= :login_explain_login_requirement.t %>)
+</div>
+
+<div>
+  <div class="h3">
+    <%= :login_data_without_login_caption.tp %>
+  </div>
+  <div>
+    <%= :login_images_without_login.tp %>
+    <%= :login_data_without_login.tp %>
+  </div>
+</div>
