@@ -35,14 +35,14 @@
 
         <%= fields_for(:collection_number) do |fcn| %>
           <div class="form-group">
-            <%= f.label(:name, :collection_number_name.t + ":") %>
-            <%= f.text_field(:name, value: @collectors_name,
-                            class: "form-control") %>
+            <%= fcn.label(:name, :collection_number_name.t + ":") %>
+            <%= fcn.text_field(:name, value: @collectors_name,
+                               class: "form-control") %>
           </div>
           <div class="form-group">
-            <%= f.label(:number, :collection_number_number.t + ":") %>
-            <%= f.text_field(:number, value: @collectors_number,
-                            class: "form-control") %>
+            <%= fcn.label(:number, :collection_number_number.t + ":") %>
+            <%= fcn.text_field(:number, value: @collectors_number,
+                               class: "form-control") %>
           </div>
         <% end %>
 
