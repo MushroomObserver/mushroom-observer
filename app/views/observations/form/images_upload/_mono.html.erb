@@ -14,24 +14,29 @@
     <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);" type="button" class="btn btn-default" value="« <%=:LESS.t%>" style="display:none" />
   <% end %><br/>
 
-  <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
-  <%= text_field(:image, :notes, index: index, size: 50) %>
-  </p>
+  <%= fields_for(:image) do |f_i| %>
+    <%= f_i.label("#{index}_notes".to_sym, "#{:NOTES.t}:") %>
+    <%= f_i.text_field(:notes, index: index, size: 50, class: "form-control") %>
 
-  <div id="image_<%= index %>_div" style="line-height:100%<%= "; display:none" if @js %>">
-    <p><label for="image_<%= index %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>
-    <%= text_field(:image, :copyright_holder, index: index) %></p>
+    <div id="image_<%= index %>_div" style="line-height:100%<%= "; display:none" if @js %>">
+      <%= f_i.label("#{index}_copyright_holder".to_sym,
+                    "#{:form_images_copyright_holder.t}:") %>
+      <%= f_i.text_field(:copyright_holder, index: index) %></p>
 
-    <p><label for="image_<%= index %>_when_1i"><%= :form_images_when_taken.t %>:</label>
+      <%= f_i.label("#{index}_when_1i".to_sym,
+                    "#{:form_images_when_taken.t}:") %>
+      <%= f_i.date_select(:when, date_select_opts(@image).merge(index: index),
+                          { onchange: "changed_date(#{index})" }) %>
+      <% turn_into_year_auto_completer(:species_list_when_1i) %>
 
-    <%= date_select(:image, :when, date_select_opts(@image).merge(index: index),
-                    {onchange: "changed_date(#{index})"}) %></p>
-    <% turn_into_year_auto_completer(:species_list_when_1i) %>
-
-    <p><label for="image_<%= index %>_license_id"><%= :form_images_select_license.t %>:</label>
-    <%= select(:image, :license_id, @licenses, {value: @image.license_id},
-               {id: "image_#{index}_license_id", name: "image[#{index}][license_id]"}) %></p>
-  </div>
+      <%= f_i.label("#{index}_license_id".to_sym,
+                    "#{:form_images_select_license.t}:") %>
+      <%= f_i.select(:license_id, @licenses,
+                     { value: @image.license_id },
+                     { id: "image_#{index}_license_id",
+                       name: "image[#{index}] [license_id]" }) %></p>
+    </div>
+  <% end %>
 
   <% inject_javascript_at_end %(
     CHANGED_DATES[#{index}] = false;
