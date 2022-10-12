@@ -29,7 +29,7 @@
       <% turn_into_year_auto_completer(:species_list_when_1i) %>
 
       <%= f_i.label("#{index}_license_id".to_sym,
-                    "#{:form_images_select_license.t}:") %>
+                    "#{:form_images_select_license.t}:".html_safe) %>
       <%= f_i.select(:license_id, @licenses,
                      { value: @image.license_id },
                      { id: "image_#{index}_license_id",

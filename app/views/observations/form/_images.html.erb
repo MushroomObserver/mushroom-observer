@@ -79,7 +79,8 @@
               </tr>
               <tr>
                 <td>
-                  <%= label_tag("image_#{image.id}_license_id", :form_images_select_license.t + ":") %>
+                  <%= label_tag("image_#{image.id}_license_id",
+                        "#{:form_images_select_license.t}:".html_safe) %>
                 </td>
                 <td>
                   <%= select(:good_image, :license_id,

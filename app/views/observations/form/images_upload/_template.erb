@@ -90,7 +90,7 @@
 
           <div class="row pt-3">
             <div class="col-sm-4">
-              <label class="font-weight-bold"><%= :form_images_select_license.t %></label>
+              <label class="font-weight-bold"><%= :form_images_select_license.t.html_safe %></label>
             </div>
             <div class="col-sm-8">
               <%= fti.select(:license_id, @licenses,
