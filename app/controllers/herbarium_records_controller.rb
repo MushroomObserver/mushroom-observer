@@ -21,7 +21,7 @@ class HerbariumRecordsController < ApplicationController
       herbarium_index and return
     elsif params[:observation_id].present?
       observation_index and return
-    elsif params[:by].present? || params[:q].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_herbarium_record and return
     else
       list_herbarium_records and return
@@ -43,15 +43,11 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
 
-  # Note that the `id` param in these crud actions is confusingly ambiguous.
-  # `id` could be an herbarium record, or it could be an observation.
-  # Would be nicer to pass a specific, legible, allow-listed `observation_id`
-  # param for the new/create form.
   def new
     store_location
     pass_query_params
     @layout      = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
+    @observation = find_or_goto_index(Observation, params[:observation_id])
     return unless @observation
 
     @back_object = @observation
@@ -62,7 +58,7 @@ class HerbariumRecordsController < ApplicationController
     store_location
     pass_query_params
     @layout      = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
+    @observation = find_or_goto_index(Observation, params[:observation_id])
     return unless @observation
 
     @back_object = @observation
