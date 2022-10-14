@@ -1,43 +1,52 @@
-<%= submit_tag(button.t, class: "btn btn-default center-block mt-3") %>
+<%
+url_params = { action: action, q: get_query_param }
+url_params = url_params.merge(
+  { observation_id: @observation.id }) if action == :create
+url_params = url_params.merge({ back: back }) if action == :update
+%>
 
-<% if @herbarium_record.observations.count > 1 %>
-  <div class="alert alert-warning">
-    <%= :edit_affects_multiple_observations.t(type: :herbarium_record) %>
+<%= form_with(model: @herbarium_record, url: url_params) do |f| %>
+
+  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+
+  <% if @herbarium_record.observations.count > 1 %>
+    <div class="alert alert-warning">
+      <%= :edit_affects_multiple_observations.t(type: :herbarium_record) %>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label(:herbarium_name, :NAME.t + ":") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+    <%= f.text_field(:herbarium_name, class: "form-control") %>
+    <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
   </div>
+
+  <div class="form-group">
+    <%= f.label(:initial_det,
+                "#{:herbarium_record_initial_det.t}:".html_safe) %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= f.text_field(:initial_det, class:"form-control") %>
+  </div>
+
+  <div class="form-inline">
+    <%= f.label(:accession_number,
+                "#{:herbarium_record_accession_number.t}:".html_safe) %>
+    <%= f.text_field(:accession_number, class:"form-control") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+  </div>
+
+  <div class="well well-sm mt-3 help-block position-relative">
+    <div class="arrow-up"></div>
+    <%= :create_herbarium_record_accession_number_help.t %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label(:notes, :NOTES.t + ":") %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= text_area(:notes, class: "form-control", rows: 6) %>
+  </div>
+
+  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+
 <% end %>
-
-<div class="form-group">
-  <%= label_tag(:herbarium_record_herbarium_name, :NAME.t + ":") %>
-  <span class="help-note">(<%= :required.t %>)</span>
-  <%= text_field(:herbarium_record, :herbarium_name,
-                  class: "form-control") %>
-  <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
-</div>
-
-<div class="form-group">
-  <%= label_tag(:herbarium_record_initial_det, :herbarium_record_initial_det.t + ":") %>
-  <span class="help-note">(<%= :optional.t %>)</span>
-  <%= text_field(:herbarium_record, :initial_det, class:"form-control") %>
-</div>
-
-<div class="form-inline">
-  <%= label_tag(:herbarium_record_accession_number,
-                :herbarium_record_accession_number.t + ":") %>
-  <%= text_field(:herbarium_record, :accession_number,
-                  class:"form-control") %>
-  <span class="help-note">(<%= :required.t %>)</span>
-</div>
-
-<div class="well well-sm mt-3 help-block position-relative">
-  <div class="arrow-up"></div>
-  <%= :create_herbarium_record_accession_number_help.t %>
-</div>
-
-<div class="form-group">
-  <%= label_tag(:herbarium_record_notes, :NOTES.t + ":") %>
-  <span class="help-note">(<%= :optional.t %>)</span>
-  <%= text_area(:herbarium_record, :notes,
-                class: "form-control", rows: 6) %>
-</div>
-
-<%= submit_tag(button.t, class: "btn btn-default center-block mt-3") %>

@@ -20,10 +20,8 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= form_tag(add_query_param(action: :edit_herbarium_record,
-                                id: @herbarium_record.id, back: @back)) do %>
-      <%= render(partial: "form", locals: { button: :SAVE }) %>
-    <% end %>
+    <%= render(partial: "form",
+               locals: { action: :update, button_name: :SAVE, back: @back }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

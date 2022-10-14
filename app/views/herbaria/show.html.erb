@@ -31,9 +31,7 @@
       <%= link_to(:show_herbarium_herbarium_record_count.t(
                     count: @herbarium.herbarium_records.length
                   ),
-                  controller: :herbarium_record,
-                  action: :herbarium_index,
-                  id: @herbarium.id) %>
+                  herbarium_records_path(id: @herbarium.id)) %>
     </div>
 
     <div class="mt-3">
