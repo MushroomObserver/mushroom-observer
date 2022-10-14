@@ -2,7 +2,8 @@
   @title = :create_collection_number_title.l
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation), @observation.show_link_args)
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :full
@@ -10,9 +11,7 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= form_tag(add_query_param(action: :create_collection_number, id: @observation.id)) do %>
-      <%= render(partial: "form", locals: {button: :ADD}) %>
-    <% end %>
+    <%= render(partial: "form", locals: { action: :create, button_name: :ADD }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

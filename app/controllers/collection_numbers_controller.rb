@@ -1,17 +1,106 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying collection numbers.
-class CollectionNumberController < ApplicationController
+class CollectionNumbersController < ApplicationController
   before_action :login_required
   # except: [
+  #   :index,
   #   :index_collection_number,
   #   :list_collection_numbers,
   #   :collection_number_search,
   #   :observation_index,
-  #   :show_collection_number,
-  #   :next_collection_number,
-  #   :prev_collection_number
+  #   :show
   # ]
+
+  def index
+    if params[:pattern].present? # rubocop:disable Style/GuardClause
+      collection_number_search and return
+    elsif params[:id].present?
+      observation_index and return
+    elsif params[:by].present? || params[:q].present?
+      index_collection_number and return
+    else
+      list_collection_numbers and return
+    end
+  end
+
+  def show
+    store_location
+    pass_query_params
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, CollectionNumber, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, CollectionNumber, params[:id]) and return
+    end
+
+    @canonical_url = CollectionNumber.show_url(params[:id])
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+  end
+
+  def new
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:id])
+    return unless @observation
+
+    @back_object = @observation
+    return unless make_sure_can_edit!(@observation)
+
+    @collection_number = CollectionNumber.new(name: @user.legal_name)
+  end
+
+  def create
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:id])
+    return unless @observation
+
+    @back_object = @observation
+    return unless make_sure_can_edit!(@observation)
+
+    create_collection_number
+  end
+
+  def edit
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
+  end
+
+  def update
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
+
+    update_collection_number
+  end
+
+  def destroy
+    pass_query_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+    return unless make_sure_can_delete!(@collection_number)
+
+    @collection_number.destroy
+    redirect_with_query(action: :index)
+  end
+
+  ##############################################################################
+
+  private
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
   def index_collection_number
@@ -32,7 +121,7 @@ class CollectionNumberController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (collection_number = CollectionNumber.safe_find(pattern))
-      redirect_to(action: :show_collection_number, id: collection_number.id)
+      redirect_to(action: :show, id: collection_number.id)
     else
       query = create_query(:CollectionNumber, :pattern_search, pattern: pattern)
       show_selected_collection_numbers(query)
@@ -45,96 +134,16 @@ class CollectionNumberController < ApplicationController
                          observation: params[:id].to_s)
     @links = [
       [:show_object.l(type: :observation),
-       Observation.show_link_args(params[:id])],
+       observation_path(params[:id])],
       [:create_collection_number.l,
-       { action: :create_collection_number, id: params[:id] }]
+       new_collection_number_path(id: params[:id])]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
 
-  def show_collection_number
-    store_location
-    pass_query_params
-    @canonical_url = CollectionNumber.show_url(params[:id])
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-  end
-
-  def next_collection_number
-    redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
-  end
-
-  def prev_collection_number
-    redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
-  end
-
-  def create_collection_number
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
-    return unless @observation
-
-    @back_object = @observation
-    return unless make_sure_can_edit!(@observation)
-
-    if request.method == "GET"
-      @collection_number = CollectionNumber.new(name: @user.legal_name)
-    elsif request.method == "POST"
-      post_create_collection_number
-    else
-      redirect_back_or_default("/")
-    end
-  end
-
-  def edit_collection_number
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-
-    figure_out_where_to_go_back_to
-    return unless make_sure_can_edit!(@collection_number)
-
-    if request.method == "GET"
-      # nothing
-    elsif request.method == "POST"
-      post_edit_collection_number
-    else
-      redirect_back_or_default("/")
-    end
-  end
-
-  def remove_observation
-    pass_query_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-
-    @observation = find_or_goto_index(Observation, params[:obs])
-    return unless @observation
-    return unless make_sure_can_delete!(@collection_number)
-
-    @collection_number.remove_observation(@observation)
-    redirect_with_query(@observation.show_link_args)
-  end
-
-  def destroy_collection_number
-    pass_query_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-    return unless make_sure_can_delete!(@collection_number)
-
-    @collection_number.destroy
-    redirect_with_query(action: :index_collection_number)
-  end
-
-  ##############################################################################
-
-  private
-
   def show_selected_collection_numbers(query, args = {})
     args = {
-      action: :list_collection_numbers,
+      action: :index,
       letters: "collection_numbers.name",
       num_per_page: 100
     }.merge(args)
@@ -152,7 +161,7 @@ class CollectionNumberController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  def post_create_collection_number
+  def create_collection_number # rubocop:disable Metrics/AbcSize
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
     normalize_parameters
@@ -174,7 +183,7 @@ class CollectionNumberController < ApplicationController
     redirect_to_observation_or_collection_number
   end
 
-  def post_edit_collection_number
+  def update_collection_number # rubocop:disable Metrics/AbcSize
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
@@ -221,7 +230,7 @@ class CollectionNumberController < ApplicationController
     return true if collection_number.can_edit? || in_admin_mode?
 
     flash_error(:permission_denied.t)
-    redirect_to(collection_number.show_link_args)
+    redirect_to(collection_number_path(collection_number.id))
     false
   end
 
@@ -261,8 +270,7 @@ class CollectionNumberController < ApplicationController
     if @back_object
       redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(action: :index_collection_number,
-                          id: @collection_number.id)
+      redirect_with_query(collection_numbers_path(id: @collection_number.id))
     end
   end
 end

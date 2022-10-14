@@ -1,0 +1,26 @@
+<%= form_with(model: @collection_number,
+              url: { action: action, back: back }) do |f| %>
+
+  <%= f.submit(button.t, class: "btn btn-default center-block mt-3") %>
+
+  <% if @collection_number.observations.count > 1 %>
+    <div class="alert alert-warning mt-3">
+      <%= :edit_affects_multiple_observations.t(type: :collection_number) %>
+    </div>
+  <% end %>
+
+  <div class="form-group mt-3">
+    <%= f.label(:name, "#{:collection_number_name.t}:") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+    <%= f.text_field(:name, class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label(:number, "#{:collection_number_number.t}:") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+    <%= f.text_field(:number, class:"form-control") %>
+  </div>
+
+  <%= f.submit(button.t, class: "btn btn-default center-block mt-3") %>
+
+<% end %>

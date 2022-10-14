@@ -121,19 +121,19 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  collection_number: {
-    collection_number_search: {},
-    create_collection_number: {},
-    destroy_collection_number: {},
-    edit_collection_number: {},
-    index_collection_number: {},
-    list_collection_numbers: {},
-    next_collection_number: {},
-    observation_index: {},
-    prev_collection_number: {},
-    remove_observation: {},
-    show_collection_number: {}
-  },
+  # collection_number: {
+  #   collection_number_search: {},
+  #   create_collection_number: {},
+  #   destroy_collection_number: {},
+  #   edit_collection_number: {},
+  #   index_collection_number: {},
+  #   list_collection_numbers: {},
+  #   next_collection_number: {},
+  #   observation_index: {},
+  #   prev_collection_number: {},
+  #   remove_observation: {},
+  #   show_collection_number: {}
+  # },
   comment: {
     add_comment: {},
     comment_search: {},
@@ -578,6 +578,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
+
+  # ----- Collection Numbers: standard actions --------------------------------
+  resources :collection_numbers do
+    resource :remove_observation, only: [:get, :update],
+                                  module: :collection_numbers
+  end
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
