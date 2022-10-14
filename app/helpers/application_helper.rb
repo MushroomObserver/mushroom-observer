@@ -133,7 +133,7 @@ module ApplicationHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
-  def destroy_button(target:, name: :DESTROY.t)
+  def destroy_button(target:, name: :DESTROY.t, classes: "text-danger")
     path = if target.is_a?(String)
              target
            else
@@ -142,7 +142,7 @@ module ApplicationHelper
     id = target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
 
     button_to(
-      name, path, method: :delete, class: "text-danger", id: id,
+      name, path, method: :delete, class: classes, id: id,
                   data: { confirm: :are_you_sure.t }
     )
   end
