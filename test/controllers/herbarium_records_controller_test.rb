@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class HerbariumRecordControllerTest < FunctionalTestCase
+class HerbariumRecordsControllerTest < FunctionalTestCase
   def herbarium_record_params
     {
       id: observations(:strobilurus_diminutivus_obs).id,
@@ -212,7 +212,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
     # Prove that post keeps query params intact.
     post(:create_herbarium_record, params: params)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(id: obs.id, q: q))
   end
 
   def test_edit_herbarium_record
@@ -284,11 +284,11 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
     # Prove that POST keeps query param when returning to observation.
     post(:edit_herbarium_record, params: params.merge(back: obs.id, q: q))
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(id: obs.id, q: q))
 
     # Prove that POST can return to show_herbarium_record with query intact.
     post(:edit_herbarium_record, params: params.merge(back: "show", q: q))
-    assert_redirected_to(rec.show_link_args.merge(q: q))
+    assert_redirected_to(herbarium_record_path(id: rec.id, q: q))
 
     # Prove that POST can return to index_herbarium_record with query intact.
     post(:edit_herbarium_record, params: params.merge(back: "index", q: q))
@@ -353,7 +353,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
     # Prove that it keeps query param intact when returning to observation.
     post(:remove_observation, params: { id: recs[1].id, obs: obs.id, q: q })
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(id: obs.id, q: q))
   end
 
   def test_destroy_herbarium_record

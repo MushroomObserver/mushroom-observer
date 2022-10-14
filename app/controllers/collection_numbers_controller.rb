@@ -15,7 +15,7 @@ class CollectionNumbersController < ApplicationController
   def index
     if params[:pattern].present? # rubocop:disable Style/GuardClause
       collection_number_search and return
-    elsif params[:id].present?
+    elsif params[:id].present? # TODO: use :observation_id here.
       observation_index and return
     elsif params[:by].present? || params[:q].present?
       index_collection_number and return
@@ -38,6 +38,10 @@ class CollectionNumbersController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
+  # Note that the `id` param in these crud actions is confusingly ambiguous.
+  # `id` could be a collection number, or it could be an observation.
+  # Would be nicer to pass a specific, legible `observation_id` param
+  # for the new/create form.
   def new
     store_location
     pass_query_params
