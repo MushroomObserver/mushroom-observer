@@ -267,7 +267,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def redirect_to_observation_or_collection_number
-    if @back_object.is_a?(CollectionNumber)
+    if @back_object.is_a?(CollectionNumber) # rubocop:disable Style/CaseLikeIf
       redirect_with_query(collection_number_path(@back_object))
     elsif @back_object.is_a?(Observation)
       redirect_with_query(observation_path(@back_object))

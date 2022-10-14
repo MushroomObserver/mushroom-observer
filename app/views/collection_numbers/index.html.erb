@@ -15,11 +15,9 @@
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
               link_with_query(:EDIT.t,
-                              edit_collection_number_path(
-                                id: collection_number.id,
-                                params: { back: :index }
-                              ),
-                              class: "btn btn-default btn-sm")
+                edit_collection_number_path(id: collection_number.id,
+                                            params: { back: :index }),
+                class: "btn btn-default btn-sm")
             end %>
           </td>
           <td>
