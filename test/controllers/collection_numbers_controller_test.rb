@@ -13,7 +13,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
     assert_equal(1, obs.collection_numbers.count)
     login
-    get(:index, params: { id: obs.id })
+    get(:index, params: { observation_id: obs.id })
     assert_template(:index)
     assert_no_flash
   end
@@ -22,7 +22,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     assert_operator(obs.collection_numbers.count, :>, 1)
     login
-    get(:index, params: { id: obs.id })
+    get(:index, params: { observation_id: obs.id })
     assert_template(:index)
     assert_no_flash
   end
@@ -31,7 +31,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
     login
-    get(:index, params: { id: obs.id })
+    get(:index, params: { observation_id: obs.id })
     assert_template(:index)
     assert_flash_text(/no matching collection numbers found/i)
   end
@@ -109,24 +109,24 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
   def test_create_collection_number
     get(:new)
-    get(:new, params: { id: "bogus" })
+    get(:new, params: { observation_id: "bogus" })
 
     obs = observations(:coprinus_comatus_obs)
-    get(:new, params: { id: obs.id })
+    get(:new, params: { observation_id: obs.id })
     assert_response(:redirect)
 
     login("mary")
-    get(:new, params: { id: obs.id })
+    get(:new, params: { observation_id: obs.id })
     assert_response(:redirect)
 
     login("rolf")
-    get(:new, params: { id: obs.id })
+    get(:new, params: { observation_id: obs.id })
     assert_response(:success)
     assert_template("new", partial: "_matrix_box")
     assert(assigns(:collection_number))
 
     make_admin("mary")
-    get(:new, params: { id: obs.id })
+    get(:new, params: { observation_id: obs.id })
     assert_response(:success)
   end
 
@@ -141,27 +141,29 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     post(:create,
-         params: { id: obs.id, collection_number: params })
+         params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_redirected_to(account_login_path)
 
     login("mary")
     post(:create,
-         params: { id: obs.id, collection_number: params })
+         params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
     post(:create,
-         params: { id: obs.id, collection_number: params.except(:name) })
+         params: { observation_id: obs.id,
+                   collection_number: params.except(:name) })
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create,
-         params: { id: obs.id, collection_number: params.except(:number) })
+         params: { observation_id: obs.id,
+                   collection_number: params.except(:number) })
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create,
-         params: { id: obs.id, collection_number: params })
+         params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     assert_response(:redirect)
@@ -187,14 +189,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     login("rolf")
     post(:create,
-         params: { id: obs.id, collection_number: params })
+         params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     number = CollectionNumber.last
     assert_obj_list_equal([number], obs.reload.collection_numbers)
 
     post(:create,
-         params: { id: obs.id, collection_number: params })
+         params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_obj_list_equal([number], obs.reload.collection_numbers)
@@ -215,7 +217,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     login("mary")
     post(:create,
-         params: { id: obs2.id, collection_number: params })
+         params: { observation_id: obs2.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_equal(1, obs1.reload.collection_numbers.count)
@@ -230,7 +232,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:CollectionNumber, :all)
     q = query.id.alphabetize
     params = {
-      id: obs.id,
+      observation_id: obs.id,
       collection_number: { name: "John Doe", number: "31415" },
       q: q
     }
@@ -238,7 +240,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='numbers?id=#{obs.id}&q=#{q}']")
+    assert_select("form[action*='numbers?observation_id=#{obs.id}&q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)

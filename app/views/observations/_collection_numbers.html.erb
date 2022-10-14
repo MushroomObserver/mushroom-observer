@@ -13,7 +13,7 @@
     <div>
       <%= :Collection_numbers.t %>: [<%=
         link_with_query(:create_collection_number.t,
-                        new_collection_number_path(id: observation.id))
+          new_collection_number_path(observation_id: observation.id))
       %>]
     </div>
     <ul class="tight-list">
@@ -30,7 +30,7 @@
            <%= link_with_query(:REMOVE.t,
                                collection_number_remove_observation_path(
                                  collection_number_id: number.id,
-                                 params: { obs: observation.id }
+                                 params: { observation_id: observation.id }
                                ),
                                { data: { confirm: :are_you_sure.t } }) %>]
         </li>
@@ -47,7 +47,7 @@
   <% elsif numbers.none? && can_edit %>
     <%= :show_observation_no_collection_numbers.t %> [<%=
       link_with_query(:create_collection_number.t,
-                      new_collection_number_path(id: observation.id))
+        new_collection_number_path(observation_id: observation.id))
     %>]
   <% end %>
 <% end %>
