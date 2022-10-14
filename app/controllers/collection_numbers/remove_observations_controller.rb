@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
-# remove one observation from a collection number
+# Remove one observation from a collection number.
+#
+# Route: `collection_number_remove_observation_path`
+# Only one action here. Call namespaced controller actions with a hash like
+# `{ controller: "collection_numbers/remove_observation", action: :update }`
+
 class CollectionNumbers::RemoveObservationsController < ApplicationController
-  # def edit
-  #   pass_query_params
-  #   @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-  #   return unless @collection_number
-
-  #   @observation = find_or_goto_index(Observation, params[:obs])
-  #   return unless @observation
-  #   return unless make_sure_can_delete!(@collection_number)
-  # end
-
   def update
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber,
