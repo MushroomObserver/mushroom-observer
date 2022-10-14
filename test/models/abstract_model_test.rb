@@ -437,8 +437,7 @@ class AbstractModelTest < UnitTestCase
 
   def test_show_urls
     assert_show_url(APIKey, "account/show_api_key")
-    assert_show_url(CollectionNumber,
-                    "collection_number/show_collection_number")
+    assert_show_url(CollectionNumber, "collection_numbers")
     assert_show_url(Comment, "comment/show_comment")
     assert_show_url(ExternalSite, "external_site/show_external_site")
     assert_show_url(Herbarium, "herbaria")
