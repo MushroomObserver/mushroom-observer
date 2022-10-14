@@ -19,14 +19,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index,
         params: { herbarium_id: herbaria(:nybg_herbarium).id })
-    assert_template(:list_herbarium_records)
+    assert_template(:index)
   end
 
   def test_herbarium_with_no_herbarium_records_index
     login
-    get(:index,
-        params: { herbarium_id: herbaria(:dick_herbarium).id })
-    assert_template(:list_herbarium_records)
+    get(:index, params: { herbarium_id: herbaria(:dick_herbarium).id })
+    assert_template(:index)
     assert_flash_text(/No matching fungarium records found/)
   end
 
@@ -34,7 +33,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index,
         params: { observation_id: observations(:coprinus_comatus_obs).id })
-    assert_template(:list_herbarium_records)
+    assert_template(:index)
   end
 
   def test_observation_with_no_herbarium_records_index

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class CuratorTest < IntegrationTestCase
+class HerbariumCuratorTest < IntegrationTestCase
   # ---------- Helpers ----------
 
   def nybg
@@ -18,7 +18,7 @@ class CuratorTest < IntegrationTestCase
     get("/#{obs.id}")
     assert_template("observations/show")
     click_mo_link(label: :create_herbarium_record.t)
-    assert_template("herbarium_record/create_herbarium_record")
+    assert_template("herbarium_records/new")
     open_form do |form|
       form.submit("Add")
     end
@@ -32,13 +32,13 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/#{obs.id}")
-    click_mo_link(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
-    assert_template("herbarium_record/edit_herbarium_record")
+    click_mo_link(href: "/herbarium_records/#{rec.id}/edit")
+    assert_template("herbarium_records/edit")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
       form.submit("Save")
     end
-    assert_template("herbarium_record/edit_herbarium_record")
+    assert_template("herbarium_records/edit")
     push_page
     open_form do |form|
       form.change("herbarium_name", rec.herbarium.name)
@@ -52,7 +52,7 @@ class CuratorTest < IntegrationTestCase
     assert_template("observations/show")
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
-    click_mo_link(href: "/herbarium_record/remove_observation/#{rec.id}")
+    click_mo_link(href: "/herbarium_records_remove_observation/#{rec.id}")
     assert_template("observations/show")
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
@@ -64,26 +64,26 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/#{obs.id}")
-    click_mo_link(href: "/herbarium_record/show_herbarium_record/#{rec.id}")
-    assert_template("herbarium_record/show_herbarium_record")
+    click_mo_link(href: "/herbarium_records/#{rec.id}")
+    assert_template("herbarium_records/show")
     click_mo_link(label: "Edit Fungarium Record")
-    assert_template("herbarium_record/edit_herbarium_record")
+    assert_template("herbarium_records/edit")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
       form.submit("Save")
     end
-    assert_template("herbarium_record/edit_herbarium_record")
+    assert_template("herbarium_records/edit")
     push_page
     click_mo_link(label: "Cancel (Show Fungarium Record)")
-    assert_template("herbarium_record/show_herbarium_record")
+    assert_template("herbarium_records/show")
     go_back
     open_form do |form|
       form.change("herbarium_name", rec.herbarium.name)
       form.submit("Save")
     end
-    assert_template("herbarium_record/show_herbarium_record")
+    assert_template("herbarium_records/show")
     click_mo_link(label: "Destroy Fungarium Record")
-    assert_template("herbarium_record/list_herbarium_records")
+    assert_template("herbarium_records/index")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
@@ -93,25 +93,25 @@ class CuratorTest < IntegrationTestCase
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get(herbarium_path(rec.herbarium.id))
     click_mo_link(href: /herbarium_index/)
-    assert_template("herbarium_record/list_herbarium_records")
-    click_mo_link(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
-    assert_template("herbarium_record/edit_herbarium_record")
+    assert_template("herbarium_records/index")
+    click_mo_link(href: "/herbarium_records/#{rec.id}/edit")
+    assert_template("herbarium_records/edit")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
       form.submit("Save")
     end
-    assert_template("herbarium_record/edit_herbarium_record")
+    assert_template("herbarium_records/edit")
     push_page
     click_mo_link(label: "Back to Fungarium Record Index")
-    assert_template("herbarium_record/list_herbarium_records")
+    assert_template("herbarium_records/index")
     go_back
     open_form do |form|
       form.change("herbarium_name", rec.herbarium.name)
       form.submit("Save")
     end
-    assert_template("herbarium_record/list_herbarium_records")
-    click_mo_link(href: "/herbarium_record/destroy_herbarium_record/#{rec.id}")
-    assert_template("herbarium_record/list_herbarium_records")
+    assert_template("herbarium_records/index")
+    click_mo_link(label: /destroy/)
+    assert_template("herbarium_records/index")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
@@ -145,7 +145,7 @@ class CuratorTest < IntegrationTestCase
   def test_herbarium_index_from_create_herbarium_record
     obs = observations(:minimal_unknown_obs)
     login!("mary", "testpassword", true)
-    get("/herbarium_record/create_herbarium_record/#{obs.id}")
+    get("/herbarium_records/new?observation_id=#{obs.id}")
     click_mo_link(label: :herbarium_index.l)
 
     assert_select(
@@ -195,7 +195,7 @@ class CuratorTest < IntegrationTestCase
       form.select("type", :HERBARIUM_RECORDS.l)
       form.submit("Search")
     end
-    assert_template("herbarium_record/list_herbarium_records")
+    assert_template("herbarium_records/index")
     assert_select(
       "#title",
       { text: "#{:HERBARIUM_RECORDS.l} Matching ‘Coprinus comatus’" },
