@@ -267,8 +267,10 @@ class CollectionNumbersController < ApplicationController
   end
 
   def redirect_to_observation_or_collection_number
-    if @back_object
-      redirect_with_query(@back_object.show_link_args)
+    if @back_object.is_a?(CollectionNumber)
+      redirect_with_query(collection_number_path(@back_object))
+    elsif @back_object.is_a?(Observation)
+      redirect_with_query(observation_path(@back_object))
     else
       redirect_with_query(collection_numbers_path(id: @collection_number.id))
     end

@@ -42,16 +42,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Singer" })
     assert_response(:success)
-    assert_template("list_collection_numbers")
+    assert_template(:index)
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", numbers.count)
   end
 
   def test_collection_number_search_by_number
-    number = collection_numbers(:minimal_unknown_coll_num).number
+    col = collection_numbers(:minimal_unknown_coll_num)
+    number = col.number
     login
     get(:index, params: { pattern: number })
-    assert_redirected_to(%r{/show_collection_number})
+    qr = QueryRecord.last.id.alphabetize
+    assert_redirected_to(
+      collection_number_path(col, params: { q: qr })
+    )
   end
 
   def test_collection_number_search_with_one_collection_number_index
@@ -59,9 +63,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(1, numbers.count)
     login
     get(:index, params: { pattern: "neighbor" })
-    query_record = QueryRecord.last
-    assert_redirected_to(action: :show,
-                         id: numbers.first.id, q: query_record.id.alphabetize)
+    qr = QueryRecord.last.id.alphabetize
+    assert_redirected_to(
+      collection_number_path(id: numbers.first.id, params: { q: qr })
+    )
     assert_no_flash
   end
 
@@ -71,14 +76,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: query.record.id.alphabetize })
     assert_response(:success)
-    assert_template("list_collection_numbers")
+    assert_template(:index)
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", query.num_results)
   end
 
   def test_show_collection_number
     login
-    get(:show)
+    # get(:show)
     get(:show, params: { id: "bogus" })
 
     number = collection_numbers(:detailed_unknown_coll_num_two)
@@ -94,10 +99,12 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     login
     get(:show, params: { flow: :next, id: number1.id, q: q })
-    assert_redirected_to(action: :show, id: number2.id, q: q)
+    assert_redirected_to(collection_number_path(id: number2.id,
+                                                params: { q: q }))
 
     get(:show, params: { flow: :prev, id: number2.id, q: q })
-    assert_redirected_to(action: :show_collection_number, id: number1.id, q: q)
+    assert_redirected_to(collection_number_path(id: number1.id,
+                                                params: { q: q }))
   end
 
   def test_create_collection_number
@@ -115,7 +122,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { id: obs.id })
     assert_response(:success)
-    assert_template("create_collection_number", partial: "_rss_log")
+    assert_template("new", partial: "_matrix_box")
     assert(assigns(:collection_number))
 
     make_admin("mary")
@@ -136,7 +143,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(account_login_path)
 
     login("mary")
     post(:create,
@@ -231,7 +238,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='numbers/#{obs.id}?q=#{q}']")
+    assert_select("form[action*='numbers?id=#{obs.id}&q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
@@ -239,7 +246,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_edit_collection_number
-    get(:edit)
+    # get(:edit)
     get(:edit, params: { id: "bogus" })
 
     number = collection_numbers(:coprinus_comatus_coll_num)
@@ -285,7 +292,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     patch(:update,
           params: { id: number.id, collection_number: params })
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(account_login_path)
 
     login("mary")
     patch(:update,
@@ -369,7 +376,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Prove that GET passes "back" and query param through to form.
     get(:edit, params: params.merge(back: "foo", q: q))
-    assert_select("form[action*='collection_numbers/#{num.id}?back=foo&q=#{q}']")
+    assert_select("form[action*='?back=foo&q=#{q}']")
 
     # Prove that POST keeps query param when returning to observation.
     patch(:update, params: params.merge(back: obs.id, q: q))
@@ -381,7 +388,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Prove that POST can return to index_collection_number with query intact.
     patch(:update, params: params.merge(back: "index", q: q))
-    assert_redirected_to(action: :index, id: num.id, q: q)
+    assert_redirected_to(collection_numbers_path(params: { id: num.id, q: q }))
   end
 
   def test_destroy_collection_number
@@ -394,29 +401,29 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_obj_list_equal([num1, num2], obs2.reload.collection_numbers, :sort)
 
     # Make sure user must be logged in.
-    get(:destroy_collection_number, params: { id: num1.id })
+    delete(:destroy, params: { id: num1.id })
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure only owner obs can destroy num from it.
     login("mary")
-    get(:destroy_collection_number, params: { id: num1.id })
+    delete(:destroy, params: { id: num1.id })
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure badly-formed queries don't crash.
     login("rolf")
-    get(:destroy_collection_number)
-    get(:destroy_collection_number, params: { id: "bogus" })
+    # get(:destroy)
+    delete(:destroy, params: { id: "bogus" })
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Owner can destroy it.
-    get(:destroy_collection_number, params: { id: num1.id })
+    delete(:destroy, params: { id: num1.id })
     assert_empty(obs1.reload.collection_numbers)
     assert_obj_list_equal([num2], obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num1.id))
 
     # Admin can destroy it.
     make_admin("mary")
-    get(:destroy_collection_number, params: { id: num2.id })
+    delete(:destroy, params: { id: num2.id })
     assert_empty(obs1.reload.collection_numbers)
     assert_empty(obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num2.id))
@@ -431,11 +438,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(nums.length, :>, 1)
 
     # Prove by default it goes back to index.
-    post(:destroy_collection_number, params: { id: nums[0].id })
-    assert_redirected_to(action: :index_collection_number)
+    delete(:destroy, params: { id: nums[0].id })
+    assert_redirected_to(collection_numbers_path)
 
     # Prove that it keeps query param intact when returning to index.
-    post(:destroy_collection_number, params: { id: nums[1].id, q: q })
-    assert_redirected_to(action: :index_collection_number, q: q)
+    delete(:destroy, params: { id: nums[1].id, q: q })
+    assert_redirected_to(collection_numbers_path(params: { q: q }))
   end
 end
