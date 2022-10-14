@@ -31,7 +31,7 @@
                                   )) %> |
              <%= link_with_query(:REMOVE.t,
                                  herbarium_record_remove_observation_path(
-                                   herbarium_record_id: number.id,
+                                   herbarium_record_id: record.id,
                                    params: { observation_id: observation.id }
                                  ),
                                  { data: { confirm: :are_you_sure.t } }) %>]
