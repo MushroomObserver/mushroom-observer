@@ -13,7 +13,7 @@ class CollectionNumbers::RemoveObservationsController < ApplicationController
                                             params[:collection_number_id])
     return unless @collection_number
 
-    @observation = find_or_goto_index(Observation, params[:obs])
+    @observation = find_or_goto_index(Observation, params[:observation_id])
     return unless @observation
 
     return unless make_sure_can_delete!(@collection_number)

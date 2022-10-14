@@ -15,9 +15,9 @@ class CollectionNumbersController < ApplicationController
   def index
     if params[:pattern].present? # rubocop:disable Style/GuardClause
       collection_number_search and return
-    elsif params[:id].present?
+    elsif params[:observation_id].present?
       observation_index and return
-    elsif params[:by].present? || params[:q].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_collection_number and return
     else
       list_collection_numbers and return
@@ -42,7 +42,7 @@ class CollectionNumbersController < ApplicationController
     store_location
     pass_query_params
     @layout = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
+    @observation = find_or_goto_index(Observation, params[:observation_id])
     return unless @observation
 
     @back_object = @observation
@@ -55,7 +55,7 @@ class CollectionNumbersController < ApplicationController
     store_location
     pass_query_params
     @layout = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
+    @observation = find_or_goto_index(Observation, params[:observation_id])
     return unless @observation
 
     @back_object = @observation
@@ -131,12 +131,12 @@ class CollectionNumbersController < ApplicationController
   def observation_index
     store_location
     query = create_query(:CollectionNumber, :for_observation,
-                         observation: params[:id].to_s)
+                         observation: params[:observation_id].to_s)
     @links = [
       [:show_object.l(type: :observation),
-       observation_path(params[:id])],
+       observation_path(params[:observation_id])],
       [:create_collection_number.l,
-       new_collection_number_path(id: params[:id])]
+       new_collection_number_path(id: params[:observation_id])]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
