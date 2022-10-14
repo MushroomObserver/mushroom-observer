@@ -121,19 +121,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  # collection_number: {
-  #   collection_number_search: {},
-  #   create_collection_number: {},
-  #   destroy_collection_number: {},
-  #   edit_collection_number: {},
-  #   index_collection_number: {},
-  #   list_collection_numbers: {},
-  #   next_collection_number: {},
-  #   observation_index: {},
-  #   prev_collection_number: {},
-  #   remove_observation: {},
-  #   show_collection_number: {}
-  # },
   comment: {
     add_comment: {},
     comment_search: {},
