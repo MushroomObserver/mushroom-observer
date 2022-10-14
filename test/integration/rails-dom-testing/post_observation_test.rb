@@ -204,7 +204,7 @@ class PostObservationTest < IntegrationTestCase
       assert_match(:show_observation_seen_at.l, response.body)
     end
     if new_obs.specimen
-      assert_match(/show_herbarium_record/, response.body)
+      assert_match(/:HERBARIUM_RECORD.t/, response.body)
     else
       assert_no_match(/No specimen/, response.body)
     end
