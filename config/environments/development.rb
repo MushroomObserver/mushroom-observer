@@ -24,6 +24,20 @@ MushroomObserver::Application.configure do
     port: 25,
     domain: "localhost"
   }
+  # Use this to actually send some GMail in development
+  # config.action_mailer.delivery_method = :smtp
+  # host = "mushroomobserver.org"
+  # config.action_mailer.default_url_options = { host: host }
+
+  # # SMTP settings for gmail
+  # config.action_mailer.smtp_settings = {
+  #   address: "smtp.gmail.com",
+  #   port: 587,
+  #   user_name: "webmaster",
+  #   password: "<gmail_password>",
+  #   authentication: "plain",
+  #   enable_starttls_auto: true
+  # }
 
   config.image_precedence = { default: [:local, :mycolab] }
   config.image_fallback_source = :mycolab
