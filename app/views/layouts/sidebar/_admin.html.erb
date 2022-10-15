@@ -1,8 +1,8 @@
 <%= content_tag(:div, "#{:app_admin.t}:",
                 class: classes[:heading]) %>
-<%= link_to(:app_blocked_ips.t, account_blocked_ips_path,
+<%= link_to(:app_blocked_ips.t, admin_blocked_ips_path,
             { class: classes[:admin] }) %>
-<%= link_to(:app_switch_users.t, account_switch_users_path,
+<%= link_to(:app_switch_users.t, admin_switch_users_path,
             { class: classes[:admin] }) %>
 <%= link_to(:app_users.t, users_path(by: "name"),
             { class: classes[:admin] }) %>
@@ -10,9 +10,9 @@
             { class: classes[:admin] }) %>
 <%= link_to(:app_email_all_users.t, emails_features_path,
             { class: classes[:admin] }) %>
-<%= link_to(:app_add_to_group.t, account_add_user_to_group_path,
+<%= link_to(:app_add_to_group.t, admin_add_user_to_group_path,
             { class: classes[:admin] }) %>
-<%= link_to(:account_manager_title.t, account_manager_path,
+<%= link_to(:account_manager_title.t, admin_manager_path,
             { class: classes[:admin] }) %>
-<%= link_to(:app_turn_admin_off.t, account_turn_admin_off_path,
+<%= link_to(:app_turn_admin_off.t, admin_turn_admin_off_path,
             { class: classes[:admin] }) %>

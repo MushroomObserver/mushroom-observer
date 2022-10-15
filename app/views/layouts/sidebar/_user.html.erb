@@ -21,6 +21,6 @@
             "https://groups.google.com/forum/?fromgroups=#!forum/mo-general",
             class: classes[:mobile_only]) %>
 <% if @user.admin && !in_admin_mode? %>
-  <%= link_to(:app_turn_admin_on.t, account_turn_admin_on_path,
+  <%= link_to(:app_turn_admin_on.t, admin_turn_admin_on_path,
               { class: classes[:mobile_only] }) %>
 <% end %>

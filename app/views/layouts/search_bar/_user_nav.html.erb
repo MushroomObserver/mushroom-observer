@@ -3,7 +3,7 @@
     <li>
       <%= link_to(
         "",
-        in_admin_mode? ? account_turn_admin_off_path : account_turn_admin_on_path,
+        in_admin_mode? ? admin_turn_admin_off_path : admin_turn_admin_on_path,
         { class: "glyphicon glyphicon-text-background",
           title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
           data: { toggle: "tooltip", placement: "bottom" } }
