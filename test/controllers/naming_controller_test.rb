@@ -604,10 +604,10 @@ class NamingControllerTest < FunctionalTestCase
 
   def assert_edit
     assert_template("naming/edit")
-    assert_template("observations/_show_observation")
+    assert_template("observations/show/_observation")
     assert_template("shared/_form_name_feedback")
     assert_template("naming/_form")
-    assert_template("observations/_show_images")
+    assert_template("observations/show/_images")
   end
 
   def test_automatic_author_bug

@@ -640,12 +640,12 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def assert_show_observation
     assert_template("observations/show")
-    assert_template("observations/_show_name_info")
-    assert_template("observations/_show_observation")
+    assert_template("observations/show/_name_info")
+    assert_template("observations/show/_observation")
     assert_template("naming/_show")
     assert_template("comment/_show_comments")
-    assert_template("observations/_show_thumbnail_map")
-    assert_template("observations/_show_images")
+    assert_template("observations/show/_thumbnail_map")
+    assert_template("observations/show/_images")
   end
 
   def test_show_observation

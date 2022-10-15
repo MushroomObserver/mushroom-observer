@@ -27,7 +27,7 @@ module ObservationTabsHelper
   end
 
   def google_images_link(obs_name)
-    format("http://images.google.com/images?q=%s", obs_name.real_text_name)
+    format("https://images.google.com/images?q=%s", obs_name.real_text_name)
   end
 
   def google_distribution_map_for(obs_name)

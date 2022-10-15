@@ -5,20 +5,22 @@
 </div>
 
 <% ContentFilter.all.each do |filter| %>
+
   <div class="form-group mb-1 form-inline">
     <% if filter.type == :boolean && filter.prefs_vals.count == 1 %>
-      <%= render partial: "prefs_filter_checkbox",
-                locals: { filter: filter, form: form } %>
+      <%= render partial: "account/prefs/filters/checkbox",
+                locals: { filter: filter, form: f } %>
     <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
-      <%= render partial: "prefs_filter_radiobox",
-                locals: { filter: filter, form: form } %>
+      <%= render partial: "account/prefs/filters/radiobox",
+                locals: { filter: filter, form: f } %>
     <% elsif filter.type == [:string] %>
-      <%= render partial: "prefs_filter_text_field",
-                locals: { filter: filter, form: form } %>
+      <%= render partial: "account/prefs/filters/text_field",
+                locals: { filter: filter, form: f } %>
     <% else %>
       <% raise "unrecognized content filter type #{filter.type.inspect}" %>
     <% end %>
   </div>
+
 <% end %>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
