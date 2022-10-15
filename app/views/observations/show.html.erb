@@ -15,31 +15,31 @@
 
 <div class="row">
   <div class="col-md-8 float-sm-left">
-    <%= render(partial: "show_observation",
+    <%= render(partial: "observations/show/observation",
                locals: { observation: @observation }) %>
   </div>
   <div class="col-md-4 float-sm-right">
     <% if @user %>
-      <%= render(partial: "show_name_info",
+      <%= render(partial: "observations/show/name_info",
                   locals: { observation: @observation }) %>
 
       <% if show_lists %>
-        <%= render(partial: "show_lists",
+        <%= render(partial: "observations/show/lists",
                    locals: {observation: @observation}) %>
       <% end %>
 
       <% if show_links %>
-        <%= render(partial: "show_links",
+        <%= render(partial: "observations/show/links",
                    locals: {observation: @observation}) %>
       <% end %>
     <% end %>
 
     <% if show_map %>
-      <%= render(partial: "show_thumbnail_map",
+      <%= render(partial: "observations/show/thumbnail_map",
                  locals: { observation: @observation }) %>
     <% end %>
 
-    <%= render(partial: "show_images",
+    <%= render(partial: "observations/show/images",
                locals: { observation: @observation }) %>
   </div>
 

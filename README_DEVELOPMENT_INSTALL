@@ -151,7 +151,7 @@ jason> touch tmp/restart.txt
 jason> vi config/consts-site.rb
   unless TESTING
     DOMAIN = 'localhost.localdomain'
-    IMAGE_DOMAIN = 'http://images.digitalmycology.com'
+    IMAGE_DOMAIN = 'https://images.digitalmycology.com'
   end
 
 # Install our programs for resizing and rotating JPEG images.

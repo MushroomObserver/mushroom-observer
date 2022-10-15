@@ -2,19 +2,19 @@
   @title = :account_manager_title.t
 %>
 
-<%= form_tag(action: :manager) do %>
-  <label for="ids"><%= :account_manager_ids.t %></label>
-    <%= text_field_tag(:ids, @users.map(&:id).map(&:to_s).join(", "), size: 40) %><br/>
-  <label for="login"><%= :account_manager_login.t %></label>
-    <%= text_field_tag(:login, "", size: 40) %><br/>
-  <label for="name"><%= :account_manager_name.t %></label>
-    <%= text_field_tag(:name, "", size: 40) %><br/>
-  <label for="email"><%= :account_manager_email.t %></label>
-    <%= text_field_tag(:email, "", size: 40) %><br/>
+<%= form_with(url: { action: :manager }) do |form| %>
 
-  <br/>
-  <input type="submit" value="<%= :SUBMIT.l %>" class="btn btn-default" /><br/>
-  <br/>
+  <%= form.label(:ids, :account_manager_ids.t) %>
+  <%= form.text_field(:ids, { value: @users.map(&:id).map(&:to_s).join(", "),
+                              size: 40, class: "form-control" }) %>
+  <%= form.label(:login,  :account_manager_login.t) %>
+  <%= form.text_field(:login, { value: "", size: 40, class: "form-control" }) %>
+  <%= form.label(:name, :account_manager_name.t) %>
+  <%= form.text_field(:name, { value: "", size: 40, class: "form-control" }) %>
+  <%= form.label(:email, :account_manager_email.t) %>
+  <%= form.text_field(:email, { value: "", size: 40, class: "form-control" }) %>
+
+  <%= form.submit(:SUBMIT.l, class: "btn btn-default") %>
 
   <% if !@users.empty? %>
     <style>
@@ -47,12 +47,12 @@
           <td><%= user.id %></td>
           <td><%= h(user.login) %></td>
           <td><%= h(user.name) %></td>
-          <td><%= text_field_tag("email_#{user.id}", user.email, size: 20) %></td>
-          <td><%= text_field_tag("password_#{user.id}", "", size: 20) %></td>
+          <td><%= form.text_field("email_#{user.id}", value: user.email, size: 20) %></td>
+          <td><%= form.text_field("password_#{user.id}", value: "", size: 20) %></td>
           <td><%= if user.verified
               user.verified.web_date
             else
-              check_box_tag("verified_#{user.id}", checked: !!user.verified)
+              form.check_box("verified_#{user.id}", checked: !!user.verified)
             end %>
           <td><%= user.last_login ? user.last_login.web_date : "" %></td>
           <td>
@@ -65,8 +65,7 @@
       <% end %>
     </table>
 
-    <br/>
-    <input type="submit" value="<%= :SUBMIT.l %>" class="btn btn-default" /><br/>
-    <br/>
+    <%= form.submit(:SUBMIT.l, class: "btn btn-default") %>
+
   <% end %>
 <% end %>
