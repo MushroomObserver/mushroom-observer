@@ -179,6 +179,7 @@ class AccountController < ApplicationController
   end
 
   def logout_user
+    # Safeguard: reset admin's session to their real_user_id
     if session[:real_user_id].present? &&
        (new_user = User.safe_find(session[:real_user_id])) &&
        new_user.admin
@@ -197,8 +198,6 @@ class AccountController < ApplicationController
 
   private
 
-  # note this is a dupe of an admin controller method. could be concern
-  # https://stackoverflow.com/questions/5767222/rails-call-another-controller-action-from-a-controller
   def switch_to_user(new_user)
     if session[:real_user_id].blank?
       session[:real_user_id] = User.current_id
