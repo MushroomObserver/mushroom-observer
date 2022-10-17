@@ -9,15 +9,12 @@
   @container = :wide
 %>
 
-<%= form_tag(add_query_param(action: :update, id: @observation,
-                             approved_name: @what, approved_where: @place_name),
-             method: :put, multipart: true, name: "observation_form") do %>
-  <%= render(partial: "form_observations", locals: {
-        action: :update,
-        logging_optional: true,
-        include_naming: false,
-        include_images: true,
-        button_name: :SAVE_EDITS.l,
-        has_specimen: (@observation.herbarium_records.length > 0)
-  }) %>
-<% end %>
+<%= render(partial: "form", locals: {
+      action: :update,
+      method: :patch,
+      logging_optional: true,
+      include_naming: false,
+      include_images: true,
+      button_name: :SAVE_EDITS.l,
+      has_specimen: (@observation.herbarium_records.length > 0)
+}) %>

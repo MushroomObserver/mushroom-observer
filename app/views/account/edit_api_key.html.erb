@@ -10,7 +10,8 @@
 
 <%= :account_api_keys_help.tp %>
 
-<%= form_for(:key, url: {id: @key.id}) do |form| %>
+<%= form_with(scope: :key, url: { id: @key.id }) do |f| %>
+
   <table>
     <tr>
       <td><%= :CREATED.t %>:&nbsp;</td>
@@ -31,13 +32,13 @@
   </table>
 
   <div class="form-group mt-3">
-    <%= label_tag(:user_notes, :NOTES.t + ":") %>
-    <%= form.text_field(:notes, class: "form-control") %>
+    <%= f.label(:notes, :NOTES.t + ":") %>
+    <%= f.text_field(:notes, class: "form-control") %>
   </div>
 
   <div class="text-center mt-3">
-    <%= submit_tag(:UPDATE.l, class: "btn btn-default") %>
+    <%= f.submit(:UPDATE.l, class: "btn btn-default") %>
     <span style="margin-left:5em"></span>
-    <%= submit_tag(:CANCEL.l, class: "btn btn-default") %>
+    <%= f.submit(:CANCEL.l, class: "btn btn-default") %>
   </div><!-- .text-center -->
 <% end %>

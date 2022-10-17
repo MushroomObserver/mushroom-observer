@@ -5,27 +5,31 @@
 
 <div class="row">
   <div class="col-xs-6">
-    <p><%= link_to("Refresh Stats", account_blocked_ips_path) %></p>
+    <p><%= link_to("Refresh Stats", admin_blocked_ips_path) %></p>
 
     <%# ----- Okay IPs ----- %>
     <div class="m-3 p-3" style="background:#f7f">
-      <%= form_tag({}, { class: "pb-2" }) %>
+      <%= form_with(url: { action: :blocked_ips }, class: "pb-2") do |form| %>
+
         <div class="form-group form-inline">
           <span class="text-larger">Okay IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
-          <%= text_field_tag(:add_okay, "", size: 20, data: { autofocus: true },
-                            class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn btn-default ml-3") %>
+          <%= form.text_field(:add_okay, value: "", size: 20,
+                              data: { autofocus: true },
+                              class: "form-control") %>
+          <%= form.submit(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
-                "Clear List", account_blocked_ips_path(clear_okay: 1)
+                "Clear List", admin_blocked_ips_path(clear_okay: 1)
               ) %>]
         </div>
-      </form>
+
+      <% end %>
+
       <table class="ips">
         <% @okay_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
             <td>[<%= link_to(
-                      :REMOVE.l, account_blocked_ips_path(remove_okay: ip)
+                      :REMOVE.l, admin_blocked_ips_path(remove_okay: ip)
                     ) %>]</td>
         <% end %>
       </table>
@@ -33,23 +37,26 @@
 
     <%# ----- Blocked IPs ----- %>
     <div class="m-3 p-3" style="background:#f7f">
-      <%= form_tag({}, { class: "pb-2" }) %>
+
+      <%= form_with(url: { action: :blocked_ips }, class: "pb-2") do |form| %>
         <div class="form-group form-inline">
           <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
-          <%= text_field_tag(:add_bad, "", size: 20, data: { autofocus: true },
-                            class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn btn-default ml-3") %>
+          <%= form.text_field(:add_bad, value: "", size: 20,
+                              data: { autofocus: true },
+                              class: "form-control") %>
+          <%= form.submit(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
-                "Clear List", account_blocked_ips_path(clear_bad: 1)
+                "Clear List", admin_blocked_ips_path(clear_bad: 1)
               ) %>]
         </div>
-      </form>
+      <% end %>
+
       <table class="ips">
         <% @blocked_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
             <td>[<%= link_to(
-                      :REMOVE.l, account_blocked_ips_path(remove_bad: ip)
+                      :REMOVE.l, admin_blocked_ips_path(remove_bad: ip)
                     ) %>]</td>
       <% end %>
       </table>

@@ -19,12 +19,8 @@
 ACTIONS = {
   account: {
     activate_api_key: {},
-    add_user_to_group: {},
     api_keys: {},
-    blocked_ips: {},
-    create_alert: {},
     create_api_key: {},
-    destroy_user: {},
     edit_api_key: {},
     email_new_password: {},
     login: {},
@@ -63,7 +59,6 @@ ACTIONS = {
     reverify: {},
     send_verify: {},
     signup: {},
-    switch_users: {},
     test_autologin: {},
     turn_admin_off: {},
     turn_admin_on: {},
@@ -561,9 +556,18 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
+  match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])
+  match("/admin/turn_admin_off", to: "admin#turn_admin_off", via: [:get, :post])
+  match("/admin/create_alert", to: "admin#create_alert", via: [:get, :post])
   match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
   match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
+  match("/admin/add_user_to_group",
+        to: "admin#add_user_to_group", via: [:get, :post])
+  match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])
+  match("/admin/destroy_user", to: "admin#destroy_user", via: [:get, :post])
+  match("/admin/manager", to: "admin#manager", via: [:get, :post])
+  match("/admin/switch_users", to: "admin#switch_users", via: [:get, :post])
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
@@ -708,6 +712,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   redirect_legacy_actions(
     old_controller: "article", actions: [:controller, :show, :list, :index]
   )
+
+  # ----- Authors: legacy action redirects
+  get("/account/add_user_to_group", to: redirect("/admin/add_user_to_group"))
+  get("/account/blocked_ips", to: redirect("/admin/blocked_ips"))
+  get("/account/add_user_to_group", to: redirect("/admin/add_user_to_group"))
+  get("/account/destroy_user", to: redirect("/admin/destroy_user"))
+  get("/account/switch_users", to: redirect("/admin/switch_users"))
 
   # ----- Authors: legacy action redirects
   get("/observer/author_request", to: redirect("/authors/email_request"))

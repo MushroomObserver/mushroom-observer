@@ -3053,7 +3053,7 @@
   add_project_success: Project was successfully created.
   add_project_title: Create New Project
 
-  # account/add_user_to_group
+  # admin/add_user_to_group
   add_user_to_group_already: "[user] is already a member of [group]."
   add_user_to_group_group: Group name
   add_user_to_group_no_group: Unable to find the group, '[group]'.
@@ -3062,7 +3062,7 @@
   add_user_to_group_title: Add [:user] to Group
   add_user_to_group_user: "[:user] name"
 
-  # account/manager
+  # admin/manager
   account_manager_title: Account Manager
   account_manager_not_found: Unable to find user [str].
   account_manager_changed_email: Changed [user]'s email address to "[email]".
@@ -3091,7 +3091,7 @@
   request_subject: Subject
   request_success: Delivered email.
 
-  # info/change_banner
+  # admin/change_banner
   change_banner_title: Change Site Banner
 
   # project/change_member_status
