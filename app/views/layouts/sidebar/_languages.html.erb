@@ -5,15 +5,17 @@
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"
         role="button" aria-expanded="false">
         <%= image_tag("/flags/flag-#{I18n.locale.downcase}.png",
-                      width: "27px", height: "18px") %>
+                      class: "lang-flag") %>
         <span class="caret"></span>
       </a>
       <ul class="dropdown-menu" role="menu">
         <% Language.where.not(beta: true).order(:order).each do |lang| %>
-          <li><%= link_to(image_tag("/flags/flag-#{lang.locale}.png",
-                                  width: "27px", height: "18px") +
-                          "&nbsp;".html_safe + h(lang.name),
-                  reload_with_args(user_locale: lang.locale)) %></li>
+          <li><%= link_to(
+            image_tag("/flags/flag-#{lang.locale}.png", class: "lang-flag") +
+                      "&nbsp;".html_safe + h(lang.name),
+            reload_with_args(user_locale: lang.locale),
+            { class: "lang-dropdown-link",
+              id: "lang_drop_#{lang.name}_link" }) %></li>
         <% end %>
       </ul>
     </div>

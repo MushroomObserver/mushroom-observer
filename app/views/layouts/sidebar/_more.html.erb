@@ -2,16 +2,23 @@
   <%= :app_more.t %>
 </div>
 <%= link_to(:app_how_to_help.t, info_how_to_help_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_how_to_help_link" }) %>
 <%= link_to(:app_feature_tracker.t, pivotal_index_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_pivotal_link" }) %>
 <%= link_to(:app_send_a_comment.t, emails_ask_webmaster_question_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_ask_webmaster_link" }) %>
 <%= link_to(:app_contributors.t, contributors_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_contributors_link" }) %>
 <%= link_to(:app_site_stats.t, info_site_stats_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_site_stats_link" }) %>
 <%= link_to(:translators_note_title.t, info_translators_note_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_translators_note_link" }) %>
 <%= link_to(:app_publications.t, publications_path,
-            { class: classes[:indent] }) %>
+            { class: classes[:indent],
+              id: "nav_publications_link" }) %>

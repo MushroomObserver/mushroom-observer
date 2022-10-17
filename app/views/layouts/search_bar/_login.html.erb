@@ -2,11 +2,11 @@
   <p class="form-control-static">
     <%= link_to(
           :app_login.t, account_login_path,
-          { class: "btn btn-primary" }
+          { class: "btn btn-primary", id: "user_nav_login_link" }
         ) %>
     <%= link_to(
           :app_create_account.t, account_signup_path,
-          { class: "btn btn-primary" }
+          { class: "btn btn-primary", id: "user_nav_signup_link" }
         ) %>
   </p>
 </div>
