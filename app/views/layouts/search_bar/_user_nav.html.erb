@@ -5,6 +5,7 @@
         "",
         in_admin_mode? ? account_turn_admin_off_path : account_turn_admin_on_path,
         { class: "glyphicon glyphicon-text-background",
+          id: "user_nav_admin_link",
           title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
           data: { toggle: "tooltip", placement: "bottom" } }
       ) %>
@@ -14,6 +15,7 @@
     <%= link_to(
           "", "#{comment_show_comments_for_user_path}/#{@user.id}",
           { class: "glyphicon glyphicon-inbox",
+            id: "user_nav_inbox_link",
             title: :app_comments_for_you.t,
             data: { toggle: "tooltip", placement: "bottom" } }
         ) %>
@@ -23,6 +25,7 @@
           "",
           interest_list_interests_path,
           { class: "glyphicon glyphicon-bullhorn",
+            id: "user_nav_interests_link",
             title: :app_your_interests.t,
             data: { toggle: "tooltip", placement: "bottom" } }
         ) %>
@@ -31,7 +34,9 @@
     <%= link_to(
           "",
           account_prefs_path,
-          { class: "glyphicon glyphicon-cog", title: :app_preferences.t,
+          { class: "glyphicon glyphicon-cog",
+            id: "user_nav_preferences_link",
+            title: :app_preferences.t,
             data: { toggle: "tooltip", placement: "bottom" } }
         ) %>
   </li>
@@ -47,24 +52,26 @@
                       { class: "" } ) %></li>
       <li><%= link_to(:app_your_lists.t,
                       species_list_species_lists_by_user_path(id: @user.id),
-                      { class: "" } ) %></li>
+                      { class: "", id: "user_drop_species_lists_link" } ) %></li>
       <li><%= link_to(:app_your_interests.t,
                       interest_list_interests_path,
-                      { class: "" }) %></li>
+                      { class: "", id: "user_drop_interests_link" }) %></li>
       <li><%= link_to(:app_your_summary.t,
                       user_path(@user.id),
-                      { class: "" }) %></li>
+                      { class: "", id: "user_drop_profile_link" }) %></li>
       <li><%= link_to(:app_preferences.t,
                       account_prefs_path,
-                      { class: "" }) %></li>
+                      { class: "", id: "user_drop_preferences_link" }) %></li>
       <li class="divider"></li>
       <li><%= link_to(:app_logout.t,
-                      account_logout_user_path) %></li>
+                      account_logout_user_path,
+                      { class: "", id: "user_drop_logout_link" }) %></li>
     </ul>
   </li>
   <li><%= link_to("",
                   account_logout_user_path,
                   { class: "glyphicon glyphicon-log-out",
+                    id: "user_nav_logout_link",
                     title: :app_logout.t,
                     data: { toggle: "tooltip", placement: "bottom" } }) %>
   </li>

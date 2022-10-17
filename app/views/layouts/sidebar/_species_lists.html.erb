@@ -4,11 +4,15 @@
 <% unless @user.nil? %>
   <%= link_to(:app_your_lists.t,
               species_list_species_lists_by_user_path(id: @user.id),
-              { class: classes[:indent] } ) %>
+              { class: classes[:indent],
+                id: "nav_your_species_lists_link" } ) %>
 <% end%>
 <%= link_to(:app_create_list.t, species_list_name_lister_path,
-              { class: classes[:indent] } ) %>
+              { class: classes[:indent],
+                id: "nav_new_species_list_link" } ) %>
 <%= link_to(:app_sort_by_date_spl.t, species_list_list_species_lists_path,
-              { class: classes[:indent] }) %>
+              { class: classes[:indent],
+                id: "nav_species_lists_by_date_link" }) %>
 <%= link_to(:app_sort_by_title.t, species_list_species_lists_by_title_path,
-              { class: classes[:indent] }) %>
+              { class: classes[:indent],
+                id: "nav_species_lists_by_title_link" }) %>
