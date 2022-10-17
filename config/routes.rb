@@ -25,7 +25,6 @@ ACTIONS = {
     email_new_password: {},
     login: {},
     logout_user: {},
-    manager: {},
     no_comment_email: { methods: [:get] },
     no_comment_response_email: {},
     no_commercial_email: {},
@@ -60,8 +59,6 @@ ACTIONS = {
     send_verify: {},
     signup: {},
     test_autologin: {},
-    turn_admin_off: {},
-    turn_admin_on: {},
     verify: {},
     welcome: {}
   },
@@ -566,7 +563,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "admin#add_user_to_group", via: [:get, :post])
   match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])
   match("/admin/destroy_user", to: "admin#destroy_user", via: [:get, :post])
-  match("/admin/manager", to: "admin#manager", via: [:get, :post])
   match("/admin/switch_users", to: "admin#switch_users", via: [:get, :post])
 
   # ----- Articles: standard actions --------------------------------------
