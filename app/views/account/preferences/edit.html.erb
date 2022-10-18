@@ -13,7 +13,7 @@
 %>
 
 <%= form_with(model: @user, url: account_preferences_path,
-              method: :post, id: "account_preferences_form") do |form| %>
+              id: "account_preferences_form") do |form| %>
   <%= render(partial: "account/preferences/login", locals: { f: form })%>
   <%= render(partial: "account/preferences/privacy", locals: { f: form })%>
   <%= render(partial: "account/preferences/appearance", locals: { f: form })%>

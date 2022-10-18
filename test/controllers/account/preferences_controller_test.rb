@@ -73,8 +73,15 @@ class Account::PreferencesControllerTest < FunctionalTestCase
     patch(:update,
           params: { user: params.merge(password_confirmation: "bogus") })
     assert_flash_error
-    binding.break
     assert_response(:success)
+    # Rails gives a 204 response to the patch request here, and that response
+    # has no message body. 204 means patch not accepted, but form not changed,
+    # keep editing.
+    # The lack of response body means the following assertions cannot work.
+    # Rails only tests against the current response. Maybe we can store response
+    # body and restore it? Otherwise, move these to an integration test.
+    # Incidentally our rails.js disables the button on submit, and does not
+    # re-enable it after the 204.
     assert_input_value(:user_password, "")
     assert_input_value(:user_password_confirmation, "")
     assert_input_value(:user_email, "new@email.com")
