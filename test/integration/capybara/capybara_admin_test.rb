@@ -33,7 +33,7 @@ class CapybaraAdminTest < CapybaraIntegrationTestCase
 
   def test_change_banner
     put_user_in_admin_mode(rolf)
-    visit("/admin/change_banner")
+    click_on(id: "nav_admin_change_banner_link")
 
     within("#admin_change_banner_form") do
       fill_in("val", with: "An **important** new banner")

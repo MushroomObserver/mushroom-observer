@@ -553,17 +553,27 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
-  match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])
-  match("/admin/turn_admin_off", to: "admin#turn_admin_off", via: [:get, :post])
+  namespace :admin do
+    resource :turn_admin_on, only: [:show], controller: "turn_on"
+    resource :turn_admin_off, only: [:show], controller: "turn_off"
+    resource :change_banner, only: [:edit, :udpate], controller: "change_banner"
+    resource :switch_users, only: [:new, :create]
+    resource :blocked_ips, only: [:show]
+    resource :add_user_to_group, only: [:new, :create],
+                                 controller: "add_user_to_group"
+  end
+
+  # match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])
+  # match("/admin/turn_admin_off", to: "admin#turn_admin_off", via: [:get, :post])
   match("/admin/create_alert", to: "admin#create_alert", via: [:get, :post])
-  match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
+  # match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
   match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
-  match("/admin/add_user_to_group",
-        to: "admin#add_user_to_group", via: [:get, :post])
-  match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])
+  # match("/admin/add_user_to_group",
+  #       to: "admin#add_user_to_group", via: [:get, :post])
+  # match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])
   match("/admin/destroy_user", to: "admin#destroy_user", via: [:get, :post])
-  match("/admin/switch_users", to: "admin#switch_users", via: [:get, :post])
+  # match("/admin/switch_users", to: "admin#switch_users", via: [:get, :post])
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/

@@ -11,7 +11,7 @@
     <tr>
       <td><%= link_to(ip, admin_blocked_ips_path(report: ip)) %></td>
       <td><% unless IpStats.blocked?(ip) %>
-               [<%= link_to("Block", admin_blocked_ips_path(add_bad: ip)) %>]
+            [<%= link_to("Block", admin_blocked_ips_path(add_bad: ip)) %>]
           <% end %>
       </td>
       <td>
