@@ -53,6 +53,10 @@ module ApplicationHelper
     "&nbsp;".html_safe
   end
 
+  def safe_spinner(text = "")
+    "#{text}<span class='spinner-right mx-2'></span>".html_safe
+  end
+
   # Return escaped HTML.
   #
   #   "<i>X</i>"  -->  "&lt;i&gt;X&lt;/i&gt;"

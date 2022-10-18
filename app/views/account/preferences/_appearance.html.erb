@@ -55,4 +55,6 @@
   <%= f.number_field(:layout_count, class: "form-control", min: 1) %>
 </div>
 
-<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= f.button(:SAVE_EDITS.l,
+             data: { disable_with: safe_spinner(:SAVE_EDITS.l) },
+             class: "btn btn-default center-block mt-3") %>

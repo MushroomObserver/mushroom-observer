@@ -46,4 +46,13 @@ jQuery(document).ready(function () {
         // If file field immediately followed by span, show selection there.
         if (next.is('span')) next.html(val);
     });
+
+});
+
+// Not a great solution, but ok for now.
+jQuery('form :input').on('change', function() {
+  var disabled_buttons = $('[data-disable-with]');
+  $(disabled_buttons).each(function() {
+    $.rails.enableElement(this);
+  })
 });

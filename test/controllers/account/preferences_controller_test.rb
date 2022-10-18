@@ -80,7 +80,7 @@ class Account::PreferencesControllerTest < FunctionalTestCase
     # The lack of response body means the following assertions cannot work.
     # Rails only tests against the current response. Maybe we can store response
     # body and restore it? Otherwise, move these to an integration test.
-    # Incidentally our rails.js disables the button on submit, and does not
+    # Incidentally rails.ujs disables the button on submit, and does not
     # re-enable it after the 204.
     assert_input_value(:user_password, "")
     assert_input_value(:user_password_confirmation, "")

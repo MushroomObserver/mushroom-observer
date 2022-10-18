@@ -2,10 +2,10 @@
   @title = :profile_title.t
 
   tabs = [
-    link_to(:bulk_license_link.t, controller: :image, action: :license_updater),
-    link_to(:show_user_your_notifications.t, controller: :interest, action: :list_interests),
-    link_to(:prefs_link.t, controller: :account, action: :prefs),
-    link_to(:account_api_keys_link.t, controller: :account, action: :api_keys)
+    link_to(:bulk_license_link.t, image_license_updater_path),
+    link_to(:show_user_your_notifications.t, interest_list_interests_path),
+    link_to(:prefs_link.t, edit_account_preferences_path),
+    link_to(:account_api_keys_link.t, account_api_keys_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -13,8 +13,8 @@
 <%= form_with(model: @user, url: account_profile_path,
               html: { multipart: true }, id: "account_profile_form") do |f| %>
 
-  <%= f.submit(:profile_button.l,
-                  class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(:profile_button.l, data: { disable_with: safe_spinner },
+               class: "btn btn-default center-block mt-3") %>
 
   <div class="form-group mt-3">
     <%= f.label(:name, :profile_name.t + ":") %>
@@ -38,8 +38,8 @@
                 (@user.image_id ? :profile_image_change.t :
                   :profile_image_create.t) + ":") %> (33%)
     <%= link_to(:profile_image_reuse.t,
-                controller: :image, action: :reuse_image, mode: :profile) %>
-    <%= link_to(:profile_image_remove.t, { action: :remove_image },
+                image_reuse_image_path, mode: :profile) %>
+    <%= link_to(:profile_image_remove.t, account_remove_image_path,
                 { data: { confirm: :are_you_sure.l } }) if @user.image %>
     <%= custom_file_field(:user, :upload_image) %>
   </div>
@@ -77,7 +77,8 @@
     <%= f.text_area(:mailing_address, rows: 5, class: "form-control") %>
   </div>
 
-  <%= f.submit(:profile_button.l,
+  <%= f.button(:profile_button.l,
+               data: { disable_with: safe_spinner(:profile_button.l) },
                class: "btn btn-default center-block mt-3") %>
 
 <% end %>
