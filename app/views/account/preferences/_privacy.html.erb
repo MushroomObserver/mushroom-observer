@@ -20,8 +20,7 @@
 
   <span class="help-note">
     <%= link_to(:prefs_change_image_vote_anonymity.t,
-                controller: :image,
-                action: :bulk_vote_anonymity_updater) %>
+                image_bulk_vote_anonymity_updater_path) %>
   </span>
 
 </div>
@@ -39,7 +38,7 @@
 
   <span class="help-note">
     <%= link_to(:prefs_bulk_filename_purge.t,
-                { controller: :image, action: :bulk_filename_purge },
+                image_bulk_filename_purge_path,
                 { data:
                   { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>
   </span>
@@ -51,8 +50,7 @@
   <%= f.select(:license_id, @licenses, {},
                 { class: "form-control d-inline-block w-auto mr-3" }) %>
   <span class="help-note">
-    <%= link_to(:bulk_license_link.t, controller: :image,
-                                      action: :license_updater) %>
+    <%= link_to(:bulk_license_link.t, image_license_updater_path) %>
   </span>
 </div>
 

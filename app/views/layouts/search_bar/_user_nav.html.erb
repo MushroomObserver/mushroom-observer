@@ -33,7 +33,7 @@
   <li>
     <%= link_to(
           "",
-          account_prefs_path,
+          edit_account_preferences_path,
           { class: "glyphicon glyphicon-cog",
             id: "user_nav_preferences_link",
             title: :app_preferences.t,
@@ -60,7 +60,7 @@
                       user_path(@user.id),
                       { class: "", id: "user_drop_profile_link" }) %></li>
       <li><%= link_to(:app_preferences.t,
-                      account_prefs_path,
+                      edit_account_preferences_path,
                       { class: "", id: "user_drop_preferences_link" }) %></li>
       <li class="divider"></li>
       <li><%= link_to(:app_logout.t,

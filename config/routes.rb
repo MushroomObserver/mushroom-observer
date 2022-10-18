@@ -51,8 +51,8 @@ ACTIONS = {
     no_name_change_email: {},
     no_name_proposal_email: {},
     no_question_email: {},
-    prefs: {},
-    profile: {},
+    # prefs: {},
+    # profile: {},
     remove_api_keys: {},
     remove_image: {},
     reverify: {},
@@ -551,6 +551,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
+
+  namespace :account do
+    resource :preferences, only: [:edit, :update]
+    resource :profile, only: [:edit, :update], controller: "profile"
+  end
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])

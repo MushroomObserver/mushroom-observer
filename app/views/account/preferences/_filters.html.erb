@@ -8,13 +8,13 @@
 
   <div class="form-group mb-1 form-inline">
     <% if filter.type == :boolean && filter.prefs_vals.count == 1 %>
-      <%= render partial: "account/prefs/filters/checkbox",
+      <%= render partial: "account/preferences/filters/checkbox",
                 locals: { filter: filter, form: f } %>
     <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
-      <%= render partial: "account/prefs/filters/radiobox",
+      <%= render partial: "account/preferences/filters/radiobox",
                 locals: { filter: filter, form: f } %>
     <% elsif filter.type == [:string] %>
-      <%= render partial: "account/prefs/filters/text_field",
+      <%= render partial: "account/preferences/filters/text_field",
                 locals: { filter: filter, form: f } %>
     <% else %>
       <% raise "unrecognized content filter type #{filter.type.inspect}" %>
