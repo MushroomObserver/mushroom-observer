@@ -3062,6 +3062,22 @@
   add_user_to_group_title:  ""
   add_user_to_group_user:  ""
 
+  # admin/manager
+  account_manager_title:  ""
+  account_manager_not_found:  ""
+  account_manager_changed_email:  ""
+  account_manager_changed_password:  ""
+  account_manager_verified_user:  ""
+  account_manager_ids:  ""
+  account_manager_login:  ""
+  account_manager_name:  ""
+  account_manager_email:  ""
+  account_manager_last_login:  ""
+  account_manager_verified:  ""
+  account_manager_alert:  ""
+  account_manager_bonus:  ""
+  account_manager_actions:  ""
+
   # admin_request/author_request emails
   admin_request_change_member_status:  ""
   admin_request_success:  ""
