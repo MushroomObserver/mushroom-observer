@@ -130,7 +130,7 @@ class AdminController < ApplicationController
 
   def update_banner_languages
     time = Time.zone.now
-    Language.all.includes([:translation_strings]).each do |lang|
+    Language.all.each do |lang|
       if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
         update_banner_string(str, time)
       else
