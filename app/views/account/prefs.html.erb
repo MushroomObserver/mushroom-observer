@@ -3,7 +3,8 @@
   @tabsets = prefs_tabset
 %>
 
-<%= form_with(model: @user, url: { action: :prefs }, method: :post) do |form| %>
+<%= form_with(model: @user, url: account_prefs_path,
+              method: :post, id: "account_preferences_form") do |form| %>
   <%= render(partial: "account/prefs/login", locals: { f: form })%>
   <%= render(partial: "account/prefs/privacy", locals: { f: form })%>
   <%= render(partial: "account/prefs/appearance", locals: { f: form })%>

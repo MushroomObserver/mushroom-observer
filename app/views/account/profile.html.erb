@@ -10,8 +10,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_with(model: @user, url: { action: :profile },
-              html: { multipart: true }) do |f| %>
+<%= form_with(model: @user, url: account_profile_path,
+              html: { multipart: true }, id: "account_profile_form") do |f| %>
 
   <%= f.submit(:profile_button.l,
                   class: "btn btn-default center-block mt-3") %>

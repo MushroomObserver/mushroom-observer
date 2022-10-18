@@ -2,7 +2,8 @@
   @title = :signup_title.t
 %>
 
-<%= form_with(scope: :new_user, url: { action: :signup }) do |f| %>
+<%= form_with(scope: :new_user, url: account_signup_path,
+              id: "account_signup_form") do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label(:login, :signup_login.t + ":") %>

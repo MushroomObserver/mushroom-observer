@@ -1,10 +1,11 @@
 <% @title = :change_banner_title.t %>
 
-<%= form_with(url: { action: :change_banner }) do |form| %>
+<%= form_with(url: admin_change_banner_path,
+              id: "admin_change_banner_form") do |f| %>
 
-  <%= form.text_area(:val, value: h(@val), rows: 5, id: "val",
+  <%= f.text_area(:val, value: h(@val), rows: 5, id: "val",
                      class: "form-control") %>
 
-  <%= form.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
 
 <% end %>

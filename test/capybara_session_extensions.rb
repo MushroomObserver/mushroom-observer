@@ -16,11 +16,23 @@ module CapybaraSessionExtensions
     login = login.login if login.is_a?(User)
     visit("/account/login")
 
-    fill_in("user_login", with: login)
-    fill_in("user_password", with: password)
-    check("user_remember_me") if remember_me == true
+    within("#account_login_form") do
+      fill_in("user_login", with: login)
+      fill_in("user_password", with: password)
+      check("user_remember_me") if remember_me == true
 
-    click_button("Login")
+      click_button(type: "submit")
+    end
+  end
+
+  def put_user_in_admin_mode(user = :zero_user)
+    user.admin = true
+    user.save!
+    login(user.login)
+    assert_equal(user.id, User.current_id)
+
+    click_on(id: "user_nav_admin_link")
+    assert_match(/DANGER: You are in administrator mode/, page.html)
   end
 
   # Login the given user, testing to make sure it was successful.

@@ -32,21 +32,6 @@ class AdminController < ApplicationController
     end
   end
 
-  # Update banner across all translations.
-  def change_banner
-    if !in_admin_mode?
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    elsif request.method == "POST"
-      @val = params[:val].to_s.strip
-      @val = "X" if @val.blank?
-      update_banner_languages
-      redirect_to("/")
-    else
-      @val = :app_banner_box.l.to_s
-    end
-  end
-
   ##############################################################################
   #
   #  :section: Admin utilities
@@ -61,6 +46,21 @@ class AdminController < ApplicationController
   def turn_admin_off
     session[:admin] = nil
     redirect_back_or_default("/")
+  end
+
+  # Update banner across all translations.
+  def change_banner
+    if !in_admin_mode?
+      flash_error(:permission_denied.t)
+      redirect_to("/")
+    elsif request.method == "POST"
+      @val = params[:val].to_s.strip
+      @val = "X" if @val.blank?
+      update_banner_languages
+      redirect_to("/")
+    else
+      @val = :app_banner_box.l.to_s
+    end
   end
 
   def switch_users
@@ -130,7 +130,7 @@ class AdminController < ApplicationController
 
   def update_banner_languages
     time = Time.zone.now
-    Language.all.each do |lang|
+    Language.all.includes([:translation_strings]).each do |lang|
       if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
         update_banner_string(str, time)
       else

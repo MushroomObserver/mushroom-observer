@@ -9,19 +9,18 @@
 
     <%# ----- Okay IPs ----- %>
     <div class="m-3 p-3" style="background:#f7f">
-      <%= form_with(url: { action: :blocked_ips }, class: "pb-2") do |form| %>
-
+      <%= form_with(url: admin_blocked_ips_path, class: "pb-2",
+                    id: "admin_okay_ips_form") do |f| %>
         <div class="form-group form-inline">
           <span class="text-larger">Okay IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
-          <%= form.text_field(:add_okay, value: "", size: 20,
-                              data: { autofocus: true },
-                              class: "form-control") %>
-          <%= form.submit(:ADD.l, class: "btn btn-default ml-3") %>
+          <%= f.text_field(:add_okay, value: "", size: 20,
+                            data: { autofocus: true },
+                            class: "form-control") %>
+          <%= f.submit(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
                 "Clear List", admin_blocked_ips_path(clear_okay: 1)
               ) %>]
         </div>
-
       <% end %>
 
       <table class="ips">
@@ -36,15 +35,16 @@
     </div>
 
     <%# ----- Blocked IPs ----- %>
-    <div class="m-3 p-3" style="background:#f7f">
+    <div class="m-3 pt-3 pb-4" style="background:#f7f">
 
-      <%= form_with(url: { action: :blocked_ips }, class: "pb-2") do |form| %>
+      <%= form_with(url: admin_blocked_ips_path,
+                    id: "admin_blocked_ips_form") do |f| %>
         <div class="form-group form-inline">
           <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
-          <%= form.text_field(:add_bad, value: "", size: 20,
-                              data: { autofocus: true },
-                              class: "form-control") %>
-          <%= form.submit(:ADD.l, class: "btn btn-default ml-3") %>
+          <%= f.text_field(:add_bad, value: "", size: 20,
+                            data: { autofocus: true },
+                            class: "form-control") %>
+          <%= f.submit(:ADD.l, class: "btn btn-default ml-3") %>
           [<%= link_to(
                 "Clear List", admin_blocked_ips_path(clear_bad: 1)
               ) %>]

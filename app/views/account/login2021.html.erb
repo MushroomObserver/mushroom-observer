@@ -2,7 +2,8 @@
   @title = :login_please_login.t
 %>
 
-<%= form_with(model: @user, url: { action: :login }) do |f| %>
+<%= form_with(model: @user, url: account_login_path,
+              id: "account_login_form") do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label(:login, :login_user.t + ":") %>
