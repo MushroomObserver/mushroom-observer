@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class CapybaraAdminTest < CapybaraIntegrationTestCase
+class AdminTest < CapybaraIntegrationTestCase
   def test_review_donations
     visit("/support/review_donations")
     assert_flash_text(:review_donations_not_allowed.t)
@@ -112,7 +112,7 @@ class CapybaraAdminTest < CapybaraIntegrationTestCase
     assert_selector("#admin_okay_ips_form")
     assert_selector("#admin_blocked_ips_form")
 
-    # files might not be in this state
+    # Cannot test this: files might not be in this state
     # within("#okay_ips") do
     #   assert_selector("td", text: "3.14.15.9")
     # end
