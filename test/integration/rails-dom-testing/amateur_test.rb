@@ -53,7 +53,7 @@ class AmateurTest < IntegrationTestCase
 
     # This should only be accessible if logged in.
     click_mo_link(label: "Preferences", in: :left_panel)
-    assert_template("account/prefs")
+    assert_template("account/preferences/edit")
 
     # Log out and try again.
     click_mo_link(label: "Logout", in: :left_panel)
@@ -61,7 +61,7 @@ class AmateurTest < IntegrationTestCase
     assert_raises(MiniTest::Assertion) do
       click_mo_link(label: "Preferences", in: :left_panel)
     end
-    get("/account/prefs")
+    get("/account/preferences/edit")
     assert_template("account/login")
   end
 
@@ -93,13 +93,13 @@ class AmateurTest < IntegrationTestCase
   def try_autologin(cookies, user)
     sess = open_session
     sess.cookies["mo_user"] = cookies["mo_user"]
-    sess.get("/account/prefs")
+    sess.get("/account/preferences/edit")
     if user
-      sess.assert_match("account/prefs", sess.response.body)
+      sess.assert_match("account/preferences/edit", sess.response.body)
       sess.assert_no_match("account/login", sess.response.body)
       assert_users_equal(user, sess.assigns(:user))
     else
-      sess.assert_no_match("account/prefs", sess.response.body)
+      sess.assert_no_match("account/preferences/edit", sess.response.body)
       sess.assert_match("account/login", sess.response.body)
     end
   end

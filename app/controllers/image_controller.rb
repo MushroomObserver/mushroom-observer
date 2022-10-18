@@ -305,8 +305,7 @@ class ImageController < ApplicationController
     return unless @observation
 
     if !check_permission!(@observation)
-      redirect_with_query(controller: :observations,
-                          action: :show, id: @observation.id)
+      redirect_with_query(observation_path(id: @observation.id))
     elsif request.method != "POST"
       @image = Image.new
       @image.license = @user.license
@@ -319,8 +318,7 @@ class ImageController < ApplicationController
       init_project_vars_for_add_or_edit(@observation)
     elsif params[:upload].blank?
       flash_warning(:runtime_no_changes.t)
-      redirect_with_query(controller: :observations,
-                          action: :show, id: @observation.id)
+      redirect_with_query(observation_path(id: @observation.id))
     else
       args = params[:image]
       i = 1
@@ -328,8 +326,7 @@ class ImageController < ApplicationController
         process_image(args, params[:upload]["image#{i}"])
         i += 1
       end
-      redirect_with_query(controller: :observations,
-                          action: :show, id: @observation.id)
+      redirect_with_query(observation_path(id: @observation.id))
     end
   end
 
@@ -598,8 +595,7 @@ class ImageController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) &&
        !check_permission!(@observation)
-      redirect_with_query(controller: :observations,
-                          action: :show, id: @observation.id)
+      redirect_with_query(observation_path(id: @observation.id))
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -616,8 +612,7 @@ class ImageController < ApplicationController
           error = image.strip_gps!
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
         end
-        redirect_with_query(controller: :observations,
-                            action: :show, id: @observation.id)
+        redirect_with_query(observation_path(id: @observation.id))
         done = true
 
       else
@@ -827,7 +822,7 @@ class ImageController < ApplicationController
           :image_vote_anonymity_invalid_submit_button.l(label: submit)
         )
       end
-      redirect_to(controller: "account", action: "prefs")
+      redirect_to(edit_account_preferences_path)
     else
       @num_anonymous = ImageVote.connection.select_value(%(
         SELECT count(id) FROM image_votes
@@ -845,7 +840,7 @@ class ImageController < ApplicationController
       UPDATE images SET original_name = '' WHERE user_id = #{User.current_id}
     ))
     flash_notice(:prefs_bulk_filename_purge_success.t)
-    redirect_to(controller: :account, action: :prefs)
+    redirect_to(edit_account_preferences_path)
   end
 
   ##############################################################################
