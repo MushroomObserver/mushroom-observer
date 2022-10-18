@@ -27,7 +27,7 @@ class CapybaraAdminTest < CapybaraIntegrationTestCase
       fill_in("id", with: "bogus")
       click_commit
     end
-    assert_flash_text("Couldn't find \"bogus\".  Play again?")
+    assert_flash_text("Couldn't find")
 
     within("#admin_switch_users_form") do
       fill_in("id", with: "mary")
@@ -70,14 +70,14 @@ class CapybaraAdminTest < CapybaraIntegrationTestCase
       fill_in("group_name", with: "all users")
       click_commit
     end
-    assert_flash_text("#{:add_user_to_group_no_user.t(user: "bogus")}")
+    assert_flash_text("Unable to find the user")
 
     within("#admin_add_user_to_group_form") do
       fill_in("user_name", with: "rolf")
       fill_in("group_name", with: "bogus")
       click_commit
     end
-    assert_flash_text("#{:add_user_to_group_no_group.t(group: "bogus")}")
+    assert_flash_text("Unable to find the group")
 
     within("#admin_add_user_to_group_form") do
       # rolf is already a member of all users. no go
