@@ -12,9 +12,11 @@ class Account::PreferencesController < ApplicationController
 
     update_password
     update_prefs_from_form
-    return unless prefs_changed_successfully
+    # call render to get the errors to display
+    render(:edit) and return unless prefs_changed_successfully
 
     update_copyright_holder(@user.legal_name_change)
+    redirect_to(edit_account_preferences_path) and return
   end
 
   private
