@@ -13,6 +13,7 @@ class Account::ProfileController < ApplicationController
 
   def update
     @licenses = License.current_names_and_ids(@user.license)
+
     [:name, :notes, :mailing_address].each do |arg|
       val = params[:user][arg].to_s
       @user.send("#{arg}=", val) if @user.send(arg) != val
@@ -71,12 +72,20 @@ class Account::ProfileController < ApplicationController
       update_copyright_holder(legal_name_change)
       if need_to_create_location
         flash_notice(:runtime_profile_must_define.t)
-        redirect_to(controller: "location", action: "create_location",
+        redirect_to(location_create_location_path,
                     where: @place_name, set_user: @user.id)
       else
         flash_notice(:runtime_profile_success.t)
         redirect_to(user_path(@user.id))
       end
     end
+  end
+
+  private
+
+  def update_copyright_holder(legal_name_change = nil)
+    return unless legal_name_change
+
+    Image.update_copyright_holder(*legal_name_change, @user)
   end
 end

@@ -7,9 +7,12 @@ module Account
   class ProfileControllerTest < FunctionalTestCase
     def test_edit
       # First make sure it can serve the form to start with.
-      requires_login(:edit)
+      get("edit")
+      assert_redirected_to(account_login_path)
+      login
+      get("edit")
 
-      # Now change everything. (Note that this user owns no images, so this tests
+      # Now change everything. (Note this user owns no images, so this tests
       # the bulk copyright_holder updater in the boundary case of no images.)
       params = {
         user: {
