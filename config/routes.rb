@@ -22,7 +22,7 @@ ACTIONS = {
     api_keys: {},
     create_api_key: {},
     edit_api_key: {},
-    email_new_password: {},
+    # email_new_password: {},
     # login: {},
     # logout_user: {},
     no_comment_email: { methods: [:get] },
@@ -555,6 +555,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   namespace :account do
     get("welcome")
     resource :login, only: [:new, :create], controller: "login"
+    get("email_new_password", controller: "login")
+    post("new_password_request", controller: "login")
     get("logout", controller: "login")
     get("test_autologin", controller: "login")
     resource :preferences, only: [:edit, :update]

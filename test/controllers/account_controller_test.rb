@@ -140,13 +140,6 @@ class AccountControllerTest < FunctionalTestCase
     assert_head_title(:welcome_no_user_title.l)
   end
 
-  def test_anon_user_email_new_password
-    get(:email_new_password)
-
-    assert_response(:success)
-    assert_head_title(:email_new_password_title.l)
-  end
-
   def test_block_known_evil_signups
     params = {
       login: "newbob",
@@ -174,29 +167,6 @@ class AccountControllerTest < FunctionalTestCase
          })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
-  end
-
-  def test_email_new_password
-    get(:email_new_password)
-    assert_no_flash
-
-    post(:email_new_password, params: { new_user: {
-           login: "brandnewuser",
-           password: "brandnewpassword",
-           password_confirmation: "brandnewpassword",
-           name: "brand new name"
-         } })
-    assert_flash_error(
-      "email_new_password should flash error if user doesn't already exist"
-    )
-
-    user = users(:roy)
-    old_password = user.password
-    post(:email_new_password,
-         params: { new_user: { login: users(:roy).login } })
-    user.reload
-    assert_not_equal(user.password, old_password,
-                     "New password should be different from old")
   end
 
   def test_normal_verify
