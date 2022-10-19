@@ -662,6 +662,13 @@ class ImageController < ApplicationController
     @object = find_or_goto_index(target_class, params[:id].to_s)
     return unless @object
 
+    redirect_url = if target_class.controller_normalized?
+                     send("#{target_class.to_s.underscore}_path", @object.id)
+                   else
+                     { controller: target_class.show_controller,
+                       action: target_class.show_action, id: @object.id }
+                   end
+
     if check_permission!(@object)
       if request.method == "POST" && (images = params[:selected])
         images.each do |image_id, do_it|
@@ -673,12 +680,10 @@ class ImageController < ApplicationController
           image.log_remove_from(@object)
           flash_notice(:runtime_image_remove_success.t(id: image_id))
         end
-        redirect_with_query(controller: target_class.show_controller,
-                            action: target_class.show_action, id: @object.id)
+        redirect_with_query(redirect_url)
       end
     else
-      redirect_with_query(controller: target_class.show_controller,
-                          action: target_class.show_action, id: @object.id)
+      redirect_with_query(redirect_url)
     end
   end
 
