@@ -20,7 +20,7 @@
     <% if @user.image %>
       <%= thumbnail(@user.image_id, {votes: false}) %>
       <%= link_to(:profile_image_remove.t,
-                  remove_image_account_profile_path,
+                  account_profile_remove_image_path,
                   { method: :patch,
                     class: "btn btn-default",
                     data: { confirm: :are_you_sure.l } }) %>

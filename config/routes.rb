@@ -53,14 +53,14 @@ ACTIONS = {
     no_question_email: {},
     # prefs: {},
     # profile: {},
-    remove_api_keys: {},
+    remove_api_keys: {}
     # remove_image: {},
-    reverify: {},
-    send_verify: {},
-    signup: {},
+    # reverify: {},
+    # send_verify: {},
+    # signup: {},
     # test_autologin: {},
-    verify: {},
-    welcome: {}
+    # verify: {}
+    # welcome: {}
   },
   ajax: {
     api_key: {},
@@ -552,17 +552,25 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
+  # NOTE: this nesting or lack thereof is necessary to get nice path helpers
+  resource :account, only: [:new, :create]
+
   namespace :account do
-    get("welcome")
     resource :login, only: [:new, :create], controller: "login"
+    resource :preferences, only: [:edit, :update]
+    resource :profile, only: [:edit, :update], controller: "profile"
+    # resource :verify, only: [:new, :create], controller: "verifications"
+
     get("email_new_password", controller: "login")
     post("new_password_request", controller: "login")
     get("logout", controller: "login")
     get("test_autologin", controller: "login")
-    resource :preferences, only: [:edit, :update]
-    resource :profile, only: [:edit, :update], controller: "profile" do
-      patch("remove_image")
-    end
+    patch("profile/remove_image", controller: "profile")
+    match("verify", via: [:get, :post], controller: "verifications")
+    get("reverify", controller: "verifications")
+    post("send_verify", controller: "verifications")
+    get("welcome")
+    get("signup", to: "/account#new")
   end
 
   # ----- Admin: no resources, just actions ------------------------------------

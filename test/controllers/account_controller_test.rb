@@ -15,7 +15,7 @@ class AccountControllerTest < FunctionalTestCase
   def test_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
-    post(:signup, params: { new_user: {
+    post(:create, params: { new_user: {
            login: "newbob",
            password: "newpassword",
            password_confirmation: "newpassword",
@@ -54,34 +54,34 @@ class AccountControllerTest < FunctionalTestCase
     }
 
     # Missing password.
-    post(:signup, params: { new_user: params.except(:password) })
+    post(:create, params: { new_user: params.except(:password) })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
-    post(:signup,
+    post(:create,
          params: { new_user: params.merge(password_confirmation: "wrong") })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
-    post(:signup, params: { new_user: params.except(:email) })
+    post(:create, params: { new_user: params.except(:email) })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?,
            assigns("new_user").dump_errors)
 
     # Email doesn't match.
-    post(:signup,
+    post(:create,
          params: { new_user: params.merge(email_confirmation: "wrong") })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?)
 
     # Make sure correct request would have succeeded!
-    post(:signup, params: { new_user: params })
+    post(:create, params: { new_user: params })
     assert_flash_success
     assert_response(:redirect)
     assert_not_nil(User.find_by(login: "newbob"))
@@ -100,14 +100,14 @@ class AccountControllerTest < FunctionalTestCase
     }
 
     @request.session["return-to"] = referrer
-    post(:signup, params: { new_user: params.merge(theme: "") })
+    post(:create, params: { new_user: params.merge(theme: "") })
     assert_no_flash
     assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
     assert_redirected_to(referrer)
 
     @request.session["return-to"] = referrer
-    post(:signup, params: { new_user: params.merge(theme: "spammer") })
+    post(:create, params: { new_user: params.merge(theme: "spammer") })
     assert_no_flash
     assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
@@ -115,22 +115,10 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_anon_user_signup
-    get(:signup)
+    get(:new)
 
     assert_response(:success)
     assert_head_title(:signup_title.l)
-  end
-
-  def test_anon_user_verify
-    get(:verify)
-
-    assert_redirected_to(users_path)
-  end
-
-  def test_anon_user_send_verify
-    get(:send_verify)
-
-    assert_redirected_to(users_path)
   end
 
   def test_anon_user_welcome
@@ -153,139 +141,20 @@ class AccountControllerTest < FunctionalTestCase
     }
     html_client_error = 400..499
 
-    post(:signup, params: { new_user: params.merge(login: "xUplilla") })
+    post(:create, params: { new_user: params.merge(login: "xUplilla") })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
-    post(:signup, params: { new_user: params.merge(email: "x@namnerbca.com") })
+    post(:create, params: { new_user: params.merge(email: "x@namnerbca.com") })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
-    post(:signup,
+    post(:create,
          params: {
            new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n")
          })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
-  end
-
-  def test_normal_verify
-    user = User.create!(
-      login: "micky",
-      password: "mouse",
-      password_confirmation: "mouse",
-      email: "mm@disney.com"
-    )
-    assert(user.auth_code.present?)
-    assert(user.auth_code.length > 10)
-
-    get(:verify, params: { id: user.id, auth_code: "bogus_code" })
-    assert_template("reverify")
-    assert_not(@request.session[:user_id])
-
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_template("verify")
-    assert(@request.session[:user_id])
-    assert_users_equal(user, assigns(:user))
-    assert_not_nil(user.reload.verified)
-
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_redirected_to(action: :welcome)
-    assert(@request.session[:user_id])
-    assert_users_equal(user, assigns(:user))
-
-    login("rolf")
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_redirected_to(new_account_login_path)
-    assert_not(@request.session[:user_id])
-  end
-
-  def test_verify_after_api_create
-    user = User.create!(
-      login: "micky",
-      email: "mm@disney.com"
-    )
-
-    get(:verify, params: { id: user.id, auth_code: "bogus_code" })
-    assert_template("reverify")
-    assert_not(@request.session[:user_id])
-
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_flash_warning
-    assert_template("choose_password")
-    assert_not(@request.session[:user_id])
-    assert_users_equal(user, assigns(:user))
-    assert_input_value("user_password", "")
-    assert_input_value("user_password_confirmation", "")
-
-    post(:verify, params: { id: user.id, auth_code: user.auth_code, user: {} })
-    assert_flash_error
-    assert_template("choose_password")
-    assert_input_value("user_password", "")
-    assert_input_value("user_password_confirmation", "")
-
-    # Password and confirmation don't match
-    post(:verify,
-         params: {
-           id: user.id,
-           auth_code: user.auth_code,
-           user: { password: "mouse", password_confirmation: "moose" }
-         })
-    assert_flash_error
-    assert_template("choose_password")
-    assert_input_value("user_password", "mouse")
-    assert_input_value("user_password_confirmation", "")
-
-    # Password invalid (too short)
-    post(:verify,
-         params: {
-           id: user.id,
-           auth_code: user.auth_code,
-           user: { password: "mo", password_confirmation: "mo" }
-         })
-    assert_flash_error
-    assert_template("choose_password")
-    assert_input_value("user_password", "mo")
-    assert_input_value("user_password_confirmation", "")
-
-    post(:verify,
-         params: {
-           id: user.id,
-           auth_code: user.auth_code,
-           user: { password: "mouse", password_confirmation: "mouse" }
-         })
-    assert_template("verify")
-    assert(@request.session[:user_id])
-    assert_users_equal(user, assigns(:user))
-    assert_not_nil(user.reload.verified)
-    assert_not_equal("", user.password)
-
-    login("rolf")
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_redirected_to(new_account_login_path)
-    assert_not(@request.session[:user_id])
-  end
-
-  def test_reverify
-    assert_raises(RuntimeError) { post(:reverify) }
-  end
-
-  def test_send_verify
-    user = User.create!(
-      login: "micky",
-      email: "mm@disney.com"
-    )
-    post(:send_verify, params: { id: user.id })
-    assert_flash_success
-  end
-
-  def test_send_verify_hotmail
-    user = User.create!(
-      login: "micky",
-      email: "mm@hotmail.com"
-    )
-    post(:send_verify, params: { id: user.id })
-    assert_flash_success
   end
 
   def test_no_email_hooks

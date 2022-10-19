@@ -62,8 +62,6 @@
     <%= f.text_area(:mailing_address, rows: 5, class: "form-control") %>
   </div>
 
-  <%= f.button(:profile_button.l,
-               data: { disable_with: safe_spinner(:profile_button.l) },
-               class: "btn btn-default center-block mt-3") %>
+  <%= f.button(:profile_button.l, class: "btn btn-default center-block mt-3") %>
 
 <% end %>
