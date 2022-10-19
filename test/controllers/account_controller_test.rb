@@ -157,36 +157,6 @@ class AccountControllerTest < FunctionalTestCase
            "Signup response should be 4xx")
   end
 
-  def test_no_email_hooks
-    [
-      :comments_owner,
-      :comments_response,
-      :comments_all,
-      :observations_consensus,
-      :observations_naming,
-      :observations_all,
-      :names_author,
-      :names_editor,
-      :names_reviewer,
-      :names_all,
-      :locations_author,
-      :locations_editor,
-      :locations_all,
-      :general_feature,
-      :general_commercial,
-      :general_question
-    ].each do |type|
-      assert_request(
-        action: "no_email_#{type}",
-        params: { id: rolf.id },
-        require_login: true,
-        require_user: :index,
-        result: "no_email"
-      )
-      assert_not(rolf.reload.send("email_#{type}"))
-    end
-  end
-
   def test_api_key_manager
     APIKey.all.each(&:destroy)
     assert_equal(0, APIKey.count)

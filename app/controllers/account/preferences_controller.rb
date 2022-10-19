@@ -4,11 +4,11 @@ class Account::PreferencesController < ApplicationController
   before_action :login_required
 
   def edit
-    get_user_licenses
+    load_user_licenses
   end
 
   def update
-    get_user_licenses
+    load_user_licenses
 
     update_password
     update_prefs_from_form
@@ -19,9 +19,56 @@ class Account::PreferencesController < ApplicationController
     redirect_to(edit_account_preferences_path) and return
   end
 
+  def no_email
+    user = User.safe_find(params[:id])
+    type = params[:type]
+    if user && check_permission!(user) && EMAIL_TYPES.include?(type)
+      method  = "email_#{type}="
+      prefix  = "no_email_#{type}"
+      success = "#{prefix}_success".to_sym
+      @note   = "#{prefix}_note".to_sym
+      @user.send(method, false)
+      if @user.save
+        flash_notice(success.t(name: @user.unique_text_name))
+        render(action: :no_email)
+      else
+        # Probably should write a better error message here...
+        flash_object_errors(@user)
+        redirect_to("/")
+      end
+    else
+      redirect_to("/")
+    end
+  end
+
+  EMAIL_TYPES = %w[
+    comments_owner
+    comments_response
+    comments_all
+
+    observations_consensus
+    observations_naming
+    observations_all
+
+    names_admin
+    names_author
+    names_editor
+    names_reviewer
+    names_all
+
+    locations_admin
+    locations_author
+    locations_editor
+    locations_all
+
+    general_feature
+    general_commercial
+    general_question
+  ].freeze
+
   private
 
-  def get_user_licenses
+  def load_user_licenses
     @licenses = License.current_names_and_ids(@user&.license)
   end
 
