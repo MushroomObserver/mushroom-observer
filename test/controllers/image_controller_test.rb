@@ -721,11 +721,14 @@ class ImageControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
     assert_equal("rolf", obs.user.login)
-    requires_user(
-      :remove_images,
-      { controller: :observations, action: :show, id: obs.id },
-      params
-    )
+    # requires_user et al don't work, these assume too much about path.
+    # requires_user(:remove_images, observation_path(id: obs.id))
+    get(:remove_images, params: params)
+    assert_redirected_to(account_login_path)
+
+    # Now login as obs owner
+    login(rolf.login)
+    get(:remove_images, params: params)
     assert_form_action(action: "remove_images", id: obs.id)
   end
 
