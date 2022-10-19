@@ -14,14 +14,14 @@ module CapybaraSessionExtensions
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
-    visit("/account/login")
+    visit("/account/login/new")
 
     within("#account_login_form") do
       fill_in("user_login", with: login)
       fill_in("user_password", with: password)
       check("user_remember_me") if remember_me == true
 
-      click_button(type: "submit")
+      click_commit
     end
   end
 

@@ -12,17 +12,6 @@ class AccountControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_auth_rolf
-    @request.session["return-to"] = "http://localhost/bogus/location"
-    post(:login, params: { user: { login: "rolf", password: "testpassword" } })
-    assert_response("http://localhost/bogus/location")
-    assert_flash_text(:runtime_login_success.t)
-    assert(@request.session[:user_id],
-           "Didn't store user in session after successful login!")
-    assert_equal(rolf.id, @request.session[:user_id],
-                 "Wrong user stored in session after successful login!")
-  end
-
   def test_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
@@ -125,13 +114,6 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(referrer)
   end
 
-  def test_anon_user_login
-    get(:login)
-
-    assert_response(:success)
-    assert_head_title(:login_please_login.l)
-  end
-
   def test_anon_user_signup
     get(:signup)
 
@@ -194,30 +176,6 @@ class AccountControllerTest < FunctionalTestCase
            "Signup response should be 4xx")
   end
 
-  def test_invalid_login
-    post(:login, params: { user: { login: "rolf", password: "not_correct" } })
-    assert_nil(@request.session["user_id"])
-    assert_template("login")
-
-    user = User.create!(
-      login: "api",
-      email: "foo@bar.com"
-    )
-    post(:login, params: { user: { login: "api", password: "" } })
-    assert_nil(@request.session["user_id"])
-    assert_template("login")
-
-    user.update(verified: Time.zone.now)
-    post(:login, params: { user: { login: "api", password: "" } })
-    assert_nil(@request.session["user_id"])
-    assert_template("login")
-
-    user.change_password("try_this_for_size")
-    post(:login,
-         params: { user: { login: "api", password: "try_this_for_size" } })
-    assert(@request.session["user_id"])
-  end
-
   def test_email_new_password
     get(:email_new_password)
     assert_no_flash
@@ -239,39 +197,6 @@ class AccountControllerTest < FunctionalTestCase
     user.reload
     assert_not_equal(user.password, old_password,
                      "New password should be different from old")
-  end
-
-  # Test autologin feature.
-  def test_autologin
-    # Make sure test page that requires login fails without autologin cookie.
-    get(:test_autologin)
-    assert_response(:redirect)
-
-    # Make sure cookie is not set if clear remember_me box in login.
-    post(:login,
-         params: {
-           user: { login: "rolf", password: "testpassword", remember_me: "" }
-         })
-    assert(session[:user_id])
-    assert_not(cookies["mo_user"])
-
-    logout
-    get(:test_autologin)
-    assert_response(:redirect)
-
-    # Now clear session and try again with remember_me box set.
-    post(:login,
-         params: {
-           user: { login: "rolf", password: "testpassword", remember_me: "1" }
-         })
-    assert(session[:user_id])
-    assert(cookies["mo_user"])
-
-    # And make sure autologin will pick that cookie up and do its thing.
-    logout
-    @request.cookies["mo_user"] = cookies["mo_user"]
-    get(:test_autologin)
-    assert_response(:success)
   end
 
   def test_normal_verify
@@ -301,7 +226,7 @@ class AccountControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_redirected_to(action: :login)
+    assert_redirected_to(new_account_login_path)
     assert_not(@request.session[:user_id])
   end
 
@@ -367,7 +292,7 @@ class AccountControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_redirected_to(action: :login)
+    assert_redirected_to(new_account_login_path)
     assert_not(@request.session[:user_id])
   end
 
@@ -392,7 +317,6 @@ class AccountControllerTest < FunctionalTestCase
     post(:send_verify, params: { id: user.id })
     assert_flash_success
   end
-
 
   def test_no_email_hooks
     [
@@ -497,7 +421,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_nil(key.verified)
 
     get(:activate_api_key, params: { id: 12_345 })
-    assert_redirected_to(action: :login)
+    assert_redirected_to(new_account_login_path)
     assert_nil(key.verified)
 
     login("dick")

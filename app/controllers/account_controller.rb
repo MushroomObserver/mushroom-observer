@@ -35,8 +35,8 @@
 class AccountController < ApplicationController
   before_action :login_required, except: [
     :email_new_password,
-    :login,
-    :logout_user,
+    # :login,
+    # :logout_user,
     :reverify,
     :send_verify,
     :signup,
@@ -44,10 +44,10 @@ class AccountController < ApplicationController
     :welcome
   ]
   before_action :disable_link_prefetching, except: [
-    :login,
-    :signup,
-    :prefs,
-    :profile
+    # :login,
+    :signup
+    # :prefs,
+    # :profile
   ]
 
   ##############################################################################
@@ -96,7 +96,7 @@ class AccountController < ApplicationController
       @user = nil
       User.current = nil
       session_user_set(nil)
-      redirect_to(action: :login)
+      redirect_to(new_account_login_path)
 
     # If user was created via API, we must ask the user to choose a password
     # first before we can verify them.
@@ -170,29 +170,29 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def login
-    request.method == "POST" ? login_post : login_get
-  end
+  # def login
+  #   request.method == "POST" ? login_post : login_get
+  # end
 
   def email_new_password
     request.method == "POST" ? email_new_password_post : email_new_password_get
   end
 
-  def logout_user
-    # Safeguard: reset admin's session to their real_user_id
-    if session[:real_user_id].present? &&
-       (new_user = User.safe_find(session[:real_user_id])) &&
-       new_user.admin
-      switch_to_user(new_user)
-      redirect_back_or_default("/")
-    else
-      @user = nil
-      User.current = nil
-      session_user_set(nil)
-      session[:admin] = false
-      clear_autologin_cookie
-    end
-  end
+  # def logout_user
+  #   # Safeguard: reset admin's session to their real_user_id
+  #   if session[:real_user_id].present? &&
+  #      (new_user = User.safe_find(session[:real_user_id])) &&
+  #      new_user.admin
+  #     switch_to_user(new_user)
+  #     redirect_back_or_default("/")
+  #   else
+  #     @user = nil
+  #     User.current = nil
+  #     session_user_set(nil)
+  #     session[:admin] = false
+  #     clear_autologin_cookie
+  #   end
+  # end
 
   # ========= private Login section methods ==========
 
@@ -262,7 +262,7 @@ class AccountController < ApplicationController
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
         PasswordEmail.build(@new_user, password).deliver_now
-        render(action: "login")
+        render("/account/login/new")
       else
         flash_object_errors(@new_user)
       end
@@ -451,15 +451,6 @@ class AccountController < ApplicationController
     @key.update!(params[:key].permit(:notes))
     flash_notice(:account_api_keys_updated.t)
   end
-
-  ##############################################################################
-  #
-  #  :section: Testing
-  #
-  ##############################################################################
-
-  # This is used to test the autologin feature.
-  def test_autologin; end
 
   ##############################################################################
 

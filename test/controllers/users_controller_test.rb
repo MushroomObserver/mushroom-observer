@@ -24,7 +24,7 @@ class UsersControllerTest < FunctionalTestCase
   #   ].each do |page, response, params|
   #     logout
   #     get(page, params: params)
-  #     assert_redirected_to(controller: :account, action: :login)
+  #     assert_redirected_to(new_account_login_path)
 
   #     login("rolf")
   #     get(page, params: params)

@@ -2,15 +2,12 @@
 
 require("test_helper")
 
-# tests of Herbarium controller
+# tests of Profile controller
 module Account
   class ProfileControllerTest < FunctionalTestCase
     def test_edit
       # First make sure it can serve the form to start with.
-      get("edit")
-      assert_redirected_to(account_login_path)
-      login
-      get("edit")
+      requires_login("edit")
 
       # Now change everything. (Note this user owns no images, so this tests
       # the bulk copyright_holder updater in the boundary case of no images.)

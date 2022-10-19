@@ -23,8 +23,8 @@ ACTIONS = {
     create_api_key: {},
     edit_api_key: {},
     email_new_password: {},
-    login: {},
-    logout_user: {},
+    # login: {},
+    # logout_user: {},
     no_comment_email: { methods: [:get] },
     no_comment_response_email: {},
     no_commercial_email: {},
@@ -58,7 +58,7 @@ ACTIONS = {
     reverify: {},
     send_verify: {},
     signup: {},
-    test_autologin: {},
+    # test_autologin: {},
     verify: {},
     welcome: {}
   },
@@ -553,6 +553,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   namespace :account do
+    get("welcome")
+    resource :login, only: [:new, :create], controller: "login"
+    get("logout", controller: "login")
+    get("test_autologin", controller: "login")
     resource :preferences, only: [:edit, :update]
     resource :profile, only: [:edit, :update], controller: "profile"
   end

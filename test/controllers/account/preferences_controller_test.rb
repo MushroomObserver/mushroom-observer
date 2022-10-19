@@ -2,14 +2,11 @@
 
 require("test_helper")
 
-# tests of Herbarium controller
+# tests of Preferences controller
 class Account::PreferencesControllerTest < FunctionalTestCase
   def test_edit
     # First make sure it can serve the form to start with.
-    get("edit")
-    assert_redirected_to(account_login_path)
-    login
-    get("edit")
+    requires_login("edit")
     Language.all.each do |lang|
       assert_select("option[value=#{lang.locale}]", { count: 1 },
                     "#{lang.locale} language option missing")
@@ -192,8 +189,8 @@ class Account::PreferencesControllerTest < FunctionalTestCase
     # Prove password was changed correctly somewhere along the line.
     logout
 
-    @controller = AccountController.new
-    post(:login,
+    @controller = Account::LoginController.new
+    post(:create,
          params: { user: { login: "steve", password: "new_password" } })
     assert_equal(rolf.id, @request.session["user_id"])
   end

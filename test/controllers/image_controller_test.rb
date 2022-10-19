@@ -724,7 +724,7 @@ class ImageControllerTest < FunctionalTestCase
     # requires_user et al don't work, these assume too much about path.
     # requires_user(:remove_images, observation_path(id: obs.id))
     get(:remove_images, params: params)
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
 
     # Now login as obs owner
     login(rolf.login)
