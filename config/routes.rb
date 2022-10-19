@@ -54,7 +54,7 @@ ACTIONS = {
     # prefs: {},
     # profile: {},
     remove_api_keys: {},
-    remove_image: {},
+    # remove_image: {},
     reverify: {},
     send_verify: {},
     signup: {},
@@ -560,7 +560,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("logout", controller: "login")
     get("test_autologin", controller: "login")
     resource :preferences, only: [:edit, :update]
-    resource :profile, only: [:edit, :update], controller: "profile"
+    resource :profile, only: [:edit, :update], controller: "profile" do
+      patch("remove_image")
+    end
   end
 
   # ----- Admin: no resources, just actions ------------------------------------

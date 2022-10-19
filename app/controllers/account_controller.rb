@@ -170,14 +170,6 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def remove_image
-    if @user&.image
-      @user.update(image: nil)
-      flash_notice(:runtime_profile_removed_image.t)
-    end
-    redirect_to(user_path(@user.id))
-  end
-
   def no_email_comments_owner
     no_email("comments_owner")
   end
