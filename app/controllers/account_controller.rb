@@ -34,23 +34,12 @@
 ################################################################################
 class AccountController < ApplicationController
   before_action :login_required, except: [
-    # :email_new_password,
-    # :login,
-    # :logout_user,
-    # :reverify,
-    # :send_verify,
-    # :signup,
     :new,
     :create,
-    # :verify,
     :welcome
   ]
   before_action :disable_link_prefetching, except: [
-    # :login,
-    # :signup,
     :new
-    # :prefs,
-    # :profile
   ]
 
   ##############################################################################
@@ -133,8 +122,8 @@ class AccountController < ApplicationController
       # to automate creation of accounts?
       DeniedEmail.build(params["new_user"]).deliver_now
     end
-    # redirect_back_or_default(action: :welcome)
-    render(:new) and return false
+    redirect_back_or_default(action: :welcome)
+    false
   end
 
   def validate_and_save_new_user!
@@ -199,109 +188,6 @@ class AccountController < ApplicationController
   #  :section: Preferences and Profile
   #
   ##############################################################################
-
-  def no_email_comments_owner
-    no_email("comments_owner")
-  end
-
-  def no_email_comments_response
-    no_email("comments_response")
-  end
-
-  def no_email_comments_all
-    no_email("comments_all")
-  end
-
-  def no_email_observations_consensus
-    no_email("observations_consensus")
-  end
-
-  def no_email_observations_naming
-    no_email("observations_naming")
-  end
-
-  def no_email_observations_all
-    no_email("observations_all")
-  end
-
-  def no_email_names_admin
-    no_email("names_admin")
-  end
-
-  def no_email_names_author
-    no_email("names_author")
-  end
-
-  def no_email_names_editor
-    no_email("names_editor")
-  end
-
-  def no_email_names_reviewer
-    no_email("names_reviewer")
-  end
-
-  def no_email_names_all
-    no_email("names_all")
-  end
-
-  def no_email_locations_admin
-    no_email("locations_admin")
-  end
-
-  def no_email_locations_author
-    no_email("locations_author")
-  end
-
-  def no_email_locations_editor
-    no_email("locations_editor")
-  end
-
-  def no_email_locations_all
-    no_email("locations_all")
-  end
-
-  def no_email_general_feature
-    no_email("general_feature")
-  end
-
-  def no_email_general_commercial
-    no_email("general_commercial")
-  end
-
-  def no_email_general_question
-    no_email("general_question")
-  end
-
-  # These are the old email flags, renamed in favor of more consistent ones.
-  alias no_comment_email no_email_comments_owner
-  alias no_comment_response_email no_email_comments_response
-  alias no_commercial_email no_email_general_commercial
-  alias no_consensus_change_email no_email_observations_consensus
-  alias no_feature_email no_email_general_feature
-  alias no_name_change_email no_email_names_author
-  alias no_name_proposal_email no_email_observations_naming
-  alias no_question_email no_email_general_question
-
-  def no_email(type)
-    user = User.safe_find(params[:id])
-    if user && check_permission!(user)
-      method  = "email_#{type}="
-      prefix  = "no_email_#{type}"
-      success = "#{prefix}_success".to_sym
-      @note   = "#{prefix}_note".to_sym
-      @user.send(method, false)
-      if @user.save
-        flash_notice(success.t(name: @user.unique_text_name))
-        render(action: :no_email)
-      else
-        # Probably should write a better error message here...
-        flash_object_errors(@user)
-        redirect_to("/")
-      end
-    else
-      redirect_to("/")
-    end
-  end
 
   def api_keys
     @key = APIKey.new
