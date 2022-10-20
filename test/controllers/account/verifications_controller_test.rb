@@ -16,6 +16,7 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_redirected_to(users_path)
   end
 
+  # Normal verify action is get(:new)
   def test_normal_verify
     user = User.create!(
       login: "micky",
@@ -47,6 +48,7 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_not(@request.session[:user_id])
   end
 
+  # API verify action, coming via :create_password, is post(:create)
   def test_verify_after_api_create
     user = User.create!(
       login: "micky",

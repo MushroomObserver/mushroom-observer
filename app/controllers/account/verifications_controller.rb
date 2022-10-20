@@ -57,6 +57,9 @@ class Account::VerificationsController < ApplicationController
     end
   end
 
+  # If user was created via API, we must ask the user to choose a password
+  # first before we can verify them. The choose_password form is currently the
+  # only place that should POST to this action, via account_verify_path
   def create
     id        = params["id"]
     auth_code = params["auth_code"]
