@@ -10,8 +10,8 @@
 
 <%= :account_api_keys_help.tp %>
 
-<%= form_with(scope: :key,
-              url: account_edit_api_key_path(id: @key.id),
+<%= form_with(scope: :key, method: :patch,
+              url: account_api_key_path(id: @key.id),
               id: "account_edit_api_key_form") do |f| %>
 
   <table>

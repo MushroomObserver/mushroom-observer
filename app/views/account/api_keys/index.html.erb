@@ -1,0 +1,25 @@
+<%
+  @title = :account_api_keys_title.t
+
+  tabs = [
+    link_to(:prefs_link.t, edit_account_preferences_path),
+    link_to(:profile_link.t, edit_account_profile_path)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+  @container = :full
+
+  javascript_include("account_api_keys")
+  inject_javascript_at_end("APIKeyModule()")
+%>
+
+<div class="container-text">
+  <%= :account_api_keys_help.tp %>
+</div><!--.container-text-->
+
+<% if @user.api_keys.any? %>
+  <%= render(partial: "existing_keys_form") %>
+<% end %>
+
+<div class="container-text mt-3">
+  <%= render(partial: "new_key_form") %>
+</div>
