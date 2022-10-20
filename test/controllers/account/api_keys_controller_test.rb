@@ -123,9 +123,7 @@ class Account::APIKeysControllerTest < FunctionalTestCase
 
     # Cancel form.
     patch(:update, params: { commit: :CANCEL.l, id: key.id })
-    # It does too f---ing redirect! @response.status 302
-    # assert_response(:redirect)
-    # assert_redirected_to(account_api_keys_path)
+    assert_redirected_to(account_api_keys_path)
     assert_equal("app name", key.reload.notes)
 
     # Try to change notes to empty string.
@@ -138,7 +136,7 @@ class Account::APIKeysControllerTest < FunctionalTestCase
     patch(:update,
           params: { commit: :UPDATE.l, id: key.id, key: { notes: "new name" } })
     assert_flash_success
-    # assert_redirected_to(account_api_keys_path)
+    assert_redirected_to(account_api_keys_path)
     assert_equal("new name", key.reload.notes)
   end
 end
