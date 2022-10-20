@@ -5,7 +5,7 @@ require("test_helper")
 # tests of Verifications controller
 class Account::VerificationsControllerTest < FunctionalTestCase
   def test_anon_user_verify
-    get(:verify)
+    get(:new)
 
     assert_redirected_to(users_path)
   end
@@ -26,23 +26,23 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert(user.auth_code.present?)
     assert(user.auth_code.length > 10)
 
-    get(:verify, params: { id: user.id, auth_code: "bogus_code" })
+    get(:new, params: { id: user.id, auth_code: "bogus_code" })
     assert_template("reverify")
     assert_not(@request.session[:user_id])
 
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
-    assert_template("verify")
+    get(:new, params: { id: user.id, auth_code: user.auth_code })
+    assert_template("new")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
 
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
+    get(:new, params: { id: user.id, auth_code: user.auth_code })
     assert_redirected_to(account_welcome_path)
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
 
     login("rolf")
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
+    get(:new, params: { id: user.id, auth_code: user.auth_code })
     assert_redirected_to(new_account_login_path)
     assert_not(@request.session[:user_id])
   end
@@ -53,11 +53,11 @@ class Account::VerificationsControllerTest < FunctionalTestCase
       email: "mm@disney.com"
     )
 
-    get(:verify, params: { id: user.id, auth_code: "bogus_code" })
+    get(:new, params: { id: user.id, auth_code: "bogus_code" })
     assert_template("reverify")
     assert_not(@request.session[:user_id])
 
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
+    get(:new, params: { id: user.id, auth_code: user.auth_code })
     assert_flash_warning
     assert_template("choose_password")
     assert_not(@request.session[:user_id])
@@ -65,14 +65,14 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
 
-    post(:verify, params: { id: user.id, auth_code: user.auth_code, user: {} })
+    post(:create, params: { id: user.id, auth_code: user.auth_code, user: {} })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
 
     # Password and confirmation don't match
-    post(:verify,
+    post(:create,
          params: {
            id: user.id,
            auth_code: user.auth_code,
@@ -84,7 +84,7 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_input_value("user_password_confirmation", "")
 
     # Password invalid (too short)
-    post(:verify,
+    post(:create,
          params: {
            id: user.id,
            auth_code: user.auth_code,
@@ -95,20 +95,21 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_input_value("user_password", "mo")
     assert_input_value("user_password_confirmation", "")
 
-    post(:verify,
+    # Password juuuuust right
+    post(:create,
          params: {
            id: user.id,
            auth_code: user.auth_code,
            user: { password: "mouse", password_confirmation: "mouse" }
          })
-    assert_template("verify")
+    assert_template("new")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
     assert_not_equal("", user.password)
 
     login("rolf")
-    get(:verify, params: { id: user.id, auth_code: user.auth_code })
+    get(:new, params: { id: user.id, auth_code: user.auth_code })
     assert_redirected_to(new_account_login_path)
     assert_not(@request.session[:user_id])
   end

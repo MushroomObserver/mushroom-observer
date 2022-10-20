@@ -571,8 +571,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :profile, only: [:edit, :update], controller: "profile"
     patch("profile/remove_image", controller: "profile")
 
-    # resource :verify, only: [:new, :create], controller: "verifications"
-    match("verify", via: [:get, :post], controller: "verifications")
+    resource :verify, only: [:new, :create], controller: "verifications"
+    # match("verify", via: [:get, :post], controller: "verifications")
     get("reverify", controller: "verifications")
     post("send_verify", controller: "verifications")
 

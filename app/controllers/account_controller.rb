@@ -173,7 +173,7 @@ class AccountController < ApplicationController
   end
 
   def notify_root_of_verification_email(user)
-    url = "#{MO.http_domain}/account/verify/#{user.id}?" \
+    url = "#{MO.http_domain}/account/verify/new/#{user.id}?" \
           "auth_code=#{user.auth_code}"
     subject = :email_subject_verify.l
     content = :email_verify_intro.tp(user: user.login, link: url)
