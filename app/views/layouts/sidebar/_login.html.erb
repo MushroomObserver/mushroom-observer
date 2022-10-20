@@ -2,7 +2,7 @@
   <i class="glyphicon glyphicon-user"> </i>
   <span> <%= :app_account.t %>:</span>
 </div>
-<%= link_to(:app_login.t, account_login_path,
+<%= link_to(:app_login.t, new_account_login_path,
             { class: classes[:indent],
               id: "nav_login_link" }) %>
 <%= link_to(:app_create_account.t, account_signup_path,

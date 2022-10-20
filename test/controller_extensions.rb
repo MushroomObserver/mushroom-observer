@@ -498,10 +498,10 @@ module ControllerExtensions
         assert_redirected_to("/", msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>#{got}"
-        assert_redirected_to({ controller: "account", action: "login" }, msg)
+        assert_redirected_to(new_account_login_path, msg)
       elsif arg == :welcome
         msg += "Expected redirect to <account/welcome>#{got}"
-        assert_redirected_to({ controller: "account", action: "login" }, msg)
+        assert_redirected_to(new_account_login_path, msg)
       else
         raise("Invalid response type expected: [#{arg.class}: #{arg}]\n")
       end

@@ -56,7 +56,7 @@ module SessionExtensions
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
-    get("/account/login")
+    get("/account/login/new")
     open_form do |form|
       form.change("login", login)
       form.change("password", password)

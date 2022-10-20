@@ -2,7 +2,7 @@
   @title = :signup_title.t
 %>
 
-<%= form_with(scope: :new_user, url: account_signup_path,
+<%= form_with(scope: :new_user, url: account_path,
               id: "account_signup_form") do |f| %>
 
   <div class="form-group mt-3">
@@ -25,8 +25,11 @@
   <div class="form-group mt-3">
     <%= f.label(:email, :signup_email_address.t + ":") %>
     <%= f.text_field(:email, class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
     <%= f.label(:email_confirmation, :signup_email_confirmation.t + ":") %>
-    <%= f.label(:email_confirmation, class: "form-control") %>
+    <%= f.text_field(:email_confirmation, class: "form-control") %>
     <div class="help-note">
       <%= :signup_email_help.tp + :email_spam_notice.tp %>
     </div>
@@ -44,6 +47,6 @@
   </div>
 
   <%= f.submit(:signup_button.l,
-                  class: "btn btn-default center-block mt-3") %>
+               class: "btn btn-default center-block mt-3") %>
 
 <% end %>

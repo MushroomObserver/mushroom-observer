@@ -26,7 +26,7 @@ class AdminControllerTest < FunctionalTestCase
       str2.update_localization
 
       get(:change_banner)
-      assert_redirected_to(controller: :account, action: :login)
+      assert_redirected_to(new_account_login_path)
 
       login("rolf")
       get(:change_banner)

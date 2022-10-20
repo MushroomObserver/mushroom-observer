@@ -18,8 +18,8 @@ Subject: [MO] Observation #<%= ActiveRecord::FixtureSet.identify(:coprinus_comat
 <ul type=none>
 <li>Show this observation: <a href="https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>">https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %></a></li>
 <li>I&#8217;m not interested in this observation: <a href="https://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&amp;type=Observation&amp;user=<%= ActiveRecord::FixtureSet.identify(:rolf) %>&amp;state=-1">https://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&amp;type=Observation&amp;user=<%= ActiveRecord::FixtureSet.identify(:rolf) %>&amp;state=-1</a></li>
-<li>Stop sending me email like this: <a href="https://mushroomobserver.org/account/no_email_observations_naming/<%= ActiveRecord::FixtureSet.identify(:rolf) %>">https://mushroomobserver.org/account/no_email_observations_naming/<%= ActiveRecord::FixtureSet.identify(:rolf) %></a></li>
-<li>Change your preferences: <a href="https://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %>">https://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %></a></li>
+<li>Stop sending me email like this: <a href="https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:rolf) %>?type=observations_naming">https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:rolf) %>?type=observations_naming</a></li>
+<li>Change your preferences: <a href="https://mushroomobserver.org/account/preferences/edit">https://mushroomobserver.org/account/preferences/edit</a></li>
 <li>Latest changes at Mushroom Observer: <a href="https://mushroomobserver.org">https://mushroomobserver.org</a></li>
 </ul>
 <br/>

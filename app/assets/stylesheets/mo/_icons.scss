@@ -96,3 +96,20 @@
   width: 27px;
   height: 18px;
 }
+
+.spinner-right {
+  @extend .glyphicon, .glyphicon-repeat;
+
+  line-height: 1.1 !important;
+  animation: spin-r 1s infinite linear;
+}
+
+@keyframes spin-r {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(359deg);
+  }
+}
