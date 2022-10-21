@@ -12,7 +12,11 @@
 #  blocked_ips::        <tt>(R V .)</tt>
 
 class AdminController < ApplicationController
+  include Admin::RestrictAccess
+
   before_action :login_required
+
+  def show; end
 
   def test_flash_redirection
     tags = params[:tags].to_s.split(",")
@@ -48,19 +52,17 @@ class AdminController < ApplicationController
   #   redirect_back_or_default("/")
   # end
 
-  def add_user_to_group
-    in_admin_mode? ? add_user_to_group_admin_mode : add_user_to_group_user_mode
-  end
+  # def add_user_to_group
+  #   in_admin_mode? ? add_user_to_group_admin_mode : add_user_to_group_user_mode
+  # end
 
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
   def destroy_user
-    if in_admin_mode?
-      id = params["id"]
-      if id.present?
-        user = User.safe_find(id)
-        User.erase_user(id) if user
-      end
+    id = params["id"]
+    if id.present?
+      user = User.safe_find(id)
+      User.erase_user(id) if user
     end
     redirect_back_or_default("/")
   end

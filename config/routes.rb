@@ -592,6 +592,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :blocked_ips, only: [:show]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
+    get("show")
   end
 
   # match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])

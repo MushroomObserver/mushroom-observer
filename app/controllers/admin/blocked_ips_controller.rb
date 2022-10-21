@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin::BlockedIpsController < ApplicationController
+  include Admin::RestrictAccess
+
   before_action :login_required
 
   # def edit
@@ -14,14 +16,10 @@ class Admin::BlockedIpsController < ApplicationController
   # end
 
   def show
-    if in_admin_mode?
-      process_blocked_ips_commands
-      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
-      @okay_ips = sort_by_ip(IpStats.read_okay_ips)
-      @stats = IpStats.read_stats(do_activity: true)
-    else
-      redirect_back_or_default("/info/how_to_help")
-    end
+    process_blocked_ips_commands
+    @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
+    @okay_ips = sort_by_ip(IpStats.read_okay_ips)
+    @stats = IpStats.read_stats(do_activity: true)
   end
 
   private

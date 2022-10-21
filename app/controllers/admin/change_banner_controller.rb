@@ -1,28 +1,20 @@
 # frozen_string_literal: true
 
 class Admin::ChangeBannerController < ApplicationController
+  include Admin::RestrictAccess
+
   before_action :login_required
 
   # Update banner across all translations.
   def new
-    if in_admin_mode?
-      @val = :app_banner_box.l.to_s
-    else
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    end
+    @val = :app_banner_box.l.to_s
   end
 
   def create
-    if in_admin_mode?
-      @val = params[:val].to_s.strip
-      @val = "X" if @val.blank?
-      update_banner_languages
-      redirect_to("/")
-    else
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    end
+    @val = params[:val].to_s.strip
+    @val = "X" if @val.blank?
+    update_banner_languages
+    redirect_to("/")
   end
 
   private
