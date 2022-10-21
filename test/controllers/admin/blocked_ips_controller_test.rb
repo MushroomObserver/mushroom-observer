@@ -17,20 +17,20 @@ module Admin
       assert_false(IpStats.blocked?(new_ip))
 
       login(:rolf)
-      get(:show)
+      get(:edit)
       assert_response(:redirect)
 
       make_admin
-      get(:show)
+      get(:edit)
       assert_response(:success)
       assert_includes(@response.body, api_key.key)
 
-      get(:show, params: { add_bad: "garbage" })
+      patch(:update, params: { add_bad: "garbage" })
       assert_flash_error
 
       time = 1.minute.ago
       File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
-      get(:show, params: { add_bad: new_ip })
+      patch(:update, params: { add_bad: new_ip })
       assert_no_flash
       assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!
@@ -38,7 +38,7 @@ module Admin
 
       time = 1.minute.ago
       File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
-      get(:show, params: { remove_bad: new_ip })
+      patch(:update, params: { remove_bad: new_ip })
       assert_no_flash
       assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!

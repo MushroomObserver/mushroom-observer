@@ -12,7 +12,7 @@
 #  blocked_ips::        <tt>(R V .)</tt>
 
 class AdminController < ApplicationController
-  include Admin::RestrictAccess
+  include Admin::RestrictAccessToAdminMode
 
   before_action :login_required
 

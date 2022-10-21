@@ -2,7 +2,7 @@
 
 module Admin
   class BlockedIpsController < ApplicationController
-    include Admin::RestrictAccess
+    include Admin::RestrictAccessToAdminMode
 
     before_action :login_required
 
@@ -16,11 +16,21 @@ module Admin
     #   end
     # end
 
-    def show
+    # This page allows editing of blocked ips via params
+    # params[:add_okay] and params[:add_bad]
+    def edit
+      @ip = params[:report] if validate_ip!(params[:report])
+      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
+      @okay_ips = sort_by_ip(IpStats.read_okay_ips)
+      @stats = IpStats.read_stats(do_activity: true)
+    end
+
+    def update
       process_blocked_ips_commands
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
+      # render(action: :edit, params: { report: @id })
     end
 
     private
@@ -48,8 +58,6 @@ module Admin
         IpStats.clear_okay_ips
       elsif params[:clear_bad].present?
         IpStats.clear_blocked_ips
-      elsif validate_ip!(params[:report])
-        @ip = params[:report]
       end
     end
     # rubocop:enable Metrics/AbcSize

@@ -2,7 +2,7 @@
 
 module Admin
   class ChangeBannerController < ApplicationController
-    include Admin::RestrictAccess
+    include Admin::RestrictAccessToAdminMode
 
     before_action :login_required
 

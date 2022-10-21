@@ -589,7 +589,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :turn_admin_off, only: [:show], controller: "turn_off"
     resource :change_banner, only: [:edit, :udpate], controller: "change_banner"
     resource :switch_users, only: [:new, :create]
-    resource :blocked_ips, only: [:show]
+    resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
     get("show")

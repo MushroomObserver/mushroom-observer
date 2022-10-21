@@ -2,7 +2,7 @@
 
 module Admin
   class AddUserToGroupController < ApplicationController
-    include Admin::Access
+    include Admin::RestrictAccessToAdminMode
 
     before_action :login_required
 

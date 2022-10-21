@@ -2,11 +2,14 @@
 
 module Admin
   class SwitchUsersController < ApplicationController
-    include Admin::RestrictAccess
+    # include Admin::RestrictAccessToAdminMode
 
     before_action :login_required
 
-    def new; end
+    def new
+      redirect_back_or_default("/") if
+        !@user&.admin && session[:real_user_id].blank?
+    end
 
     def create
       @id = params[:id].to_s
