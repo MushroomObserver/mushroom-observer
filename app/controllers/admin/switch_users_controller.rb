@@ -14,9 +14,10 @@ module Admin
     def create
       @id = params[:id].to_s
       new_user = find_user_by_id_login_or_email(@id)
-      flash_error("Couldn't find \"#{@id}\".  Play again?") \
-        if new_user.blank? && @id.present?
-      if !@user&.admin && session[:real_user_id].blank?
+      if new_user.blank? && @id.present?
+        flash_error("Couldn't find \"#{@id}\".  Play again?")
+        render(action: :new)
+      elsif !@user&.admin && session[:real_user_id].blank?
         redirect_back_or_default("/")
       elsif new_user.present?
         switch_to_user(new_user)
