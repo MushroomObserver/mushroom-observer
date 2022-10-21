@@ -574,7 +574,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :verify, only: [:new, :create], controller: "verifications"
     # match("verify", via: [:get, :post], controller: "verifications")
     get("reverify", controller: "verifications")
-    post("send_verify", controller: "verifications")
+    post("verify/resend_email", controller: "verify")
 
     resources :api_keys, only: [:index, :create, :edit, :update]
     post("api_keys/:id/activate", to: "api_keys#activate",

@@ -120,21 +120,21 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_raises(RuntimeError) { post(:reverify) }
   end
 
-  def test_send_verify
+  def test_verify_resend_email
     user = User.create!(
       login: "micky",
       email: "mm@disney.com"
     )
-    post(:send_verify, params: { id: user.id })
+    post(:resend_email, params: { id: user.id })
     assert_flash_success
   end
 
-  def test_send_verify_hotmail
+  def test_verify_resend_hotmail
     user = User.create!(
       login: "micky",
       email: "mm@hotmail.com"
     )
-    post(:send_verify, params: { id: user.id })
+    post(:resend_email, params: { id: user.id })
     assert_flash_success
   end
 end
