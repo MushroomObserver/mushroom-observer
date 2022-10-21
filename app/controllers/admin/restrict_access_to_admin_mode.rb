@@ -10,7 +10,11 @@ module Admin
 
     def access_denied
       flash_error(:permission_denied.t)
-      redirect_back_or_default("/")
+      if session[:user_id]
+        redirect_to("/")
+      else
+        redirect_to(new_account_login_path)
+      end
     end
   end
 end
