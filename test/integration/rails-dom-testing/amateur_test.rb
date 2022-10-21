@@ -15,7 +15,7 @@ class AmateurTest < IntegrationTestCase
 
     # Login.
     click_mo_link(label: "Login", in: :left_panel)
-    assert_template("account/login")
+    assert_template("account/login/new")
 
     # Try to login without a password.
     open_form do |form|
@@ -25,7 +25,7 @@ class AmateurTest < IntegrationTestCase
       form.change("login", "rolf")
       form.submit("Login")
     end
-    assert_template("account/login")
+    assert_template("account/login/new")
     assert_flash_text(/unsuccessful/i)
 
     # Try again with incorrect password.
@@ -37,7 +37,7 @@ class AmateurTest < IntegrationTestCase
       form.uncheck("remember_me")
       form.submit("Login")
     end
-    assert_template("account/login")
+    assert_template("account/login/new")
     assert_flash_text(/unsuccessful/i)
 
     # Try yet again with correct password.
@@ -53,16 +53,16 @@ class AmateurTest < IntegrationTestCase
 
     # This should only be accessible if logged in.
     click_mo_link(label: "Preferences", in: :left_panel)
-    assert_template("account/prefs")
+    assert_template("account/preferences/edit")
 
     # Log out and try again.
     click_mo_link(label: "Logout", in: :left_panel)
-    assert_template("account/logout_user")
+    assert_template("account/login/logout")
     assert_raises(MiniTest::Assertion) do
       click_mo_link(label: "Preferences", in: :left_panel)
     end
-    get("/account/prefs")
-    assert_template("account/login")
+    get("/account/preferences/edit")
+    assert_template("account/login/new")
   end
 
   # ----------------------------
@@ -93,14 +93,14 @@ class AmateurTest < IntegrationTestCase
   def try_autologin(cookies, user)
     sess = open_session
     sess.cookies["mo_user"] = cookies["mo_user"]
-    sess.get("/account/prefs")
+    sess.get("/account/preferences/edit")
     if user
-      sess.assert_match("account/prefs", sess.response.body)
-      sess.assert_no_match("account/login", sess.response.body)
+      sess.assert_match("account/preferences/edit", sess.response.body)
+      sess.assert_no_match("account/login/new", sess.response.body)
       assert_users_equal(user, sess.assigns(:user))
     else
-      sess.assert_no_match("account/prefs", sess.response.body)
-      sess.assert_match("account/login", sess.response.body)
+      sess.assert_no_match("account/preferences/edit", sess.response.body)
+      sess.assert_match("account/login/new", sess.response.body)
     end
   end
 
@@ -345,7 +345,7 @@ class AmateurTest < IntegrationTestCase
       get("/#{obs.id}")
       assert_template("observations/show")
       click_mo_link(label: /login/i)
-      assert_template("account/login")
+      assert_template("account/login/new")
       open_form do |form|
         form.change("login", namer.login)
         form.change("password", "testpassword")

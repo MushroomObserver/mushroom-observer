@@ -18,49 +18,49 @@
 #
 ACTIONS = {
   account: {
-    activate_api_key: {},
-    api_keys: {},
-    create_api_key: {},
-    edit_api_key: {},
-    email_new_password: {},
-    login: {},
-    logout_user: {},
-    no_comment_email: { methods: [:get] },
-    no_comment_response_email: {},
-    no_commercial_email: {},
-    no_consensus_change_email: {},
-    no_email_comments_all: {},
-    no_email_comments_owner: {},
-    no_email_comments_response: {},
-    no_email_general_commercial: {},
-    no_email_general_feature: {},
-    no_email_general_question: {},
-    no_email_locations_admin: {},
-    no_email_locations_all: {},
-    no_email_locations_author: {},
-    no_email_locations_editor: {},
-    no_email_names_admin: {},
-    no_email_names_all: {},
-    no_email_names_author: {},
-    no_email_names_editor: {},
-    no_email_names_reviewer: {},
-    no_email_observations_all: {},
-    no_email_observations_consensus: {},
-    no_email_observations_naming: {},
-    no_feature_email: {},
-    no_name_change_email: {},
-    no_name_proposal_email: {},
-    no_question_email: {},
-    prefs: {},
-    profile: {},
-    remove_api_keys: {},
-    remove_image: {},
-    reverify: {},
-    send_verify: {},
-    signup: {},
-    test_autologin: {},
-    verify: {},
-    welcome: {}
+    # activate_api_key: {},
+    # api_keys: {},
+    # create_api_key: {},
+    # edit_api_key: {},
+    # email_new_password: {},
+    # login: {},
+    # logout_user: {},
+    # no_comment_email: { methods: [:get] },
+    # no_comment_response_email: {},
+    # no_commercial_email: {},
+    # no_consensus_change_email: {},
+    # no_email_comments_all: {},
+    # no_email_comments_owner: {},
+    # no_email_comments_response: {},
+    # no_email_general_commercial: {},
+    # no_email_general_feature: {},
+    # no_email_general_question: {},
+    # no_email_locations_admin: {},
+    # no_email_locations_all: {},
+    # no_email_locations_author: {},
+    # no_email_locations_editor: {},
+    # no_email_names_admin: {},
+    # no_email_names_all: {},
+    # no_email_names_author: {},
+    # no_email_names_editor: {},
+    # no_email_names_reviewer: {},
+    # no_email_observations_all: {},
+    # no_email_observations_consensus: {},
+    # no_email_observations_naming: {},
+    # no_feature_email: {},
+    # no_name_change_email: {},
+    # no_name_proposal_email: {},
+    # no_question_email: {},
+    # prefs: {},
+    # profile: {},
+    # remove_api_keys: {}
+    # remove_image: {},
+    # reverify: {},
+    # send_verify: {},
+    # signup: {},
+    # test_autologin: {},
+    # verify: {}
+    # welcome: {}
   },
   ajax: {
     api_key: {},
@@ -551,6 +551,38 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
+
+  # NOTE: this nesting or lack thereof is necessary to get nice path helpers
+  resource :account, only: [:new, :create]
+
+  namespace :account do
+    get("welcome")
+    get("signup", to: "/account#new")
+
+    resource :login, only: [:new, :create], controller: "login"
+    get("email_new_password", controller: "login")
+    post("new_password_request", controller: "login")
+    get("logout", controller: "login")
+    get("test_autologin", controller: "login")
+
+    resource :preferences, only: [:edit, :update]
+    get("no_email", controller: "preferences")
+
+    resource :profile, only: [:edit, :update], controller: "profile"
+    patch("profile/remove_image", controller: "profile")
+
+    resource :verify, only: [:new, :create], controller: "verifications"
+    # match("verify", via: [:get, :post], controller: "verifications")
+    get("reverify", controller: "verifications")
+    post("send_verify", controller: "verifications")
+
+    resources :api_keys, only: [:index, :create, :edit, :update]
+    post("api_keys/:id/activate", to: "api_keys#activate",
+                                  as: "activate_api_key")
+    post("api_keys/remove", to: "api_keys#remove",
+                            as: "remove_api_key")
+    # get("api_keys", to: "api_keys#index")
+  end
 
   # ----- Admin: no resources, just actions ------------------------------------
   namespace :admin do

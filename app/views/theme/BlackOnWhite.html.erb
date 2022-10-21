@@ -2,10 +2,8 @@
   @title = :theme_black_on_white.tl
 
   tabs = [
-    link_to(:theme_list.t,
-            controller: :theme, action: :color_themes),
-    link_to(:app_preferences.t,
-            controller: :account, action: :prefs)
+    link_to(:theme_list.t, theme_color_themes_path),
+    link_to(:app_preferences.t, edit_account_preferences_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
