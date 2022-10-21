@@ -13,9 +13,7 @@ module Account
       :create
     ]
 
-    # I feel like i've been chopping wood for weeks, and I don't feel like
-    # refactoring these two nearly identical methods. But they could use help.
-    # rubocop:disable Metrics/AbcSize
+    # Regular signup verifications hit this page only.
     def new
       id        = params["id"]
       auth_code = params["auth_code"]
@@ -25,8 +23,7 @@ module Account
       # login.  The user just gets redirected here instead of being properly
       # logged in.  "auth_code" will be missing.
       if auth_code != user.auth_code
-        @unverified_user = user
-        render(action: :reverify)
+        reverify_unverified_user(user)
 
       # If already logged in and verified, just send to "welcome" page.
       elsif @user == user
@@ -36,26 +33,17 @@ module Account
       # someone grabs a user's verify email, they could theoretically use it to
       # log in any time they wanted to.  This makes it a one-time use.)
       elsif user.verified
-        flash_warning(:runtime_reverify_already_verified.t)
-        @user = nil
-        User.current = nil
-        session_user_set(nil)
-        redirect_to(new_account_login_path)
+        redirect_already_used_verification(user)
 
       # If user was created via API, we must ask the user to choose a password
       # first before we can verify them.
       elsif user.password.blank?
-        @user = user
-        flash_warning(:account_choose_password_warning.t)
-        render(action: :choose_password)
+        send_api_new_user_to_choose_password(user)
 
       # If not already verified, and the code checks out, then mark account
       # "verified", log user in, and display the "you're verified" page.
       else
-        @user = user
-        User.current = user
-        session_user_set(user)
-        @user.verify
+        mark_user_verified_and_login(user)
         render(:new)
       end
     end
@@ -68,77 +56,23 @@ module Account
       auth_code = params["auth_code"]
       return unless (user = find_or_goto_index(User, id))
 
-      # This will happen legitimately whenever a non-verified user tries to
-      # login.  The user just gets redirected here instead of being properly
-      # logged in.  "auth_code" will be missing.
       if auth_code != user.auth_code
-        @unverified_user = user
-        render(action: :reverify)
-
-      # If already logged in and verified, just send to "welcome" page.
+        reverify_unverified_user(user)
       elsif @user == user
         redirect_to(account_welcome_path)
-
-      # If user is already verified, send them back to the login page.  (If
-      # someone grabs a user's verify email, they could theoretically use it to
-      # log in any time they wanted to.  This makes it a one-time use.)
       elsif user.verified
-        flash_warning(:runtime_reverify_already_verified.t)
-        @user = nil
-        User.current = nil
-        session_user_set(nil)
-        redirect_to(new_account_login_path)
+        redirect_already_used_verification(user)
 
-      # If user was created via API, we must ask the user to choose a password
-      # first before we can verify them.
+      # If user was created via API, they will have been sent to the
+      # choose password form, which POSTs to this action (:create)
       elsif user.password.blank?
-        @user = user
-        password = begin
-                     params[:user][:password]
-                   rescue StandardError
-                     nil
-                   end
-        confirmation = begin
-                         params[:user][:password_confirmation]
-                       rescue StandardError
-                         nil
-                       end
-        if password.blank?
-          @user.errors.add(:password, :validate_user_password_missing.t)
-        elsif password != confirmation
-          @user.errors.add(:password_confirmation,
-                           :validate_user_password_no_match.t)
-        elsif password.length < 5 || password.size > 40
-          @user.errors.add(:password, :validate_user_password_too_long.t)
-        else
-          User.current = @user
-          session_user_set(@user)
-          @user.change_password(password)
-          @user.verify
-        end
-
-        # Question: Why is it `user` and not `@user`, below?
-        # We've been assigning errors to @user. Anyway, check if we tallied any.
-        if user.errors.any?
-          @user.password = password
-          flash_object_errors(user)
-
-          render(action: :choose_password) and return
-        end
-
-        render(action: :new) and return
-      # If not already verified, and the code checks out, then mark account
-      # "verified", log user in, and display the "you're verified" page.
+        handle_password_form_submission(user)
       else
-        @user = user
-        User.current = user
-        session_user_set(user)
-        @user.verify
+        mark_user_verified_and_login(user)
 
         render(action: :new)
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
     # This action is never actually used.  Its template is rendered by verify.
     def reverify
@@ -156,6 +90,68 @@ module Account
     end
 
     private
+
+    def reverify_unverified_user(user)
+      @unverified_user = user
+      render(action: :reverify)
+    end
+
+    def redirect_already_used_verification(_user)
+      flash_warning(:runtime_reverify_already_verified.t)
+      @user = nil
+      User.current = nil
+      session_user_set(nil)
+      redirect_to(new_account_login_path)
+    end
+
+    def send_api_new_user_to_choose_password(user)
+      @user = user
+      flash_warning(:account_choose_password_warning.t)
+      render(action: :choose_password)
+    end
+
+    def handle_password_form_submission(user)
+      @user = user
+      password = begin
+                   params[:user][:password]
+                 rescue StandardError
+                   nil
+                 end
+      confirmation = begin
+                       params[:user][:password_confirmation]
+                     rescue StandardError
+                       nil
+                     end
+      check_password_form_for_errors(password, confirmation)
+
+      render(action: :new) and return unless @user.errors.any?
+
+      @user.password = password
+      flash_object_errors(@user)
+
+      render(action: :choose_password) and return
+    end
+
+    def check_password_form_for_errors(password, confirmation)
+      if password.blank?
+        @user.errors.add(:password, :validate_user_password_missing.t)
+      elsif password != confirmation
+        @user.errors.add(:password_confirmation,
+                         :validate_user_password_no_match.t)
+      elsif password.length < 5 || password.size > 40
+        @user.errors.add(:password, :validate_user_password_too_long.t)
+      else
+        @user.change_password(password)
+        mark_user_verified_and_login(@user)
+      end
+    end
+
+    def mark_user_verified_and_login(user)
+      @user = user
+      User.current = user
+      session_user_set(user)
+      @user.verify
+    end
 
     def notify_root_of_verification_email(user)
       url = "#{MO.http_domain}/account/verify/new/#{user.id}?" \
