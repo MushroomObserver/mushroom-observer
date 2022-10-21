@@ -20,7 +20,7 @@ module Admin
         redirect_back_or_default("/")
       elsif new_user.present?
         switch_to_user(new_user)
-        redirect_back_or_default("/")
+        render(action: :new)
       end
     end
 
