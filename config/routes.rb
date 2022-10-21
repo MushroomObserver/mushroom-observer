@@ -572,16 +572,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     patch("profile/remove_image", controller: "profile")
 
     resource :verify, only: [:new, :create], controller: "verifications"
-    # match("verify", via: [:get, :post], controller: "verifications")
     get("reverify", controller: "verifications")
-    post("send_verify", controller: "verifications")
+    post("verify/resend_email(/:id)", to: "verifications#resend_email",
+                                      as: "resend_verification_email")
 
     resources :api_keys, only: [:index, :create, :edit, :update]
     post("api_keys/:id/activate", to: "api_keys#activate",
                                   as: "activate_api_key")
     post("api_keys/remove", to: "api_keys#remove",
                             as: "remove_api_key")
-    # get("api_keys", to: "api_keys#index")
   end
 
   # ----- Admin: no resources, just actions ------------------------------------
