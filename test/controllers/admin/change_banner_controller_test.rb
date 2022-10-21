@@ -26,8 +26,7 @@ module Admin
         str2.update_localization
 
         get(:edit)
-        binding.break
-        assert_redirected_to(account_login_path)
+        assert_redirected_to(new_account_login_path)
 
         login("rolf")
         get(:edit)
