@@ -10,12 +10,6 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_redirected_to(users_path)
   end
 
-  def test_anon_user_send_verify
-    get(:send_verify)
-
-    assert_redirected_to(users_path)
-  end
-
   # Normal verify action is get(:new)
   def test_normal_verify
     user = User.create!(
@@ -120,7 +114,13 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_raises(RuntimeError) { post(:reverify) }
   end
 
-  def test_verify_resend_email
+  def test_anon_user_resend_email
+    get(:resend_email)
+
+    assert_redirected_to(users_path)
+  end
+
+  def test_resend_email
     user = User.create!(
       login: "micky",
       email: "mm@disney.com"
@@ -129,7 +129,7 @@ class Account::VerificationsControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  def test_verify_resend_hotmail
+  def test_resend_hotmail
     user = User.create!(
       login: "micky",
       email: "mm@hotmail.com"

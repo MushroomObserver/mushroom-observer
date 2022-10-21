@@ -2,11 +2,10 @@
 
 class Account::VerificationsController < ApplicationController
   before_action :login_required, except: [
-    # :verify,
-    :reverify,
-    :send_verify,
     :new,
-    :create
+    :create,
+    :reverify,
+    :resend_email
   ]
   before_action :disable_link_prefetching, except: [
     :new,
@@ -143,8 +142,7 @@ class Account::VerificationsController < ApplicationController
 
   # This is used by the "reverify" page to re-send the verification email.
   def resend_email
-    return unless (user = find_or_goto_index(User, params[:id].to_s)) &&
-                  (request.method == "POST")
+    return unless user = find_or_goto_index(User, params[:id])
 
     VerifyEmail.build(user).deliver_now
     notify_root_of_verification_email(user)
