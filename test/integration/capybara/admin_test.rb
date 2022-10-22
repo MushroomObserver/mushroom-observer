@@ -112,17 +112,11 @@ class AdminTest < CapybaraIntegrationTestCase
     assert_selector("#admin_okay_ips_form")
     assert_selector("#admin_blocked_ips_form")
 
-    # Cannot test this: files might not be in this state
-    # within("#okay_ips") do
-    #   assert_selector("td", text: "3.14.15.9")
-    # end
-
-    # within("#blocked_ips") do
-    #   assert_selector("td", text: "1.2.3.4")
-    #   assert_selector("td", text: "3.14.15.9")
-    #   assert_selector("td", text: "12.34.56.78")
-    #   assert_selector("td", text: "97.53.10.86")
-    # end
+    # Be sure these are not already in the table
+    within("#okay_ips") do
+      refute_selector("td", text: "3.4.5.6")
+      refute_selector("td", text: "3.14.15.9")
+    end
 
     within("#admin_okay_ips_form") do
       fill_in("add_okay", with: "not.an.ip")
@@ -133,15 +127,18 @@ class AdminTest < CapybaraIntegrationTestCase
     within("#admin_okay_ips_form") do
       fill_in("add_okay", with: "3.4.5.6")
       click_commit
+      fill_in("add_okay", with: "3.14.15.9")
+      click_commit
     end
 
     within("#okay_ips") do
       assert_selector("td", text: "3.4.5.6")
+      assert_selector("td", text: "3.14.15.9")
+      click_on(id: "remove_okay_ip_3.14.15.9")
+      refute_selector("td", text: "3.14.15.9")
     end
 
-    within("#admin_okay_ips_form") do
-      click_on(id: "clear_okay_ips_link")
-    end
+    click_on(id: "clear_okay_ips_list")
 
     within("#okay_ips") do
       refute_selector("td", text: "3.4.5.6")
@@ -151,15 +148,18 @@ class AdminTest < CapybaraIntegrationTestCase
     within("#admin_blocked_ips_form") do
       fill_in("add_bad", with: "3.4.5.6")
       click_commit
+      fill_in("add_bad", with: "3.14.15.9")
+      click_commit
     end
 
     within("#blocked_ips") do
       assert_selector("td", text: "3.4.5.6")
+      assert_selector("td", text: "3.14.15.9")
+      click_on(id: "remove_blocked_ip_3.14.15.9")
+      refute_selector("td", text: "3.14.15.9")
     end
 
-    within("#admin_blocked_ips_form") do
-      click_on(id: "clear_blocked_ips_link")
-    end
+    click_on(id: "clear_blocked_ips_list")
 
     within("#blocked_ips") do
       refute_selector("td", text: "3.4.5.6")

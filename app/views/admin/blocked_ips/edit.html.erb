@@ -8,7 +8,7 @@
     <p><%= link_to("Refresh Stats", edit_admin_blocked_ips_path) %></p>
 
     <%# ----- Okay IPs ----- %>
-    <section id="okay_ips" class="m-3 p-3" style="background:#f7f">
+    <section class="m-3 p-3" style="background:#f7f">
       <%= form_with(url: admin_blocked_ips_path, method: "patch",
                     class: "d-inline-block",
                     id: "admin_okay_ips_form") do |f| %>
@@ -33,16 +33,17 @@
           <tr>
             <td><%= ip.t %></td>
             <td>[<%= patch_button(name: :REMOVE.l,
-                       path: admin_blocked_ips_path(remove_okay: ip)) %>]</td>
+                       path: admin_blocked_ips_path(remove_okay: ip),
+                       id: "remove_okay_ip_#{ip}",) %>]</td>
         <% end %>
       </table>
     </section><!--#okay_ips-->
 
     <%# ----- Blocked IPs ----- %>
-    <section id="blocked_ips" class="m-3 p-3" style="background:#f7f">
+    <section class="m-3 p-3" style="background:#f7f">
 
       <%= form_with(url: admin_blocked_ips_path, class: "d-inline-block",
-                    id: "admin_blocked_ips_form") do |f| %>
+                    id: "admin_blocked_ips_form", method: :patch) do |f| %>
         <div class="form-group form-inline d-inline-block">
           <span class="text-larger">Blocked IPs:</span><!-- .text-larger --> &nbsp;&nbsp;
           <%= f.text_field(:add_bad,
@@ -64,7 +65,8 @@
           <tr>
             <td><%= ip.t %></td>
             <td>[<%= patch_button(name: :REMOVE.l,
-                      path: admin_blocked_ips_path(remove_bad: ip)) %>]</td>
+                       path: admin_blocked_ips_path(remove_bad: ip),
+                       id: "remove_blocked_ip_#{ip}") %>]</td>
       <% end %>
       </table>
     </section><!--#blocked_ips-->

@@ -18,6 +18,7 @@ module Admin
 
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
+    # GETting this page with params[:report] will show info about a chosen IP
     def edit
       @ip = params[:report] if validate_ip!(params[:report])
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
@@ -25,12 +26,13 @@ module Admin
       @stats = IpStats.read_stats(do_activity: true)
     end
 
+    # Render the page after an update
     def update
       process_blocked_ips_commands
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
-      # render(action: :edit, params: { report: @id })
+      render(action: :edit)
     end
 
     private
