@@ -29,7 +29,6 @@ ACTIONS = {
     email_new_password: {},
     login: {},
     logout_user: {},
-    manager: {},
     no_comment_email: { methods: [:get] },
     no_comment_response_email: {},
     no_commercial_email: {},
