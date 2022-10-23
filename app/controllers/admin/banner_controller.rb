@@ -7,15 +7,15 @@ module Admin
     before_action :login_required
 
     # Update banner across all translations.
-    def new
-      @val = :app_banner_box.l.to_s
+    def edit
+      @val = h(:app_banner_box.l.to_s)
     end
 
-    def create
+    def update
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
       update_banner_languages
-      redirect_to("/")
+      render(:edit)
     end
 
     private

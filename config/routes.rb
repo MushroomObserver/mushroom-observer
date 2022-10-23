@@ -587,7 +587,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   namespace :admin do
     resource :turn_admin_on, only: [:show], controller: "turn_on"
     resource :turn_admin_off, only: [:show], controller: "turn_off"
-    resource :banner, only: [:edit, :udpate], controller: "banner"
+    resource :banner, only: [:edit, :update], controller: "banner"
     resource :switch_users, only: [:new, :create]
     resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
