@@ -2610,6 +2610,10 @@
   # visual_groups/destroy
   destroy_visual_group_success: "[:VISUAL_GROUP] [:destroyed]"
 
+  # visual_groups/edit
+  edit_visual_group_title: "[:EDITING] [name] [:VISUAL_GROUP]"
+  edit_visual_group_change_images: "Save Changes"
+
   # visual_models/show
   show_visual_model_title: "[name] [:VISUAL_MODEL]"
   show_visual_model_back_to_index: Back to Visual Model Index

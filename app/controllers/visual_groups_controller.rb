@@ -20,9 +20,17 @@ class VisualGroupsController < ApplicationController
     @visual_group = VisualGroup.new
   end
 
-  #   # GET /visual_groups/1/edit
-  #   def edit
-  #   end
+  # GET /visual_groups/1/edit
+  def edit
+    pass_query_params
+    @visual_group = VisualGroup.find(params[:id])
+    query = create_query(:Image, :pattern_search, by: :created_at,
+                                                  pattern: @visual_group.name)
+    @layout = calc_layout_params
+    @pages = paginate_numbers(:page, @layout["count"])
+    @objects = query.paginate(@pages,
+                              include: [:user, { observations: :name }])
+  end
 
   # POST /visual_groups or /visual_groups.json
   def create

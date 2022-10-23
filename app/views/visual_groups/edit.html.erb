@@ -1,6 +1,8 @@
-<h1>Editing Visual Group</h1>
+<%
+  @title = :edit_visual_group_title.t(name: @visual_group.name)
+%>
 
 <%= render 'form', visual_group: @visual_group %>
 
 <%= link_to 'Show', @visual_group %> |
-<%= link_to 'Back', visual_groups_path %>
+<%= link_to 'Back', visual_model_visual_groups_path(@visual_group.visual_model) %>
