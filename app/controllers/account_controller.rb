@@ -593,7 +593,7 @@ class AccountController < ApplicationController
     @key = APIKey.new # blank out form for if they want to create another key
     flash_notice(:account_api_keys_create_success.t)
   rescue StandardError => e
-    flash_error(:account_api_keys_create_failed.t(msg: e.to_s))
+    flash_error(:account_api_keys_create_failed.t + e.to_s)
   end
 
   def remove_api_keys
