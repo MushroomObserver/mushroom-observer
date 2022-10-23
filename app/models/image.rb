@@ -223,6 +223,7 @@ class Image < AbstractModel
 
   has_many :observation_images, dependent: :destroy
   has_many :observations, through: :observation_images
+  has_many :visual_group_images, dependent: :destroy
   has_many :visual_groups, through: :visual_group_images
 
   has_many :project_images, dependent: :destroy
