@@ -2614,6 +2614,9 @@
   edit_visual_group_title: "[:EDITING] [name] [:VISUAL_GROUP]"
   edit_visual_group_change_images: "Save Changes"
 
+  # visual_groups/update
+  update_visual_group_success: "[:UPDATED] [name] [:VISUAL_GROUP]"
+
   # visual_models/show
   show_visual_model_title: "[name] [:VISUAL_MODEL]"
   show_visual_model_back_to_index: Back to Visual Model Index

@@ -36,49 +36,32 @@ class VisualGroupsController < ApplicationController
   def create
     @visual_group = VisualGroup.new(visual_group_params)
 
-    if @visual_group.save
-      redirect_to(visual_model_visual_groups_url(@visual_group.visual_model, @visual_group),
-                  notice: :runtime_visual_group_created_at.t)
-    else
-      render(:new, status: :unprocessable_entity)
-    end
+    @visual_group.save!
+    redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
+                                               @visual_group),
+                notice: :runtime_visual_group_created_at.t)
   end
 
-  #   # PATCH/PUT /visual_groups/1 or /visual_groups/1.json
-  #   def update
-  #     respond_to do |format|
-  #       if @visual_group.update(visual_group_params)
-  #         format.html { redirect_to visual_group_url(@visual_group),
-  # notice: "Visual group was successfully updated." }
-  #         format.json { render :show, status: :ok, location: @visual_group }
-  #       else
-  #         format.html { render :edit, status: :unprocessable_entity }
-  #         format.json { render json: @visual_group.errors,
-  # status: :unprocessable_entity }
-  #       end
-  #     end
-  #   end
+  # PATCH/PUT /visual_groups/1 or /visual_groups/1.json
+  def update
+    @visual_group = VisualGroup.find(params[:id])
+    @visual_group.update!(visual_group_params)
+    redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
+                                               @visual_group),
+                notice: :update_visual_group_success.t)
+  end
 
   # DELETE /visual_groups/1 or /visual_groups/1.json
   def destroy
     @visual_group = VisualGroup.find(params[:id])
+    model = @visual_group.visual_model
     @visual_group.destroy
 
-    respond_to do |format|
-      format.html do
-        redirect_to(visual_groups_url,
-                    notice: :destroy_visual_group_success.t)
-      end
-      format.json { head(:no_content) }
-    end
+    redirect_to(visual_model_visual_groups_url(model),
+                notice: :destroy_visual_group_success.t)
   end
 
   private
-
-  # Use callbacks to share common setup or constraints between actions.
-  def set_visual_group
-    @visual_group = VisualGroup.find(params[:id])
-  end
 
   # Only allow a list of trusted parameters through.
   def visual_group_params
