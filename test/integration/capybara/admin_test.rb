@@ -52,7 +52,7 @@ class AdminTest < CapybaraIntegrationTestCase
   #   put_user_in_admin_mode(rolf)
   #   click_on(id: "nav_admin_edit_banner_link")
 
-  #   within("#admin_change_banner_form") do
+  #   within("#admin_banner_form") do
   #     fill_in("val", with: "An **important** new banner")
   #     # first(:button, type: "submit", name: "commit").click
   #     click_commit
