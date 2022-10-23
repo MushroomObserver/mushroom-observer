@@ -3,8 +3,8 @@
 require("test_helper")
 
 module Admin
-  class ChangeBannerControllerTest < FunctionalTestCase
-    def test_change_banner
+  class BannerControllerTest < FunctionalTestCase
+    def test_edit_banner
       use_test_locales do
         # Oops!  One of these tags actually exists now!
         TranslationString.where(tag: "app_banner_box").each(&:destroy)

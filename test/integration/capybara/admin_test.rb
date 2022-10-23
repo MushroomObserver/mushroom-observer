@@ -46,11 +46,11 @@ class AdminTest < CapybaraIntegrationTestCase
   # Deactivated for now. Somehow this test strips all language tags
   # (the controller action does not, however).
   #
-  # def test_change_banner
-  #   refute_selector(id: "nav_admin_change_banner_link")
+  # def test_edit_banner
+  #   refute_selector(id: "nav_admin_edit_banner_link")
 
   #   put_user_in_admin_mode(rolf)
-  #   click_on(id: "nav_admin_change_banner_link")
+  #   click_on(id: "nav_admin_edit_banner_link")
 
   #   within("#admin_change_banner_form") do
   #     fill_in("val", with: "An **important** new banner")

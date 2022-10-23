@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class ChangeBannerController < ApplicationController
+  class BannerController < ApplicationController
     include Admin::RestrictAccessToAdminMode
 
     before_action :login_required

@@ -1,7 +1,7 @@
 <% @title = :change_banner_title.t %>
 
-<%= form_with(url: edit_admin_change_banner_path, method: :put,
-              id: "admin_change_banner_form") do |f| %>
+<%= form_with(url: edit_admin_banner_path, method: :put,
+              id: "admin_banner_form") do |f| %>
 
   <%= f.text_area(:val, value: h(@val), rows: 5, id: "val",
                      class: "form-control") %>
