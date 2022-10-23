@@ -31,26 +31,25 @@
     <%= form.submit %>
   </div>
 
-  <%= paginate_block(@pages) do %>
-    <ul class="row list-unstyled mt-3">
-      <%= render(layout: "shared/matrix_table",
-                 locals: {objects: @objects}) do |image| %>
-        <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
-          <div class="py-3 text-center">
-            <%= thumbnail(image, votes: true, original: true) %>
-          </div>
-          <div class="pb-3 text-center">
-            <%= fields_for :selected do |selects_form| %>
-              <%= selects_form.check_box(image.id, {}, "yes", "no") %>
-              <%= selects_form.label(image.id, "#{:image.t} ##{image.id}") %>
-            <% end %>
-          </div>
-        </li><!-- .matrix-box -->
-      <% end %>
-    </ul>
+  <% if @pages %>
+    <%= paginate_block(@pages) do %>
+      <ul class="row list-unstyled mt-3">
+        <%= render(layout: "shared/matrix_table",
+                   locals: {objects: @objects}) do |image| %>
+          <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
+            <div class="py-3 text-center">
+              <%= thumbnail(image, votes: true, original: true) %>
+            </div>
+            <div class="pb-3 text-center">
+              <%= fields_for :selected do |selects_form| %>
+                <%= selects_form.check_box(image.id, {}, "yes", "no") %>
+                <%= selects_form.label(image.id, "#{:image.t} ##{image.id}") %>
+              <% end %>
+            </div>
+          </li><!-- .matrix-box -->
+        <% end %>
+      </ul>
+    <% end %>
   <% end %>
-  <div class="actions">
-    <%= form.submit %>
-  </div>
 <% @container = :full %>
 <% end %>

@@ -13,19 +13,25 @@ class VisualGroupsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  # test "should get new" do
-  #   get new_visual_group_url
-  #   assert_response :success
-  # end
+  test "should get new" do
+    login
+    get(:new, params: { visual_model_id: @visual_group.visual_model_id })
+    debugger
+    assert_response :success
+  end
 
   # test "should create visual_group" do
   #   assert_difference('VisualGroup.count') do
-  #     post visual_groups_url, params: { visual_group: {
-  # name: @visual_group.name,
-  # reviewed: @visual_group.reviewed } }
+  #     post visual_model_visual_groups_url, params: {
+  #            visual_group: {
+  #              visual_model_id: @visual_group.visual_model_id,
+  #              name: @visual_group.name,
+  #              reviewed: @visual_group.reviewed
+  #            }
+  #          }
   #   end
 
-  #   assert_redirected_to visual_group_url(VisualGroup.last)
+  #   assert_redirected_to visual_model_visual_group_url(VisualGroup.last)
   # end
 
   test "should show visual_group" do
