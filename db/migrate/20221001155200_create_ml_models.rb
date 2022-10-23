@@ -20,6 +20,7 @@ class CreateMlModels < ActiveRecord::Migration[6.1]
     create_table(:visual_group_images) do |t|
       t.integer(:image_id)
       t.integer(:visual_group_id)
+      t.boolean(:included, default: true, null: false)
     end
   end
 end

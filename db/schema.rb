@@ -689,6 +689,7 @@ ActiveRecord::Schema.define(version: 2022_10_01_155200) do
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "image_id"
     t.integer "visual_group_id"
+    t.boolean "included", default: true, null: false
   end
 
   create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
