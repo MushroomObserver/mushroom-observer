@@ -4,6 +4,10 @@ require("test_helper")
 
 module Admin
   class DonationsControllerTest < FunctionalTestCase
+    # NOTE: zeitwerk does not autoload the /tests directory
+    require_relative("../donations_controller_test_helpers")
+    include ::DonationsControllerTestHelpers
+
     def test_new_donation
       get(:new)
       assert_response(:redirect)
@@ -27,19 +31,6 @@ module Admin
       params = donation_params(amount, rolf, anon, recurring)
       post(:create, params: params)
       assert_donations(donations + 1, amount, true, params[:donation])
-    end
-
-    def donation_params(amount, user, anon, recurring = false)
-      {
-        donation: {
-          amount: amount,
-          who: user.name,
-          email: user.email,
-          anonymous: anon,
-          recurring: recurring,
-          reviewed: false
-        }
-      }
     end
 
     def test_review_donations

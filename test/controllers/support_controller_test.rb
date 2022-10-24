@@ -3,6 +3,10 @@
 require("test_helper")
 
 class SupportControllerTest < FunctionalTestCase
+  # NOTE: zeitwerk does not autoload the /tests directory
+  require_relative("donations_controller_test_helpers")
+  include ::DonationsControllerTestHelpers
+
   def test_gets
     [
       :donors,
@@ -39,33 +43,6 @@ class SupportControllerTest < FunctionalTestCase
     post(:confirm, params: params)
     assert_template(:confirm)
     assert_donations(donations + 1, final_amount, false, params[:donation])
-  end
-
-  def assert_donations(count, final_amount, reviewed, params)
-    donation = Donation.all.order("created_at DESC")[0]
-    assert_equal([count, final_amount, reviewed],
-                 [Donation.count, donation.amount, donation.reviewed])
-    assert_donation_params(params, donation)
-  end
-
-  def assert_donation_params(params, donation)
-    assert_equal([params[:who], params[:email],
-                  params[:anonymous], params[:recurring]],
-                 [donation.who, donation.email,
-                  donation.anonymous, donation.recurring])
-  end
-
-  def donation_params(amount, user, anon, recurring = false)
-    {
-      donation: {
-        amount: amount,
-        who: user.name,
-        email: user.email,
-        anonymous: anon,
-        recurring: recurring,
-        reviewed: false
-      }
-    }
   end
 
   def test_confirm_other_amount_post
