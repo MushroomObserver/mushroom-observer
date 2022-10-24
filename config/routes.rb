@@ -596,7 +596,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     namespace :emails do
       resource :feature, only: [:new, :create], controller: "feature"
     end
-    get("show")
+    # get("show")
   end
 
   # match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])

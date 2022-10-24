@@ -10,25 +10,6 @@ class EmailsControllerTest < FunctionalTestCase
     assert_form_action(action: :ask_webmaster_question)
   end
 
-  def test_some_admin_pages
-    [
-      [:features, "features", {}]
-    ].each do |page, response, params|
-      logout
-      get(page, params: params)
-      assert_redirected_to(new_account_login_path)
-
-      login("rolf")
-      get(page, params: params)
-      assert_redirected_to("/")
-      assert_flash_text(/denied|only.*admin/i)
-
-      make_admin("rolf")
-      get(page, params: params)
-      assert_template(response) # 1
-    end
-  end
-
   def test_ask_questions
     id = observations(:coprinus_comatus_obs).id
     requires_login(:ask_observation_question, id: id)
