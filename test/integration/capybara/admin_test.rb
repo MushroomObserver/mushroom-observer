@@ -4,12 +4,13 @@ require("test_helper")
 
 class AdminTest < CapybaraIntegrationTestCase
   def test_review_donations
-    visit("/support/review_donations")
-    assert_flash_text(:review_donations_not_allowed.t)
+    visit("/admin/donations/edit")
+    # binding.break
+    assert_flash_text(:permission_denied.t)
 
     put_user_in_admin_mode(rolf)
 
-    visit("/support/review_donations")
+    visit("/admin/donations/edit")
 
     # There are two of these submit buttons too
     click_commit
@@ -46,13 +47,13 @@ class AdminTest < CapybaraIntegrationTestCase
   # Deactivated for now. Somehow this test strips all language tags
   # (the controller action does not, however).
   #
-  # def test_change_banner
-  #   refute_selector(id: "nav_admin_change_banner_link")
+  # def test_edit_banner
+  #   refute_selector(id: "nav_admin_edit_banner_link")
 
   #   put_user_in_admin_mode(rolf)
-  #   click_on(id: "nav_admin_change_banner_link")
+  #   click_on(id: "nav_admin_edit_banner_link")
 
-  #   within("#admin_change_banner_form") do
+  #   within("#admin_banner_form") do
   #     fill_in("val", with: "An **important** new banner")
   #     # first(:button, type: "submit", name: "commit").click
   #     click_commit
@@ -112,17 +113,13 @@ class AdminTest < CapybaraIntegrationTestCase
     assert_selector("#admin_okay_ips_form")
     assert_selector("#admin_blocked_ips_form")
 
-    # Cannot test this: files might not be in this state
-    # within("#okay_ips") do
-    #   assert_selector("td", text: "3.14.15.9")
-    # end
+    click_on(id: "clear_okay_ips_list")
 
-    # within("#blocked_ips") do
-    #   assert_selector("td", text: "1.2.3.4")
-    #   assert_selector("td", text: "3.14.15.9")
-    #   assert_selector("td", text: "12.34.56.78")
-    #   assert_selector("td", text: "97.53.10.86")
-    # end
+    # Be sure these are not already in the table
+    within("#okay_ips") do
+      refute_selector("td", text: "3.4.5.6")
+      refute_selector("td", text: "3.14.15.9")
+    end
 
     within("#admin_okay_ips_form") do
       fill_in("add_okay", with: "not.an.ip")
@@ -133,33 +130,41 @@ class AdminTest < CapybaraIntegrationTestCase
     within("#admin_okay_ips_form") do
       fill_in("add_okay", with: "3.4.5.6")
       click_commit
+      fill_in("add_okay", with: "3.14.15.9")
+      click_commit
     end
 
     within("#okay_ips") do
       assert_selector("td", text: "3.4.5.6")
+      assert_selector("td", text: "3.14.15.9")
+      click_on(id: "remove_okay_ip_3.14.15.9")
+      refute_selector("td", text: "3.14.15.9")
     end
 
-    within("#admin_okay_ips_form") do
-      click_on(id: "clear_okay_ips_link")
-    end
+    click_on(id: "clear_okay_ips_list")
 
     within("#okay_ips") do
       refute_selector("td", text: "3.4.5.6")
       refute_selector("td", text: "3.14.15.9")
     end
 
+    click_on(id: "clear_blocked_ips_list")
+
     within("#admin_blocked_ips_form") do
       fill_in("add_bad", with: "3.4.5.6")
+      click_commit
+      fill_in("add_bad", with: "3.14.15.9")
       click_commit
     end
 
     within("#blocked_ips") do
       assert_selector("td", text: "3.4.5.6")
+      assert_selector("td", text: "3.14.15.9")
+      click_on(id: "remove_blocked_ip_3.14.15.9")
+      refute_selector("td", text: "3.14.15.9")
     end
 
-    within("#admin_blocked_ips_form") do
-      click_on(id: "clear_blocked_ips_link")
-    end
+    click_on(id: "clear_blocked_ips_list")
 
     within("#blocked_ips") do
       refute_selector("td", text: "3.4.5.6")

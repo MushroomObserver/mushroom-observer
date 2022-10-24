@@ -1,0 +1,13 @@
+<% @title = :change_user_bonuses_title.t(user: @user2.legal_name) %>
+
+<%= form_with(url: admin_users_path, method: :patch) do |f| %>
+
+  <div class="help-note">
+    <%= :change_user_bonuses_help.tp %>
+  </div>
+
+  <%= f.text_area(:val, value: h(@val), rows: 5,
+                  class: "form-control mt-3") %>
+
+  <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<% end %>
