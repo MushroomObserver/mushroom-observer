@@ -9,6 +9,9 @@ module Admin
     end
 
     def access_denied
+      # error for #new and #create was :create_donation_not_allowed.t
+      # error for #edit and #update was :review_donations_not_allowed.t
+
       flash_error(:permission_denied.t)
       if session[:user_id]
         redirect_to(support_donate_path)
@@ -18,21 +21,15 @@ module Admin
     end
 
     def new
-      # return unless check_donate_admin(:create_donation_not_allowed.t)
-
       @donation = Donation.new
     end
 
     def create
-      # return unless check_donate_admin(:create_donation_not_allowed.t)
-
       @donation = create_donation(params)
     end
 
     # Review donations
     def edit
-      # return unless check_donate_admin(:review_donations_not_allowed.t)
-
       @donations = Donation.all.order(created_at: :desc)
       @reviewed = {}
       @donations.each do |d|
@@ -41,8 +38,6 @@ module Admin
     end
 
     def update
-      # return unless check_donate_admin(:review_donations_not_allowed.t)
-
       update_donations(params[:reviewed])
       @donations = Donation.all.order(created_at: :desc)
       @reviewed = {}
