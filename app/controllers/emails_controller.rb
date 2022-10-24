@@ -6,23 +6,6 @@ class EmailsController < ApplicationController
     :ask_webmaster_question
   ]
 
-  def features
-    if in_admin_mode?
-      @users = User.where("email_general_feature=1 && verified is not null")
-      if request.method == "POST"
-        @users.each do |user|
-          QueuedEmail::Feature.create_email(user,
-                                            params[:feature_email][:content])
-        end
-        flash_notice(:send_feature_email_success.t)
-        redirect_to(users_path(by: "name"))
-      end
-    else
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    end
-  end
-
   def ask_webmaster_question
     @email = params.dig(:user, :email)
     @content = params.dig(:question, :content)

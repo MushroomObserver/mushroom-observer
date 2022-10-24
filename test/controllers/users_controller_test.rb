@@ -18,25 +18,6 @@ class UsersControllerTest < FunctionalTestCase
     assert_template(:show)
   end
 
-  # def test_some_admin_pages
-  #   [
-  #     [:users_by_name,  "list_users", {}],
-  #   ].each do |page, response, params|
-  #     logout
-  #     get(page, params: params)
-  #     assert_redirected_to(new_account_login_path)
-
-  #     login("rolf")
-  #     get(page, params: params)
-  #     assert_redirected_to(action: :index)
-  #     assert_flash_text(/denied|only.*admin/i)
-
-  #     make_admin("rolf")
-  #     get(page, params)
-  #     assert_template(response) # 1
-  #   end
-  # end
-
   #   -------------
   #    user_search
   #   -------------
@@ -92,10 +73,27 @@ class UsersControllerTest < FunctionalTestCase
     assert_flash_text(flash_text)
   end
 
+  #   ---------------
+  #    admin actions
+  #   ---------------
+
+  # Prove that user_index (without search or id param) is restricted to admins
+  def test_index
+    login("rolf")
+    get(:index)
+    assert_redirected_to(:root)
+
+    make_admin
+    get(:index)
+    assert_response(:success)
+  end
+
   #   ---------------------
   #    show_selected_users
   #   ---------------------
 
+  # The unfiltered user :index is admin-only, but selected/searched users
+  # can be shown via the same action.
   # Prove that sorting links include "Contribution" (when not in admin mode)
   def prove_sorting_links_include_contribution
     sorting_links = css_select("#sorts")
@@ -124,51 +122,5 @@ class UsersControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: number8.id, q: q, flow: "prev" })
     assert_redirected_to(user_path(number7.id, q: q))
-  end
-
-  #   ---------------
-  #    admin actions
-  #   ---------------
-
-  # Prove that user_index is restricted to admins
-  def test_index
-    login("rolf")
-    get(:index)
-    assert_redirected_to(:root)
-
-    make_admin
-    get(:index)
-    assert_response(:success)
-  end
-
-  def test_change_bonuses
-    user = users(:mary)
-    old_contribution = mary.contribution
-    bonus = "7 lucky \n 13 unlucky"
-
-    # Prove that non-admin cannot change bonuses and attempt to do so
-    # redirects to target user's page
-    login("rolf")
-    get(:edit, params: { id: user.id })
-    assert_redirected_to(user_path(user.id))
-
-    # Prove that admin posting bonuses in wrong format causes a flash error,
-    # leaving bonuses and contributions unchanged.
-    make_admin
-    post(:update, params: { id: user.id, val: "wong format 7" })
-    assert_flash_error
-    user.reload
-    assert_empty(user.bonuses)
-    assert_equal(old_contribution, user.contribution)
-
-    # Prove that admin can change bonuses
-    post(:update, params: { id: user.id, val: bonus })
-    user.reload
-    assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
-    assert_equal(old_contribution + 20, user.contribution)
-
-    # Prove that admin can get bonuses
-    get(:edit, params: { id: user.id })
-    assert_response(:success)
   end
 end
