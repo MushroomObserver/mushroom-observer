@@ -682,10 +682,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     end
     collection do
       get("map")
-      get("download")
-      post("download")
-      get("print_labels")
-      post("print_labels")
+      # get("download", to: "observations/downloads#new")
+      # post("download")
+      # get("print_labels")
+      # post("print_labels")
+      resources :downloads, only: [:new, :create]
+      get("print_labels", to: "observations/downloads#print_labels")
     end
   end
 

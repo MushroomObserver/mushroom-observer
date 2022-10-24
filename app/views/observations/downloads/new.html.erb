@@ -2,12 +2,12 @@
   @title = :download_observations_title.t
 
   tabs = [
-    link_with_query(:download_observations_back.t, action: :index)
+    link_with_query(:download_observations_back.t, observations_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(add_query_param({})) %>
+<%= form_with(url: add_query_param(observations_downloads_path)) %>
   <p><%= :download_observations_format.t %>:</p>
   <ul type="none">
     <li>

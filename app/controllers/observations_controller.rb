@@ -8,7 +8,7 @@ class ObservationsController < ApplicationController
   include Destroy
   include Suggestions
   include Map
-  include Download
+  # include Download
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
