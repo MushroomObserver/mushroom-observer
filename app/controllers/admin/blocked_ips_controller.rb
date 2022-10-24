@@ -6,16 +6,6 @@ module Admin
 
     before_action :login_required
 
-    # def edit
-    #   if in_admin_mode?
-    #     @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
-    #     @okay_ips = sort_by_ip(IpStats.read_okay_ips)
-    #     @stats = IpStats.read_stats(do_activity: true)
-    #   else
-    #     redirect_back_or_default("/info/how_to_help")
-    #   end
-    # end
-
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
     # GETting this page with params[:report] will show info about a chosen IP

@@ -17,51 +17,51 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  account: {
-    # activate_api_key: {},
-    # api_keys: {},
-    # create_api_key: {},
-    # edit_api_key: {},
-    # email_new_password: {},
-    # login: {},
-    # logout_user: {},
-    # no_comment_email: { methods: [:get] },
-    # no_comment_response_email: {},
-    # no_commercial_email: {},
-    # no_consensus_change_email: {},
-    # no_email_comments_all: {},
-    # no_email_comments_owner: {},
-    # no_email_comments_response: {},
-    # no_email_general_commercial: {},
-    # no_email_general_feature: {},
-    # no_email_general_question: {},
-    # no_email_locations_admin: {},
-    # no_email_locations_all: {},
-    # no_email_locations_author: {},
-    # no_email_locations_editor: {},
-    # no_email_names_admin: {},
-    # no_email_names_all: {},
-    # no_email_names_author: {},
-    # no_email_names_editor: {},
-    # no_email_names_reviewer: {},
-    # no_email_observations_all: {},
-    # no_email_observations_consensus: {},
-    # no_email_observations_naming: {},
-    # no_feature_email: {},
-    # no_name_change_email: {},
-    # no_name_proposal_email: {},
-    # no_question_email: {},
-    # prefs: {},
-    # profile: {},
-    # remove_api_keys: {}
-    # remove_image: {},
-    # reverify: {},
-    # send_verify: {},
-    # signup: {},
-    # test_autologin: {},
-    # verify: {}
-    # welcome: {}
-  },
+  # account: {
+  # activate_api_key: {},
+  # api_keys: {},
+  # create_api_key: {},
+  # edit_api_key: {},
+  # email_new_password: {},
+  # login: {},
+  # logout_user: {},
+  # no_comment_email: { methods: [:get] },
+  # no_comment_response_email: {},
+  # no_commercial_email: {},
+  # no_consensus_change_email: {},
+  # no_email_comments_all: {},
+  # no_email_comments_owner: {},
+  # no_email_comments_response: {},
+  # no_email_general_commercial: {},
+  # no_email_general_feature: {},
+  # no_email_general_question: {},
+  # no_email_locations_admin: {},
+  # no_email_locations_all: {},
+  # no_email_locations_author: {},
+  # no_email_locations_editor: {},
+  # no_email_names_admin: {},
+  # no_email_names_all: {},
+  # no_email_names_author: {},
+  # no_email_names_editor: {},
+  # no_email_names_reviewer: {},
+  # no_email_observations_all: {},
+  # no_email_observations_consensus: {},
+  # no_email_observations_naming: {},
+  # no_feature_email: {},
+  # no_name_change_email: {},
+  # no_name_proposal_email: {},
+  # no_question_email: {},
+  # prefs: {},
+  # profile: {},
+  # remove_api_keys: {}
+  # remove_image: {},
+  # reverify: {},
+  # send_verify: {},
+  # signup: {},
+  # test_autologin: {},
+  # verify: {}
+  # welcome: {}
+  # },
   ajax: {
     api_key: {},
     auto_complete: {},
@@ -321,12 +321,12 @@ ACTIONS = {
   },
   support: {
     confirm: {},
-    create_donation: {},
+    # create_donation: {},
     donate: {},
     donors: {},
     governance: {},
     letter: {},
-    review_donations: {},
+    # review_donations: {},
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are to very old pages that we might get rid of.
@@ -552,7 +552,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
-  # NOTE: this nesting or lack thereof is necessary to get nice path helpers
+  # NOTE: Nesting below is necessary to get nice path helpers
   resource :account, only: [:new, :create]
 
   namespace :account do
@@ -586,6 +586,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Admin: resources and actions ------------------------------------
   namespace :admin do
     resource :users, only: [:edit, :update, :destroy]
+    resource :donations, only: [:new, :create, :edit, :update, :destroy]
+    get("review_donations", to: "admin/donations#edit")
     resource :turn_admin_on, only: [:show], controller: "turn_on"
     resource :turn_admin_off, only: [:show], controller: "turn_off"
     resource :banner, only: [:edit, :update], controller: "banner"
@@ -597,14 +599,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       resource :feature, only: [:new, :create], controller: "feature"
     end
     # get("show")
+    get("test_flash_redirection")
   end
 
   # match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])
   # match("/admin/turn_admin_off", to: "admin#turn_admin_off", via: [:get, :post])
   # match("/admin/create_alert", to: "admin#create_alert", via: [:get, :post])
   # match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
-  match("/admin/test_flash_redirection",
-        to: "admin#test_flash_redirection", via: [:get, :post])
+  # match("/admin/test_flash_redirection",
+  #       to: "admin#test_flash_redirection", via: [:get, :post])
   # match("/admin/add_user_to_group",
   #       to: "admin#add_user_to_group", via: [:get, :post])
   # match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])

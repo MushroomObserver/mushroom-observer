@@ -4,12 +4,13 @@ require("test_helper")
 
 class AdminTest < CapybaraIntegrationTestCase
   def test_review_donations
-    visit("/support/review_donations")
-    assert_flash_text(:review_donations_not_allowed.t)
+    visit("/admin/donations/edit")
+    # binding.break
+    assert_flash_text(:permission_denied.t)
 
     put_user_in_admin_mode(rolf)
 
-    visit("/support/review_donations")
+    visit("/admin/donations/edit")
 
     # There are two of these submit buttons too
     click_commit

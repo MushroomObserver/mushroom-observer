@@ -79,47 +79,4 @@ class SupportControllerTest < FunctionalTestCase
     post(:confirm, params: params)
     assert_flash_text(:confirm_positive_number_error.t)
   end
-
-  def test_create_donation
-    get(:create_donation)
-    assert_response(:redirect)
-    make_admin
-    get(:create_donation)
-    assert_template(:create_donation)
-  end
-
-  def test_create_donation_post
-    create_donation_post(false, false)
-  end
-
-  def create_donation_post(anon, recurring)
-    make_admin
-    amount = 100.00
-    donations = Donation.count
-    params = donation_params(amount, rolf, anon, recurring)
-    post(:create_donation, params: params)
-    assert_donations(donations + 1, amount, true, params[:donation])
-  end
-
-  def test_create_donation_anon_recurring_post
-    create_donation_post(true, true)
-  end
-
-  def test_review_donations
-    get(:review_donations)
-    assert_response(:redirect)
-    make_admin
-    get(:review_donations)
-    assert_template(:review_donations)
-  end
-
-  def test_review_donations_post
-    make_admin
-    unreviewed = donations(:unreviewed)
-    assert_equal(false, unreviewed.reviewed)
-    params = { reviewed: { unreviewed.id => true } }
-    post(:review_donations, params: params)
-    reloaded = Donation.find(unreviewed.id)
-    assert(reloaded.reviewed)
-  end
 end

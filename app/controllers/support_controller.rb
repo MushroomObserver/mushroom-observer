@@ -13,34 +13,6 @@ class SupportController < ApplicationController
     @donation.email = @user.email
   end
 
-  def create_donation
-    return unless check_donate_admin(:create_donation_not_allowed.t)
-
-    @donation = if request.method == "POST"
-                  post_donation(params)
-                else
-                  Donation.new
-                end
-  end
-
-  def check_donate_admin(error)
-    return true if in_admin_mode?
-
-    flash_error(error)
-    redirect_to(action: "donate")
-  end
-
-  def post_donation(params)
-    email = params["donation"]["email"]
-    Donation.create(amount: params["donation"]["amount"],
-                    who: params["donation"]["who"],
-                    recurring: params["donation"]["recurring"],
-                    anonymous: params["donation"]["anonymous"],
-                    email: email,
-                    user: find_user(email),
-                    reviewed: true)
-  end
-
   def confirm
     @donation = if request.method == "POST"
                   confirm_donation(params["donation"])
@@ -76,25 +48,6 @@ class SupportController < ApplicationController
       return false
     end
     true
-  end
-
-  def review_donations
-    return unless check_donate_admin(:review_donations_not_allowed.t)
-
-    update_donations(params[:reviewed]) if request.method == "POST"
-    @donations = Donation.all.order("created_at DESC")
-    @reviewed = {}
-    @donations.each do |d|
-      @reviewed[d.id] = d.reviewed
-    end
-  end
-
-  def update_donations(params)
-    params.each do |x, y|
-      d = Donation.find(x)
-      d.reviewed = y
-      d.save
-    end
   end
 
   def donors
