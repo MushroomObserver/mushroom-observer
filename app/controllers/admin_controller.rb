@@ -12,11 +12,25 @@
 #  blocked_ips::        <tt>(R V .)</tt>
 
 class AdminController < ApplicationController
-  include Admin::RestrictAccessToAdminMode
-
   before_action :login_required
 
-  def show; end
+  ### Custom login_required behavior for this controller
+  def authorize?(_user)
+    in_admin_mode?
+  end
+
+  def access_denied
+    flash_error(:permission_denied.t)
+    if session[:user_id]
+      redirect_to("/")
+    else
+      redirect_to(herbaria_path)
+    end
+  end
+
+  def show
+    @redirect_path = herbaria_path
+  end
 
   def test_flash_redirection
     tags = params[:tags].to_s.split(",")
@@ -35,37 +49,4 @@ class AdminController < ApplicationController
       render(layout: "application", html: "")
     end
   end
-
-  ##############################################################################
-  #
-  #  :section: Admin utilities
-  #
-  ##############################################################################
-
-  # def turn_admin_on
-  #   session[:admin] = true if @user&.admin && !in_admin_mode?
-  #   redirect_back_or_default("/")
-  # end
-
-  # def turn_admin_off
-  #   session[:admin] = nil
-  #   redirect_back_or_default("/")
-  # end
-
-  # def add_user_to_group
-  #   in_admin_mode? ? add_user_to_group_admin_mode : add_user_to_group_user_mode
-  # end
-
-  # This is messy, but the new User#erase_user method makes a pretty good
-  # stab at the problem.
-  def destroy_user
-    id = params["id"]
-    if id.present?
-      user = User.safe_find(id)
-      User.erase_user(id) if user
-    end
-    redirect_back_or_default("/")
-  end
-
-  # ========= private Admin utilities section methods ==========
 end

@@ -583,8 +583,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                             as: "remove_api_key")
   end
 
-  # ----- Admin: no resources, just actions ------------------------------------
+  # ----- Admin: resources and actions ------------------------------------
   namespace :admin do
+    resource :users, only: [:edit, :update, :destroy]
     resource :turn_admin_on, only: [:show], controller: "turn_on"
     resource :turn_admin_off, only: [:show], controller: "turn_off"
     resource :banner, only: [:edit, :update], controller: "banner"
@@ -592,19 +593,22 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
+    namespace :emails do
+      resource :feature, only: [:new, :create], controller: "feature"
+    end
     get("show")
   end
 
   # match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])
   # match("/admin/turn_admin_off", to: "admin#turn_admin_off", via: [:get, :post])
-  match("/admin/create_alert", to: "admin#create_alert", via: [:get, :post])
+  # match("/admin/create_alert", to: "admin#create_alert", via: [:get, :post])
   # match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
   match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
   # match("/admin/add_user_to_group",
   #       to: "admin#add_user_to_group", via: [:get, :post])
   # match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])
-  match("/admin/destroy_user", to: "admin#destroy_user", via: [:get, :post])
+  # match("/admin/destroy_user", to: "admin#destroy_user", via: [:get, :post])
   # match("/admin/switch_users", to: "admin#switch_users", via: [:get, :post])
 
   # ----- Articles: standard actions --------------------------------------
@@ -726,7 +730,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :sequences, id: /\d+/
 
   # ----- Users: standard actions -------------------------------------------
-  resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
+  resources :users, id: /\d+/, only: [:index, :show]
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

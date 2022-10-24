@@ -2,8 +2,6 @@
 
 module Admin
   class SwitchUsersController < ApplicationController
-    # include Admin::RestrictAccessToAdminMode
-
     before_action :login_required
 
     def new

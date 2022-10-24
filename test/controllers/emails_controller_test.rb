@@ -108,24 +108,6 @@ class EmailsControllerTest < FunctionalTestCase
     assert_flash_text(flash) if flash
   end
 
-  def test_features
-    page = :features
-    params = { feature_email: { content: "test" } }
-
-    logout
-    post(page, params: params)
-    assert_redirected_to(new_account_login_path)
-
-    login("rolf")
-    post(page, params: params)
-    assert_redirected_to("/")
-    assert_flash_text(/denied|only.*admin/i)
-
-    make_admin("rolf")
-    post(page, params: params)
-    assert_redirected_to(users_path(by: "name"))
-  end
-
   def test_send_commercial_inquiry
     image = images(:commercial_inquiry_image)
     params = {

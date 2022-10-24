@@ -6,7 +6,7 @@ require("test_helper")
 class AdminControllerTest < FunctionalTestCase
   def test_basic_access
     get(:show)
-    assert_redirected_to(new_account_login_path)
+    assert_redirected_to(herbaria_path)
 
     login
     assert_false(session[:admin])
