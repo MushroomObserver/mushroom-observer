@@ -41,7 +41,6 @@ module Admin
 
         put(:update, params: { val: "new banner" })
         assert_no_flash
-        assert_redirected_to("/")
         assert_equal("new banner", :app_banner_box.l)
 
         strs = TranslationString.where(tag: :app_banner_box)
