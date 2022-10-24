@@ -704,9 +704,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       # post("download")
       # get("print_labels")
       # post("print_labels")
-      resources :downloads, only: [:new, :create]
-      get("print_labels", to: "observations/downloads#print_labels")
+      get("print_labels", to: "observations/downloads#print_labels",
+                          as: "print_labels_for")
     end
+  end
+  namespace :observations do
+    resources :downloads, only: [:new, :create]
   end
 
   # ----- Policy: one route  --------------------------------------------------

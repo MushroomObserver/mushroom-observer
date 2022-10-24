@@ -7,7 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(add_query_param(print_labels_observations_path, @query)) %>
+<%= form_tag(add_query_param(print_labels_for_observations_path, @query)) %>
   <h3 class="margin-top:2em"><%= :species_list_labels_header.t %>:</h3>
   <%= submit_tag(:species_list_labels_button.l, class: "btn btn-default") %>
 </form>

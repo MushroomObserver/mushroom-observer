@@ -34,7 +34,7 @@ module Observations
 
     def download_observations_switch
       if params[:commit] == :CANCEL.l
-        redirect_with_query(action: :index, always_index: true)
+        redirect_with_query(observations_path(always_index: true))
       elsif params[:commit] == :DOWNLOAD.l
         create_and_render_report
       elsif params[:commit] == :download_observations_print_labels.l

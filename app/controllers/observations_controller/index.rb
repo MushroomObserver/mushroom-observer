@@ -241,10 +241,7 @@ module ObservationsController::Index
 
     @links << [
       :list_observations_download_as_csv.t,
-      add_query_param(
-        { controller: :observations, action: :download },
-        query
-      )
+      add_query_param(new_observations_download_path, query)
     ]
     @links
   end
