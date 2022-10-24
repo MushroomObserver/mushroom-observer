@@ -112,6 +112,8 @@ class AdminTest < CapybaraIntegrationTestCase
     assert_selector("#admin_okay_ips_form")
     assert_selector("#admin_blocked_ips_form")
 
+    click_on(id: "clear_okay_ips_list")
+
     # Be sure these are not already in the table
     within("#okay_ips") do
       refute_selector("td", text: "3.4.5.6")
@@ -144,6 +146,8 @@ class AdminTest < CapybaraIntegrationTestCase
       refute_selector("td", text: "3.4.5.6")
       refute_selector("td", text: "3.14.15.9")
     end
+
+    click_on(id: "clear_blocked_ips_list")
 
     within("#admin_blocked_ips_form") do
       fill_in("add_bad", with: "3.4.5.6")
