@@ -37,7 +37,7 @@ module Herbaria
       WebmasterEmail.build(@user.email, content, subject).deliver_now
       flash_notice(:show_herbarium_request_sent.t)
       redirect_to_referrer ||
-        redirect_with_query(herbarium_path(@herbarium))
+        redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
     end
 
     ############################################################################

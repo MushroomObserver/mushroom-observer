@@ -7,7 +7,7 @@ class ObservationsController < ApplicationController
   include EditAndUpdate
   include Destroy
   # include Suggestions
-  include Map
+  # include Map
   # include Download
 
   # Disable cop: all these methods are defined in files included above.

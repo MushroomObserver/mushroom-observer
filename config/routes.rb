@@ -667,12 +667,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   resources :observations do
     member do
-      get("map")
+      get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/naming_suggestions#show",
                          as: "naming_suggestions_for")
     end
     collection do
-      get("map")
+      get("map", to: "observations/maps#index")
       get("print_labels", to: "observations/downloads#print_labels",
                           as: "print_labels_for")
     end
