@@ -17,51 +17,6 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  # account: {
-  # activate_api_key: {},
-  # api_keys: {},
-  # create_api_key: {},
-  # edit_api_key: {},
-  # email_new_password: {},
-  # login: {},
-  # logout_user: {},
-  # no_comment_email: { methods: [:get] },
-  # no_comment_response_email: {},
-  # no_commercial_email: {},
-  # no_consensus_change_email: {},
-  # no_email_comments_all: {},
-  # no_email_comments_owner: {},
-  # no_email_comments_response: {},
-  # no_email_general_commercial: {},
-  # no_email_general_feature: {},
-  # no_email_general_question: {},
-  # no_email_locations_admin: {},
-  # no_email_locations_all: {},
-  # no_email_locations_author: {},
-  # no_email_locations_editor: {},
-  # no_email_names_admin: {},
-  # no_email_names_all: {},
-  # no_email_names_author: {},
-  # no_email_names_editor: {},
-  # no_email_names_reviewer: {},
-  # no_email_observations_all: {},
-  # no_email_observations_consensus: {},
-  # no_email_observations_naming: {},
-  # no_feature_email: {},
-  # no_name_change_email: {},
-  # no_name_proposal_email: {},
-  # no_question_email: {},
-  # prefs: {},
-  # profile: {},
-  # remove_api_keys: {}
-  # remove_image: {},
-  # reverify: {},
-  # send_verify: {},
-  # signup: {},
-  # test_autologin: {},
-  # verify: {}
-  # welcome: {}
-  # },
   ajax: {
     api_key: {},
     auto_complete: {},
@@ -135,7 +90,7 @@ ACTIONS = {
     list_comments: {},
     next_comment: {},
     prev_comment: {},
-    show_comment: {},
+    # show_comment: {},
     show_comments_by_user: {},
     show_comments_for_target: {},
     show_comments_for_user: {}
@@ -151,8 +106,8 @@ ACTIONS = {
     next_herbarium_record: {},
     observation_index: {},
     prev_herbarium_record: {},
-    remove_observation: {},
-    show_herbarium_record: {}
+    remove_observation: {}
+    # show_herbarium_record: {}
   },
   image: {
     add_image: {},
@@ -174,7 +129,7 @@ ACTIONS = {
     remove_images_for_glossary_term: {},
     reuse_image: {},
     reuse_image_for_glossary_term: {},
-    show_image: {},
+    # show_image: {},
     show_original: {},
     transform_image: {}
   },
@@ -215,7 +170,7 @@ ACTIONS = {
     prev_location_description: {},
     publish_description: {},
     reverse_name_order: {},
-    show_location: {},
+    # show_location: {},
     show_location_description: {},
     show_past_location: {},
     show_past_location_description: {}
@@ -264,7 +219,7 @@ ACTIONS = {
     publish_description: {},
     refresh_classification: {},
     set_review_status: {},
-    show_name: {},
+    # show_name: {},
     show_name_description: {},
     show_past_name: {},
     show_past_name_description: {},
@@ -289,8 +244,8 @@ ACTIONS = {
     list_projects: {},
     next_project: {},
     prev_project: {},
-    project_search: {},
-    show_project: {}
+    project_search: {}
+    # show_project: {}
   },
   species_list: {
     add_observation_to_species_list: {},
@@ -312,7 +267,7 @@ ACTIONS = {
     prev_species_list: {},
     print_labels: {},
     remove_observation_from_species_list: {},
-    show_species_list: {},
+    # show_species_list: {},
     species_list_search: {},
     species_lists_by_title: {},
     species_lists_by_user: {},
@@ -602,18 +557,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("test_flash_redirection")
   end
 
-  # match("/admin/turn_admin_on", to: "admin#turn_admin_on", via: [:get, :post])
-  # match("/admin/turn_admin_off", to: "admin#turn_admin_off", via: [:get, :post])
-  # match("/admin/create_alert", to: "admin#create_alert", via: [:get, :post])
-  # match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
-  # match("/admin/test_flash_redirection",
-  #       to: "admin#test_flash_redirection", via: [:get, :post])
-  # match("/admin/add_user_to_group",
-  #       to: "admin#add_user_to_group", via: [:get, :post])
-  # match("/admin/blocked_ips", to: "admin#blocked_ips", via: [:get, :post])
-  # match("/admin/destroy_user", to: "admin#destroy_user", via: [:get, :post])
-  # match("/admin/switch_users", to: "admin#switch_users", via: [:get, :post])
-
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
@@ -627,6 +570,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
+
+  # ----- Comment:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/comment/show_comment/:id", to: "comment#show_comment",
+                                   as: "show_comment")
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
@@ -644,9 +592,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/emails/commercial_inquiry(/:id)",
         to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
         as: "emails_commercial_inquiry")
-  match("/emails/features(/:id)",
-        to: "emails#features", via: [:get, :post], id: /\d+/,
-        as: "emails_features")
+  # match("/emails/features(/:id)",
+  #       to: "emails#features", via: [:get, :post], id: /\d+/,
+  #       as: "emails_features")
   match("/emails/merge_request(/:id)",
         to: "emails#merge_request", via: [:get, :post], id: /\d+/,
         as: "emails_merge_request")
@@ -676,6 +624,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
   resources :herbaria, id: /\d+/
 
+  # ----- Herbarium record:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/herbarium_record/show_herbarium_record/:id",
+      to: "herbarium_record#show_herbarium_record",
+      as: "show_herbarium_record")
+
+  # ----- Image:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/image/show_image/:id", to: "image#show_image",
+                               as: "show_image")
+
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
   get("/info/how_to_use", to: "info#how_to_use")
@@ -692,28 +651,40 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
+  # ----- Location:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/location/show_location/:id", to: "location#show_location",
+                                     as: "show_location")
+
+  # ----- Name:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/name/show_name/:id", to: "name#show_name", as: "show_name")
+
   # ----- Observations: standard actions  ----------------------------
-  resources :observations do
-    member do
-      get("map")
-      get("suggestions")
-    end
-    collection do
-      get("map")
-      # get("download", to: "observations/downloads#new")
-      # post("download")
-      # get("print_labels")
-      # post("print_labels")
-      get("print_labels", to: "observations/downloads#print_labels",
-                          as: "print_labels_for")
-    end
-  end
   namespace :observations do
     resources :downloads, only: [:new, :create]
   end
 
+  resources :observations do
+    member do
+      get("map")
+      get("suggestions", to: "observations/naming_suggestions#show",
+                         as: "naming_suggestions_for")
+    end
+    collection do
+      get("map")
+      get("print_labels", to: "observations/downloads#print_labels",
+                          as: "print_labels_for")
+    end
+  end
+
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
+
+  # ----- Project:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/project/show_project/:id", to: "project#show_project",
+                                   as: "show_project")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
@@ -736,6 +707,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
+
+  # ----- Species List:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/species_list/show_species_list/:id",
+      to: "species_list#show_species_list",
+      as: "show_species_list")
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show]
@@ -764,13 +741,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   )
 
   # ----- Authors: legacy action redirects
-  get("/account/add_user_to_group", to: redirect("/admin/add_user_to_group"))
-  get("/account/blocked_ips", to: redirect("/admin/blocked_ips"))
-  get("/account/add_user_to_group", to: redirect("/admin/add_user_to_group"))
-  get("/account/destroy_user", to: redirect("/admin/destroy_user"))
-  get("/account/switch_users", to: redirect("/admin/switch_users"))
-
-  # ----- Authors: legacy action redirects
   get("/observer/author_request", to: redirect("/authors/email_request"))
   get("/observer/review_authors", to: redirect("/authors/review"))
 
@@ -786,8 +756,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect(path: "/emails/ask_webmaster_question"))
   get("/observer/commercial_inquiry/:id",
       to: redirect(path: "/emails/commercial_inquiry/%{id}"))
-  get("/observer/email_features",
-      to: redirect(path: "/emails/features"))
   get("/observer/email_merge_request",
       to: redirect(path: "/emails/merge_request"))
   get("/observer/email_name_change_request",

@@ -6,7 +6,7 @@ class ObservationsController < ApplicationController
   include NewAndCreate
   include EditAndUpdate
   include Destroy
-  include Suggestions
+  # include Suggestions
   include Map
   # include Download
 

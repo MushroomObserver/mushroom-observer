@@ -510,8 +510,23 @@ class AbstractModel < ApplicationRecord
   #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
   #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
   #
+  # NOTE: `show_controller` does not play well with namespaced controllers!
+  # Specifically, requests from a nested controller will infer the same nesting,
+  # which is very confusing, and almost never what you want. (Took me a year to
+  # figure out that THIS is where it happens!)
+  #
+  # Because of its misleading false specificity, I'd like to completely
+  # eradicate `show_controller`, and all methods composing paths by
+  # controller/action args, in favor of rails path helpers as drawn by routes,
+  # but wrath may be impractical - some actions handle a polyvalent object whose
+  # path cannot be easily interpolated.
+  #
+  # So at a minimum, `show_link_args` now requires string-interpolating the
+  # `show_controller` name behind a leading forward slash, in order to
+  # explicitly specify a "top level" controller. - AN 10/2022
+  #
   def self.show_link_args(id)
-    { controller: show_controller, action: show_action, id: id }
+    { controller: "/#{show_controller}", action: show_action, id: id }
   end
 
   def show_link_args
