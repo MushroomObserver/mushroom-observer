@@ -143,7 +143,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
 
     login("mary")
     post(:create,
@@ -294,7 +294,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     patch(:update,
           params: { id: number.id, collection_number: params })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
 
     login("mary")
     patch(:update,

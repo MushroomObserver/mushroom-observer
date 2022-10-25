@@ -32,20 +32,20 @@ class RandomTest < IntegrationTestCase
 
     get("/info/how_to_help")
     assert_template("info/how_to_help")
-    assert_no_link_exists("/account/login")
-    assert_link_exists("/account/logout_user")
+    assert_no_link_exists("/account/login/new")
+    assert_link_exists("/account/logout")
     assert_link_exists("/users/#{rolf.id}")
 
     click_mo_link(label: "Logout")
-    assert_template("account/logout_user")
-    assert_link_exists("/account/login")
-    assert_no_link_exists("/account/logout_user")
+    assert_template("account/login/logout")
+    assert_link_exists("/account/login/new")
+    assert_no_link_exists("/account/logout")
     assert_no_link_exists("/users/#{rolf.id}")
 
     click_mo_link(label: "Introduction")
     assert_template("info/intro")
-    assert_link_exists("/account/login")
-    assert_no_link_exists("/account/logout_user")
+    assert_link_exists("/account/login/new")
+    assert_no_link_exists("/account/logout")
     assert_no_link_exists("/users/#{rolf.id}")
   end
 

@@ -3,7 +3,7 @@
 require("test_helper")
 
 class PostObservationTest < IntegrationTestCase
-  LOGIN_TEMPLATE = "account/login"
+  LOGIN_TEMPLATE = "account/login/new"
   SHOW_OBSERVATION_TEMPLATE = "observations/show"
   NEW_OBSERVATION_TEMPLATE = "observations/new"
   CREATE_OBSERVATION_TEMPLATE = "observations"

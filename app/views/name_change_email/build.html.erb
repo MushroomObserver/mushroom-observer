@@ -84,10 +84,10 @@
     "#{MO.http_domain}/interest/set_interest?id=#{new_name.id}&type=Name&user=#{@user.id}&state=-1"])
   if email_type && email_type != "interest"
     links.push([:email_links_stop_sending.t,
-      "#{MO.http_domain}/account/no_email_names_#{email_type}/#{@user.id}"])
+      "#{MO.http_domain}/account/no_email/#{@user.id}?type=names_#{email_type}"])
   end
   links.push([:email_links_change_prefs.t,
-    "#{MO.http_domain}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/preferences/edit"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

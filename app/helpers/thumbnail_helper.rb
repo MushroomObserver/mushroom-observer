@@ -16,7 +16,7 @@ module ThumbnailHelper
     image_id = image.is_a?(Integer) ? image : image.id
     locals = {
       image: image,
-      link: Image.show_link_args(image_id),
+      link: image_show_image_path(image_id),
       size: :small,
       votes: true,
       original: false,

@@ -4,51 +4,20 @@ require("test_helper")
 
 # Controller tests for info pages
 class AdminControllerTest < FunctionalTestCase
-  def test_change_banner
-    use_test_locales do
-      # Oops!  One of these tags actually exists now!
-      TranslationString.where(tag: "app_banner_box").each(&:destroy)
+  # def test_basic_access
+  #   get(:show)
+  #   assert_redirected_to(herbaria_path)
 
-      str1 = TranslationString.create!(
-        language: languages(:english),
-        tag: :app_banner_box,
-        text: "old banner",
-        user: User.admin
-      )
-      str1.update_localization
+  #   login
+  #   assert_false(session[:admin])
+  #   rolf.admin = true
+  #   rolf.save!
 
-      str2 = TranslationString.create!(
-        language: languages(:french),
-        tag: :app_banner_box,
-        text: "banner ancienne",
-        user: User.admin
-      )
-      str2.update_localization
+  #   get(:show)
+  #   assert_redirected_to("/")
 
-      get(:change_banner)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(:change_banner)
-      assert_flash_error
-      assert_redirected_to("/")
-
-      make_admin("rolf")
-      get(:change_banner)
-      assert_no_flash
-      assert_response(:success)
-      assert_textarea_value(:val, :app_banner_box.l)
-
-      post(:change_banner, params: { val: "new banner" })
-      assert_no_flash
-      assert_redirected_to("/")
-      assert_equal("new banner", :app_banner_box.l)
-
-      strs = TranslationString.where(tag: :app_banner_box)
-      strs.each do |str|
-        assert_equal("new banner", str.text,
-                     "Didn't change text of #{str.language.locale} correctly.")
-      end
-    end
-  end
+  #   session[:admin] = true
+  #   get(:show)
+  #   assert_template("admin/show")
+  # end
 end

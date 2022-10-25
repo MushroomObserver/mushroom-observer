@@ -59,9 +59,9 @@
   links.push([:email_links_not_interested.t(type: @target.type_tag),
     "#{MO.http_domain}/interest/set_interest?id=#{@comment.target_id}&type=#{@comment.target_type}&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,
-    "#{MO.http_domain}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
+    "#{MO.http_domain}/account/no_email/#{@user.id}?type=comments_#{email_type}"]) unless watching
   links.push([:email_links_change_prefs.t,
-    "#{MO.http_domain}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/preferences/edit"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

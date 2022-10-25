@@ -207,7 +207,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
 
     # get(:login)
-    # assert_redirected_to(controller: :account, action: :login)
+    # assert_redirected_to(new_account_login_path)
   end
 
   def test_observations_by_unknown_user
