@@ -212,7 +212,7 @@ class EmailsControllerTest < FunctionalTestCase
 
     post(:name_change_request, params: params)
     assert_redirected_to(
-      "#{name_show_name_path}/#{name.id}",
+      show_name_path(id: name.id),
       "Sending Name Change Request should redirect to Name page"
     )
   end

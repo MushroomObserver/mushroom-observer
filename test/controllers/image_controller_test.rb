@@ -49,12 +49,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
   end
 
-  def test_next_image
+  def test_next_image_1
     login
     get(:next_image, params: { id: images(:turned_over_image).id })
     # Default sort order is inverse chronological (created_at DESC, id DESC).
     # So here, "next" image is one created immediately previously.
-    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|?]})
+    exp_id = images(:in_situ_image).id
+    assert_redirected_to(/#{show_image_path(id: exp_id)}[\b|?]/)
   end
 
   def test_next_image_ss
@@ -117,9 +118,10 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     login
     get(:next_image, params: params)
-    assert_redirected_to(action: "show_image",
-                         id: images(:agaricus_campestris_image).id,
-                         params: @controller.query_params(save_query))
+    qp = @controller.query_params(save_query)
+    assert_redirected_to(
+      show_image_path(id: images(:agaricus_campestris_image).id, params: qp)
+    )
   end
 
   # Test next_image in the context of a search
@@ -149,8 +151,8 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     login
     get(:next_image, params: params)
-    assert_redirected_to(action: "show_image", id: expected_next,
-                         params: @controller.query_params(query))
+    qp = @controller.query_params(query)
+    assert_redirected_to(show_image_path(id: expected_next, params: qp))
   end
 
   def test_prev_image
@@ -158,7 +160,8 @@ class ImageControllerTest < FunctionalTestCase
     # oldest image
     get(:prev_image, params: { id: images(:in_situ_image).id })
     # so "prev" is the 2nd oldest
-    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|?]})
+    exp_id = images(:turned_over_image).id
+    assert_redirected_to(/#{show_image_path(id: exp_id)}[\b|?]/)
   end
 
   def test_prev_image_ss
@@ -212,18 +215,16 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     login
     get(:prev_image, params: params)
-    assert_redirected_to(
-      action: "show_image",
-      id: observations(:detailed_unknown_obs).images.second.id,
-      params: @controller.query_params(QueryRecord.last)
-    )
+    expected_id = observations(:detailed_unknown_obs).images.second.id
+    qp = @controller.query_params(QueryRecord.last)
+    assert_redirected_to(show_image_path(id: expected_id, params: qp))
   end
 
   def test_show_original
     img_id = images(:in_situ_image).id
     login
     get(:show_original, params: { id: img_id })
-    assert_redirected_to(action: "show_image", size: "full_size", id: img_id)
+    assert_redirected_to(show_image_path(size: "full_size", id: img_id))
   end
 
   def test_show_image
@@ -345,7 +346,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_difference("ImageVote.count", 1, "Failed to cast vote") do
       get(:cast_vote, params: { id: image.id, value: value })
     end
-    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    assert_redirected_to(show_image_path(id: image.id))
     vote = ImageVote.last
     assert(vote.image == image && vote.user == user && vote.value == value,
            "Vote not cast correctly")
@@ -360,10 +361,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_difference("ImageVote.count", 1, "Failed to cast vote") do
       get(:cast_vote, params: { id: image.id, value: value, next: true })
     end
-    assert_redirected_to(
-      "#{image_show_image_path}/#{image.id}" \
-      "?q=#{QueryRecord.last.id.alphabetize}"
-    )
+    assert_redirected_to(show_image_path(id: image.id,
+                                         q: QueryRecord.last.id.alphabetize))
     vote = ImageVote.last
     assert(vote.image == image && vote.user == user && vote.value == value,
            "Vote not cast correctly")
@@ -393,7 +392,7 @@ class ImageControllerTest < FunctionalTestCase
     img_id = images(:commercial_inquiry_image).id
     login
     get(:image_search, params: { pattern: img_id })
-    assert_redirected_to(action: "show_image", id: img_id)
+    assert_redirected_to(show_image_path(id: img_id))
   end
 
   def test_advanced_search
@@ -598,7 +597,7 @@ class ImageControllerTest < FunctionalTestCase
 
     requires_user(:destroy_image, :show_image, params, user.login)
 
-    assert_redirected_to(action: :show_image, id: next_image.id, q: q)
+    assert_redirected_to(show_image_path(id: next_image.id, q: q))
     assert_equal(0, user.reload.contribution)
     assert_not(obs.reload.images.member?(image))
   end
@@ -630,7 +629,7 @@ class ImageControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:edit_image, params)
-    assert_redirected_to(action: :show_image, id: image.id)
+    assert_redirected_to(show_image_path(id: image.id))
     assert_equal(10, rolf.reload.contribution)
 
     assert(obs.reload.rss_log)
@@ -1278,7 +1277,7 @@ class ImageControllerTest < FunctionalTestCase
     # Asserting the flash text is the best I can do because Image.transform
     # does not transform images in the text environment. 2022-08-19 JDC
     assert_flash_text(flash)
-    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    assert_redirected_to(show_image_path(id: image.id))
   end
 
   # Prove that if size is provided and is
@@ -1295,6 +1294,6 @@ class ImageControllerTest < FunctionalTestCase
     # Asserting the flash text is the best I can do because Image.transform
     # does not transform images in the text environment. 2022-08-19 JDC
     assert_flash_text(:image_show_transform_note.l)
-    assert_redirected_to("#{image_show_image_path}/#{image.id}?size=#{size}")
+    assert_redirected_to(show_image_path(id: image.id, size: size))
   end
 end
