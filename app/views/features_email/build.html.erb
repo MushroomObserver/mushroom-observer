@@ -5,9 +5,9 @@
 
   links = []
   links.push([:email_links_stop_sending.t,
-    "#{MO.http_domain}/account/no_email_general_feature/#{@user.id}"])
+    "#{MO.http_domain}/account/no_email/#{@user.id}?type=general_feature"])
   links.push([:email_links_change_prefs.t,
-    "#{MO.http_domain}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/preferences/edit"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

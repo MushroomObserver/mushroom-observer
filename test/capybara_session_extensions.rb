@@ -14,13 +14,15 @@ module CapybaraSessionExtensions
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
-    visit("/account/login")
+    visit("/account/login/new")
 
-    fill_in("user_login", with: login)
-    fill_in("user_password", with: password)
-    check("user_remember_me") if remember_me == true
+    within("#account_login_form") do
+      fill_in("user_login", with: login)
+      fill_in("user_password", with: password)
+      check("user_remember_me") if remember_me == true
 
-    click_button("Login")
+      click_commit
+    end
   end
 
   # Login the given user, testing to make sure it was successful.
@@ -29,6 +31,16 @@ module CapybaraSessionExtensions
     assert_flash(/success/i)
     user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
+  end
+
+  def put_user_in_admin_mode(user = :zero_user)
+    user.admin = true
+    user.save!
+    login(user.login)
+    assert_equal(user.id, User.current_id)
+
+    click_on(id: "user_nav_admin_link")
+    assert_match(/DANGER: You are in administrator mode/, page.html)
   end
 
   # The current_path plus the query, similar to @request.fullpath
@@ -68,5 +80,10 @@ module CapybaraSessionExtensions
     @page_stack ? @page_stack.push(current_path) : @page_stack = [current_path]
     yield(block)
     visit(@page_stack.pop)
+  end
+
+  # Many forms have more than one submit button
+  def click_commit
+    first(:button, type: "submit", name: "commit").click
   end
 end

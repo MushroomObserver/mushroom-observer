@@ -4917,7 +4917,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Make sure user has to be logged in.
     get(:inherit_classification, params: { id: name.id })
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(new_account_login_path)
     login("rolf")
 
     # Make sure it doesn't crash if id is missing.
@@ -4942,7 +4942,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Make sure user has to be logged in.
     post(:inherit_classification, params: { id: name, parent: "Agaricales" })
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(new_account_login_path)
     login("rolf")
 
     # Make sure it doesn't crash if id is missing.
@@ -5029,7 +5029,7 @@ class NameControllerTest < FunctionalTestCase
   def test_get_edit_classification
     # Make sure user has to be logged in.
     get(:edit_classification)
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(new_account_login_path)
     login("rolf")
 
     # Make sure missing and bogus ids do not crash it.
@@ -5055,7 +5055,7 @@ class NameControllerTest < FunctionalTestCase
   def test_post_edit_classification
     # Make sure user has to be logged in.
     post(:edit_classification)
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(new_account_login_path)
     login("rolf")
 
     # Make sure bogus requests don't crash.

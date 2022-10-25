@@ -30,4 +30,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("TSV")
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")
+  inflect.irregular("account", "account")
 end

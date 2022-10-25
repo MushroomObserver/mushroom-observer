@@ -314,6 +314,10 @@ class Observation < AbstractModel
         ->(name) { where(name: Name.text_name_includes(name)) }
   scope :by_user,
         ->(user) { where(user: user) }
+  scope :mappable,
+        -> { where.not(location: nil).or(where.not(lat: nil)) }
+  scope :unmappable,
+        -> { where(location: nil).and(where(lat: nil)) }
   scope :with_location,
         -> { where.not(location: nil) }
   scope :without_location,

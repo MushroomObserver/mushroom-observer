@@ -32,8 +32,8 @@
 #     is +nil+).
 #
 #  4. A verification email is sent to the email address given in the sign-up
-#     form.  Inside the email is a link to /account/verify.  This provides the
-#     User +id+ and +auth_code+.
+#     form.  Inside the email is a link to /account/verify/new.  This provides
+#     the User +id+ and +auth_code+.
 #
 #  5. When they click on that link, the User record is updated and the User is
 #     automatically logged in.
@@ -355,7 +355,7 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    :users
+    "/users"
   end
 
   # Find admin's record.

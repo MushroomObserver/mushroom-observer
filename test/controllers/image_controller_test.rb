@@ -49,12 +49,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
   end
 
-  def test_next_image
+  def test_next_image_1
     login
     get(:next_image, params: { id: images(:turned_over_image).id })
     # Default sort order is inverse chronological (created_at DESC, id DESC).
     # So here, "next" image is one created immediately previously.
-    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|?]})
+    exp_id = images(:in_situ_image).id
+    assert_redirected_to(/#{show_image_path(id: exp_id)}[\b|?]/)
   end
 
   def test_next_image_ss
@@ -117,9 +118,10 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     login
     get(:next_image, params: params)
-    assert_redirected_to(action: "show_image",
-                         id: images(:agaricus_campestris_image).id,
-                         params: @controller.query_params(save_query))
+    qp = @controller.query_params(save_query)
+    assert_redirected_to(
+      show_image_path(id: images(:agaricus_campestris_image).id, params: qp)
+    )
   end
 
   # Test next_image in the context of a search
@@ -149,8 +151,8 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     login
     get(:next_image, params: params)
-    assert_redirected_to(action: "show_image", id: expected_next,
-                         params: @controller.query_params(query))
+    qp = @controller.query_params(query)
+    assert_redirected_to(show_image_path(id: expected_next, params: qp))
   end
 
   def test_prev_image
@@ -158,7 +160,8 @@ class ImageControllerTest < FunctionalTestCase
     # oldest image
     get(:prev_image, params: { id: images(:in_situ_image).id })
     # so "prev" is the 2nd oldest
-    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|?]})
+    exp_id = images(:turned_over_image).id
+    assert_redirected_to(/#{show_image_path(id: exp_id)}[\b|?]/)
   end
 
   def test_prev_image_ss
@@ -212,18 +215,16 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     login
     get(:prev_image, params: params)
-    assert_redirected_to(
-      action: "show_image",
-      id: observations(:detailed_unknown_obs).images.second.id,
-      params: @controller.query_params(QueryRecord.last)
-    )
+    expected_id = observations(:detailed_unknown_obs).images.second.id
+    qp = @controller.query_params(QueryRecord.last)
+    assert_redirected_to(show_image_path(id: expected_id, params: qp))
   end
 
   def test_show_original
     img_id = images(:in_situ_image).id
     login
     get(:show_original, params: { id: img_id })
-    assert_redirected_to(action: "show_image", size: "full_size", id: img_id)
+    assert_redirected_to(show_image_path(size: "full_size", id: img_id))
   end
 
   def test_show_image
@@ -345,7 +346,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_difference("ImageVote.count", 1, "Failed to cast vote") do
       get(:cast_vote, params: { id: image.id, value: value })
     end
-    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    assert_redirected_to(show_image_path(id: image.id))
     vote = ImageVote.last
     assert(vote.image == image && vote.user == user && vote.value == value,
            "Vote not cast correctly")
@@ -360,10 +361,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_difference("ImageVote.count", 1, "Failed to cast vote") do
       get(:cast_vote, params: { id: image.id, value: value, next: true })
     end
-    assert_redirected_to(
-      "#{image_show_image_path}/#{image.id}" \
-      "?q=#{QueryRecord.last.id.alphabetize}"
-    )
+    assert_redirected_to(show_image_path(id: image.id,
+                                         q: QueryRecord.last.id.alphabetize))
     vote = ImageVote.last
     assert(vote.image == image && vote.user == user && vote.value == value,
            "Vote not cast correctly")
@@ -393,7 +392,7 @@ class ImageControllerTest < FunctionalTestCase
     img_id = images(:commercial_inquiry_image).id
     login
     get(:image_search, params: { pattern: img_id })
-    assert_redirected_to(action: "show_image", id: img_id)
+    assert_redirected_to(show_image_path(id: img_id))
   end
 
   def test_advanced_search
@@ -430,13 +429,13 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_add_image
-    requires_login(:add_image, id: observations(:coprinus_comatus_obs).id)
-    assert_form_action(action: "add_image",
-                       id: observations(:coprinus_comatus_obs).id)
+    obs1 = observations(:coprinus_comatus_obs)
+    obs2 = observations(:minimal_unknown_obs)
+    requires_login(:add_image, id: obs1.id)
+    assert_form_action(action: "add_image", id: obs1.id)
     # Check that image cannot be added to an observation the user doesn't own.
-    get(:add_image,
-        params: { id: observations(:minimal_unknown_obs).id })
-    assert_redirected_to(controller: :observations, action: :show)
+    get(:add_image, params: { id: obs2.id })
+    assert_redirected_to(observation_path(id: obs2.id))
   end
 
   # Test reusing an image by id number.
@@ -447,8 +446,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(obs.images.member?(image))
     requires_login(:reuse_image, mode: "observation", obs_id: obs.id,
                                  img_id: image.id)
-    assert_redirected_to(controller: :observations, action: :show,
-                         id: obs.id)
+    assert_redirected_to(observation_path(id: obs.id))
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
   end
@@ -552,7 +550,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post_requires_login(:remove_images, params, "mary")
-    assert_redirected_to(controller: :observations, action: :show)
+    assert_redirected_to(observation_path(obs.id))
     assert_equal(10, mary.reload.contribution)
     assert(obs.reload.images.member?(keep))
     assert_not(obs.images.member?(remove))
@@ -565,7 +563,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post(:remove_images, params: params)
-    assert_redirected_to(controller: :observations, action: :show)
+    assert_redirected_to(observation_path(obs.id))
     # Observation gets downgraded to 1 point because it no longer has images.
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
@@ -599,7 +597,7 @@ class ImageControllerTest < FunctionalTestCase
 
     requires_user(:destroy_image, :show_image, params, user.login)
 
-    assert_redirected_to(action: :show_image, id: next_image.id, q: q)
+    assert_redirected_to(show_image_path(id: next_image.id, q: q))
     assert_equal(0, user.reload.contribution)
     assert_not(obs.reload.images.member?(image))
   end
@@ -631,7 +629,7 @@ class ImageControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:edit_image, params)
-    assert_redirected_to(action: :show_image, id: image.id)
+    assert_redirected_to(show_image_path(id: image.id))
     assert_equal(10, rolf.reload.contribution)
 
     assert(obs.reload.rss_log)
@@ -722,11 +720,14 @@ class ImageControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
     assert_equal("rolf", obs.user.login)
-    requires_user(
-      :remove_images,
-      { controller: :observations, action: :show, id: obs.id },
-      params
-    )
+    # requires_user et al don't work, these assume too much about path.
+    # requires_user(:remove_images, observation_path(id: obs.id))
+    get(:remove_images, params: params)
+    assert_redirected_to(new_account_login_path)
+
+    # Now login as obs owner
+    login(rolf.login)
+    get(:remove_images, params: params)
     assert_form_action(action: "remove_images", id: obs.id)
   end
 
@@ -767,8 +768,7 @@ class ImageControllerTest < FunctionalTestCase
     login("mary", "testpassword")
     send(:get, :reuse_image, params: params)
     # assert_redirected_to(%r{/#{obs.id}$})
-    assert_redirected_to(controller: :observations, action: :show,
-                         id: obs.id)
+    assert_redirected_to(observation_path(obs.id))
 
     login("rolf", "testpassword")
     send(:get, :reuse_image, params: params)
@@ -823,15 +823,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_not_equal("mary", owner)
     requires_login(:reuse_image, params, "mary")
     # assert_template(controller: :observations, action: :show)
-    assert_redirected_to(controller: :observations, action: :show,
-                         id: obs.id)
+    assert_redirected_to(observation_path(obs.id))
     assert_not(obs.reload.images.member?(image))
 
     login(owner)
     get(:reuse_image, params: params)
     # assert_template(controller: :observations, action: :show)
-    assert_redirected_to(controller: :observations, action: :show,
-                         id: obs.id)
+    assert_redirected_to(observation_path(obs.id))
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
   end
@@ -1020,7 +1018,7 @@ class ImageControllerTest < FunctionalTestCase
                              image4: "" } })
 
     assert_flash_error("image.process_image failure should cause flash error")
-    assert_redirected_to(controller: :observations, action: :show, id: obs.id)
+    assert_redirected_to(observation_path(obs.id))
   end
 
   # This is what would happen when user first opens form.
@@ -1102,7 +1100,7 @@ class ImageControllerTest < FunctionalTestCase
     login("mary")
     post(:bulk_vote_anonymity_updater,
          params: { commit: :image_vote_anonymity_make_anonymous.l })
-    assert_redirected_to(controller: :account, action: :prefs)
+    assert_redirected_to(edit_account_preferences_path)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
@@ -1111,7 +1109,7 @@ class ImageControllerTest < FunctionalTestCase
     login("rolf")
     post(:bulk_vote_anonymity_updater,
          params: { commit: :image_vote_anonymity_make_public.l })
-    assert_redirected_to(controller: :account, action: :prefs)
+    assert_redirected_to(edit_account_preferences_path)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert_not(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
@@ -1123,7 +1121,7 @@ class ImageControllerTest < FunctionalTestCase
     post(:bulk_vote_anonymity_updater, params: { commit: "bad commit" })
 
     assert_flash_error
-    assert_redirected_to(account_prefs_path)
+    assert_redirected_to(edit_account_preferences_path)
   end
 
   def test_original_filename_visibility
@@ -1279,7 +1277,7 @@ class ImageControllerTest < FunctionalTestCase
     # Asserting the flash text is the best I can do because Image.transform
     # does not transform images in the text environment. 2022-08-19 JDC
     assert_flash_text(flash)
-    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    assert_redirected_to(show_image_path(id: image.id))
   end
 
   # Prove that if size is provided and is
@@ -1296,6 +1294,6 @@ class ImageControllerTest < FunctionalTestCase
     # Asserting the flash text is the best I can do because Image.transform
     # does not transform images in the text environment. 2022-08-19 JDC
     assert_flash_text(:image_show_transform_note.l)
-    assert_redirected_to("#{image_show_image_path}/#{image.id}?size=#{size}")
+    assert_redirected_to(show_image_path(id: image.id, size: size))
   end
 end

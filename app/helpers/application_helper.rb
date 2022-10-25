@@ -53,6 +53,10 @@ module ApplicationHelper
     "&nbsp;".html_safe
   end
 
+  def safe_spinner(text = "")
+    "#{text}<span class='spinner-right mx-2'></span>".html_safe
+  end
+
   # Return escaped HTML.
   #
   #   "<i>X</i>"  -->  "&lt;i&gt;X&lt;/i&gt;"
@@ -133,45 +137,62 @@ module ApplicationHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
-  def destroy_button(target:, name: :DESTROY.t, classes: "text-danger")
+  def destroy_button(target:, name: :DESTROY.t, **args)
     path = if target.is_a?(String)
              target
            else
              add_query_param(send("#{target.type_tag}_path", target.id))
            end
-    id = target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
+    # classes ||= "text-danger"
+    id ||= target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
 
-    button_to(
-      name, path, method: :delete, class: classes, id: id,
-                  data: { confirm: :are_you_sure.t }
-    )
+    html_options = {
+      method: :delete,
+      class: "text-danger",
+      id: id,
+      data: { confirm: :are_you_sure.t }
+    }.merge(args)
+
+    button_to(name, path, html_options)
   end
 
   # POST to a path; used instead of a link because POST link requires js
   # post_button(name: herbarium.name.t,
   #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
   #             confirm: :are_you_sure.t)
-  def post_button(name:, path:, confirm: nil)
-    data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :post, class: "text-info", data: data)
+  def post_button(name:, path:, **args)
+    html_options = {
+      method: :post,
+      class: "text-info"
+    }.merge(args)
+
+    button_to(name, path, html_options)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
   # put_button(name: herbarium.name.t,
   #            path: herbarium_path(id: @herbarium.id),
   #            confirm: :are_you_sure.t)
-  def put_button(name:, path:, confirm: nil)
-    data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :put, class: "text-info", data: data)
+  def put_button(name:, path:, **args)
+    html_options = {
+      method: :put,
+      class: "text-info"
+    }.merge(args)
+
+    button_to(name, path, html_options)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
   # patch_button(name: herbarium.name.t,
   #              path: herbarium_path(id: @herbarium.id),
   #              confirm: :are_you_sure.t)
-  def patch_button(name:, path:, confirm: nil)
-    data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :patch, class: "text-info", data: data)
+  def patch_button(name:, path:, **args)
+    html_options = {
+      method: :patch,
+      class: "text-info"
+    }.merge(args)
+
+    button_to(name, path, html_options)
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.

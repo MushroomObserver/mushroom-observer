@@ -189,7 +189,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all_no_login
     get(:index, params: { flavor: :all })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
@@ -238,7 +238,7 @@ class HerbariaControllerTest < FunctionalTestCase
     source = field_museum
     get(:index, params: { flavor: :all, merge: source.id })
 
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("form[action *= 'herbaria_merges_path']", count: 0)
   end
@@ -333,12 +333,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_new_no_login
     get(:new)
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_edit_no_login
     get(:edit, params: { id: nybg.id })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_edit_without_curators
@@ -595,7 +595,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_update_no_login
     patch(:update, params: { herbarium: herbarium_params, id: nybg.id })
-    assert_redirected_to(account_login_path)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_update_with_duplicate_name_by_owner_of_some_records

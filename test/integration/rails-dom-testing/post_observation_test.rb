@@ -3,7 +3,7 @@
 require("test_helper")
 
 class PostObservationTest < IntegrationTestCase
-  LOGIN_TEMPLATE = "account/login"
+  LOGIN_TEMPLATE = "account/login/new"
   SHOW_OBSERVATION_TEMPLATE = "observations/show"
   NEW_OBSERVATION_TEMPLATE = "observations/new"
   CREATE_OBSERVATION_TEMPLATE = "observations"
@@ -211,8 +211,8 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations?where")
-    assert_link_exists_containing("show_location/#{new_loc.id}")
-    assert_link_exists_containing("show_image/#{new_img.id}")
+    assert_link_exists_containing(show_location_path(new_loc.id))
+    assert_link_exists_containing(show_image_path(new_img.id))
   end
 
   def review_flash(patterns)
