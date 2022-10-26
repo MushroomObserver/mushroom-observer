@@ -45,6 +45,7 @@
 # See https://tinyurl.com/ynapvpt7
 
 # View and modify Herbaria (displayed as "Fungaria")
+# rubocop:disable Metrics/ClassLength
 class HerbariaController < ApplicationController
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
@@ -374,3 +375,4 @@ class HerbariaController < ApplicationController
              :place_name, :personal, :personal_user_name)
   end
 end
+# rubocop:enable Metrics/ClassLength
