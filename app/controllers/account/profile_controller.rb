@@ -51,7 +51,7 @@ module Account
       end
     end
 
-    def upload_the_image
+    def upload_the_image_if_present
       # Check if we need to upload an image.
       upload = params["user"]["upload_image"]
       return if upload.blank?
