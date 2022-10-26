@@ -81,7 +81,7 @@ module Account
 
     # This is used by the "reverify" page to re-send the verification email.
     def resend_email
-      return unless user = find_or_goto_index(User, params[:id])
+      return unless (user = find_or_goto_index(User, params[:id]))
 
       VerifyEmail.build(user).deliver_now
       notify_root_of_verification_email(user)

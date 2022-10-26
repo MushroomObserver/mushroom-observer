@@ -65,24 +65,15 @@ module Account
         flash_error(:runtime_email_new_password_failed.t(user: @login))
         render("account/login/email_new_password") and return
       else
-        password = String.random(10)
-        @new_user.change_password(password)
-        if @new_user.save
-          flash_notice(:runtime_email_new_password_success.tp +
-                       :email_spam_notice.tp)
-          PasswordEmail.build(@new_user, password).deliver_now
-          render("account/login/new")
-        else
-          flash_object_errors(@new_user)
-        end
+        set_random_password_for_new_user_and_email_them
       end
     end
 
-    ##############################################################################
+    ############################################################################
     #
     #  :section: Testing
     #
-    ##############################################################################
+    ############################################################################
 
     # This is used to test the autologin feature.
     def test_autologin; end
@@ -104,6 +95,19 @@ module Account
     def login_unverified(user)
       @unverified_user = user
       render("/account/reverify")
+    end
+
+    def set_random_password_for_new_user_and_email_them
+      password = String.random(10)
+      @new_user.change_password(password)
+      if @new_user.save
+        flash_notice(:runtime_email_new_password_success.tp +
+                     :email_spam_notice.tp)
+        PasswordEmail.build(@new_user, password).deliver_now
+        render("account/login/new")
+      else
+        flash_object_errors(@new_user)
+      end
     end
 
     def switch_to_user(new_user)
