@@ -61,13 +61,14 @@ module Observations
       country = l.name.split(", ")[-1]
       state =   l.name.split(", ")[-2]
       city =    l.name.split(", ")[-3]
+      labels =  o.try(:herbarium_records).map(&:herbarium_label).join(", ")
 
       # Hard coded values below come from the actual
       # part of a test failure message.
       # If fixtures change, these may also need to be changed.
       assert_equal(
         "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
-        "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\"," \
+        "X,\"#{labels}\"," \
         "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
         "#{l.id},#{country},#{state},,#{city}," \
         ",,,34.22,34.15,-118.29,-118.37," \

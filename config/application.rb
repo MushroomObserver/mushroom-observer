@@ -76,6 +76,10 @@ module MushroomObserver
     # generated form input IDs in 6.1, as they were in `form_for`.
     config.action_view.form_with_generates_ids = true
 
+    # Rails 6.1 can auto-generate HTML comments with the template filename
+    # Unfortunately this is also added to email templates!
+    # config.action_view.annotate_rendered_view_with_filenames = true
+
     # Rails 6.1+
     config.active_record.legacy_connection_handling = false
   end

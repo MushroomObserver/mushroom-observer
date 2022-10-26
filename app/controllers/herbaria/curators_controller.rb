@@ -19,6 +19,7 @@ module Herbaria
 
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
 
+    # rubocop:disable Metrics/AbcSize
     def create
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       if @user && (@herbarium.curator?(@user) || in_admin_mode?)
@@ -46,6 +47,7 @@ module Herbaria
       redirect_to_referrer ||
         redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
     end
+    # rubocop:enable Metrics/AbcSize
 
     ############################################################################
 
