@@ -206,7 +206,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='records?observation_id=#{obs.id}&amp;q=#{q}']")
+    assert_select("form[action*='records?observation_id=#{obs.id}&q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
@@ -253,14 +253,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_edit_herbarium_record_post_no_specimen
+  def test_update_herbarium_record_no_specimen
     login("rolf")
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     post(:update, params: { id: nybg.id })
     assert_template(:edit)
   end
 
-  def test_edit_herbarium_record_redirect
+  def test_update_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
     query = Query.lookup_and_save(:HerbariumRecord, :all)

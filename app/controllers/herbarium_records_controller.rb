@@ -221,9 +221,10 @@ class HerbariumRecordsController < ApplicationController
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = whitelisted_herbarium_record_params
     normalize_parameters
+
     if !validate_herbarium_name! ||
        !can_add_record_to_herbarium?
-      return
+      render(:edit) and return
     elsif herbarium_label_free?
       @herbarium_record.save
       @herbarium_record.notify_curators if
