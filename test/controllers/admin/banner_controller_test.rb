@@ -45,8 +45,10 @@ module Admin
 
         strs = TranslationString.where(tag: :app_banner_box)
         strs.each do |str|
-          assert_equal("new banner", str.text,
-                       "Didn't change text of #{str.language.locale} correctly.")
+          assert_equal(
+            "new banner", str.text,
+            "Didn't change text of #{str.language.locale} correctly."
+          )
         end
       end
     end
