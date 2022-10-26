@@ -355,7 +355,7 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    :users
+    "/users"
   end
 
   # Find admin's record.

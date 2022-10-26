@@ -13,11 +13,8 @@
 
 <%= :show_herbarium_curator_help.tp %>
 
-<%= form_with(
-      url: add_query_param(
-              herbaria_curator_requests_path(id: @herbarium, back: @back)
-      )
-    ) do |f| %>
+<%= form_with(url: herbaria_curator_requests_path(
+      id: @herbarium, back: @back, q: get_query_param)) do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label(:name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>

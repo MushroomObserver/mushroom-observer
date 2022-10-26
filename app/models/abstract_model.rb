@@ -368,18 +368,30 @@ class AbstractModel < ApplicationRecord
   # I don't think there will be relevant special cases,
   # i.e., searchable models with singular controller names. JDC 2020-08-02
   #
-  # Return the name of the controller (as a symbol)
+  # Return the name of the controller (as a string! see below)
   # that handles the "show_<object>" for this object.
   #
   #   Article.show_controller => :articles # for normalized controller
   #
   #   Name.show_controller => :name # unnormalized controller & special cases
   #
+  # NOTE: `show_controller` MUST string-interpolate the controller name after
+  # a leading forward slash, in order to explicitly specify a "top level"
+  # controller. Took me a year to learn again what Joe learned two years ago:
+  # Without the forward slash, requests from a nested controller will assume the
+  # same nesting. It's very confusing to debug, and almost never what you want.
+  #
+  # Because of this misleading specificity, I'd like to move away from
+  # `show_controller`, and methods composing paths by controller/action args,
+  # in favor of Rails explicit path helpers as drawn by routes, but in some
+  # cases `show_controller` is practical - some actions handle a polyvalent
+  # object whose path cannot be easily interpolated. - AN 10/2022
+  #
   def self.show_controller
     if controller_normalized?
-      name.pluralize.underscore.to_sym # Rails standard for most controllers
+      "/#{name.pluralize.underscore}" # Rails standard for most controllers
     else
-      name.underscore.to_sym # old MO controller names and any special cases
+      "/#{name.underscore}" # old MO controller names and any special cases
     end
   end
 
@@ -455,11 +467,14 @@ class AbstractModel < ApplicationRecord
   #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
   #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
   #
+  # NOTE: show_controller now has leading forward slash,
+  # to account for namespacing
+  #
   def self.show_url(id)
     if controller_normalized?
-      "#{MO.http_domain}/#{show_controller}/#{id}"
+      "#{MO.http_domain}#{show_controller}/#{id}"
     else
-      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
     end
   end
 

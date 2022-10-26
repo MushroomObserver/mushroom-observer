@@ -175,9 +175,11 @@ form_url = add_query_param(controller: :vote, action: :cast_votes,
 <!--/VOTE POPUPS-->
 
 <!--SUGGESTIONS-->
-<% url = url_for(add_query_param(controller: :observations,
-                                 action: :suggestions,
-                                 id: observation.id, names: :xxx))
+<%
+@query ||= nil
+url = naming_suggestions_for_observation_path(id: observation.id,
+        names: :xxx, q: get_query_param(@query))
+
 inject_javascript_at_end %(
   SuggestionModule(#{observation.image_ids}, "#{url}", {
     suggestions_processing_images:  "#{j :suggestions_processing_images.t}",

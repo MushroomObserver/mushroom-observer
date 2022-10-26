@@ -5,8 +5,7 @@
 
   tabs = [
     link_with_query(:show_object.t(type: :observation),
-                    controller: :observations, action: :show,
-                    id: @observation.id)
+                    observation_path(id: @observation.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -34,8 +33,7 @@
       <tr>
         <td>
           <%= link_with_query(sugg.name.display_name_brief_authors.t,
-                              controller: :name, action: :show_name,
-                              id: sugg.name.id) %><br/>
+                              show_name_path(id: sugg.name.id)) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
             (<%= :suggestions_already_proposed.t %>)
@@ -60,9 +58,7 @@
           </td>
           <td>
             <%= thumbnail(sugg.image_obs.thumb_image,
-                          link: {controller: sugg.image_obs.show_controller,
-                                 action: sugg.image_obs.show_action,
-                                 id: sugg.image_obs.id}) \
+                          link: show_image_path(id: sugg.image_obs.id)) \
                           if sugg.image_obs.present? %>
         </td>
       </tr>

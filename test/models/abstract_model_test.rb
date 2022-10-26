@@ -404,8 +404,8 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_show_controller
-    assert_equal(:articles, Article.show_controller)
-    assert_equal(:phony, Phony.show_controller)
+    assert_equal("/articles", Article.show_controller)
+    assert_equal("/phony", Phony.show_controller)
   end
 
   def test_show_action
@@ -417,7 +417,7 @@ class AbstractModelTest < UnitTestCase
     assert_equal("#{MO.http_domain}/articles/2020",
                  Article.show_url(2020))
     assert_equal(
-      "#{MO.http_domain}/#{Phony.show_controller}/#{Phony.show_action}/2020",
+      "#{MO.http_domain}#{Phony.show_controller}/#{Phony.show_action}/2020",
       Phony.show_url(2020)
     )
   end
@@ -432,31 +432,33 @@ class AbstractModelTest < UnitTestCase
   end
 
   # -------------------------------------------
-  #  Show_url is missing slash in some cases.
+  #  NOTE: this is a bit hacky. If we can normalize controllers and
+  #  use the route-generated path helpers, no need for a `show_url`.
+  #  `show_controller` now has leading forward slash in all cases.
   # -------------------------------------------
 
   def test_show_urls
-    assert_show_url(APIKey, "account/show_api_key")
-    assert_show_url(CollectionNumber, "collection_numbers")
-    assert_show_url(Comment, "comment/show_comment")
-    assert_show_url(ExternalSite, "external_site/show_external_site")
-    assert_show_url(Herbarium, "herbaria")
-    assert_show_url(HerbariumRecord, "herbarium_record/show_herbarium_record")
-    assert_show_url(Image, "image/show_image")
-    assert_show_url(Location, "location/show_location")
-    assert_show_url(Name, "name/show_name")
-    assert_show_url(Naming, "observations/show_naming")
-    assert_show_url(Observation, "observations")
-    assert_show_url(Project, "project/show_project")
-    assert_show_url(Sequence, "sequences")
-    assert_show_url(SpeciesList, "species_list/show_species_list")
-    assert_show_url(User, "users")
+    assert_show_url(APIKey, "/account/show_api_key")
+    assert_show_url(CollectionNumber, "/collection_numbers")
+    assert_show_url(Comment, "/comment/show_comment")
+    assert_show_url(ExternalSite, "/external_site/show_external_site")
+    assert_show_url(Herbarium, "/herbaria")
+    assert_show_url(HerbariumRecord, "/herbarium_record/show_herbarium_record")
+    assert_show_url(Image, "/image/show_image")
+    assert_show_url(Location, "/location/show_location")
+    assert_show_url(Name, "/name/show_name")
+    assert_show_url(Naming, "/observations/show_naming")
+    assert_show_url(Observation, "/observations")
+    assert_show_url(Project, "/project/show_project")
+    assert_show_url(Sequence, "/sequences")
+    assert_show_url(SpeciesList, "/species_list/show_species_list")
+    assert_show_url(User, "/users")
   end
 
   def assert_show_url(model, path)
     domain = "https://mushroomobserver.org"
     obj = model.first
-    assert_equal("#{domain}/#{path}/#{obj.id}", obj.show_url)
+    assert_equal("#{domain}#{path}/#{obj.id}", obj.show_url)
   end
 
   # -------------------------------------------------------------------------

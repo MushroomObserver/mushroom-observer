@@ -28,12 +28,11 @@ module ObjectLinkHelper
       location = Location.find(location) unless location.is_a?(AbstractModel)
       link_string = where_string(location.display_name, count)
       link_string += " [#{:click_for_map.t}]" if click
-      link_to(link_string, location.show_link_args)
+      link_to(link_string, show_location_path(id: location.id))
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, controller: :observations,
-                           action: :index, where: where)
+      link_to(link_string, observations_path(where: where))
     end
   end
 
@@ -44,10 +43,10 @@ module ObjectLinkHelper
   def name_link(name, str = nil)
     if name.is_a?(Integer)
       str ||= "#{:NAME.t} ##{name}"
-      link_to(str, Name.show_link_args(name))
+      link_to(str, show_name_path(id: name))
     else
       str ||= name.display_name_brief_authors.t
-      link_to(str, name.show_link_args)
+      link_to(str, show_name_path(id: name.id))
     end
   end
 
@@ -140,9 +139,7 @@ module ObjectLinkHelper
     links = users.map { |u| user_link(u, u.legal_name) }
     # interpolating would require inefficient #sanitize
     # or dangerous #html_safe
-    # rubocop:disable Style/StringConcatenation
     title + ": " + links.safe_join(", ")
-    # rubocop:enable Style/StringConcatenation
   end
 
   # Wrap object's name in link to the object, return nil if no object

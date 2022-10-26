@@ -16,7 +16,7 @@ module ThumbnailHelper
     image_id = image.is_a?(Integer) ? image : image.id
     locals = {
       image: image,
-      link: image_show_image_path(image_id),
+      link: show_image_path(image_id),
       size: :small,
       votes: true,
       original: false,
@@ -32,7 +32,7 @@ module ThumbnailHelper
     return unless obs&.thumb_image
 
     thumbnail(obs.thumb_image,
-              link: obs.show_link_args,
+              link: observation_path(id: obs.id),
               size: :thumbnail,
               votes: true,
               responsive: false) + image_copyright(obs.thumb_image)
@@ -54,10 +54,7 @@ module ThumbnailHelper
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
     # return a link if the user has NOT voted this way
     link = link_to(vote_text,
-                   { controller: :image,
-                     action: :show_image,
-                     id: image.id,
-                     vote: vote },
+                   show_image_path(id: image.id, vote: vote),
                    title: image_vote_as_help_string(vote),
                    data: { role: "image_vote", id: image.id, val: vote })
     if current_vote == vote
