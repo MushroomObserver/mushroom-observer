@@ -548,6 +548,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :collection_numbers do
     resource :remove_observation, only: [:update], module: :collection_numbers
   end
+
   # ----- Comment:
   # ----- temporary show route for path_builder with id ---------------
   get("/comment/show_comment/:id", to: "comment#show_comment",
