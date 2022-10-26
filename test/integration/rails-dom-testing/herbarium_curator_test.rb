@@ -52,7 +52,7 @@ class HerbariumCuratorTest < IntegrationTestCase
     assert_template("observations/show")
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
-    click_mo_link(href: "/herbarium_records_remove_observation/#{rec.id}")
+    click_mo_link(href: "/herbarium_records/#{rec.id}/remove_observation")
     assert_template("observations/show")
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
@@ -92,7 +92,7 @@ class HerbariumCuratorTest < IntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get(herbarium_path(rec.herbarium.id))
-    click_mo_link(href: /herbarium_index/)
+    click_mo_link(href: /herbarium_records/)
     assert_template("herbarium_records/index")
     click_mo_link(href: "/herbarium_records/#{rec.id}/edit")
     assert_template("herbarium_records/edit")

@@ -3,11 +3,9 @@
 
   tabs = []
   if in_admin_mode? || @herbarium_record.can_edit?
-    tabs << link_with_query(:edit_herbarium_record.t,
-                            edit_herbarium_record_path(
-                              id: @herbarium_record.id,
-                              params: { back: :show }
-                            ))
+    tabs << link_to(:edit_herbarium_record.t,
+                    edit_herbarium_record_path(id: @herbarium_record.id,
+                                               back: :show, q: get_query_param))
     tabs << destroy_button(name: :destroy_object.t(type: :herbarium_record),
                            target: herbarium_record_path(@herbarium_record.id))
   end

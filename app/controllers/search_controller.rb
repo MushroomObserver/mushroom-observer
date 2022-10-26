@@ -30,6 +30,13 @@ class SearchController < ApplicationController
         index_path: herbaria_path(flavor: :all)
       )
       return
+    when :herbarium_record
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: herbarium_records_path(pattern: pattern),
+        index_path: herbarium_records_path
+      )
+      return
     when :observation
       redirect_to_search_or_index(
         pattern: pattern,
@@ -44,8 +51,7 @@ class SearchController < ApplicationController
         index_path: users_path
       )
       return
-    when :comment, :image, :location, :name, :project, :species_list,
-      :herbarium_record
+    when :comment, :image, :location, :name, :project, :species_list
       ctrlr = type
     when :google
       site_google_search(pattern)
