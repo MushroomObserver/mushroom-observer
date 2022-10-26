@@ -40,7 +40,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     obs = observations(:strobilurus_diminutivus_obs)
     get(:index, params: { observation_id: obs.id })
-    assert_template(:list_herbarium_records)
+    assert_template(:index)
     assert_flash_text(/No matching fungarium records found/)
   end
 
@@ -98,21 +98,20 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     q = query.record.id.alphabetize
 
     login
-    get(:next_herbarium_record, params: { id: number1.id, q: q })
+    get(:show, params: { id: number1.id, q: q, flow: :next })
     assert_redirected_to(herbarium_record_path(id: number2.id, q: q))
 
-    get(:prev_herbarium_record, params: { id: number2.id, q: q })
+    get(:show, params: { id: number2.id, q: q, flow: :prev })
     assert_redirected_to(herbarium_record_path(id: number1.id, q: q))
   end
 
   def test_new_herbarium_record
-    get(:new,
-        params: { observation_id: observations(:coprinus_comatus_obs).id })
+    obs_id = observations(:coprinus_comatus_obs).id
+    get(:new, params: { observation_id: obs_id })
     assert_response(:redirect)
 
     login("rolf")
-    get(:new,
-        params: { observation_id: observations(:coprinus_comatus_obs).id })
+    get(:new, params: { observation_id: obs_id })
     assert_template("new")
     assert_template("shared/_matrix_box")
     assert(assigns(:herbarium_record))
@@ -122,7 +121,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
-    obs = Observation.find(params[:id])
+    obs = Observation.find(params[:observation_id])
     assert_not(obs.specimen)
     post(:create, params: params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
@@ -134,7 +133,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium_record][:accession_number],
                  herbarium_record.accession_number)
     assert_equal(rolf, herbarium_record.user)
-    obs = Observation.find(params[:id])
+    obs = Observation.find(params[:observation_id])
     assert(obs.specimen)
     assert_response(:redirect)
   end
@@ -173,7 +172,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs.update(user: dick)
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
-    params[:id] = obs.id
+    params[:observation_id] = obs.id
     params[:herbarium_record][:herbarium_name] = nybg.name
 
     login("mary")
@@ -207,7 +206,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='records?observation_id=#{obs.id}?q=#{q}']")
+    assert_select("form[action*='records?observation_id=#{obs.id}&amp;q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)

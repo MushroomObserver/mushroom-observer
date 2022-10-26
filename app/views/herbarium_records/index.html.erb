@@ -20,7 +20,7 @@
                   link_with_query(
                     :EDIT.t,
                     edit_herbarium_record_path(
-                      id: @herbarium_record.id, params: { back: :index }
+                      id: herbarium_record.id, params: { back: :index }
                     ),
                     class: "btn btn-default btn-sm"
                   )
@@ -44,8 +44,8 @@
             <%= if in_admin_mode? || herbarium_record.can_edit?
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
-                    target: herbarium_record_path(@herbarium_record.id),
-                    classes: "btn btn-default btn-sm"
+                    target: herbarium_record_path(herbarium_record.id),
+                    class: "btn btn-default btn-sm"
                   )
                 end %>
           </td>

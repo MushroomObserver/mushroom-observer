@@ -14,6 +14,7 @@ class HerbariumRecordsController < ApplicationController
   #   :prev_herbarium_record
   # ]
 
+  # rubocop:disable Metrics/AbcSize
   def index
     if params[:pattern].present? # rubocop:disable Style/GuardClause
       herbarium_record_search and return
@@ -27,6 +28,7 @@ class HerbariumRecordsController < ApplicationController
       list_herbarium_records and return
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   def show
     store_location
@@ -99,7 +101,7 @@ class HerbariumRecordsController < ApplicationController
 
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
-    redirect_with_query(action: :index)
+    redirect_with_query(herbarium_records_path)
   end
 
   ##############################################################################
@@ -156,15 +158,14 @@ class HerbariumRecordsController < ApplicationController
 
   def show_selected_herbarium_records(query, args = {})
     args = {
-      action: :list_herbarium_records,
+      action: :index,
       letters: "herbarium_records.initial_det",
       num_per_page: 100,
       include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(args)
 
     @links ||= []
-    @links << [:create_herbarium.l,
-               { controller: :herbaria, action: :create }]
+    @links << [:create_herbarium.l, new_herbarium_path]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -326,10 +327,14 @@ class HerbariumRecordsController < ApplicationController
 
   def redirect_to_observation_or_herbarium_record
     if @back_object
-      redirect_with_query(@back_object.show_link_args)
+      case @back_object.type_tag
+      when :observation
+        redirect_with_query(observation_path(id: @back_object.id))
+      when :herbarium_record
+        redirect_with_query(herbarium_record_path(id: @back_object.id))
+      end
     else
-      redirect_with_query(action: :index_herbarium_record,
-                          id: @herbarium_record.id)
+      redirect_with_query(herbarium_records_path(id: @herbarium_record.id))
     end
   end
 end
