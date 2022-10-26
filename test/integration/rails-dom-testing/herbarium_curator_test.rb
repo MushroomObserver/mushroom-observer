@@ -77,6 +77,8 @@ class HerbariumCuratorTest < IntegrationTestCase
     click_mo_link(label: "Cancel (Show Fungarium Record)")
     assert_template("herbarium_records/show")
     go_back
+    # It's still at :show. Fix
+    assert_template("herbarium_records/edit")
     open_form do |form|
       form.change("herbarium_name", rec.herbarium.name)
       form.submit("Save")
@@ -110,6 +112,7 @@ class HerbariumCuratorTest < IntegrationTestCase
       form.submit("Save")
     end
     assert_template("herbarium_records/index")
+    # This does not work because it's a destroy button, no "label"
     click_mo_link(label: /destroy/)
     assert_template("herbarium_records/index")
     assert_not(obs.reload.herbarium_records.include?(rec))

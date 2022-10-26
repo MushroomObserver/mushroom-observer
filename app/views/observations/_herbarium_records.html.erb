@@ -22,19 +22,18 @@
         <li>
           <%= link_to(record.accession_at_herbarium.t,
                       herbarium_record_path(id: record.id,
-                                            params: { q: query })) %>
+                                            params: { q: get_query_param })) %>
           <% if record.can_edit? || in_admin_mode? %>
-            [<%= link_with_query(:EDIT.t,
-                                  edit_herbarium_record_path(
-                                    id: record.id,
-                                    params: { back: observation.id }
-                                  )) %> |
-             <%= link_with_query(:REMOVE.t,
-                                 herbarium_record_remove_observation_path(
-                                   herbarium_record_id: record.id,
-                                   params: { observation_id: observation.id }
-                                 ),
-                                 { data: { confirm: :are_you_sure.t } }) %>]
+            [<%= link_to(:EDIT.t,
+                         edit_herbarium_record_path(id: record.id,
+                                                    back: observation.id,
+                                                    q: get_query_param)) %> |
+             <%= patch_button(name: :REMOVE.t,
+                    path: herbarium_record_remove_observation_path(
+                      herbarium_record_id: record.id,
+                      observation_id: observation.id, q: get_query_param,
+                    ),
+                    data: { confirm: :are_you_sure.t }) %>]
           <% end %>
         </li>
       <% end %>
@@ -48,15 +47,17 @@
       <% records.each do |record| %>
         <li>
           <%= link_to(record.accession_at_herbarium.t,
-                      add_query_param(record.show_link_args, query)) %>
+                      herbarium_record_path(id: record.id,
+                                            q: get_query_param)) %>
         </li>
       <% end %>
     </ul>
 
   <% elsif records.none? && can_add %>
     <%= :show_observation_no_herbarium_records.t %> [<%=
-      link_with_query(:create_herbarium_record.t,
-                      new_herbarium_record_path(observation_id: observation.id))
+      link_to(:create_herbarium_record.t,
+              new_herbarium_record_path(observation_id: observation.id,
+                                        q: get_query_param))
     %>]
   <% end %>
 <% end %>

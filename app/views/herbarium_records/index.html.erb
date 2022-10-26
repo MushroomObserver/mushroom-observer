@@ -17,10 +17,10 @@
         <tr>
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?
-                  link_with_query(
+                  link_to(
                     :EDIT.t,
                     edit_herbarium_record_path(
-                      id: herbarium_record.id, params: { back: :index }
+                      id: herbarium_record.id, back: :index, q: get_query_param
                     ),
                     class: "btn btn-default btn-sm"
                   )
@@ -32,8 +32,9 @@
                   :UNKNOWN.t %>
           </td>
           <td>
-            <%= link_with_query(herbarium_record.herbarium_label.t,
-                                herbarium_record_path(herbarium_record.id)) %>
+            <%= link_to(herbarium_record.herbarium_label.t,
+                        herbarium_record_path(id: herbarium_record.id,
+                                              q: get_query_param)) %>
           </td>
           <td>
             <%= herbarium_record.observations.map do |obs|
