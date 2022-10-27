@@ -39,7 +39,7 @@ module CapybaraSessionExtensions
     login(user.login)
     assert_equal(user.id, User.current_id)
 
-    click_on(id: "user_nav_admin_link")
+    click_on(id: "user_nav_admin_mode_link")
     assert_match(/DANGER: You are in administrator mode/, page.html)
   end
 
