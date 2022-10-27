@@ -45,7 +45,7 @@ url_params = url_params.merge({ back: back }) if action == :update
   <div class="form-group">
     <%= f.label(:notes, :NOTES.t + ":") %>
     <span class="help-note">(<%= :optional.t %>)</span>
-    <%= text_area(:notes, class: "form-control", rows: 6) %>
+    <%= f.text_area(:notes, class: "form-control", rows: 6) %>
   </div>
 
   <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>

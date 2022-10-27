@@ -66,27 +66,34 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     visit("/#{obs.id}")
     first("a[href*='#{herbarium_record_path(rec.id)}']").click
-    assert_template("herbarium_records/show")
-    click_mo_link(label: "Edit Fungarium Record")
-    assert_template("herbarium_records/edit")
-    open_form do |form|
-      form.change("herbarium_name", "This Should Cause It to Reload Form")
-      form.submit("Save")
+    assert_selector("body.herbarium_records__show")
+    # binding.break
+    # click_on(text: "Edit Fungarium Record")
+    first("a[href*='#{edit_herbarium_record_path(rec.id)}']").click
+
+    assert_selector("body.herbarium_records__edit")
+    within("#herbarium_record_form") do
+      fill_in("herbarium_record_herbarium_name",
+              with: "This Should Cause It to Reload Form")
+      click_commit
     end
-    assert_template("herbarium_records/edit")
-    push_page
-    click_mo_link(label: "Cancel (Show Fungarium Record)")
-    assert_template("herbarium_records/show")
-    go_back
-    # It's still at :show. Fix
-    assert_template("herbarium_records/edit")
-    open_form do |form|
-      form.change("herbarium_name", rec.herbarium.name)
-      form.submit("Save")
+    assert_selector("body.herbarium_records__edit")
+    assert_selector("#herbarium_record_form")
+    back = current_fullpath
+    click_on(text: "Cancel (Show Fungarium Record)")
+    assert_selector("body.herbarium_records__show")
+    # go_back
+    visit(back)
+    assert_selector("#herbarium_record_form")
+    # binding.break
+    within("#herbarium_record_form") do
+      fill_in("herbarium_record_herbarium_name", with: rec.herbarium.name)
+      click_commit
     end
-    assert_template("herbarium_records/show")
-    click_mo_link(label: "Destroy Fungarium Record")
-    assert_template("herbarium_records/index")
+    # we're at observations#show ?!
+    assert_selector("body.herbarium_records__show")
+    click_on(text: "Destroy Fungarium Record")
+    assert_selector("body.herbarium_records__index")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 

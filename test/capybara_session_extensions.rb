@@ -44,8 +44,9 @@ module CapybaraSessionExtensions
   end
 
   # The current_path plus the query, similar to @request.fullpath
+  # URI.parse(current_url).request_uri gives same result but slower
   def current_fullpath
-    URI.parse(current_url).request_uri
+    current_url[current_host.size..]
   end
 
   def current_path_id
