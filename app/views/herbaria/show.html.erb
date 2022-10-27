@@ -31,7 +31,8 @@
       <%= link_to(:show_herbarium_herbarium_record_count.t(
                     count: @herbarium.herbarium_records.length
                   ),
-                  herbarium_records_path(herbarium_id: @herbarium.id)) %>
+                  herbarium_records_path(herbarium_id: @herbarium.id),
+                  id: "herbarium_records_for_herbarium_link") %>
     </div>
 
     <div class="mt-3">

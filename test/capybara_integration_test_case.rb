@@ -46,6 +46,24 @@ require("capybara/minitest")
 #    end
 #
 ################################################################################
+#
+# NOTE for test writers!
+#
+# Even though Capybara can find an anchor by attribute href with a regex:
+# `find("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` << OK
+# `assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` <OK
+#
+# Capybara can't click that same selector.
+# `click_on("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` << NO GO.
+#
+# Instead, give the link an HTML id (maybe even with an interpolated AR id) and
+# `click_on(id: "edit_herbarium_record_#{rec.id}_link")` << WORKS
+#
+# Or, try an explicit href attribute, but it won't match regex or path w/ params
+# `click_link(href: edit_herbarium_record_path(id: rec.id))` << ONLY WITH NO Q:
+# -- AN 10/2022
+#
+################################################################################
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests
