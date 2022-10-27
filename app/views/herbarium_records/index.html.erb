@@ -12,17 +12,18 @@
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <table class="table table-striped">
-      <% @objects.each do |herbarium_record|
-        herbarium = herbarium_record.herbarium %>
+      <% @objects.each do |rec|
+        herbarium = rec.herbarium %>
         <tr>
           <td>
-            <%= if in_admin_mode? || herbarium_record.can_edit?
+            <%= if in_admin_mode? || rec.can_edit?
                   link_to(
                     :EDIT.t,
                     edit_herbarium_record_path(
-                      id: herbarium_record.id, back: :index, q: get_query_param
+                      id: rec.id, back: :index, q: get_query_param
                     ),
-                    class: "btn btn-default btn-sm"
+                    class: "btn btn-default btn-sm",
+                    id: "edit_herbarium_record_#{rec.id}_path"
                   )
                 end %>
           </td>
@@ -32,21 +33,23 @@
                   :UNKNOWN.t %>
           </td>
           <td>
-            <%= link_to(herbarium_record.herbarium_label.t,
-                        herbarium_record_path(id: herbarium_record.id,
-                                              q: get_query_param)) %>
+            <%= link_to(rec.herbarium_label.t,
+                        herbarium_record_path(id: rec.id,
+                                              q: get_query_param),
+                        id: "herbarium_record_#{rec.id}_link") %>
           </td>
           <td>
-            <%= herbarium_record.observations.map do |obs|
+            <%= rec.observations.map do |obs|
                   link_to(obs.unique_format_name.t, observation_path(obs.id))
                 end.safe_join(", ") %>
           </td>
           <td>
-            <%= if in_admin_mode? || herbarium_record.can_edit?
+            <%= if in_admin_mode? || rec.can_edit?
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
-                    target: herbarium_record_path(herbarium_record.id),
-                    class: "btn btn-default btn-sm"
+                    target: herbarium_record_path(rec.id),
+                    class: "btn btn-default btn-sm",
+                    id: "destroy_herbarium_record_#{rec.id}_link"
                   )
                 end %>
           </td>

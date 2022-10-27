@@ -68,6 +68,7 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     visit("/#{obs.id}")
     first("a[href*='#{herbarium_record_path(rec.id)}']").click
+
     assert_selector("body.herbarium_records__show")
     click_on(text: "Edit Fungarium Record")
 
@@ -81,11 +82,11 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
     assert_selector("body.herbarium_records__edit")
     assert_selector("#herbarium_record_form")
     back = current_fullpath
-
     click_on(text: "Cancel (Show Fungarium Record)")
-    assert_selector("body.herbarium_records__show")
 
+    assert_selector("body.herbarium_records__show")
     visit(back)
+
     assert_selector("#herbarium_record_form")
     within("#herbarium_record_form") do
       fill_in("herbarium_record_herbarium_name", with: rec.herbarium.name)
@@ -94,11 +95,49 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
 
     assert_selector("body.herbarium_records__show")
     click_on(id: "destroy_herbarium_record_link")
+
     assert_selector("body.herbarium_records__index")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
-  def test_edit_herbarium_record_from_index; end
+  def test_edit_herbarium_record_from_index
+    login!("mary")
+    obs = observations(:detailed_unknown_obs)
+    rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
+    visit(herbarium_path(rec.herbarium.id))
+    binding.break
+    click_on(
+      "a[href*='#{herbarium_records_path(herbarium_id: rec.herbarium.id)}']"
+    )
+
+    assert_selector("body.herbarium_records__index")
+    click_on("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")
+
+    assert_selector("body.herbarium_records__edit")
+    within("#herbarium_record_form") do
+      fill_in("herbarium_record_herbarium_name",
+              with: "This Should Cause It to Reload Form")
+      click_commit
+    end
+
+    assert_selector("body.herbarium_records__edit")
+    back = current_fullpath
+    click_on(text: "Back to Fungarium Record Index")
+
+    assert_selector("body.herbarium_records__index")
+    visit(back)
+
+    within("#herbarium_record_form") do
+      fill_in("herbarium_record_herbarium_name", with: rec.herbarium.name)
+      click_commit
+    end
+
+    assert_selector("body.herbarium_records__index")
+    click_on(id: "destroy_herbarium_record_#{rec.id}_link")
+
+    assert_selector("body.herbarium_records__index")
+    assert_not(obs.reload.herbarium_records.include?(rec))
+  end
 
   def test_index_sort_links; end
 
