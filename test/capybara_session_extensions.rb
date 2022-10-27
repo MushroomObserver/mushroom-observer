@@ -30,7 +30,7 @@ module CapybaraSessionExtensions
     login(user, *args)
     assert_flash_success
     user = User.find_by(login: user) if user.is_a?(String)
-    assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
+    assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
   end
 
   def put_user_in_admin_mode(user = :zero_user)
