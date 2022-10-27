@@ -69,7 +69,6 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
     visit("/#{obs.id}")
     first("a[href*='#{herbarium_record_path(rec.id)}']").click
     assert_selector("body.herbarium_records__show")
-    # binding.break
     click_on(text: "Edit Fungarium Record")
 
     assert_selector("body.herbarium_records__edit")
@@ -78,23 +77,21 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
               with: "This Should Cause It to Reload Form")
       click_commit
     end
-    # It's not passing the back param thru when it redirects to edit.
+
     assert_selector("body.herbarium_records__edit")
     assert_selector("#herbarium_record_form")
     back = current_fullpath
-    # binding.break
-    # It actually has a @back_object of observation here.
+
     click_on(text: "Cancel (Show Fungarium Record)")
     assert_selector("body.herbarium_records__show")
-    # go_back
+
     visit(back)
     assert_selector("#herbarium_record_form")
-    # binding.break
     within("#herbarium_record_form") do
       fill_in("herbarium_record_herbarium_name", with: rec.herbarium.name)
       click_commit
     end
-    # binding.break
+
     assert_selector("body.herbarium_records__show")
     click_on(id: "destroy_herbarium_record_link")
     assert_selector("body.herbarium_records__index")
