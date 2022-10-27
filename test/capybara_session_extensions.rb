@@ -28,9 +28,9 @@ module CapybaraSessionExtensions
   # Login the given user, testing to make sure it was successful.
   def login!(user, *args)
     login(user, *args)
-    assert_flash(/success/i)
+    assert_flash_success
     user = User.find_by(login: user) if user.is_a?(String)
-    assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
+    assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
   end
 
   def put_user_in_admin_mode(user = :zero_user)
@@ -39,13 +39,14 @@ module CapybaraSessionExtensions
     login(user.login)
     assert_equal(user.id, User.current_id)
 
-    click_on(id: "user_nav_admin_link")
+    click_on(id: "user_nav_admin_mode_link")
     assert_match(/DANGER: You are in administrator mode/, page.html)
   end
 
   # The current_path plus the query, similar to @request.fullpath
+  # URI.parse(current_url).request_uri gives same result but slower
   def current_fullpath
-    URI.parse(current_url).request_uri
+    current_url[current_host.size..]
   end
 
   def current_path_id
