@@ -3,7 +3,8 @@
 <head>
   <%= render(partial: "layouts/app/head") %>
 </head>
-<body>
+
+<body class="<%= controller.controller_name %>__<%= controller.action_name %>">
   <% if Rails.env == "production" %>
     <%= render(partial: "layouts/app/gtm_iframe") %>
   <% end %>
