@@ -180,7 +180,7 @@ module ObjectLinkHelper
     return unless (url = LOCATION_SEARCH_URLS[site_symbol])
 
     link_to(site_symbol.to_s.titlecase, "#{url}#{search_string}",
-            { id: "search_link" })
+            { id: "search_link_to_#{site_symbol}_#{search_string}" })
   end
 
   def observation_herbarium_record_link(obs)
