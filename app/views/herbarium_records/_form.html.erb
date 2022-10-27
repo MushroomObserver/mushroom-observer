@@ -5,7 +5,8 @@ url_params = url_params.merge(
 url_params = url_params.merge({ back: back }) if action == :update
 %>
 
-<%= form_with(model: @herbarium_record, url: url_params) do |f| %>
+<%= form_with(model: @herbarium_record, url: url_params,
+              id: "herbarium_record_form") do |f| %>
 
   <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
 
