@@ -257,7 +257,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("rolf")
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     post(:update, params: { id: nybg.id })
-    assert_template(:edit)
+    assert_redirected_to(action: :edit)
   end
 
   def test_update_herbarium_record_redirect

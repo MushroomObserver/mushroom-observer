@@ -210,8 +210,9 @@ class CollectionNumbersController < ApplicationController
                       when "create"
                         { action: :new }
                       when "update"
-                        { action: :edit, back: @back }
+                        { action: :edit }
                       end
+    redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
     if @collection_number.name.blank?
       flash_error(:create_collection_number_missing_name.t)

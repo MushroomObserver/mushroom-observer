@@ -41,23 +41,22 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
     back = current_fullpath
 
     within("#herbarium_record_form") do
-      fill_in("herbarium_record_herbarium_name",
-              with: rec.herbarium.name)
+      fill_in("herbarium_record_herbarium_name", with: rec.herbarium.name)
       click_commit
     end
-    assert_selector("body.herbarium_records__show")
+    assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
-    visit(back)
+    visit(back) # back to edit herbarium record
     click_on(text: "Cancel (Show Observation)")
-    assert_selector("body.herbarium_records__show")
+    assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
-    # The remove button is a form patch submit, not a link
+    # The remove button is a rails form patch submit input, not a link
     within("form[action*='#{
       herbarium_record_remove_observation_path(rec.id)}']") { click_commit }
 
-    assert_selector("body.herbarium_records__show")
+    assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end

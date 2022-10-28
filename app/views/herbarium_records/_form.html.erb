@@ -2,7 +2,9 @@
 url_params = { action: action, q: get_query_param }
 url_params = url_params.merge(
   { observation_id: @observation.id }) if action == :create
-url_params = url_params.merge({ back: @back }) if action == :update
+if action == :update && @back.present?
+  url_params = url_params.merge({ back: @back })
+end
 %>
 
 <%= form_with(model: @herbarium_record, url: url_params,

@@ -194,14 +194,13 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
-  def create_herbarium_record # rubocop:disable Metrics/AbcSize
+  def create_herbarium_record
     @herbarium_record =
       HerbariumRecord.new(whitelisted_herbarium_record_params)
     normalize_parameters
-    if !validate_herbarium_name! ||
-       !can_add_record_to_herbarium?
-      return
-    elsif herbarium_label_free?
+    return if check_for_form_errors?
+
+    if herbarium_label_free?
       @herbarium_record.save
       @herbarium_record.add_observation(@observation)
     elsif @other_record.can_edit?
@@ -221,11 +220,9 @@ class HerbariumRecordsController < ApplicationController
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = whitelisted_herbarium_record_params
     normalize_parameters
+    return if check_for_form_errors?
 
-    if !validate_herbarium_name! ||
-       !can_add_record_to_herbarium?
-      redirect_to(action: :edit, back: @back) and return
-    elsif herbarium_label_free?
+    if herbarium_label_free?
       @herbarium_record.save
       @herbarium_record.notify_curators if
         @herbarium_record.herbarium != old_herbarium
@@ -235,6 +232,24 @@ class HerbariumRecordsController < ApplicationController
     end
 
     redirect_to_observation_or_herbarium_record
+  end
+
+  def check_for_form_errors?
+    redirect_params = case action_name # this is a rails var
+                      when "create"
+                        { action: :new }
+                      when "update"
+                        { action: :edit }
+                      end
+    redirect_params = redirect_params.merge({ back: @back }) if @back.present?
+
+    redirect_to(redirect_params) and return true unless validate_herbarium_name!
+
+    unless can_add_record_to_herbarium?
+      redirect_to_observation_or_herbarium_record and return true
+    end
+
+    false
   end
 
   def whitelisted_herbarium_record_params
@@ -297,7 +312,6 @@ class HerbariumRecordsController < ApplicationController
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
-    redirect_to_observation_or_herbarium_record
     false
   end
 
