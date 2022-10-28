@@ -1004,6 +1004,8 @@ class ObservationsControllerTest < FunctionalTestCase
                   { count: 1 }, "Observation page missing an Add Sequence link")
   end
 
+  # Refactored for CRUD routes in :collection_numbers or :herbarium_records
+  # When both are CRUDified, remove the first cases of regex matches below
   def assert_show_obs(types, items, can_add)
     type = types.to_s.chop
     selector = types == :collection_numbers && !can_add ? "i" : "li"
@@ -1011,20 +1013,26 @@ class ObservationsControllerTest < FunctionalTestCase
                   items.count,
                   "Wrong number of #{types} shown.")
     if can_add
-      assert(response.body.match(%r{href="/#{type}/create_#{type}/}),
+      assert((response.body.match(%r{href="/#{type}/create_#{type}/}) ||
+              response.body.match(%r{href="/#{types}/new})),
              "Expected to find a create link for #{types}.")
     else
-      assert_not(response.body.match(%r{href="/#{type}/create_#{type}/}),
+      assert_not((response.body.match(%r{href="/#{type}/create_#{type}/}) &&
+                  response.body.match(%r{href="/#{types}/new})),
                  "Expected not to find a create link for #{types}.")
     end
 
     items.each do |id, can_edit|
       if can_edit
-        assert(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
+        assert((response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}) ||
+                response.body.match(%r{href="/#{types}/#{id}/edit})),
                "Expected to find an edit link for #{type} #{id}.")
       else
-        assert_not(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
-                   "Expected not to find an edit link for #{type} #{id}.")
+        assert_not(
+          (response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}) &&
+           response.body.match(%r{href="/#{types}/#{id}/edit})),
+          "Expected not to find an edit link for #{type} #{id}."
+        )
       end
     end
   end
