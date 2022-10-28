@@ -12,7 +12,7 @@ class CollectionNumbersController < ApplicationController
   #   :show
   # ]
 
-  def index
+  def index # rubocop:disable Metrics/AbcSize
     if params[:pattern].present? # rubocop:disable Style/GuardClause
       collection_number_search and return
     elsif params[:observation_id].present?
@@ -161,17 +161,13 @@ class CollectionNumbersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  def create_collection_number # rubocop:disable Metrics/AbcSize
+  def create_collection_number
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
     normalize_parameters
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
-      return
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      return
-    elsif name_and_number_free?
+    return if check_for_form_errors?
+
+    if name_and_number_free?
       @collection_number.save
       @collection_number.add_observation(@observation)
     else
@@ -183,17 +179,13 @@ class CollectionNumbersController < ApplicationController
     redirect_to_observation_or_collection_number
   end
 
-  def update_collection_number # rubocop:disable Metrics/AbcSize
+  def update_collection_number
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
-      return
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      return
-    elsif name_and_number_free?
+    return if check_for_form_errors?
+
+    if name_and_number_free?
       @collection_number.save
       @collection_number.change_corresponding_herbarium_records(old_format_name)
     else
@@ -209,7 +201,26 @@ class CollectionNumbersController < ApplicationController
       @collection_number.destroy
       @collection_number = @other_number
     end
+
     redirect_to_observation_or_collection_number
+  end
+
+  def check_for_form_errors?
+    redirect_params = case action_name # this is a rails var
+                      when "create"
+                        { action: :new }
+                      when "update"
+                        { action: :edit, back: @back }
+                      end
+
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      redirect_to(redirect_params) and return true
+    elsif @collection_number.number.blank?
+      flash_error(:create_collection_number_missing_number.t)
+      redirect_to(redirect_params) and return true
+    end
+    false
   end
 
   def whitelisted_collection_number_params
@@ -267,10 +278,13 @@ class CollectionNumbersController < ApplicationController
   end
 
   def redirect_to_observation_or_collection_number
-    if @back_object.is_a?(CollectionNumber) # rubocop:disable Style/CaseLikeIf
-      redirect_with_query(collection_number_path(@back_object))
-    elsif @back_object.is_a?(Observation)
-      redirect_with_query(observation_path(@back_object))
+    if @back_object # workaround for show_link_args being unpredictable
+      case @back_object.type_tag
+      when :observation
+        redirect_with_query(observation_path(id: @back_object.id))
+      when :collection_number
+        redirect_with_query(collection_number_path(id: @back_object.id))
+      end
     else
       redirect_with_query(collection_numbers_path(id: @collection_number.id))
     end
