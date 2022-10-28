@@ -107,7 +107,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
                                                 params: { q: q }))
   end
 
-  def test_create_collection_number
+  def test_new_collection_number
     get(:new)
     get(:new, params: { observation_id: "bogus" })
 
@@ -130,7 +130,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_create_collection_number_post
+  def test_create_collection_number
     collection_number_count = CollectionNumber.count
     obs = observations(:strobilurus_diminutivus_obs)
     assert_false(obs.specimen)
@@ -178,7 +178,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_includes(obs.collection_numbers, number)
   end
 
-  def test_create_collection_number_post_twice
+  def test_create_collection_number_twice
     collection_number_count = CollectionNumber.count
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
@@ -202,7 +202,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_obj_list_equal([number], obs.reload.collection_numbers)
   end
 
-  def test_create_collection_number_post_already_used
+  def test_create_collection_number_already_used
     collection_number_count = CollectionNumber.count
     obs1 = observations(:coprinus_comatus_obs)
     obs2 = observations(:detailed_unknown_obs)
@@ -270,7 +270,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_edit_collection_number_post
+  def test_update_collection_number
     obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)
     record1 = herbarium_records(:coprinus_comatus_rolf_spec)
@@ -332,7 +332,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_edit_collection_number_post_merge
+  def test_update_collection_number_merge
     collection_number_count = CollectionNumber.count
     obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
@@ -365,7 +365,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_collection_number_redirect
+  def test_update_collection_number_redirect
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
     query = Query.lookup_and_save(:CollectionNumber, :all)
