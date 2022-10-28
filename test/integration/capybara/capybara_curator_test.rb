@@ -108,17 +108,11 @@ class CapybaraCuratorTest < CapybaraIntegrationTestCase
     assert_selector(
       "a[href*='#{herbarium_records_path(herbarium_id: rec.herbarium.id)}']"
     )
-    # binding.break
-    # click_link(href: herbarium_records_path(herbarium_id: rec.herbarium.id))
-    # clicking the selector produces an error, probably capybara's load order:
-    # eval error: uninitialized constant ContentFilter::HasImages
     click_on(id: "herbarium_records_for_herbarium_link")
-    # visit(herbarium_records_path(herbarium_id: rec.herbarium.id))
 
     assert_selector("body.herbarium_records__index")
     assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")
     click_on(id: "edit_herbarium_record_#{rec.id}_link")
-    # click_link(href: edit_herbarium_record_path(id: rec.id))
 
     assert_selector("body.herbarium_records__edit")
     within("#herbarium_record_form") do

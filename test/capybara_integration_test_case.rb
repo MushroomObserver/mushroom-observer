@@ -47,7 +47,7 @@ require("capybara/minitest")
 #
 ################################################################################
 #
-# NOTE for test writers!
+#    NOTE for test writers!
 #
 # Even though Capybara can find an anchor by attribute href with a regex:
 # `find("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` << OK
