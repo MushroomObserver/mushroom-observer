@@ -79,7 +79,7 @@ class GlossaryTermsController < ApplicationController
 
     flash_warning(:permission_denied.t)
     redirect_to(glossary_term_path(@glossary_term.id))
-    return true
+    true
   end
 
   def destroy_unused_images(images)
