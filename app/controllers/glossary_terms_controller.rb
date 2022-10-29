@@ -66,7 +66,7 @@ class GlossaryTermsController < ApplicationController
     if @glossary_term.destroy
       destroy_unused_images(old_images)
       flash_notice(
-        :runtime_destroyed_id.t(type: GlossaryTerm, value: params[:id])
+        :runtime_destroyed_id.t(type: :glossary_term, value: params[:id])
       )
       redirect_to(glossary_terms_path)
     else
