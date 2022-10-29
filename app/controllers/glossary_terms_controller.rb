@@ -59,12 +59,8 @@ class GlossaryTermsController < ApplicationController
   end
 
   def destroy
-    return unless (@glossary_term = GlossaryTerm.find(params[:id]))
-
-    unless in_admin_mode?
-      flash_warning(:permission_denied.t)
-      return redirect_to(glossary_term_path(@glossary_term.id))
-    end
+    @glossary_term = GlossaryTerm.find(params[:id])
+    return if redirect_non_admins!
 
     old_images = @glossary_term.images.to_a
     if @glossary_term.destroy
@@ -78,9 +74,17 @@ class GlossaryTermsController < ApplicationController
     end
   end
 
+  def redirect_non_admins!
+    return false if in_admin_mode?
+
+    flash_warning(:permission_denied.t)
+    redirect_to(glossary_term_path(@glossary_term.id))
+    return true
+  end
+
   def destroy_unused_images(images)
     images.each do |image|
-      image.destroy if image&.all_subjects.empty?
+      image.destroy if image&.all_subjects&.empty?
     end
   end
 
