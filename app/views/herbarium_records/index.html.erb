@@ -36,7 +36,7 @@
             <%= link_to(rec.herbarium_label.t,
                         herbarium_record_path(id: rec.id,
                                               q: get_query_param),
-                        id: "herbarium_record_link_#{rec.id}") %>
+                        id: "show_herbarium_record_link_#{rec.id}") %>
           </td>
           <td>
             <%= rec.observations.map do |obs|
