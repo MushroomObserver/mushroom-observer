@@ -207,13 +207,15 @@ class HerbariaController < ApplicationController
     links ||= []
     unless query.flavor == :all
       links << [:herbarium_index_list_all_herbaria.l,
-                herbaria_path(flavor: :all)]
+                herbaria_path(flavor: :all), { id: "all_herbaria_link" }]
     end
     unless query.flavor == :nonpersonal
       links << [:herbarium_index_nonpersonal_herbaria.l,
-                herbaria_path(flavor: :nonpersonal)]
+                herbaria_path(flavor: :nonpersonal),
+                { id: "all_nonpersonal_herbaria_link" }]
     end
-    links << [:create_herbarium.l, new_herbarium_path]
+    links << [:create_herbarium.l, new_herbarium_path,
+              { id: "new_herbarium_link" }]
   end
 
   def make_sure_can_edit!

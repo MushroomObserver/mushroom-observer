@@ -27,7 +27,8 @@ adv_search = link_to(
 %>
 
 <%= form_with(url: search_pattern_path, method: :get,
-              class: "navbar-form navbar-left px-0") do |form| %>
+              class: "navbar-form navbar-left px-0",
+              id: "pattern_search_form") do |form| %>
 
   <div class="form-group has-feedback has-search">
     <span class="glyphicon glyphicon-search form-control-feedback"></span>

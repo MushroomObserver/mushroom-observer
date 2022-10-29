@@ -63,7 +63,7 @@ module CapybaraSessionExtensions
 
   def assert_flash_text(text = "")
     assert_selector("#flash_notices")
-    assert_selector("#flash_notices", text: text)
+    assert_selector("#flash_notices", text: text.to_s)
   end
 
   def assert_no_flash

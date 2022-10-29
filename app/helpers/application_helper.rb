@@ -199,7 +199,7 @@ module ApplicationHelper
   def create_links(links)
     return [] unless links
 
-    links.compact.map { |str, url| link_to(str, url) }
+    links.compact.map { |str, url, args| link_to(str, url, args) }
   end
 
   # Short-hand to render shared tab_set partial for a given set of links.
