@@ -159,7 +159,7 @@ module ApplicationHelper
   # POST to a path; used instead of a link because POST link requires js
   # post_button(name: herbarium.name.t,
   #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
-  #             confirm: :are_you_sure.t)
+  #             data: { confirm: :are_you_sure.t })
   def post_button(name:, path:, **args)
     html_options = {
       method: :post,
@@ -172,7 +172,7 @@ module ApplicationHelper
   # PUT to a path; used instead of a link because PUT link requires js
   # put_button(name: herbarium.name.t,
   #            path: herbarium_path(id: @herbarium.id),
-  #            confirm: :are_you_sure.t)
+  #            data: { confirm: :are_you_sure.t })
   def put_button(name:, path:, **args)
     html_options = {
       method: :put,
@@ -185,7 +185,7 @@ module ApplicationHelper
   # PATCH to a path; used instead of a link because PATCH link requires js
   # patch_button(name: herbarium.name.t,
   #              path: herbarium_path(id: @herbarium.id),
-  #              confirm: :are_you_sure.t)
+  #              data: { confirm: :are_you_sure.t })
   def patch_button(name:, path:, **args)
     html_options = {
       method: :patch,
@@ -199,7 +199,7 @@ module ApplicationHelper
   def create_links(links)
     return [] unless links
 
-    links.compact.map { |str, url| link_to(str, url) }
+    links.compact.map { |str, url, args| link_to(str, url, args) }
   end
 
   # Short-hand to render shared tab_set partial for a given set of links.

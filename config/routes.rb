@@ -82,20 +82,6 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  herbarium_record: {
-    create_herbarium_record: {},
-    destroy_herbarium_record: {},
-    edit_herbarium_record: {},
-    herbarium_index: {},
-    herbarium_record_search: {},
-    index_herbarium_record: {},
-    list_herbarium_records: {},
-    next_herbarium_record: {},
-    observation_index: {},
-    prev_herbarium_record: {},
-    remove_observation: {}
-    # show_herbarium_record: {}
-  },
   image: {
     add_image: {},
     advanced_search: {},
@@ -616,11 +602,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
   resources :herbaria, id: /\d+/
 
-  # ----- Herbarium record:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/herbarium_record/show_herbarium_record/:id",
-      to: "herbarium_record#show_herbarium_record",
-      as: "show_herbarium_record")
+  # ----- Herbarium Records: standard actions --------------------------------
+  resources :herbarium_records do
+    resource :remove_observation, only: [:update], module: :herbarium_records
+  end
 
   # ----- Image:
   # ----- temporary show route for path_builder with id ---------------
