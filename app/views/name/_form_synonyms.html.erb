@@ -36,7 +36,7 @@
         </span>
       </div>
     <% end %>
-  </div>
+  </div><!--.col-->
 
   <div class="col-sm-6">
     <% if @new_names && (@new_names != []) %>
@@ -47,7 +47,7 @@
             <%= h(n) %><br/>
             <% end %>
           </span>
-        <span class="HelpNote"><%= :form_synonyms_missing_names_help.t %></span>
+        <span class="help-note"><%= :form_synonyms_missing_names_help.t %></span>
       </div>
     <% end %>
 
@@ -63,6 +63,6 @@
       <%= text_area(:synonym, :members, value: @list_members, class: "form-control",
                     data: { autofocus: true }) %>
     </div>
-  </div>
-</div>
+  </div><!--.col-->
+</div><!--.row-->
 <!--[eoform:synonyms]-->

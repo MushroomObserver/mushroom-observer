@@ -10,7 +10,5 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
-  <%= render(partial: "shared/merge_descriptions",
-             locals: {description: @description}) %>
-</div>
+<%= render(partial: "shared/merge_descriptions",
+            locals: {description: @description}) %>

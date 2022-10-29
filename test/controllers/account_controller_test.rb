@@ -182,7 +182,7 @@ class AccountControllerTest < FunctionalTestCase
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
-    post(:signup, params: { new_user: params.merge(email: "foo@xxx.xyz") })
+    post(:signup, params: { new_user: params.merge(email: "x@namnerbca.com") })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 

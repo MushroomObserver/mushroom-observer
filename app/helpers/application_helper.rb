@@ -60,6 +60,24 @@ module ApplicationHelper
     h(html.to_str)
   end
 
+  # Return a width class for the layout content container.
+  # Defaults to :text width, currently the most common. :wide is for forms
+  # These classes are MO-defined
+  #
+  def container_class
+    @container ||= :text
+    case @container
+    when :text
+      "container-text"
+    when :text_image
+      "container-text-image"
+    when :wide
+      "container-wide"
+    else
+      "container-full"
+    end
+  end
+
   # --------- links and buttons ------------------------------------------------
 
   # Call link_to with query params added.

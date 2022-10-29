@@ -15,30 +15,29 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
-  <%= :review_authors_note.tp if type == :name_description %>
+<%= :review_authors_note.tp if type == :name_description %>
 
-  <p>
-    <%= :review_authors_authors.t %><br/>
-    <% @authors.each do |u| %>
+<p>
+  <%= :review_authors_authors.t %><br/>
+  <% @authors.each do |u| %>
+    <%= user_link(u) %>
+    | <%= link_to(:review_authors_remove_author.t,
+                  { action: :review, id: @object.id,
+                    type: type, remove: u.id},
+                  { data: { confirm: :are_you_sure.l } }) %>
+    <br/>
+  <% end %>
+</p>
+
+<p>
+  <%= :review_authors_other_users.t %><br/>
+  <% @users.each do |u|
+    unless @authors.member?(u) %>
       <%= user_link(u) %>
-      | <%= link_to(:review_authors_remove_author.t,
-                    { action: :review, id: @object.id,
-                      type: type, remove: u.id},
-                    { data: { confirm: :are_you_sure.l } }) %>
+      | <%= link_to(:review_authors_add_author.t, action: :review,
+                    id: @object.id, type: type, add: u.id) %>
       <br/>
     <% end %>
-  </p>
+  <% end %>
+</p>
 
-  <p>
-    <%= :review_authors_other_users.t %><br/>
-    <% @users.each do |u|
-      unless @authors.member?(u) %>
-        <%= user_link(u) %>
-        | <%= link_to(:review_authors_add_author.t, action: :review,
-                      id: @object.id, type: type, add: u.id) %>
-        <br/>
-      <% end %>
-    <% end %>
-  </p>
-</div>
