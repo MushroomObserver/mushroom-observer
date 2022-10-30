@@ -52,11 +52,11 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_redirected_to visual_model_url(@visual_model)
   end
 
-  # test "should destroy visual_model" do
-  #   assert_difference('VisualModel.count', -1) do
-  #     delete visual_model_url(@visual_model)
-  #   end
-
-  #   assert_redirected_to visual_models_url
-  # end
+  test "should destroy visual_model" do
+    login
+    assert_difference('VisualModel.count', -1) do
+      delete(:destroy, params: { id: @visual_model.id })
+    end
+    assert_redirected_to visual_models_url
+  end
 end
