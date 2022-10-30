@@ -26,20 +26,20 @@ class VisualModelsController < ApplicationController
   # POST /visual_models
   def create
     @visual_model = VisualModel.new(visual_model_params)
-    if @visual_model.save
-      redirect_to(visual_model_url(@visual_model),
-                  notice: :runtime_visual_model_created_at.t)
-    end
+    return unless @visual_model.save
+
+    redirect_to(visual_model_url(@visual_model),
+                notice: :runtime_visual_model_created_at.t)
   end
 
   # PATCH/PUT /visual_models/1
   def update
     @visual_model = VisualModel.find(params[:id])
 
-    if @visual_model.update(visual_model_params)
-      redirect_to(visual_model_url(@visual_model),
-                  notice: :runtime_visual_model_updated_at.t)
-    end
+    return unless @visual_model.update(visual_model_params)
+
+    redirect_to(visual_model_url(@visual_model),
+                notice: :runtime_visual_model_updated_at.t)
   end
 
   # DELETE /visual_models/1
