@@ -37,10 +37,11 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  # test "should get edit" do
-  #   get edit_visual_model_url(@visual_model)
-  #   assert_response :success
-  # end
+  test "should get edit" do
+    login
+    get(:edit, params: { id: @visual_model.id })
+    assert_response :success
+  end
 
   # test "should update visual_model" do
   #   patch visual_model_url(@visual_model), params: { visual_model:
