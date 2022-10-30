@@ -13,10 +13,11 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  # test "should get new" do
-  #   get new_visual_model_url
-  #   assert_response :success
-  # end
+  test "should get new" do
+    login
+    get(:new)
+    assert_response :success
+  end
 
   # test "should create visual_model" do
   #   assert_difference('VisualModel.count') do
