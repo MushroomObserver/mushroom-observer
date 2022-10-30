@@ -21,11 +21,10 @@ class VisualModelsControllerTest < FunctionalTestCase
 
   test "should create visual_model" do
     login
-    assert_difference('VisualModel.count') do
+    assert_difference("VisualModel.count") do
       post(:create, params: { visual_model: {
-                                name: @visual_model.name,
-                              }
-                            })
+             name: @visual_model.name
+           } })
     end
 
     assert_redirected_to visual_model_url(VisualModel.last)
@@ -54,7 +53,7 @@ class VisualModelsControllerTest < FunctionalTestCase
 
   test "should destroy visual_model" do
     login
-    assert_difference('VisualModel.count', -1) do
+    assert_difference("VisualModel.count", -1) do
       delete(:destroy, params: { id: @visual_model.id })
     end
     assert_redirected_to visual_models_url
