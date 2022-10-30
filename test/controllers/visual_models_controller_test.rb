@@ -19,15 +19,17 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  # test "should create visual_model" do
-  #   assert_difference('VisualModel.count') do
-  #     post visual_models_url, params: { visual_model: {
-  # name: @visual_model.name,
-  # reviewed: @visual_model.reviewed } }
-  #   end
+  test "should create visual_model" do
+    login
+    assert_difference('VisualModel.count') do
+      post(:create, params: { visual_model: {
+                                name: @visual_model.name,
+                              }
+                            })
+    end
 
-  #   assert_redirected_to visual_model_url(VisualModel.last)
-  # end
+    assert_redirected_to visual_model_url(VisualModel.last)
+  end
 
   test "should show visual_model" do
     login
