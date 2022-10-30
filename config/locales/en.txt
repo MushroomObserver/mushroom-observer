@@ -1195,7 +1195,7 @@
   log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
   log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
   log_species_list_updated_at: "[:log_object_updated_by_user(type=:species_list)]"
-  log_sequence_added: "[name] added by [user]"
+  log_sequence_added: "[:log_object_added_by_user(type=name)]"
   log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
   log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
   log_specimen_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
