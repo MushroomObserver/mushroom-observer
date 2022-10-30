@@ -69,7 +69,7 @@ class ArticlesController < ApplicationController
 
   def destroy
     if (@article = Article.find(params[:id])) && @article.destroy
-      flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
+      flash_notice(:runtime_destroyed_id.t(type: :article, value: params[:id]))
     end
     redirect_to(articles_path)
   end
