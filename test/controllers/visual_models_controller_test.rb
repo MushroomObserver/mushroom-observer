@@ -45,7 +45,7 @@ class VisualModelsControllerTest < FunctionalTestCase
 
   test "should update visual_model" do
     login
-    patch(:update,  {
+    patch(:update, params: {
             id: @visual_model.id,
             visual_model: { name: @visual_model.name }
           })
