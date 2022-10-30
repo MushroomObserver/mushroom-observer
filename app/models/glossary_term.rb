@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Glossary of mycological terms, with illustrations
+# Glossary of mycological terms, with illustrations.
+#
+# NOTE: Glossary terms are attached to one or more images via the glue table
+# glossary_term_images.  This table includes the thumbnail!!!!
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
@@ -25,8 +28,6 @@ class GlossaryTerm < AbstractModel
   }
   # rubocop:enable Rails/UniqueValidationWithoutIndex
   validate :must_have_description_or_image
-
-  after_destroy(:destroy_unused_images)
 
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
@@ -76,16 +77,16 @@ class GlossaryTerm < AbstractModel
     images.push(image)
   end
 
-  def all_images
-    [thumb_image] + images
-  end
-
   def remove_image(image)
     images.delete(image) if images.member?(image)
     return unless thumb_image == image
 
     self.thumb_image = images.first
     save
+  end
+
+  def other_images
+    images.where.not(id: thumb_image_id)
   end
 
   ##############################################################################
@@ -96,11 +97,5 @@ class GlossaryTerm < AbstractModel
     return if description.present? || thumb_image.present?
 
     errors.add(:base, :glossary_error_description_or_image.t)
-  end
-
-  def destroy_unused_images
-    all_images.each do |image|
-      image.destroy if image && !image.other_subjects?(self)
-    end
   end
 end
