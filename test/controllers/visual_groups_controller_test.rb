@@ -26,7 +26,6 @@ class VisualGroupsControllerTest < FunctionalTestCase
       post(:create, params: {
              visual_model_id: @visual_model.id,
              visual_group: {
-               visual_model_id: @visual_model.id,
                name: @visual_group.name,
                approved: @visual_group.approved
              }

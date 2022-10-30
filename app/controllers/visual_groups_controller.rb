@@ -35,6 +35,7 @@ class VisualGroupsController < ApplicationController
   # POST /visual_groups or /visual_groups.json
   def create
     @visual_group = VisualGroup.new(visual_group_params)
+    @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
 
     @visual_group.save!
     redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
