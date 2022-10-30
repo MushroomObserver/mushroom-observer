@@ -53,11 +53,6 @@ class VisualModelsController < ApplicationController
 
   private
 
-  # Use callbacks to share common setup or constraints between actions.
-  def set_visual_model
-    @visual_model = VisualModel.find(params[:id])
-  end
-
   # Only allow a list of trusted parameters through.
   def visual_model_params
     params.require(:visual_model).permit(:name, :reviewed)
