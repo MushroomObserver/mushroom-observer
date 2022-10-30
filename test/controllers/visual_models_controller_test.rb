@@ -43,12 +43,14 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  # test "should update visual_model" do
-  #   patch visual_model_url(@visual_model), params: { visual_model:
-  # { name: @visual_model.name,
-  # reviewed: @visual_model.reviewed } }
-  #   assert_redirected_to visual_model_url(@visual_model)
-  # end
+  test "should update visual_model" do
+    login
+    patch(:update,  {
+            id: @visual_model.id,
+            visual_model: { name: @visual_model.name }
+          })
+    assert_redirected_to visual_model_url(@visual_model)
+  end
 
   # test "should destroy visual_model" do
   #   assert_difference('VisualModel.count', -1) do
