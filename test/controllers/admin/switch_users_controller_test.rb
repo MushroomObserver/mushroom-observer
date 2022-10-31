@@ -18,6 +18,9 @@ module Admin
       assert_response(:success)
 
       assert_users_equal(rolf, User.current)
+      post(:create, params: { id: "unverified" })
+      assert_users_equal(rolf, User.current)
+      assert_flash(/not verified yet/)
       post(:create, params: { id: "Frosted Flake" })
       assert_users_equal(rolf, User.current)
       post(:create, params: { id: mary.id })
