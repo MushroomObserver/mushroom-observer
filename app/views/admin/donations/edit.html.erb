@@ -10,10 +10,11 @@
   @container = :full
 %>
 
-<%= form_with(url: admin_donations_path) do |form| %>
+<%= form_with(url: admin_donations_path,
+              id: "admin_review_donations_form", method: :patch) do |f| %>
 
-  <%= form.submit(:review_donations_update.l,
-                  class: "btn btn-default center-block") %>
+  <%= f.submit(:review_donations_update.l,
+               class: "btn btn-default center-block") %>
 
   <div class="text-center">
     <table class="table-striped table-review-donations mb-3 mt-3">
@@ -28,7 +29,7 @@
         <% @donations.each do |d| %>
           <tr>
             <td><%= check_box(:reviewed, d.id, checked: d.reviewed,
-                                class: "form-control") %></td>
+                              class: "form-control") %></td>
             <td><%= d.id %></td>
             <td><%= d.who %></td>
             <td><%= d.anonymous %></td>
@@ -40,6 +41,6 @@
     </table>
   </div><!-- .text-center -->
 
-  <%= form.submit(:review_donations_update.l,
-                  class: "btn btn-default center-block") %>
+  <%= f.submit(:review_donations_update.l,
+               class: "btn btn-default center-block") %>
 <% end %>

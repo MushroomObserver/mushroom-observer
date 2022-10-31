@@ -515,7 +515,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   namespace :admin do
     resource :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
-    get("review_donations", to: "admin/donations#edit")
+    get("review_donations", to: "donations#edit")
     resource :turn_admin_on, only: [:show], controller: "turn_on"
     resource :turn_admin_off, only: [:show], controller: "turn_off"
     resource :banner, only: [:edit, :update], controller: "banner"

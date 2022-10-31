@@ -9,7 +9,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_with(url: admin_donations_path) do |form| %>
+<%= form_with(url: admin_donations_path,
+              id: "admin_new_donations_form") do |form| %>
 
   <%= fields_for(:donation) do |f| %>
     <div class="form-group form-inline">

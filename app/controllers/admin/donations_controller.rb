@@ -44,6 +44,7 @@ module Admin
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed
       end
+      render(action: :edit)
     end
 
     private
