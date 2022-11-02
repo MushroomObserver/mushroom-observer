@@ -18,25 +18,30 @@ MushroomObserver::Application.configure do
   config.server_code = "XX"
 
   # Turn off email.
-  config.queue_email = false
-  config.action_mailer.smtp_settings = {
-    address: "localhost",
-    port: 25,
-    domain: "localhost"
-  }
-  # Use this to actually send some GMail in development
-  # config.action_mailer.delivery_method = :smtp
+  config.queue_email = true # false
+  # Use this to actually send some Gmail in development
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true # false
+  config.action_mailer.raise_delivery_errors = true # false
   # host = "mushroomobserver.org"
   # config.action_mailer.default_url_options = { host: host }
 
-  # # SMTP settings for gmail
+  # SMTP settings for gmail.
+  # Use port 465 with tls: true, or port 587 and enable_starttls_auto: true
+  # https://stackoverflow.com/questions/59687194/how-do-i-set-the-ssl-protocol-needed-for-actionmailer-to-use-a-tls-connection
+  config.action_mailer.smtp_settings = {
+    address: "smtp-relay.gmail.com",
+    port: 587, # 587
+    user_name: "webmaster@mushroomobserver.org",
+    password: "ZPd.;4mgeQTp4b9c",
+    authentication: "plain",
+    # tls: true
+    enable_starttls_auto: true
+  }
   # config.action_mailer.smtp_settings = {
-  #   address: "smtp.gmail.com",
-  #   port: 587,
-  #   user_name: "webmaster",
-  #   password: "<gmail_password>",
-  #   authentication: "plain",
-  #   enable_starttls_auto: true
+  #   address: "localhost",
+  #   port: 25,
+  #   domain: "localhost"
   # }
 
   config.image_precedence = { default: [:local, :mycolab] }
@@ -58,12 +63,12 @@ MushroomObserver::Application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = false
+  # config.action_mailer.raise_delivery_errors = false
 
   # Tell ActionMailer not to deliver emails to the real world.
   # The :file delivery method accumulates sent emails in the
   # ../mail directory.  (This is a feature I added. -JPH 20080213)
-  config.action_mailer.delivery_method = :file
+  # config.action_mailer.delivery_method = :file
 
   # Allow YAML deserializer to deserialize symbols
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
