@@ -825,8 +825,8 @@
   review_inaccurate: Inaccurate/Incomplete
   review_no_export: Not for Export
   review_ok_for_export: Okay for Export
-  review_no_ml: Not for Machine Learning
-  review_ok_for_ml: Okay for Machine Learning
+  review_non_diagnostic: Non-Diagnostic
+  review_diagnostic: Diagnostic
 
   # Naming reasons.
   naming_reason_label_1: Recognized by sight
@@ -1203,7 +1203,7 @@
   log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
   log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
   log_species_list_updated_at: "[:log_object_updated_by_user(type=:species_list)]"
-  log_sequence_added: "[name] added by [user]"
+  log_sequence_added: "[:log_object_added_by_user(type=name)]"
   log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
   log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
   log_specimen_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
