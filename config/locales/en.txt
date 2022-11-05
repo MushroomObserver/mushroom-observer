@@ -817,8 +817,8 @@
   review_inaccurate: Inaccurate/Incomplete
   review_no_export: Not for Export
   review_ok_for_export: Okay for Export
-  review_no_ml: Not for Machine Learning
-  review_ok_for_ml: Okay for Machine Learning
+  review_non_diagnostic: Non-Diagnostic
+  review_diagnostic: Diagnostic
 
   # Naming reasons.
   naming_reason_label_1: Recognized by sight

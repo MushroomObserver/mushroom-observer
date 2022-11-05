@@ -17,8 +17,8 @@ module ExporterHelper
   end
 
   def set_ml_status_controls(obj)
-    status_controls(obj, obj.ok_for_ml,
-                    :review_ok_for_ml.t, :review_no_ml.t,
+    status_controls(obj, obj.diagnostic,
+                    :review_diagnostic.t, :review_non_diagnostic.t,
                     :set_ml_status)
   end
 
