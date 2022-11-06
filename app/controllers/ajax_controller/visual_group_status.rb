@@ -24,5 +24,7 @@ module AjaxController::VisualGroupStatus
                                image: image,
                                included: included)
     end
+    render(partial: "visual_groups/visual_group_status_links",
+           locals: { visual_group: visual_group, image: image })
   end
 end
