@@ -56,7 +56,11 @@ class ActiveSupport::TimeWithZone
 
   # Format time as "5 days ago", etc.
   def fancy_time(ref = Time.zone.now)
-    diff = diff_corrected_for_dst_change(ref)
+    # This used to correct for daylight savings time, but on
+    # Sunday Nov. 6, 2022 around 5pm EST (the time change was
+    # early this morning) tests started failing.  The tests
+    # work fine if we no longer try to compensate for DST.
+    diff = ref - self # diff_corrected_for_dst_change(ref)
     if -diff > 1.minute
       web_time
     elsif diff < 1.minute
@@ -87,14 +91,14 @@ class ActiveSupport::TimeWithZone
 
   ##############################################################################
 
-  private
+  # private
 
-  def diff_corrected_for_dst_change(ref)
-    return ref - self - 1.hour if dst? && !ref.dst?
-    return ref - self + 1.hour if !dst? && ref.dst?
+  # def diff_corrected_for_dst_change(ref)
+  #   return ref - self - 1.hour if dst? && !ref.dst?
+  #   return ref - self + 1.hour if !dst? && ref.dst?
 
-    ref - self
-  end
+  #   ref - self
+  # end
 end
 
 # Make MO date and time formats available to Time, just in case.
