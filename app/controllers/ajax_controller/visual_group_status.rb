@@ -14,14 +14,15 @@ module AjaxController::VisualGroupStatus
 
     vgi = visual_group.visual_group_images.find_by(image: image)
     included = (@value == "true")
-    debugger
     if params["need"] == "true"
       vgi&.destroy
     elsif vgi
       vgi.included = @value
       vgi.save!
     else
-      VisualGroupImage.create!(visual_group: visual_group, image: image, included: included)
+      VisualGroupImage.create!(visual_group: visual_group,
+                               image: image,
+                               included: included)
     end
   end
 end

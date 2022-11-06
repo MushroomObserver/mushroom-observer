@@ -52,7 +52,9 @@ module ThumbnailHelper
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
-    return content_tag(:span, image_vote_as_short_string(vote)) if current_vote == vote
+    if current_vote == vote
+      return content_tag(:span, image_vote_as_short_string(vote))
+    end
 
     # return a link if the user has NOT voted this way
     link_to(vote_text,
