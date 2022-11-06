@@ -84,6 +84,7 @@ ACTIONS = {
     old_translation: {},
     pivotal: {},
     test: {},
+    visual_group_status: {},
     vote: {}
   },
   api: {

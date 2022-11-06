@@ -37,14 +37,11 @@
         <%= render(layout: "shared/matrix_table",
                    locals: {objects: @objects}) do |image| %>
           <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
-            <div class="py-3 text-center">
-              <%= thumbnail(image, votes: true, original: true) %>
-            </div>
-            <div class="pb-3 text-center">
-              <%= fields_for :selected do |selects_form| %>
-                <%= selects_form.check_box(image.id, {}, "yes", "no") %>
-                <%= selects_form.label(image.id, "#{:image.t} ##{image.id}") %>
-              <% end %>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <%= thumbnail(image, votes: false, original: true) %>
+		<%= render(partial: "visual_group_status_links", locals: { visual_group: visual_group, image: image }) %>
+              </div>
             </div>
           </li><!-- .matrix-box -->
         <% end %>

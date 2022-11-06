@@ -9,6 +9,7 @@
 //= require external_link
 //= require image_vote
 //= require image_export
+//= require visual_group_status
 //= require theater
 //= require validate_file_input_fields
 //= require main

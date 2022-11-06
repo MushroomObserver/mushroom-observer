@@ -52,17 +52,35 @@ module ThumbnailHelper
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
+    return content_tag(:span, image_vote_as_short_string(vote)) if current_vote == vote
+
     # return a link if the user has NOT voted this way
-    link = link_to(vote_text,
-                   { controller: :image,
-                     action: :show_image,
-                     id: image.id,
-                     vote: vote },
-                   title: image_vote_as_help_string(vote),
-                   data: { role: "image_vote", id: image.id, val: vote })
-    if current_vote == vote
-      link = content_tag(:span, image_vote_as_short_string(vote))
-    end
-    link
+    link_to(vote_text,
+            { controller: :image,
+              action: :show_image,
+              id: image.id,
+              vote: vote },
+            title: image_vote_as_help_string(vote),
+            data: { role: "image_vote", id: image.id, val: vote })
+  end
+
+  def visual_group_status_link(visual_group, image, needs_review, included)
+    group_image = visual_group.visual_group_images.find_by(image_id: image.id)
+    link_text = visual_group_status_text(needs_review, included)
+    state_text = visual_group_status_text(group_image.nil?,
+                                          group_image&.included)
+    return content_tag(:span, link_text) if link_text == state_text
+
+    link_to(link_text,
+            { controller: :image,
+              action: :show_image,
+              id: image.id,
+              vote: 1 },
+            title: link_text,
+            data: { role: "visual_group_status",
+                    imgid: image.id,
+                    vgid: visual_group.id,
+                    need: needs_review,
+                    inc: included })
   end
 end
