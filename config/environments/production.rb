@@ -26,24 +26,20 @@ MushroomObserver::Application.configure do
 
   # Enable queued email.
   config.queue_email = true
-
-  # Testing
-  # config.action_mailer.delivery_method = :sendmail
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 
+  # SMTP settings for gmail smtp-relay
   config.action_mailer.delivery_method = :smtp
-  host = "mushroomobserver.org"
-  config.action_mailer.default_url_options = { host: host }
-
-  # SMTP settings for gmail
   config.action_mailer.smtp_settings = {
-    address: "smtp.gmail.com",
-    port: 587,
-    user_name: "webmaster",
-    password: "<gmail_password>",
-    authentication: "plain",
-    enable_starttls_auto: true
+    address: "smtp-relay.gmail.com",
+    port: 587, # or 465 with tls: true
+    user_name: "webmaster@mushroomobserver.org",
+    password: Rails.application.credentials.gmail_app_password[:webmaster],
+    authentication: "login",
+    enable_starttls_auto: true, # tls: true
+    domain: "mushroomobserver.org",
+    openssl_verify_mode: "none"
   }
 
   config.image_precedence = {
@@ -126,11 +122,6 @@ MushroomObserver::Application.configure do
   # application.js, application.css, and all non-JS/CSS in app/assets
   # folder are already added.
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery
-  # to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
-
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation can not be found)
   config.i18n.fallbacks = [I18n.default_locale]
@@ -151,9 +142,6 @@ MushroomObserver::Application.configure do
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
-
-  # Rails 5.2 credentials - add the master.key in production
-  # config.require_master_key = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)

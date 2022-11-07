@@ -18,30 +18,37 @@ MushroomObserver::Application.configure do
   config.server_code = "XX"
 
   # Turn off email.
-  config.queue_email = true # false
-  # Use this to actually send some Gmail in development
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.perform_deliveries = true # false
-  config.action_mailer.raise_delivery_errors = true # false
-  # host = "mushroomobserver.org"
-  # config.action_mailer.default_url_options = { host: host }
+  config.queue_email = false
 
-  # SMTP settings for gmail.
-  # Use port 465 with tls: true, or port 587 and enable_starttls_auto: true
-  # https://stackoverflow.com/questions/59687194/how-do-i-set-the-ssl-protocol-needed-for-actionmailer-to-use-a-tls-connection
+  # Tell ActionMailer not to deliver emails to the real world.
+  # The :file delivery method accumulates sent emails in the
+  # ../mail directory.  (This is a feature I added. -JPH 20080213)
+  config.action_mailer.delivery_method = :file
+
+  # Don't care if the mailer can't send
+  config.action_mailer.raise_delivery_errors = false
+
   config.action_mailer.smtp_settings = {
-    address: "smtp-relay.gmail.com",
-    port: 587, # 587
-    user_name: "webmaster@mushroomobserver.org",
-    password: "ZPd.;4mgeQTp4b9c",
-    authentication: "plain",
-    # tls: true
-    enable_starttls_auto: true
+    address: "localhost",
+    port: 25,
+    domain: "localhost"
   }
+
+  # Use this to actually send some Gmail via SMTP-Relay in development
+  #
+  # config.queue_email = true
+  # config.action_mailer.delivery_method = :smtp
+  # config.action_mailer.perform_deliveries = true
+  # config.action_mailer.raise_delivery_errors = true
   # config.action_mailer.smtp_settings = {
-  #   address: "localhost",
-  #   port: 25,
-  #   domain: "localhost"
+  #   address: "smtp-relay.gmail.com",
+  #   port: 587,
+  #   user_name: "webmaster@mushroomobserver.org",
+  #   password: Rails.application.credentials.gmail_app_password[:webmaster],
+  #   authentication: "login",
+  #   enable_starttls_auto: true,
+  #   domain: "mushroomobserver.org",
+  #   openssl_verify_mode: "none"
   # }
 
   config.image_precedence = { default: [:local, :mycolab] }
