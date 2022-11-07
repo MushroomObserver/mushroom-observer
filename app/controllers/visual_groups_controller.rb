@@ -11,6 +11,7 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1 or /visual_groups/1.json
   def show
+    logger.debug(VisualGroupData.new("Agaricus sylvicola", 1.5).sql_query)
     @visual_group = VisualGroup.find(params[:id])
   end
 
