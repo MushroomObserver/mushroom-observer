@@ -9,8 +9,9 @@
                     action: @object.edit_action, id: @object.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :full
 
-  url_args = {action: :reuse_image_for_glossary_term, id: @object.id}
+  url_args = { action: :reuse_image_for_glossary_term, id: @object.id }
 %>
 
-<%= render(partial: "reuse_image", locals: {url_args: url_args}) %>
+<%= render(partial: "reuse_image", locals: { url_args: url_args }) %>

@@ -1,0 +1,72 @@
+// form elements and inputs
+
+input[type=checkbox] {
+  // fixes alignment issue in firefox; bootstrap applies this only to IE9:
+  // margin-top: 1px \9;
+  margin-top: 1px;
+}
+
+// got this trick from:
+// http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+.file-field {
+  position: relative;
+  overflow: hidden;
+
+  input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
+  }
+
+  + span {
+    margin-left: 0.5em;
+  }
+}
+
+// Specific text elements
+
+form.button_to {
+  display: inline;
+  margin: 0;
+  padding: 0;
+
+  div {
+    display: inline;
+  }
+
+  input[type=submit] {
+    margin: 0;
+    padding: 0;
+    -webkit-appearance: caret;
+    background: none;
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    cursor: pointer;
+    // Note: Use a text-info type utility class to color the button text
+    // color: #2050E0;
+  }
+
+  input[type=submit]:hover {
+    text-decoration: underline;
+  }
+}
+
+// activity log filters inside btn-group
+a.filter-only {
+  color: darken($link-color, 25%) !important;
+
+  &:hover {
+    background-color: transparent;
+  }
+}

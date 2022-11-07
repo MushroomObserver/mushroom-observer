@@ -6,7 +6,7 @@
     <input id="approved_names" name="approved_names" type="hidden" value="<%= val.html_safe %>"/>
   <% end %>
 
-  <br/><center><%= submit_tag(:SAVE.l, class: "btn") %></center>
+  <br/><div class="text-center"><%= submit_tag(:SAVE.l, class: "btn btn-default") %></div><!-- .text-center -->
 
   <%= render(partial: "shared/form_list_feedback") %>
 
@@ -14,6 +14,6 @@
   <%= text_area(:list, :members, value: @list_members, cols: 80,
                 data: {autofocus: true}) %></p><br/>
 
-  <div class="HelpNote"><%= :name_bulk_help.tp %></div>
+  <div class="help-note"><%= :name_bulk_help.tp %></div>
 <% end %>
 

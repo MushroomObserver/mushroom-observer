@@ -1,6 +1,8 @@
 <%
   @title ||= @description.format_name.t
-  show_description_tab_set(@description)
+  tabs = show_description_tab_set(@description)
+  @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
 <table cellpadding="5" width="100%">
@@ -21,5 +23,4 @@
 <%= render(partial: "comment/show_comments",
            locals: { object: @description, controls: true, limit: 10 }
           ) if false%>
-<br/>
 <%= show_object_footer(@description) %>

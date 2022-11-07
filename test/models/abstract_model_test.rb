@@ -449,7 +449,7 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Naming, "observations/show_naming")
     assert_show_url(Observation, "observations")
     assert_show_url(Project, "project/show_project")
-    assert_show_url(Sequence, "sequence/show_sequence")
+    assert_show_url(Sequence, "sequences")
     assert_show_url(SpeciesList, "species_list/show_species_list")
     assert_show_url(User, "users")
   end

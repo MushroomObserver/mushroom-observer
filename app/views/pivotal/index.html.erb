@@ -1,6 +1,7 @@
 <%
   @title = :pivotal_index_title.l
   javascript_include("pivotal")
+  @container = :wide
 
   label_map = {}
   @stories.each do |story|
@@ -46,17 +47,15 @@
   )
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <% if @stories.count > 900 %>
-      <b>Displaying <%= @stories.count %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/emails/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
-    <% end %>
-    <%= :pivotal_index_header.tp %>
-  </div>
-</div>
+<div class="container-text">
+  <% if @stories.count > 900 %>
+    <b>Displaying <%= @stories.count %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/emails/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
+  <% end %>
+  <%= :pivotal_index_header.tp %>
+</div><!--.container-text-->
 
 <div id="pivotal_index">
-  <table id="pivotal_labels" style="margin-bottom:1em">
+  <table id="pivotal_labels" class="mb-3">
     <tr>
       <td>
         <table>
@@ -71,7 +70,7 @@
             other
           ).each do |label| %>
             <tr>
-              <td align="right" style="font-size:120%; white-space:nowrap"><%=
+              <td align="right" class="text-nowrap text-larger"><%=
                 if label == "-"
                   safe_nbsp
                 else
@@ -112,7 +111,7 @@
           <span class="pivotal_name"><%=
             link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
           %></span><br/>
-          <span style="white-space:nowrap">
+          <span class="text-nowrap">
             <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
               pivotal_vote_controls(story)
             %></span>
@@ -136,7 +135,7 @@
             %></span>
           </span>
         </div>
-        <div class="pivotal_body max-width-text" id="pivotal_body_<%= story.id %>" style="display:none">
+        <div class="pivotal_body container-text" id="pivotal_body_<%= story.id %>" style="display:none">
         </div>
       </div>
     <% end %>

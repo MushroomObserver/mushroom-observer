@@ -21,7 +21,8 @@
     <li>
       <%= radio_button_tag(:format, :dwca, @format == "dwca") %>
       <%= :download_observations_dwca.t %>
-      (<%= link_to(:download_observations_what_is_this.t, "http://rs.tdwg.org/dwc/index.htm",
+      (<%= link_to(:download_observations_what_is_this.t,
+                   "http://rs.tdwg.org/dwc/index.htm",
                    target: "_new") %>)
     </li>
     <li>
@@ -64,9 +65,9 @@
     </li>
   </ul>
 
-  <%= submit_tag(:DOWNLOAD.l, class: "btn") %>
-  <%= submit_tag(:CANCEL.l, class: "btn") %>
+  <%= submit_tag(:DOWNLOAD.l, class: "btn btn-default") %>
+  <%= submit_tag(:CANCEL.l, class: "btn btn-default") %>
 
-  <p style="margin-top:2em"><%= :download_observations_print_labels_header.t %>:</p>
-  <%= submit_tag(:download_observations_print_labels.l, class: "btn") %>
+  <p class="mt-5"><%= :download_observations_print_labels_header.t %>:</p>
+  <%= submit_tag(:download_observations_print_labels.l, class: "btn btn-default") %>
 </form>

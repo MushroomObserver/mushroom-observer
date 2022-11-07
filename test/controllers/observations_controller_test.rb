@@ -94,12 +94,12 @@ class ObservationsControllerTest < FunctionalTestCase
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
     assert(obs.images.member?(img))
-    get_with_dump(:show, id: obs.id)
+    get(:show, params: { id: obs.id })
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
-    get_with_dump(:show, id: obs.id)
+    get(:show, params: { id: obs.id })
   end
 
   def test_show_observation_change_thumbnail_size
@@ -174,7 +174,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_page_loads
     login
-    get_with_dump(:index)
+    get(:index)
     assert_template("shared/_matrix_box")
 
     # Test again, this time specifying page number via an observation id.
@@ -186,7 +186,7 @@ class ObservationsControllerTest < FunctionalTestCase
         params: { project: projects(:bolete_project).id })
     assert_template("shared/_matrix_box")
 
-    get_with_dump(:index, params: { by: "name" })
+    get(:index, params: { by: "name" })
     assert_template("shared/_matrix_box")
 
     get(:index,
@@ -203,10 +203,10 @@ class ObservationsControllerTest < FunctionalTestCase
                   name: names(:tremella_mesenterica).text_name })
     assert_template(:index)
 
-    get_with_dump(:index, params: { user: rolf.id })
+    get(:index, params: { user: rolf.id })
     assert_template("shared/_matrix_box")
 
-    # get_with_dump(:login)
+    # get(:login)
     # assert_redirected_to(controller: :account, action: :login)
   end
 
@@ -337,7 +337,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_advanced_search_2
+  def test_advanced_search2
     login
     get(:index,
         params: { name: "Agaricus",
@@ -348,7 +348,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(4, results.length)
   end
 
-  def test_advanced_search_3
+  def test_advanced_search3
     login
     # Fail to include notes.
     get(:index,
@@ -422,14 +422,14 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_observation_search_help
     login
-    get_with_dump(:index, pattern: "help:me")
+    get(:index, params: { pattern: "help:me" })
     assert_match(/unexpected term/i, @response.body)
   end
 
-  def test_observation_search_1
+  def test_observation_search1
     login
     pattern = "Boletus edulis"
-    get_with_dump(:index, pattern: pattern)
+    get(:index, params: { pattern: pattern })
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -438,10 +438,10 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_observation_search_2
+  def test_observation_search2
     login
     pattern = "Boletus edulis"
-    get_with_dump(:index, pattern: pattern, page: 2)
+    get(:index, params: { pattern: pattern, page: 2 })
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -455,7 +455,7 @@ class ObservationsControllerTest < FunctionalTestCase
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
     pattern = "no hits"
-    get_with_dump(:index, pattern: pattern)
+    get(:index, params: { pattern: pattern })
     assert_template(:index)
 
     # Change 2022/07 : Now setting @title explicitly for refactored indexes
@@ -469,7 +469,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
-    get_with_dump(:index, pattern: obs.id)
+    get(:index, params: { pattern: obs.id })
     assert_redirected_to(action: :show, id: Observation.first.id)
   end
 
@@ -513,7 +513,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_where_search_next_page
     login
     params = { place_name: "Burbank", page: 2 }
-    get_with_dump(:index, params)
+    get(:index, params: params)
     assert_template(:index)
   end
 
@@ -522,7 +522,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_where_search_pattern
     login
     params = { place_name: "Burbank" }
-    get_with_dump(:index, params)
+    get(:index, params: params)
     assert_template("shared/_matrix_box")
   end
 
@@ -547,7 +547,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # Prove that lichen content_filter works on observations
   def test_observations_with_lichen_filter
     login(users(:lichenologist).name)
-    get_with_dump(:index)
+    get(:index)
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.count.positive?)
@@ -555,7 +555,7 @@ class ObservationsControllerTest < FunctionalTestCase
            "All results should be lichen-ish")
 
     login(users(:antilichenologist).name)
-    get_with_dump(:index)
+    get(:index)
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.count.positive?)
@@ -631,7 +631,7 @@ class ObservationsControllerTest < FunctionalTestCase
     num_views = obs.num_views
     last_view = obs.last_view
     # obs.update_view_stats
-    get_with_dump(:show, id: obs.id)
+    get(:show, params: { id: obs.id })
     obs.reload
     assert_equal(num_views + 1, obs.num_views)
     assert_not_equal(last_view, obs.last_view)
@@ -654,27 +654,27 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # Test it on obs with no namings first.
     obs_id = observations(:unknown_with_no_naming).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with owner logged in.
     login("rolf")
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, params: { id: obs_id })
     assert_show_observation
     assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
@@ -694,11 +694,11 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     user = login(users(:public_voter).name)
 
-    get_with_dump(:show, id: obs.id, go_private: 1)
+    get(:show, params: { id: obs.id, go_private: 1 })
     user.reload
     assert_equal("yes", user.votes_anonymous)
 
-    get_with_dump(:show, id: obs.id, go_public: 1)
+    get(:show, params: { id: obs.id, go_public: 1 })
     user.reload
     assert_equal("no", user.votes_anonymous)
   end
@@ -706,15 +706,16 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_owner_id
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
-    get_with_dump(:show, id: obs.id)
-    assert_select("div[class *= 'owner-id']",
+    get(:show, params: { id: obs.id })
+    assert_select("#owner_id",
                   { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show Observer ID")
 
-    get_with_dump(:show,
-                  id: observations(:owner_multiple_favorites).id)
-    assert_select("div[class *= 'owner-id']",
+    get(
+      :show, params: { id: observations(:owner_multiple_favorites).id }
+    )
+    assert_select("#owner_id",
                   { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
                   "Observation should show lack of Observer preference")
@@ -722,17 +723,19 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_show_owner_id_view_owner_id_false
     login(user_with_view_owner_id_false)
-    get_with_dump(:show,
-                  id: observations(:owner_only_favorite_ne_consensus).id)
-    assert_select("div[class *= 'owner-id']", { count: 0 },
+    get(
+      :show, params: { id: observations(:owner_only_favorite_ne_consensus).id }
+    )
+    assert_select("#owner_id", { count: 0 },
                   "Do not show Observer ID when user has not opted for it")
   end
 
   def test_show_owner_id_noone_logged_in
     logout
-    get_with_dump(:show,
-                  id: observations(:owner_only_favorite_ne_consensus).id)
-    assert_select("div[class *= 'owner-id']", { count: 0 },
+    get(
+      :show, params: { id: observations(:owner_only_favorite_ne_consensus).id }
+    )
+    assert_select("#owner_id", { count: 0 },
                   "Do not show Observer ID when nobody logged in")
   end
 
@@ -747,7 +750,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_observation_external_links_exist
     login
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, params: { id: obs_id })
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")
@@ -855,7 +858,9 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
     # But any logged-in user can add sequence to any observation.
-    assert_show_obs(:sequences, [], true)
+    assert_select("a[href ^= '#{new_sequence_path}']", { count: 1 },
+                  "Observation page should show an Add Sequence link for " \
+                  "any logged-in user")
 
     get(:show, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
@@ -864,9 +869,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     [[obs2.herbarium_records.first.id, false]],
                     false)
-    assert_show_obs(:sequences,
-                    [[obs2.sequences.first.id, false]],
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
@@ -875,9 +879,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     obs3.herbarium_records.map { |x| [x.id, false] },
                     false)
-    assert_show_obs(:sequences,
-                    obs3.sequences.map { |x| [x.id, false] },
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     # Roy is a curator at NY, so can add herbarium records, and modify existing
     # herbarium records attached to NY.
@@ -886,7 +889,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], true)
-    assert_show_obs(:sequences, [], true)
+    assert_select("a[href ^= '#{new_sequence_path}']", { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
@@ -895,9 +899,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     [[obs2.herbarium_records.first.id, true]],
                     true)
-    assert_show_obs(:sequences,
-                    [[obs2.sequences.first.id, false]],
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
@@ -906,9 +909,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     obs3.herbarium_records.map { |x| [x.id, x.can_edit?(roy)] },
                     true)
-    assert_show_obs(:sequences,
-                    obs3.sequences.map { |x| [x.id, false] },
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     # Dick owns all of the sequences, is on obs3's project, and has a personal
     # herbarium.
@@ -916,7 +918,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], true)
-    assert_show_obs(:sequences, [], true)
+    assert_select("a[href ^= '#{new_sequence_path}']", { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
@@ -925,9 +928,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     [[obs2.herbarium_records.first.id, false]],
                     true)
-    assert_show_obs(:sequences,
-                    [[obs2.sequences.first.id, true]],
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
@@ -936,9 +938,9 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     obs3.herbarium_records.map { |x| [x.id, false] },
                     true)
-    assert_show_obs(:sequences,
-                    obs3.sequences.map { |x| [x.id, true] },
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+                  { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     # Rolf owns obs1 and owns one herbarium record for both obs2 and obs3,
     # and he is a curator at NYBG.
@@ -946,7 +948,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], true)
     assert_show_obs(:herbarium_records, [], true)
-    assert_show_obs(:sequences, [], true)
+    assert_select("a[href ^= '#{new_sequence_path}']", { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
@@ -955,9 +958,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
                     [[obs2.herbarium_records.first.id, true]],
                     true)
-    assert_show_obs(:sequences,
-                    [[obs2.sequences.first.id, false]],
-                    true)
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
@@ -967,18 +969,17 @@ class ObservationsControllerTest < FunctionalTestCase
       obs3.herbarium_records.map { |x| [x.id, x.can_edit?(rolf)] },
       true
     )
-    assert_show_obs(
-      :sequences,
-      obs3.sequences.map { |x| [x.id, false] },
-      true
-    )
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+                  { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     # Mary owns obs2 and obs3, but has nothing to do with obs1.
     login("mary")
     get(:show, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
-    assert_show_obs(:sequences, [], true)
+    assert_select("a[href ^= '#{new_sequence_path}']", { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs2.id })
     assert_show_obs(
@@ -991,11 +992,8 @@ class ObservationsControllerTest < FunctionalTestCase
       [[obs2.herbarium_records.first.id, false]],
       true
     )
-    assert_show_obs(
-      :sequences,
-      [[obs2.sequences.first.id, false]],
-      true
-    )
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
     assert_show_obs(
@@ -1008,18 +1006,16 @@ class ObservationsControllerTest < FunctionalTestCase
       obs3.herbarium_records.map { |x| [x.id, x.can_edit?(mary)] },
       true
     )
-    assert_show_obs(
-      :sequences,
-      obs3.sequences.map { |x| [x.id, false] },
-      true
-    )
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     # Make sure admins can do everything.
     make_admin("katrina")
     get(:show, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], true)
     assert_show_obs(:herbarium_records, [], true)
-    assert_show_obs(:sequences, [], true)
+    assert_select("a[href ^= '#{new_sequence_path}']", { count: 1 },
+                  "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs2.id })
     assert_show_obs(
@@ -1032,11 +1028,8 @@ class ObservationsControllerTest < FunctionalTestCase
       [[obs2.herbarium_records.first.id, true]],
       true
     )
-    assert_show_obs(
-      :sequences,
-      [[obs2.sequences.first.id, true]],
-      true
-    )
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
     assert_show_obs(
@@ -1049,11 +1042,8 @@ class ObservationsControllerTest < FunctionalTestCase
       obs3.herbarium_records.map { |x| [x.id, true] },
       true
     )
-    assert_show_obs(
-      :sequences,
-      obs3.sequences.map { |x| [x.id, true] },
-      true
-    )
+    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+                  { count: 1 }, "Observation page missing an Add Sequence link")
   end
 
   def assert_show_obs(types, items, can_add)
@@ -3038,7 +3028,8 @@ class ObservationsControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     assert_operator(query.num_results, :>=, 4)
     get(:print_labels, params: { q: query.id.alphabetize })
-    assert_select("div#labels td", query.num_results)
+    # \pard is paragraph command in rtf, one paragraph per result
+    assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
     assert_match(/314159/, @response.body) # make sure fundis id in there!
     assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
@@ -3050,7 +3041,15 @@ class ObservationsControllerTest < FunctionalTestCase
         commit: "Print Labels"
       }
     )
-    assert_select("div#labels td", query.num_results)
+    assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+  end
+
+  # Print labels for all observations just to be sure all cases (more or less)
+  # are tested and at least not crashing.
+  def test_print_labels_all
+    login
+    query = Query.lookup_and_save(:Observation, :all)
+    get(:print_labels, params: { q: query.id.alphabetize })
   end
 
   def test_external_sites_user_can_add_links_to

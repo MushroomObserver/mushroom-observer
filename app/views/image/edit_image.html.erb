@@ -5,23 +5,25 @@
     link_with_query(:cancel_and_show.t(type: :image), @image.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
-<%= form_for(:image, url: add_query_param(action: :edit_image, id: @image)) do |form| %>
-  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 max-width-text">
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+<%= form_for(:image,
+      url: add_query_param(action: :edit_image, id: @image)) do |form| %>
+  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
 
     <%= render(partial: "form_images",
-               locals: {form: form, leave_out_original_file_name: false}) %>
+              locals: { form: form, leave_out_original_file_name: false }) %>
 
-    <div class="text-center push-down" style="margin-bottom:2em">
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
+    <div class="text-center mt-3 mb-5">
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
       <%= link_with_query(:cancel_and_show.t(type: :image),
-                          {action: :show_image, id: @image.id},
-                          {class: "btn"}) %>
+                          { action: :show_image, id: @image.id },
+                          { class: "btn btn-default" }) %>
     </div>
   </div>
   <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
-    <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
+    <%= thumbnail(@image, { size: :medium, votes: true, responsive: true }) %>
   </div>
 <% end %>

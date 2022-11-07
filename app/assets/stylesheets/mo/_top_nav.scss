@@ -1,0 +1,47 @@
+//
+// top nav bar
+// --------------------------------------------------
+
+.navbar-default {
+  color: $TOP_BAR_FG_COLOR;
+  background-color: $TOP_BAR_BG_COLOR;
+  // margin-left: 10px;
+  border-color: $TOP_BAR_BORDER_COLOR;
+  border-width: $TOP_BAR_BORDER_WIDTH;
+  border-style: $TOP_BAR_BORDER_STYLE;
+  border-radius: $TOP_BAR_BORDER_RADIUS;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-right-width: 0px;
+  padding: 0px;
+
+  a,
+  a:visited {
+    color: $TOP_BAR_LINK_FG_COLOR;
+    background-color: $TOP_BAR_LINK_BG_COLOR;
+  }
+
+  a:hover {
+    color: $TOP_BAR_LINK_HOVER_FG_COLOR;
+    background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
+  }
+
+  .navbar-nav {
+    margin-top: 8px;
+    margin-right: 2px;
+  }
+
+  .navbar-nav > li > a,
+  .navbar-nav > li > a.dropdown-toggle {
+    color: $TOP_BAR_FG_COLOR !important;
+    background-color: $TOP_BAR_BG_COLOR !important;
+    margin: 0px 4px;
+    border: 0px;
+    padding: 2px 4px;
+
+    &:hover {
+      color: $TOP_BAR_LINK_HOVER_FG_COLOR !important;
+      background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
+    }
+  }
+}

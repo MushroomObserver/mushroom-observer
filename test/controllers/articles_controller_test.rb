@@ -23,7 +23,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params = @controller.query_params(query)
     get(:index, params: params)
 
-    assert_select("div#content a:match('href',?)", %r{/articles/\d+},
+    assert_select("#content a:match('href',?)", %r{/articles/\d+},
                   { count: 1 },
                   "filtered Article Index has wrong number of entries")
     assert_select(

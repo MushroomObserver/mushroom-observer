@@ -2,8 +2,6 @@
   @title = :email_welcome.t(user: @user.legal_name)
 %>
 
-<div class="max-width-text">
-  <%= @note.tp %>
-  <%= :no_email_how_to_reenable.tp %>
-  <%= :no_email_some_maybe_queued.tp %>
-</div>
+<%= @note.tp %>
+<%= :no_email_how_to_reenable.tp %>
+<%= :no_email_some_maybe_queued.tp %>

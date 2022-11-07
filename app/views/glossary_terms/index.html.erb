@@ -7,16 +7,12 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= :glossary_term_index_intro.tp %>
-  </div>
-</div>
+<%= :glossary_term_index_intro.tp %>
 
 <table class="table table-striped">
   <% @glossary_terms.each do |term| %>
     <tr>
-      <td class="max-width-text">
+      <td class="">
         <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
         <%= term.description.tpl %>
       </td>

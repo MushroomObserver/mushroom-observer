@@ -12,11 +12,12 @@ module PaginationHelper
   #     <% end %>
   #   <% end %>
   #
-  def paginate_block(pages, args = {}, &block) # #TODO: Depreciate / REMOVE
+  def paginate_block(pages, args = {}, &block)
+    html_id = args[:html_id] ||= "results"
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
-    content_tag(:div, class: "results") do
+    content_tag(:div, id: html_id) do
       letters + safe_br + numbers + body + numbers + safe_br + letters
     end
   end

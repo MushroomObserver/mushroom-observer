@@ -36,7 +36,7 @@ We are always happy to discuss the topic. The present code is in need of a
 great deal of work, however there are a few examples I think we can all
 agree exemplify where we're trying to move the code:
 
-controller::  app/controllers/sequence_controller.rb
+controller::  app/controllers/sequences_controller.rb
 helper::      app/helpers/map_*.rb
 other::       app/classes/api/*
 unit test::   test/integration/post_observation_test.rb

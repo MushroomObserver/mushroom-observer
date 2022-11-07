@@ -5,7 +5,7 @@ require("test_helper")
 class EmailsControllerTest < FunctionalTestCase
   def test_page_loads
     login
-    get_with_dump(:ask_webmaster_question)
+    get(:ask_webmaster_question)
     assert_template(:ask_webmaster_question)
     assert_form_action(action: :ask_webmaster_question)
   end
@@ -24,7 +24,7 @@ class EmailsControllerTest < FunctionalTestCase
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
-      get_with_dump(page, params)
+      get(page, params: params)
       assert_template(response) # 1
     end
   end
@@ -122,7 +122,7 @@ class EmailsControllerTest < FunctionalTestCase
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
-    post_with_dump(page, params)
+    post(page, params: params)
     assert_redirected_to(users_path(by: "name"))
   end
 
@@ -191,7 +191,7 @@ class EmailsControllerTest < FunctionalTestCase
     get(:merge_request, params: params.merge(new_id: -456))
     assert_response(:redirect)
 
-    get_with_dump(:merge_request, params)
+    get(:merge_request, params: params)
     assert_response(:success)
     assert_names_equal(name1, assigns(:old_obj))
     assert_names_equal(name2, assigns(:new_obj))
@@ -233,7 +233,7 @@ class EmailsControllerTest < FunctionalTestCase
 
     get(:name_change_request, params: params)
     assert_select(
-      "#title-caption", text: :email_name_change_request_title.l, count: 1
+      "#title", text: :email_name_change_request_title.l, count: 1
     )
   end
 

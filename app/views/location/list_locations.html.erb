@@ -6,6 +6,7 @@
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   @known_pages = @pages
   @known_data  = @objects
@@ -14,13 +15,12 @@
   flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
-<div>
-  <br>
+<div class="mt-3">
   <%= :list_place_names_popularity.t %>
   <%= :list_place_names_parenthetical.t %>
 </div>
 
-<div class="row push-down">
+<div class="row mt-3">
   <div class="col-md-7">
     <% if @known_pages.any? && @known_data.any? %>
       <div class="h4">
@@ -47,7 +47,7 @@
         <%= :list_place_names_undef.t %>
         <%= :list_place_names_undef_order.t if @default_orders %>
       </div>
-      <%= paginate_block(@undef_pages) do %>
+      <%= paginate_block(@undef_pages, { html_id: "locations_undefined" }) do %>
         <div class="list-group">
           <% @undef_data.each do |location, count|
             if @undef_location_format == "scientific"
@@ -63,4 +63,4 @@
       <% end %>
     <% end %>
   </div>
-</div>
+</div><!--.row-->

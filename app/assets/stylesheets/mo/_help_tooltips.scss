@@ -1,0 +1,64 @@
+//
+// Help tips on create observation page
+// ------------------------------------------
+$help-block-max-width: 600px;
+
+.well {
+  background-color: $WELL_BG_COLOR;
+
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.help-note {
+  color: $WELL_FG_COLOR;
+}
+
+.help-block {
+  color: $WELL_FG_COLOR;
+  max-width: $help-block-max-width;
+}
+
+.tooltip-inner {
+  word-wrap: break-word;
+}
+
+.arrow-up {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid rgba(203, 203, 203, 0.9);
+  position: absolute;
+  left: 16px;
+  top: -15px;
+  margin-top: 3px;
+  margin-left: 1px;
+}
+
+.arrow-left {
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 15px solid rgba(203, 203, 203, 0.9);
+  position: absolute;
+  left: -16px;
+  top: 15px;
+  margin-left: 1px;
+}
+
+.spacer {
+  height: 30px;
+  width: 1px;
+}
+
+// don't bold the labels on image date and geotag helper boxes
+// on create observation page
+.image_messages label,
+.geocode_messages label {
+  font-weight: normal;
+}
+

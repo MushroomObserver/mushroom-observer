@@ -186,4 +186,7 @@ MushroomObserver::Application.configure do
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.
   config.image_model_beta_testers = [103_233]
+
+  # Header for print_labels RTF file.
+  config.label_rtf_header_file = "#{config.root}/public/label_header.rtf"
 end

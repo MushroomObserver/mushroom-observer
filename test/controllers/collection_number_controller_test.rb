@@ -5,7 +5,7 @@ require("test_helper")
 class CollectionNumberControllerTest < FunctionalTestCase
   def test_collection_index
     login
-    get_with_dump(:list_collection_numbers)
+    get(:list_collection_numbers)
     assert_template(:list_collection_numbers)
   end
 
@@ -13,7 +13,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
     assert_equal(1, obs.collection_numbers.count)
     login
-    get_with_dump(:observation_index, id: obs.id)
+    get(:observation_index, params: { id: obs.id })
     assert_template(:list_collection_numbers)
     assert_no_flash
   end
@@ -22,7 +22,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     assert_operator(obs.collection_numbers.count, :>, 1)
     login
-    get_with_dump(:observation_index, id: obs.id)
+    get(:observation_index, params: { id: obs.id })
     assert_template(:list_collection_numbers)
     assert_no_flash
   end
@@ -31,7 +31,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
     login
-    get_with_dump(:observation_index, id: obs.id)
+    get(:observation_index, params: { id: obs.id })
     assert_template(:list_collection_numbers)
     assert_flash_text(/no matching collection numbers found/i)
   end
@@ -44,7 +44,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("list_collection_numbers")
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", numbers.count)
+    assert_select("#results tr", numbers.count)
   end
 
   def test_collection_number_search_by_number
@@ -58,7 +58,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
     login
-    get_with_dump(:collection_number_search, pattern: "neighbor")
+    get(:collection_number_search, params: { pattern: "neighbor" })
     query_record = QueryRecord.last
     assert_redirected_to(action: :show_collection_number,
                          id: numbers.first.id, q: query_record.id.alphabetize)
@@ -73,7 +73,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("list_collection_numbers")
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", query.num_results)
+    assert_select("#results tr", query.num_results)
   end
 
   def test_show_collection_number
@@ -82,7 +82,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     get(:show_collection_number, params: { id: "bogus" })
 
     number = collection_numbers(:detailed_unknown_coll_num_two)
-    get_with_dump(:show_collection_number, id: number.id)
+    get(:show_collection_number, params: { id: number.id })
   end
 
   def test_next_and_prev_collection_number
@@ -113,7 +113,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:create_collection_number, id: obs.id)
+    get(:create_collection_number, params: { id: obs.id })
     assert_response(:success)
     assert_template("create_collection_number", partial: "_rss_log")
     assert(assigns(:collection_number))
@@ -251,7 +251,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit_collection_number, id: number.id)
+    get(:edit_collection_number, params: { id: number.id })
     assert_response(:success)
     assert_template("edit_collection_number", partial: "_rss_log")
     assert_objs_equal(number, assigns(:collection_number))

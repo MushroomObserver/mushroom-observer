@@ -6,26 +6,31 @@
 #  == Actions
 #
 #  ==== Searches and Indexes
-#  list_images::
-#  images_by_user::
-#  image_search::
-#  advanced_search::
-#  index_image::
-#  show_selected_images::
+#                          Display a matrix of images:
+#  list_images::           all images, by creation date descending
+#  images_by_user::        by a given user
+#  images_for_project      attached to a given project
+#  image_search::          whose attributes match a string pattern
+#  advanced_search::       matching Advanced Search results
+#  index_image::           current query
+#  show_selected_images::  search results
 #
 #  ==== Show Images
 #  show_image::
+#  show_original::         show full_size image (for backwards compatibility)
 #  next_image::
 #  prev_image::
-#  cast_vote::
+#  cast_vote::             change user's vote & go to next image
 #
 #  ==== Work With Images
 #  add_image::             Upload images for observation.
 #  edit_image::            Edit notes, etc. for image.
+#  transform_image         Rotate or flip image
 #  destroy_image::         Callback: destroy image.
 #  remove_image::          Callback: remove image from observation.
 #  reuse_image::           Choose images to add to observation.
 #  remove_images::         Choose images to remove from observation.
+#  remove_images_for_glossary_term Choose images to remove from GlossaryTerm.
 #  license_updater::       Change copyright of many images.
 #  bulk_vote_anonymity_updater:: Change anonymity of image votes in bulk.
 #  bulk_filename_purge::   Purge all original image filenames from the database.
@@ -121,7 +126,7 @@ class ImageController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observations, action: :advanced_search)
+    redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a matrix with "list_images" template.
@@ -272,7 +277,7 @@ class ImageController < ApplicationController
     if params[:next]
       redirect_to_next_object(:next, Image, params[:id].to_s)
     else
-      redirect_with_query(action: "show_image", id: id)
+      redirect_with_query(action: "show_image", id: params[:id])
     end
   end
 
@@ -411,6 +416,10 @@ class ImageController < ApplicationController
     end
   end
 
+  ##############################################################################
+
+  private
+
   def init_project_vars_for_add_or_edit(obs_or_img)
     @projects = User.current.projects_member(order: :title)
     @project_checks = {}
@@ -483,6 +492,10 @@ class ImageController < ApplicationController
     any_changes
   end
 
+  public
+
+  ##############################################################################
+
   # Callback to destroy an image.
   # Linked from: show_image/original
   # Inputs: params[:id] (image)
@@ -513,30 +526,9 @@ class ImageController < ApplicationController
     end
   end
 
-  # Callback to remove a single image from an observation.
-  # Linked from: observations/edit
-  # Inputs: params[:image_id], params[:observation_id]
-  # Redirects to observations/show.
-  def remove_image
-    pass_query_params
-    @image = find_or_goto_index(Image, params[:image_id])
-    return unless @image
+  ##############################################################################
 
-    @observation = find_or_goto_index(Observation, params[:observation_id])
-    return unless @observation
-
-    if !check_permission!(@observation)
-      flash_error(:runtime_image_remove_denied.t(id: @image.id))
-    elsif @observation.images.exclude?(@image)
-      flash_error(:runtime_image_remove_missing.t(id: @image.id))
-    else
-      @observation.remove_image(@image)
-      @image.log_remove_from(@observation)
-      flash_notice(:runtime_image_remove_success.t(id: @image.id))
-    end
-    redirect_with_query(controller: :observations,
-                        action: :show, id: @observation.id)
-  end
+  private # helpers for reuse_image_for_glossary_term
 
   def serve_reuse_form(params)
     if params[:all_users] == "1"
@@ -559,6 +551,10 @@ class ImageController < ApplicationController
     end
     img
   end
+
+  public
+
+  ##############################################################################
 
   def reuse_image_for_glossary_term
     pass_query_params
@@ -612,7 +608,6 @@ class ImageController < ApplicationController
       image = Image.safe_find(params[:img_id])
       if !image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-
       elsif @mode == :observation
         # Add image to observation.
         @observation.add_image(image)
@@ -663,6 +658,10 @@ class ImageController < ApplicationController
     remove_images_from_object(Observation, params)
   end
 
+  ##############################################################################
+
+  private
+
   def remove_images_from_object(target_class, params)
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s)
@@ -687,6 +686,10 @@ class ImageController < ApplicationController
                           action: target_class.show_action, id: @object.id)
     end
   end
+
+  public
+
+  ##############################################################################
 
   def remove_images_for_glossary_term
     remove_images_from_object(GlossaryTerm, params)
@@ -714,7 +717,7 @@ class ImageController < ApplicationController
       end
     end
     if params[:size].blank? ||
-       params[:size].to_sym == (@user ? @user.image_size : :medium)
+       params[:size].to_sym == (@user ? @user.image_size.to_sym : :medium)
       redirect_with_query(action: "show_image", id: image)
     else
       redirect_with_query(action: "show_image", id: image,
@@ -757,7 +760,9 @@ class ImageController < ApplicationController
     end
   end
 
-  private # private methods used by license updater ############################
+  ##############################################################################
+
+  private # private methods used by license updater
 
   def process_license_changes
     params[:updates].values.each do |row|
@@ -795,7 +800,9 @@ class ImageController < ApplicationController
     )
   end
 
-  public # end private methods used by license updater #########################
+  public # end private methods used by license updater
+
+  ##############################################################################
 
   # Bulk update anonymity of user's image votes.
   # Input: params[:commit] - which button user pressed

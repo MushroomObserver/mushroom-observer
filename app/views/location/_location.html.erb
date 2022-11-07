@@ -5,20 +5,16 @@
       finish_map(gmap)
       gmap.div(width: "100%", height: "480px").html_safe
     %>
-    <center>
+    <div class="text-center">
       <%= show_authors_and_editors(location) %>
-    </center>
-  </div>
+    </div><!-- .text-center -->
+  </div><!--.col-sm-8-->
 
   <div class="col-sm-4">
-    <center>
-      <div class="row push-down">
-        <div class="col-xs-12">
-          <center>
-            <b><%= :NORTH.t %>:</b> <%= location.north %>&deg;
-          </center>
-        </div>
-      </div>
+    <div class="text-center">
+      <div class="text-center mt-3">
+        <b><%= :NORTH.t %>:</b> <%= location.north %>&deg;
+      </div><!-- .text-center -->
       <div class="row" style="max-width:30em">
         <div class="col-xs-6">
           <span class="pull-left">
@@ -31,31 +27,23 @@
           </span>
         </div>
       </div>
-      <div class="row">
-        <div class="col-xs-12">
-          <center>
-            <b><%= :SOUTH.t %>:</b> <%= location.south %>&deg;
-          </center>
-        </div>
-      </div>
-      <div class="row push-down">
-        <div class="col-xs-12">
-          <center>
-            <% if location.high %>
-              <b class="nowrap"><%= :show_location_highest.t %>:</b>
-              <%= location.high %>&nbsp;<%= :units_meters.t %><br/>
-            <% end %>
-            <% if location.low %>
-              <b class="nowrap"><%= :show_location_lowest.t %>:</b>
-              <%= location.low %>&nbsp;<%= :units_meters.t %><br/>
-            <% end %>
-          </center>
-        </div>
-      </div>
-    </center>
-  </div>
+      <div class="text-center">
+        <b><%= :SOUTH.t %>:</b> <%= location.south %>&deg;
+      </div><!-- .text-center -->
+      <div class="text-center mt-3">
+        <% if location.high %>
+          <b class="text-nowrap"><%= :show_location_highest.t %>:</b>
+          <%= location.high %>&nbsp;<%= :units_meters.t %><br/>
+        <% end %>
+        <% if location.low %>
+          <b class="text-nowrap"><%= :show_location_lowest.t %>:</b>
+          <%= location.low %>&nbsp;<%= :units_meters.t %><br/>
+        <% end %>
+      </div><!-- .text-center -->
+    </div><!-- .text-center -->
+  </div><!--.col-sm-4-->
+</div><!--.row-->
 
-  <div class="col-xs-12 max-width-text">
-    <%= ("*" + :NOTES.l + "*: " + location.notes.to_s.html_safe).tpl unless location.notes.blank? %>
-  </div>
-</div>
+<div class="container-text">
+  <%= ("*" + :NOTES.l + "*: " + location.notes.to_s.html_safe).tpl unless location.notes.blank? %>
+</div><!--.container-text-->

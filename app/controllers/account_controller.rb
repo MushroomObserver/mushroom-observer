@@ -660,10 +660,14 @@ class AccountController < ApplicationController
     new_user = find_user_by_id_login_or_email(@id)
     flash_error("Couldn't find \"#{@id}\".  Play again?") \
       if new_user.blank? && @id.present?
+    # Allow non-admin that's already in "switch user mode" to switch to another
+    # user. This is a weird case which only comes up if you switch to another
+    # admin user.  But if you do so the Switch User mechanism should behave in
+    # a reasonable way, and this seems the most appropriate behavior.
     if !@user&.admin && session[:real_user_id].blank?
       redirect_back_or_default("/")
     elsif new_user.present?
-      switch_to_user(new_user)
+      switch_to_user_if_verified(new_user)
       redirect_back_or_default("/")
     end
   end
@@ -678,14 +682,27 @@ class AccountController < ApplicationController
     end
   end
 
+  def switch_to_user_if_verified(new_user)
+    if new_user.verified
+      switch_to_user(new_user)
+    else
+      flash_error("This user is not verified yet!")
+    end
+  end
+
   def switch_to_user(new_user)
+    # This happens if an admin switches to another user from themselves.
     if session[:real_user_id].blank?
       session[:real_user_id] = User.current_id
       session[:admin] = nil
+    # This happens if an admin in "switch user mode" logs out or explicitly.
+    # switches back to themselves.
     elsif session[:real_user_id] == new_user.id
       session[:real_user_id] = nil
       session[:admin] = true
     end
+    # This happens if an admin already in "switch user mode" switches to yet
+    # another user.
     User.current = new_user
     session_user_set(new_user)
   end
@@ -856,7 +873,7 @@ class AccountController < ApplicationController
 
   def evil_signup_credentials?
     /(Vemslons|Uplilla)$/ =~ @new_user.login ||
-      /(\.xyz|namnerbca.com)$/ =~ @new_user.email ||
+      /namnerbca.com$/ =~ @new_user.email ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
       @new_user.email.remove(".").include?("blizkoyan2017")
   end

@@ -182,7 +182,7 @@ class AccountControllerTest < FunctionalTestCase
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
-    post(:signup, params: { new_user: params.merge(email: "foo@xxx.xyz") })
+    post(:signup, params: { new_user: params.merge(email: "x@namnerbca.com") })
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
 
@@ -621,7 +621,7 @@ class AccountControllerTest < FunctionalTestCase
     }
     File.stub(:rename, false) do
       login("rolf", "testpassword")
-      post_with_dump(:profile, params)
+      post(:profile, params: params)
     end
     assert_redirected_to(user_path(rolf.id))
     assert_flash_success
@@ -898,6 +898,9 @@ class AccountControllerTest < FunctionalTestCase
     get(:switch_users)
     assert_response(:success)
     assert_users_equal(rolf, User.current)
+    post(:switch_users, params: { id: "unverified" })
+    assert_users_equal(rolf, User.current)
+    assert_flash(/not verified yet/)
     post(:switch_users, params: { id: "Frosted Flake" })
     assert_users_equal(rolf, User.current)
     post(:switch_users, params: { id: mary.id })

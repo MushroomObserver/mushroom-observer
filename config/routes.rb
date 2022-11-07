@@ -29,7 +29,6 @@ ACTIONS = {
     email_new_password: {},
     login: {},
     logout_user: {},
-    manager: {},
     no_comment_email: { methods: [:get] },
     no_comment_response_email: {},
     no_commercial_email: {},
@@ -300,18 +299,6 @@ ACTIONS = {
     project_search: {},
     show_project: {}
   },
-  sequence: {
-    create_sequence: {},
-    destroy_sequence: {},
-    edit_sequence: {},
-    index_sequence: {},
-    list_sequences: {},
-    next_sequence: {},
-    observation_index: {},
-    prev_sequence: {},
-    sequence_search: {},
-    show_sequence: {}
-  },
   species_list: {
     add_observation_to_species_list: {},
     add_remove_observations: {},
@@ -456,9 +443,7 @@ def redirect_legacy_actions(old_controller: "",
     to_url = format(data[:to],
                     new_controller: new_controller,
                     model: model,
-                    # This is going to be used in a redirect which rubocop
-                    # has been instructed to ignore, but doesn't realize it.
-                    id: "%{id}") # rubocop:disable Style/FormatStringToken
+                    id: "%{id}")
 
     match(format(data[:from], old_controller: old_controller, model: model),
           to: redirect(path: to_url),
@@ -578,7 +563,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
   match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
-  get("/admin/w3c_tests", to: "admin#w3c_tests")
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
@@ -669,6 +653,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("download")
       post("download")
       get("print_labels")
+      post("print_labels")
     end
   end
 
@@ -693,6 +678,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/search/advanced(/:id)",
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
+
+  # ----- Sequences: standard actions ---------------------------------------
+  resources :sequences, id: /\d+/
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
@@ -818,6 +806,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/index_rss_log", to: redirect("/activity_logs"))
   get("/observer/show_rss_log/:id", to: redirect("/activity_logs/%{id}"))
   get("/observer/rss", to: redirect("/activity_logs/rss"))
+
+  # ----- Sequences: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "sequence", new_controller: "sequences",
+    actions: [:show, :index]
+  )
+  get("/sequence/create_sequence/:id",
+      to: redirect("/sequences/new?obs_id=%{id}"))
+  get("/sequence/edit_sequence/:id", to: redirect("/sequences/%{id}/edit"))
+  # ----- Sequences: nonstandard legacy action redirects
+  get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
 
   # ----- Users: legacy action redirects  ----------------------------------
   get("/observer/user_search", to: redirect(path: "/users"))

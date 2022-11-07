@@ -5,28 +5,25 @@
     link_to(:name_lister_classic.t, action: :create_species_list)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   javascript_include "name_lister"
   javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline
 %>
 
 <noscript>
-  <div class="row">
-    <div class="col-xs-12 max-width-text push-down">
-      <%= :name_lister_no_js.tp %>
-    </div>
+  <div class="container-text mt-3">
+    <%= :name_lister_no_js.tp %>
   </div>
 </noscript>
 
 <% if !can_do_ajax? %>
-  <div class="row">
-    <div class="col-xs-12 max-width-text push-down">
-      <%= :name_lister_bad_browser.tp %>
-    </div>
+  <div class="container-text mt-3">
+    <%= :name_lister_bad_browser.tp %>
   </div>
 <% end %>
 
-<table cols="3" width="100%" class="scroller push-down">
+<table cols="3" width="100%" class="scroller mt-3">
   <thead>
     <tr>
       <th width="20%"><%= :name_lister_genera.t %></th>
@@ -52,18 +49,18 @@
       <td colspan="3">
         <div id="word">&nbsp;</div>
         <%= form_tag({action: :name_lister}, {}) %>
-          <center>
-            <%= submit_tag(:name_lister_submit_spl.l, class: "btn", disabled: !@user) %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_txt.l, class: "btn") %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_rtf.l, class: "btn") %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_csv.l, class: "btn") %>
-          </center>
+          <div class="text-center">
+            <%= submit_tag(:name_lister_submit_spl.l, class: "btn btn-default", disabled: !@user) %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_txt.l, class: "btn btn-default") %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_rtf.l, class: "btn btn-default") %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_csv.l, class: "btn btn-default") %>
+          </div><!-- .text-center -->
           <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
           <% if false %>
             <br/>
             <%= label_tag(:charset, :name_lister_charset.t + ":") %>
             <%= select_tag(:charset, options_for_select(["ISO-8859-1", "WINDOWS-1252", "UTF-8"], @charset)) %>
-            <span class="HelpNote"><%= :name_lister_charset_help.t %></span>
+            <span class="help-note"><%= :name_lister_charset_help.t %></span>
           <% end %>
         </form>
       </td>
@@ -71,7 +68,7 @@
   </tbody>
 </table>
 
-<div id="log" style="margin-top:1em"></div>
+<div id="log mt-3"></div>
 
 <% inject_javascript_at_end %(
   nl_initialize_names();
@@ -84,8 +81,6 @@
   nc("g", 0); // click on first genus
 ) %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text push-down">
-    <div class="HelpNote"><%= :name_lister_help.tp %></div>
-  </div>
+<div class="container-text mt-3">
+  <div class="help-note"><%= :name_lister_help.tp %></div>
 </div>

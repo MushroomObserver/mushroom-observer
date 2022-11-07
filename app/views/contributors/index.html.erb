@@ -5,28 +5,29 @@
     link_with_query(:app_site_stats.t, info_site_stats_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 %>
 
 <div class="row">
   <div class="col-md-6">
     <div class="list-group">
       <%= render(partial: "contributor",
-                 collection: @users, as: :user) %>
+                  collection: @users, as: :user) %>
     </div>
   </div>
 
   <div class="col-md-6">
     <div class="list-group">
-      <div class="list-group-item max-width-text">
+      <div class="list-group-item">
 
         <%= :users_by_contribution_1.tp %>
         <% SiteData::ALL_FIELDS.select { |f| SiteData::FIELD_WEIGHTS[f] > 0}.each do |field| %>
           <div class="row">
             <div class="col-xs-8 col-xs-push-1"><%= "user_stats_#{field}".to_sym.t %> </div>
             <div class="col-xs-2"><%= SiteData::FIELD_WEIGHTS[field] %></div>
-          </div>
+          </div><!--.row-->
         <% end %>
-        <p class="pad-top"><%= :users_by_contribution_2.t %></p>
+        <p class="pt-3"><%= :users_by_contribution_2.t %></p>
         <%
           v1 = SiteData::FIELD_WEIGHTS[:images]
           v2 = SiteData::FIELD_WEIGHTS[:name_description_editors]
@@ -46,10 +47,10 @@
           <div class="col-xs-3 col-xs-push-1">+ 1 * <%= v5 %></div>
           <div class="col-xs-8">(<%= :users_by_contribution_2e.t %>)</div>
           <div class="col-xs-11 col-xs-push-1">&nbsp; &nbsp;<%= 3*v1 + v2 + v3 + v4 + v5 %> <%= :users_by_contribution_2f.t %></div>
-        </div>
+        </div><!--.row-->
         <%= :users_by_contribution_3.tp %>
 
       </div>
     </div>
   </div>
-</div>
+</div><!--.row-->

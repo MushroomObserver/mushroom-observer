@@ -3,20 +3,21 @@
 
   tabs = create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
 
   flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @merge %>
-  <div class="alert alert-warning max-width-text push-down">
+  <div class="alert alert-warning container-text mt-3">
     <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
                                        url: reload_with_args(merge: nil)) %>
-  </div>
+  </div><!--.container-text-->
 <% end %>
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <table class="table-striped table-herbarium push-down">
+    <table class="table-striped table-herbarium mt-3">
       <thead>
         <tr>
           <th><%= :herbarium_index_records.t %></th>
@@ -34,7 +35,7 @@
             <td>
               <%= if !@no_user_column && herbarium.personal_user.present?
                     tag.span(user_link(herbarium.personal_user),
-                             title: herbarium.personal_user.unique_text_name)
+                            title: herbarium.personal_user.unique_text_name)
               end %>
             </td>
             <td>
@@ -50,7 +51,7 @@
                 <%= post_button(
                       name: herbarium.name.t,
                       path: herbaria_merges_path(src: @merge.id,
-                                                 dest: herbarium.id),
+                                                dest: herbarium.id),
                       confirm: :are_you_sure.t
                     ) %>
               <% else %>
@@ -59,10 +60,10 @@
               <% if @user && !@merge && (herbarium.can_edit? ||
                     in_admin_mode?) %>
                 [<%= link_with_query(
-                       :EDIT.t, edit_herbarium_path(herbarium)
-                     ) %> |
-                 <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id)
-                     ) %>]
+                      :EDIT.t, edit_herbarium_path(herbarium)
+                    ) %> |
+                <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id)
+                    ) %>]
               <% end %>
             </td>
           </tr>

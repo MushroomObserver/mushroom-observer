@@ -98,7 +98,7 @@ module Query
         return [] if ids.empty?
 
         Name.
-          where((Name[:correct_spelling_id].coalesce(Name[:id])).
+          where(Name[:correct_spelling_id].coalesce(Name[:id]).
                 in(limited_id_set(ids))).
           pluck(*minimal_name_columns)
       end

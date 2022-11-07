@@ -13,14 +13,12 @@
 ) %>
 
 <div id="whirly" class="hidden">
-  <span id="whirly_text" class="pad-bottom-2x"></span>
+  <span id="whirly_text" class="pb-2"></span>
   <%= image_tag("indicator.gif") %>
 </div>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <p class="help-block"><%= :edit_translations_help.t %></p>
-  </div>
+<div class="container-text">
+  <p class="help-block"><%= :edit_translations_help.t %></p>
 </div>
 
 <div class="row">
@@ -31,9 +29,9 @@
           <%= case item.class.name
           when /MajorHeader/
             content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "major_header")
-          when /MinorHeader/                                                    
+          when /MinorHeader/
             content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "minor_header")
-          when /Comment/                                                        
+          when /Comment/
             content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "comment")
           when /TagField/
             tag = item.tag
@@ -47,7 +45,7 @@
               # Mark as translated if there is nothing to actually translate!
               up_to_date = true
             end
-            span_class = up_to_date ? "faint" : "bold bright"
+            span_class = up_to_date ? "faint" : "font-weight-bold bright"
             str = content_tag(:span, h(str), class: span_class, id: "str_#{tag}")
             label = content_tag(:span, h(tag) + ":", class: "tag")
             label = link_to(label, {page: @page, tag: tag}, data: {tag: tag, role: "show_tag"})
@@ -72,4 +70,4 @@
       <iframe id="hidden_frame" name="hidden_frame" src="" style="display:none"></iframe>
     </div>
   </div>
-</div>
+</div><!--.row-->

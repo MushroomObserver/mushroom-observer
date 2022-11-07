@@ -17,8 +17,7 @@ module ObservationsController::Download
   def print_labels
     query = find_query(:Observation)
     if query
-      @labels = make_labels(query.results)
-      render(layout: "printable", action: "print_labels")
+      render_report(Labels.new(query))
     else
       flash_error(:runtime_search_has_expired.t)
       redirect_back_or_default("/")
@@ -33,7 +32,7 @@ module ObservationsController::Download
     elsif params[:commit] == :DOWNLOAD.l
       create_and_render_report
     elsif params[:commit] == :download_observations_print_labels.l
-      render_labels
+      render_report(Labels.new(@query))
     end
   end
 
@@ -42,11 +41,6 @@ module ObservationsController::Download
       query: @query, format: @format, encoding: @encoding
     )
     render_report(report)
-  end
-
-  def render_labels
-    @labels = make_labels(@query.results)
-    render(layout: "printable", action: "print_labels")
   end
 
   def create_report(args)
@@ -78,42 +72,5 @@ module ObservationsController::Download
       disposition: "attachment",
       filename: report.filename
     }.merge(report.header || {}))
-  end
-
-  def make_labels(observations)
-    @fundis_herbarium = Herbarium.where(
-      name: "Fungal Diversity Survey"
-    ).first
-    observations.map do |observation|
-      make_label(observation)
-    end
-  end
-
-  def make_label(observation)
-    rows = label_data(observation)
-    insert_fundis_id(rows, observation)
-    rows
-  end
-
-  def label_data(observation)
-    [
-      ["MO #", observation.id],
-      ["When", observation.when],
-      ["Who", observation.collector_and_number],
-      ["Where", observation.place_name_and_coordinates],
-      ["What", observation.format_name.t],
-      ["Notes", observation.notes_export_formatted.t]
-    ]
-  end
-
-  def insert_fundis_id(rows, observation)
-    return unless @fundis_herbarium
-
-    fundis_record = observation.herbarium_records.where(
-      herbarium: @fundis_herbarium
-    ).first
-    return unless fundis_record
-
-    rows.insert(1, ["FunDiS #", fundis_record.accession_number])
   end
 end

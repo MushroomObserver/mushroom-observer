@@ -9,19 +9,19 @@
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <table class="table table-striped">
+    <table class="table table-striped mt-3">
       <% @objects.each do |collection_number| %>
         <tr>
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
               link_with_query(:EDIT.t,
                               {action: :edit_collection_number, id: collection_number.id, back: :index},
-                              class: "btn btn-xs")
+                              class: "btn btn-default btn-sm")
             end %>
           </td>
           <td>
             <i><%= link_with_query(collection_number.format_name.t,
-                                   collection_number.show_link_args) %></i>
+                                  collection_number.show_link_args) %></i>
           </td>
           <td>
             <%= collection_number.observations.map do |obs|
@@ -31,8 +31,10 @@
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
               link_with_query(:DESTROY.t,
-                              {action: :destroy_collection_number, id: collection_number.id},
-                              data: { confirm: :are_you_sure.t }, class: "btn btn-xs")
+                              { action: :destroy_collection_number,
+                                id: collection_number.id },
+                              data: { confirm: :are_you_sure.t },
+                              class: "btn btn-default btn-sm")
             end %>
           </td>
         </tr>

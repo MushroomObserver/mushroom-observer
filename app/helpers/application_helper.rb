@@ -60,6 +60,24 @@ module ApplicationHelper
     h(html.to_str)
   end
 
+  # Return a width class for the layout content container.
+  # Defaults to :text width, currently the most common. :wide is for forms
+  # These classes are MO-defined
+  #
+  def container_class
+    @container ||= :text
+    case @container
+    when :text
+      "container-text"
+    when :text_image
+      "container-text-image"
+    when :wide
+      "container-wide"
+    else
+      "container-full"
+    end
+  end
+
   # --------- links and buttons ------------------------------------------------
 
   # Call link_to with query params added.
@@ -165,15 +183,15 @@ module ApplicationHelper
 
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "/shared/tab_set", locals: { links: links })
+    render(partial: "layouts/content/tab_set", locals: { links: links })
   end
 
   # ----------------------------------------------------------------------------
 
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
-  def indent(count = 10)
-    "<span style='margin-left:#{count}px'>&nbsp;</span>".html_safe
+  def indent
+    "<span class='ml-10px'>&nbsp;</span>".html_safe
   end
 
   def content_tag_if(condition, name, content_or_options_with_block = nil,
@@ -379,7 +397,8 @@ module ApplicationHelper
         max_upload_size: max_size
       )
     )
-    content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
+    content_tag(:span, :select_file.t + file_field,
+                class: "file-field btn btn-default") +
       content_tag(:span, :no_file_selected.t)
   end
 

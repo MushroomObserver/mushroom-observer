@@ -75,11 +75,11 @@ module VersionHelper
       end
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
-      i = indent(1)
+      i = indent
       [date, i, user, i, link, i]
     end
 
-    table = make_table(table, style: "margin-left:20px")
+    table = make_table(table, class: "ml-4")
     tag.p(:VERSIONS.t) + table + safe_br
   end
 end

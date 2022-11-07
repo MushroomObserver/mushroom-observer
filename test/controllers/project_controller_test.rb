@@ -72,7 +72,7 @@ class ProjectControllerTest < FunctionalTestCase
   def test_show_project
     login("zero") # NOt the owner of eol_project
     p_id = projects(:eol_project).id
-    get_with_dump(:show_project, id: p_id)
+    get(:show_project, params: { id: p_id })
     assert_template("show_project")
     assert_select("a[href*='admin_request/#{p_id}']")
     assert_select("a[href*='edit_project/#{p_id}']", count: 0)
@@ -83,7 +83,7 @@ class ProjectControllerTest < FunctionalTestCase
   def test_show_project_logged_in
     p_id = projects(:eol_project).id
     requires_login(:add_project)
-    get_with_dump(:show_project, id: p_id)
+    get(:show_project, params: { id: p_id })
     assert_template("show_project")
     assert_select("a[href*='admin_request/']")
     assert_select("a[href*='edit_project/#{p_id}']")
@@ -93,7 +93,7 @@ class ProjectControllerTest < FunctionalTestCase
 
   def test_list_projects
     login
-    get_with_dump(:list_projects)
+    get(:list_projects)
     assert_template("list_projects")
   end
 
@@ -198,28 +198,22 @@ class ProjectControllerTest < FunctionalTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       admin_group = UserGroup.find(admin_group.id)
     end
-    n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_description_admins
-      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
-    ))
+    n = NameDescriptionAdmin.
+        where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
       0, n,
       "Project admin/user group has been destroyed, " \
       "no name descriptions should refer to it to set admin privileges."
     )
-    n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_description_writers
-      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
-    ))
+    n = NameDescriptionWriter.
+        where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
       0, n,
       "Project admin/user group has been destroyed, " \
       "no name descriptions should refer to it to set write permissions."
     )
-    n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_description_readers
-      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
-    ))
+    n = NameDescriptionReader.
+        where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
       0, n,
       "Project admin/user group has been destroyed, " \

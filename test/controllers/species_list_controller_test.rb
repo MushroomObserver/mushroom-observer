@@ -1845,11 +1845,11 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_post_add_remove_double_observations
     spl = species_lists(:unknown_species_list)
-    old_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM species_list_observations
-      WHERE species_list_id = #{spl.id}
-      ORDER BY observation_id ASC
-    ))
+    old_obs_list =
+      SpeciesListObservation.select(:observation_id).
+      where(species_list: spl.id).
+      order(observation_id: :asc).
+      map(&:observation_id)
     dup_obs = spl.observations.first
     new_obs = (Observation.all - spl.observations).first
     ids = [dup_obs.id, new_obs.id]
@@ -1862,11 +1862,11 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
     assert_flash_success
-    new_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM species_list_observations
-      WHERE species_list_id = #{spl.id}
-      ORDER BY observation_id ASC
-    ))
+    new_obs_list =
+      SpeciesListObservation.select(:observation_id).
+      where(species_list: spl.id).
+      order(observation_id: :asc).
+      map(&:observation_id)
     assert_equal(new_obs_list.length, old_obs_list.length + 1)
     assert_equal((new_obs_list - old_obs_list).first, new_obs.id)
   end
@@ -1932,23 +1932,23 @@ class SpeciesListControllerTest < FunctionalTestCase
     # make sure no checklist appears if no source set
     @request.session[:checklist_source] = nil
     get(:create_species_list)
-    assert_select("div#checklist_data", count: 0)
+    assert_select("#checklist_data", count: 0)
 
     @request.session[:checklist_source] = nil
     get(:edit_species_list, params: { id: spl2.id })
-    assert_select("div#checklist_data", count: 0)
+    assert_select("#checklist_data", count: 0)
 
     # make sure the source observations appear if source set
     @request.session[:checklist_source] = query2.id
     get(:create_species_list)
-    assert_select("div#checklist_data")
+    assert_select("#checklist_data")
     name1 = spl2.observations.first.name.id
     assert_select("input[name='checklist_data[#{name1}]']")
 
     login(spl1.user.login)
     @request.session[:checklist_source] = query2.id
     get(:edit_species_list, params: { id: spl1.id })
-    assert_select("div#checklist_data")
+    assert_select("#checklist_data")
     name2 = spl2.observations.last.name.id
     assert_select("input[name='checklist_data[#{name2}]']")
   end
