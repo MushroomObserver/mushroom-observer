@@ -18,6 +18,6 @@ class QueuedEmail::Feature < QueuedEmail
   def deliver_email
     return unless to_user.email_general_feature # Make sure it hasn't changed
 
-    FeaturesEmail.build(to_user, content).deliver_now
+    FeaturesMailer.build(to_user, content).deliver_now
   end
 end

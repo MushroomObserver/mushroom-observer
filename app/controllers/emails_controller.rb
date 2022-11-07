@@ -39,7 +39,7 @@ class EmailsController < ApplicationController
 
     subject = params[:email][:subject]
     content = params[:email][:content]
-    UserEmail.build(@user, @target, subject, content).deliver_now
+    UserMailer.build(@user, @target, subject, content).deliver_now
     flash_notice(:runtime_ask_user_question_success.t)
     redirect_to(user_path(@target.id))
   end
@@ -51,7 +51,7 @@ class EmailsController < ApplicationController
                   request.method == "POST"
 
     question = params[:question][:content]
-    ObservationEmail.build(@user, @observation, question).deliver_now
+    ObservationMailer.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
     redirect_with_query(controller: :observations, action: :show,
                         id: @observation.id)
@@ -64,7 +64,7 @@ class EmailsController < ApplicationController
                   request.method == "POST"
 
     commercial_inquiry = params[:commercial_inquiry][:content]
-    CommercialEmail.build(@user, @image, commercial_inquiry).deliver_now
+    CommercialMailer.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
     redirect_with_query(controller: "image", action: "show_image",
                         id: @image.id)
@@ -126,7 +126,7 @@ class EmailsController < ApplicationController
     elsif non_user_potential_spam?
       flash_error(:runtime_ask_webmaster_antispam.t)
     else
-      WebmasterEmail.build(@email, @content).deliver_now
+      WebmasterMailer.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to("/")
     end
@@ -158,7 +158,7 @@ class EmailsController < ApplicationController
   def send_merge_request
     temporarily_set_locale(MO.default_locale) do
       subject = "#{@model.name} Merge Request"
-      WebmasterEmail.build(@user.email, merge_request_content, subject).
+      WebmasterMailer.build(@user.email, merge_request_content, subject).
         deliver_now
     end
     flash_notice(:email_merge_request_success.t)
@@ -183,7 +183,7 @@ class EmailsController < ApplicationController
     temporarily_set_locale(MO.default_locale) do
       subject = "Request to change Name having dependents"
       content = change_request_content(name_with_icn_id, new_name_with_icn_id)
-      WebmasterEmail.build(@user.email, content, subject).
+      WebmasterMailer.build(@user.email, content, subject).
         deliver_now
     end
     flash_notice(:email_change_name_request_success.t)

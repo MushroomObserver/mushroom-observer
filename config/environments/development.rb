@@ -34,22 +34,15 @@ MushroomObserver::Application.configure do
     domain: "localhost"
   }
 
-  # Use this to actually send some Gmail via SMTP-Relay in development
+  # Use this to actually send some Gmail via SMTP-Relay in development,
+  # provided you have the credentials in credentials.yml.enc
   #
   # config.queue_email = true
   # config.action_mailer.delivery_method = :smtp
   # config.action_mailer.perform_deliveries = true
   # config.action_mailer.raise_delivery_errors = true
-  # config.action_mailer.smtp_settings = {
-  #   address: "smtp-relay.gmail.com",
-  #   port: 587,
-  #   user_name: "webmaster@mushroomobserver.org",
-  #   password: Rails.application.credentials.gmail_app_password[:webmaster],
-  #   authentication: "login",
-  #   enable_starttls_auto: true,
-  #   domain: "mushroomobserver.org",
-  #   openssl_verify_mode: "none"
-  # }
+  # config.action_mailer.smtp_settings =
+  #   Rails.application.credentials.gmail_smtp_settings_webmaster
 
   config.image_precedence = { default: [:local, :mycolab] }
   config.image_fallback_source = :mycolab

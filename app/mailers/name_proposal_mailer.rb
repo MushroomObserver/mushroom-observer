@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user of name proposal for their obs.
-class NameProposalEmail < AccountMailer
+class NameProposalMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, receiver, naming, observation)
     setup_user(receiver)
     @title = :email_subject_name_proposal.l(name: naming.text_name,

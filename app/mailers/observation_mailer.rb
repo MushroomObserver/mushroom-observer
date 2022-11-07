@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # User asking user about an observation.
-class ObservationEmail < AccountMailer
+class ObservationMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, observation, question)
     setup_user(observation.user)
     name = observation.unique_text_name

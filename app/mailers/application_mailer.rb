@@ -1,8 +1,23 @@
 # frozen_string_literal: true
 
 #  Base class for mailers for each type of email
-class AccountMailer < ActionMailer::Base
+class ApplicationMailer < ActionMailer::Base
   private
+
+  def webmaster_delivery
+    mail.delivery_method.settings =
+      Rails.application.credentials.gmail_smtp_settings_webmaster
+  end
+
+  def news_delivery
+    mail.delivery_method.settings =
+      Rails.application.credentials.gmail_smtp_settings_news
+  end
+
+  def noreply_delivery
+    mail.delivery_method.settings =
+      Rails.application.credentials.gmail_smtp_settings_noreply
+  end
 
   def setup_user(user)
     @user = user

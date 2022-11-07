@@ -31,16 +31,8 @@ MushroomObserver::Application.configure do
 
   # SMTP settings for gmail smtp-relay
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: "smtp-relay.gmail.com",
-    port: 587, # or 465 with tls: true
-    user_name: "webmaster@mushroomobserver.org",
-    password: Rails.application.credentials.gmail_app_password[:webmaster],
-    authentication: "login",
-    enable_starttls_auto: true, # tls: true
-    domain: "mushroomobserver.org",
-    openssl_verify_mode: "none"
-  }
+  config.action_mailer.smtp_settings =
+    Rails.application.credentials.gmail_smtp_settings_webmaster
 
   config.image_precedence = {
     default: [:mycolab, :local]

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user of change in observation.
-class ObservationChangeEmail < AccountMailer
+class ObservationChangeMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, receiver, obs, note, time)
     setup_user(receiver)
     @title = observation_change_title(obs, note)
