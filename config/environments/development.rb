@@ -69,14 +69,6 @@ MushroomObserver::Application.configure do
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
 
-  # Don't care if the mailer can't send
-  # config.action_mailer.raise_delivery_errors = false
-
-  # Tell ActionMailer not to deliver emails to the real world.
-  # The :file delivery method accumulates sent emails in the
-  # ../mail directory.  (This is a feature I added. -JPH 20080213)
-  # config.action_mailer.delivery_method = :file
-
   # Allow YAML deserializer to deserialize symbols
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
   config.active_record.yaml_column_permitted_classes = [Symbol]
