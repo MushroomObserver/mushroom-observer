@@ -12,15 +12,15 @@ class VisualGroupData
   end
 
   def sql_query
-    self.query.to_sql
+    query.to_sql
   end
 
   private
 
   def tables
     @tables ||= {
-      observation_images: ObservationImage.arel_table, # Arel::Table.new(:observation_images),
-      visual_group_images: VisualGroupImage.arel_table, # Arel::Table.new(:visual_group_images),
+      observation_images: ObservationImage.arel_table,
+      visual_group_images: VisualGroupImage.arel_table,
       observations: Observation.arel_table,
       names: Name.arel_table
     }
