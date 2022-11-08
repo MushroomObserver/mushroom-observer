@@ -83,7 +83,7 @@ module Account
     def resend_email
       return unless (user = find_or_goto_index(User, params[:id]))
 
-      VerifyEmail.build(user).deliver_now
+      VerifyMailer.build(user).deliver_now
       notify_root_of_verification_email(user)
       flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(account_welcome_path)
@@ -159,7 +159,7 @@ module Account
       subject = :email_subject_verify.l
       content = :email_verify_intro.tp(user: user.login, link: url)
       content = "email: #{user.email}\n\n" + content.html_to_ascii
-      WebmasterEmail.build(user.email, content, subject).deliver_now
+      WebmasterMailer.build(user.email, content, subject).deliver_now
     end
   end
 end

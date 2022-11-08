@@ -103,7 +103,7 @@ module Account
       if @new_user.save
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
-        PasswordEmail.build(@new_user, password).deliver_now
+        PasswordMailer.build(@new_user, password).deliver_now
         render("account/login/new")
       else
         flash_object_errors(@new_user)
