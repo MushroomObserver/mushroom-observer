@@ -42,7 +42,7 @@ class API2
     def after_create(api_key)
       return if api_key.verified
 
-      VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
+      VerifyAPIKeyMailer.build(@for_user, @user, api_key).deliver_now
     end
 
     def get

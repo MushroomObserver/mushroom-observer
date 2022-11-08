@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Tell observer someone is interested in their obs.
-class NamingObserverEmail < AccountMailer
+class NamingObserverMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(observer, naming, notification)
     sender = notification.user
     setup_user(observer)

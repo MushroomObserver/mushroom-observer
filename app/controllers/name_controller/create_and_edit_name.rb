@@ -283,7 +283,7 @@ module NameController::CreateAndEditName
   def email_admin_name_change
     subject = "Nontrivial Name Change"
     content = email_name_change_content
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 
@@ -381,7 +381,7 @@ module NameController::CreateAndEditName
       show_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
       edit_url: "#{MO.http_domain}/name/edit_name/#{@name.id}"
     )
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 

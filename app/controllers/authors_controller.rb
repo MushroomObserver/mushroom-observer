@@ -13,7 +13,7 @@ class AuthorsController < ApplicationController
     subject = param_lookup([:email, :subject], "")
     content = param_lookup([:email, :content], "")
     (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
-      AuthorEmail.build(@user, receiver, @object, subject, content).deliver_now
+      AuthorMailer.build(@user, receiver, @object, subject, content).deliver_now
     end
     flash_notice(:request_success.t)
     redirect_with_query(controller: @object.show_controller,
