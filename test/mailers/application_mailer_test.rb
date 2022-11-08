@@ -288,4 +288,12 @@ class ApplicationMailerTest < UnitTestCase
     assert_false(ApplicationMailer.valid_email_address?("joe.schmo.com"))
     assert_false(ApplicationMailer.valid_email_address?(""))
   end
+
+  def test_undeliverable_email
+    last = ActionMailer::Base.deliveries.last
+    mary.update(email: "bogus.address")
+    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    assert_nil(ActionMailer::Base.deliveries.last,
+               "Should not have delivered an email to 'bogus.address'.")
+  end
 end
