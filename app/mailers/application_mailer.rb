@@ -2,6 +2,15 @@
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
+  # This more or less follows RFC-5321 rules, minus the ridiculous quoting.
+  DOT_ATOM = %r{[0-9A-Za-z_!$&*\-=\\^`|~#%‘+/?{}]+}
+  DOT_ATOMS = /#{DOT_ATOM}(\.#{DOT_ATOM})*/
+  VALID_EMAIL_REGEXP = /^#{DOT_ATOMS}@#{DOT_ATOMS}$/
+
+  def self.valid_email_address?(address)
+    address.to_s.match?(VALID_EMAIL_REGEXP)
+  end
+
   private
 
   def webmaster_delivery
@@ -30,6 +39,8 @@ class ApplicationMailer < ActionMailer::Base
 
   def mo_mail(title, headers = {})
     to = calc_email(headers[:to])
+    return unless ApplicationMailer.valid_email_address?(to)
+
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
     reply_to = calc_email(headers[:reply_to]) || MO.noreply_email_address

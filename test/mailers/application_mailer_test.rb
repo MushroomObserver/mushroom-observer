@@ -282,4 +282,10 @@ class ApplicationMailerTest < UnitTestCase
       VerifyAPIKeyMailer.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
     end
   end
+
+  def test_valid_email_address
+    assert_true(ApplicationMailer.valid_email_address?("joe@schmo.com"))
+    assert_false(ApplicationMailer.valid_email_address?("joe.schmo.com"))
+    assert_false(ApplicationMailer.valid_email_address?(""))
+  end
 end
