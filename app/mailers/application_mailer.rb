@@ -39,7 +39,7 @@ class ApplicationMailer < ActionMailer::Base
 
   def mo_mail(title, headers = {})
     to = calc_email(headers[:to])
-    return unless ApplicationMailer.valid_email_address?(to)
+    abort! && return unless ApplicationMailer.valid_email_address?(to)
 
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
@@ -50,6 +50,14 @@ class ApplicationMailer < ActionMailer::Base
          reply_to: reply_to,
          content_type: "text/#{content_style}")
     I18n.locale = @old_locale if I18n.locale != @old_locale
+  end
+
+  def abort!
+    @abort = true
+  end
+
+  def deliver_now
+    super unless @abort
   end
 
   def debug_log(template, from, to, objects = {})
