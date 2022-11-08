@@ -290,7 +290,6 @@ class ApplicationMailerTest < UnitTestCase
   end
 
   def test_undeliverable_email
-    last = ActionMailer::Base.deliveries.last
     mary.update(email: "bogus.address")
     UserMailer.build(rolf, mary, "subject", "body").deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
