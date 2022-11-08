@@ -1126,7 +1126,7 @@ class NameController < ApplicationController
     content = "User: ##{user.id} / #{user.login}\n" \
               "Name: ##{name.id} / #{name.search_name}\n" \
               "Note: [[#{note}]]"
-    WebmasterEmail.build(user.email, content, subject).deliver_now
+    WebmasterMailer.build(user.email, content, subject).deliver_now
   end
 
   def edit_lifeform

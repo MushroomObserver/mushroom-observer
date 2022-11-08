@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # User asking user about an image.
-class CommercialEmail < AccountMailer
+class CommercialMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, image, commercial_inquiry)
     setup_user(image.user)
     @sender = sender

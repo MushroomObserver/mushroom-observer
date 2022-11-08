@@ -76,7 +76,7 @@ class AccountController < ApplicationController
 
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
-    VerifyEmail.build(@new_user).deliver_now
+    VerifyMailer.build(@new_user).deliver_now
     notify_root_of_blocked_verification_email(@new_user)
     redirect_back_or_default(action: :welcome)
   end
@@ -164,7 +164,7 @@ class AccountController < ApplicationController
   def send_verify
     return unless (user = find_or_goto_index(User, params[:id].to_s))
 
-    VerifyEmail.build(user).deliver_now
+    VerifyMailer.build(user).deliver_now
     notify_root_of_verification_email(user)
     flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
     redirect_back_or_default(action: :welcome)
@@ -257,7 +257,7 @@ class AccountController < ApplicationController
       if @new_user.save
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
-        PasswordEmail.build(@new_user, password).deliver_now
+        PasswordMailer.build(@new_user, password).deliver_now
         render(action: "login")
       else
         flash_object_errors(@new_user)
@@ -887,7 +887,7 @@ class AccountController < ApplicationController
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
-      DeniedEmail.build(params["new_user"]).deliver_now
+      DeniedMailer.build(params["new_user"]).deliver_now
     end
     redirect_back_or_default(action: :welcome)
     false
@@ -945,6 +945,6 @@ class AccountController < ApplicationController
     subject = :email_subject_verify.l
     content = :email_verify_intro.tp(user: user.login, link: url)
     content = "email: #{user.email}\n\n" + content.html_to_ascii
-    WebmasterEmail.build(user.email, content, subject).deliver_now
+    WebmasterMailer.build(user.email, content, subject).deliver_now
   end
 end

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Let curators know about a herbarium_record added by a non-curator.
-class AddHerbariumRecordEmail < AccountMailer
+class AddHerbariumRecordMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, receiver, herbarium_record)
     setup_user(receiver)
     @title = :email_subject_add_herbarium_record_not_curator.l(

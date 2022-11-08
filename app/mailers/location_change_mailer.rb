@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user of change in location description.
-class LocationChangeEmail < AccountMailer
+class LocationChangeMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, receiver, time, loc_change, desc_change)
     setup_user(receiver)
     name = loc_change.old_clone.display_name

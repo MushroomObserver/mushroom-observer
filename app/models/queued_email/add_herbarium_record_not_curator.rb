@@ -19,6 +19,6 @@ class QueuedEmail::AddHerbariumRecordNotCurator < QueuedEmail
     # Make sure it hasn't been deleted since email was queued.
     return unless herbarium_record
 
-    AddHerbariumRecordEmail.build(user, to_user, herbarium_record).deliver_now
+    AddHerbariumRecordMailer.build(user, to_user, herbarium_record).deliver_now
   end
 end
