@@ -12,6 +12,8 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups/1 or /visual_groups/1.json
   def show
     @visual_group = VisualGroup.find(params[:id])
+    @vals = @visual_group.visual_group_images.where(included: true).
+              pluck(:image_id, :included)
   end
 
   # GET /visual_groups/new

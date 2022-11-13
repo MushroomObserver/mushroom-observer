@@ -9,18 +9,15 @@
   <%= @visual_group.approved %>
 </p>
 <p>
+  <%= @visual_group.image_count %>
   <%= :definitional_images.t %>
-  <ul>
-    <% @visual_group.images.each do |image|
-       link = link_to(image.unique_format_name.t,
-                      controller: :image,
-                      action: :show_image, id: image.id) %>
-      <li>
-	<%= content_tag(:p, link) %>
-      </li>
-    <% end %>
-  </ul>
 </p>
 
-<%= link_to :show_visual_group_edit.t, edit_visual_group_path(@visual_group) %> |
-<%= link_to :show_visual_group_back_to_index.t, visual_model_visual_groups_path(@visual_group.visual_model) %>
+<%= render(partial: "image_matrix",
+           locals: { visual_group: @visual_group }) %>
+<% @container = :full %>
+
+<%= link_to :show_visual_group_edit.t,
+    edit_visual_group_path(@visual_group) %> |
+<%= link_to :show_visual_group_back_to_index.t,
+    visual_model_visual_groups_path(@visual_group.visual_model) %>
