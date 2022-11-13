@@ -4,12 +4,12 @@ jQuery(document).ready(function () {
   jQuery("body").delegate("[data-role='visual_group_status']", 'click', function(event){
     event.preventDefault();
     var data = $(this).data();
-      visual_group_status(data.imgid, data.vgid, data.need, data.inc);
+      visual_group_status(data.imgid, data.vgid, data.status);
   });
 
-  function visual_group_status(imgid, vgid, need, value) {
+  function visual_group_status(imgid, vgid, status) {
     jQuery.ajax("/ajax/visual_group_status/visual_group/" + vgid, {
-      data: { imgid: imgid, need: need, value: value, authenticity_token: csrf_token() },
+      data: { imgid: imgid, value: status, authenticity_token: csrf_token() },
       dataType: 'text',
       async: true,
       error: function (response) {

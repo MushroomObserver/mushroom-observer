@@ -66,23 +66,20 @@ module ThumbnailHelper
             data: { role: "image_vote", id: image.id, val: vote })
   end
 
-  def visual_group_status_link(visual_group, image, needs_review, included)
-    group_image = visual_group.visual_group_images.find_by(image_id: image.id)
-    link_text = visual_group_status_text(needs_review, included)
-    state_text = visual_group_status_text(group_image.nil?,
-                                          group_image&.included)
+  def visual_group_status_link(visual_group, image_id, state, link)
+    link_text = visual_group_status_text(link)
+    state_text = visual_group_status_text(state)
     return content_tag(:span, link_text) if link_text == state_text
 
     link_to(link_text,
             { controller: :image,
               action: :show_image,
-              id: image.id,
+              id: image_id,
               vote: 1 },
             title: link_text,
             data: { role: "visual_group_status",
-                    imgid: image.id,
+                    imgid: image_id,
                     vgid: visual_group.id,
-                    need: needs_review,
-                    inc: included })
+                    status: link })
   end
 end

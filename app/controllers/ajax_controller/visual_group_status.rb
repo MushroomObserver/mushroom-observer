@@ -13,18 +13,21 @@ module AjaxController::VisualGroupStatus
     return unless image && visual_group
 
     vgi = visual_group.visual_group_images.find_by(image: image)
-    included = (@value == "true")
-    if params["need"] == "true"
+    status = (@value == "true")
+    if @value == ""
       vgi&.destroy
+      status = nil
     elsif vgi
-      vgi.included = @value
+      vgi.included = status
       vgi.save!
     else
       VisualGroupImage.create!(visual_group: visual_group,
                                image: image,
-                               included: included)
+                               included: status)
     end
     render(partial: "visual_groups/visual_group_status_links",
-           locals: { visual_group: visual_group, image: image })
+           locals: { visual_group: visual_group,
+                     image_id: image.id,
+                     status: status })
   end
 end

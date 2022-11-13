@@ -11,7 +11,6 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1 or /visual_groups/1.json
   def show
-    logger.debug(VisualGroupData.new("Agaricus sylvicola", 1.5).sql_query)
     @visual_group = VisualGroup.find(params[:id])
   end
 
@@ -25,12 +24,8 @@ class VisualGroupsController < ApplicationController
   def edit
     pass_query_params
     @visual_group = VisualGroup.find(params[:id])
-    query = create_query(:Image, :pattern_search, by: :created_at,
-                                                  pattern: @visual_group.name)
-    @layout = calc_layout_params
-    @pages = paginate_numbers(:page, @layout["count"])
-    @objects = query.paginate(@pages,
-                              include: [:user, { observations: :name }])
+    query = VisualGroupData.new(@visual_group.name, 1.5).sql_query
+    @vals = VisualGroup.connection.select_rows(query)
   end
 
   # POST /visual_groups or /visual_groups.json
