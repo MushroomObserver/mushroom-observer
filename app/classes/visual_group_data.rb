@@ -3,12 +3,12 @@
 class VisualGroupData
   attr_accessor :query
 
-  def initialize(name, vote_limit)
+  def initialize(name, vote_limit, count)
     self.query = tables[:observation_images]
     add_joins
     add_project
     add_conditions(name, vote_limit)
-    query.order(tables[:observations][:vote_cache].desc)
+    query.order(tables[:observations][:vote_cache].desc).take(count)
   end
 
   def sql_query
@@ -55,5 +55,6 @@ class VisualGroupData
   def add_conditions(name, vote_limit)
     query.where(tables[:names][:text_name].matches("%#{name}%"))
     query.where(tables[:observations][:vote_cache].gteq(vote_limit))
+    query.where(tables[:visual_group_images][:included].eq(nil))
   end
 end

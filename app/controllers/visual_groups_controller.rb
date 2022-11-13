@@ -26,7 +26,8 @@ class VisualGroupsController < ApplicationController
   def edit
     pass_query_params
     @visual_group = VisualGroup.find(params[:id])
-    query = VisualGroupData.new(@visual_group.name, 1.5).sql_query
+    count = calc_layout_params["count"]
+    query = VisualGroupData.new(@visual_group.name, 1.5, count).sql_query
     @vals = VisualGroup.connection.select_rows(query)
   end
 
