@@ -12,9 +12,15 @@
 </p>
 
 <p>
+  <strong><%= :DESCRIPTION.t %>:</strong><br/>
+  <%= @visual_group.description %>
+</p>
+
+<p>
   <strong><%= :APPROVED.t %>:</strong>
   <%= @visual_group.approved %>
 </p>
+
 <p>
   <%= @visual_group.image_count %>
   <%= :definitional_images.t %>
