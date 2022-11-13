@@ -2604,7 +2604,11 @@
   # visual group statuses
   visual_group_include: Include
   visual_group_exclude: Exclude
+  visual_group_included: Included
+  visual_group_excluded: Excluded
   visual_group_needs_review: Needs Review
+
+  visual_group_includes_names: Includes images from these names
 
   # Links to CRUD pages
   visual_group_back_to_index: Back to Visual Group Index
@@ -2620,6 +2624,7 @@
 
   # visual_groups/edit
   edit_visual_group_title: "[:EDITING] [name] [:VISUAL_GROUP]"
+  edit_visual_group_filter_options: Filter Options
   edit_visual_group_update_filter: Update Filter
 
   # visual_groups/update

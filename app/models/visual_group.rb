@@ -22,4 +22,13 @@ class VisualGroup < ApplicationRecord
       add_image(image) if image.visual_group(visual_model) != self
     end
   end
+
+  def needs_review_vals(filter, count)
+    query = VisualGroupData.new(filter, 1.5, count).sql_query
+    VisualGroup.connection.select_rows(query)
+  end
+
+  def distinct_names
+    VisualGroup.connection.select_rows(VisualGroupNames.new(id).sql_query)
+  end
 end

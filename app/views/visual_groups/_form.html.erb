@@ -17,18 +17,18 @@
   <div>
     <div class="field">
       <%= form.label :name %>
-      <%= form.text_field :name %>
+      <%= form.text_field(:name, size: 40) %>
       <%= :VISUAL_GROUP.t %>
-    </div>
-
-    <div class="field">
-      <%= form.label :approved %>
-      <%= form.check_box :approved %>
     </div>
 
     <div class="field">
       <%= form.label :description %><br>
       <%= form.text_area(:description, cols: 60, rows: 10) %>
+    </div>
+
+    <div class="field">
+      <%= form.label :approved %>
+      <%= form.check_box :approved %>
     </div>
   </div>
 

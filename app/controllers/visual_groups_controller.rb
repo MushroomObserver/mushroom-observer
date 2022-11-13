@@ -26,18 +26,19 @@ class VisualGroupsController < ApplicationController
   def edit
     pass_query_params
     @visual_group = VisualGroup.find(params[:id])
-    count = calc_layout_params["count"]
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""
-    query = VisualGroupData.new(@filter, 1.5, count).sql_query
-    @vals = VisualGroup.connection.select_rows(query)
+    @status = params[:status] || "needs_review"
+    @vals = calc_vals(@filter, @status, calc_layout_params["count"])
   end
 
   # POST /visual_groups/edit_filter/1
   def edit_filter
     pass_query_params
     @visual_group = VisualGroup.find(params[:id])
-    redirect_to(edit_visual_group_path(@visual_group, filter: params["filter"]))
+    redirect_to(edit_visual_group_path(@visual_group,
+                                       filter: params["filter"],
+                                       status: params["status"]))
   end
 
   # POST /visual_groups or /visual_groups.json
@@ -76,5 +77,13 @@ class VisualGroupsController < ApplicationController
   def visual_group_params
     params.require(:visual_group).permit(:visual_model_id, :name,
                                          :approved, :description)
+  end
+
+  def calc_vals(filter, status, count)
+    if status != "needs_review"
+      return @visual_group.visual_group_images.
+             where(included: status != "excluded").pluck(:image_id, :included)
+    end
+    @visual_group.needs_review_vals(filter, count)
   end
 end

@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
-class VisualGroupData
+class VisualGroupNames
   attr_accessor :query
 
-  def initialize(name, vote_limit, count)
+  def initialize(visual_group_id)
     self.query = tables[:observation_images]
     add_joins
     add_project
-    add_conditions(name, vote_limit)
-    query.order(tables[:observations][:vote_cache].desc).take(count)
+    add_conditions(visual_group_id)
   end
 
   def sql_query
@@ -28,8 +27,7 @@ class VisualGroupData
 
   def add_joins
     join_table(:visual_group_images, :image_id,
-               attribute(:observation_images, :image_id),
-               Arel::Nodes::OuterJoin)
+               attribute(:observation_images, :image_id))
     join_table(:observations, :id,
                attribute(:observation_images, :observation_id))
     join_table(:names, :id, attribute(:observations, :name_id))
@@ -47,14 +45,10 @@ class VisualGroupData
   end
 
   def add_project
-    query.project(attribute(:observation_images, :image_id),
-                  attribute(:visual_group_images, :included),
-                  attribute(:observations, :vote_cache))
+    query.project(attribute(:names, :text_name)).distinct
   end
 
-  def add_conditions(name, vote_limit)
-    query.where(tables[:names][:text_name].eq(name))
-    query.where(tables[:observations][:vote_cache].gteq(vote_limit))
-    query.where(tables[:visual_group_images][:included].eq(nil))
+  def add_conditions(visual_group_id)
+    query.where(tables[:visual_group_images][:visual_group_id].eq(visual_group_id))
   end
 end

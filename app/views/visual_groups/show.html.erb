@@ -21,6 +21,18 @@
   <%= @visual_group.approved %>
 </p>
 
+<hr>
+
+<p>
+  <strong><%= :visual_group_includes_names.t %>:</strong><br>
+  <% @visual_group.distinct_names.each do |name| %>
+  <%= link_to(name[0],
+              edit_visual_group_path(@visual_group, filter: name[0]))%><br>
+  <% end %>
+</p>
+
+<hr>
+
 <p>
   <%= @visual_group.image_count %>
   <%= :definitional_images.t %>
