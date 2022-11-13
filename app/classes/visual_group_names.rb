@@ -49,6 +49,7 @@ class VisualGroupNames
   end
 
   def add_conditions(visual_group_id)
-    query.where(tables[:visual_group_images][:visual_group_id].eq(visual_group_id))
+    query.where(tables[:visual_group_images][:visual_group_id].
+                eq(visual_group_id))
   end
 end
