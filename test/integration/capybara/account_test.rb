@@ -8,8 +8,8 @@ class AccountTest < CapybaraIntegrationTestCase
   def test_profile
     login!("mary")
 
-    # cheating, i'm not going to use selenium just to click a dropdown
-    visit("/users/#{mary[:id]}")
+    # cheating: going direct instead of using selenium just to click a dropdown
+    visit("/users/#{mary.id}")
     click_on(text: "Edit Profile")
 
     assert_selector("body.profile__edit")
