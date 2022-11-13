@@ -1,7 +1,10 @@
 <%= form_with(model: [@visual_model, @visual_group], local: true) do |form| %>
   <% if visual_group.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(visual_group.errors.count, "error") %> prohibited this visual_group from being saved:</h2>
+      <h2>
+	<%= pluralize(visual_group.errors.count, "error") %>
+	prohibited this visual_group from being saved:
+      </h2>
 
       <ul>
         <% visual_group.errors.each do |error| %>
@@ -32,8 +35,4 @@
   <div class="actions">
     <%= form.submit %>
   </div>
-
-  <%= render(partial: "image_matrix",
-             locals: { visual_group: visual_group }) %>
-  <% @container = :full %>
 <% end %>

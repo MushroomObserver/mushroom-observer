@@ -27,8 +27,17 @@ class VisualGroupsController < ApplicationController
     pass_query_params
     @visual_group = VisualGroup.find(params[:id])
     count = calc_layout_params["count"]
-    query = VisualGroupData.new(@visual_group.name, 1.5, count).sql_query
+    @filter = params[:filter]
+    @filter = @visual_group.name unless @filter && @filter != ""
+    query = VisualGroupData.new(@filter, 1.5, count).sql_query
     @vals = VisualGroup.connection.select_rows(query)
+  end
+
+  # POST /visual_groups/edit_filter/1
+  def edit_filter
+    pass_query_params
+    @visual_group = VisualGroup.find(params[:id])
+    redirect_to(edit_visual_group_path(@visual_group, filter: params["filter"]))
   end
 
   # POST /visual_groups or /visual_groups.json

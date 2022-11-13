@@ -690,6 +690,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :visual_models, id: /\d+/ do
     resources :visual_groups, id: /\d+/, shallow: true
   end
+  post("visual_groups/edit_filter/:id", to: "visual_groups#edit_filter", as: "edit_filter_visual_group")
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
