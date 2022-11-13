@@ -34,7 +34,7 @@ module Comment::Callbacks
     return unless (user_ids & ::MO.water_users).any?
     return unless (user_ids & ::MO.oil_users).any?
 
-    ::WebmasterEmail.build(
+    ::WebmasterMailer.build(
       MO.noreply_email_address,
       oil_and_water_content(user_ids),
       oil_and_water_subject

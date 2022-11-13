@@ -116,7 +116,7 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     if check_permission(@sequence)
       @sequence.destroy
-      flash_notice(:runtime_destroyed_id.t(type: Sequence, value: params[:id]))
+      flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
     else
       flash_warning(:permission_denied.t)
     end

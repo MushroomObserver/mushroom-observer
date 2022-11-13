@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user of comment on their object.
-class CommentEmail < AccountMailer
+class CommentMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, receiver, target, comment)
     setup_user(receiver)
     @title = :email_subject_comment.l(name: target.unique_text_name)

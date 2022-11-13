@@ -622,7 +622,7 @@ class LocationController < ApplicationController
     return unless (@location = find_or_goto_index(Location, params[:id].to_s))
 
     if @location.destroy
-      flash_notice(:runtime_destroyed_id.t(type: Location, value: params[:id]))
+      flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
     end
     redirect_to(location_list_locations_path)
   end
@@ -689,7 +689,7 @@ class LocationController < ApplicationController
   def email_admin_location_change
     subject = "Nontrivial Location Change"
     content = email_location_change_content
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(@user.email, content, subject).deliver_now
     LocationControllerTest.report_email(content) if Rails.env.test?
   end
 

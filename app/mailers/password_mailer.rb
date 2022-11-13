@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # User forgot their password.
-class PasswordEmail < AccountMailer
+class PasswordMailer < ApplicationMailer
+  after_action :webmaster_delivery, only: [:build]
+
   def build(user, password)
     setup_user(user)
     @title = :email_subject_new_password.l

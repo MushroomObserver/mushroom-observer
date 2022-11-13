@@ -292,7 +292,7 @@ class Image < AbstractModel
 
   # How this image is refered to in the rss logs.
   def log_name
-    "#{:Image.t} ##{id || was || "?"}"
+    "##{id || was || "?"}"
   end
 
   ##############################################################################

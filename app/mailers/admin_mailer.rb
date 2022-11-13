@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Ask project admins for admin privileges on project.
-class AdminEmail < AccountMailer
+class AdminMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, receiver, project, subject, message)
     setup_user(receiver)
     @title = subject

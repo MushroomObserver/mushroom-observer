@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user of change in name description.
-class NameChangeEmail < AccountMailer
+class NameChangeMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(email)
     @name_change = email.name_change
     @desc_change = email.desc_change

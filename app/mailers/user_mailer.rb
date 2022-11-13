@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # User asking user about anything else.
-class UserEmail < AccountMailer
+class UserMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender, user, subject, content)
     setup_user(user)
     @title = subject

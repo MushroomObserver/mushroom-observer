@@ -59,6 +59,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(1, glossary_term.images.length)
     second_image = images(:convex_image)
     glossary_term.add_image(second_image)
+    glossary_term.reload
     assert_equal(thumb, glossary_term.thumb_image)
     assert_equal(2, glossary_term.images.length)
     assert(glossary_term.images.member?(second_image))
@@ -119,6 +120,17 @@ class GlossaryTermTest < UnitTestCase
     glossary_term.reload
     assert_equal(thumb, glossary_term.thumb_image)
     assert_equal(images_length, glossary_term.images.length)
+  end
+
+  def test_remove_last_image
+    glossary_term = glossary_terms(:conic_glossary_term)
+    assert_equal(1, glossary_term.images.length)
+    last_image = glossary_term.thumb_image
+    assert(last_image)
+    glossary_term.remove_image(last_image)
+    glossary_term.reload
+    assert_nil(glossary_term.thumb_image)
+    assert_equal(0, glossary_term.images.length)
   end
 
   def test_validations
