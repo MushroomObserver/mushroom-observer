@@ -9,7 +9,8 @@ module Account
       @place_name        = @user.location ? @user.location.display_name : ""
       @copyright_holder  = @user.legal_name
       @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license.id
+      # NOTE: @user.license is not set by default
+      @upload_license_id = @user.license ? @user.license.id : nil
     end
 
     def update

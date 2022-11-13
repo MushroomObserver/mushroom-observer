@@ -494,12 +494,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("test_autologin", controller: "login")
 
     resource :preferences, only: [:edit, :update]
-    get("no_email", controller: "preferences")
+    get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
     patch("profile/remove_image", controller: "profile")
 
     resource :verify, only: [:new, :create], controller: "verifications"
+    # Alternate path name for email verification
+    get("verify(/:id)", to: "verifications#new", as: "verify_email")
     get("reverify", controller: "verifications")
     post("verify/resend_email(/:id)", to: "verifications#resend_email",
                                       as: "resend_verification_email")

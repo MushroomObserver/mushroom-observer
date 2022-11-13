@@ -13,7 +13,7 @@ module Account
       :create
     ]
 
-    # Regular signup verifications hit this page only.
+    # Regular signup verifications hit this page only (via GET).
     def new
       id        = params["id"]
       auth_code = params["auth_code"]
@@ -84,9 +84,20 @@ module Account
       return unless (user = find_or_goto_index(User, params[:id]))
 
       VerifyMailer.build(user).deliver_now
-      notify_root_of_verification_email(user)
+      self.class.notify_root_of_verification_email(user)
       flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(account_welcome_path)
+    end
+
+    # This method is also called by AccountController, so it's a class method.
+    def self.notify_root_of_verification_email(user)
+      url = "#{MO.http_domain}/account/verify/#{user.id}?" \
+            "auth_code=#{user.auth_code}"
+      # url = account_verify_url(id: user.id, auth_code: user.auth_code)
+      subject = :email_subject_verify.l
+      content = :email_verify_intro.tp(user: user.login, link: url)
+      content = "email: #{user.email}\n\n" + content.html_to_ascii
+      WebmasterMailer.build(user.email, content, subject).deliver_now
     end
 
     private
@@ -151,15 +162,6 @@ module Account
       User.current = user
       session_user_set(user)
       @user.verify
-    end
-
-    def notify_root_of_verification_email(user)
-      url = "#{MO.http_domain}/account/verify/new/#{user.id}?" \
-            "auth_code=#{user.auth_code}"
-      subject = :email_subject_verify.l
-      content = :email_verify_intro.tp(user: user.login, link: url)
-      content = "email: #{user.email}\n\n" + content.html_to_ascii
-      WebmasterMailer.build(user.email, content, subject).deliver_now
     end
   end
 end

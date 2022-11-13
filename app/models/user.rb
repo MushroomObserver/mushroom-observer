@@ -32,7 +32,7 @@
 #     is +nil+).
 #
 #  4. A verification email is sent to the email address given in the sign-up
-#     form.  Inside the email is a link to /account/verify/new.  This provides
+#     form.  Inside the email is a link to /account/verify.  This provides
 #     the User +id+ and +auth_code+.
 #
 #  5. When they click on that link, the User record is updated and the User is

@@ -6,19 +6,24 @@ class AccountTest < CapybaraIntegrationTestCase
   def test_preferences; end
 
   def test_profile
-    login!("mary")
+    mary = users("mary")
+    login!(mary)
 
     # cheating: going direct instead of using selenium just to click a dropdown
-    visit("/users/#{mary.id}")
-    click_on(text: "Edit Profile")
+    visit(user_path(mary))
+    click_link(text: "Edit Profile")
 
     assert_selector("body.profile__edit")
     within("#account_profile_form") do
-      fill_in("user_name", with: "Merula Marsh")
+      fill_in("user_name", with: "Merula Marshwell")
       fill_in("user_place_name", with: locations(:mitrula_marsh).name)
       click_commit
     end
-    assert_equal("Merula Marsh", mary.name)
+
+    mary.reload
+    assert_flash_text(/Successfully updated profile/i)
+    assert_equal("Merula Marshwell", mary.name)
+    assert_equal(locations(:mitrula_marsh), mary.location)
   end
 
   def test_api_keys; end
