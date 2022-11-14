@@ -4,48 +4,6 @@ require("test_helper")
 
 # Controller tests for author pages
 class AuthorsControllerTest < FunctionalTestCase
-  def test_email_request
-    id = name_descriptions(:coprinus_comatus_desc).id
-    requires_login(:email_request, id: id, type: :name_description)
-    assert_form_action(action: :email_request, id: id,
-                       type: :name_description)
-
-    id = location_descriptions(:albion_desc).id
-    requires_login(:email_request, id: id, type: :location_description)
-    assert_form_action(action: :email_request, id: id,
-                       type: :location_description)
-
-    params = {
-      id: name_descriptions(:coprinus_comatus_desc).id,
-      type: :name_description,
-      email: {
-        subject: "Author request subject",
-        message: "Message for authors"
-      }
-    }
-    post_requires_login(:email_request, params)
-    assert_redirected_to(
-      controller: :name,
-      action: :show_name_description,
-      id: name_descriptions(:coprinus_comatus_desc).id
-    )
-    assert_flash_text(:request_success.t)
-
-    params = {
-      id: location_descriptions(:albion_desc).id,
-      type: :location_description,
-      email: {
-        subject: "Author request subject",
-        message: "Message for authors"
-      }
-    }
-    post_requires_login(:email_request, params)
-    assert_redirected_to(controller: :location,
-                         action: :show_location_description,
-                         id: location_descriptions(:albion_desc).id)
-    assert_flash_text(:request_success.t)
-  end
-
   def test_review_locations
     desc = location_descriptions(:albion_desc)
     params = { id: desc.id, type: "LocationDescription" }
