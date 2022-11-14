@@ -44,18 +44,6 @@ module Account
       redirect_to(account_api_keys_path)
     end
 
-    def activate
-      if (key = find_or_goto_index(APIKey, params[:id].to_s))
-        if check_permission!(key)
-          key.verify!
-          flash_notice(:account_api_keys_activated.t(notes: key.notes))
-        end
-        redirect_to(account_api_keys_path)
-      end
-    rescue StandardError => e
-      flash_error(e.to_s)
-    end
-
     private
 
     def create_api_key

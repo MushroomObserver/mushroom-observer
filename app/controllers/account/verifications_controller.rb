@@ -35,11 +35,6 @@ module Account
       elsif user.verified
         redirect_already_used_verification(user)
 
-      # If user was created via API, we must ask the user to choose a password
-      # first before we can verify them.
-      elsif user.password.blank?
-        send_api_new_user_to_choose_password(user)
-
       # If not already verified, and the code checks out, then mark account
       # "verified", log user in, and display the "you're verified" page.
       else
@@ -62,14 +57,8 @@ module Account
         redirect_to(account_welcome_path)
       elsif user.verified
         redirect_already_used_verification(user)
-
-      # If user was created via API, they will have been sent to the
-      # choose password form, which POSTs to this action (:create)
-      elsif user.password.blank?
-        handle_password_form_submission(user)
       else
         mark_user_verified_and_login(user)
-
         render(action: :new)
       end
     end
@@ -113,48 +102,6 @@ module Account
       User.current = nil
       session_user_set(nil)
       redirect_to(new_account_login_path)
-    end
-
-    def send_api_new_user_to_choose_password(user)
-      @user = user
-      flash_warning(:account_choose_password_warning.t)
-      render(action: :choose_password)
-    end
-
-    def handle_password_form_submission(user)
-      @user = user
-      password = begin
-                   params[:user][:password]
-                 rescue StandardError
-                   nil
-                 end
-      confirmation = begin
-                       params[:user][:password_confirmation]
-                     rescue StandardError
-                       nil
-                     end
-      check_password_form_for_errors(password, confirmation)
-
-      render(action: :new) and return unless @user.errors.any?
-
-      @user.password = password
-      flash_object_errors(@user)
-
-      render(action: :choose_password) and return
-    end
-
-    def check_password_form_for_errors(password, confirmation)
-      if password.blank?
-        @user.errors.add(:password, :validate_user_password_missing.t)
-      elsif password != confirmation
-        @user.errors.add(:password_confirmation,
-                         :validate_user_password_no_match.t)
-      elsif password.length < 5 || password.size > 40
-        @user.errors.add(:password, :validate_user_password_too_long.t)
-      else
-        @user.change_password(password)
-        mark_user_verified_and_login(@user)
-      end
     end
 
     def mark_user_verified_and_login(user)

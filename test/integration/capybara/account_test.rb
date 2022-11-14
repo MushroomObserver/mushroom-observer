@@ -37,10 +37,11 @@ class AccountTest < CapybaraIntegrationTestCase
     assert_selector("body.api_keys__index")
     within("#account_api_keys_form") do
       assert_field("key_#{marys_api_key.id}")
-      # Does not work because single quote gets converted to "smart" apostrophe
-      # and encoded. Capybara not smart enough to tell they are equivalent.
-      # assert_selector("#key_notes_#{marys_api_key.id} span.current_notes",
-      #                 text: marys_api_key.notes.t)
+      # needs `CGI.unescapeHTML` because single quote gets converted to "smart"
+      # apostrophe and encoded by `t`. Otherwise Capybara will not find the
+      # HTML entity `&#8217;` and the character `’` equivalent.
+      assert_selector("#key_notes_#{marys_api_key.id} span.current_notes",
+                      text: CGI.unescapeHTML(marys_api_key.notes.t))
     end
     # Add a new api key
     within("#account_new_api_key_form") do
@@ -86,24 +87,6 @@ class AccountTest < CapybaraIntegrationTestCase
     within("#account_api_keys_form") do
       refute_field("key_#{marys_api_key.id}")
     end
-  end
-
-  # API users are supposedly created without a password.
-  # Be sure they're sent to choose one
-  def test_choose_password
-    # new_api_user = users("unverified_api_user")
-    # visit(account_verify_path(id: new_api_user.id,
-    #                           auth_code: new_api_user.auth_code))
-    # binding.break
-
-    # assert_flash_text(:account_choose_password_warning.t)
-    # within("#account_choose_password_form") do
-    #   fill_in("user_password", with: "something")
-    #   click_commit
-    # end
-
-    # assert_equal(new_api_user.password, User.sha1("something"))
-    # binding.break
   end
 
   def test_signup; end
