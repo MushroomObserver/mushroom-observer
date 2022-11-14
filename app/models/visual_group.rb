@@ -11,6 +11,7 @@ class VisualGroup < ApplicationRecord
     if status && status != "excluded"
       return visual_group_images.where(included: true).count
     end
+
     visual_group_images.where(included: false).count
   end
 
