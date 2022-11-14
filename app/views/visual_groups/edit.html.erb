@@ -22,12 +22,14 @@
   <% end %>
 </p>
 
-<hr>
+<span id="filter_options">
+  <hr>
+</span>
 
 <strong><%= :edit_visual_group_filter_options.t %></strong>
-<%= form_with(url: edit_visual_group_path(@visual_group), method: :get,
+<%= form_with(url: edit_visual_group_path(@visual_group, anchor: "filter_options"), method: :get,
               id: "visual_group_filters_form") do |form| %>
-  <%= form.text_field(:filter, value: @filter, size: 60) %>
+  <%= form.text_field(:filter, value: @filter, size: 60, id: "filter") %>
   <p>
     <% ["needs_review", "included", "excluded"].each do |a_status| %>
       <%= form.radio_button(:status, a_status, checked: @status == a_status, id: a_status) %>
@@ -40,6 +42,12 @@
       <%= form.submit(:edit_visual_group_update_filter.t) %>
     </div>
   </p>
+
+  <% inject_javascript_at_end %(
+    jQuery("#included, #excluded").on("click", function(e){
+     jQuery("#filter").val("");
+    })
+  ) %>
 <% end %>
 
 <%= render(partial: "image_matrix",
