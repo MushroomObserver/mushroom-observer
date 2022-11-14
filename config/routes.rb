@@ -538,9 +538,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Authors: standard actions ------------------------------------
   namespace :authors do
     resource :email_requests, only: [:new, :create]
+    get("review(/:id)", to: "/authors#review", id: /\d+/, as: "review")
   end
-  get("/authors/review(/:id)", to: "authors#review", id: /\d+/,
-                               as: "authors_review")
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
