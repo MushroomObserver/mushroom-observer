@@ -1,4 +1,5 @@
-<%= form_with(model: [@visual_model, @visual_group], local: true) do |form| %>
+<%= form_with(model: [@visual_model, @visual_group], local: true,
+              id: "visual_group_form") do |form| %>
   <% if visual_group.errors.any? %>
     <div id="error_explanation">
       <h2>
