@@ -32,15 +32,6 @@ class VisualGroupsController < ApplicationController
     @vals = calc_vals(@filter, @status, calc_layout_params["count"])
   end
 
-  # POST /visual_groups/edit_filter/1
-  def edit_filter
-    pass_query_params
-    @visual_group = VisualGroup.find(params[:id])
-    redirect_to(edit_visual_group_path(@visual_group,
-                                       filter: params["filter"],
-                                       status: params["status"]))
-  end
-
   # POST /visual_groups or /visual_groups.json
   def create
     @visual_group = VisualGroup.new(visual_group_params)

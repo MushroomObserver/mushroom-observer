@@ -25,7 +25,7 @@
 <hr>
 
 <strong><%= :edit_visual_group_filter_options.t %></strong>
-<%= form_with(url: edit_filter_visual_group_path(@visual_group.id)) do |form| %>
+<%= form_with(url: edit_visual_group_path(@visual_group), method: :get) do |form| %>
   <%= form.text_field(:filter, value: @filter, size: 60) %>
   <p>
     <% ["needs_review", "included", "excluded"].each do |a_status| %>
