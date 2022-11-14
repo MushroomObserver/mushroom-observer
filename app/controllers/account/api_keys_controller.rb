@@ -17,7 +17,7 @@ module Account
       @key = APIKey.new
 
       create_api_key
-      render(:index)
+      redirect_to(account_api_keys_path)
     end
 
     # The edit view seems to be only for no-js users.
@@ -41,7 +41,7 @@ module Account
 
     def remove
       remove_api_keys
-      render(:index)
+      redirect_to(account_api_keys_path)
     end
 
     def activate

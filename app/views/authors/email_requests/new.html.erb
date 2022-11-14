@@ -1,7 +1,8 @@
 <% @title = :author_request_title.t(title: @object.format_name) %>
 
 <%= form_with(url: authors_email_requests_path(id: @object.id,
-      type: @object.type_tag, q: get_query_param)) do |form| %>
+      type: @object.type_tag, q: get_query_param),
+      id: "authors_email_requests_form") do |form| %>
 
   <%= :author_request_note.tp %>
 

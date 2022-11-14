@@ -34,7 +34,7 @@
         <td id="key_notes_<%= key.id %>">
           <div class="edit_key_notes_container"
                 data-target-key="<%= key.id %>" style="display:none">
-            <%= f.text_field("key_notes_#{key.id}",
+            <%= f.text_field("key_notes_input_#{key.id}",
                              { value: key.notes,
                                data: { role: "key_notes_input",
                                        id: key.id } }) %>
