@@ -33,13 +33,8 @@
 
 <hr>
 
-<p>
-  <%= @visual_group.image_count %>
-  <%= :definitional_images.t %>
-</p>
-
 <%= render(partial: "image_matrix",
-           locals: { visual_group: @visual_group }) %>
+           locals: { visual_group: @visual_group, status: "included" }) %>
 <% @container = :full %>
 
 <p>

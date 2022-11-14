@@ -51,6 +51,22 @@ class VisualGroupsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "should get edit page with excluded images" do
+    login
+    get(:edit, params: { id: @visual_group.id, status: "excluded" })
+    assert_response :success
+  end
+
+  test "should post edit_filter" do
+    login
+    post(:edit_filter, params: { id: @visual_group.id,
+                                 filter: @visual_group.name,
+                                 status: "excluded" })
+    assert_redirected_to edit_visual_group_url(@visual_group,
+                                               filter: @visual_group.name,
+                                               status: "excluded")
+  end
+
   test "should update visual_group" do
     login
     patch(:update, params: {

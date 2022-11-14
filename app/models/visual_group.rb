@@ -6,9 +6,11 @@ class VisualGroup < ApplicationRecord
   belongs_to :visual_model
 
   def image_count(status = true)
-    return visual_group_images.count if status.nil?
-    return visual_group_images.where(included: true).count if status
+    return visual_group_images.count if status.nil? || status == "needs_review"
 
+    if status && status != "excluded"
+      return visual_group_images.where(included: true).count
+    end
     visual_group_images.where(included: false).count
   end
 

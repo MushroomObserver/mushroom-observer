@@ -1,4 +1,9 @@
 <% if @vals %>
+  <p>
+    <%= visual_group.image_count(status) %>
+    <%= :IMAGES.t %>
+  </p>
+
   <%= content_tag(:div, id: "results") do %>
     <ul class="row list-unstyled mt-3">
       <%= render(layout: "shared/matrix_table",
