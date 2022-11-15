@@ -94,6 +94,7 @@ module Account
         redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
+        render(:edit) and return
       else
         update_copyright_holder(legal_name_change)
         maybe_update_location_and_finish
