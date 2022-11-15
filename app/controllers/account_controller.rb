@@ -56,12 +56,12 @@ class AccountController < ApplicationController
     @new_user = User.new(theme: MO.default_theme)
 
     initialize_new_user
-    # return if block_evil_signups!
-    # return unless make_sure_theme_is_valid!
-    # return unless validate_and_save_new_user!
 
     return if block_evil_signups!
-    return unless make_sure_theme_is_valid! && validate_and_save_new_user!
+    unless make_sure_theme_is_valid!
+      redirect_back_or_default(action: :welcome) and return
+    end
+    redirect_to(action: :new) and return unless validate_and_save_new_user!
 
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
@@ -122,7 +122,6 @@ class AccountController < ApplicationController
       # to automate creation of accounts?
       DeniedMailer.build(params["new_user"]).deliver_now
     end
-    redirect_back_or_default(action: :welcome)
     false
   end
 
@@ -132,7 +131,7 @@ class AccountController < ApplicationController
     return true if @new_user.errors.none? && @new_user.save
 
     flash_object_errors(@new_user)
-    render(:new) and return false
+    false
   end
 
   # I think this is not in the User model validations because of tests or
