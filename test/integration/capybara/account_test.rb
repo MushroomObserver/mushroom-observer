@@ -26,7 +26,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     assert_flash_error
     assert_flash_text(:validate_user_email_missing.t)
-    assert_selector("body.preferences__edit")
+    assert_selector("body.preferences__update")
     within("#account_preferences_form") do
       fill_in("user_email", with: "yabba@dabba.doo")
       click_commit
@@ -90,9 +90,28 @@ class AccountTest < CapybaraIntegrationTestCase
       check("user_has_images")
       check("user_has_specimen")
       select("Show only lichens", from: "user_lichen")
-      # Region filter - must be end of location string to work, including
-      # the country, but it's not validated. User must type wisely.
-      fill_in("user_region", with: "Westbrook, Massachusetts")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    # Content filters
+    within("#account_preferences_form") do
+      # Region filter - must be end of location string to work,
+      # **** including the country ****. There's no autocomplete yet.
+      # User must type or paste wisely.
+      fill_in("user_region", with: "Gloucester, Massachusetts")
+      click_commit
+    end
+
+    assert_flash_error
+    assert_selector("body.preferences__update")
+    assert_flash_text(CGI.unescapeHTML(:advanced_search_filter_region.t))
+    within("#account_preferences_form") do
+      # Region filter - must be end of location string to work,
+      # **** including the country ****. There's no autocomplete yet.
+      # User must type or paste wisely.
+      fill_in("user_region", with: "Massachusetts, USA")
       click_commit
     end
 
@@ -203,7 +222,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     # We ought to be back at the form
-    assert_selector("body.account__new")
+    assert_selector("body.account__create")
     assert_flash_error
     assert_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
     assert_flash_text(:validate_user_email_missing.t)
@@ -216,7 +235,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     # Ah, but we didn't give an email address.
-    assert_selector("body.account__new")
+    assert_selector("body.account__create")
     assert_flash_error
     assert_no_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
     assert_flash_text(:validate_user_email_missing.t)

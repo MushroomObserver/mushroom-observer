@@ -73,6 +73,13 @@ class AccountControllerTest < FunctionalTestCase
     assert(assigns("new_user").errors[:email].any?,
            assigns("new_user").dump_errors)
 
+    # Invalid email
+    post(:create, params: { new_user: params.merge(email: "wrong") })
+    assert_flash_error
+    assert_redirected_to(action: :new)
+    assert(assigns("new_user").errors[:email].any?,
+           assigns("new_user").dump_errors)
+
     # Email doesn't match.
     post(:create,
          params: { new_user: params.merge(email_confirmation: "wrong") })

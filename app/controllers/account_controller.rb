@@ -69,7 +69,7 @@ class AccountController < ApplicationController
       return
     end
 
-    redirect_to(action: :new) and return unless validate_and_save_new_user!
+    render(action: :new) and return unless validate_and_save_new_user!
 
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
