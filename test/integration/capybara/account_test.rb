@@ -3,6 +3,71 @@
 require("test_helper")
 
 class AccountTest < CapybaraIntegrationTestCase
+  def test_signup
+    visit(account_signup_path)
+    assert_selector("body.account__new")
+    # Make a mistake with the password confirmation
+    within("#account_signup_form") do
+      assert_field("new_user_login")
+      fill_in("new_user_login", with: "Dumbledore")
+      fill_in("new_user_password", with: "Hagrid_24!")
+      fill_in("new_user_password_confirmation", with: "Hagrid_24?")
+      click_commit
+    end
+
+    # We ought to be back at the form
+    assert_selector("body.account__create")
+    assert_flash_error
+    assert_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
+    assert_flash_text(:validate_user_email_missing.t)
+    # This time, do it right
+    within("#account_signup_form") do
+      fill_in("new_user_login", with: "Dumbledore")
+      fill_in("new_user_password", with: "Hagrid_24!")
+      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+      click_commit
+    end
+
+    # Ah, but we didn't give an email address.
+    assert_selector("body.account__create")
+    assert_flash_error
+    assert_no_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
+    assert_flash_text(:validate_user_email_missing.t)
+    within("#account_signup_form") do
+      fill_in("new_user_login", with: "Dumbledore")
+      fill_in("new_user_password", with: "Hagrid_24!")
+      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+      fill_in("new_user_email", with: "Hagrid_24!")
+      click_commit
+    end
+
+    # That's not an email address.
+    assert_flash_error
+    assert_flash_text(:validate_user_email_confirmation_missing.t)
+    within("#account_signup_form") do
+      fill_in("new_user_login", with: "Dumbledore")
+      fill_in("new_user_password", with: "Hagrid_24!")
+      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+      fill_in("new_user_email", with: "Hagrid_24!")
+      fill_in("new_user_email_confirmation", with: "Hagrid_24!")
+      click_commit
+    end
+
+    # That's still not an email address.
+    assert_flash_error
+    assert_flash_text(:validate_user_email_missing.t)
+    within("#account_signup_form") do
+      fill_in("new_user_login", with: "Dumbledore")
+      fill_in("new_user_password", with: "Hagrid_24!")
+      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
+      fill_in("new_user_email", with: "webmaster@hogwarts.org")
+      fill_in("new_user_email_confirmation", with: "webmaster@hogwarts.org")
+      click_commit
+    end
+
+    assert_selector("body.account__welcome")
+  end
+
   def test_preferences
     mary = users("mary")
     login!(mary)
@@ -108,10 +173,14 @@ class AccountTest < CapybaraIntegrationTestCase
     assert_selector("body.preferences__update")
     assert_flash_text(CGI.unescapeHTML(:advanced_search_filter_region.t))
     within("#account_preferences_form") do
-      # Region filter - must be end of location string to work,
-      # **** including the country ****. There's no autocomplete yet.
-      # User must type or paste wisely.
       fill_in("user_region", with: "Massachusetts, USA")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    within("#account_preferences_form") do
+      fill_in("user_region", with: "")
       click_commit
     end
 
@@ -207,70 +276,5 @@ class AccountTest < CapybaraIntegrationTestCase
     within("#account_api_keys_form") do
       refute_field("key_#{marys_api_key.id}")
     end
-  end
-
-  def test_signup
-    visit(account_signup_path)
-    assert_selector("body.account__new")
-    # Make a mistake with the password confirmation
-    within("#account_signup_form") do
-      assert_field("new_user_login")
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24?")
-      click_commit
-    end
-
-    # We ought to be back at the form
-    assert_selector("body.account__create")
-    assert_flash_error
-    assert_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
-    assert_flash_text(:validate_user_email_missing.t)
-    # This time, do it right
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # Ah, but we didn't give an email address.
-    assert_selector("body.account__create")
-    assert_flash_error
-    assert_no_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
-    assert_flash_text(:validate_user_email_missing.t)
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      fill_in("new_user_email", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # That's not an email address.
-    assert_flash_error
-    assert_flash_text(:validate_user_email_confirmation_missing.t)
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      fill_in("new_user_email", with: "Hagrid_24!")
-      fill_in("new_user_email_confirmation", with: "Hagrid_24!")
-      click_commit
-    end
-
-    # That's still not an email address.
-    assert_flash_error
-    assert_flash_text(:validate_user_email_missing.t)
-    within("#account_signup_form") do
-      fill_in("new_user_login", with: "Dumbledore")
-      fill_in("new_user_password", with: "Hagrid_24!")
-      fill_in("new_user_password_confirmation", with: "Hagrid_24!")
-      fill_in("new_user_email", with: "webmaster@hogwarts.org")
-      fill_in("new_user_email_confirmation", with: "webmaster@hogwarts.org")
-      click_commit
-    end
-
-    assert_selector("body.account__welcome")
   end
 end
