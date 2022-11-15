@@ -56,20 +56,20 @@ class AccountControllerTest < FunctionalTestCase
     # Missing password.
     post(:create, params: { new_user: params.except(:password) })
     assert_flash_error
-    assert_response(:success)
+    assert_redirected_to(action: :new)
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
     post(:create,
          params: { new_user: params.merge(password_confirmation: "wrong") })
     assert_flash_error
-    assert_response(:success)
+    assert_redirected_to(action: :new)
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
     post(:create, params: { new_user: params.except(:email) })
     assert_flash_error
-    assert_response(:success)
+    assert_redirected_to(action: :new)
     assert(assigns("new_user").errors[:email].any?,
            assigns("new_user").dump_errors)
 
@@ -77,13 +77,13 @@ class AccountControllerTest < FunctionalTestCase
     post(:create,
          params: { new_user: params.merge(email_confirmation: "wrong") })
     assert_flash_error
-    assert_response(:success)
+    assert_redirected_to(action: :new)
     assert(assigns("new_user").errors[:email].any?)
 
     # Make sure correct request would have succeeded!
     post(:create, params: { new_user: params })
     assert_flash_success
-    assert_response(:redirect)
+    assert_redirected_to("/bogus/location")
     assert_not_nil(User.find_by(login: "newbob"))
   end
 
