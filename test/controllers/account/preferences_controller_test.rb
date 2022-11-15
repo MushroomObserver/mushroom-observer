@@ -120,6 +120,11 @@ module Account
       assert_input_value(:user_region, "California")
       assert_input_value(:user_clade, "Ascomycota")
 
+      # Try a bogus email address
+      patch(:update, params: { user: params.merge(email: "bogus") })
+      assert_flash_error
+      assert_flash_text(:validate_user_email_missing.t)
+
       # Now do it correctly, and make sure changes were made.
       patch(:update, params: { user: params })
       assert_flash_text(:runtime_prefs_success.t)
