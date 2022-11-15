@@ -129,7 +129,6 @@ class AccountTest < CapybaraIntegrationTestCase
 
     # That's not an email address.
     assert_flash_error
-    assert_flash_text(:validate_user_email_missing.t)
     assert_flash_text(:validate_user_email_confirmation_missing.t)
     within("#account_signup_form") do
       fill_in("new_user_login", with: "Dumbledore")

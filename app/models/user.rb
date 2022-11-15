@@ -1198,7 +1198,7 @@ class User < AbstractModel
   end
 
   def user_email_requirements
-    if email.to_s.blank?
+    if email.to_s.blank? || !ApplicationMailer.valid_email_address?(email.to_s)
       errors.add(:email, :validate_user_email_missing.t)
     elsif email.size > 80
       errors.add(:email, :validate_user_email_too_long.t)
