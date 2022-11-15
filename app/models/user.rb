@@ -1169,6 +1169,7 @@ class User < AbstractModel
   validate :check_password, on: :create
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
+  validate :check_region
 
   def user_requirements
     user_login_requirements
@@ -1258,5 +1259,14 @@ class User < AbstractModel
 
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
+  end
+
+  def check_region
+    return if content_filter[:region].blank?
+    # Check if provided region is a region, i.e. the end of a location name
+    return if Location.in_region(content_filter[:region]).any?
+
+    # If we're here, there are no MO locations in that region.
+    errors.add(:region, :advanced_search_filter_region.t)
   end
 end
