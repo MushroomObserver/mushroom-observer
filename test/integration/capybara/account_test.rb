@@ -3,15 +3,115 @@
 require("test_helper")
 
 class AccountTest < CapybaraIntegrationTestCase
-  def test_preferences; end
+  def test_preferences
+    mary = users("mary")
+    login!(mary)
+
+    # cheating: going direct instead of using selenium just to click a dropdown
+    visit(edit_account_preferences_path)
+
+    assert_selector("body.preferences__edit")
+    # Login settings
+    within("#account_preferences_form") do
+      fill_in("user_login", with: "yabba dabba doo")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    within("#account_preferences_form") do
+      fill_in("user_email", with: "yabba dabba doo")
+      click_commit
+    end
+
+    assert_flash_error
+    assert_flash_text(:validate_user_email_missing.t)
+    assert_selector("body.preferences__edit")
+    within("#account_preferences_form") do
+      fill_in("user_email", with: "yabba@dabba.doo")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    within("#account_preferences_form") do
+      fill_in("user_password", with: "wanda")
+      click_commit
+    end
+
+    assert_flash_error
+    assert_flash_text(CGI.unescapeHTML(:runtime_prefs_password_no_match.t))
+    within("#account_preferences_form") do
+      fill_in("user_password", with: "wanda")
+      fill_in("user_password_confirmation", with: "beverly")
+      click_commit
+    end
+
+    assert_flash_error
+    assert_flash_text(CGI.unescapeHTML(:runtime_prefs_password_no_match.t))
+    within("#account_preferences_form") do
+      fill_in("user_password", with: "wanda")
+      fill_in("user_password_confirmation", with: "wanda")
+      click_commit
+    end
+    # End Login settings
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    # Privacy settings
+    within("#account_preferences_form") do
+      select("Always anonymous", from: "user_votes_anonymous")
+      select("remove from database completely", from: "user_keep_filenames")
+      select("Public Domain", from: "user_license_id")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    # Appearance settings
+    within("#account_preferences_form") do
+      select("hide author for genus and higher ranks",
+             from: "user_hide_authors")
+      select("Postal (New York, USA)", from: "user_location_format")
+      select("Agaricus", from: "user_theme")
+      assert_select("user_locale",
+                    with_options: %w[Ελληνικά English Français Español])
+      select("Ελληνικά", from: "user_locale")
+      uncheck("user_thumbnail_maps")
+      uncheck("user_view_owner_id")
+      fill_in("user_layout_count", with: 45)
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    # Content filters
+    within("#account_preferences_form") do
+      check("user_has_images")
+      check("user_has_specimen")
+      select("Show only lichens", from: "user_lichen")
+      # Region filter - must be end of location string to work, including
+      # the country, but it's not validated. User must type wisely.
+      fill_in("user_region", with: "Westbrook, Massachusetts")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    # Notes and email prefs
+    within("#account_preferences_form") do
+      fill_in("user_notes_template", with: "Smells, Textures, Impressions")
+      uncheck("user_email_html")
+      click_commit
+    end
+  end
 
   def test_profile
     mary = users("mary")
     login!(mary)
 
     # cheating: going direct instead of using selenium just to click a dropdown
-    visit(user_path(mary))
-    click_link(text: "Edit Profile")
+    visit(edit_account_profile_path)
 
     assert_selector("body.profile__edit")
     within("#account_profile_form") do
