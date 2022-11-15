@@ -102,6 +102,7 @@ class AccountTest < CapybaraIntegrationTestCase
     within("#account_preferences_form") do
       fill_in("user_notes_template", with: "Smells, Textures, Impressions")
       uncheck("user_email_html")
+      # More email prefs
       click_commit
     end
   end
