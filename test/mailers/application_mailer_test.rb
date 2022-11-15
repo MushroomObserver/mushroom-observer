@@ -282,4 +282,17 @@ class ApplicationMailerTest < UnitTestCase
       VerifyAPIKeyMailer.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
     end
   end
+
+  def test_valid_email_address
+    assert_true(ApplicationMailer.valid_email_address?("joe@schmo.com"))
+    assert_false(ApplicationMailer.valid_email_address?("joe.schmo.com"))
+    assert_false(ApplicationMailer.valid_email_address?(""))
+  end
+
+  def test_undeliverable_email
+    mary.update(email: "bogus.address")
+    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    assert_nil(ActionMailer::Base.deliveries.last,
+               "Should not have delivered an email to 'bogus.address'.")
+  end
 end
