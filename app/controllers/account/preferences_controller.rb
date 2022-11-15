@@ -13,8 +13,8 @@ module Account
 
       update_password
       update_prefs_from_form
-      # render to get the errors to display
-      render(action: :edit) and return unless prefs_changed_successfully
+      # redirect to get the errors to display
+      redirect_to(action: :edit) and return unless prefs_changed_successfully
 
       update_copyright_holder(@user.legal_name_change)
       redirect_to(action: :edit) and return
