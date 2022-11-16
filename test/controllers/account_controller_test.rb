@@ -400,6 +400,48 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
+  PARAMS = {
+    login: "rolf",
+    password: "new_password",
+    password_confirmation: "new_password",
+    email: "new@email.com",
+    email_comments_all: "",
+    email_comments_owner: "1",
+    email_comments_response: "1",
+    email_general_commercial: "1",
+    email_general_feature: "1",
+    email_general_question: "1",
+    email_html: "1",
+    email_locations_admin: "1",
+    email_locations_all: "",
+    email_locations_author: "1",
+    email_locations_editor: "",
+    email_names_admin: "1",
+    email_names_all: "",
+    email_names_author: "1",
+    email_names_editor: "",
+    email_names_reviewer: "1",
+    email_observations_all: "",
+    email_observations_consensus: "1",
+    email_observations_naming: "1",
+    hide_authors: "above_species",
+    keep_filenames: "keep_but_hide",
+    # license_id: licenses(:publicdomain).id.to_s,
+    layout_count: "100",
+    locale: "el",
+    location_format: "scientific",
+    notes_template: "Collector's #",
+    theme: "Agaricus",
+    thumbnail_maps: "",
+    view_owner_id: "",
+    votes_anonymous: "yes",
+    has_images: "1",
+    has_specimen: "1",
+    lichen: "yes",
+    region: "California",
+    clade: "Ascomycota"
+  }
+
   def test_edit_prefs
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
@@ -420,48 +462,6 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_clade, "")
 
     # Now change everything.
-    params = {
-      login: "rolf",
-      password: "new_password",
-      password_confirmation: "new_password",
-      email: "new@email.com",
-      email_comments_all: "",
-      email_comments_owner: "1",
-      email_comments_response: "1",
-      email_general_commercial: "1",
-      email_general_feature: "1",
-      email_general_question: "1",
-      email_html: "1",
-      email_locations_admin: "1",
-      email_locations_all: "",
-      email_locations_author: "1",
-      email_locations_editor: "",
-      email_names_admin: "1",
-      email_names_all: "",
-      email_names_author: "1",
-      email_names_editor: "",
-      email_names_reviewer: "1",
-      email_observations_all: "",
-      email_observations_consensus: "1",
-      email_observations_naming: "1",
-      hide_authors: "above_species",
-      keep_filenames: "keep_but_hide",
-      license_id: licenses(:publicdomain).id.to_s,
-      layout_count: "100",
-      locale: "el",
-      location_format: "scientific",
-      notes_template: "Collector's #",
-      theme: "Agaricus",
-      thumbnail_maps: "",
-      view_owner_id: "",
-      votes_anonymous: "yes",
-      has_images: "1",
-      has_specimen: "1",
-      lichen: "yes",
-      region: "California",
-      clade: "Ascomycota"
-    }
-
     # Prove that all the values are initialized correctly if reloading form.
     post(:prefs, params: { user: params.merge(password_confirmation: "bogus") })
     assert_flash_error
@@ -582,6 +582,44 @@ class AccountControllerTest < FunctionalTestCase
     logout
     post(:login, params: { user: { login: "steve", password: "new_password" } })
     assert_equal(rolf.id, @request.session["user_id"])
+  end
+
+  def test_edit_prefs_user_with_bogus_email
+    # licenses fixture only available within test??
+    params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                            login: "flintstone" })
+
+    user = users(:flintstone)
+    login("flintstone")
+
+    get(:edit)
+    assert_input_value(:user_login, "flintstone")
+    assert_input_value(:user_email, "bogus")
+
+    # I don't know if we need all the PARAMS, but
+    patch(:update, params: { user: params })
+
+    assert_flash_text(:runtime_prefs_success.t)
+    assert_equal("new@email.com", user.reload.email)
+  end
+
+  def test_edit_prefs_user_with_invalid_region
+    # licenses fixture only available within test??
+    params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                            login: "nonregional" })
+
+    user = users(:nonregional)
+    login("nonregional")
+
+    get(:edit)
+    assert_input_value(:user_login, "nonregional")
+    assert_input_value(:user_region, "Massachusetts")
+
+    # I don't know if we need all the PARAMS, but
+    patch(:update, params: { user: params })
+
+    assert_flash_text(:runtime_prefs_success.t)
+    assert_equal("California, USA", user.reload.content_filter[:region])
   end
 
   def test_edit_profile
