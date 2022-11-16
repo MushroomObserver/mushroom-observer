@@ -85,7 +85,7 @@ class AccountControllerTest < FunctionalTestCase
            assigns("new_user").dump_errors)
 
     # Invalid email
-    post(:create, params: { new_user: params.merge(email: "wrong") })
+    post(:signup, params: { new_user: params.merge(email: "wrong") })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?,
@@ -595,12 +595,12 @@ class AccountControllerTest < FunctionalTestCase
     user = users(:flintstone)
     login("flintstone")
 
-    get(:edit)
+    get(:prefs)
     assert_input_value(:user_login, "flintstone")
     assert_input_value(:user_email, "bogus")
 
     # I don't know if we need all the PARAMS, but
-    patch(:update, params: { user: params })
+    post(:prefs, params: { user: params })
 
     assert_flash_text(:runtime_prefs_success.t)
     assert_equal("new@email.com", user.reload.email)
@@ -614,12 +614,12 @@ class AccountControllerTest < FunctionalTestCase
     user = users(:nonregional)
     login("nonregional")
 
-    get(:edit)
+    get(:prefs)
     assert_input_value(:user_login, "nonregional")
     assert_input_value(:user_region, "Massachusetts")
 
     # I don't know if we need all the PARAMS, but
-    patch(:update, params: { user: params })
+    post(:prefs, params: { user: params })
 
     assert_flash_text(:runtime_prefs_success.t)
     assert_equal("California, USA", user.reload.content_filter[:region])
