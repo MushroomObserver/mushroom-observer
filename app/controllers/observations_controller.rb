@@ -23,7 +23,11 @@ class ObservationsController < ApplicationController
     :show
   ]
 
-  before_action :pass_query_params
+  before_action :pass_query_params, only: [
+    :show,
+    :edit,
+    :update
+  ]
 
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
