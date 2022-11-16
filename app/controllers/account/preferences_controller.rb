@@ -13,13 +13,16 @@ module Account
 
       update_password
       update_prefs_from_form
-      # redirect to get the errors to display
+
+      # render to get the errors to display
       render(action: :edit) and return unless prefs_changed_successfully
 
       update_copyright_holder(@user.legal_name_change)
       redirect_to(action: :edit) and return
     end
 
+    # This action handles GET requests from email links.
+    # It does write to the DB.
     def no_email
       user = User.safe_find(params[:id])
       type = params[:type]
@@ -71,53 +74,6 @@ module Account
 
     def load_user_licenses
       @licenses = License.current_names_and_ids(@user&.license)
-    end
-
-    # Table for converting form value to object value
-    # Used by update_prefs_from_form
-    def prefs_types # rubocop:disable Metrics/MethodLength
-      [
-        [:email_comments_all, :boolean],
-        [:email_comments_owner, :boolean],
-        [:email_comments_response, :boolean],
-        [:email_general_commercial, :boolean],
-        [:email_general_feature, :boolean],
-        [:email_general_question, :boolean],
-        [:email_html, :boolean],
-        [:email_locations_admin, :boolean],
-        [:email_locations_all, :boolean],
-        [:email_locations_author, :boolean],
-        [:email_locations_editor, :boolean],
-        [:email_names_admin, :boolean],
-        [:email_names_all, :boolean],
-        [:email_names_author, :boolean],
-        [:email_names_editor, :boolean],
-        [:email_names_reviewer, :boolean],
-        [:email_observations_all, :boolean],
-        [:email_observations_consensus, :boolean],
-        [:email_observations_naming, :boolean],
-        [:email, :string],
-        [:hide_authors, :enum],
-        [:image_size, :enum],
-        [:keep_filenames, :enum],
-        [:layout_count, :integer],
-        [:license_id, :integer],
-        [:locale, :string],
-        [:location_format, :enum],
-        [:login, :string],
-        [:notes_template, :string],
-        [:theme, :string],
-        [:thumbnail_maps, :boolean],
-        [:thumbnail_size, :enum],
-        [:view_owner_id, :boolean],
-        [:votes_anonymous, :enum]
-      ] + content_filter_types
-    end
-
-    def content_filter_types
-      ContentFilter.all.map do |fltr|
-        [fltr.sym, :content_filter]
-      end
     end
 
     def update_password
@@ -174,6 +130,53 @@ module Account
         result = true
       end
       result
+    end
+
+    # Table for converting form value to object value
+    # Used by update_prefs_from_form
+    def prefs_types # rubocop:disable Metrics/MethodLength
+      [
+        [:email_comments_all, :boolean],
+        [:email_comments_owner, :boolean],
+        [:email_comments_response, :boolean],
+        [:email_general_commercial, :boolean],
+        [:email_general_feature, :boolean],
+        [:email_general_question, :boolean],
+        [:email_html, :boolean],
+        [:email_locations_admin, :boolean],
+        [:email_locations_all, :boolean],
+        [:email_locations_author, :boolean],
+        [:email_locations_editor, :boolean],
+        [:email_names_admin, :boolean],
+        [:email_names_all, :boolean],
+        [:email_names_author, :boolean],
+        [:email_names_editor, :boolean],
+        [:email_names_reviewer, :boolean],
+        [:email_observations_all, :boolean],
+        [:email_observations_consensus, :boolean],
+        [:email_observations_naming, :boolean],
+        [:email, :string],
+        [:hide_authors, :enum],
+        [:image_size, :enum],
+        [:keep_filenames, :enum],
+        [:layout_count, :integer],
+        [:license_id, :integer],
+        [:locale, :string],
+        [:location_format, :enum],
+        [:login, :string],
+        [:notes_template, :string],
+        [:theme, :string],
+        [:thumbnail_maps, :boolean],
+        [:thumbnail_size, :enum],
+        [:view_owner_id, :boolean],
+        [:votes_anonymous, :enum]
+      ] + content_filter_types
+    end
+
+    def content_filter_types
+      ContentFilter.all.map do |fltr|
+        [fltr.sym, :content_filter]
+      end
     end
   end
 end
