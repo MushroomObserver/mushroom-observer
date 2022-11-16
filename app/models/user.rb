@@ -1167,14 +1167,20 @@ class User < AbstractModel
 
   validate :user_requirements
   validate :check_password, on: :create
+  # Accounts for existing invalid entries
+  validate :user_email_requirements, if: proc { |c|
+    c.new_record? || c.email_changed?
+  }
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
-  validate :check_content_filter_region
+  validate :check_content_filter_region, if: proc { |c|
+    c.new_record? || c.content_filter_changed?
+  }
 
   def user_requirements
     user_login_requirements
     user_password_requirements
-    user_email_requirements
+    # user_email_requirements
     user_other_requirements
   end
 
