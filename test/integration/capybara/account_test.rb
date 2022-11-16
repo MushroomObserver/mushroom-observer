@@ -16,7 +16,6 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     # We ought to be back at the form
-    assert_selector("body.account__create")
     assert_flash_error
     assert_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
     assert_flash_text(:validate_user_email_missing.t)
@@ -29,7 +28,6 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     # Ah, but we didn't give an email address.
-    assert_selector("body.account__create")
     assert_flash_error
     assert_no_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
     assert_flash_text(:validate_user_email_missing.t)
@@ -68,7 +66,45 @@ class AccountTest < CapybaraIntegrationTestCase
     assert_selector("body.account__welcome")
   end
 
-  def test_preferences
+  def test_correct_invalid_preferences
+    flintstone = users("flintstone")
+    login!(flintstone)
+
+    visit(edit_account_preferences_path)
+    assert_selector("body.preferences__edit")
+    within("#account_preferences_form") do
+      fill_in("user_email", with: "valid@seemingly.com")
+      click_commit
+    end
+
+    assert_no_flash_errors
+    assert_selector("body.preferences__edit")
+
+    # This user has an invalid region AND a bogus email
+    nonregional = users("nonregional")
+    login!(nonregional)
+
+    visit(edit_account_preferences_path)
+    assert_selector("body.preferences__edit")
+    within("#account_preferences_form") do
+      fill_in("user_region", with: "Canada") # Use country with a fixture!
+      fill_in("user_email", with: "badonkadonk")
+      click_commit
+    end
+
+    assert_flash_error
+    assert_flash_text(CGI.unescapeHTML(:validate_user_email_missing.t))
+    within("#account_preferences_form") do
+      fill_in("user_region", with: "Canada")
+      fill_in("user_email", with: "valid@seemingly.com")
+      click_commit
+    end
+
+    assert_no_flash_errors
+    assert_selector("body.preferences__edit")
+  end
+
+  def test_edit_preferences
     mary = users("mary")
     login!(mary)
 
@@ -82,6 +118,9 @@ class AccountTest < CapybaraIntegrationTestCase
       click_commit
     end
 
+    mary.reload
+    assert_equal(mary.login, "yabba dabba doo")
+
     assert_flash_success
     assert_selector("body.preferences__edit")
     within("#account_preferences_form") do
@@ -91,7 +130,6 @@ class AccountTest < CapybaraIntegrationTestCase
 
     assert_flash_error
     assert_flash_text(:validate_user_email_missing.t)
-    assert_selector("body.preferences__edit")
     within("#account_preferences_form") do
       fill_in("user_email", with: "yabba@dabba.doo")
       click_commit
@@ -170,12 +208,14 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_selector("body.preferences__edit")
     assert_flash_text(CGI.unescapeHTML(:advanced_search_filter_region.t))
     within("#account_preferences_form") do
       fill_in("user_region", with: "Massachusetts, USA")
       click_commit
     end
+
+    mary.reload
+    assert_equal(mary.content_filter[:region], "Massachusetts, USA")
 
     assert_flash_success
     assert_selector("body.preferences__edit")
