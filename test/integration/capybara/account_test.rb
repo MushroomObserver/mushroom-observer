@@ -17,7 +17,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     # We ought to be back at the form
     assert_flash_error
-    assert_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
+    assert_flash_text(:validate_user_password_no_match.t.render_html)
     assert_flash_text(:validate_user_email_missing.t)
     # This time, do it right
     within("#account_signup_form") do
@@ -29,7 +29,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     # Ah, but we didn't give an email address.
     assert_flash_error
-    assert_no_flash_text(CGI.unescapeHTML(:validate_user_password_no_match.t))
+    assert_no_flash_text(:validate_user_password_no_match.t.render_html)
     assert_flash_text(:validate_user_email_missing.t)
     within("#account_signup_form") do
       fill_in("new_user_login", with: "Dumbledore")
@@ -93,7 +93,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(CGI.unescapeHTML(:validate_user_email_missing.t))
+    assert_flash_text(:validate_user_email_missing.t.render_html)
     within("#account_preferences_form") do
       fill_in("user_region", with: "Canada")
       fill_in("user_email", with: "valid@seemingly.com")
@@ -143,7 +143,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(CGI.unescapeHTML(:runtime_prefs_password_no_match.t))
+    assert_flash_text(:runtime_prefs_password_no_match.t.render_html)
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       fill_in("user_password_confirmation", with: "beverly")
@@ -151,7 +151,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(CGI.unescapeHTML(:runtime_prefs_password_no_match.t))
+    assert_flash_text(:runtime_prefs_password_no_match.t.render_html)
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       fill_in("user_password_confirmation", with: "wanda")
@@ -208,7 +208,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(CGI.unescapeHTML(:advanced_search_filter_region.t))
+    assert_flash_text(:advanced_search_filter_region.t.render_html)
     within("#account_preferences_form") do
       fill_in("user_region", with: "Massachusetts, USA")
       click_commit
@@ -234,7 +234,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     assert_flash_error
     assert_flash_text(
-      CGI.unescapeHTML(:prefs_notes_template_no_other.t(part: "Other"))
+      :prefs_notes_template_no_other.t(part: "Other").render_html
     )
     within("#account_preferences_form") do
       fill_in("user_notes_template", with: "Smells, Textures, Impressions")
@@ -316,11 +316,11 @@ class AccountTest < CapybaraIntegrationTestCase
     assert_selector("body.api_keys__index")
     within("#account_api_keys_form") do
       assert_field("key_#{marys_api_key.id}")
-      # needs `CGI.unescapeHTML` because single quote gets converted to "smart"
+      # needs `render_html` because single quote gets converted to "smart"
       # apostrophe and encoded by `t`. Otherwise Capybara will not find the
       # HTML entity `&#8217;` and the character `’` equivalent.
       assert_selector("#key_notes_#{marys_api_key.id} span.current_notes",
-                      text: CGI.unescapeHTML(marys_api_key.notes.t))
+                      text: marys_api_key.notes.t.render_html)
     end
     # Add a new api key
     within("#account_new_api_key_form") do

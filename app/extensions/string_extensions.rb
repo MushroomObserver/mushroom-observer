@@ -502,6 +502,10 @@ class String
       html_safe # rubocop:disable Rails/OutputSafety
   end
 
+  def render_html
+    CGI.unescapeHTML(self)
+  end
+
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
   #
