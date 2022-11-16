@@ -6,13 +6,9 @@ class ObservationsController < ApplicationController
   include NewAndCreate
   include EditAndUpdate
   include Destroy
-  # include Suggestions
-  # include Map
-  # include Download
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
-
   before_action :login_required, except: [
     :show
   ]
@@ -28,7 +24,6 @@ class ObservationsController < ApplicationController
     :edit,
     :update
   ]
-
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
