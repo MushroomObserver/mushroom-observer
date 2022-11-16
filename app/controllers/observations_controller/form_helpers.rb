@@ -54,7 +54,8 @@ module ObservationsController::FormHelpers
   end
 
   def init_project_vars
-    @projects = User.current.projects_member(order: :title)
+    @projects = User.current.projects_member(order: :title,
+                                             include: :user_group)
     @project_checks = {}
   end
 
