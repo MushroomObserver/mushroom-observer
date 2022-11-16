@@ -63,7 +63,7 @@ module Account
         has_images: "1",
         has_specimen: "1",
         lichen: "yes",
-        region: "California",
+        region: "California, USA",
         clade: "Ascomycota"
       }
 
@@ -117,13 +117,18 @@ module Account
       assert_input_value(:user_has_images, "1")
       assert_input_value(:user_has_specimen, "1")
       assert_input_value(:user_lichen, "yes")
-      assert_input_value(:user_region, "California")
+      assert_input_value(:user_region, "California, USA")
       assert_input_value(:user_clade, "Ascomycota")
 
       # Try a bogus email address
       patch(:update, params: { user: params.merge(email: "bogus") })
       assert_flash_error
-      assert_flash_text(:validate_user_email_missing.t)
+      # assert_flash_text(:validate_user_email_missing.t)
+
+      # Try an incomplete region
+      patch(:update, params: { user: params.merge(region: "California") })
+      assert_flash_error
+      # assert_flash_text(:advanced_search_filter_region.t)
 
       # Now do it correctly, and make sure changes were made.
       patch(:update, params: { user: params })
@@ -163,7 +168,7 @@ module Account
       assert_equal("yes", user.content_filter[:has_images])
       assert_equal("yes", user.content_filter[:has_specimen])
       assert_equal("yes", user.content_filter[:lichen])
-      assert_equal("California", user.content_filter[:region])
+      assert_equal("California, USA", user.content_filter[:region])
       assert_equal("Ascomycota", user.content_filter[:clade])
 
       # Prove user cannot pick "Other" as a notes_template heading
