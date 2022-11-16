@@ -1167,7 +1167,7 @@ class User < AbstractModel
 
   validate :user_requirements
   validate :check_password, on: :create
-  # Accounts for existing invalid entries
+  # `if` accounts for existing invalid entries; otherwise you cannot update
   validate :user_email_requirements, if: proc { |c|
     c.new_record? || c.email_changed?
   }
@@ -1180,7 +1180,6 @@ class User < AbstractModel
   def user_requirements
     user_login_requirements
     user_password_requirements
-    # user_email_requirements
     user_other_requirements
   end
 
