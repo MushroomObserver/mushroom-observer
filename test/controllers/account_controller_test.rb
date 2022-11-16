@@ -400,7 +400,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  PARAMS = {
+  GOOD_PARAMS = {
     login: "rolf",
     password: "new_password",
     password_confirmation: "new_password",
@@ -444,7 +444,7 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_edit_prefs
     # licenses fixture only available within test??
-    params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s })
+    params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s })
 
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
@@ -589,8 +589,8 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_edit_prefs_user_with_bogus_email
     # licenses fixture only available within test??
-    params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
-                            login: "flintstone" })
+    params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                                 login: "flintstone" })
 
     user = users(:flintstone)
     login("flintstone")
@@ -608,8 +608,8 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_edit_prefs_user_with_invalid_region
     # licenses fixture only available within test??
-    params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
-                            login: "nonregional" })
+    params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                                 login: "nonregional" })
 
     user = users(:nonregional)
     login("nonregional")
