@@ -443,6 +443,9 @@ class AccountControllerTest < FunctionalTestCase
   }
 
   def test_edit_prefs
+    # licenses fixture only available within test??
+    params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s })
+
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
     Language.all.each do |lang|
