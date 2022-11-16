@@ -505,6 +505,14 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_region, "California")
     assert_input_value(:user_clade, "Ascomycota")
 
+    # Try a bogus email address
+    post(:prefs, params: { user: params.merge(email: "bogus") })
+    assert_flash_error
+
+    # Try an incomplete region
+    post(:prefs, params: { user: params.merge(region: "California") })
+    assert_flash_error
+
     # Now do it correctly, and make sure changes were made.
     post(:prefs, params: { user: params })
     assert_flash_text(:runtime_prefs_success.t)
