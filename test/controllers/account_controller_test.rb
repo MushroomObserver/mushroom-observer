@@ -438,7 +438,7 @@ class AccountControllerTest < FunctionalTestCase
     has_images: "1",
     has_specimen: "1",
     lichen: "yes",
-    region: "California",
+    region: "California, USA",
     clade: "Ascomycota"
   }
 
@@ -505,7 +505,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_has_images, "1")
     assert_input_value(:user_has_specimen, "1")
     assert_input_value(:user_lichen, "yes")
-    assert_input_value(:user_region, "California")
+    assert_input_value(:user_region, "California, USA")
     assert_input_value(:user_clade, "Ascomycota")
 
     # Try a bogus email address
@@ -554,7 +554,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("yes", user.content_filter[:has_images])
     assert_equal("yes", user.content_filter[:has_specimen])
     assert_equal("yes", user.content_filter[:lichen])
-    assert_equal("California", user.content_filter[:region])
+    assert_equal("California, USA", user.content_filter[:region])
     assert_equal("Ascomycota", user.content_filter[:clade])
 
     # Prove user cannot pick "Other" as a notes_template heading
