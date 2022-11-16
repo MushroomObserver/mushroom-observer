@@ -5,7 +5,7 @@ require("test_helper")
 # tests of Preferences controller
 module Account
   class PreferencesControllerTest < FunctionalTestCase
-    PARAMS = {
+    GOOD_PARAMS = {
       login: "rolf",
       password: "new_password",
       password_confirmation: "new_password",
@@ -49,7 +49,9 @@ module Account
 
     def test_edit
       # Setup: this licenses fixture only available within test??
-      params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s })
+      params = GOOD_PARAMS.merge(
+        { license_id: licenses(:publicdomain).id.to_s }
+      )
 
       # First make sure it can serve the form to start with.
       requires_login("edit")
@@ -211,8 +213,8 @@ module Account
 
     def test_edit_user_with_bogus_email
       # licenses fixture only available within test??
-      params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
-                              login: "flintstone" })
+      params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                                   login: "flintstone" })
 
       user = users(:flintstone)
       login("flintstone")
@@ -230,8 +232,8 @@ module Account
 
     def test_edit_user_with_invalid_region
       # licenses fixture only available within test??
-      params = PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
-                              login: "nonregional" })
+      params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                                   login: "nonregional" })
 
       user = users(:nonregional)
       login("nonregional")
