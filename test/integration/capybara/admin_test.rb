@@ -28,10 +28,10 @@ class AdminTest < CapybaraIntegrationTestCase
     click_on(id: "nav_admin_switch_users_link")
 
     within("#admin_switch_users_form") do
-      fill_in("id", with: "bogus")
+      fill_in("id", with: "something unlikely and bogus")
       click_commit
     end
-    assert_flash_text("Couldn't find")
+    assert_flash_text("Play again?")
 
     within("#admin_switch_users_form") do
       fill_in("id", with: "unverified")
