@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# see observations_controller.rb
+# rubocop:disable Metrics/ModuleLength
 module ObservationsController::NewAndCreate
   include ObservationsController::FormHelpers
+
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
   #
@@ -28,12 +29,10 @@ module ObservationsController::NewAndCreate
   #   @good_images                      list of images already downloaded
   #
 
-  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
-
   def new
     # These are needed to create pulldown menus in form.
-    @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(Time.zone.now)
+    init_license_var
+    init_new_image_var(Time.zone.now)
 
     # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
@@ -51,6 +50,22 @@ module ObservationsController::NewAndCreate
     init_project_vars_for_create
     init_list_vars_for_create
     defaults_from_last_observation_created
+  end
+
+  ##############################################################################
+
+  private
+
+  def init_specimen_vars_for_create
+    init_specimen_vars
+  end
+
+  def init_project_vars_for_create
+    init_project_vars
+  end
+
+  def init_list_vars_for_create
+    init_list_vars
   end
 
   def defaults_from_last_observation_created # rubocop:disable Metrics/AbcSize
@@ -75,12 +90,17 @@ module ObservationsController::NewAndCreate
     end
   end
 
+  ##############################################################################
+
+  public
+
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
+
   def create # rubocop:disable Metrics/AbcSize
     @observation = create_observation_object(params[:observation])
     # set these again, in case they are not defined
-    @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(Time.zone.now)
+    init_license_var
+    init_new_image_var(Time.zone.now)
 
     rough_cut(params)
     success = true
@@ -106,6 +126,35 @@ module ObservationsController::NewAndCreate
     end
   end
 
+  ##############################################################################
+
+  private
+
+  # Roughly create observation object.  Will validate and save later
+  # once we're sure everything is correct.
+  # INPUT: params[:observation] (and @user) (and various notes params)
+  # OUTPUT: new observation
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
+
+  def create_observation_object(args) # rubocop:disable Metrics/AbcSize
+    now = Time.zone.now
+    observation = if args
+                    Observation.new(args.permit(whitelisted_observation_args))
+                  else
+                    Observation.new
+                  end
+    observation.created_at = now
+    observation.updated_at = now
+    observation.user       = @user
+    observation.name       = Name.unknown
+    if Location.is_unknown?(observation.place_name) ||
+       (observation.lat && observation.long && observation.place_name.blank?)
+      observation.location = Location.unknown
+      observation.where = nil
+    end
+    observation
+  end
+
   def rough_cut(params)
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct(params[:naming], @observation)
@@ -113,19 +162,6 @@ module ObservationsController::NewAndCreate
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
-  end
-
-  # Symbolize keys; delete key/value pair if value blank
-  # Also avoids whitelisting issues
-  def notes_to_sym_and_compact
-    return Observation.no_notes unless notes_param_present?
-
-    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
-    symbolized.delete_if { |_key, value| value.blank? }
-  end
-
-  def notes_param_present?
-    params[:observation] && params[:observation][:notes].present?
   end
 
   def validate_name(params)
@@ -150,6 +186,19 @@ module ObservationsController::NewAndCreate
     success
   end
 
+  # Symbolize keys; delete key/value pair if value blank
+  # Also avoids whitelisting issues
+  def notes_to_sym_and_compact
+    return Observation.no_notes unless notes_param_present?
+
+    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    symbolized.delete_if { |_key, value| value.blank? }
+  end
+
+  def notes_param_present?
+    params[:observation] && params[:observation][:notes].present?
+  end
+
   def save_everything_else(reason)
     update_naming(reason)
     attach_good_images(@observation, @good_images)
@@ -157,6 +206,15 @@ module ObservationsController::NewAndCreate
     update_species_lists(@observation, params[:list])
     save_collection_number(@observation, params)
     save_herbarium_record(@observation, params)
+  end
+
+  def update_naming(reason)
+    return unless @name
+
+    @naming.create_reasons(reason, params[:was_js_on] == "yes")
+    save_with_log(@naming)
+    @observation.reload
+    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def save_collection_number(obs, params)
@@ -207,17 +265,6 @@ module ObservationsController::NewAndCreate
     herbarium_record.add_observation(obs)
   end
 
-  def not_creating_record?(obs, herbarium, accession_number)
-    return true unless obs.specimen
-    # This happens if there is a problem looking up or creating the herbarium.
-    return true if !herbarium || accession_number.blank?
-
-    # If user checks specimen box and nothing else, do not create record.
-    obs.collection_numbers.empty? &&
-      herbarium == @user.preferred_herbarium &&
-      params[:herbarium_record][:herbarium_id].blank?
-  end
-
   def normalize_herbarium_record_params(obs, params)
     params2   = params[:herbarium_record] || return
     herbarium = params2[:herbarium_name].to_s.strip_html.strip_squeeze
@@ -227,15 +274,6 @@ module ObservationsController::NewAndCreate
     accession = default_accession_number(obs, params) if accession.blank?
     notes = params2[:herbarium_record_notes]
     [herbarium, init_det, accession, notes]
-  end
-
-  def initial_determination(obs)
-    (obs.name || Name.unknown).text_name
-  end
-
-  def default_accession_number(obs, params)
-    name, number = normalize_collection_number_params(params)
-    number ? "#{name} #{number}" : "MO #{obs.id}"
   end
 
   def lookup_herbarium(name)
@@ -254,6 +292,15 @@ module ObservationsController::NewAndCreate
     @user.create_personal_herbarium
   end
 
+  def initial_determination(obs)
+    (obs.name || Name.unknown).text_name
+  end
+
+  def default_accession_number(obs, params)
+    name, number = normalize_collection_number_params(params)
+    number ? "#{name} #{number}" : "MO #{obs.id}"
+  end
+
   def lookup_herbarium_record(herbarium, accession_number)
     HerbariumRecord.where(
       herbarium: herbarium,
@@ -269,6 +316,17 @@ module ObservationsController::NewAndCreate
       accession_number: accession_number,
       notes: herbarium_record_notes
     )
+  end
+
+  def not_creating_record?(obs, herbarium, accession_number)
+    return true unless obs.specimen
+    # This happens if there is a problem looking up or creating the herbarium.
+    return true if !herbarium || accession_number.blank?
+
+    # If user checks specimen box and nothing else, do not create record.
+    obs.collection_numbers.empty? &&
+      herbarium == @user.preferred_herbarium &&
+      params[:herbarium_record][:herbarium_id].blank?
   end
 
   def redirect_to_next_page
@@ -291,18 +349,5 @@ module ObservationsController::NewAndCreate
     init_list_vars_for_reload(@observation)
     render(action: :new)
   end
-
-  ##############################################################################
-
-  private
-
-  # Used by :create
-  def update_naming(reason)
-    return unless @name
-
-    @naming.create_reasons(reason, params[:was_js_on] == "yes")
-    save_with_log(@naming)
-    @observation.reload
-    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
-  end
 end
+# rubocop:enable Metrics/ModuleLength

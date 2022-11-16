@@ -4,7 +4,6 @@
 module ObservationsController::EditAndUpdate
   include ObservationsController::FormHelpers
 
-  #
   # Form to edit an existing observation.
   # Linked from: left panel
   #
@@ -33,8 +32,8 @@ module ObservationsController::EditAndUpdate
       redirect_with_query(action: :show, id: @observation.id) and return
     end
 
-    @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(@observation.when)
+    init_license_var
+    init_new_image_var(@observation.when)
 
     # Initialize form.
     @images      = []
@@ -43,9 +42,31 @@ module ObservationsController::EditAndUpdate
     init_list_vars_for_edit(@observation)
   end
 
+  private
+
+  def init_project_vars_for_edit(obs)
+    init_project_vars
+    obs.projects.each do |proj|
+      @projects << proj unless @projects.include?(proj)
+      @project_checks[proj.id] = true
+    end
+  end
+
+  def init_list_vars_for_edit(obs)
+    init_list_vars
+    obs.species_lists.each do |list|
+      @lists << list unless @lists.include?(list)
+      @list_checks[list.id] = true
+    end
+  end
+
+  ##############################################################################
+
+  public
+
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  # rubocop:disable Metrics/AbcSize
-  def update
+
+  def update # rubocop:disable Metrics/AbcSize
     return unless (@observation = find_or_goto_index(
       Observation, params[:id].to_s
     ))
@@ -55,8 +76,8 @@ module ObservationsController::EditAndUpdate
       redirect_with_query(action: :show, id: @observation.id) and return
     end
 
-    @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(Time.zone.now)
+    init_license_var
+    init_new_image_var(@observation.when)
     @any_errors = false
 
     update_whitelisted_observation_attributes
@@ -72,7 +93,6 @@ module ObservationsController::EditAndUpdate
     update_project_and_species_list_attachments
     redirect_to_observation_or_create_location
   end
-  # rubocop:enable Metrics/AbcSize
 
   ##############################################################################
 
@@ -80,6 +100,12 @@ module ObservationsController::EditAndUpdate
 
   def update_whitelisted_observation_attributes
     @observation.attributes = whitelisted_observation_params || {}
+  end
+
+  def whitelisted_observation_params
+    return unless params[:observation]
+
+    params[:observation].permit(whitelisted_observation_args)
   end
 
   def warn_if_unchecking_specimen_with_records_present!
@@ -95,21 +121,6 @@ module ObservationsController::EditAndUpdate
 
   def strip_images_if_observation_gps_hidden
     strip_images! if @observation.gps_hidden
-  end
-
-  def reload_edit_form
-    @images         = @bad_images
-    @new_image.when = @observation.when
-    init_project_vars_for_reload(@observation)
-    init_list_vars_for_reload(@observation)
-    render(action: :edit)
-  end
-
-  # used by :update, :update_whitelisted_observation_attributes
-  def whitelisted_observation_params
-    return unless params[:observation]
-
-    params[:observation].permit(whitelisted_observation_args)
   end
 
   def validate_edit_place_name
@@ -145,9 +156,56 @@ module ObservationsController::EditAndUpdate
     end
   end
 
+  def reload_edit_form
+    @images         = @bad_images
+    @new_image.when = @observation.when
+    init_project_vars_for_reload(@observation)
+    init_list_vars_for_reload(@observation)
+    render(action: :edit)
+  end
+
   def update_project_and_species_list_attachments
     update_projects(@observation, params[:project])
     update_species_lists(@observation, params[:list])
+  end
+
+  def update_projects(obs, checks)
+    return unless checks
+
+    User.current.projects_member(include: :observations).each do |project|
+      before = obs.projects.include?(project)
+      after = checks["id_#{project.id}"] == "1"
+      next unless before != after
+
+      if after
+        project.add_observation(obs)
+        flash_notice(:attached_to_project.t(object: :observation,
+                                            project: project.title))
+      else
+        project.remove_observation(obs)
+        flash_notice(:removed_from_project.t(object: :observation,
+                                             project: project.title))
+      end
+    end
+  end
+
+  def update_species_lists(obs, checks)
+    return unless checks
+
+    User.current.all_editable_species_lists.includes(:observations).
+      each do |list|
+      before = obs.species_lists.include?(list)
+      after = checks["id_#{list.id}"] == "1"
+      next unless before != after
+
+      if after
+        list.add_observation(obs)
+        flash_notice(:added_to_list.t(list: list.title))
+      else
+        list.remove_observation(obs)
+        flash_notice(:removed_from_list.t(list: list.title))
+      end
+    end
   end
 
   def redirect_to_observation_or_create_location
