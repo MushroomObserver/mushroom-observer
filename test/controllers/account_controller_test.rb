@@ -440,7 +440,7 @@ class AccountControllerTest < FunctionalTestCase
     lichen: "yes",
     region: "California, USA",
     clade: "Ascomycota"
-  }
+  }.freeze
 
   def test_edit_prefs
     # licenses fixture only available within test??
