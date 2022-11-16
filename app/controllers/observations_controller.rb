@@ -23,6 +23,8 @@ class ObservationsController < ApplicationController
     :show
   ]
 
+  before_action :pass_query_params
+
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
