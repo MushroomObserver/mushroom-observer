@@ -202,7 +202,7 @@ class AccountTest < CapybaraIntegrationTestCase
     within("#account_preferences_form") do
       # Region filter - must be end of location string to work,
       # **** including the country ****. There's no autocomplete yet.
-      # User must type or paste wisely.
+      # User must type or paste wisely. This won't pass:
       fill_in("user_region", with: "Gloucester, Massachusetts")
       click_commit
     end
@@ -226,20 +226,70 @@ class AccountTest < CapybaraIntegrationTestCase
 
     assert_flash_success
     assert_selector("body.preferences__edit")
-    # Notes and email prefs
+    # Notes - Try a reserved word:
     within("#account_preferences_form") do
-      fill_in("user_notes_template", with: "Smells, Textures, Impressions")
-      uncheck("user_email_html")
-      # More email prefs
+      fill_in("user_notes_template", with: "Smells, Textures, Other")
       click_commit
     end
+
+    assert_flash_error
+    assert_flash_text(
+      CGI.unescapeHTML(:prefs_notes_template_no_other.t(part: "Other"))
+    )
+    within("#account_preferences_form") do
+      fill_in("user_notes_template", with: "Smells, Textures, Impressions")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+    # Email prefs - flip them all
+    within("#account_preferences_form") do
+      uncheck("user_email_html")
+
+      uncheck("user_email_comments_owner")
+      uncheck("user_email_comments_response")
+      check("user_email_comments_all")
+
+      uncheck("user_email_observations_consensus")
+      uncheck("user_email_observations_naming")
+      check("user_email_observations_all")
+
+      uncheck("user_email_names_admin")
+      uncheck("user_email_names_author")
+      uncheck("user_email_names_editor")
+      uncheck("user_email_names_reviewer")
+      check("user_email_names_all")
+
+      uncheck("user_email_locations_admin")
+      uncheck("user_email_locations_author")
+      uncheck("user_email_locations_editor")
+      check("user_email_locations_all")
+
+      uncheck("user_email_general_commercial")
+      uncheck("user_email_general_feature")
+      uncheck("user_email_general_question")
+      click_commit
+    end
+
+    assert_flash_success
+    assert_selector("body.preferences__edit")
+
+    mary.reload
+    assert_equal(mary.email_html, false)
+    assert_equal(mary.email_comments_owner, false)
+    assert_equal(mary.email_comments_all, true)
+    assert_equal(mary.email_observations_all, true)
+    assert_equal(mary.email_locations_all, true)
+    assert_equal(mary.email_names_all, true)
+    assert_equal(mary.email_general_question, false)
+    assert_equal(mary.email_general_feature, false)
   end
 
   def test_profile
     mary = users("mary")
     login!(mary)
 
-    # cheating: going direct instead of using selenium just to click a dropdown
     visit(edit_account_profile_path)
 
     assert_selector("body.profile__edit")
