@@ -83,6 +83,11 @@ module CapybaraSessionExtensions
                             "#flash_notices.alert-danger")
   end
 
+  def assert_no_flash_errors
+    assert_none_of_selectors("#flash_notices.alert-error",
+                             "#flash_notices.alert-danger")
+  end
+
   def assert_flash_warning
     assert_selector("#flash_notices.alert-warning")
   end
