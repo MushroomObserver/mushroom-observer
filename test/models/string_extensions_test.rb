@@ -87,7 +87,7 @@ class StringExtensionsTest < UnitTestCase
   end
 
   def test_fix_utf8
-    str = +"foo \xC9\x2C bar".dup
+    str = +"foo \xC9\x2C bar"
     assert_false(str.valid_encoding?)
     assert_true(str.fix_utf8.valid_encoding?)
   end
