@@ -1,7 +1,6 @@
 <% if @vals %>
   <p>
-    <%= visual_group.image_count(status) %>
-    <%= :IMAGES.t %>
+    <%= :"visual_group_count_#{status}".t(count: visual_group.image_count(status)) %>
   </p>
 
   <%= content_tag(:div, id: "results") do %>

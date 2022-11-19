@@ -30,19 +30,7 @@
 <strong><%= :edit_visual_group_filter_options.t %></strong>
 <%= form_with(url: edit_visual_group_path(@visual_group, anchor: "filter_options"), method: :get,
               id: "visual_group_filters_form") do |form| %>
-  <%= form.text_field(:filter, value: @filter, size: 60, id: "filter") %>
-  <p>
-    <% ["needs_review", "included", "excluded"].each do |a_status| %>
-      <%= form.radio_button(:status, a_status, checked: @status == a_status, id: a_status) %>
-      <%= form.label(:"status_#{a_status}", :"visual_group_#{a_status}".t, value: a_status, for: a_status) %>
-    <% end %>
-  </p>
-
-  <p>
-    <div class="actions">
-      <%= form.submit(:edit_visual_group_update_filter.t) %>
-    </div>
-  </p>
+  <%= form.text_field(:filter, value: @filter, size: 60, id: "filter") %> <%= form.submit(:edit_visual_group_update_filter.t) %>
 
   <% inject_javascript_at_end %(
     jQuery("#included, #excluded").on("click", function(e){
@@ -50,6 +38,23 @@
     })
   ) %>
 <% end %>
+
+<p>
+  <% if @status != "included" %>
+    <%= link_to(:visual_group_included.t,
+        edit_visual_group_path(@visual_group, status: "included", anchor: "filter_options")) %> |
+  <% end %>
+  <% if @status != "excluded" %>
+    <%= link_to(:visual_group_excluded.t,
+        edit_visual_group_path(@visual_group, status: "excluded", anchor: "filter_options")) %> |
+  <% end %>
+  <% if @status != "needs_review" %>
+    <%= link_to(:visual_group_needs_review.t,
+        edit_visual_group_path(@visual_group, status: "needs_review", anchor: "filter_options")) %>
+  <% else %>
+    <a href="javascript:window.location.reload(true)"><%= :RELOAD.t %></a>
+  <% end %>
+</p>
 
 <%= render(partial: "image_matrix",
            locals: { visual_group: @visual_group, status: @status }) %>

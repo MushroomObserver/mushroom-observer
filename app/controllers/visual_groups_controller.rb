@@ -28,8 +28,15 @@ class VisualGroupsController < ApplicationController
     @visual_group = VisualGroup.find(params[:id])
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""
-    @status = params[:status] || "needs_review"
+    @status = status_from_params(params)
     @vals = calc_vals(@filter, @status, calc_layout_params["count"])
+  end
+
+  def status_from_params(params)
+    return "included" if params[:commit] == :visual_group_included.t
+    return "excluded" if params[:commit] == :visual_group_excluded.t
+
+    params[:status] || "needs_review"
   end
 
   # POST /visual_groups or /visual_groups.json
