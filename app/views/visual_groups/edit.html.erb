@@ -13,7 +13,9 @@
 
 <%= render 'form', visual_group: @visual_group %>
 
-<hr>
+<span id="filter_options">
+  <hr>
+</span>
 
 <p>
   <strong><%= :visual_group_includes_names.t %>:</strong><br>
@@ -23,9 +25,7 @@
   <% end %>
 </p>
 
-<span id="filter_options">
   <hr>
-</span>
 
 <strong><%= :edit_visual_group_filter_options.t %></strong>
 <%= form_with(url: edit_visual_group_path(@visual_group, anchor: "filter_options"), method: :get,
