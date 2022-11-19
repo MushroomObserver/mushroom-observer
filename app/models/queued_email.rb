@@ -19,7 +19,7 @@
 #
 #  The specific email classes know which data are required for themselves: how
 #  to store it, how to retrieve it, and how to deliver the actual mail (via
-#  an AccountMailer subclass).
+#  an ApplicationMailer subclass).
 #
 #  == Typical execution flow
 #
@@ -50,11 +50,11 @@
 #
 #  7. QueuedEmail::Blah grabs all the attached data it needs (often done in the
 #     constructor, actually), and calls the build method of the appropriate
-#     AccountMailer subclass:
+#     ApplicationMailer subclass:
 #
-#       CommentEmail.build(from, to, observation, comment)
+#       CommentMailer.build(from, to, observation, comment)
 #
-#  8. AccountMailer subclass renders the email message and dispatches it
+#  8. ApplicationMailer subclass renders the email message and dispatches it
 #     to postfix or whichever mailserver is responsible for delivering email.
 #
 #  == Basic properties

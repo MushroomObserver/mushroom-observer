@@ -65,7 +65,7 @@ class QueuedEmail::LocationChange < QueuedEmail
     desc_change = ObjectChange.new(description,
                                    old_description_version,
                                    new_description_version)
-    LocationChangeEmail.build(user, to_user, queued,
-                              loc_change, desc_change).deliver_now
+    LocationChangeMailer.build(user, to_user, queued,
+                               loc_change, desc_change).deliver_now
   end
 end

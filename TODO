@@ -410,7 +410,7 @@ Translate .rhtml templates for account and observer (on hold waiting for transla
 
 Add language preference to user preferences (8)
 
-Figure out how to correctly translate emails (account_mailer/*.rhtml) (4)
+Figure out how to correctly translate emails (application_mailer/*.rhtml) (4)
 
 Herbarium records - Provide a standard way to describe herbarium collections. (40)
 

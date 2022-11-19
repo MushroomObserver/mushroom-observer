@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Email sent to admins when sign-up is denied.
-class DeniedEmail < AccountMailer
+class DeniedMailer < ApplicationMailer
+  after_action :webmaster_delivery, only: [:build]
+
   def build(user_params)
     I18n.locale = MO.default_locale
     @title = :email_subject_denied.l

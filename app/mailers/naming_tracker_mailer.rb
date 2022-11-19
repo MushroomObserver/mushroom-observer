@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user someone has observed a name they are interested in.
-class NamingTrackerEmail < AccountMailer
+class NamingTrackerMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(tracker, naming)
     setup_user(tracker)
     name = "#{naming.observation_id}: #{naming.name.real_search_name}"

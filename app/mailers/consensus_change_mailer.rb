@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Notify user of name change of their obs.
-class ConsensusChangeEmail < AccountMailer
+class ConsensusChangeMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(email)
     setup_user(email.to_user)
     @observation = email.observation

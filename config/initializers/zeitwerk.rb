@@ -3,7 +3,7 @@
 Rails.autoloaders.main.inflector.inflect(
   { "mo_paginator" => "MOPaginator",
     "gmap" => "GMap",
-    "verify_api_key_email" => "VerifyAPIKeyEmail" }
+    "verify_api_key_email" => "VerifyAPIKeyMailer" }
 )
 
 Rails.autoloaders.main.ignore(
