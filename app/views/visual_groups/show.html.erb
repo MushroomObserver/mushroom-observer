@@ -24,15 +24,22 @@
 
 <hr>
 
+<% if @filter %>
+  <strong>Showing definitional images for "<%= @filter %>"</strong><br>
+  <%= link_to("Show All Definitional Images", visual_group_path(@visual_group)) %>
+<% else %>
+<p>
+  <%= :"visual_group_count_included".t(count: @visual_group.image_count("included")) %>
+</p>
+
 <p>
   <strong><%= :visual_group_includes_names.t %>:</strong><br>
   <% @visual_group.distinct_names.each do |name| %>
-  <%= link_to(name[0],
-              edit_visual_group_path(@visual_group, filter: name[0]))%><br>
+    <%= link_to(name[0],
+        visual_group_path(@visual_group, filter: name[0])) %><br>
   <% end %>
 </p>
-
-<hr>
+<% end %>
 
 <%= render(partial: "image_matrix",
            locals: { visual_group: @visual_group, status: "included" }) %>

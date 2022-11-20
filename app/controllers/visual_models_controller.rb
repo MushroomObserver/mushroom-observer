@@ -26,10 +26,13 @@ class VisualModelsController < ApplicationController
   # POST /visual_models
   def create
     @visual_model = VisualModel.new(visual_model_params)
-    return unless @visual_model.save
-
-    redirect_to(visual_model_url(@visual_model),
-                notice: :runtime_visual_model_created_at.t)
+    if @visual_model.save
+      redirect_to(visual_model_url(@visual_model),
+                  notice: :runtime_visual_model_created_at.t)
+    else
+      flash_object_errors(@visual_model)
+      redirect_to(new_visual_model_url)
+    end
   end
 
   # PATCH/PUT /visual_models/1

@@ -11,9 +11,9 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1 or /visual_groups/1.json
   def show
+    @filter = params[:filter]
     @visual_group = VisualGroup.find(params[:id])
-    @vals = @visual_group.visual_group_images.where(included: true).
-            pluck(:image_id, :included)
+    @vals = calc_show_vals(calc_layout_params["count"])
   end
 
   # GET /visual_groups/new
@@ -29,7 +29,7 @@ class VisualGroupsController < ApplicationController
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""
     @status = status_from_params(params)
-    @vals = calc_vals(@filter, @status, calc_layout_params["count"])
+    @vals = calc_edit_vals(calc_layout_params["count"])
   end
 
   def status_from_params(params)
@@ -44,10 +44,14 @@ class VisualGroupsController < ApplicationController
     @visual_group = VisualGroup.new(visual_group_params)
     @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
 
-    @visual_group.save!
-    redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
-                                               @visual_group),
-                notice: :runtime_visual_group_created_at.t)
+    if @visual_group.save
+      redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
+                                                 @visual_group),
+                  notice: :runtime_visual_group_created_at.t)
+    else
+      flash_object_errors(@visual_group)
+      redirect_to(new_visual_model_visual_group_url(@visual_group.visual_model))
+    end
   end
 
   # PATCH/PUT /visual_groups/1 or /visual_groups/1.json
@@ -77,11 +81,22 @@ class VisualGroupsController < ApplicationController
                                          :approved, :description)
   end
 
-  def calc_vals(filter, status, count)
-    if status != "needs_review"
-      return @visual_group.visual_group_images.
-             where(included: status != "excluded").pluck(:image_id, :included)
+  def calc_show_vals(count)
+    if !@filter || @filter == ""
+      @visual_group.visual_group_images.where(included: true).
+        pluck(:image_id, :included)
+    else
+      vgi = VisualGroupImages.new(@filter, true, count)
+      logger.debug(vgi.query.to_sql)
+      vgi.vals
     end
-    @visual_group.needs_review_vals(filter, count)
+  end
+
+  def calc_edit_vals(count)
+    if @status != "needs_review"
+      return @visual_group.visual_group_images.
+             where(included: @status != "excluded").pluck(:image_id, :included)
+    end
+    VisualGroupImages.new(@filter, nil, count).vals
   end
 end

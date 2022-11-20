@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
-class VisualGroup < ApplicationRecord
+class VisualGroup < AbstractModel
   has_many :visual_group_images, dependent: :destroy
   has_many :images, through: :visual_group_images
   belongs_to :visual_model
+
+  validates :name, presence: {
+    message: proc { :cannot_be_blank.t }
+  }
 
   def image_count(status = true)
     return visual_group_images.count if status.nil? || status == "needs_review"
@@ -24,11 +28,6 @@ class VisualGroup < ApplicationRecord
     new_images.each do |image|
       add_image(image) if image.visual_group(visual_model) != self
     end
-  end
-
-  def needs_review_vals(filter, count)
-    query = VisualGroupData.new(filter, 1.5, count).sql_query
-    VisualGroup.connection.select_rows(query)
   end
 
   def distinct_names

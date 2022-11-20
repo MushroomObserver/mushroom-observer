@@ -56,6 +56,10 @@
   <% end %>
 </p>
 
+<p>
+  <%= :"visual_group_count_#{@status}".t(count: @visual_group.image_count(@status)) %>
+</p>
+
 <%= render(partial: "image_matrix",
            locals: { visual_group: @visual_group, status: @status }) %>
 <% @container = :full %>
