@@ -28,25 +28,22 @@
   <hr>
 
 <strong><%= :edit_visual_group_filter_options.t %></strong>
-<%= form_with(url: edit_visual_group_path(@visual_group, anchor: "filter_options"), method: :get,
+<%= form_with(url: edit_visual_group_path(@visual_group), method: :get,
               id: "visual_group_filters_form") do |form| %>
-  <%= form.text_field(:filter, value: @filter, size: 60, id: "filter") %> <%= form.submit(:edit_visual_group_update_filter.t) %>
-
-  <% inject_javascript_at_end %(
-   jQuery("#included, #excluded").on("click", function(e){
-     jQuery("#filter").val("");
-    })
-  ) %>
+  <%= form.text_field(:filter, value: @filter, size: 60, id: "filter") %>
+  <%= form.submit(:edit_visual_group_update_filter.t) %>
 <% end %>
 
 <p>
   <% if @status != "included" %>
     <%= link_to(:visual_group_included.t,
-        edit_visual_group_path(@visual_group, status: "included", anchor: "filter_options")) %> |
+        edit_visual_group_path(@visual_group, status: "included",
+                                              anchor: "filter_options")) %> |
   <% end %>
   <% if @status != "excluded" %>
     <%= link_to(:visual_group_excluded.t,
-        edit_visual_group_path(@visual_group, status: "excluded", anchor: "filter_options")) %> |
+        edit_visual_group_path(@visual_group, status: "excluded",
+                                              anchor: "filter_options")) %> |
   <% end %>
   <% if @status != "needs_review" %>
     <%= link_to(:visual_group_needs_review.t,
