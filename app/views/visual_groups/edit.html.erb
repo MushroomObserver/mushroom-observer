@@ -33,7 +33,7 @@
   <%= form.text_field(:filter, value: @filter, size: 60, id: "filter") %> <%= form.submit(:edit_visual_group_update_filter.t) %>
 
   <% inject_javascript_at_end %(
-    jQuery("#included, #excluded").on("click", function(e){
+   jQuery("#included, #excluded").on("click", function(e){
      jQuery("#filter").val("");
     })
   ) %>
