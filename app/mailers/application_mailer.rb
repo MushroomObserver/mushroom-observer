@@ -15,13 +15,9 @@ ActionMailer::Base.raise_delivery_errors = false
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
-  # This more or less follows RFC-5321 rules, minus the ridiculous quoting.
-  DOT_ATOM = %r{[0-9A-Za-z_!$&*\-=\\^`|~#%‘+/?{}]+}
-  DOT_ATOMS = /#{DOT_ATOM}(\.#{DOT_ATOM})*/
-  VALID_EMAIL_REGEXP = /^#{DOT_ATOMS}@#{DOT_ATOMS}$/
-
+  # Use native Ruby URI::MailTo class
   def self.valid_email_address?(address)
-    address.to_s.match?(VALID_EMAIL_REGEXP)
+    address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
   end
 
   private
