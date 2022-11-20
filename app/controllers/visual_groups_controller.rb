@@ -57,10 +57,16 @@ class VisualGroupsController < ApplicationController
   # PATCH/PUT /visual_groups/1 or /visual_groups/1.json
   def update
     @visual_group = VisualGroup.find(params[:id])
-    @visual_group.update!(visual_group_params)
-    redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
-                                               @visual_group),
-                notice: :update_visual_group_success.t)
+    if @visual_group.update(visual_group_params)
+      redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
+                                                 @visual_group),
+                  notice: :update_visual_group_success.t(
+                    name: @visual_group.name
+                  ))
+    else
+      flash_object_errors(@visual_group)
+      redirect_to(edit_visual_group_url(@visual_group))
+    end
   end
 
   # DELETE /visual_groups/1 or /visual_groups/1.json
@@ -87,7 +93,6 @@ class VisualGroupsController < ApplicationController
         pluck(:image_id, :included)
     else
       vgi = VisualGroupImages.new(@filter, true, count)
-      logger.debug(vgi.query.to_sql)
       vgi.vals
     end
   end

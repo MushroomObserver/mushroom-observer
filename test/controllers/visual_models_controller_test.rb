@@ -30,6 +30,17 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_redirected_to visual_model_url(VisualModel.last)
   end
 
+  test "should not create visual_model" do
+    login
+    assert_no_difference("VisualModel.count") do
+      post(:create, params: { visual_model: {
+             name: ""
+           } })
+    end
+
+    assert_redirected_to new_visual_model_url
+  end
+
   test "should show visual_model" do
     login
     get(:show, params: { id: visual_models(:visual_model_one).id })
@@ -49,6 +60,15 @@ class VisualModelsControllerTest < FunctionalTestCase
             visual_model: { name: @visual_model.name }
           })
     assert_redirected_to visual_model_url(@visual_model)
+  end
+
+  test "should not update visual_model" do
+    login
+    patch(:update, params: {
+            id: @visual_model.id,
+            visual_model: { name: "" }
+          })
+    assert_redirected_to edit_visual_model_url(@visual_model)
   end
 
   test "should destroy visual_model" do

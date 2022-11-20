@@ -39,10 +39,13 @@ class VisualModelsController < ApplicationController
   def update
     @visual_model = VisualModel.find(params[:id])
 
-    return unless @visual_model.update(visual_model_params)
-
-    redirect_to(visual_model_url(@visual_model),
-                notice: :runtime_visual_model_updated_at.t)
+    if @visual_model.update(visual_model_params)
+      redirect_to(visual_model_url(@visual_model),
+                  notice: :runtime_visual_model_updated_at.t)
+    else
+      flash_object_errors(@visual_model)
+      redirect_to(edit_visual_model_url(@visual_model))
+    end
   end
 
   # DELETE /visual_models/1
