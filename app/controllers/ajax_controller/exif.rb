@@ -39,7 +39,7 @@ module AjaxController::EXIF
   end
 
   def parse_exif_data(result, hide_gps)
-    result.split("\n").
+    result.fix_utf8.split("\n").
       map { |line| line.split(/\s*:\s+/, 2) }.
       select { |_key, val| val != "" && val != "n/a" }.
       reject { |key, _val| hide_gps && key.match(GPS_TAGS) }

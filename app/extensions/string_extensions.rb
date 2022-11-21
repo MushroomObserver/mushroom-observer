@@ -416,6 +416,21 @@ class String
     encode(charset, fallback: ->(c) { UTF8_TO_ASCII[c] || "?" })
   end
 
+  # This fixes a string which is supposed to be UTF-8 but which nevertheless
+  # might have invalid byte sequences and there's nothing we can do to fix it
+  # "correctly".  This just ignores the invalid sequences so we get at least
+  # *something* out of the string, and don't just dying and do nothing.
+  #
+  # Found this solution here:
+  # https://stackoverflow.com/questions/2982677/ruby-1-9-invalid-byte-sequence-in-utf-8
+  def fix_utf8
+    str = force_encoding("UTF-8")
+    return str if str.valid_encoding?
+
+    str.encode("UTF-8", "binary",
+               invalid: :replace, undef: :replace, replace: "")
+  end
+
   # Escape a string to be safe to place in double-quotes inside javascript.
   # TODO: Use the rails method "j" for this
   def escape_js_string
