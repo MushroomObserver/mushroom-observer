@@ -85,4 +85,10 @@ class StringExtensionsTest < UnitTestCase
   def test_tp_nodiv
     assert("<p>a</p>", "a".tp_nodiv)
   end
+
+  def test_fix_utf8
+    str = +"foo \xC9\x2C bar"
+    assert_false(str.valid_encoding?)
+    assert_true(str.fix_utf8.valid_encoding?)
+  end
 end
