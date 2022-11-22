@@ -2058,7 +2058,6 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     where = "Somewhere, China"
-    binding.break
     params = {
       id: obs.id,
       observation: {
