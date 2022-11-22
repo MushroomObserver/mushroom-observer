@@ -27,8 +27,7 @@
     </div>
   </div>
   <div class="col-xs-12 col-sm-6">
-    <div class="well well-sm help-block position-relative">
-      <div class="arrow-left hidden-xs"></div>
+    <%= help_block_with_arrow("left", id: "where_help") do %>
       <%=
         loc1 = "Albion, Mendocino Co., California, USA"
         loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
@@ -38,17 +37,16 @@
         end
         :form_observations_where_help.t(loc1: loc1, loc2: loc2)
       %>
-    </div>
+    <% end %>
   </div>
 </div><!--.row-->
 
 <div class="row">
   <div class="col-xs-12 col-sm-6">
     <button type="button" class="map-locate btn btn-default mt-3">Locate on Map</button>
-    <div class="well well-sm mt-3 help-block position-relative">
-      <div class="arrow-up hidden-xs"></div>
+    <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
       <%= :form_observations_locate_on_map_help.t %>
-    </div>
+    <% end %>
   </div>
 </div><!--.row-->
 <!-- /WHERE -->
@@ -62,10 +60,9 @@
       <%= f.label(:is_collection_location,
                   :form_observations_is_collection_location.t) %>
     </div>
-    <div class="well well-sm mt-3 help-block position-relative">
-      <div class="arrow-up hidden-xs"></div>
+    <%= help_block_with_arrow("up", id: "is_collection_location_help") do %>
       <%= :form_observations_is_collection_location_help.t %>
-    </div>
+    <% end %>
   </div><!--.col-->
 </div><!--.row-->
 <!-- /IS_COLLECTION_LOCATION -->
@@ -81,10 +78,9 @@
     </div>
   </div>
   <div class="col-sm-6">
-    <div class="well well-sm help-block position-relative">
-      <div class="arrow-left hidden-xs"></div>
+    <%= help_block_with_arrow("up", id: "is_collection_location_help") do %>
       <%= :form_observations_lat_long_help.t %>
-    </div>
+    <% end %>
   </div>
 </div><!--.row-->
 

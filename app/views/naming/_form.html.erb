@@ -43,10 +43,9 @@ locals = {
   </div>
 
   <div class="col-sm-6">
-    <div class="well well-sm help-block position-relative">
-      <div class="arrow-left hidden-xs"></div>
+    <%= help_block_with_arrow("left", id: "naming_name_help") do %>
       <%= tag.p(:form_naming_name_help.t) %>
-    </div>
+    <% end %>
   </div>
 </div><!--.row-->
 

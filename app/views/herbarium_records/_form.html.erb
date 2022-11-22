@@ -39,10 +39,9 @@ end
     <span class="help-note">(<%= :required.t %>)</span>
   </div>
 
-  <div class="well well-sm mt-3 help-block position-relative">
-    <div class="arrow-up"></div>
+  <%= help_block_with_arrow("up") do %>
     <%= :create_herbarium_record_accession_number_help.t %>
-  </div>
+  <% end %>
 
   <div class="form-group">
     <%= f.label(:notes, :NOTES.t + ":") %>
