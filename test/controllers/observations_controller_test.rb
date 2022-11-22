@@ -580,6 +580,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_obj_list_equal(observations_in_region, results)
   end
 
+  ##############################################################################
+
   # ------ Show ----------------------------------------------- #
 
   def test_show_observation_num_views
@@ -1032,10 +1034,14 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
+  ##############################################################################
+
+  # -------------------- Destroy ---------------------------------------- #
+
   def test_destroy_observation
     assert(obs = observations(:minimal_unknown_obs))
     id = obs.id
-    params = { id: id.to_s }
+    params = { id: id }
     assert_equal("mary", obs.user.login)
     requires_user(:destroy,
                   [{ action: :show }],
@@ -1082,6 +1088,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
   end
+
+  ##############################################################################
 
   # ------------------------------
   #  Test creating observations.
@@ -1966,6 +1974,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_false(old_img2.reload.gps_stripped)
   end
 
+  ##############################################################################
+
   # ----------------------------------------------------------------
   #  Test :edit and :update (note :update uses method: :put)
   # ----------------------------------------------------------------
@@ -1975,12 +1985,12 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_edit_observation_form
     obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
-    params = { id: obs.id.to_s }
+    params = { id: obs.id }
     requires_user(:edit,
                   [{ controller: :observations, action: :show }],
                   params)
 
-    assert_form_action(action: :update, id: obs.id.to_s)
+    assert_form_action(action: :update, id: obs.id)
 
     # image notes field must be textarea -- not just text -- because text
     # is inline and would drops any newlines in the image notes
@@ -1996,7 +2006,7 @@ class ObservationsControllerTest < FunctionalTestCase
     new_specimen = false
     img = images(:in_situ_image)
     params = {
-      id: obs.id.to_s,
+      id: obs.id,
       observation: {
         notes: new_notes,
         place_name: new_where,
@@ -2008,14 +2018,14 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       good_images: "#{img.id} #{images(:turned_over_image).id}",
       good_image: {
-        img.id.to_s => {
+        img.id => {
           notes: "new notes",
           original_name: "new name",
           copyright_holder: "someone else",
           "when(1i)" => "2012",
           "when(2i)" => "4",
           "when(3i)" => "6",
-          license_id: licenses(:ccwiki30).id.to_s
+          license_id: licenses(:ccwiki30).id
         }
       },
       log_change: { checked: "1" }
@@ -2048,8 +2058,9 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     where = "Somewhere, China"
+    binding.break
     params = {
-      id: obs.id.to_s,
+      id: obs.id,
       observation: {
         place_name: where,
         when: obs.when,
@@ -2078,7 +2089,7 @@ class ObservationsControllerTest < FunctionalTestCase
     new_notes = { other: "blather blather blather" }
     new_specimen = false
     params = {
-      id: obs.id.to_s,
+      id: obs.id,
       observation: {
         place_name: new_where,
         "when(1i)" => "2001",
@@ -2120,7 +2131,7 @@ class ObservationsControllerTest < FunctionalTestCase
     old_img3_notes = img3.notes
 
     params = {
-      id: obs.id.to_s,
+      id: obs.id,
       observation: {
         place_name: obs.place_name,
         when: obs.when,
@@ -2130,8 +2141,8 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       good_images: img_ids.map(&:to_s).join(" "),
       good_image: {
-        img2.id.to_s => { notes: "new notes for two" },
-        img3.id.to_s => { notes: "new notes for three" }
+        img2.id => { notes: "new notes for two" },
+        img3.id => { notes: "new notes for three" }
       }
     }
     login("mary")
@@ -2443,9 +2454,9 @@ class ObservationsControllerTest < FunctionalTestCase
             }
           },
           good_image: {
-            new_image1.id.to_s => {
+            new_image1.id => {
             },
-            new_image2.id.to_s => {
+            new_image2.id => {
               notes: "notes_2_new"
             }
           },
