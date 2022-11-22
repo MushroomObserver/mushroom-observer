@@ -43,7 +43,7 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <button type="button" class="map-locate btn btn-default mt-3">Locate on Map</button>
+    <button type="button" class="map-locate btn btn-default my-3">Locate on Map</button>
     <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
       <%= :form_observations_locate_on_map_help.t %>
     <% end %>
@@ -54,7 +54,7 @@
 <!-- IS_COLLECTION_LOCATION -->
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <div class="form-inline">
+    <div class="form-inline mb-3">
       <%= f.check_box(:is_collection_location,
                       class: "form-control-xxx") %>
       <%= f.label(:is_collection_location,
