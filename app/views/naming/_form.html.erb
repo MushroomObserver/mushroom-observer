@@ -27,11 +27,11 @@ locals = {
 <div class="row">
   <div class="col-xs-12 col-sm-6">
     <%= render(partial: "shared/form_name_feedback",
-            locals: locals) if what.present? %>
+               locals: locals) if what.present? %>
   </div>
 </div><!--.row-->
 
-<div class="row mt-3" id="observation_naming_form">
+<div class="row mt-3" id="observation_naming">
   <div class="col-sm-6">
     <div class="form-group">
       <%= label_tag(:name_name, :WHAT.t + ":") %>
