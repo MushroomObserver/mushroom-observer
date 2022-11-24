@@ -61,6 +61,20 @@ class RssLogTest < UnitTestCase
                  log.detail)
   end
 
+  def test_really_long_notes
+    max = RssLog::MAX_LENGTH
+    log = RssLog.first
+    log.notes = "test test " * (max / 10 - 1)
+    log.save
+    assert_operator(max, ">", log.notes.length)
+    assert_operator(max, "<", log.notes.length + 20)
+    log.add_with_date(:log_object_created_by_user,
+                      user: "make sure this is nice and long!",
+                      type: :OBSERVATION)
+    log.reload
+    assert_operator(max, ">", log.notes.length)
+  end
+
   # ---------- helpers ---------------------------------------------------------
 
   def normalized_rss_log_types

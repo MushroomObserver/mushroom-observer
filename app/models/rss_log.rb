@@ -156,6 +156,10 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
 
+  # Maximum allowed length (in bytes) of notes column.  Actually it should be
+  # 65535, I think, but let's mak sure there's a safe buffer.
+  MAX_LENGTH = 65_500
+
   # Override the default show_controller
   def self.show_controller
     "/rss_logs"
@@ -296,7 +300,7 @@ class RssLog < AbstractModel
   def add_with_date(tag, args = {})
     entry = encode(tag, relevant_args(args), args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
-    self.notes = "#{entry}\n#{notes}"
+    add_entry(entry)
     save_without_our_callbacks unless args.key?(:save) && !args[:save]
     RssLog.record_timestamps = true
   end
@@ -315,7 +319,7 @@ class RssLog < AbstractModel
   def orphan(title, key, args = {})
     args = args.merge(save: false)
     add_with_date(key, args)
-    self.notes = "#{escape(title)}\n#{notes}"
+    add_entry(escape(title))
     clear_target_id
     save_without_our_callbacks
   end
@@ -450,5 +454,11 @@ class RssLog < AbstractModel
   # Reverse protection of special characters in string for log encoder/decoder.
   def unescape(str)
     str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
+  end
+
+  # Add line to top of notes field, truncating it to keep it within the MySQL
+  # limit on TEXT field.
+  def add_entry(entry)
+    self.notes = "#{entry}\n#{notes}".truncate_bytes(MAX_LENGTH)
   end
 end
