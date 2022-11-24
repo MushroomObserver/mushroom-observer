@@ -126,6 +126,10 @@ gem("mail")
 # temporarily add until the mail gem includes it as a dependancy.
 gem("net-smtp", require: false)
 
+# These seem to be required by unicorn -> zeitwerk
+gem("net-pop")
+gem("net-imap")
+
 # for detecting file type of uploaded images
 gem("mimemagic")
 
