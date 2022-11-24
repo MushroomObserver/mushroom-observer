@@ -33,4 +33,8 @@ class VisualGroup < AbstractModel
   def distinct_names
     VisualGroup.connection.select_rows(VisualGroupNames.new(id).sql_query)
   end
+
+  def included_image_ids
+    visual_group_images.where(included: true).pluck(:image_id)
+  end
 end

@@ -47,6 +47,13 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
+  test "should show visual_model as json" do
+    login
+    get(:show, params: { format: :json,
+                         id: visual_models(:visual_model_one).id })
+    assert_response :success
+  end
+
   test "should get edit" do
     login
     get(:edit, params: { id: @visual_model.id })

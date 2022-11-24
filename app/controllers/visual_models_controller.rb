@@ -11,6 +11,10 @@ class VisualModelsController < ApplicationController
   # GET /visual_models/1
   def show
     @visual_model = VisualModel.find(params[:id])
+    respond_to do |format|
+      format.html
+      format.json { render(json: @visual_model) }
+    end
   end
 
   # GET /visual_models/new
