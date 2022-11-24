@@ -9,7 +9,7 @@ module ObservationsController::NewAndCreate
   #
   # Inputs:
   #   params[:observation][...]         observation args
-  #   params[:name][:name]              name
+  #   params[:naming][:name]            name
   #   params[:approved_name]            old name
   #   params[:approved_where]           old place name
   #   params[:chosen_name][:name_id]    name radio boxes
@@ -157,7 +157,7 @@ module ObservationsController::NewAndCreate
 
   def rough_cut(params)
     @observation.notes = notes_to_sym_and_compact
-    @naming = Naming.construct(params[:naming], @observation)
+    @naming = Naming.construct({}, @observation)
     @vote = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
@@ -165,7 +165,7 @@ module ObservationsController::NewAndCreate
   end
 
   def validate_name(params)
-    given_name = param_lookup([:name, :name], "").to_s
+    given_name = param_lookup([:naming, :name], "").to_s
     chosen_name = param_lookup([:chosen_name, :name_id], "").to_s
     (success, @what, @name, @names, @valid_names, @parent_deprecated,
      @suggest_corrections) =

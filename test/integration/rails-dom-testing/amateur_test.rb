@@ -364,7 +364,7 @@ class AmateurTest < IntegrationTestCase
       assert_select("#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
-        form.assert_value("name_name", "")
+        form.assert_value("naming_name", "")
         form.assert_value("vote_value", "")
         form.assert_unchecked("reason_1_check")
         form.assert_unchecked("reason_2_check")

@@ -20,10 +20,10 @@ class NamingController < ApplicationController
 
   def create
     pass_query_params
-    @params = NamingParams.new(params[:name])
+    @params = NamingParams.new(params[:naming])
     @params.observation =
       load_for_show_observation_or_goto_index(params[:id])
-    fill_in_reference_for_suggestions(@params) if params[:name].present?
+    fill_in_reference_for_suggestions(@params) if params[:naming].present?
     return unless @params.observation
 
     create_post if request.method == "POST"
@@ -63,8 +63,8 @@ class NamingController < ApplicationController
   end
 
   def rough_draft
-    @params.rough_draft(params[:naming], params[:vote],
-                        param_lookup([:name, :name]),
+    @params.rough_draft({}, params[:vote],
+                        param_lookup([:naming, :name]),
                         params[:approved_name],
                         param_lookup([:chosen_name, :name_id], "").to_s)
   end
@@ -87,7 +87,7 @@ class NamingController < ApplicationController
   end
 
   def validate_name
-    success = resolve_name(param_lookup([:name, :name], "").to_s,
+    success = resolve_name(param_lookup([:naming, :name], "").to_s,
                            param_lookup([:chosen_name, :name_id], "").to_s)
     flash_object_errors(@params.naming) if @params.name_missing?
     success
@@ -112,7 +112,7 @@ class NamingController < ApplicationController
   end
 
   def create_new_naming
-    @params.rough_draft(params[:naming], params[:vote])
+    @params.rough_draft({}, params[:vote])
     naming = @params.naming
     return unless validate_object(naming) && validate_object(@params.vote)
 
