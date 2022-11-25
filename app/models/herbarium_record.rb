@@ -84,6 +84,8 @@ class HerbariumRecord < AbstractModel
     return if recipients.member?(sender)
 
     recipients.each do |recipient|
+      next if recipient.no_emails
+
       email_klass = QueuedEmail::AddHerbariumRecordNotCurator
       email_klass.create_email(sender, recipient, self)
     end

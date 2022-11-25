@@ -295,4 +295,11 @@ class ApplicationMailerTest < UnitTestCase
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not have delivered an email to 'bogus.address'.")
   end
+
+  def test_opt_out
+    mary.update(no_emails: true)
+    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    assert_nil(ActionMailer::Base.deliveries.last,
+               "Should not deliver email if recipient has opted out.")
+  end
 end

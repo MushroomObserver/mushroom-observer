@@ -47,8 +47,7 @@ class ApplicationMailer < ActionMailer::Base
   end
 
   def mo_mail(title, headers = {})
-    to = calc_email(headers[:to])
-    return unless ApplicationMailer.valid_email_address?(to)
+    return unless (to = to_address(headers[:to]))
 
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
@@ -82,5 +81,16 @@ class ApplicationMailer < ActionMailer::Base
 
   def calc_email(user)
     user.respond_to?(:email) ? user.email : user
+  end
+
+  def to_address(user)
+    # I just want to be extra certain that we don't accidentally send email
+    # to anyone who has opted out of all email.
+    return nil if user.is_a?(User) && user.no_emails
+
+    address = calc_email(user)
+    return nil unless ApplicationMailer.valid_email_address?(address)
+
+    address
   end
 end
