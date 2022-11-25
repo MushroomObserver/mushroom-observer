@@ -5,7 +5,7 @@ require("test_helper")
 class ObservationsControllerTest < FunctionalTestCase
   def modified_generic_params(params, user)
     params[:observation] = sample_obs_fields.merge(params[:observation] || {})
-    params[:vote] = { value: "3" }.merge(params[:vote] || {})
+    params[:naming][:vote] = { value: "3" }.merge(params[:naming][:vote] || {})
     params[:collection_number] =
       default_collection_number_fields.merge(params[:collection_number] || {})
     params[:herbarium_record] =
@@ -1716,8 +1716,9 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: "0",
         thumb_image_id: "0"
       },
-      naming: {},
-      vote: { value: "3" }
+      naming: {
+        vote: { value: "3" }
+      }
     }
     expected_page = :create_location
 
@@ -2312,7 +2313,9 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       herbarium_record: default_herbarium_record_fields,
       username: user.login,
-      vote: { value: "3" }
+      naming: {
+        vote: { value: "3" }
+      }
     }
 
     login(user.login)
@@ -2363,13 +2366,15 @@ class ObservationsControllerTest < FunctionalTestCase
     post(:create,
          params: {
            observation: { place_name: "Where, Japan", when: Time.zone.now },
-           naming: { name: names(:coprinus_comatus).text_name },
-           vote: { value: 3 },
-           reason: {
-             "1" => { check: "0", notes: ""    },
-             "2" => { check: "0", notes: "foo" },
-             "3" => { check: "1", notes: ""    },
-             "4" => { check: "1", notes: "bar" }
+           naming: {
+             name: names(:coprinus_comatus).text_name,
+             vote: { value: 3 },
+             reasons: {
+               "1" => { check: "0", notes: "" },
+               "2" => { check: "0", notes: "foo" },
+               "3" => { check: "1", notes: ""    },
+               "4" => { check: "1", notes: "bar" }
+             }
            }
          })
     assert_response(:redirect) # redirected = successfully created
@@ -2381,13 +2386,15 @@ class ObservationsControllerTest < FunctionalTestCase
     post(:create,
          params: {
            observation: { place_name: "Where, Japan", when: Time.zone.now },
-           naming: { name: names(:coprinus_comatus).text_name },
-           vote: { value: 3 },
-           reason: {
-             "1" => { check: "0", notes: ""    },
-             "2" => { check: "0", notes: "foo" },
-             "3" => { check: "1", notes: ""    },
-             "4" => { check: "1", notes: "bar" }
+           naming: {
+             name: names(:coprinus_comatus).text_name,
+             vote: { value: 3 },
+             reasons: {
+               "1" => { check: "0", notes: "" },
+               "2" => { check: "0", notes: "foo" },
+               "3" => { check: "1", notes: ""    },
+               "4" => { check: "1", notes: "bar" }
+             }
            },
            was_js_on: "yes"
          })

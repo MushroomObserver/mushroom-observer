@@ -13,8 +13,8 @@ module ObservationsController::NewAndCreate
   #   params[:approved_name]            old name
   #   params[:approved_where]           old place name
   #   params[:chosen_name][:name_id]    name radio boxes
-  #   params[:vote][...]                vote args
-  #   params[:reason][n][...]           naming_reason args
+  #   params[:naming][:vote][...]       vote args
+  #   params[:naming][:reasons][n][...] naming_reasons args
   #   params[:image][n][...]            image args
   #   params[:good_images]              images already downloaded
   #   params[:was_js_on]                was form javascripty? ("yes" = true)
@@ -22,7 +22,7 @@ module ObservationsController::NewAndCreate
   # Outputs:
   #   @observation, @naming, @vote      empty objects
   #   @what, @names, @valid_names       name validation
-  #   @reason                           array of naming_reasons
+  #   @reasons                          array of naming_reasons
   #   @images                           array of images
   #   @licenses                         used for image license menu
   #   @new_image                        blank image object
@@ -43,7 +43,7 @@ module ObservationsController::NewAndCreate
     @what        = "" # can't be nil else rails tries to call @name.name
     @names       = nil
     @valid_names = nil
-    @reason      = @naming.init_reasons
+    @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
     init_specimen_vars_for_create
@@ -115,14 +115,15 @@ module ObservationsController::NewAndCreate
     # Once observation is saved we can save everything else.
     if success
       @observation.log(:log_observation_created)
-      save_everything_else(params[:reason]) # should always succeed
+      # should always succeed
+      save_everything_else(param_lookup([:naming, :reasons]))
       strip_images! if @observation.gps_hidden
       flash_notice(:runtime_observation_success.t(id: @observation.id))
       redirect_to_next_page
 
     # If anything failed reload the form.
     else
-      reload_new_form(params[:reason])
+      reload_new_form(param_lookup([:naming, :reasons]))
     end
   end
 
@@ -158,7 +159,7 @@ module ObservationsController::NewAndCreate
   def rough_cut(params)
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct({}, @observation)
-    @vote = Vote.construct(params[:vote], @naming)
+    @vote = Vote.construct(param_lookup([:naming, :vote]), @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
@@ -340,8 +341,8 @@ module ObservationsController::NewAndCreate
     end
   end
 
-  def reload_new_form(reason)
-    @reason          = @naming.init_reasons(reason)
+  def reload_new_form(reasons)
+    @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
     init_specimen_vars_for_reload
