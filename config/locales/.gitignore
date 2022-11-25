@@ -1,15 +1,5 @@
 *.yml
-ar.txt
-de.txt
-el.txt
-es.txt
-fr.txt
-it.txt
-jp.txt
-pl.txt
-pt.txt
-ru.txt
-tr.txt
-ua.txt
-uk.txt
-zh.txt
+
+# All *.txt except en.txt:
+[a-df-z][a-z].txt
+e[a-mo-z].txt
