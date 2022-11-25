@@ -63,11 +63,13 @@ class NamingController < ApplicationController
   end
 
   def rough_draft
-    @params.rough_draft({},
-                        param_lookup([:naming, :vote]),
-                        param_lookup([:naming, :name]),
-                        params[:approved_name],
-                        param_lookup([:chosen_name, :name_id], "").to_s)
+    @params.rough_draft(
+      {},
+      param_lookup([:naming, :vote]),
+      param_lookup([:naming, :name]),
+      params[:approved_name],
+      param_lookup([:chosen_name, :name_id], "").to_s
+    )
   end
 
   def can_save?
