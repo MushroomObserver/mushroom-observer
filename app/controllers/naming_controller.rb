@@ -129,7 +129,7 @@ class NamingController < ApplicationController
                                       params[:was_js_on] == "yes")
 
     flash_notice(:runtime_naming_updated_at.t)
-    @params.change_vote(param_lookup([:vote, :value], &:to_i))
+    @params.change_vote(param_lookup([:naming, :vote, :value], &:to_i))
   end
 
   def save_changes
