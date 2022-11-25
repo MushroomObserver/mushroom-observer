@@ -3,7 +3,17 @@
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
   before_action :login_required
-  before_action :disable_link_prefetching, except: [:create, :edit]
+  before_action :disable_link_prefetching,
+                except: [:new, :create, :edit, :update]
+
+  def new
+    pass_query_params
+    @params = NamingParams.new(params[:naming])
+    @params.observation =
+      load_for_show_observation_or_goto_index(params[:id])
+    fill_in_reference_for_suggestions(@params) if params[:naming].present?
+    return unless @params.observation
+  end
 
   def create
     pass_query_params
@@ -13,7 +23,7 @@ class NamingController < ApplicationController
     fill_in_reference_for_suggestions(@params) if params[:naming].present?
     return unless @params.observation
 
-    create_post if request.method == "POST"
+    create_post
   end
 
   def edit
@@ -26,7 +36,20 @@ class NamingController < ApplicationController
 
     # TODO: Can this get moved into NamingParams#naming=
     @params.vote = naming.owners_vote
-    request.method == "POST" ? edit_post : @params.edit_init
+    @params.edit_init
+  end
+
+  def update
+    pass_query_params
+    @params = NamingParams.new
+    naming = @params.naming = Naming.from_params(params)
+    @params.observation =
+      load_for_show_observation_or_goto_index(naming.observation_id)
+    return default_redirect(naming.observation) unless check_permission!(naming)
+
+    # TODO: Can this get moved into NamingParams#naming=
+    @params.vote = naming.owners_vote
+    edit_post
   end
 
   def destroy
@@ -53,6 +76,7 @@ class NamingController < ApplicationController
     else # If anything failed reload the form.
       flash_object_errors(@params.naming) if @params.name_missing?
       @params.add_reasons(param_lookup([:naming, :reasons]))
+      render(action: :new) and return
     end
   end
 
