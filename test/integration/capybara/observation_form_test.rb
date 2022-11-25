@@ -16,7 +16,7 @@ class ObservationFormTest < CapybaraIntegrationTestCase
                    with: users(:rolf).preferred_herbarium_name)
       assert_selector("#where_help",
                       text: "Albion, Mendocino Co., California")
-      fill_in("name_name", with: "Elfin saddle")
+      fill_in("naming_name", with: "Elfin saddle")
       fill_in("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -28,7 +28,7 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     assert_selector("#name_messages", text: "MO does not recognize the name")
 
     within("#observation_form") do
-      fill_in("name_name", with: "Coprinus comatus")
+      fill_in("naming_name", with: "Coprinus comatus")
       fill_in("observation_place_name", with: locations.first.name)
       click_commit
     end

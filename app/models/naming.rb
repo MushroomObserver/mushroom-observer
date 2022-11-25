@@ -301,9 +301,9 @@ class Naming < AbstractModel
     observation.change_vote(self, value, user)
   end
 
-  def update_name(new_name, user, reason, was_js_on)
+  def update_name(new_name, user, reasons, was_js_on)
     clean_votes(new_name, user)
-    create_reasons(reason, was_js_on)
+    create_reasons(reasons, was_js_on)
     update_object(new_name, changed?)
   end
 
@@ -475,8 +475,8 @@ class Naming < AbstractModel
     end
 
     # Initialize Reason.
-    def initialize(reasons, num)
-      @reasons = reasons
+    def initialize(reason, num)
+      @reason  = reason
       @num     = num
     end
 
@@ -499,22 +499,22 @@ class Naming < AbstractModel
 
     # Is this Reason being used by the parent Naming?
     def used?
-      @reasons.key?(@num)
+      @reason.key?(@num)
     end
 
     # Get notes, or +nil+ if Reason not used.
     def notes
-      @reasons[@num]
+      @reason[@num]
     end
 
     # Set notes, and mark this Reason as "used".
     def notes=(val)
-      @reasons[@num] = val.to_s
+      @reason[@num] = val.to_s
     end
 
     # Mark this Reason as "unused".
     def delete
-      @reasons.delete(@num)
+      @reason.delete(@num)
     end
   end
 

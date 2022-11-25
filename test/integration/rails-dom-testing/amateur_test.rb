@@ -364,12 +364,12 @@ class AmateurTest < IntegrationTestCase
       assert_select("#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
-        form.assert_value("name_name", "")
-        form.assert_value("vote_value", "")
-        form.assert_unchecked("reason_1_check")
-        form.assert_unchecked("reason_2_check")
-        form.assert_unchecked("reason_3_check")
-        form.assert_unchecked("reason_4_check")
+        form.assert_value("naming_name", "")
+        form.assert_value("naming_vote_value", "")
+        form.assert_unchecked("naming_reasons_1_check")
+        form.assert_unchecked("naming_reasons_2_check")
+        form.assert_unchecked("naming_reasons_3_check")
+        form.assert_unchecked("naming_reasons_4_check")
         form.submit
       end
       assert_template("naming/create")
@@ -377,7 +377,7 @@ class AmateurTest < IntegrationTestCase
       assert_flash_text(/\S/)
 
       open_form do |form|
-        form.change("name", text_name)
+        form.change("naming_name", text_name)
         form.submit
       end
       assert_template("naming/create")
@@ -389,11 +389,11 @@ class AmateurTest < IntegrationTestCase
       end
 
       open_form do |form|
-        form.assert_value("name", text_name)
-        form.assert_unchecked("reason_1_check")
-        form.assert_unchecked("reason_2_check")
-        form.assert_unchecked("reason_3_check")
-        form.assert_unchecked("reason_4_check")
+        form.assert_value("naming_name", text_name)
+        form.assert_unchecked("naming_reasons_1_check")
+        form.assert_unchecked("naming_reasons_2_check")
+        form.assert_unchecked("naming_reasons_3_check")
+        form.assert_unchecked("naming_reasons_4_check")
         form.select(/vote/, /call it that/i)
         form.submit
       end
@@ -421,13 +421,13 @@ class AmateurTest < IntegrationTestCase
       click_mo_link(label: /edit/i, href: %r{naming/edit})
       assert_template("naming/edit")
       open_form do |form|
-        form.assert_value("name", text_name)
-        form.assert_checked("reason_1_check")
-        form.uncheck("reason_1_check")
-        form.change("name", "#{text_name} #{author}")
-        form.check("reason_2_check")
-        form.change("reason_2_notes", reason)
-        form.select("vote_value", /call it that/i)
+        form.assert_value("naming_name", text_name)
+        form.assert_checked("naming_reasons_1_check")
+        form.uncheck("naming_reasons_1_check")
+        form.change("naming_name", "#{text_name} #{author}")
+        form.check("naming_reasons_2_check")
+        form.change("naming_reasons_2_notes", reason)
+        form.select("naming_vote_value", /call it that/i)
         form.submit
       end
       assert_template("observations/show")
@@ -448,13 +448,13 @@ class AmateurTest < IntegrationTestCase
       click_mo_link(label: /edit/i, href: %r{naming/edit})
       assert_template("naming/edit")
       open_form do |form|
-        form.assert_value("name", "#{text_name} #{author}")
-        form.assert_unchecked("reason_1_check")
-        form.assert_value("reason_1_notes", "")
-        form.assert_checked("reason_2_check")
-        form.assert_value("reason_2_notes", reason)
-        form.assert_unchecked("reason_3_check")
-        form.assert_value("reason_3_notes", "")
+        form.assert_value("naming_name", "#{text_name} #{author}")
+        form.assert_unchecked("naming_reasons_1_check")
+        form.assert_value("naming_reasons_1_notes", "")
+        form.assert_checked("naming_reasons_2_check")
+        form.assert_value("naming_reasons_2_notes", reason)
+        form.assert_unchecked("naming_reasons_3_check")
+        form.assert_value("naming_reasons_3_notes", "")
       end
       click_mo_link(label: /cancel.*show/i)
       naming

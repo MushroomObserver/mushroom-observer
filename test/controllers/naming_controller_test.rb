@@ -40,7 +40,7 @@ class NamingControllerTest < FunctionalTestCase
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Easter bunny"
-    params = { id: nam.id.to_s, name: { name: new_name } }
+    params = { id: nam.id.to_s, naming: { name: new_name } }
     post(:edit, params: params)
     assert_edit
     assert_equal(10, rolf.reload.contribution)
@@ -58,9 +58,11 @@ class NamingControllerTest < FunctionalTestCase
     new_name = "Easter bunny"
     params = {
       id: nam.id.to_s,
-      name: { name: new_name },
-      approved_name: new_name,
-      vote: { value: 1 }
+      naming: {
+        name: new_name,
+        vote: { value: 1 }
+      },
+      approved_name: new_name
     }
     old_contribution = rolf.contribution
 
@@ -85,7 +87,7 @@ class NamingControllerTest < FunctionalTestCase
     new_name = "Amanita baccata"
     params = {
       id: nam.id.to_s,
-      name: { name: new_name }
+      naming: { name: new_name }
     }
     post(:edit, params: params)
     assert_edit
@@ -104,9 +106,11 @@ class NamingControllerTest < FunctionalTestCase
     new_name = "Amanita baccata"
     params = {
       id: nmg.id.to_s,
-      name: { name: new_name },
-      chosen_name: { name_id: names(:amanita_baccata_arora).id },
-      vote: { value: 1 }
+      naming: {
+        name: new_name,
+        vote: { value: 1 }
+      },
+      chosen_name: { name_id: names(:amanita_baccata_arora).id }
     }
     post(:edit, params: params)
     assert_redirected_to(controller: :observations, action: :show,
@@ -127,7 +131,7 @@ class NamingControllerTest < FunctionalTestCase
     new_name = "Lactarius subalpinus"
     params = {
       id: nam.id.to_s,
-      name: { name: new_name }
+      naming: { name: new_name }
     }
     post(:edit, params: params)
     assert_edit
@@ -147,10 +151,12 @@ class NamingControllerTest < FunctionalTestCase
     chosen_name = names(:lactarius_alpinus)
     params = {
       id: nmg.id.to_s,
-      name: { name: new_name },
+      naming: {
+        name: new_name,
+        vote: { value: 1 }
+      },
       approved_name: new_name,
-      chosen_name: { name_id: chosen_name.id },
-      vote: { value: 1 }
+      chosen_name: { name_id: chosen_name.id }
     }
     post(:edit, params: params)
     assert_redirected_to(controller: :observations, action: :show,
@@ -170,10 +176,12 @@ class NamingControllerTest < FunctionalTestCase
     new_text_name = names(:lactarius_subalpinus).text_name
     params = {
       id: nmg.id.to_s,
-      name: { name: new_text_name },
+      naming: {
+        name: new_text_name,
+        vote: { value: 3 }
+      },
       approved_name: new_text_name,
-      chosen_name: {},
-      vote: { value: 3 }
+      chosen_name: {}
     }
     post(:edit, params: params)
     assert_redirected_to(controller: :observations, action: :show,
@@ -199,19 +207,21 @@ class NamingControllerTest < FunctionalTestCase
 
     # Rolf makes superficial changes to his naming.
     login("rolf")
-    post(:edit,
-         params: {
-           id: nam1.id,
-           name: { name: names(:coprinus_comatus).search_name },
-           vote: { value: "3" },
-           reason: {
-             "1" => { check: "1", notes: "Change to macro notes." },
-             "2" => { check: "1", notes: "" },
-             "3" => { check: "0", notes: "Add some micro notes." },
-             "4" => { check: "0", notes: "" }
-           }
-         })
-    assert_equal(10, rolf.reload.contribution)
+    params = {
+      id: nam1.id,
+      naming: {
+        name: names(:coprinus_comatus).search_name,
+        vote: { value: "3" },
+        reasons: {
+          "1" => { check: "1", notes: "Change to macro notes." },
+          "2" => { check: "1", notes: "" },
+          "3" => { check: "0", notes: "Add some micro notes." },
+          "4" => { check: "0", notes: "" }
+        }
+      }
+    }
+    post(:edit, params: params)
+    assert_equal(10, rolf.reload.contribution) # unchanged
 
     # Make sure the right number of objects were created.
     assert_equal(o_count + 0, Observation.count)
@@ -252,18 +262,20 @@ class NamingControllerTest < FunctionalTestCase
     # Now, Rolf makes name change to his naming (leave rest the same).
     login("rolf")
     assert_equal(10, rolf.contribution)
-    post(:edit,
-         params: {
-           id: nam1.id,
-           name: { name: "Conocybe filaris" },
-           vote: { value: "2" },
-           reason: {
-             "1" => { check: "1", notes: "Isn't it obvious?" },
-             "2" => { check: "0", notes: "" },
-             "3" => { check: "0", notes: "" },
-             "4" => { check: "0", notes: "" }
-           }
-         })
+    params = {
+      id: nam1.id,
+      naming: {
+        name: "Conocybe filaris",
+        vote: { value: "2" },
+        reasons: {
+          "1" => { check: "1", notes: "Isn't it obvious?" },
+          "2" => { check: "0", notes: "" },
+          "3" => { check: "0", notes: "" },
+          "4" => { check: "0", notes: "" }
+        }
+      }
+    }
+    post(:edit, params: params)
     assert_response(:redirect) # redirect indicates success
     assert_equal(12, rolf.reload.contribution)
 
@@ -329,13 +341,15 @@ class NamingControllerTest < FunctionalTestCase
     # sure of.  (Mary also has a naming with two votes.)
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: "Agaricus" },
-      vote: { value: "3" },
-      reason: {
-        "1" => { check: "1", notes: "Looks good to me." },
-        "2" => { check: "1", notes: "" },
-        "3" => { check: "0", notes: "Spore texture." },
-        "4" => { check: "0", notes: "" }
+      naming: {
+        name: "Agaricus",
+        vote: { value: "3" },
+        reasons: {
+          "1" => { check: "1", notes: "Looks good to me." },
+          "2" => { check: "1", notes: "" },
+          "3" => { check: "0", notes: "Spore texture." },
+          "4" => { check: "0", notes: "" }
+        }
       }
     }
     login("rolf")
@@ -401,8 +415,10 @@ class NamingControllerTest < FunctionalTestCase
   def test_propose_uncertain_naming
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: "Agaricus" },
-      vote: { value: "-1" }
+      naming: {
+        name: "Agaricus",
+        vote: { value: "-1" }
+      }
     }
     login("rolf")
     post(:create, params: params)
@@ -431,8 +447,10 @@ class NamingControllerTest < FunctionalTestCase
     # Dick proposes "Conocybe filaris" out of the blue.
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: "Conocybe filaris" },
-      vote: { value: "3" }
+      naming: {
+        name: "Conocybe filaris",
+        vote: { value: "3" }
+      }
     }
     login("dick")
     post(:create, params: params)
@@ -470,8 +488,10 @@ class NamingControllerTest < FunctionalTestCase
   def test_create_with_author_when_name_without_author_already_exists
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: "Conocybe filaris (With) Author" },
-      vote: { value: "3" }
+      naming: {
+        name: "Conocybe filaris (With) Author",
+        vote: { value: "3" }
+      }
     }
     login("dick")
     post(:create, params: params)
@@ -491,7 +511,7 @@ class NamingControllerTest < FunctionalTestCase
   def test_create_fill_in_author
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: "Agaricus campestris" }
+      naming: { name: "Agaricus campestris" }
     }
     login("dick")
     post(:create, params: params)
@@ -507,7 +527,7 @@ class NamingControllerTest < FunctionalTestCase
     name = 'Foo "bar" Author'
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: name },
+      naming: { name: name },
       approved_name: name
     }
     login("dick")
@@ -595,7 +615,7 @@ class NamingControllerTest < FunctionalTestCase
   def test_enforce_imageless_rules
     params = {
       id: observations(:coprinus_comatus_obs).id,
-      name: { name: "Imageless" }
+      naming: { name: "Imageless" }
     }
     login("dick")
     post(:create, params: params)
@@ -619,7 +639,7 @@ class NamingControllerTest < FunctionalTestCase
 
     params = {
       id: obs.id,
-      name: { name: "#{name.text_name} Seneca #{name.author}" },
+      naming: { name: "#{name.text_name} Seneca #{name.author}" },
       approved_name: "#{name.text_name} #{name.author}"
     }
     login("dick")
@@ -637,7 +657,7 @@ class NamingControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     params = {
       id: obs.id,
-      name: { name: "Coprinus Comatus" }
+      naming: { name: "Coprinus Comatus" }
     }
     login("dick")
     post(:create, params: params)
