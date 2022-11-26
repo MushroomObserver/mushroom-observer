@@ -616,7 +616,7 @@ class ObservationsControllerTest < FunctionalTestCase
     obs_id = observations(:unknown_with_no_naming).id
     get(:show, params: { id: obs_id })
     assert_show_observation
-    # NO: The vote form doesn't print unless there are namings.
+    # As of now, the vote form doesn't print unless there are namings - 11/22
     # assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
