@@ -352,12 +352,12 @@ class AmateurTest < IntegrationTestCase
         form.change("remember_me", true)
         form.submit("Login")
       end
-      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
+      assert_select("a[id*='edit_naming_'], a[href*='naming/destroy']", false)
       click_mo_link(label: /propose.*name/i)
     end
 
     def create_name(obs, text_name)
-      assert_template("naming/create")
+      assert_template("observations/namings/new")
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
       # (Make sure there is a tab to go back to observations/show.)
@@ -372,7 +372,7 @@ class AmateurTest < IntegrationTestCase
         form.assert_unchecked("naming_reasons_4_check")
         form.submit
       end
-      assert_template("naming/create")
+      assert_template("observations/namings/new")
       # (I don't care so long as it says something.)
       assert_flash_text(/\S/)
 
@@ -380,7 +380,7 @@ class AmateurTest < IntegrationTestCase
         form.change("naming_name", text_name)
         form.submit
       end
-      assert_template("naming/create")
+      assert_template("observations/namings/new")
       assert_select("div.alert-warning") do |elems|
         assert(elems.any? do |e|
                  /MO does not recognize the name.*#{text_name}/ =~ e.to_s
@@ -418,7 +418,7 @@ class AmateurTest < IntegrationTestCase
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click_mo_link(label: /edit/i, href: %r{naming/edit})
+      click_mo_link(label: /edit/i, href: /#{edit_naming_path(naming.id)}/)
       assert_template("observations/namings/edit")
       open_form do |form|
         form.assert_value("naming_name", text_name)
@@ -445,8 +445,8 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click_mo_link(label: /edit/i, href: %r{naming/edit})
-      assert_template("naming/edit")
+      click_mo_link(label: /edit/i, href: /#{edit_naming_path(naming.id)}/)
+      assert_template("observations/namings/edit")
       open_form do |form|
         form.assert_value("naming_name", "#{text_name} #{author}")
         form.assert_unchecked("naming_reasons_1_check")
