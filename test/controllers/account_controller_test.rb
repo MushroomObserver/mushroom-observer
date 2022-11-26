@@ -27,12 +27,12 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
     post(:signup, params: { new_user: {
-           login: "newbob",
-           password: "newpassword",
-           password_confirmation: "newpassword",
-           email: "webmaster@mushroomobserver.org",
-           email_confirmation: "webmaster@mushroomobserver.org",
-           name: "needs a name!",
+           login: " newbob ",
+           password: " newpassword ",
+           password_confirmation: " newpassword ",
+           email: " webmaster@mushroomobserver.org ",
+           email_confirmation: "  webmaster@mushroomobserver.org  ",
+           name: " needs a name! ",
            theme: "NULL"
          } })
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
@@ -604,6 +604,14 @@ class AccountControllerTest < FunctionalTestCase
 
     assert_flash_text(:runtime_prefs_success.t)
     assert_equal("new@email.com", user.reload.email)
+  end
+
+  def test_edit_prefs_with_email_with_trailing_space
+    params = GOOD_PARAMS.merge({ email: " trim@this.com " })
+    login("rolf")
+    post(:prefs, params: { user: params })
+    assert_flash_text(:runtime_prefs_success.t)
+    assert_equal("trim@this.com", rolf.reload.email)
   end
 
   def test_edit_prefs_user_with_invalid_region

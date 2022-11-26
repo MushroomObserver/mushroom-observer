@@ -82,8 +82,8 @@ class AccountController < ApplicationController
   end
 
   def verify
-    id        = params["id"]
-    auth_code = params["auth_code"]
+    id        = params[:id]
+    auth_code = params[:auth_code]
     return unless (user = find_or_goto_index(User, id))
 
     # This will happen legitimately whenever a non-verified user tries to
@@ -112,16 +112,8 @@ class AccountController < ApplicationController
     elsif user.password.blank?
       @user = user
       if request.method == "POST"
-        password = begin
-                     params[:user][:password]
-                   rescue StandardError
-                     nil
-                   end
-        confirmation = begin
-                         params[:user][:password_confirmation]
-                       rescue StandardError
-                         nil
-                       end
+        password = params[:user] && params[:user][:password]
+        confirmation = params[:user] && params[:user][:password_confirmation]
         if password.blank?
           @user.errors.add(:password, :validate_user_password_missing.t)
         elsif password != confirmation
@@ -213,8 +205,8 @@ class AccountController < ApplicationController
 
   def login_post
     user_params = params[:user] || {}
-    @login = user_params[:login].to_s
-    @password = user_params[:password].to_s
+    @login = user_params[:login].to_s.strip
+    @password = user_params[:password].to_s.strip
     @remember = user_params[:remember_me] == "1"
     user = User.authenticate(login: @login, password: @password)
     user ||= User.authenticate(login: @login, password: @password.strip)
@@ -246,7 +238,7 @@ class AccountController < ApplicationController
   end
 
   def email_new_password_post
-    @login = params["new_user"]["login"]
+    @login = params[:new_user] && params[:new_user][:login]
     @new_user = User.where("login = ? OR name = ? OR email = ?",
                            @login, @login, @login).first
     if @new_user.nil?
@@ -333,9 +325,9 @@ class AccountController < ApplicationController
   end
 
   def update_password
-    return unless (password = params["user"]["password"])
+    return unless (password = params[:user][:password])
 
-    if password == params["user"]["password_confirmation"]
+    if password == params[:user][:password_confirmation]
       @user.change_password(password)
     else
       @user.errors.add(:password, :runtime_prefs_password_no_match.t)
@@ -346,7 +338,7 @@ class AccountController < ApplicationController
     prefs_types.each do |pref, type|
       val = params[:user][pref]
       case type
-      when :string  then update_pref(pref, val.to_s)
+      when :string  then update_pref(pref, val.to_s.strip)
       when :integer then update_pref(pref, val.to_i)
       when :boolean then update_pref(pref, val == "1")
       when :enum    then update_pref(pref, val)
@@ -397,7 +389,7 @@ class AccountController < ApplicationController
       end
 
       # Make sure the given location exists before accepting it.
-      @place_name = params["user"]["place_name"].to_s
+      @place_name = params[:user][:place_name].to_s
       if @place_name.present?
         location = Location.find_by_name_or_reverse_name(@place_name)
         if !location
@@ -411,11 +403,11 @@ class AccountController < ApplicationController
       end
 
       # Check if we need to upload an image.
-      upload = params["user"]["upload_image"]
+      upload = params[:user][:upload_image]
       if upload.present?
-        date = Date.parse("#{params["date"]["copyright_year"]}0101")
-        license = License.safe_find(params["upload"]["license_id"])
-        holder = params["copyright_holder"]
+        date = Date.parse("#{params[:date][:copyright_year]}0101")
+        license = License.safe_find(params[:upload][:license_id])
+        holder = params[:copyright_holder]
         image = Image.new(
           image: upload,
           user: @user,
@@ -716,7 +708,7 @@ class AccountController < ApplicationController
   # stab at the problem.
   def destroy_user
     if in_admin_mode?
-      id = params["id"]
+      id = params[:id]
       if id.present?
         user = User.safe_find(id)
         User.erase_user(id) if user
@@ -789,8 +781,8 @@ class AccountController < ApplicationController
   def add_user_to_group_admin_mode
     return unless request.method == "POST"
 
-    user_name  = params["user_name"].to_s
-    group_name = params["group_name"].to_s
+    user_name  = params[:user_name].to_s
+    group_name = params[:group_name].to_s
     user       = User.find_by(login: user_name)
     group      = UserGroup.find_by(name: group_name)
 
@@ -852,10 +844,19 @@ class AccountController < ApplicationController
       admin: false,
       layout_count: 15,
       mailing_address: "",
-      notes: ""
-    }.merge(params.require(:new_user).permit(:login, :name, :theme,
-                                             :email, :email_confirmation,
-                                             :password, :password_confirmation))
+      notes: "",
+      login: strip_new_user_param(:login),
+      name: strip_new_user_param(:name),
+      theme: strip_new_user_param(:theme),
+      email: strip_new_user_param(:email),
+      email_confirmation: strip_new_user_param(:email_confirmation),
+      password: strip_new_user_param(:password),
+      password_confirmation: strip_new_user_param(:password_confirmation)
+    }
+  end
+
+  def strip_new_user_param(arg)
+    params[:new_user] && params[:new_user][arg].to_s.strip
   end
 
   # Block attempts to register by clients with known "evil" params,
@@ -888,7 +889,7 @@ class AccountController < ApplicationController
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
-      DeniedMailer.build(params["new_user"]).deliver_now
+      DeniedMailer.build(params[:new_user]).deliver_now
     end
     redirect_back_or_default(action: :welcome)
     false
