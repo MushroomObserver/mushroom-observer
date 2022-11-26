@@ -122,6 +122,13 @@ gem("jquery-slick-rails")
 
 # email generation, parsing and sending
 gem("mail")
+# Action Mailbox depends on net/smtp, but not included with Ruby 3.1
+# temporarily add until the mail gem includes it as a dependancy.
+gem("net-smtp", require: false)
+
+# These seem to be required by unicorn -> zeitwerk
+gem("net-pop")
+gem("net-imap")
 
 # for detecting file type of uploaded images
 gem("mimemagic")

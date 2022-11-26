@@ -4,6 +4,8 @@
 </div>
 
 <div class="form-group form-inline">
+  <%= form.check_box(:no_emails, class: "form-control") %>
+  <%= label_tag(:user_no_emails, :prefs_no_emails.t) %><br/>
   <%= form.check_box(:email_html, class: "form-control") %>
   <%= label_tag(:user_email_html, :prefs_email_html.t) %>
 </div>

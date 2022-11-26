@@ -50,6 +50,9 @@ module Name::Notify
       end
     end
 
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
+
     # Send notification to all except the person who triggered the change.
     (recipients.uniq - [sender]).each do |recipient|
       QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)

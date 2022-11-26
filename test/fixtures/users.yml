@@ -154,3 +154,14 @@ unverified:
 admin:
   <<: *DEFAULTS
   admin: true
+
+# User with existing email that won't pass new validations
+flintstone:
+  <<: *DEFAULTS
+  email: "bogus"
+
+# User with existing content_filter[:region] that won't pass new validations
+nonregional:
+  <<: *DEFAULTS
+  email: "bogus"
+  content_filter: <%= { region: "Massachusetts" }.to_yaml.inspect %>

@@ -36,6 +36,7 @@ module ObservationTabsHelper
   end
 
   def general_questions_link(obs, user)
+    return if obs.user.no_emails
     return unless obs.user.email_general_question && obs.user != user
 
     link_with_query(:show_observation_send_question.t,

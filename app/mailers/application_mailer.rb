@@ -15,13 +15,9 @@ ActionMailer::Base.raise_delivery_errors = false
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
-  # This more or less follows RFC-5321 rules, minus the ridiculous quoting.
-  DOT_ATOM = %r{[0-9A-Za-z_!$&*\-=\\^`|~#%‘+/?{}]+}
-  DOT_ATOMS = /#{DOT_ATOM}(\.#{DOT_ATOM})*/
-  VALID_EMAIL_REGEXP = /^#{DOT_ATOMS}@#{DOT_ATOMS}$/
-
+  # Use native Ruby URI::MailTo class
   def self.valid_email_address?(address)
-    address.to_s.match?(VALID_EMAIL_REGEXP)
+    address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
   end
 
   private
@@ -51,8 +47,7 @@ class ApplicationMailer < ActionMailer::Base
   end
 
   def mo_mail(title, headers = {})
-    to = calc_email(headers[:to])
-    return unless ApplicationMailer.valid_email_address?(to)
+    return unless (to = to_address(headers[:to]))
 
     content_style = calc_content_style(headers)
     from = calc_email(headers[:from]) || MO.news_email_address
@@ -86,5 +81,16 @@ class ApplicationMailer < ActionMailer::Base
 
   def calc_email(user)
     user.respond_to?(:email) ? user.email : user
+  end
+
+  def to_address(user)
+    # I just want to be extra certain that we don't accidentally send email
+    # to anyone who has opted out of all email.
+    return nil if user.is_a?(User) && user.no_emails
+
+    address = calc_email(user)
+    return nil unless ApplicationMailer.valid_email_address?(address)
+
+    address
   end
 end
