@@ -1,5 +1,5 @@
 <%
-  @owner_id = owner_id_line(@observation) # must go before show_obs_title
+  @owner_naming = owner_naming_line(@observation) # must before show_obs_title
   @title = show_obs_title(@observation)
   num_images = @observation.images.length
 

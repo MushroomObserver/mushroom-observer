@@ -20,6 +20,26 @@ class NamingParams
     success && @name
   end
 
+  def rough_draft(naming_args, vote_args,
+                  name_str = nil, approved_name = nil, chosen_name = nil)
+    @naming = Naming.construct(naming_args, @observation)
+    @vote = Vote.construct(vote_args, @naming)
+    result = if name_str
+               resolve_name(name_str, approved_name, chosen_name)
+             else
+               true
+             end
+    @naming.name = @name
+    result
+  end
+
+  def edit_init
+    @what        = @naming.text_name
+    @names       = nil
+    @valid_names = nil
+    @reasons     = @naming.init_reasons
+  end
+
   def name_missing?
     if @name && @what.match(/\S/)
       false
@@ -43,19 +63,6 @@ class NamingParams
 
   def name_been_proposed?
     @observation.name_been_proposed?(@name)
-  end
-
-  def rough_draft(naming_args, vote_args,
-                  name_str = nil, approved_name = nil, chosen_name = nil)
-    @naming = Naming.construct(naming_args, @observation)
-    @vote = Vote.construct(vote_args, @naming)
-    result = if name_str
-               resolve_name(name_str, approved_name, chosen_name)
-             else
-               true
-             end
-    @naming.name = @name
-    result
   end
 
   def logged_change_vote
@@ -84,12 +91,5 @@ class NamingParams
   def update_naming(reasons, was_js_on)
     @naming.name = @name
     @naming.create_reasons(reasons, was_js_on)
-  end
-
-  def edit_init
-    @what        = @naming.text_name
-    @names       = nil
-    @valid_names = nil
-    @reasons     = @naming.init_reasons
   end
 end

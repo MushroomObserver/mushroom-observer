@@ -7,11 +7,11 @@
       <% observation.species_lists.each do |list| %>
         <tr>
           <td style="border-top:0">
-            <%= link_to(list.format_name.t, controller: :species_list,
+            <%= link_to(list.format_name.t, controller: "/species_list",
                         action: :show_species_list, id: list.id) %>
             <%= if check_permission(list)
               url = {
-                controller: :species_list,
+                controller: "/species_list",
                 action: :remove_observation_from_species_list,
                 observation: observation.id,
                 species_list: list.id

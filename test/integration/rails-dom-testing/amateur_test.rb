@@ -412,14 +412,14 @@ class AmateurTest < IntegrationTestCase
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*='naming/edit/#{naming.id}']", 2)
-      assert_select("a[href*='naming/destroy/#{naming.id}']", 2)
+      assert_select("a[href*='#{edit_naming_path(naming.id)}']", 2)
+      assert_select("button[id='destroy_naming']", 2)
 
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
       click_mo_link(label: /edit/i, href: %r{naming/edit})
-      assert_template("naming/edit")
+      assert_template("observations/namings/edit")
       open_form do |form|
         form.assert_value("naming_name", text_name)
         form.assert_checked("naming_reasons_1_check")

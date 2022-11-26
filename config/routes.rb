@@ -198,11 +198,11 @@ ACTIONS = {
     show_past_name_description: {},
     test_index: {}
   },
-  naming: {
-    create: {},
-    destroy: {},
-    edit: {}
-  },
+  # naming: {
+  #   create: {},
+  #   destroy: {},
+  #   edit: {}
+  # },
   pivotal: {
     index: {}
   },
@@ -644,6 +644,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   resources :observations do
+    resources :namings, only: [:new, :create, :edit, :update, :destroy],
+                        shallow: true, controller: "observations/namings"
     member do
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/naming_suggestions#show",
