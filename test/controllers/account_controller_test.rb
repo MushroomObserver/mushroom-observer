@@ -16,12 +16,12 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
     post(:create, params: { new_user: {
-           login: "newbob",
-           password: "newpassword",
-           password_confirmation: "newpassword",
-           email: "webmaster@mushroomobserver.org",
-           email_confirmation: "webmaster@mushroomobserver.org",
-           name: "needs a name!",
+           login: " newbob ",
+           password: " newpassword ",
+           password_confirmation: " newpassword ",
+           email: " webmaster@mushroomobserver.org ",
+           email_confirmation: "  webmaster@mushroomobserver.org  ",
+           name: " needs a name! ",
            theme: "NULL"
          } })
     assert_equal("http://localhost/bogus/location", @response.redirect_url)

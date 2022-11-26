@@ -1893,6 +1893,7 @@
   prefs_email_names_reviewer: someone changes a name I've reviewed.
   prefs_email_prefs: Email preferences
   prefs_email_html: It's okay to use HTML in my emails.
+  prefs_no_emails: Opt out of _all_ email from MO.
   prefs_email_digest_daily: Send me summary at the end of the day.
   prefs_email_digest_immediate: Notify me of events as they happen.
   prefs_email_digest_weekly: Send me summary at the end of the week.

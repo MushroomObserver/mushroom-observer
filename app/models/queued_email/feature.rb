@@ -16,6 +16,7 @@ class QueuedEmail::Feature < QueuedEmail
   end
 
   def deliver_email
+    return if to_user.no_emails
     return unless to_user.email_general_feature # Make sure it hasn't changed
 
     FeaturesMailer.build(to_user, content).deliver_now

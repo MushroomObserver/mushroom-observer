@@ -1305,7 +1305,7 @@ class Observation < AbstractModel
 
     # Send notification to all except the person who triggered the change.
     recipients.uniq.each do |recipient|
-      next if !recipient || recipient == sender
+      next if !recipient || recipient == sender || recipient.no_emails
 
       case action
       when :destroy
@@ -1347,6 +1347,9 @@ class Observation < AbstractModel
         recipients.delete(interest.user)
       end
     end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
 
     # Send notification to all except the person who triggered the change.
     (recipients.uniq - [sender]).each do |recipient|

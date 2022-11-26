@@ -172,6 +172,7 @@ class Naming < AbstractModel
         find_each do |n|
         next unless (n.user_id != user.id) && !done_user[n.user_id] &&
                     (!n.require_specimen || observation.specimen)
+        next if n.user.no_emails
 
         QueuedEmail::NameTracking.create_email(n, self)
         done_user[n.user_id] = true
@@ -206,6 +207,9 @@ class Naming < AbstractModel
         recipients.push(interest.user) if interest.state
       end
     end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
 
     # Send to everyone (except the person who created the naming!)
     (recipients.uniq - [sender]).each do |recipient|

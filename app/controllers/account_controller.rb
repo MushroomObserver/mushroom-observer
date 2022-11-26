@@ -92,10 +92,19 @@ class AccountController < ApplicationController
       admin: false,
       layout_count: 15,
       mailing_address: "",
-      notes: ""
-    }.merge(params.require(:new_user).
-                   permit(:login, :name, :theme, :email, :email_confirmation,
-                          :password, :password_confirmation))
+      notes: "",
+      login: strip_new_user_param(:login),
+      name: strip_new_user_param(:name),
+      theme: strip_new_user_param(:theme),
+      email: strip_new_user_param(:email),
+      email_confirmation: strip_new_user_param(:email_confirmation),
+      password: strip_new_user_param(:password),
+      password_confirmation: strip_new_user_param(:password_confirmation)
+    }
+  end
+
+  def strip_new_user_param(arg)
+    params[:new_user] && params[:new_user][arg].to_s.strip
   end
 
   # Block attempts to register by clients with known "evil" params,
@@ -124,7 +133,7 @@ class AccountController < ApplicationController
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
-      DeniedMailer.build(params["new_user"]).deliver_now
+      DeniedMailer.build(params[:new_user]).deliver_now
     end
     false
   end

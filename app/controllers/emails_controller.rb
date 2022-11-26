@@ -17,7 +17,7 @@ class EmailsController < ApplicationController
 
   def ask_user_question
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
-                  can_email_user_question?(@user) &&
+                  can_email_user_question?(@target) &&
                   request.method == "POST"
 
     subject = params[:email][:subject]
@@ -55,7 +55,7 @@ class EmailsController < ApplicationController
 
   def can_email_user_question?(target, method: :email_general_question)
     user = target.is_a?(User) ? target : target.user
-    return true if user.send(method)
+    return true if user.send(method) && !user.no_emails
 
     flash_error(:permission_denied.t)
     redirect_with_query(controller: target.show_controller,
