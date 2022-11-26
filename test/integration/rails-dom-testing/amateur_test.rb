@@ -321,7 +321,7 @@ class AmateurTest < IntegrationTestCase
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
-      open_form("form[id=cast_votes_1]") do |form|
+      open_form("form#cast_votes_wide_#{naming.id}") do |form|
         form.assert_value("vote_#{naming.id}_value", /no opinion/i)
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit("Update Votes")
@@ -333,7 +333,7 @@ class AmateurTest < IntegrationTestCase
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
-      open_form("form[id=cast_votes_1]") do |form|
+      open_form("form#cast_votes_wide_#{naming.id}") do |form|
         form.select("vote_#{naming.id}_value", /as if!/i)
         form.submit("Update Votes")
       end
@@ -352,7 +352,10 @@ class AmateurTest < IntegrationTestCase
         form.change("remember_me", true)
         form.submit("Login")
       end
-      assert_select("a[id*='edit_naming_'], a[href*='naming/destroy']", false)
+      assert_select(
+        "a[class*='edit_naming_'], input[class*='destroy_naming_']",
+        false
+      )
       click_mo_link(label: /propose.*name/i)
     end
 
@@ -413,7 +416,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now two: one for wide-screen, one for mobile.)
       assert_select("a[href*='#{edit_naming_path(naming.id)}']", 2)
-      assert_select("button[id='destroy_naming']", 2)
+      assert_select("input.destroy_naming_link_#{naming.id}", 2)
 
       # Try changing it.
       author = "(Pers.) Grev."
@@ -461,12 +464,12 @@ class AmateurTest < IntegrationTestCase
     end
 
     def failed_delete(_obs)
-      click_mo_link(label: /destroy/i, href: %r{naming/destroy})
+      click_mo_link(label: /destroy/i, href: /namings/)
       assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      click_mo_link(label: /destroy/i, href: %r{naming/destroy})
+      click_mo_link(label: /destroy/i, href: /#{naming_path(naming.id)}/)
       assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
