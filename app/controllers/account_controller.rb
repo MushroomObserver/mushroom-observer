@@ -846,7 +846,7 @@ class AccountController < ApplicationController
       mailing_address: "",
       notes: "",
       login: strip_new_user_param(:login),
-      name:  strip_new_user_param(:name),
+      name: strip_new_user_param(:name),
       theme: strip_new_user_param(:theme),
       email: strip_new_user_param(:email),
       email_confirmation: strip_new_user_param(:email_confirmation),
