@@ -90,7 +90,7 @@ module Account
       prefs_types.each do |pref, type|
         val = params[:user][pref]
         case type
-        when :string  then update_pref(pref, val.to_s).strip
+        when :string  then update_pref(pref, val.to_s.strip)
         when :integer then update_pref(pref, val.to_i)
         when :boolean then update_pref(pref, val == "1")
         when :enum    then update_pref(pref, val)
