@@ -23,8 +23,8 @@ module Account
     # login post action
     def create
       user_params = params[:user] || {}
-      @login = user_params[:login].to_s
-      @password = user_params[:password].to_s
+      @login = user_params[:login].to_s.strip
+      @password = user_params[:password].to_s.strip
       @remember = user_params[:remember_me] == "1"
       user = User.authenticate(login: @login, password: @password)
       user ||= User.authenticate(login: @login, password: @password.strip)
@@ -58,7 +58,7 @@ module Account
     end
 
     def new_password_request
-      @login = params["new_user"]["login"]
+      @login = params[:new_user] && params[:new_user][:login]
       @new_user = User.where("login = ? OR name = ? OR email = ?",
                              @login, @login, @login).first
       if @new_user.nil?

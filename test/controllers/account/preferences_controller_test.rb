@@ -230,6 +230,15 @@ module Account
       assert_equal("new@email.com", user.reload.email)
     end
 
+    def test_edit_prefs_with_email_with_trailing_space
+      params = GOOD_PARAMS.merge({ email: " trim@this.com " })
+      login("rolf")
+
+      patch(:update, params: { user: params })
+      assert_flash_text(:runtime_prefs_success.t)
+      assert_equal("trim@this.com", rolf.reload.email)
+    end
+
     def test_edit_user_with_invalid_region
       # licenses fixture only available within test??
       params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,

@@ -77,9 +77,9 @@ module Account
     end
 
     def update_password
-      return unless (password = params["user"]["password"])
+      return unless (password = params[:user][:password])
 
-      if password == params["user"]["password_confirmation"]
+      if password == params[:user][:password_confirmation]
         @user.change_password(password)
       else
         @user.errors.add(:password, :runtime_prefs_password_no_match.t)
@@ -90,7 +90,7 @@ module Account
       prefs_types.each do |pref, type|
         val = params[:user][pref]
         case type
-        when :string  then update_pref(pref, val.to_s)
+        when :string  then update_pref(pref, val.to_s).strip
         when :integer then update_pref(pref, val.to_i)
         when :boolean then update_pref(pref, val == "1")
         when :enum    then update_pref(pref, val)

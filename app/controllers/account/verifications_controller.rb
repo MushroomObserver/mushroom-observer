@@ -15,8 +15,8 @@ module Account
 
     # Regular signup verifications hit this page only (via GET).
     def new
-      id        = params["id"]
-      auth_code = params["auth_code"]
+      id        = params[:id]
+      auth_code = params[:auth_code]
       return unless (user = find_or_goto_index(User, id))
 
       # This will happen legitimately whenever a non-verified user tries to
@@ -47,8 +47,8 @@ module Account
     # first before we can verify them. The choose_password form is currently the
     # only place that should POST to this action, via account_verify_path
     def create
-      id        = params["id"]
-      auth_code = params["auth_code"]
+      id        = params[:id]
+      auth_code = params[:auth_code]
       return unless (user = find_or_goto_index(User, id))
 
       if auth_code != user.auth_code

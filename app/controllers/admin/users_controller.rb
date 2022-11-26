@@ -53,7 +53,7 @@ module Admin
     # Delete user. This is messy, but the new User#erase_user method
     # makes a pretty good stab at the problem.
     def destroy
-      id = params["id"]
+      id = params[:id]
       if id.present?
         user = User.safe_find(id)
         User.erase_user(id) if user
