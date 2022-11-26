@@ -616,7 +616,8 @@ class ObservationsControllerTest < FunctionalTestCase
     obs_id = observations(:unknown_with_no_naming).id
     get(:show, params: { id: obs_id })
     assert_show_observation
-    assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
+    # NO: The vote form doesn't print unless there are namings.
+    # assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs_id = observations(:coprinus_comatus_obs).id
@@ -663,31 +664,33 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal("no", user.votes_anonymous)
   end
 
-  def test_show_owner_id
+  def test_show_owner_naming
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
     get(:show, params: { id: obs.id })
-    assert_select("#owner_id",
+    assert_select("#owner_naming",
                   { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
-                  "Observation should show Observer ID")
+                  "Observation should show owner's preferred naming")
 
     get(
       :show, params: { id: observations(:owner_multiple_favorites).id }
     )
-    assert_select("#owner_id",
+    assert_select("#owner_naming",
                   { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
-                  "Observation should show lack of Observer preference")
+                  "Observation should show lack of owner naming preference")
   end
 
-  def test_show_owner_id_view_owner_id_false
+  def test_show_owner_naming_view_owner_id_false
     login(user_with_view_owner_id_false)
     get(
       :show, params: { id: observations(:owner_only_favorite_ne_consensus).id }
     )
-    assert_select("#owner_id", { count: 0 },
-                  "Do not show Observer ID when user has not opted for it")
+    assert_select(
+      "#owner_naming", { count: 0 },
+      "Do not show owner's preferred naming when user has not opted for it"
+    )
   end
 
   def test_show_owner_id_noone_logged_in
@@ -695,7 +698,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(
       :show, params: { id: observations(:owner_only_favorite_ne_consensus).id }
     )
-    assert_select("#owner_id", { count: 0 },
+    assert_select("#owner_naming", { count: 0 },
                   "Do not show Observer ID when nobody logged in")
   end
 
