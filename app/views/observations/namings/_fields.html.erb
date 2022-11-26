@@ -36,9 +36,8 @@ locals = {
     <div class="col-sm-6">
       <div class="form-group">
         <%= f_n.label(:name, :WHAT.t + ":") %>
-        <%= f_n.text_field(:name, value: what, size: 40,
-                        class: "form-control",
-                        data: { autofocus: focus_on_name }) %>
+        <%= f_n.text_field(:name, value: what, size: 40, class: "form-control",
+                           data: { autofocus: focus_on_name }) %>
         <% turn_into_name_auto_completer(:naming_name, primer: Name.primer) %>
       </div>
     </div>
@@ -83,7 +82,7 @@ locals = {
           </div>
           <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
             <%= f_r.text_area(:notes,
-                              index: r.num, rows: 1, value: r.notes,
+                              index: r.num, rows: 3, value: r.notes,
                               class: "form-control") %>
           </div>
         <% end %>

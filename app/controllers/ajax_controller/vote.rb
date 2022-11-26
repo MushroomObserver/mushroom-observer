@@ -32,7 +32,7 @@ module AjaxController::Vote
     render(inline: %(<div>
       <%= content_tag(:div, show_obs_title(@observation),
             title: show_obs_title(@observation).strip_html.html_safe) %>
-      <%= content_tag(:div, render(partial: 'naming/show',
+      <%= content_tag(:div, render(partial: 'observations/namings/show',
             locals: { observation: @observation })) %>
     </div>))
   end

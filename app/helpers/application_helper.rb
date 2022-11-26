@@ -143,12 +143,15 @@ module ApplicationHelper
            else
              add_query_param(send("#{target.type_tag}_path", target.id))
            end
-    # classes ||= "text-danger"
-    id ||= target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
+    classes ||= "text-danger"
+    id ||= nil
+    unless target.is_a?(String)
+      classes += " destroy_#{target.type_tag}_link_#{target.id}"
+    end
 
     html_options = {
       method: :delete,
-      class: "text-danger",
+      class: classes,
       id: id,
       data: { confirm: :are_you_sure.t }
     }.merge(args)

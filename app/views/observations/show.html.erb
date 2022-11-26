@@ -1,5 +1,5 @@
 <%
-  @owner_id = owner_id_line(@observation) # must go before show_obs_title
+  @owner_naming = owner_naming_line(@observation) # must before show_obs_title
   @title = show_obs_title(@observation)
   @tabsets = show_observation_tabset(obs: @observation, user: @user,
                                      mappable: @mappable)
@@ -45,7 +45,7 @@
 
   <div class="col-md-8 float-sm-left">
     <% if @user %>
-      <%= render(partial: "naming/show",
+      <%= render(partial: "observations/namings/show",
                  locals: { observation: @observation }) %>
     <% end %>
 

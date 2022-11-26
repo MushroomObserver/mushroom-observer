@@ -24,7 +24,7 @@ module ObservationsHelper
   ##### Portion of page title that includes Observer Preference ################
 
   # Observer Preference: Hydnum repandum
-  def owner_id_line(obs)
+  def owner_naming_line(obs)
     return unless User.current&.view_owner_id
 
     capture do
@@ -53,7 +53,7 @@ module ObservationsHelper
         concat(link_to_display_name_brief_authors(name))
         # Differentiate this Name from Observer Preference
         # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-        concat(" (#{:show_observation_site_id.t})") if @owner_id # rubocop:disable Rails/HelperInstanceVariable
+        concat(" (#{:show_observation_site_id.t})") if @owner_naming # rubocop:disable Rails/HelperInstanceVariable
       end
     end
   end
