@@ -7,11 +7,13 @@ module Admin::Emails
     before_action :login_required
 
     def new
-      @users = User.where("email_general_feature=1 && verified is not null")
+      @users = User.where(email_general_feature: true, no_emails: false).
+               where.not(verified: nil)
     end
 
     def create
-      @users = User.where("email_general_feature=1 && verified is not null")
+      @users = User.where(email_general_feature: true, no_emails: false).
+               where.not(verified: nil)
       @users.each do |user|
         QueuedEmail::Feature.create_email(user,
                                           params[:feature_email][:content])

@@ -5,6 +5,8 @@
 </div>
 
 <div class="form-group form-inline">
+  <%= f.check_box(:no_emails, class: "form-control") %>
+  <%= f.label(:no_emails, :prefs_no_emails.t) %><br/>
   <%= f.check_box(:email_html, class: "form-control") %>
   <%= f.label(:email_html, :prefs_email_html.t) %>
 </div>

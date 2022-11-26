@@ -164,6 +164,7 @@ module Account
         [:locale, :string],
         [:location_format, :enum],
         [:login, :string],
+        [:no_emails, :boolean],
         [:notes_template, :string],
         [:theme, :string],
         [:thumbnail_maps, :boolean],
