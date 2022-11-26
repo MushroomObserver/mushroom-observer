@@ -17,13 +17,14 @@ naming_table = observation.namings.sort_by(&:created_at).map do |naming|
     menu = [Vote.no_opinion] + menu
   end
   row = {
+    naming_id: naming.id,
     permission: can_vote,
     show1:   link_with_query(naming.display_name_brief_authors.t,
                 { controller: :name, action: :show_name, id: naming.name }),
     show2:   link_with_query(naming.format_name.t,
                 { controller: :name, action: :show_name, id: naming.name }),
     edit:    link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
-                             id: "edit_naming_#{naming.id}_link"),
+                             class: "edit_naming_link_#{naming.id}"),
     destroy: destroy_button(target: naming),
     user:    user_link(naming.user, naming.user.login),
     percent: (any_votes ?
@@ -79,19 +80,25 @@ form_url = add_query_param(controller: :vote, action: :cast_votes,
             <td><%= row[:show1] %> <% if row[:permission] %><br />[<%= row[:edit] %> | <%= row[:destroy] %>]<% end %></td>
             <td><strong><%= row[:user] %></strong></td>
             <td><%= row[:percent] %></td>
-            <td><%= row[:menu] if logged_in %></td>
+            <td>
+              <% if logged_in %>
+                <%= form_with(url: form_url,
+                              id: "cast_votes_wide_#{row[:naming_id]}") \
+                              do |f| %>
+                  <%= row[:menu] %>
+                  <%= f.submit(:show_namings_update_votes.l,
+                               { data: { role: "save_votes" },
+                               class: "btn btn-default" }) \
+                               if any_names %>
+                <% end %>
+              <% end %>
+            </td>
             <td><%= row[:eyes] %></td>
           </tr>
           <tr>
             <td colspan="5">
-              <%= form_with(url: form_url, id: "cast_votes_1") do |f| %>
-                <% row[:reasons].each do |val| %>
-                  <div><span><%= val %></span></div>
-                <% end %>
-                <%= f.submit(:show_namings_update_votes.l,
-                             { data: { role: "save_votes" },
-                               class: "btn btn-default" }) \
-                    if logged_in && any_names %>
+              <% row[:reasons].each do |val| %>
+                <div><span><%= val %></span></div>
               <% end %>
             </td>
           </tr>
@@ -127,16 +134,22 @@ form_url = add_query_param(controller: :vote, action: :cast_votes,
               <% end %>
               <div class="col-xs-6"><strong><%= row[:user] %></strong></div>
               <div class="col-xs-6"><%= row[:percent] %></div>
-              <div class="col-xs-6"><%= row[:menu] if logged_in %></div>
-              <div class="col-xs-6"><%= row[:eyes] %></div>
-              <%= form_with(url: form_url, id: "cast_votes_2") do |f| %>
-                <% row[:reasons].each do |val| %>
-                  <div class="col-xs-12"><span><%= val %></span></div>
-                <% end %>
-                <%= f.submit(:show_namings_update_votes.l,
-                             { data: { role: "save_votes" },
+              <div class="col-xs-6">
+              <% if logged_in %>
+                <%= form_with(url: form_url,
+                              id: "cast_votes_mobi_#{row[:naming_id]}") \
+                              do |f| %>
+                  <%= row[:menu] %>
+                  <%= f.submit(:show_namings_update_votes.l,
+                               { data: { role: "save_votes" },
                                class: "btn btn-default" }) \
-                    if logged_in && any_names %>
+                               if any_names %>
+                <% end %>
+              <% end %>
+              </div>
+              <div class="col-xs-6"><%= row[:eyes] %></div>
+              <% row[:reasons].each do |val| %>
+                <div class="col-xs-12"><span><%= val %></span></div>
               <% end %>
             </div><!--.row-->
           </div>
