@@ -2604,6 +2604,8 @@
 
   cannot_be_blank: cannot be blank
 
+  cannot_include_tabs: cannot include tabs
+
   # visual group statuses
   visual_group_include: Include
   visual_group_exclude: Exclude
