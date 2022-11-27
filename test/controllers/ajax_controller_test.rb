@@ -323,8 +323,10 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type:
-                      :image, id: images(:in_situ_image).id, value: 3)
+    good_ajax_request(:vote,
+                      type: :image,
+                      id: images(:in_situ_image).id,
+                      value: 3)
 
     # should show four vote links as dick already voted
     assert_select("[data-role='image_vote']", 4)
@@ -579,5 +581,37 @@ class AjaxControllerTest < FunctionalTestCase
     get(:location_primer)
     assert(@response.body.include?(item),
            "Expected #{@response.body} to include #{item}.")
+  end
+
+  def test_visual_group_flip_status
+    login
+    visual_group = visual_groups(:visual_group_one)
+    image = images(:agaricus_campestris_image)
+    vgi = visual_group.visual_group_images.find_by(image_id: image.id)
+    new_status = !vgi.included
+    get(:visual_group_status,
+        params: { id: visual_group.id, imgid: image.id, value: new_status })
+    vgi.reload
+    assert_equal(new_status, vgi.included)
+  end
+
+  def test_visual_group_delete_relationship
+    login
+    visual_group = visual_groups(:visual_group_one)
+    image = images(:agaricus_campestris_image)
+    count = VisualGroupImage.count
+    get(:visual_group_status,
+        params: { id: visual_group.id, imgid: image.id, value: "" })
+    assert_equal(count - 1, VisualGroupImage.count)
+  end
+
+  def test_visual_group_add_relationship
+    login
+    visual_group = visual_groups(:visual_group_one)
+    image = images(:peltigera_image)
+    count = VisualGroupImage.count
+    get(:visual_group_status,
+        params: { id: visual_group.id, imgid: image.id, value: "true" })
+    assert_equal(count + 1, VisualGroupImage.count)
   end
 end

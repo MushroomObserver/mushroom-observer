@@ -223,6 +223,8 @@ class Image < AbstractModel
 
   has_many :observation_images, dependent: :destroy
   has_many :observations, through: :observation_images
+  has_many :visual_group_images, dependent: :destroy
+  has_many :visual_groups, through: :visual_group_images
 
   has_many :project_images, dependent: :destroy
   has_many :projects, through: :project_images
@@ -984,6 +986,10 @@ class Image < AbstractModel
 
   def year
     self.when.year
+  end
+
+  def visual_group(visual_model)
+    visual_groups.find_by(visual_model: visual_model)
   end
 
   ##############################################################################

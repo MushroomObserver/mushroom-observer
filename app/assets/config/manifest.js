@@ -14,6 +14,7 @@
 //= link suggestions.js
 //= link thumbnail_map.js
 //= link translations.js
+//= link visual_group_status.js
 //= link vote_popup.js
 
 //= link Admin.css

@@ -40,7 +40,7 @@ class ExportController < ApplicationController
 
   def update_obj(obj, status_type)
     if status_type == :ml
-      obj.ok_for_ml = (@value == "1")
+      obj.diagnostic = (@value == "1")
     else
       obj.ok_for_export = (@value == "1")
     end
