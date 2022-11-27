@@ -527,15 +527,12 @@ class String
   # (for styling taxonomic names legibly)
   def break_name
     possibles = ["</i></b>", "</b></i>", "</i>"]
-    ind = possibles.each do |possible|
-      offset = possible.length + 1
-      indx = index(possible)
-      next unless ind
-      break(indx + offset) if indx
-    end
-    return self unless ind
+    tag = possibles.first { |tag| include?(tag) }
+    return self unless tag
 
-    insert(ind + offset, "<br />")
+    offset = tag.length + 1
+    ind = index(tag)
+    insert((ind + offset), "<br />".html_safe)
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.

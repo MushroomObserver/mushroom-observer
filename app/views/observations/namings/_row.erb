@@ -22,10 +22,9 @@ reasons = reasons.map do |reason|
             end
 reasons = reasons.safe_join
 
+binding.break
 row = {
-  show1:   link_with_query(naming.display_name_brief_authors.t,
-                           show_name_path(id: naming.name)),
-  show2:   link_with_query(naming.format_name.t,
+  show1:   link_with_query(naming.display_name_brief_authors.t.break_name,
                            show_name_path(id: naming.name)),
   edit:    link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
                            class: "edit_naming_link_#{naming.id}"),
@@ -64,6 +63,7 @@ row = {
 </div>
 <div class="table-row">
   <div class="table-cell colspan">
+    <% # NOTE: fake colspan here requires other table-cells below %>
     <%= row[:reasons] %>
   </div>
   <div class="table-cell"></div>
