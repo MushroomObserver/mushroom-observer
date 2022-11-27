@@ -142,13 +142,21 @@ thead tr {
   }
 }
 
-div.table-namings {
+section.table-namings {
+  width: 100%;
+
   .table-cell {
-    padding: $panel-heading-padding;
+    padding: $panel-body-padding;
+    vertical-align: middle;
   }
 
   header .table-cell {
-    font-weight: $btn-font-weight;
+    vertical-align: bottom;
+    padding-bottom: 0.25em;
+
+    &:first-child {
+      padding-left: 0;
+    }
   }
 
   // not header.table-row
@@ -182,6 +190,31 @@ div.table-namings {
 
     .table-cell {
       display: table-cell;
+
+      &:first-child {
+        padding-left: 1em;
+        width: 30%;
+      }
+
+      &:nth-child(2) {
+        width: 20%;
+      }
+
+      &:nth-child(3) {
+        width: 15%;
+      }
+
+      &:nth-child(4) {
+        width: 25%;
+      }
+
+      &:nth-child(5) {
+        width: 10%;
+      }
+
+      &:last-child {
+        padding-right: 1em;
+      }
     }
 
     .colspan {
