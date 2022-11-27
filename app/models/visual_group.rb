@@ -9,6 +9,8 @@ class VisualGroup < AbstractModel
     message: proc { :cannot_be_blank.t }
   }
 
+  # validates that prevents tabs
+
   def image_count(status = true)
     return visual_group_images.count if status.nil? || status == "needs_review"
 

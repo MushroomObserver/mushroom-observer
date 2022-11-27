@@ -7,6 +7,8 @@ class VisualModel < AbstractModel
     message: proc { :cannot_be_blank.t }
   }
 
+  # validates that prevents tabs
+
   def to_json(_)
     {
       name: name,
