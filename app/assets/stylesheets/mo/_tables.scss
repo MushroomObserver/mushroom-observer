@@ -142,6 +142,55 @@ thead tr {
   }
 }
 
+div.table-namings {
+  .table-cell {
+    padding: $panel-heading-padding;
+  }
+
+  header .table-cell {
+    font-weight: $btn-font-weight;
+  }
+
+  // not header.table-row
+  div.table-row {
+    background-color: $panel-bg;
+  }
+
+  @media screen and (max-width: ($grid-float-breakpoint - 1)) {
+    header.table-row {
+      .table-cell {
+        display: none;
+      }
+      .table-cell:first-child {
+        display: block;
+      }
+    }
+    div.table-row {
+      .table-cell {
+        width: 50%;
+      }
+      .table-cell:first-child {
+        width: 100%;
+      }
+    }
+  }
+
+  @media screen and (min-width: $grid-float-breakpoint) {
+    .table-row {
+      display: table-row;
+    }
+
+    .table-cell {
+      display: table-cell;
+    }
+
+    .colspan {
+      max-width: 1px;
+      overflow: visible;
+    }
+  }
+}
+
 table.table-namings {
   width: 100%;
 

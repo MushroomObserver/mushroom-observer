@@ -1,0 +1,73 @@
+<%
+# Naming Row (widescreen):
+# Shows a proposed naming for this observation, with a tiny vote form.
+# Also naming edit and delete buttons if the current user owns the naming.
+consensus = observation.consensus_naming
+
+Textile.register_name(naming.name)
+percent = naming.vote_percent.round.to_s.html_safe + "%"
+any_votes = naming.votes && naming.votes.length > 0
+can_vote = check_permission(naming)
+@vote = @votes[naming.id]
+show_votes_link = link_with_query(h(percent),
+                                  naming_vote_path(id: naming.id),
+                                  { data: { role: "open_popup",
+                                            id: naming.id } })
+reasons = naming.reasons_array.select(&:used?).map do |reason|
+              reason.notes.blank? ? reason.label.t :
+                "#{reason.label.l}: #{reason.notes.to_s.html_safe}".tl
+            end
+reasons = reasons.map do |reason|
+            ("<div><span>#{reason}</span></div>").html_safe
+            end
+reasons = reasons.safe_join
+
+row = {
+  show1:   link_with_query(naming.display_name_brief_authors.t,
+                           show_name_path(id: naming.name)),
+  show2:   link_with_query(naming.format_name.t,
+                           show_name_path(id: naming.name)),
+  edit:    link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
+                           class: "edit_naming_link_#{naming.id}"),
+  destroy: destroy_button(target: naming),
+  user:    user_link(naming.user, naming.user.login),
+  percent: (any_votes ?
+              "#{show_votes_link} (#{naming.votes.length})" :
+              "(#{:show_namings_no_votes.t})").html_safe,
+  eyes:    [(observation.owners_favorite?(naming) ? image_tag("eye3.png") : ""),
+            (naming == consensus ? image_tag("eyes3.png") : "")].safe_join,
+  reasons: reasons
+}
+%>
+<div class="table-row">
+  <div class="table-cell">
+    <%= row[:show1] %>
+    <% if can_vote %>
+      <br />[<%= row[:edit] %> | <%= row[:destroy] %>]
+    <% end %>
+  </div>
+  <div class="table-cell">
+    <strong><%= row[:user] %></strong>
+  </div>
+  <div class="table-cell">
+    <%= row[:percent] %>
+  </div>
+  <div class="table-cell">
+    <% if logged_in %>
+      <%= render(partial: "observations/namings/votes/form",
+                 locals: { naming: naming, can_vote: can_vote }) %>
+    <% end %>
+  </div>
+  <div class="table-cell">
+    <%= row[:eyes] %>
+  </div>
+</div>
+<div class="table-row">
+  <div class="table-cell colspan">
+    <%= row[:reasons] %>
+  </div>
+  <div class="table-cell"></div>
+  <div class="table-cell"></div>
+  <div class="table-cell"></div>
+  <div class="table-cell"></div>
+</div>
