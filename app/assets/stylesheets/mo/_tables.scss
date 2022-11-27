@@ -148,6 +148,11 @@ section.table-namings {
   .table-cell {
     padding: $panel-body-padding;
     vertical-align: middle;
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
   }
 
   header .table-cell {
@@ -176,10 +181,53 @@ section.table-namings {
     }
     div.table-row {
       .table-cell {
-        width: 50%;
-      }
-      .table-cell:first-child {
         width: 100%;
+
+        // &:not(:first-child) {
+          // strong, a {
+          //   float: right;
+          // }
+        // }
+
+        // name
+        &:first-child {
+          padding-bottom: 0;
+        }
+
+        // user
+        &:nth-child(2) {
+          padding-top: 0;
+          padding-bottom: 0;
+        }
+
+        // community vote
+        &:nth-child(3) {
+          padding-bottom: 0;
+
+          span {
+            float: right;
+          }
+        }
+
+        // voting form
+        // &:nth-child(4) {
+        // }
+
+        // eyes
+        &:nth-child(5) {
+          display: none;
+        }
+      }
+
+      // reasons row - dummy table cells
+      &:last-child {
+        .table-cell {
+          padding: 0;
+
+          &:first-child {
+            padding: $panel-body-padding;
+          }
+        }
       }
     }
   }
@@ -211,11 +259,6 @@ section.table-namings {
 
       &:nth-child(5) {
         width: 10%;
-
-        img {
-          max-width: 100%;
-          height: auto;
-        }
       }
 
       &:last-child {

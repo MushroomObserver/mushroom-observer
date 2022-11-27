@@ -12,7 +12,7 @@ end
               method: :put, id: "cast_votes_wide_#{naming.id}") \
               do |f| %>
   <%= f.select(:value, menu, {},
-               { index: naming.id,
+               { index: naming.id, class: "form-control w-100",
                  data: { role: "change_vote", id: naming.id } }) %>
   <% if !can_do_ajax? %>
     <%= f.submit(:show_namings_cast.l, class: "btn btn-default") %>
