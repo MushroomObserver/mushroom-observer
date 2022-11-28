@@ -29,13 +29,17 @@ module AjaxController::Vote
     @naming.change_vote(value, @user)
     @observation = @naming.observation
     @votes = gather_users_votes(@observation, @user)
+    # Send five things: Recalculated show_obs_title,
+    # refreshed votes table, the id of the popup where the table goes,
+    # the new vote %, and the new num_votes
     render(inline: %(<div>
       <%= content_tag(:div, show_obs_title(@observation),
             title: show_obs_title(@observation).strip_html.html_safe) %>
       <%= content_tag(:div, render(partial: 'observations/namings/votes/table',
             locals: { do_cancel: false, observation: @observation,
                       naming: @naming })) %>
-      <%= content_tag(:span, "#show_votes_#{@naming.id}_frame") %>
+      <%= content_tag(:span, "#{@naming.reload.vote_percent.round}%") %>
+      <%= content_tag(:span, "#{@naming.reload.votes.length}") %>
     </div>))
   end
 

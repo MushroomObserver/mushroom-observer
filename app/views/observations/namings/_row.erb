@@ -11,7 +11,10 @@ can_vote = check_permission(naming)
 @vote = @votes[naming.id]
 show_votes_link = link_with_query(
                     h(percent), naming_vote_path(naming_id: naming.id),
-                    { data: { role: "open_popup", id: naming.id } })
+                    { class: "vote-percent",
+                      data: { role: "open_popup", id: naming.id } })
+num_votes_span = content_tag(:span, naming.votes.length,
+                             { class: "vote-number", data: { id: naming.id } })
 reasons = naming.reasons_array.select(&:used?).map do |reason|
               reason.notes.blank? ? reason.label.t :
                 "#{reason.label.l}: #{reason.notes.to_s.html_safe}".tl
@@ -30,7 +33,7 @@ row = {
   destroy: destroy_button(target: naming),
   user:    user_link(naming.user, naming.user.login),
   percent: (any_votes ?
-              "#{show_votes_link} (#{naming.votes.length})" :
+              "#{show_votes_link} (#{num_votes_span})" :
               "(#{:show_namings_no_votes.t})").html_safe,
   eyes:    [(observation.owners_favorite?(naming) ? image_tag("eye3.png") : ""),
             (naming == consensus ? image_tag("eyes3.png") : "")].safe_join,
