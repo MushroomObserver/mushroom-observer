@@ -52,14 +52,28 @@ module ThumbnailHelper
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
-    # return a link if the user has NOT voted this way
-    link = link_to(vote_text,
-                   show_image_path(id: image.id, vote: vote),
-                   title: image_vote_as_help_string(vote),
-                   data: { role: "image_vote", id: image.id, val: vote })
     if current_vote == vote
-      link = content_tag(:span, image_vote_as_short_string(vote))
+      return content_tag(:span, image_vote_as_short_string(vote))
     end
-    link
+
+    # return a link if the user has NOT voted this way
+    link_to(vote_text,
+            show_image_path(id: image.id, vote: vote),
+            title: image_vote_as_help_string(vote),
+            data: { role: "image_vote", id: image.id, val: vote })
+  end
+
+  def visual_group_status_link(visual_group, image_id, state, link)
+    link_text = visual_group_status_text(link)
+    state_text = visual_group_status_text(state)
+    return content_tag(:span, link_text) if link_text == state_text
+
+    link_to(link_text,
+            show_image_path(id: image_id, vote: vote),
+            title: link_text,
+            data: { role: "visual_group_status",
+                    imgid: image_id,
+                    vgid: visual_group.id,
+                    status: link })
   end
 end

@@ -164,7 +164,7 @@ ActiveRecord::Schema.define(version: 2022_11_25_111600) do
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
-    t.boolean "ok_for_ml", default: true, null: false
+    t.boolean "diagnostic", default: true, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -685,6 +685,27 @@ ActiveRecord::Schema.define(version: 2022_11_25_111600) do
     t.text "notes_template"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
+  end
+
+  create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "image_id"
+    t.integer "visual_group_id"
+    t.boolean "included", default: true, null: false
+  end
+
+  create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "visual_model_id"
+    t.string "name", null: false
+    t.boolean "approved", default: false, null: false
+    t.text "description"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "visual_models", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|

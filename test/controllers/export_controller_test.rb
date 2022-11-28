@@ -84,25 +84,25 @@ class ExportControllerTest < FunctionalTestCase
   def test_set_ml_status_turn_off
     login("rolf")
     image = ml_image
-    image.update(ok_for_ml: true)
+    image.update(diagnostic: true)
     get(:set_ml_status, params: ml_params.merge(value: "0"))
     assert_redirected_to(controller: :image, action: :show_image, id: image.id)
-    assert_equal(false, image.reload.ok_for_ml)
+    assert_equal(false, image.reload.diagnostic)
   end
 
   def test_set_ml_status_turn_on
     login("rolf")
     image = ml_image
-    image.update(ok_for_ml: false)
+    image.update(diagnostic: false)
     get(:set_ml_status, params: ml_params.merge(value: "1"))
     assert_redirected_to(controller: :image, action: :show_image, id: image.id)
-    assert_equal(true, image.reload.ok_for_ml)
+    assert_equal(true, image.reload.diagnostic)
   end
 
   def test_set_ml_status_no_change
     login("rolf")
     image = ml_image
-    image.update(ok_for_ml: true)
+    image.update(diagnostic: true)
     get(:set_ml_status, params: ml_params.merge(value: "1", return: true))
     assert_redirected_to("/")
   end

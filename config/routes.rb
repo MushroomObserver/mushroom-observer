@@ -32,6 +32,7 @@ ACTIONS = {
     old_translation: {},
     pivotal: {},
     test: {},
+    visual_group_status: {},
     vote: {}
   },
   api: {
@@ -701,6 +702,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show]
+
+  # ----- VisualModels: standard actions ------------------------------------
+  resources :visual_models, id: /\d+/ do
+    resources :visual_groups, id: /\d+/, shallow: true
+  end
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
