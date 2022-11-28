@@ -12,8 +12,8 @@ end
               method: :put, id: "cast_vote_#{naming.id}") \
               do |f| %>
   <%= f.select(:value, menu, {},
-               { index: naming.id, class: "form-control w-100",
+               { class: "form-control w-100",
                  data: { role: "change_vote", id: naming.id } }) %>
-  <%= f.submit(:show_namings_cast.l, class: "btn btn-default",
+  <%= f.submit(:show_namings_cast.l, class: "btn btn-default w-100",
                data: { role: "save_vote" }) %>
 <% end %>

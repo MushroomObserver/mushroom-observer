@@ -21,7 +21,7 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("dick")
-      put(:update, params: { value: "3", id: nam2.id })
+      put(:update, params: { value: "3", naming_id: nam2.id })
       assert_equal(11, dick.reload.contribution)
 
       # Check votes.
@@ -54,7 +54,7 @@ module Observations::Namings
       nam1 = namings(:coprinus_comatus_naming)
 
       login("rolf")
-      put(:update, params: { value: "2", id: nam1.id })
+      put(:update, params: { value: "2", naming_id: nam1.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
@@ -72,7 +72,7 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      put(:update, params: { value: "3", id: nam2.id })
+      put(:update, params: { value: "3", naming_id: nam2.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
@@ -92,7 +92,7 @@ module Observations::Namings
       nam2 = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
-      put(:update, params: { value: "-1", id: nam2.id })
+      put(:update, params: { value: "-1", naming_id: nam2.id })
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
@@ -124,7 +124,7 @@ module Observations::Namings
       assert_equal(11, dick.reload.contribution)
 
       login("mary")
-      put(:update, params: { value: Vote.delete_vote, id: nam1.id })
+      put(:update, params: { value: Vote.delete_vote, naming_id: nam1.id })
       assert_equal(9, mary.reload.contribution)
 
       # Check votes.
@@ -143,7 +143,7 @@ module Observations::Namings
       login
       # First just make sure the page displays.
       get(
-        :show, params: { id: namings(:coprinus_comatus_naming).id }
+        :show, params: { naming_id: namings(:coprinus_comatus_naming).id }
       )
       assert_template("observations/namings/votes/show")
       assert_template("observations/namings/votes/_table")

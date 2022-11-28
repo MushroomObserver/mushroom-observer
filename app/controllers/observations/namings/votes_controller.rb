@@ -12,7 +12,7 @@ module Observations::Namings
     # Outputs: @naming
     def show
       pass_query_params
-      @naming = find_or_goto_index(Naming, params[:id].to_s)
+      @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
     end
 
     # NOTE: MOST VOTES CAST NEVER HIT THIS CONTROLLER! THEY GO BY AJAX.
@@ -31,9 +31,9 @@ module Observations::Namings
     # Redirects to show_observation.
     def update
       pass_query_params
-      naming = Naming.find(params[:id].to_s)
+      naming = Naming.find(params[:naming_id].to_s)
       observation = naming.observation
-      observation.change_vote(naming, params[:value])
+      observation.change_vote(naming, param_lookup([:vote, :value]))
       redirect_with_query(observation_path(id: observation.id))
     end
 
@@ -42,6 +42,7 @@ module Observations::Namings
     # only available to non-JS users. It's incompatible with the CRUDified
     # NamingsControllerbecause it assumes the whole namings table is one form.
     # However, the new CRUD destroy buttons are themselves small forms.
+    # This also requires the <select> to have the html option index: naming.id
     # def cast_votes
     #   pass_query_params
     #   observation = find_or_goto_index(Observation, params[:id].to_s)

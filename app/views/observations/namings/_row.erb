@@ -10,7 +10,7 @@ any_votes = naming.votes && naming.votes.length > 0
 can_vote = check_permission(naming)
 @vote = @votes[naming.id]
 show_votes_link = link_with_query(
-                    h(percent), naming_vote_path(id: naming.id),
+                    h(percent), naming_vote_path(naming_id: naming.id),
                     { data: { role: "open_popup", id: naming.id } })
 reasons = naming.reasons_array.select(&:used?).map do |reason|
               reason.notes.blank? ? reason.label.t :

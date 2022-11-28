@@ -624,7 +624,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
-                       action: :update, id: obs.namings.first.id)
+                       action: :update, naming_id: obs.namings.first.id)
 
     # Test it on obs with two namings, with owner logged in.
     login("rolf")
@@ -632,7 +632,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
-                       action: :update, id: obs.namings.first.id)
+                       action: :update, naming_id: obs.namings.first.id)
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
@@ -640,7 +640,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_show_observation
     assert_form_action(controller: "observations/namings/votes",
-                       action: :update, id: obs.namings.first.id)
+                       action: :update, naming_id: obs.namings.first.id)
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # Ensure that rolf owns @obs_with_no_opinion.

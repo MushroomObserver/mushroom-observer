@@ -324,9 +324,10 @@ class AmateurTest < IntegrationTestCase
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
       open_form("form#cast_vote_#{naming.id}") do |form|
-        form.assert_value("vote_#{naming.id}_value", /no opinion/i)
-        form.select("vote_#{naming.id}_value", /call it that/i)
-        form.submit(:show_namings_cast.l)
+        form.assert_value("vote_value", /no opinion/i)
+        form.select("vote_value", /call it that/i)
+        form.assert_value("vote_value", "3.0")
+        form.submit("Cast Vote")
       end
       # assert_template("observations/show")
       assert_match(/call it that/i, response.body)
@@ -336,7 +337,7 @@ class AmateurTest < IntegrationTestCase
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
       open_form("form#cast_vote_#{naming.id}") do |form|
-        form.select("vote_#{naming.id}_value", /as if!/i)
+        form.select("vote_value", /as if!/i)
         form.submit(:show_namings_cast.l)
       end
     end

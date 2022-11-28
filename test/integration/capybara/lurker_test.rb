@@ -108,10 +108,9 @@ class LurkerTest < CapybaraIntegrationTestCase
     go_back_after do
       # Owner has done several things to Observation:
       #  Observation itself, naming, comment.
-      # (plus a link to it is also in table of names for mobile)
       assert(
         assert_selector("#content a[href^='/users/#{owner.id}']",
-                        minimum: 4)
+                        minimum: 3)
       )
 
       first(:link, owner.name).click
