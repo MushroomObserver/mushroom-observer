@@ -532,7 +532,7 @@ class String
 
     offset = tag.length + 1
     ind = rindex(tag)
-    return self if length <= (ind + offset)
+    return self if !ind || !offset || (length <= (ind + offset))
 
     insert((ind + offset), "<br/>".html_safe)
   end
