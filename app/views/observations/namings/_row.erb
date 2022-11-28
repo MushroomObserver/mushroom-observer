@@ -37,7 +37,8 @@ row = {
   reasons: reasons.safe_join
 }
 %>
-<div class="table-row">
+
+<div class="table-row" id="observation_naming_<%= naming.id %>">
   <div class="table-cell">
     <%= row[:show] %>
     <% if can_vote %>

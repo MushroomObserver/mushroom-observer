@@ -527,8 +527,10 @@ class String
   # (for styling taxonomic names legibly)
   def break_name
     possibles = ["</i></b>", "</i>"]
-    tag = possibles.first { |tag| include?(tag) }
-    return self unless tag
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
 
     offset = tag.length + 1
     ind = rindex(tag)
@@ -541,8 +543,10 @@ class String
   # (for styling taxonomic names legibly)
   def small_author
     possibles = ["<br/>", "</i></b>", "</i>"]
-    tag = possibles.first { |tag| include?(tag) }
-    return self unless tag
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
 
     offset = tag.length
     ind = rindex(tag)

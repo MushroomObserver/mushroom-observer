@@ -44,13 +44,13 @@ eyes = "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe
   <!--/TABLE OF NAMES FOR WIDE SCREEN-->
 
   <!--HELP TEXT AND EYES FOR WIDE SCREEN-->
-  <div class="float-sm-right my-5px ml-10px mt-sm-3">
+  <div class="float-sm-right my-2 ml-3">
     <%= buttons.safe_join("<br/>".html_safe) %>
   </div>
-  <p class="help-block container-text"><%= help %></p>
+  <div class="help-block container-text my-2"><%= help %></div>
   <div class="row">
-    <div class="col-xs-6"><div class="p-5px"><%= eye %></div></div>
-    <div class="col-xs-6"><div class="p-5px"><%= eyes %></div></div>
+    <div class="col-xs-6"><div class="p-2"><%= eye %></div></div>
+    <div class="col-xs-6"><div class="p-2"><%= eyes %></div></div>
   </div>
   <!--/HELP TEXT AND EYES FOR WIDE SCREEN-->
 
