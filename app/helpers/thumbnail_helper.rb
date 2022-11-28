@@ -69,7 +69,7 @@ module ThumbnailHelper
     return content_tag(:span, link_text) if link_text == state_text
 
     link_to(link_text,
-            show_image_path(id: image_id, vote: vote),
+            show_image_path(id: image_id, vote: 1),
             title: link_text,
             data: { role: "visual_group_status",
                     imgid: image_id,
