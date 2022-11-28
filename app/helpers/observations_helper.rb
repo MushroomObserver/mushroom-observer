@@ -2,7 +2,7 @@
 
 # helpers for show Observation view
 module ObservationsHelper
-  ##### Portion of page title that includes consensus (site id) ################
+  ##### Portion of page title that includes consensus naming (site id) #########
   #
   # Depends on whether consensus is deprecated and user preferences include
   # showing Observer's Preference
@@ -21,7 +21,7 @@ module ObservationsHelper
     end
   end
 
-  ##### Portion of page title that includes Observer Preference ################
+  ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
   def owner_naming_line(obs)

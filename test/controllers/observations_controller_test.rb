@@ -602,7 +602,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("observations/show")
     assert_template("observations/show/_name_info")
     assert_template("observations/show/_observation")
-    assert_template("observations/namings/_show")
+    assert_template("observations/show/_namings")
     assert_template("comment/_show_comments")
     assert_template("observations/show/_thumbnail_map")
     assert_template("observations/show/_images")
@@ -613,31 +613,34 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(0, QueryRecord.count)
 
     # Test it on obs with no namings first.
-    obs_id = observations(:unknown_with_no_naming).id
-    get(:show, params: { id: obs_id })
+    obs = observations(:unknown_with_no_naming)
+    get(:show, params: { id: obs.id })
     assert_show_observation
     # As of now, the vote form doesn't print unless there are namings - 11/22
     # assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
-    obs_id = observations(:coprinus_comatus_obs).id
-    get(:show, params: { id: obs_id })
+    obs = observations(:coprinus_comatus_obs)
+    get(:show, params: { id: obs.id })
     assert_show_observation
-    assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
+    assert_form_action(controller: "observations/namings/votes",
+                       action: :update, naming_id: obs.namings.first.id)
 
     # Test it on obs with two namings, with owner logged in.
     login("rolf")
-    obs_id = observations(:coprinus_comatus_obs).id
-    get(:show, params: { id: obs_id })
+    obs = observations(:coprinus_comatus_obs)
+    get(:show, params: { id: obs.id })
     assert_show_observation
-    assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
+    assert_form_action(controller: "observations/namings/votes",
+                       action: :update, naming_id: obs.namings.first.id)
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
-    obs_id = observations(:coprinus_comatus_obs).id
-    get(:show, params: { id: obs_id })
+    obs = observations(:coprinus_comatus_obs)
+    get(:show, params: { id: obs.id })
     assert_show_observation
-    assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
+    assert_form_action(controller: "observations/namings/votes",
+                       action: :update, naming_id: obs.namings.first.id)
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # Ensure that rolf owns @obs_with_no_opinion.
@@ -2877,9 +2880,9 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_response(:success)
     assert_template(:show)
-    assert_select("select#vote_#{naming1.id}_value>" \
+    assert_select("form#cast_vote_#{naming1.id} select#vote_value>" \
                   "option[selected=selected][value='#{vote1.value}']")
-    assert_select("select#vote_#{naming2.id}_value>" \
+    assert_select("form#cast_vote_#{naming2.id} select#vote_value>" \
                   "option[selected=selected][value='#{vote2.value}']")
   end
 end

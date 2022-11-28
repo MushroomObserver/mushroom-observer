@@ -517,8 +517,43 @@ class String
       html_safe # rubocop:disable Rails/OutputSafety
   end
 
+  # For integration test comparisons:
+  # Render special encoded characters as they appear in HTML
   def render_html
     CGI.unescapeHTML(self)
+  end
+
+  # Insert a line break between the scientific name and the author
+  # (for styling taxonomic names legibly)
+  def break_name
+    possibles = ["</i></b>", "</i>"]
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
+
+    offset = tag.length + 1
+    ind = rindex(tag)
+    return self if !ind || !offset || (length <= (ind + offset))
+
+    insert((ind + offset), "<br/>".html_safe)
+  end
+
+  # Wrap the author name in <small> HTML tag, with or without break
+  # (for styling taxonomic names legibly)
+  def small_author
+    possibles = ["<br/>", "</i></b>", "</i>"]
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
+
+    offset = tag.length
+    ind = rindex(tag)
+    return self if !ind || !offset || (length <= (ind + offset))
+
+    insert(length, "</small>".html_safe)
+    insert((ind + offset), "<small>".html_safe)
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.

@@ -14,7 +14,7 @@
 //= link suggestions.js
 //= link thumbnail_map.js
 //= link translations.js
-//= link vote_popup.js
+//= link vote_by_ajax.js
 
 //= link Admin.css
 //= link Agaricus.css
