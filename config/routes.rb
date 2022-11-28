@@ -654,7 +654,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
     member do
       get("map", to: "observations/maps#show")
-      get("suggestions", to: "observations/naming_suggestions#show",
+      get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
     end
     collection do

@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-module Observations
-  class NamingSuggestionsControllerTest < FunctionalTestCase
+module Observations::Namings
+  class SuggestionsControllerTest < FunctionalTestCase
     def test_suggestions
       obs = observations(:detailed_unknown_obs)
       name1 = names(:coprinus_comatus)

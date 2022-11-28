@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# see observations_controller.rb
-module Observations
-  class NamingSuggestionsController < ApplicationController
+# Generates suggested namings from ML
+module Observations::Namings
+  class SuggestionsController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
 

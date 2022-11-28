@@ -21,7 +21,7 @@ eyes = "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe
 
 <div id="observation_namings">
 
-  <!--TABLE OF NAMES FOR WIDE SCREEN-->
+  <!--TABLE OF NAMES -->
   <section class="table-namings">
     <header class="table-row">
       <div class="table-cell">
@@ -41,9 +41,9 @@ eyes = "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe
                            logged_in: logged_in }) %>
     <% end # each naming %>
   </section>
-  <!--/TABLE OF NAMES FOR WIDE SCREEN-->
+  <!--/TABLE OF NAMES -->
 
-  <!--HELP TEXT AND EYES FOR WIDE SCREEN-->
+  <!--HELP TEXT AND EYES -->
   <div class="float-sm-right my-2 ml-3">
     <%= buttons.safe_join("<br/>".html_safe) %>
   </div>
@@ -52,7 +52,7 @@ eyes = "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe
     <div class="col-xs-6"><div class="p-2"><%= eye %></div></div>
     <div class="col-xs-6"><div class="p-2"><%= eyes %></div></div>
   </div>
-  <!--/HELP TEXT AND EYES FOR WIDE SCREEN-->
+  <!--/HELP TEXT AND EYES -->
 
 </div><!--#observation_namings-->
 
@@ -63,6 +63,7 @@ eyes = "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe
   <%= render(partial: "observations/namings/votes/popup",
               locals: { do_cancel: true, naming: @naming }) %>
 <% end %>
+
 <% inject_javascript_at_end %(
   VoteByAjaxModule({
     show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
