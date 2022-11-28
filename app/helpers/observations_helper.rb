@@ -33,7 +33,7 @@ module ObservationsHelper
     end
   end
 
-  private ######################################################################
+  private
 
   # name portion of Observation title
   def obs_title_consensus_id(name)
@@ -74,5 +74,140 @@ module ObservationsHelper
   def link_to_display_name_without_authors(name)
     link_to(name.display_name_without_authors.t,
             show_name_path(id: name.id))
+  end
+
+  public ######################################################################
+
+  ##### Observation Naming "table" content #########
+  def observation_naming_header_row(observation, logged_in)
+    any_names = observation.namings&.length&.positive?
+    heading = (if any_names
+                 :show_namings_proposed_names.t
+               else
+                 :show_namings_no_names_yet.t
+               end)
+    heading_html = content_tag(:h4, heading, class: "table-title mb-0")
+    user_heading_html = content_tag(:small, :show_namings_user.t)
+    consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
+    your_heading_html = content_tag(:small, :show_namings_your_vote.t)
+
+    {
+      heading: heading_html,
+      user_name: user_heading_html,
+      consensus_vote: consensus_heading_html,
+      your_vote: logged_in ? your_heading_html : ""
+    }
+  end
+
+  def observation_naming_row(observation, naming, logged_in)
+    {
+      name: name_html(naming),
+      proposer: proposer_html(naming),
+      consensus_vote: consensus_vote_html(naming),
+      your_vote: logged_in ? your_vote_html(naming) : "",
+      eyes: eyes_html(observation, naming),
+      reasons: reasons_html(naming)
+    }
+  end
+
+  def observation_naming_buttons(observation, do_suggestions)
+    buttons = []
+    buttons << link_with_query(:show_namings_propose_new_name.t,
+                               new_observation_naming_path(
+                                 observation_id: observation.id
+                               ),
+                               { class: "btn btn-default" })
+    if do_suggestions
+      buttons << link_to(:show_namings_suggest_names.l, "#",
+                         { data: { role: "suggest_names" },
+                           class: "btn btn-default" })
+    end
+    buttons.safe_join(tag(:br))
+  end
+
+  private
+
+  def name_html(naming)
+    Textile.register_name(naming.name)
+    name_link = link_with_query(
+      naming.display_name_brief_authors.t.break_name.small_author,
+      show_name_path(id: naming.name)
+    )
+
+    if check_permission(naming)
+      edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
+                                  class: "edit_naming_link_#{naming.id}")
+      delete_link = destroy_button(target: naming)
+      proposer_links = [tag(:br),
+                        "[", edit_link, " | ", delete_link, "]"].safe_join
+    else
+      proposer_links = ""
+    end
+
+    [name_link, proposer_links].safe_join
+  end
+
+  def proposer_html(naming)
+    user_link = user_link(naming.user, naming.user.login)
+
+    # row props have mobile-friendly labels
+    [content_tag(:small, "#{:show_namings_user.t}: ",
+                 class: "visible-xs-inline mr-4"),
+     content_tag(:strong, user_link)].safe_join
+  end
+
+  def consensus_vote_html(naming)
+    consensus_votes = (if naming.votes&.length&.positive?
+                         "#{pct_votes_html(naming)} (#{num_votes_html(naming)})"
+                       else
+                         "(#{:show_namings_no_votes.t})"
+                       end).html_safe # has links
+
+    # row props have mobile-friendly labels
+    [content_tag(:small, "#{:show_namings_consensus.t}: ",
+                 class: "visible-xs-inline mr-4"),
+     content_tag(:span, consensus_votes)].safe_join
+  end
+
+  def pct_votes_html(naming)
+    percent = naming.vote_percent.round.to_s + "%"
+
+    link_with_query(h(percent),
+                    naming_vote_path(naming_id: naming.id),
+                    { class: "vote-percent",
+                      data: { role: "open_popup", id: naming.id } })
+  end
+
+  def num_votes_html(naming)
+    content_tag(:span, naming.votes&.length,
+                { class: "vote-number", data: { id: naming.id } })
+  end
+
+  def your_vote_html(naming)
+    # row props have mobile-friendly labels
+    [content_tag(:small, "#{:show_namings_your_vote.t}: ",
+                 class: "visible-xs-block"),
+     render(partial: "observations/namings/votes/form",
+            locals: { naming: naming,
+                      can_vote: check_permission(naming) })].safe_join
+  end
+
+  def eyes_html(observation, naming)
+    consensus = observation.consensus_naming
+
+    [(observation.owners_favorite?(naming) ? image_tag("eye3.png") : ""),
+     (naming == consensus ? image_tag("eyes3.png") : "")].safe_join
+  end
+
+  def reasons_html(naming)
+    reasons = naming.reasons_array.select(&:used?).map do |reason|
+      if reason.notes.blank?
+        reason.label.t
+      else
+        "#{reason.label.l}: #{reason.notes.to_s.html_safe}".tl # may have links
+      end
+    end
+
+    reasons.map { |reason| content_tag(:div, reason) }.safe_join
   end
 end
