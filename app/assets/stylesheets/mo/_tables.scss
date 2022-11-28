@@ -171,7 +171,7 @@ section.table-namings {
     background-color: $panel-bg;
 
     // reasons row - reason table-cell, then 4 dummy table-cells
-    &:last-child {
+    &:nth-of-type(even) {
       .table-cell {
 
         // the reasons
@@ -256,7 +256,7 @@ section.table-namings {
 
       &:first-child {
         padding-left: 1em;
-        width: 30%;
+        width: 31%;
       }
 
       &:nth-child(2) {
@@ -272,11 +272,12 @@ section.table-namings {
       }
 
       &:nth-child(5) {
-        width: 10%;
+        width: 7%;
       }
 
       &:last-child {
-        padding-right: 1em;
+        padding-right: 1rem;
+        padding-left: 0.25rem;
       }
     }
 
