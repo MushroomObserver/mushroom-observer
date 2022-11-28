@@ -16,7 +16,7 @@ module Observations::Namings
     end
 
     # NOTE: MOST VOTES CAST NEVER HIT THIS CONTROLLER! THEY GO BY AJAX.
-    # Changes in the state of the Vote selects are handled by vote_popup.js
+    # Changes in the state of the Vote selects are handled by vote_by_ajax.js
     # and sent to the AjaxController::Vote module at the path
     # "/ajax/vote/naming/" + naming_id, which changes naming votes directly.
 
@@ -31,7 +31,7 @@ module Observations::Namings
     # Redirects to show_observation.
     def update
       pass_query_params
-      naming = Naming.find(params[:naming_id].to_s)
+      naming = Naming.find(params[:id].to_s)
       observation = naming.observation
       observation.change_vote(naming, params[:value])
       redirect_with_query(observation_path(id: observation.id))

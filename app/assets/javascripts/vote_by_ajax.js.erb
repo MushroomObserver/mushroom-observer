@@ -1,11 +1,11 @@
-function VotePopupModule(translations) {
+function VoteByAjaxModule(translations) {
   $(document).ready(function () {
 
     var _haveVotesChanged = false;
     var _haveVotesBeenSaved = false;
 
-    var save_votes_button = function () {
-      return $("[data-role='save_votes']");
+    var save_vote_buttons = function () {
+      return $("[data-role='save_vote']");
     };
 
     var close_popup_buttons = function () {
@@ -73,16 +73,17 @@ function VotePopupModule(translations) {
             _haveVotesChanged = false;
             whirly.remove();
             if (request.status == 200) {
-              var html  = $(request.responseText);
-              var title = html.children().eq(0);
-              var div   = html.children().eq(1);
+              var html    = $(request.responseText);
+              var title   = html.children().eq(0);
+              var div     = html.children().eq(1);
+              var target  = html.children().eq(2).html;
               document.title = title.attr("title");
               $("#title").html(title.html());
-              $("#observation_naming").html(div.html());
+              $(target).html(div.html());
               attach_bindings();
               if (typeof SuggestionModule !== "undefined")
                 attach_suggestion_bindings();
-              save_votes_button().hide();
+              save_vote_buttons().hide();
             } else {
               change_vote_selects().each(function () {
                _this.val(_this.data("old_value"))
@@ -98,6 +99,7 @@ function VotePopupModule(translations) {
       change_vote_selects().each(function (event) {
         var _this = $(this);
         _this.data("old_value", _this.val());
+        _this.attr("disabled", null);
       });
     };
 
@@ -110,6 +112,6 @@ function VotePopupModule(translations) {
     attach_bindings();
 
     // Don't need this if AJAX available.
-    save_votes_button().hide();
+    save_vote_buttons().hide();
   });
 }

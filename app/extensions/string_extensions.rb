@@ -546,7 +546,7 @@ class String
 
     offset = tag.length
     ind = rindex(tag)
-    return self if length <= (ind + offset)
+    return self if !ind || !offset || (length <= (ind + offset))
 
     insert(length, "</small>".html_safe)
     insert((ind + offset), "<small>".html_safe)

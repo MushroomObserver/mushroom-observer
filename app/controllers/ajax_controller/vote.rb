@@ -32,8 +32,10 @@ module AjaxController::Vote
     render(inline: %(<div>
       <%= content_tag(:div, show_obs_title(@observation),
             title: show_obs_title(@observation).strip_html.html_safe) %>
-      <%= content_tag(:div, render(partial: 'observations/namings/show',
-            locals: { observation: @observation })) %>
+      <%= content_tag(:div, render(partial: 'observations/namings/votes/table',
+            locals: { do_cancel: false, observation: @observation,
+                      naming: @naming })) %>
+      <%= content_tag(:span, "#show_votes_#{@naming.id}_frame") %>
     </div>))
   end
 

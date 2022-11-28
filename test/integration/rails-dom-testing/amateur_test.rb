@@ -318,13 +318,15 @@ class AmateurTest < IntegrationTestCase
     end
   end
 
+  # Note that this only tests non-JS vote submission.
+  # Most users will have their vote sent via AJAX from vote_by_ajax.js
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
-      open_form("form#cast_votes_wide_#{naming.id}") do |form|
+      open_form("form#cast_vote_#{naming.id}") do |form|
         form.assert_value("vote_#{naming.id}_value", /no opinion/i)
         form.select("vote_#{naming.id}_value", /call it that/i)
-        form.submit("Update Votes")
+        form.submit(:show_namings_cast.l)
       end
       # assert_template("observations/show")
       assert_match(/call it that/i, response.body)
@@ -333,9 +335,9 @@ class AmateurTest < IntegrationTestCase
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
-      open_form("form#cast_votes_wide_#{naming.id}") do |form|
+      open_form("form#cast_vote_#{naming.id}") do |form|
         form.select("vote_#{naming.id}_value", /as if!/i)
-        form.submit("Update Votes")
+        form.submit(:show_namings_cast.l)
       end
     end
   end
@@ -414,9 +416,9 @@ class AmateurTest < IntegrationTestCase
       # (Make sure naming shows up somewhere.)
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
-      # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*='#{edit_naming_path(naming.id)}']", 2)
-      assert_select("input.destroy_naming_link_#{naming.id}", 2)
+      # (Now one: same for wide-screen as for mobile.)
+      assert_select("a[href*='#{edit_naming_path(naming.id)}']", 1)
+      assert_select("input.destroy_naming_link_#{naming.id}", 1)
 
       # Try changing it.
       author = "(Pers.) Grev."
