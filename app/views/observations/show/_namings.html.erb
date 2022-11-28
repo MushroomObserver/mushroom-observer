@@ -55,7 +55,8 @@ eyes = content_tag(:div,
               locals: { do_cancel: true, naming: @naming }) %>
 <% end %>
 
-<% inject_javascript_at_end %(
+<% # initializes module with translations for js messages
+inject_javascript_at_end %(
   VoteByAjaxModule({
     show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
     show_namings_saving: '#{j :show_namings_saving.l}'
