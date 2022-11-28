@@ -2615,7 +2615,7 @@
 
   visual_group_count_excluded: "[count] Excluded Images"
   visual_group_count_included: "[count] Definitional Images"
-  visual_group_count_needs_review: "[count] Images that Need Review"
+  visual_group_count_needs_review: "[count] Images have been reviewed"
 
   visual_group_includes_names: Includes images from these names
 
