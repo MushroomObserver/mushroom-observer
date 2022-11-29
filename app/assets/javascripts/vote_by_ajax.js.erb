@@ -8,35 +8,11 @@ function VoteByAjaxModule(translations) {
       return $("[data-role='save_vote']");
     };
 
-    // var close_popup_buttons = function () {
-    //   return $("[data-role='close_popup']");
-    // };
-
-    // var open_popup_buttons = function () {
-    //   return $("[data-role='open_popup']");
-    // };
-
     var change_vote_selects = function () {
       return $("[data-role='change_vote']");
     };
 
-    // var vote_popups = function () {
-    //   return $("[data-role='popup']");
-    // };
-
     var attach_bindings = function () {
-      // close_popup_buttons().click(function () {
-      //   $(this).parents(".popup").first().hide();
-      // });
-
-      // open_popup_buttons().click(function (event) {
-      //   event.preventDefault();
-      //   var namingId = $(this).data("id");
-      //   vote_popups().hide();
-      //   $("#show_votes_" + namingId)
-      //     .center().show();
-      // });
-
       change_vote_selects().change(function (event) {
         var _this = $(this);
         var value = _this.val();
