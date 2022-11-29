@@ -210,7 +210,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
-    assert_redirected_to(observation_path(id: obs.id, q: q))
+    assert_redirected_to(permanent_observation_path(id: obs.id, q: q))
   end
 
   def test_edit_herbarium_record
@@ -282,7 +282,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     # Prove that POST keeps query param when returning to observation.
     post(:update, params: params.merge(back: obs.id, q: q))
-    assert_redirected_to(observation_path(id: obs.id, q: q))
+    assert_redirected_to(permanent_observation_path(id: obs.id, q: q))
 
     # Prove that POST can return to show_herbarium_record with query intact.
     post(:update, params: params.merge(back: "show", q: q))

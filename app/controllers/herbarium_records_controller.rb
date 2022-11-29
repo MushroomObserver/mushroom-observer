@@ -14,6 +14,8 @@ class HerbariumRecordsController < ApplicationController
   #   :next_herbarium_record,
   #   :prev_herbarium_record
   # ]
+  before_action :pass_query_params, except: :index
+  before_action :store_location, except: [:index, :destroy]
 
   # rubocop:disable Metrics/AbcSize
   def index
@@ -32,8 +34,6 @@ class HerbariumRecordsController < ApplicationController
   # rubocop:enable Metrics/AbcSize
 
   def show
-    store_location
-    pass_query_params
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, HerbariumRecord, params[:id]) and return
@@ -47,10 +47,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def new
-    store_location
-    pass_query_params
-    @layout      = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:observation_id])
+    set_ivars_for_new
     return unless @observation
 
     @back_object = @observation
@@ -58,10 +55,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def create
-    store_location
-    pass_query_params
-    @layout      = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:observation_id])
+    set_ivars_for_new
     return unless @observation
 
     @back_object = @observation
@@ -69,10 +63,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def edit
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    set_ivars_for_edit
     return unless @herbarium_record
 
     figure_out_where_to_go_back_to
@@ -82,10 +73,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def update
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    set_ivars_for_edit
     return unless @herbarium_record
 
     figure_out_where_to_go_back_to
@@ -95,7 +83,6 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def destroy
-    pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
     return unless make_sure_can_delete!(@herbarium_record)
@@ -108,6 +95,16 @@ class HerbariumRecordsController < ApplicationController
   ##############################################################################
 
   private
+
+  def set_ivars_for_new
+    @layout = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:observation_id])
+  end
+
+  def set_ivars_for_edit
+    @layout = calc_layout_params
+    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+  end
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_herbarium_record
@@ -214,7 +211,7 @@ class HerbariumRecordsController < ApplicationController
       return
     end
 
-    redirect_to_observation_or_herbarium_record
+    redirect_to_observation_or_object(@herbarium_record)
   end
 
   def update_herbarium_record
@@ -232,7 +229,7 @@ class HerbariumRecordsController < ApplicationController
       return
     end
 
-    redirect_to_observation_or_herbarium_record
+    redirect_to_observation_or_object(@herbarium_record)
   end
 
   def check_for_form_errors?
@@ -247,7 +244,7 @@ class HerbariumRecordsController < ApplicationController
     redirect_to(redirect_params) and return true unless validate_herbarium_name!
 
     unless can_add_record_to_herbarium?
-      redirect_to_observation_or_herbarium_record and return true
+      redirect_to_observation_or_object(@herbarium_record) and return true
     end
 
     false
@@ -265,7 +262,7 @@ class HerbariumRecordsController < ApplicationController
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
-    redirect_to_observation_or_herbarium_record
+    redirect_to_observation_or_object(@herbarium_record)
     false
   end
 
@@ -338,19 +335,6 @@ class HerbariumRecordsController < ApplicationController
                      else
                        @herbarium_record
                      end
-    end
-  end
-
-  def redirect_to_observation_or_herbarium_record
-    if @back_object
-      case @back_object.type_tag
-      when :observation
-        redirect_with_query(observation_path(id: @back_object.id))
-      when :herbarium_record
-        redirect_with_query(herbarium_record_path(id: @back_object.id))
-      end
-    else
-      redirect_with_query(herbarium_records_path(id: @herbarium_record.id))
     end
   end
 end
