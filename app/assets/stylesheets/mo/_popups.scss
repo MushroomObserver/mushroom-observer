@@ -2,6 +2,29 @@
 // naming vote popup
 // --------------------------------------------------
 
+// BS3 only vertical centering. z-index not getting set by BS?
+.modal {
+  text-align: center;
+}
+
+.modal:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -4px;
+}
+
+.modal-dialog {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+  z-index: $zindex-modal;
+
+  color: $MENU_FG_COLOR !important;
+  background-color: $MENU_BG_COLOR !important;
+}
+
 .popup {
   z-index: 1000;
   border: 1px solid $MENU_BORDER_COLOR;

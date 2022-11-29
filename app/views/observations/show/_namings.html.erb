@@ -51,8 +51,8 @@ eyes = content_tag(:div,
 <!--VOTE POPUPS-->
 <% namings_with_votes.each do |naming|
   @naming = naming %>
-  <%= render(partial: "observations/namings/votes/popup",
-              locals: { do_cancel: true, naming: @naming }) %>
+  <%= render(partial: "observations/namings/votes/modal",
+             locals: { naming: @naming }) %>
 <% end %>
 
 <% # initializes module with translations for js messages

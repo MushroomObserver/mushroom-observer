@@ -157,11 +157,12 @@ module ObservationsHelper
   end
 
   def consensus_vote_html(naming)
-    consensus_votes = (if naming.votes&.length&.positive?
-                         "#{pct_votes_html(naming)} (#{num_votes_html(naming)})"
-                       else
-                         "(#{:show_namings_no_votes.t})"
-                       end).html_safe # has links
+    consensus_votes =
+      (if naming.votes&.length&.positive?
+         "#{pct_html(naming)} (#{num_votes_html(naming)})"
+       else
+         "(#{:show_namings_no_votes.t})"
+       end).html_safe # has links
 
     # row props have mobile-friendly labels
     [content_tag(:small, "#{:show_namings_consensus.t}: ",
@@ -169,13 +170,19 @@ module ObservationsHelper
      content_tag(:span, consensus_votes)].safe_join
   end
 
-  def pct_votes_html(naming)
+  def pct_html(naming)
     percent = naming.vote_percent.round.to_s + "%"
 
-    link_with_query(h(percent),
-                    naming_vote_path(naming_id: naming.id),
-                    { class: "vote-percent",
-                      data: { role: "open_popup", id: naming.id } })
+    if can_do_ajax?
+      content_tag(:button, h(percent),
+                  class: "vote-percent btn btn-link",
+                  data: { toggle: "modal",
+                          target: "#show_votes_#{naming.id}" })
+    else
+      link_with_query(h(percent),
+                      naming_vote_path(naming_id: naming.id),
+                      { class: "vote-percent" })
+    end
   end
 
   def num_votes_html(naming)
