@@ -3,6 +3,11 @@
 require("test_helper")
 
 class ObservationFormTest < CapybaraIntegrationTestCase
+  def setup
+    super
+    Capybara.current_driver = Capybara.javascript_driver # :selenium by default
+  end
+
   def test_create_minimal_observation
     rolf = users("rolf")
     login!(rolf)
