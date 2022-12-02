@@ -127,8 +127,8 @@ gem("mail")
 gem("net-smtp", require: false)
 
 # These seem to be required by unicorn -> zeitwerk
-gem("net-pop")
 gem("net-imap")
+gem("net-pop")
 
 # for detecting file type of uploaded images
 gem("mimemagic")
