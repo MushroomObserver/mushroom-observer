@@ -3,8 +3,9 @@
 # Allow simuluation of user-browser interaction with capybara
 require("capybara/rails")
 require("capybara/minitest")
+require("webdrivers")
 
-require("database_cleaner")
+require("database_cleaner/active_record")
 DatabaseCleaner.strategy = :transaction
 
 #  = Capybara Integration Test Case
@@ -87,45 +88,20 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     # NOTE: Shouldn't be necessary, but in case:
     # Capybara.reset_sessions!
 
+    # needed for selenium
+    Capybara.server = :webrick
+
+    # Webdrivers.logger.level = :debug
+    Webdrivers::Geckodriver.update
+
+    # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
+    DatabaseCleaner.start
+
     # Treat Rails html requests as coming from non-robots.
     # If it's a bot, controllers often do not serve the expected content.
     # The requester looks like a bot to the `browser` gem because the User Agent
     # in the request is blank. I don't see an easy way to change that. -JDC
     Browser::Bot.any_instance.stubs(:bot?).returns(false)
-
-    # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
-    DatabaseCleaner.start
-
-    # This driver won't open a browser window
-    Capybara.register_driver(:chrome_headless) do |app|
-      capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-        "goog:chromeOptions": {
-          args: %w[no-sandbox headless disable-gpu --window-size=1920,1080]
-        }
-      )
-      Capybara::Selenium::Driver.new(app, browser: :chrome,
-                                          desired_capabilities: capabilities)
-    end
-
-    # Ensure Log directory exists
-    `mkdir -p tmp/selenium_logs`
-
-    # This driver will open a browser window
-    Capybara.register_driver(:chrome) do |app|
-      capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-        "goog:chromeOptions": { args: %w[start-maximized] }
-      )
-
-      Capybara::Selenium::Driver.new(
-        app,
-        browser: :chrome,
-        desired_capabilities: capabilities,
-        driver_opts: {
-          log_path: "./tmp/selenium_logs/selenium-#{Time.now.to_i}.log",
-          verbose: true
-        }
-      )
-    end
   end
 
   def teardown
