@@ -3,7 +3,7 @@
 # Allow simuluation of user-browser interaction with capybara
 require("capybara/rails")
 require("capybara/minitest")
-require("webdrivers")
+require("webdrivers/geckodriver")
 
 require("database_cleaner/active_record")
 DatabaseCleaner.strategy = :transaction
@@ -92,7 +92,8 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     Capybara.server = :webrick
 
     # Webdrivers.logger.level = :debug
-    Webdrivers::Geckodriver.update
+    # TODO: Move this, it gets called tooo often
+    # Webdrivers::Geckodriver.update
 
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
     DatabaseCleaner.start

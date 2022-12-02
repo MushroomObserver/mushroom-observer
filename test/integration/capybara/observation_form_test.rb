@@ -7,7 +7,6 @@ class ObservationFormTest < CapybaraIntegrationTestCase
   #   super
   #   Capybara.current_driver = Capybara.javascript_driver # :selenium by default
   #   driver = Selenium::WebDriver.for(:firefox)
-  #   # binding.break
   # end
 
   def test_create_minimal_observation
