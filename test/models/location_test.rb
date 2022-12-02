@@ -512,7 +512,7 @@ class LocationTest < UnitTestCase
 
   def test_scope_in_region
     assert_includes(
-      Location.in_region("New York\, USA"),
+      Location.in_region("New York, USA"),
       locations(:nybg_location)
     )
     assert_not_includes(

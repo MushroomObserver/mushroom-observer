@@ -485,7 +485,7 @@ class String
         break
       end
     end
-    result += opens.reverse.map { |x| "<\/#{x}>" }.join
+    result += opens.reverse.map { |x| "</#{x}>" }.join
     # Disable cop; we need `html_safe` to prevent Rails from adding escaping
     result.html_safe # rubocop:disable Rails/OutputSafety
   end
