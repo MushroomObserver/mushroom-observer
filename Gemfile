@@ -127,8 +127,8 @@ gem("mail")
 gem("net-smtp", require: false)
 
 # These seem to be required by unicorn -> zeitwerk
-gem("net-pop")
 gem("net-imap")
+gem("net-pop")
 
 # for detecting file type of uploaded images
 gem("mimemagic")
@@ -167,6 +167,8 @@ gem("simplecov-lcov", require: false)
 gem("brakeman", require: false)
 
 # Use rubocop and associated gems for code quality control
+# When updating rubocop, insure that .codeclimate.yml uses highest available
+# rubocop channel. See https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
 gem("rubocop", require: false)
 gem("rubocop-performance")
 gem("rubocop-rails")
