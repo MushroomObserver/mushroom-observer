@@ -16,9 +16,12 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     assert_selector("body.observations__new")
 
     within("#observation_form") do
-      assert_field("collection_number_name", with: users(:rolf).legal_name)
-      assert_field("herbarium_record_herbarium_name",
-                   with: users(:rolf).preferred_herbarium_name)
+      assert_select("observation_when_1i", text: Date.today.year.to_s)
+      assert_select("observation_when_2i", text: Date.today.strftime("%B"))
+      assert_select("observation_when_3i", text: Date.today.strftime("%d").to_i)
+      # assert_field("collection_number_name", with: users(:rolf).legal_name)
+      # assert_field("herbarium_record_herbarium_name",
+      #              with: users(:rolf).preferred_herbarium_name)
       assert_selector("#where_help",
                       text: "Albion, Mendocino Co., California")
       fill_in("naming_name", with: "Elfin saddle")
