@@ -80,6 +80,19 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   include CapybaraSessionExtensions
   include CapybaraMacros
 
+  # Javascript tests use this
+  Capybara.register_driver :firefox_headless do |app|
+    options = ::Selenium::WebDriver::Firefox::Options.new
+    options.args << '--headless'
+
+    Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+  end
+
+  # In case using screenshot
+  # Capybara::Screenshot.register_driver(:firefox_headless) do |driver, path|
+  #   driver.browser.save_screenshot(path)
+  # end
+
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
   def setup
