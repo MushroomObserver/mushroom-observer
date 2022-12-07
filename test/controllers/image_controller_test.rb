@@ -1123,7 +1123,7 @@ class ImageControllerTest < FunctionalTestCase
     post(:bulk_vote_anonymity_updater, params: { commit: "bad commit" })
 
     assert_flash_error
-    assert_redirected_to(account_prefs_path)
+    assert_redirected_to(edit_account_preferences_path)
   end
 
   def test_original_filename_visibility

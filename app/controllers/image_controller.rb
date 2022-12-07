@@ -827,7 +827,7 @@ class ImageController < ApplicationController
           :image_vote_anonymity_invalid_submit_button.l(label: submit)
         )
       end
-      redirect_to(controller: "account", action: "prefs")
+      redirect_to(edit_account_preferences_path)
     else
       @num_anonymous = ImageVote.connection.select_value(%(
         SELECT count(id) FROM image_votes
