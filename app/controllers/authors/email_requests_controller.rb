@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Authors
-  # request to be an object author
+  # request to be an object (usually a Description) author
   class EmailRequestsController < ApplicationController
     # filters
     before_action :login_required
@@ -23,14 +23,13 @@ module Authors
 
     private
 
-    # TODO: Use QueuedEmail mechanism
     def send_author_emails
       subject = param_lookup([:email, :subject], "")
       content = param_lookup([:email, :content], "")
 
       (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
-        AuthorMailer.build(@user, receiver, @object, subject,
-                           content).deliver_now
+        QueuedEmail::AuthorRequest.create_email(@user, receiver, @object,
+                                                subject, content)
       end
     end
   end
