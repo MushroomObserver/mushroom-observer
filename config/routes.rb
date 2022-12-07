@@ -666,6 +666,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  # ----- Project:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/project/show_project/:id", to: "project#show_project",
+                                   as: "show_project")
+
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
