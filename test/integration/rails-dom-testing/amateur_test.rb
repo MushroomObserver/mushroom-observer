@@ -347,7 +347,7 @@ class AmateurTest < IntegrationTestCase
       get("/#{obs.id}")
       assert_template("observations/show")
       click_mo_link(label: /login/i)
-      assert_template("account/login")
+      assert_template("account/login/new")
       open_form do |form|
         form.change("login", namer.login)
         form.change("password", "testpassword")
