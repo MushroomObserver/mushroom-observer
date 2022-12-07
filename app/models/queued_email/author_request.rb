@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Request to be the author of an object
+# Request to be the author of an object, usually a Description
 class QueuedEmail::AuthorRequest < QueuedEmail
   def obj_id
     get_integer(:obj_id)
