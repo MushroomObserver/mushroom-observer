@@ -129,18 +129,6 @@ class QueuedEmail < AbstractModel
   self.inheritance_column = "flavor"
   self.store_full_sti_class = true
 
-  # Ensure that all the subclasses get loaded.  Problem is some subclasses have
-  # the same name as toplevel classes, e.g., QueuedEmail::Comment.  Thus the
-  # constant QueuedEmail::Comment will already be "defined" if Comment is
-  # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
-  # soon as QueuedEmail is defined, we know that all subclasses are also
-  # properly defined, and we no longer have to rely on autoloading.
-  #
-  Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
-    match = /(\w+)\.rb$/.match(file)
-    require("queued_email/#{match[1]}") if match
-  end
-
   # ----------------------------
   # :section: General methods.
   # ----------------------------
