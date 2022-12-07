@@ -23,14 +23,11 @@ module Authors
 
     private
 
-    # TODO: Use QueuedEmail mechanism
     def send_author_emails
       subject = param_lookup([:email, :subject], "")
       content = param_lookup([:email, :content], "")
 
       (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
-        # AuthorMailer.build(@user, receiver, @object, subject,
-        #                    content).deliver_now
         QueuedEmail::AuthorRequest.create_email(@user, receiver, @object,
                                                 subject, content)
       end
