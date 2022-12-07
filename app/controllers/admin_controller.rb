@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
+#  ==== Admin utilities
+#  test_flash_redirection::      <tt>(R . .)</tt>
+
 class AdminController < ApplicationController
   before_action :login_required
 
+  # NOTE: this action does not require admin access.
   def test_flash_redirection
     tags = params[:tags].to_s.split(",")
     if tags.any?
@@ -19,51 +23,5 @@ class AdminController < ApplicationController
       @title = "test_flash_redirection_title".to_sym.t # rubocop:disable Lint/SymbolConversion
       render(layout: "application", html: "")
     end
-  end
-
-  # Update banner across all translations.
-  def change_banner
-    if !in_admin_mode?
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    elsif request.method == "POST"
-      @val = params[:val].to_s.strip
-      @val = "X" if @val.blank?
-      update_banner_languages
-      redirect_to("/")
-    else
-      @val = :app_banner_box.l.to_s
-    end
-  end
-
-  private
-
-  def update_banner_languages
-    time = Time.zone.now
-    Language.all.each do |lang|
-      if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
-        update_banner_string(str, time)
-      else
-        str = create_banner_string(lang, time)
-      end
-      str.update_localization
-      str.language.update_localization_file
-      str.language.update_export_file
-    end
-  end
-
-  def update_banner_string(str, time)
-    str.update!(
-      text: @val,
-      updated_at: (str.language.official ? time : time - 1.minute)
-    )
-  end
-
-  def create_banner_string(lang, time)
-    lang.translation_strings.create!(
-      tag: "app_banner_box",
-      text: @val,
-      updated_at: time - 1.minute
-    )
   end
 end

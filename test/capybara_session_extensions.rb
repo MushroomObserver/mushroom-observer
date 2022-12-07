@@ -14,26 +14,39 @@ module CapybaraSessionExtensions
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
-    visit("/account/login")
+    visit("/account/login/new")
 
-    fill_in("user_login", with: login)
-    fill_in("user_password", with: password)
-    check("user_remember_me") if remember_me == true
+    within("#account_login_form") do
+      fill_in("user_login", with: login)
+      fill_in("user_password", with: password)
+      check("user_remember_me") if remember_me == true
 
-    click_button("Login")
+      click_commit
+    end
   end
 
   # Login the given user, testing to make sure it was successful.
   def login!(user, *args)
     login(user, *args)
-    assert_flash(/success/i)
+    assert_flash_success
     user = User.find_by(login: user) if user.is_a?(String)
-    assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
+    assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
+  end
+
+  def put_user_in_admin_mode(user = :zero_user)
+    user.admin = true
+    user.save!
+    login(user.login)
+    assert_equal(user.id, User.current_id)
+
+    click_on(id: "user_nav_admin_mode_link")
+    assert_match(/DANGER: You are in administrator mode/, page.html)
   end
 
   # The current_path plus the query, similar to @request.fullpath
+  # URI.parse(current_url).request_uri gives same result but slower
   def current_fullpath
-    URI.parse(current_url).request_uri
+    current_url[current_host.size..]
   end
 
   def current_path_id
@@ -53,12 +66,30 @@ module CapybaraSessionExtensions
     assert_selector("#flash_notices", text: text)
   end
 
+  def assert_no_flash_text(text = "")
+    refute_selector("#flash_notices", text: text)
+  end
+
   def assert_no_flash
     refute_selector("#flash_notices")
   end
 
   def assert_flash_success
     assert_selector("#flash_notices.alert-success")
+  end
+
+  def assert_flash_error
+    assert_any_of_selectors("#flash_notices.alert-error",
+                            "#flash_notices.alert-danger")
+  end
+
+  def assert_no_flash_errors
+    assert_none_of_selectors("#flash_notices.alert-error",
+                             "#flash_notices.alert-danger")
+  end
+
+  def assert_flash_warning
+    assert_selector("#flash_notices.alert-warning")
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers
@@ -68,5 +99,10 @@ module CapybaraSessionExtensions
     @page_stack ? @page_stack.push(current_path) : @page_stack = [current_path]
     yield(block)
     visit(@page_stack.pop)
+  end
+
+  # Many forms have more than one submit button
+  def click_commit
+    first(:button, type: "submit").click
   end
 end

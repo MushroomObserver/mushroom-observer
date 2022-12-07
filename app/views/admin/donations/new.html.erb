@@ -1,0 +1,40 @@
+<%
+  @title = :create_donation_title.l
+
+  tabs = [
+    link_to(:donors_tab.t, support_donors_path),
+    link_to(:donate_tab.t, support_donate_path),
+	  link_to(:review_donations_tab.t, edit_admin_donations_path)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= form_with(url: admin_donations_path,
+              id: "admin_new_donations_form") do |form| %>
+
+  <%= fields_for(:donation) do |f| %>
+    <div class="form-group form-inline">
+      <%= f.label(:amount, :confirm_amount.t + ":") %>
+      $<%= f.text_field(:amount, size: 7, class: "form-control") %>
+    </div>
+
+    <div class="form-group form-inline">
+      <%= f.label(:who, :WHO.t + ":") %>
+      <%= f.text_field(:who, size: 50, class: "form-control") %>
+    </div>
+
+    <div class="form-group form-inline">
+      <%= f.check_box(:anonymous, class: "form-control") %>
+      <%= f.label(:anonymous, :donate_anonymous.t) %>
+    </div>
+
+    <div class="form-group form-inline">
+      <%= f.label(:email, :EMAIL.t + ":") %>
+      <%= f.text_field(:email, size: 50, class: "form-control") %>
+    </div>
+
+    <%= f.submit(:create_donation_add.l,
+                 class: "btn btn-default center-block") %>
+  <% end %>
+
+<% end %>

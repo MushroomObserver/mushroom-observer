@@ -17,58 +17,6 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  account: {
-    activate_api_key: {},
-    add_user_to_group: {},
-    api_keys: {},
-    blocked_ips: {},
-    create_alert: {},
-    create_api_key: {},
-    destroy_user: {},
-    edit_api_key: {},
-    email_new_password: {},
-    login: {},
-    logout_user: {},
-    no_comment_email: { methods: [:get] },
-    no_comment_response_email: {},
-    no_commercial_email: {},
-    no_consensus_change_email: {},
-    no_email_comments_all: {},
-    no_email_comments_owner: {},
-    no_email_comments_response: {},
-    no_email_general_commercial: {},
-    no_email_general_feature: {},
-    no_email_general_question: {},
-    no_email_locations_admin: {},
-    no_email_locations_all: {},
-    no_email_locations_author: {},
-    no_email_locations_editor: {},
-    no_email_names_admin: {},
-    no_email_names_all: {},
-    no_email_names_author: {},
-    no_email_names_editor: {},
-    no_email_names_reviewer: {},
-    no_email_observations_all: {},
-    no_email_observations_consensus: {},
-    no_email_observations_naming: {},
-    no_feature_email: {},
-    no_name_change_email: {},
-    no_name_proposal_email: {},
-    no_question_email: {},
-    prefs: {},
-    profile: {},
-    remove_api_keys: {},
-    remove_image: {},
-    reverify: {},
-    send_verify: {},
-    signup: {},
-    switch_users: {},
-    test_autologin: {},
-    turn_admin_off: {},
-    turn_admin_on: {},
-    verify: {},
-    welcome: {}
-  },
   ajax: {
     api_key: {},
     auto_complete: {},
@@ -329,12 +277,10 @@ ACTIONS = {
   },
   support: {
     confirm: {},
-    create_donation: {},
     donate: {},
     donors: {},
     governance: {},
     letter: {},
-    review_donations: {},
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are to very old pages that we might get rid of.
@@ -560,10 +506,57 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
-  # ----- Admin: no resources, just actions ------------------------------------
-  match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
-  match("/admin/test_flash_redirection",
-        to: "admin#test_flash_redirection", via: [:get, :post])
+  # NOTE: Nesting below is necessary to get nice path helpers
+  resource :account, only: [:new, :create]
+
+  namespace :account do
+    get("welcome")
+    get("signup", to: "/account#new")
+
+    resource :login, only: [:new, :create], controller: "login"
+    get("email_new_password", controller: "login")
+    post("new_password_request", controller: "login")
+    get("logout", controller: "login")
+    get("test_autologin", controller: "login")
+
+    resource :preferences, only: [:edit, :update]
+    get("no_email/:id", to: "preferences#no_email", as: "no_email")
+
+    resource :profile, only: [:edit, :update], controller: "profile"
+    patch("profile/remove_image", controller: "profile")
+
+    resource :verify, only: [:new, :create], controller: "verifications"
+    # Alternate path name for email verification
+    get("verify(/:id)", to: "verifications#new", as: "verify_email")
+    get("reverify", controller: "verifications")
+    post("verify/resend_email(/:id)", to: "verifications#resend_email",
+                                      as: "resend_verification_email")
+
+    resources :api_keys, only: [:index, :create, :edit, :update]
+    post("api_keys/:id/activate", to: "api_keys#activate",
+                                  as: "activate_api_key")
+    post("api_keys/remove", to: "api_keys#remove",
+                            as: "remove_api_key")
+  end
+
+  # ----- Admin: resources and actions ------------------------------------
+  namespace :admin do
+    resource :users, only: [:edit, :update, :destroy]
+    resource :donations, only: [:new, :create, :edit, :update, :destroy]
+    get("review_donations", to: "donations#edit")
+    resource :turn_admin_on, only: [:show], controller: "turn_on"
+    resource :turn_admin_off, only: [:show], controller: "turn_off"
+    resource :banner, only: [:edit, :update], controller: "banner"
+    resource :switch_users, only: [:new, :create]
+    resource :blocked_ips, only: [:edit, :update]
+    resource :add_user_to_group, only: [:new, :create],
+                                 controller: "add_user_to_group"
+    namespace :emails do
+      resource :feature, only: [:new, :create], controller: "feature"
+    end
+    # get("show")
+    get("test_flash_redirection")
+  end
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
@@ -624,6 +617,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
+
+  # ----- Image:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/image/show_image/:id", to: "image#show_image",
+                               as: "show_image")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -689,6 +687,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
+
+  # ----- Species List:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/species_list/show_species_list/:id",
+      to: "species_list#show_species_list",
+      as: "show_species_list")
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]

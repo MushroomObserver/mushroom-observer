@@ -10,25 +10,6 @@ class EmailsControllerTest < FunctionalTestCase
     assert_form_action(action: :ask_webmaster_question)
   end
 
-  def test_some_admin_pages
-    [
-      [:features, "features", {}]
-    ].each do |page, response, params|
-      logout
-      get(page, params: params)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(page, params: params)
-      assert_redirected_to("/")
-      assert_flash_text(/denied|only.*admin/i)
-
-      make_admin("rolf")
-      get(page, params: params)
-      assert_template(response) # 1
-    end
-  end
-
   def test_ask_questions
     id = observations(:coprinus_comatus_obs).id
     requires_login(:ask_observation_question, id: id)
@@ -110,24 +91,6 @@ class EmailsControllerTest < FunctionalTestCase
          })
     assert_response(response)
     assert_flash_text(flash) if flash
-  end
-
-  def test_features
-    page = :features
-    params = { feature_email: { content: "test" } }
-
-    logout
-    post(page, params: params)
-    assert_redirected_to(controller: :account, action: :login)
-
-    login("rolf")
-    post(page, params: params)
-    assert_redirected_to("/")
-    assert_flash_text(/denied|only.*admin/i)
-
-    make_admin("rolf")
-    post(page, params: params)
-    assert_redirected_to(users_path(by: "name"))
   end
 
   def test_send_commercial_inquiry
@@ -253,7 +216,7 @@ class EmailsControllerTest < FunctionalTestCase
 
     post(:name_change_request, params: params)
     assert_redirected_to(
-      "#{name_show_name_path}/#{name.id}",
+      show_name_path(id: name.id),
       "Sending Name Change Request should redirect to Name page"
     )
   end

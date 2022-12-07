@@ -44,6 +44,13 @@ a:hover {
 //   padding: $padding-small-vertical $padding-small-horizontal;
 }
 
+input.has_error,
+textarea.has_error,
+select.has_error {
+  @extend .form-control;
+  border-color: $alert-danger-border;
+}
+
 //
 // alerts
 // --------------------------------------------------

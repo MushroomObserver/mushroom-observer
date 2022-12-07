@@ -5,7 +5,7 @@
 
 <% if @user %>
   <%= :welcome_note.tp %>
-  <%= link_to(:welcome_logout_link.t, action: :logout_user) %>
+  <%= link_to(:welcome_logout_link.t, account_logout_path) %>
 <% else %>
   <%= :welcome_no_user_note.tp %>
 <% end %>
