@@ -92,7 +92,7 @@ class Vote < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    :observations
+    "/observations"
   end
 
   # This is used to mean "delete my vote".

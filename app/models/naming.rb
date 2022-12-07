@@ -65,7 +65,7 @@ class Naming < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    :observations
+    "/observations"
   end
 
   def self.construct(args, observation)

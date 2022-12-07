@@ -995,7 +995,7 @@ class ApplicationController < ActionController::Base
     if params.is_a?(String) # i.e., if params is a path
       append_query_param_to_path(params, query_param)
     else
-      params[:q] = query_param
+      params[:q] = query_param if query_param
       params
     end
   end
@@ -1609,9 +1609,10 @@ class ApplicationController < ActionController::Base
     # Assure that this method calls a top level controller namespace by
     # the show_controller in a string after a leading slash.
     # The name must be anchored with a slash to avoid namespacing it.
+    # Currently handled upstream in AbstractModel#show_controller.
     # references: http://guides.rubyonrails.org/routing.html#controller-namespaces-and-routing
     # https://stackoverflow.com/questions/20057910/rails-url-for-behaving-differently-when-using-namespace-based-on-current-cont
-    redirect_with_query(controller: "/#{model.show_controller}",
+    redirect_with_query(controller: model.show_controller,
                         action: model.index_action)
     nil
   end
