@@ -185,4 +185,19 @@ class QueuedEmailTest < UnitTestCase
     email = QueuedEmail.first.deliver_email
     assert(email)
   end
+
+  def test_author_request_email
+    QueuedEmail::AuthorRequest.create_email(mary, dick,
+      name_descriptions(:peltigera_desc), "Hi", "Please make me the author")
+    assert_email(0,
+                 flavor: "QueuedEmail::AuthorRequest",
+                 from: mary,
+                 to: dick,
+                 obj_id: name_descriptions(:peltigera_desc).id,
+                 obj_type: "name_description",
+                 subject: "Hi",
+                 note: "Please make me the author")
+    email = QueuedEmail.first.deliver_email
+    assert(email)
+  end
 end
