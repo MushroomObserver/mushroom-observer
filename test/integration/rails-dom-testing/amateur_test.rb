@@ -15,7 +15,7 @@ class AmateurTest < IntegrationTestCase
 
     # Login.
     click_mo_link(label: "Login", in: :left_panel)
-    assert_template("account/login")
+    assert_template("account/login/new")
 
     # Try to login without a password.
     open_form do |form|
@@ -25,7 +25,7 @@ class AmateurTest < IntegrationTestCase
       form.change("login", "rolf")
       form.submit("Login")
     end
-    assert_template("account/login")
+    assert_template("account/login/new")
     assert_flash_text(/unsuccessful/i)
 
     # Try again with incorrect password.
@@ -37,7 +37,7 @@ class AmateurTest < IntegrationTestCase
       form.uncheck("remember_me")
       form.submit("Login")
     end
-    assert_template("account/login")
+    assert_template("account/login/new")
     assert_flash_text(/unsuccessful/i)
 
     # Try yet again with correct password.
@@ -53,16 +53,16 @@ class AmateurTest < IntegrationTestCase
 
     # This should only be accessible if logged in.
     click_mo_link(label: "Preferences", in: :left_panel)
-    assert_template("account/prefs")
+    assert_template("account/preferences/edit")
 
     # Log out and try again.
     click_mo_link(label: "Logout", in: :left_panel)
-    assert_template("account/logout_user")
+    assert_template("account/login/logout")
     assert_raises(MiniTest::Assertion) do
       click_mo_link(label: "Preferences", in: :left_panel)
     end
-    get("/account/prefs")
-    assert_template("account/login")
+    get("/account/preferences/edit")
+    assert_template("account/login/new")
   end
 
   # ----------------------------
@@ -93,14 +93,14 @@ class AmateurTest < IntegrationTestCase
   def try_autologin(cookies, user)
     sess = open_session
     sess.cookies["mo_user"] = cookies["mo_user"]
-    sess.get("/account/prefs")
+    sess.get("/account/preferences/edit")
     if user
-      sess.assert_match("account/prefs", sess.response.body)
-      sess.assert_no_match("account/login", sess.response.body)
+      sess.assert_match("account/preferences/edit", sess.response.body)
+      sess.assert_no_match("account/login/new", sess.response.body)
       assert_users_equal(user, sess.assigns(:user))
     else
-      sess.assert_no_match("account/prefs", sess.response.body)
-      sess.assert_match("account/login", sess.response.body)
+      sess.assert_no_match("account/preferences/edit", sess.response.body)
+      sess.assert_match("account/login/new", sess.response.body)
     end
   end
 
@@ -318,13 +318,16 @@ class AmateurTest < IntegrationTestCase
     end
   end
 
+  # Note that this only tests non-JS vote submission.
+  # Most users will have their vote sent via AJAX from vote_by_ajax.js
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
-      open_form("form[id=cast_votes_1]") do |form|
-        form.assert_value("vote_#{naming.id}_value", /no opinion/i)
-        form.select("vote_#{naming.id}_value", /call it that/i)
-        form.submit("Update Votes")
+      open_form("form#cast_vote_#{naming.id}") do |form|
+        form.assert_value("vote_value", /no opinion/i)
+        form.select("vote_value", /call it that/i)
+        form.assert_value("vote_value", "3.0")
+        form.submit("Cast Vote")
       end
       # assert_template("observations/show")
       assert_match(/call it that/i, response.body)
@@ -333,9 +336,9 @@ class AmateurTest < IntegrationTestCase
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
-      open_form("form[id=cast_votes_1]") do |form|
-        form.select("vote_#{naming.id}_value", /as if!/i)
-        form.submit("Update Votes")
+      open_form("form#cast_vote_#{naming.id}") do |form|
+        form.select("vote_value", /as if!/i)
+        form.submit(:show_namings_cast.l)
       end
     end
   end
@@ -345,42 +348,45 @@ class AmateurTest < IntegrationTestCase
       get("/#{obs.id}")
       assert_template("observations/show")
       click_mo_link(label: /login/i)
-      assert_template("account/login")
+      assert_template("account/login/new")
       open_form do |form|
         form.change("login", namer.login)
         form.change("password", "testpassword")
         form.change("remember_me", true)
         form.submit("Login")
       end
-      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
+      assert_select(
+        "a[class*='edit_naming_'], input[class*='destroy_naming_']",
+        false
+      )
       click_mo_link(label: /propose.*name/i)
     end
 
     def create_name(obs, text_name)
-      assert_template("naming/create")
+      assert_template("observations/namings/new")
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
       # (Make sure there is a tab to go back to observations/show.)
       assert_select("#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
-        form.assert_value("name_name", "")
-        form.assert_value("vote_value", "")
-        form.assert_unchecked("reason_1_check")
-        form.assert_unchecked("reason_2_check")
-        form.assert_unchecked("reason_3_check")
-        form.assert_unchecked("reason_4_check")
+        form.assert_value("naming_name", "")
+        form.assert_value("naming_vote_value", "")
+        form.assert_unchecked("naming_reasons_1_check")
+        form.assert_unchecked("naming_reasons_2_check")
+        form.assert_unchecked("naming_reasons_3_check")
+        form.assert_unchecked("naming_reasons_4_check")
         form.submit
       end
-      assert_template("naming/create")
+      assert_template("observations/namings/new")
       # (I don't care so long as it says something.)
       assert_flash_text(/\S/)
 
       open_form do |form|
-        form.change("name", text_name)
+        form.change("naming_name", text_name)
         form.submit
       end
-      assert_template("naming/create")
+      assert_template("observations/namings/new")
       assert_select("div.alert-warning") do |elems|
         assert(elems.any? do |e|
                  /MO does not recognize the name.*#{text_name}/ =~ e.to_s
@@ -389,11 +395,11 @@ class AmateurTest < IntegrationTestCase
       end
 
       open_form do |form|
-        form.assert_value("name", text_name)
-        form.assert_unchecked("reason_1_check")
-        form.assert_unchecked("reason_2_check")
-        form.assert_unchecked("reason_3_check")
-        form.assert_unchecked("reason_4_check")
+        form.assert_value("naming_name", text_name)
+        form.assert_unchecked("naming_reasons_1_check")
+        form.assert_unchecked("naming_reasons_2_check")
+        form.assert_unchecked("naming_reasons_3_check")
+        form.assert_unchecked("naming_reasons_4_check")
         form.select(/vote/, /call it that/i)
         form.submit
       end
@@ -411,23 +417,23 @@ class AmateurTest < IntegrationTestCase
       # (Make sure naming shows up somewhere.)
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
-      # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*='naming/edit/#{naming.id}']", 2)
-      assert_select("a[href*='naming/destroy/#{naming.id}']", 2)
+      # (Now one: same for wide-screen as for mobile.)
+      assert_select("a[href*='#{edit_naming_path(naming.id)}']", 1)
+      assert_select("input.destroy_naming_link_#{naming.id}", 1)
 
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click_mo_link(label: /edit/i, href: %r{naming/edit})
-      assert_template("naming/edit")
+      click_mo_link(label: /edit/i, href: /#{edit_naming_path(naming.id)}/)
+      assert_template("observations/namings/edit")
       open_form do |form|
-        form.assert_value("name", text_name)
-        form.assert_checked("reason_1_check")
-        form.uncheck("reason_1_check")
-        form.change("name", "#{text_name} #{author}")
-        form.check("reason_2_check")
-        form.change("reason_2_notes", reason)
-        form.select("vote_value", /call it that/i)
+        form.assert_value("naming_name", text_name)
+        form.assert_checked("naming_reasons_1_check")
+        form.uncheck("naming_reasons_1_check")
+        form.change("naming_name", "#{text_name} #{author}")
+        form.check("naming_reasons_2_check")
+        form.change("naming_reasons_2_notes", reason)
+        form.select("naming_vote_value", /call it that/i)
         form.submit
       end
       assert_template("observations/show")
@@ -445,28 +451,28 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click_mo_link(label: /edit/i, href: %r{naming/edit})
-      assert_template("naming/edit")
+      click_mo_link(label: /edit/i, href: /#{edit_naming_path(naming.id)}/)
+      assert_template("observations/namings/edit")
       open_form do |form|
-        form.assert_value("name", "#{text_name} #{author}")
-        form.assert_unchecked("reason_1_check")
-        form.assert_value("reason_1_notes", "")
-        form.assert_checked("reason_2_check")
-        form.assert_value("reason_2_notes", reason)
-        form.assert_unchecked("reason_3_check")
-        form.assert_value("reason_3_notes", "")
+        form.assert_value("naming_name", "#{text_name} #{author}")
+        form.assert_unchecked("naming_reasons_1_check")
+        form.assert_value("naming_reasons_1_notes", "")
+        form.assert_checked("naming_reasons_2_check")
+        form.assert_value("naming_reasons_2_notes", reason)
+        form.assert_unchecked("naming_reasons_3_check")
+        form.assert_value("naming_reasons_3_notes", "")
       end
       click_mo_link(label: /cancel.*show/i)
       naming
     end
 
     def failed_delete(_obs)
-      click_mo_link(label: /destroy/i, href: %r{naming/destroy})
+      click_mo_link(label: /destroy/i, href: /namings/)
       assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      click_mo_link(label: /destroy/i, href: %r{naming/destroy})
+      click_mo_link(label: /destroy/i, href: /#{naming_path(naming.id)}/)
       assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
