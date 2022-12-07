@@ -1102,7 +1102,7 @@ class ImageControllerTest < FunctionalTestCase
     login("mary")
     post(:bulk_vote_anonymity_updater,
          params: { commit: :image_vote_anonymity_make_anonymous.l })
-    assert_redirected_to(controller: :account, action: :prefs)
+    assert_redirected_to(edit_account_preferences_path)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
@@ -1111,7 +1111,7 @@ class ImageControllerTest < FunctionalTestCase
     login("rolf")
     post(:bulk_vote_anonymity_updater,
          params: { commit: :image_vote_anonymity_make_public.l })
-    assert_redirected_to(controller: :account, action: :prefs)
+    assert_redirected_to(edit_account_preferences_path)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert_not(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)

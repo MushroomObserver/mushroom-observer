@@ -109,7 +109,7 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
 
     I18n.stub(:t, translator) do
       Capybara.reset_sessions!
-      visit("/account/login")
+      visit("/account/login/new")
       fill_in("en:mo.login_user:", with: sender.login)
       fill_in("en:mo.login_password:", with: "testpassword")
       click_button("en:mo.login_login")

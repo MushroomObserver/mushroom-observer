@@ -363,7 +363,7 @@ class AmateurTest < IntegrationTestCase
     end
 
     def create_name(obs, text_name)
-      assert_template("observations/namings/new")
+      assert_template("naming/create") # observations/namings/new
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
       # (Make sure there is a tab to go back to observations/show.)

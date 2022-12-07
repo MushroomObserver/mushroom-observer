@@ -5,7 +5,7 @@ Subject: [MO] Petigera Has Been Changed
 
 Name was Changed
 
-There were change(s) made to the name Petigera (<%= ActiveRecord::FixtureSet.identify(:peltigera) %>):
+There were change(s) made to the name Petigera (158828821):
 
 Time: IGNORE
 By: Tricky Dick (dick)
@@ -60,9 +60,8 @@ Good for making birds nests... if you're a bird.
 You received this email because you are an author of a description of the changed name.
 Here are some handy links:
 
-Show this name: https://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:peltigera) %>
-I'm not interested in this name: https://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&type=Name&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
-Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:mary) %>?type=names_author
+Show this name: https://mushroomobserver.org/name/show_name/158828821
+I'm not interested in this name: https://mushroomobserver.org/interest/set_interest?id=158828821&type=Name&user=365790011&state=-1
+Stop sending me email like this: https://mushroomobserver.org/account/no_email/365790011?type=names_author
 Change your preferences: https://mushroomobserver.org/account/preferences/edit
 Latest changes at Mushroom Observer: https://mushroomobserver.org
-

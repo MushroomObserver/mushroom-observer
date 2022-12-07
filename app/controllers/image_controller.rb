@@ -845,7 +845,7 @@ class ImageController < ApplicationController
       UPDATE images SET original_name = '' WHERE user_id = #{User.current_id}
     ))
     flash_notice(:prefs_bulk_filename_purge_success.t)
-    redirect_to(controller: :account, action: :prefs)
+    redirect_to(edit_account_preferences_path)
   end
 
   ##############################################################################
