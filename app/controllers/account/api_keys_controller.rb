@@ -59,10 +59,10 @@ module Account
     def remove_api_keys
       num_destroyed = 0
       @user.api_keys.each do |key|
-        if params["key_#{key.id}"] == "1"
-          @user.api_keys.delete(key)
-          num_destroyed += 1
-        end
+        next unless params["key_#{key.id}"] == "1"
+
+        @user.api_keys.delete(key)
+        num_destroyed += 1
       end
       if num_destroyed.positive?
         flash_notice(:account_api_keys_removed_some.t(num: num_destroyed))
