@@ -221,7 +221,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     # assert_selector("a[href^='/#{obs}']")
     links = find_all("a[href^='/#{obs}']")
     assert(links.all? { |l| l[:href].match(/#{obs}\?q=/) },
-           "Expected a link to reference #{obs}\?q=??.\n" \
+           "Expected a link to reference #{obs}?q=??.\n" \
            "Found these: #{links.inspect}")
   end
 

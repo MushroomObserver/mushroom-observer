@@ -485,7 +485,7 @@ class String
         break
       end
     end
-    result += opens.reverse.map { |x| "<\/#{x}>" }.join
+    result += opens.reverse.map { |x| "</#{x}>" }.join
     # Disable cop; we need `html_safe` to prevent Rails from adding escaping
     result.html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -659,10 +659,10 @@ class String
     d = (0..m).to_a
     x = nil
 
-    str1.each_char.each_with_index do |char1, i|
+    str1.each_char.with_index do |char1, i|
       e = i + 1
 
-      str2.each_char.each_with_index do |char2, j|
+      str2.each_char.with_index do |char2, j|
         cost = (char1 == char2 ? 0 : 1)
         x = [
           d[j + 1] + 1, # insertion

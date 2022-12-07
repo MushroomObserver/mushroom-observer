@@ -2468,9 +2468,8 @@ class ObservationsControllerTest < FunctionalTestCase
             }
           },
           good_image: {
-            new_image1.id => {
-            },
-            new_image2.id => {
+            new_image1.id.to_s => {},
+            new_image2.id.to_s => {
               notes: "notes_2_new"
             }
           },
