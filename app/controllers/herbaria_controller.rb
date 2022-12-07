@@ -143,12 +143,10 @@ class HerbariaController < ApplicationController
     if user_can_destroy_herbarium?
       @herbarium.destroy
       redirect_to_referrer ||
-        redirect_to(herbarium_path(id: @herbarium.try(&:id),
-                                   q: get_query_param))
+        redirect_with_query(herbarium_path(@herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_to(herbarium_path(id: @herbarium.id,
-                                                         q: get_query_param))
+      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
     end
   end
 
@@ -222,8 +220,7 @@ class HerbariaController < ApplicationController
     return true if in_admin_mode? || @herbarium.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_referrer ||
-      redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
+    redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
     false
   end
 
@@ -357,7 +354,7 @@ class HerbariaController < ApplicationController
 
   def redirect_to_create_location_or_referrer_or_show_location
     redirect_to_create_location || redirect_to_referrer ||
-      redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
+      redirect_with_query(herbarium_path(@herbarium))
   end
 
   def redirect_to_create_location
