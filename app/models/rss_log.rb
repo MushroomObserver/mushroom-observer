@@ -160,11 +160,6 @@ class RssLog < AbstractModel
   # 65535, I think, but let's mak sure there's a safe buffer.
   MAX_LENGTH = 65_500
 
-  # Override the default show_controller
-  def self.show_controller
-    :rss_logs
-  end
-
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
   def self.all_types

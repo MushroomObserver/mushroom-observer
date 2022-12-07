@@ -368,18 +368,30 @@ class AbstractModel < ApplicationRecord
   # I don't think there will be relevant special cases,
   # i.e., searchable models with singular controller names. JDC 2020-08-02
   #
-  # Return the name of the controller (as a symbol)
+  # Return the name of the controller (as a string! see below)
   # that handles the "show_<object>" for this object.
   #
   #   Article.show_controller => :articles # for normalized controller
   #
   #   Name.show_controller => :name # unnormalized controller & special cases
   #
+  # NOTE: `show_controller` MUST string-interpolate the controller name after
+  # a leading forward slash, in order to explicitly specify a "top level"
+  # controller. Took me a year to learn again what Joe learned two years ago:
+  # Without the forward slash, requests from a nested controller will assume the
+  # same nesting. It's very confusing to debug, and almost never what you want.
+  #
+  # Because of this misleading specificity, I'd like to move away from
+  # `show_controller`, and methods composing paths by controller/action args,
+  # in favor of Rails explicit path helpers as drawn by routes, but in some
+  # cases `show_controller` is practical - some actions handle a polyvalent
+  # object whose path cannot be easily interpolated. - AN 10/2022
+  #
   def self.show_controller
     if controller_normalized?
-      name.pluralize.underscore.to_sym # Rails standard for most controllers
+      "/#{name.pluralize.underscore}" # Rails standard for most controllers
     else
-      name.underscore.to_sym # old MO controller names and any special cases
+      "/#{name.underscore}" # old MO controller names and any special cases
     end
   end
 
@@ -428,12 +440,28 @@ class AbstractModel < ApplicationRecord
     self.class.index_action
   end
 
+  # Return the link_to args of the "index_<object>" action
+  # (the index, indexed to a particular id)
+  #
+  #   Name.index_link_args(12) => {controller: "/name", action: :index_name,
+  #                                id: 12}
+  #   name.index_link_args     => {controller: "/name", action: :index_name,
+  #                                id: 12}
+  #
+  def self.index_link_args(id)
+    { controller: show_controller, action: index_action, id: id }
+  end
+
+  def index_link_args
+    self.class.index_link_args(id)
+  end
+
   # Return the name of the "show_<object>" action (as a symbol)
   # that displays this object.
   #
   #   Article.show_action => :show # normalized controller
   #
-  #   Name.show_action => :show_name # unormalized
+  #   Name.show_action => :show_name # unnormalized
   #   name.show_action => :show_name
   #
   def self.show_action
@@ -449,17 +477,20 @@ class AbstractModel < ApplicationRecord
   # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
-  #   Article.index_action => "https://mushroomobserver.org/article/12"
+  #   Article.show_url(12) => "https://mushroomobserver.org/articles/12"
   #
   #   # unnormalized controller
   #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
   #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
   #
+  # NOTE: show_controller now has leading forward slash,
+  # to account for namespacing
+  #
   def self.show_url(id)
     if controller_normalized?
-      "#{MO.http_domain}/#{show_controller}/#{id}"
+      "#{MO.http_domain}#{show_controller}/#{id}"
     else
-      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
     end
   end
 
@@ -507,8 +538,10 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "show_<object>" action
   #
-  #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
-  #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
+  #   Name.show_link_args(12) => {controller: "/name", action: :show_name,
+  #                               id: 12}
+  #   name.show_link_args     => {controller: "/name", action: :show_name,
+  #                               id: 12}
   #
   def self.show_link_args(id)
     { controller: show_controller, action: show_action, id: id }
