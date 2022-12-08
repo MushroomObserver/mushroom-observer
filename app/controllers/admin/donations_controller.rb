@@ -2,23 +2,30 @@
 
 module Admin
   class DonationsController < ApplicationController
+    include Admin::RestrictAccessToAdminMode
+
     before_action :login_required
 
-    def authorize?(_user)
-      in_admin_mode?
-    end
+    # def authorize?(_user)
+    #   in_admin_mode?
+    # end
 
-    def access_denied
-      # error for #new and #create was :create_donation_not_allowed.t
-      # error for #edit and #update was :review_donations_not_allowed.t
+    # def access_denied
+    #   # error for #new and #create was :create_donation_not_allowed.t
+    #   # error for #edit and #update was :review_donations_not_allowed.t
 
-      flash_error(:permission_denied.t)
-      if session[:user_id]
-        redirect_to(support_donate_path)
-      else
-        redirect_to(new_account_login_path)
-      end
-    end
+    #   flash_error(:permission_denied.t)
+    #   # if session[:user_id]
+    #   #   redirect_to(support_donate_path)
+    #   # else
+    #   #   redirect_to(new_account_login_path)
+    #   # end
+    #   if session[:user_id]
+    #     redirect_to("/")
+    #   else
+    #     redirect_to(new_account_login_path)
+    #   end
+    # end
 
     def new
       @donation = Donation.new

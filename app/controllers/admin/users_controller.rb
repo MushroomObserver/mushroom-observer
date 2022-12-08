@@ -2,22 +2,29 @@
 
 module Admin
   class UsersController < ApplicationController
+    include Admin::RestrictAccessToAdminMode
+
     before_action :login_required
 
     ### Custom login_required behavior for this controller
 
-    def authorize?(_user)
-      in_admin_mode?
-    end
+    # def authorize?(_user)
+    #   in_admin_mode?
+    # end
 
-    def access_denied
-      flash_error(:permission_denied.t)
-      if params[:id]
-        redirect_to(user_path(id: params[:id]))
-      else
-        redirect_to(users_path)
-      end
-    end
+    # def access_denied
+    #   flash_error(:permission_denied.t)
+    #   # if params[:id]
+    #   #   redirect_to(user_path(id: params[:id]))
+    #   # else
+    #   #   redirect_to(users_path)
+    #   # end
+    #   if session[:user_id]
+    #     redirect_to("/")
+    #   else
+    #     redirect_to(new_account_login_path)
+    #   end
+    # end
 
     ###
 
