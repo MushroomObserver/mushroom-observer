@@ -28,15 +28,13 @@ module FooterHelper
       if is_admin
         authors += safe_nbsp
         authors += link_with_query("(#{:review_authors_review_authors.t})",
-                                   controller: :authors,
-                                   action: :review,
-                                   id: obj.id, type: type)
+                                   authors_review_path(id: obj.id, type: type))
       elsif !is_author
         authors += safe_nbsp
         authors += link_with_query("(#{:show_name_author_request.t})",
-                                   controller: :authors,
-                                   action: :email_request,
-                                   id: obj.id, type: type)
+                                   new_authors_email_requests_path(
+                                     id: obj.id, type: type
+                                   ))
       end
 
     # Locations and names.

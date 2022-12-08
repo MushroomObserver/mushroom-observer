@@ -568,13 +568,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
-  # ----- Authors: no resources, just forms ------------------------------------
-  match("/authors/email_request(/:id)",
-        to: "authors#email_request", via: [:get, :post], id: /\d+/,
-        as: "authors_email_request")
-  match("/authors/review(/:id)",
-        to: "authors#review", via: [:get, :post], id: /\d+/,
-        as: "authors_review")
+  # ----- Authors: standard actions ------------------------------------
+  namespace :authors do
+    resource :review, only: [:show, :create, :destroy], id: /\d+/
+    resource :email_requests, only: [:new, :create]
+  end
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
@@ -642,6 +640,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  # ----- Location:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/location/show_location/:id", to: "location#show_location",
+                                     as: "show_location")
+
+  # ----- Name:
+  # ----- temporary show route for path_builder with id ---------------
+  get("/name/show_name/:id", to: "name#show_name", as: "show_name")
 
   # ----- Observations: standard actions  ----------------------------
   resources :observations do

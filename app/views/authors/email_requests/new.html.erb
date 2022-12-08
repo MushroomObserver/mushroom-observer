@@ -1,0 +1,26 @@
+<% @title = :author_request_title.t(title: @object.format_name) %>
+
+<%= form_with(url: authors_email_requests_path(id: @object.id,
+      type: @object.type_tag, q: get_query_param),
+      id: "authors_email_requests_form") do |form| %>
+
+  <%= :author_request_note.tp %>
+
+  <%= fields_for(:email) do |f| %>
+
+    <div class="form-group mt-3">
+      <%= f.label(:subject, :request_subject.t + ":") %>
+      <%= f.text_field(:subject, data: { autofocus: true },
+                      class: "form-control") %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label(:content, :request_message.t + ":") %>
+      <%= f.text_area(:content, rows: 10, class: "form-control") %>
+    </div>
+
+  <% end %>
+
+  <%= form.submit(:SEND.l, class: "btn btn-default") %>
+
+<% end %>
