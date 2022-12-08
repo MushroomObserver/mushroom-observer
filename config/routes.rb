@@ -544,8 +544,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit")
-    resource :turn_admin_on, only: [:show], controller: "turn_on"
-    resource :turn_admin_off, only: [:show], controller: "turn_off"
+    # resource :turn_admin_on, only: [:show], controller: "turn_on"
+    # resource :turn_admin_off, only: [:show], controller: "turn_off"
     resource :banner, only: [:edit, :update], controller: "banner"
     resource :switch_users, only: [:new, :create]
     resource :blocked_ips, only: [:edit, :update]
@@ -557,6 +557,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     # get("show")
     get("test_flash_redirection")
   end
+
+  # ----- Admin Mode: just GET with params ---------------------------------
+  get "/admin_mode", to: "admin_mode#show"
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
