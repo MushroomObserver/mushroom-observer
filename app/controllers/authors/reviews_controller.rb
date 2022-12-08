@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 module Authors
-  # manage (review: add or remove) authors of an object
+  # manage (review: add or remove) authors of an object, usually a Description
   class ReviewsController < ApplicationController
     # filters
     before_action :login_required
     before_action :pass_query_params
-    # before_action :set_object_and_authors_ivars
 
     def show
       set_object_and_authors
