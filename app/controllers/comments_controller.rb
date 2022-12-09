@@ -28,42 +28,40 @@
 #  allowed_to_see!::
 #
 ################################################################################
-class CommentController < ApplicationController
+class CommentsController < ApplicationController
   before_action :login_required
-  # except: [
-  #   :comment_search,
-  #   :index_comment,
-  #   :list_comments,
-  #   :next_comment,
-  #   :prev_comment,
-  #   :show_comment,
-  #   :show_comments_by_user,
-  #   :show_comments_for_target,
-  #   :show_comments_for_user
-  # ]
-
-  before_action :disable_link_prefetching, except: [
-    :add_comment,
-    :edit_comment,
-    :show_comment
-  ]
+  before_action :pass_query_params, except: [:index]
+  before_action :disable_link_prefetching, except: [:new, :edit, :show]
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
-  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
-    :index_comment,
-    :list_comments,
-    :show_comments_by_user,
-    :show_comments_for_user,
-    :show_comments_for_target,
-    :comment_search
-  ]
+  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
   ##############################################################################
   #
   #  :section: Searches and Indexes
   #
   ##############################################################################
+
+  # rubocop:disable Metrics/AbcSize
+  def index
+    if params[:target].present?
+      show_comments_for_target
+    elsif params[:pattern].present?
+      comment_search
+    elsif params[:by_user].present?
+      show_comments_by_user
+    elsif params[:for_user].present?
+      show_comments_for_user
+    elsif params[:by].present?
+      index_comment
+    else
+      list_comments
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  private
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
@@ -80,7 +78,7 @@ class CommentController < ApplicationController
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
   def show_comments_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = find_or_goto_index(User, params[:by_user].to_s) || @user
     return unless user
 
     query = create_query(:Comment, :by_user, user: user)
@@ -89,7 +87,7 @@ class CommentController < ApplicationController
 
   # Shows comments for a given user, most recent first. (Linked from show_user.)
   def show_comments_for_user
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = find_or_goto_index(User, params[:for_user].to_s) || @user
     return unless user
 
     query = create_query(:Comment, :for_user, user: user)
@@ -104,7 +102,7 @@ class CommentController < ApplicationController
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
       redirect_back_or_default(action: :list_comments)
-    elsif (target = find_or_goto_index(model, params[:id].to_s))
+    elsif (target = find_or_goto_index(model, params[:target].to_s))
       query = create_query(:Comment, :for_target, target: target.id,
                                                   type: target.class.name)
       show_selected_comments(query)
@@ -156,6 +154,8 @@ class CommentController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  public
+
   ##############################################################################
   #
   #  :section: Show, Create and Edit
@@ -166,23 +166,19 @@ class CommentController < ApplicationController
   # Linked from: show_<object>, list_comments
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
-  def show_comment
+  def show
     store_location
-    pass_query_params
     return unless (@comment = find_or_goto_index(Comment, params[:id].to_s))
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Comment, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, Comment, params[:id]) and return
+    end
 
     @target = @comment.target
     allowed_to_see!(@target)
-  end
-
-  # Go to next comment: redirects to show_comment.
-  def next_comment
-    redirect_to_next_object(:next, Comment, params[:id].to_s)
-  end
-
-  # Go to previous comment: redirects to show_comment.
-  def prev_comment
-    redirect_to_next_object(:prev, Comment, params[:id].to_s)
   end
 
   # Form to create comment for an object.
@@ -197,15 +193,18 @@ class CommentController < ApplicationController
   # Failure:
   #   Renders add_comment again.
   #   Outputs: @comment, @object
-  def add_comment
-    pass_query_params
-    return unless (@target = load_target(params[:type], params[:id]))
-    return unless allowed_to_see!(@target)
+  def new
+    return unless target_exists && allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
-    return unless request.method == "POST"
+  end
 
+  def create
+    return unless target_exists && allowed_to_see!(@target)
+
+    @comment = Comment.new(target: @target)
     @comment.attributes = whitelisted_comment_params if params[:comment]
+
     if @comment.save
       @comment.log_create
       flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
@@ -227,14 +226,20 @@ class CommentController < ApplicationController
   # Failure:
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
-  def edit_comment
-    pass_query_params
-    return unless (@comment = find_or_goto_index(Comment, params[:id].to_s))
+  def edit
+    return unless comment_exists
 
-    @target = load_target(@comment.target_type, @comment.target_id)
+    load_target_for_comment
     return unless allowed_to_see!(@target)
     return unless check_permission_or_redirect!(@comment, @target)
-    return unless request.method == "POST"
+  end
+
+  def update
+    return unless comment_exists
+
+    load_target_for_comment
+    return unless allowed_to_see!(@target)
+    return unless check_permission_or_redirect!(@comment, @target)
 
     @comment.attributes = whitelisted_comment_params if params[:comment]
     if !@comment.changed?
@@ -258,10 +263,8 @@ class CommentController < ApplicationController
   # Redirects to show_object.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy_comment
-    pass_query_params
-    id = params[:id].to_s
-    return unless (@comment = find_or_goto_index(Comment, id))
+  def destroy
+    return unless comment_exists
 
     @target = @comment.target
     if !check_permission!(@comment)
@@ -274,6 +277,20 @@ class CommentController < ApplicationController
     end
     redirect_with_query(controller: @target.show_controller,
                         action: @target.show_action, id: @target.id)
+  end
+
+  private
+
+  def target_exists
+    @target = load_target(params[:type], params[:id])
+  end
+
+  def comment_exists
+    @comment = find_or_goto_index(Comment, params[:id].to_s)
+  end
+
+  def load_target_for_comment
+    @target = load_target(@comment.target_type, @comment.target_id)
   end
 
   # Make sure users can't see/add comments on objects they aren't allowed to
@@ -290,10 +307,6 @@ class CommentController < ApplicationController
       true
     end
   end
-
-  ##############################################################################
-
-  private
 
   def whitelisted_comment_params
     params[:comment].permit([:summary, :comment])

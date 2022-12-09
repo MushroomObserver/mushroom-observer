@@ -122,10 +122,12 @@ class AmateurTest < IntegrationTestCase
     get("/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing comments.)
-    assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
+    assert_select(
+      "a[class*='edit_comment_'], input[class*='destroy_comment_']", false
+    )
 
     click_mo_link(label: "Add Comment")
-    assert_template("comment/add_comment")
+    assert_template("comments/new")
 
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
@@ -133,7 +135,7 @@ class AmateurTest < IntegrationTestCase
     assert_select("#right_tabs a[href='/#{obs.id}']")
 
     open_form(&:submit)
-    assert_template("comment/add_comment")
+    assert_template("comments/new")
     # (I don't care so long as it says something.)
     assert_flash_text(/\S/)
 
@@ -153,12 +155,12 @@ class AmateurTest < IntegrationTestCase
     assert_match(summary, response.body)
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_select("a[href*='edit_comment/#{com.id}']", 1)
-    assert_select("a[href*='destroy_comment/#{com.id}']", 1)
+    assert_select("a[class*='edit_comment_']", 1)
+    assert_select("input[class*='destroy_comment_']", 1)
 
     # Try changing it.
-    click_mo_link(label: /edit/i, href: /edit_comment/)
-    assert_template("comment/edit_comment")
+    click_mo_link(label: /edit/i, href: /#{edit_comment_path(com.id)}/)
+    assert_template("comment/edit")
     open_form do |form|
       form.assert_value("summary", summary)
       form.assert_value("comment", message)
@@ -178,16 +180,17 @@ class AmateurTest < IntegrationTestCase
     # (There should be a link in there to look up Xylaria polymorpha.)
     assert_select("a[href*=lookup_name]", 1) do |links|
       url = links.first.attributes["href"]
-      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha",
+      assert_equal("#{MO.http_domain}/lookups/lookup_name/Xylaria+polymorpha",
                    url.value)
     end
 
     # I grow weary of this comment.
-    click_mo_link(label: /destroy/i, href: /destroy_comment/)
+    click_mo_link(label: /destroy/i, href: /#{comment_path(com.id)}/)
     assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
-    assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
+    assert_select("a[class*='edit_comment_'], input[class*='destroy_comment_']",
+                  false)
     assert_nil(Comment.safe_find(com.id))
   end
 
