@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+# Controls viewing and modifying herbaria.
 module Herbaria
-  # Controls viewing and modifying herbaria.
   class CuratorsController < ApplicationController
     # filters
     before_action :login_required
