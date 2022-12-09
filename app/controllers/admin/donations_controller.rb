@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class DonationsController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class DonationsController < AdminController
     def new
       @donation = Donation.new
     end

@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class UsersController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class UsersController < AdminController
     ### Edit user bonuses
     def edit
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))

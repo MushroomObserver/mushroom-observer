@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin::Emails
-  class FeatureController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class FeatureController < AdminController
     def new
       @users = User.where(email_general_feature: true, no_emails: false).
                where.not(verified: nil)

@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class AddUserToGroupController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class AddUserToGroupController < AdminController
     def new; end
 
     def create
