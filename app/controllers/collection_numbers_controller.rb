@@ -11,6 +11,8 @@ class CollectionNumbersController < ApplicationController
   #   :observation_index,
   #   :show
   # ]
+  before_action :pass_query_params, except: :index
+  before_action :store_location, except: [:index, :destroy]
 
   def index # rubocop:disable Metrics/AbcSize
     if params[:pattern].present? # rubocop:disable Style/GuardClause
@@ -25,8 +27,6 @@ class CollectionNumbersController < ApplicationController
   end
 
   def show
-    store_location
-    pass_query_params
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, CollectionNumber, params[:id]) and return
@@ -39,10 +39,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def new
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:observation_id])
+    set_ivars_for_new
     return unless @observation
 
     @back_object = @observation
@@ -52,10 +49,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def create
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:observation_id])
+    set_ivars_for_new
     return unless @observation
 
     @back_object = @observation
@@ -65,10 +59,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def edit
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    set_ivars_for_edit
     return unless @collection_number
 
     figure_out_where_to_go_back_to
@@ -76,10 +67,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def update
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    set_ivars_for_edit
     return unless @collection_number
 
     figure_out_where_to_go_back_to
@@ -89,7 +77,6 @@ class CollectionNumbersController < ApplicationController
   end
 
   def destroy
-    pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
@@ -161,6 +148,16 @@ class CollectionNumbersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  def set_ivars_for_new
+    @layout = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:observation_id])
+  end
+
+  def set_ivars_for_edit
+    @layout = calc_layout_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+  end
+
   def create_collection_number
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
@@ -176,7 +173,7 @@ class CollectionNumbersController < ApplicationController
       @other_number.add_observation(@observation)
       @collection_number = @other_number
     end
-    redirect_to_observation_or_collection_number
+    redirect_to_observation_or_object(@collection_number)
   end
 
   def update_collection_number
@@ -202,7 +199,7 @@ class CollectionNumbersController < ApplicationController
       @collection_number = @other_number
     end
 
-    redirect_to_observation_or_collection_number
+    redirect_to_observation_or_object(@collection_number)
   end
 
   def check_for_form_errors?
@@ -234,7 +231,7 @@ class CollectionNumbersController < ApplicationController
     return true if in_admin_mode? || obj.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_observation_or_collection_number
+    redirect_to_observation_or_object(@collection_number)
     false
   end
 
@@ -275,19 +272,6 @@ class CollectionNumbersController < ApplicationController
                      else
                        @collection_number
                      end
-    end
-  end
-
-  def redirect_to_observation_or_collection_number
-    if @back_object # workaround for show_link_args being unpredictable
-      case @back_object.type_tag
-      when :observation
-        redirect_with_query(observation_path(id: @back_object.id))
-      when :collection_number
-        redirect_with_query(collection_number_path(id: @back_object.id))
-      end
-    else
-      redirect_with_query(collection_numbers_path(id: @collection_number.id))
     end
   end
 end

@@ -282,6 +282,15 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Objects that belong to a single observation:
+  def redirect_to_observation_or_object(obj)
+    if @back_object
+      redirect_with_query(@back_object.show_link_args)
+    else
+      redirect_with_query(obj.index_link_args)
+    end
+  end
+
   # Redirect from www.mo.org to mo.org.
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this
