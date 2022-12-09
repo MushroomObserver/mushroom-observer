@@ -1,3 +1,4 @@
+@@ -0,0 +1,155 @@
 # frozen_string_literal: true
 
 require("test_helper")
@@ -6,26 +7,26 @@ class CommentsControllerTest < FunctionalTestCase
   def test_list_comments
     login
     get(:index)
-    assert_template("list_comments")
+    assert_template("index")
   end
 
   def test_show_comment
     login
     get(:show,
         params: { id: comments(:minimal_unknown_obs_comment_1).id })
-    assert_template("show_comment")
+    assert_template("show")
   end
 
   def test_show_comments_for_user
     login
     get(:index, params: { for_user: rolf.id })
-    assert_template("list_comments")
+    assert_template("index")
   end
 
   def test_show_comments_by_user
     login
     get(:index, params: { by_user: rolf.id })
-    assert_redirected_to(action: "show_comment",
+    assert_redirected_to(action: "show",
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
   end
@@ -101,7 +102,9 @@ class CommentsControllerTest < FunctionalTestCase
     obs = comment.target
     params = { id: comment.id.to_s }
     assert_equal("rolf", comment.user.login)
-    requires_user(:edit, observation_path(obs.id), params)
+    requires_user(:edit,
+                  [{ controller: "/observations", action: :show,
+                     id: obs.id }], params)
     assert_form_action(comment_path(id: comment.id.to_s))
   end
 
@@ -111,7 +114,9 @@ class CommentsControllerTest < FunctionalTestCase
     assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
     params = { id: comment.id.to_s }
-    requires_user(:destroy, observation_path(obs.id), params)
+    requires_user(:destroy,
+                  [{ controller: "/observations", action: :show,
+                     id: obs.id }], params)
     assert_equal(9, rolf.reload.contribution)
     obs.reload
     assert_not(obs.comments.member?(comment))
@@ -140,7 +145,9 @@ class CommentsControllerTest < FunctionalTestCase
     params = { id: comment.id,
                comment: { summary: "New Summary", comment: "New text." } }
     assert_equal("rolf", comment.user.login)
-    put_requires_user(:update, observation_path(obs.id), params)
+    put_requires_user(:update,
+                      [{ controller: "/observations",
+                         action: :show, id: obs.id }], params)
     assert_equal(10, rolf.reload.contribution)
     comment = Comment.find(comment.id)
     assert_equal("New Summary", comment.summary)

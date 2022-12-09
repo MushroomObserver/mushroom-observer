@@ -114,7 +114,7 @@ class CommentsController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
-      redirect_to(action: "show_comment", id: comment.id)
+      redirect_to(action: :show, id: comment.id)
     else
       query = create_query(:Comment, :pattern_search, pattern: pattern)
       show_selected_comments(query)
