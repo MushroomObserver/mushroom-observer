@@ -101,7 +101,7 @@ class CommentsController < ApplicationController
     if !model
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
-      redirect_back_or_default(action: :list_comments)
+      redirect_back_or_default(action: :index)
     elsif (target = find_or_goto_index(model, params[:target].to_s))
       query = create_query(:Comment, :for_target, target: target.id,
                                                   type: target.class.name)
@@ -126,7 +126,7 @@ class CommentsController < ApplicationController
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
     args = {
-      action: :list_comments,
+      action: :index,
       num_per_page: 25,
       include: [:target, :user]
     }.merge(args)
@@ -163,7 +163,7 @@ class CommentsController < ApplicationController
   ##############################################################################
 
   # Display comment by itself.
-  # Linked from: show_<object>, list_comments
+  # Linked from: show_<object>, index
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
   def show

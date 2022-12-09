@@ -7,8 +7,8 @@
   # NOTE: refactored links will need params
   links = {}
   [
-    [ :comments, :comment, :show_comments_by_user, {} ],
-    [ :comments_for, :comment, :show_comments_for_user, {} ],
+    [ :comments, :comment, :index, { by_user: @show_user.id } ],
+    [ :comments_for, :comment, :index, { for_user: @show_user.id } ],
     [ :images, :image, :images_by_user, {} ],
     [ :location_description_authors, :location,
       :location_descriptions_by_author, {} ],
