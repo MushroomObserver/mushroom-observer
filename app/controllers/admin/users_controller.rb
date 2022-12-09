@@ -1,28 +1,8 @@
 # frozen_string_literal: true
 
 module Admin
-  class UsersController < ApplicationController
-    before_action :login_required
-
-    ### Custom login_required behavior for this controller
-
-    def authorize?(_user)
-      in_admin_mode?
-    end
-
-    def access_denied
-      flash_error(:permission_denied.t)
-      if params[:id]
-        redirect_to(user_path(id: params[:id]))
-      else
-        redirect_to(users_path)
-      end
-    end
-
-    ###
-
+  class UsersController < AdminController
     ### Edit user bonuses
-
     def edit
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 

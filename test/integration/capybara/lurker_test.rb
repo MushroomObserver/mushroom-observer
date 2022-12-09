@@ -134,7 +134,7 @@ class LurkerTest < CapybaraIntegrationTestCase
                    page.title, "Wrong page")
 
       # (Make sure observation is shown somewhere.)
-      assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),
+      assert(has_selector?("a[href^='#{permanent_observation_path(obs.id)}']"),
              "Missing a link to Observation")
     end
     # back at Observation
