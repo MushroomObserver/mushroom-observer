@@ -278,7 +278,7 @@ class ExpertTest < IntegrationTestCase
 
     # Try adding a comment, just for kicks.
     click_mo_link(href: /#{new_comment_path}/)
-    assert_template("comments/add_comment")
+    assert_template("comments/new")
     assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
     open_form do |form|

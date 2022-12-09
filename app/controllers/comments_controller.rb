@@ -241,6 +241,7 @@ class CommentsController < ApplicationController
                           action: @target.show_action, id: @target.id)
     else
       flash_object_errors(@comment)
+      render(:new) and return
     end
   end
 

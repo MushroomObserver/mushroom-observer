@@ -134,12 +134,12 @@ class AmateurTest < IntegrationTestCase
     # (Make sure there is a tab to go back to observations/show.)
     assert_select("#right_tabs a[href='/#{obs.id}']")
 
-    open_form(&:submit)
+    open_form(&:submit) # (submit without commenting anything)
     assert_template("comments/new")
     # (I don't care so long as it says something.)
     assert_flash_text(/\S/)
 
-    open_form do |form|
+    open_form("#comment_form") do |form|
       form.change("summary", summary)
       form.change("comment", message)
       form.submit
@@ -161,7 +161,7 @@ class AmateurTest < IntegrationTestCase
     # Try changing it.
     click_mo_link(label: /edit/i, href: /#{edit_comment_path(com.id)}/)
     assert_template("comments/edit")
-    open_form do |form|
+    open_form("#comment_form") do |form|
       form.assert_value("summary", summary)
       form.assert_value("comment", message)
       form.change("comment", message2)
