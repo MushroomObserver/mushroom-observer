@@ -29,7 +29,7 @@
         <% @donations.each do |d| %>
           <tr>
             <td><%= check_box(:reviewed, d.id, checked: d.reviewed,
-                                class: "form-control") %></td>
+                              class: "form-control") %></td>
             <td><%= d.id %></td>
             <td><%= d.who %></td>
             <td><%= d.anonymous %></td>

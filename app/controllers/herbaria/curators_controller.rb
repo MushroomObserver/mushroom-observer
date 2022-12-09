@@ -19,7 +19,6 @@ module Herbaria
 
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
 
-    # rubocop:disable Metrics/AbcSize
     def create
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       if @user && (@herbarium.curator?(@user) || in_admin_mode?)
@@ -31,7 +30,7 @@ module Herbaria
           flash_error(:show_herbarium_no_user.t(login: login))
         end
       end
-      redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
+      redirect_with_query(herbarium_path(@herbarium))
     end
 
     def destroy
@@ -44,10 +43,8 @@ module Herbaria
       elsif user && @herbarium.curator?(user)
         @herbarium.delete_curator(user)
       end
-      redirect_to_referrer ||
-        redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
+      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
     end
-    # rubocop:enable Metrics/AbcSize
 
     ############################################################################
 

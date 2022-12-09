@@ -27,7 +27,7 @@ module ObservationTabsHelper
   end
 
   def google_images_link(obs_name)
-    format("https://images.google.com/images?q=%s", obs_name.real_text_name)
+    format("http://images.google.com/images?q=%s", obs_name.real_text_name)
   end
 
   def google_distribution_map_for(obs_name)
@@ -66,5 +66,19 @@ module ObservationTabsHelper
                       edit_observation_path(obs.id)),
       destroy_button(target: obs)
     ]
+  end
+
+  def prefs_tabset
+    tabs = [
+      link_to(:bulk_license_link.t,
+              controller: :image, action: :license_updater),
+      link_to(:prefs_change_image_vote_anonymity.t,
+              controller: :image, action: :bulk_vote_anonymity_updater),
+      link_to(:profile_link.t, action: :profile),
+      link_to(:show_user_your_notifications.t,
+              controller: :interest, action: :list_interests),
+      link_to(:account_api_keys_link.t, action: :api_keys)
+    ]
+    { right: draw_tab_set(tabs) }
   end
 end

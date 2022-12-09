@@ -68,11 +68,13 @@ module ObservationsHelper
 
   def link_to_display_name_brief_authors(name)
     link_to(name.display_name_brief_authors.t,
-            show_name_path(id: name.id))
+            controller: :name,
+            action: :show_name, id: name.id)
   end
 
   def link_to_display_name_without_authors(name)
     link_to(name.display_name_without_authors.t,
-            show_name_path(id: name.id))
+            controller: :name,
+            action: :show_name, id: name.id)
   end
 end

@@ -73,7 +73,9 @@
       <div class="list-group-item default">
         <%= :species_list_show_members.t %>:
         <%= link_to(:species_list_show_regular_index.t,
-                    observations_path(q: get_query_param(@query)),
+                    add_query_param({ controller: :observations,
+                                      action: :index },
+                                      @query),
                     { help: :species_list_show_regular_index_help.t }) %> |
         <%= link_to_coerced_query(@query, Location) %> |
         <%= link_to_coerced_query(@query, Name) %> |
@@ -81,7 +83,9 @@
         <%= link_to(:app_checklist.t,
                     checklist_path(species_list_id: @species_list.id)) %> |
         <%= link_to(:show_object.t(type: :map),
-                    map_observations_path(q: get_query_param(@query))) %>
+                    add_query_param({ controller: :observations,
+                                      action: :map },
+                                    @query)) %>
       </div>
 
       <% if @objects.any? %>
@@ -91,19 +95,17 @@
               <div class="col-sm-4 col-md-3 col-lg-2">
                 <%= if observation.thumb_image_id
                   thumbnail(observation.thumb_image,
-                            link: observation_path(id: observation.id),
+                            link: observation.show_link_args,
                             votes: true)
                 end %>
               </div>
               <div class="col-sm-8 col-md-9 col-lg-10">
                 <div class="font-weight-bold">
-                  <%= link_to(observation.unique_format_name.t,
-                              observation_path(id: observation.id,
-                                               q: get_query_param(@query))) %>
+                  <%= link_with_query(observation.unique_format_name.t,
+                                      observation.show_link_args) %>
                 </div>
                 <div>
-                  <b><%= location_link(observation.place_name,
-                                       observation.location) %></b><br/>
+                  <b><%= location_link(observation.place_name, observation.location) %></b><br/>
                   <span><%= user_link(observation.user) %></span>:
                   <span><%= observation.when.web_date %></span>
                 </div>

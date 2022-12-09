@@ -149,32 +149,30 @@ module MapHelper
 
   def mapset_submap_links(set, args, type) # rubocop:disable Metrics/AbcSize
     params = args[:query_params] || {}
+    params = params.merge(
+      controller: type.to_s.sub("observation", "observations")
+    )
     params = params.merge(mapset_box_params(set))
-    model = type.to_s.classify.constantize
-    if type.to_s == "observation"
-      [link_to(:show_all.t, observations_path(params: params)),
-       link_to(:map_all.t, map_observations_path(params: params))]
+    if type.to_s.classify.constantize.controller_normalized?
+      [link_to(:show_all.t, params.merge(action: :index)),
+       link_to(:map_all.t, params.merge(action: :map))]
     else
-      params = params.merge(controller: model.show_controller)
-      if model.controller_normalized?
-        [link_to(:show_all.t, params.merge(action: :index)),
-         link_to(:map_all.t, params.merge(action: :map))]
-      else
-        [link_to(:show_all.t, params.merge(action: "index_#{type}")),
-         link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
-      end
+      [link_to(:show_all.t, params.merge(action: "index_#{type}")),
+       link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
     end
   end
 
   def mapset_observation_link(obs, args)
-    params = args[:query_params] || {}
     link_to("#{:Observation.t} ##{obs.id}",
-            observation_path(id: obs.id, params: params))
+            controller: :observations,
+            action: :show,
+            id: obs.id,
+            params: args[:query_params] || {})
   end
 
   def mapset_location_link(loc, args)
-    params = args[:query_params] || {}
-    link_to(loc.display_name.t, show_location_path(id: loc.id, params: params))
+    link_to(loc.display_name.t, controller: :location, action: :show_location,
+                                id: loc.id, params: args[:query_params] || {})
   end
 
   def mapset_box_params(set)

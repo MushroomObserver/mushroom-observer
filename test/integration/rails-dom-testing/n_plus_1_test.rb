@@ -31,7 +31,7 @@ class NPlusOneTest < IntegrationTestCase
 
   def test_download_observations
     login
-    get("/observations/downloads/new")
+    get("/observations/download")
   end
 
   def test_site_stats

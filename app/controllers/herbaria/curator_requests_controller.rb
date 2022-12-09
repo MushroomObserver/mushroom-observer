@@ -25,7 +25,6 @@ module Herbaria
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
 
     # Email the completed form to the webmaster
-    # rubocop:disable Metrics/AbcSize
     def create
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       return unless @herbarium
@@ -38,9 +37,8 @@ module Herbaria
       WebmasterMailer.build(@user.email, content, subject).deliver_now
       flash_notice(:show_herbarium_request_sent.t)
       redirect_to_referrer ||
-        redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))
+        redirect_with_query(herbarium_path(@herbarium))
     end
-    # rubocop:enable Metrics/AbcSize
 
     ############################################################################
 

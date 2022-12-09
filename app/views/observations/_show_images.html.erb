@@ -32,8 +32,10 @@
                 sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id}.
                 each do |image| %>
       <div class="list-group-item">
-        <%= thumbnail(image,
-                      link: show_image_path(id: image.id, obs: observation.id),
+        <%= thumbnail(image, link: {controller: image.show_controller,
+                                    action: image.show_action,
+                                    id: image.id,
+                                    obs: observation.id},
                       votes: true,
                       original: true,
                       is_set: true,

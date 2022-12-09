@@ -562,11 +562,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :remove_observation, only: [:update], module: :collection_numbers
   end
 
-  # ----- Comment:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/comment/show_comment/:id", to: "comment#show_comment",
-                                   as: "show_comment")
-
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
@@ -612,12 +607,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
   resources :herbaria, id: /\d+/
 
-  # ----- Herbarium record:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/herbarium_record/show_herbarium_record/:id",
-      to: "herbarium_record#show_herbarium_record",
-      as: "show_herbarium_record")
-
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
   get("/info/how_to_use", to: "info#how_to_use")
@@ -635,20 +624,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Observations: standard actions  ----------------------------
-  namespace :observations do
-    resources :downloads, only: [:new, :create]
-  end
-
   resources :observations do
     member do
-      get("map", to: "observations/maps#show")
-      get("suggestions", to: "observations/naming_suggestions#show",
-                         as: "naming_suggestions_for")
+      get("map")
+      get("suggestions")
     end
     collection do
-      get("map", to: "observations/maps#index")
-      get("print_labels", to: "observations/downloads#print_labels",
-                          as: "print_labels_for")
+      get("map")
+      get("download")
+      post("download")
+      get("print_labels")
+      post("print_labels")
     end
   end
 
@@ -692,6 +678,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
+  # ----- Comment:
+  get("/comment/show_comment/:id", to: "comment#show_comment",
+                                   as: "show_comment")
+  # ----- Herbarium record:
+  get("/herbarium_record/show_herbarium_record/:id",
+      to: "herbarium_record#show_herbarium_record",
+      as: "show_herbarium_record")
   # ----- Image:
   get("/image/show_image/:id", to: "image#show_image",
                                as: "show_image")

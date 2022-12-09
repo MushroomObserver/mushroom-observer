@@ -580,7 +580,49 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_obj_list_equal(observations_in_region, results)
   end
 
-  # ------ Show ----------------------------------------------- #
+  # ------ Map ----------------------------------------------- #
+  def test_map_observations
+    login
+    get(:map)
+    assert_template(:map)
+  end
+
+  def test_map_observation_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    login("rolf") # a user who does not own obs
+    get(:map, params: { id: obs.id })
+    assert_true(assigns(:observations).map(&:lat).map(&:to_s).join.
+                                       include?("34.1622"))
+    assert_true(assigns(:observations).map(&:long).map(&:to_s).join.
+                                       include?("118.3521"))
+
+    obs.update(gps_hidden: true)
+    get(:map, params: { id: obs.id })
+    assert_false(assigns(:observations).map(&:lat).map(&:to_s).join.
+                                        include?("34.1622"))
+    assert_false(assigns(:observations).map(&:long).map(&:to_s).join.
+                                        include?("118.3521"))
+  end
+
+  def test_map_observations_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    assert(query.result_ids.include?(obs.id))
+
+    login("rolf") # a user who does not own obs
+    get(:map, params: { q: query.id.alphabetize })
+    assert_true(assigns(:observations).map(&:lat).map(&:to_s).join.
+                                       include?("34.1622"))
+    assert_true(assigns(:observations).map(&:long).map(&:to_s).join.
+                                       include?("118.3521"))
+
+    obs.update(gps_hidden: true)
+    get(:map, params: { q: query.id.alphabetize })
+    assert_false(assigns(:observations).map(&:lat).map(&:to_s).join.
+                                        include?("34.1622"))
+    assert_false(assigns(:observations).map(&:long).map(&:to_s).join.
+                                        include?("118.3521"))
+  end
 
   def test_show_observation_num_views
     login
@@ -598,12 +640,12 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def assert_show_observation
     assert_template("observations/show")
-    assert_template("observations/show/_name_info")
-    assert_template("observations/show/_observation")
+    assert_template("observations/_show_name_info")
+    assert_template("observations/_show_observation")
     assert_template("naming/_show")
     assert_template("comment/_show_comments")
-    assert_template("observations/show/_thumbnail_map")
-    assert_template("observations/show/_images")
+    assert_template("observations/_show_thumbnail_map")
+    assert_template("observations/_show_images")
   end
 
   def test_show_observation
@@ -1004,8 +1046,6 @@ class ObservationsControllerTest < FunctionalTestCase
                   { count: 1 }, "Observation page missing an Add Sequence link")
   end
 
-  # Refactored for CRUD routes in :collection_numbers or :herbarium_records
-  # When both are CRUDified, remove the first cases of regex matches below
   def assert_show_obs(types, items, can_add)
     type = types.to_s.chop
     selector = types == :collection_numbers && !can_add ? "i" : "li"
@@ -1013,26 +1053,20 @@ class ObservationsControllerTest < FunctionalTestCase
                   items.count,
                   "Wrong number of #{types} shown.")
     if can_add
-      assert((response.body.match(%r{href="/#{type}/create_#{type}/}) ||
-              response.body.match(%r{href="/#{types}/new})),
+      assert(response.body.match(%r{href="/#{type}/create_#{type}/}),
              "Expected to find a create link for #{types}.")
     else
-      assert_not((response.body.match(%r{href="/#{type}/create_#{type}/}) &&
-                  response.body.match(%r{href="/#{types}/new})),
+      assert_not(response.body.match(%r{href="/#{type}/create_#{type}/}),
                  "Expected not to find a create link for #{types}.")
     end
 
     items.each do |id, can_edit|
       if can_edit
-        assert((response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}) ||
-                response.body.match(%r{href="/#{types}/#{id}/edit})),
+        assert(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
                "Expected to find an edit link for #{type} #{id}.")
       else
-        assert_not(
-          (response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}) &&
-           response.body.match(%r{href="/#{types}/#{id}/edit})),
-          "Expected not to find an edit link for #{type} #{id}."
-        )
+        assert_not(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
+                   "Expected not to find an edit link for #{type} #{id}.")
       end
     end
   end
@@ -2830,6 +2864,171 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_download_observation_index
+    obs = Observation.where(user: mary)
+    assert(obs.length >= 4)
+    query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+
+    # Add herbarium_record to fourth obs for testing purposes.
+    login("mary")
+    fourth = obs.fourth
+    fourth.herbarium_records << HerbariumRecord.create!(
+      herbarium: herbaria(:nybg_herbarium),
+      user: mary,
+      initial_det: fourth.name.text_name,
+      accession_number: "Mary #1234"
+    )
+
+    get(:download, params: { q: query.id.alphabetize })
+    assert_no_flash
+    assert_response(:success)
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: :raw,
+        encoding: "UTF-8",
+        commit: "Cancel"
+      }
+    )
+    assert_no_flash
+    # assert_redirected_to(action: :index)
+    assert_redirected_to(%r{/observations})
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: :raw,
+        encoding: "UTF-8",
+        commit: "Download"
+      }
+    )
+    rows = @response.body.split("\n")
+    ids = rows.map { |s| s.sub(/,.*/, "") }
+    expected = %w[observation_id] + obs.map { |o| o.id.to_s }
+    last_expected_index = expected.length - 1
+
+    assert_no_flash
+    assert_response(:success)
+    assert_equal(expected, ids[0..last_expected_index],
+                 "Exported 1st column incorrect")
+    last_row = rows[last_expected_index].chomp
+    o = obs.last
+    nm = o.name
+    l = o.location
+    country = l.name.split(", ")[-1]
+    state =   l.name.split(", ")[-2]
+    city =    l.name.split(", ")[-3]
+
+    # Hard coded values below come from the actual
+    # part of a test failure message.
+    # If fixtures change, these may also need to be changed.
+    assert_equal(
+      "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
+      "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\"," \
+      "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
+      "#{l.id},#{country},#{state},,#{city}," \
+      ",,,34.22,34.15,-118.29,-118.37," \
+      "#{l.high.to_f.round},#{l.low.to_f.round}," \
+      "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
+      "#{o.notes[Observation.other_notes_key]}," \
+      "#{MO.http_domain}/#{o.id}",
+      last_row.iconv("utf-8"),
+      "Exported last row incorrect"
+    )
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: "raw",
+        encoding: "ASCII",
+        commit: "Download"
+      }
+    )
+    assert_no_flash
+    assert_response(:success)
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: "raw",
+        encoding: "UTF-16",
+        commit: "Download"
+      }
+    )
+    assert_no_flash
+    assert_response(:success)
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: "adolf",
+        encoding: "UTF-8",
+        commit: "Download"
+      }
+    )
+    assert_no_flash
+    assert_response(:success)
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: "darwin",
+        encoding: "UTF-8",
+        commit: "Download"
+      }
+    )
+    assert_no_flash
+    assert_response(:success)
+
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        format: "symbiota",
+        encoding: "UTF-8",
+        commit: "Download"
+      }
+    )
+    assert_no_flash
+    assert_response(:success)
+  end
+
+  def test_print_labels
+    login
+    query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    assert_operator(query.num_results, :>=, 4)
+    get(:print_labels, params: { q: query.id.alphabetize })
+    # \pard is paragraph command in rtf, one paragraph per result
+    assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+    assert_match(/314159/, @response.body) # make sure fundis id in there!
+    assert_match(/Mary Newbie 174/, @response.body) # and collection number!
+
+    # Alternative entry point.
+    post(
+      :download,
+      params: {
+        q: query.id.alphabetize,
+        commit: "Print Labels"
+      }
+    )
+    assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+  end
+
+  # Print labels for all observations just to be sure all cases (more or less)
+  # are tested and at least not crashing.
+  def test_print_labels_all
+    login
+    query = Query.lookup_and_save(:Observation, :all)
+    get(:print_labels, params: { q: query.id.alphabetize })
+  end
+
   def test_external_sites_user_can_add_links_to
     # not logged in
     do_external_sites_test([], nil, nil)
@@ -2849,6 +3048,30 @@ class ObservationsControllerTest < FunctionalTestCase
     @controller.instance_variable_set(:@user, user)
     actual = @controller.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
+  end
+
+  def test_suggestions
+    obs = observations(:detailed_unknown_obs)
+    name1 = names(:coprinus_comatus)
+    name2a = names(:lentinellus_ursinus_author1)
+    name2b = names(:lentinellus_ursinus_author2)
+    obs.name = name2b
+    obs.vote_cache = 2.0
+    obs.save
+    assert_not_nil(obs.thumb_image)
+    assert_obj_list_equal([], name2a.reload.observations)
+    assert_obj_list_equal([obs], name2b.reload.observations)
+    suggestions = '[[["Coprinus comatus",0.7654],' \
+                    '["Lentinellus ursinus",0.321]]]'
+    requires_login(:suggestions, id: obs.id, names: suggestions)
+    data = @controller.instance_variable_get(:@suggestions)
+    assert_equal(2, data.length)
+    data = data.sort_by(&:max).reverse
+    assert_names_equal(name1, data[0].name)
+    assert_names_equal(name2b, data[1].name)
+    assert_equal(0.7654, data[0].max)
+    assert_equal(0.321, data[1].max)
+    assert_objs_equal(obs, data[1].image_obs)
   end
 
   def test_show_observation_votes

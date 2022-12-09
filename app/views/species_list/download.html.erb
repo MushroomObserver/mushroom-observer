@@ -5,14 +5,12 @@
     link_with_query(:species_list_download_back.t, action: :show_species_list)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-
-  query_param = get_query_param(@query)
 %>
 
-<%= form_with(url: print_labels_for_observations_path(q: query_param)) do |f| %>
+<%= form_tag(add_query_param(print_labels_observations_path, @query)) %>
   <h3 class="margin-top:2em"><%= :species_list_labels_header.t %>:</h3>
   <%= submit_tag(:species_list_labels_button.l, class: "btn btn-default") %>
-<% end %>
+</form>
 
 <%= form_tag(add_query_param({ action: :make_report, id: @list.id })) %>
   <h3 class="margin-top:2em"><%= :species_list_report_header.t %>:</h3>
@@ -36,7 +34,7 @@
   <%= submit_tag(:species_list_report_button.l, class: "btn btn-default") %>
 </form>
 
-<%= form_with(url: observations_downloads_path(q: query_param)) do |f| %>
+<%= form_tag(add_query_param(download_observations_path, @query)) %>
   <h3 class="margin-top:2em"><%= :species_list_download_header.t %>:</h3>
 
   <p><%= :download_observations_format.t %>:</p>
@@ -86,4 +84,4 @@
   </ul>
 
   <%= submit_tag(:DOWNLOAD.l, class: "btn btn-default") %>
-<% end %>
+</form>
