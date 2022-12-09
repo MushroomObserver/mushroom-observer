@@ -29,14 +29,14 @@ class SearchController < ApplicationController
     when :google
       site_google_search(pattern)
       return
-    when :herbarium, :herbarium_record, :observation, :user
+    when :comment, :herbarium, :herbarium_record, :observation, :user
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
         index_path: send("#{type.to_s.pluralize}_path", special_params)
       )
       return
-    when :comment, :image, :location, :name, :project, :species_list
+    when :image, :location, :name, :project, :species_list
       ctrlr = type
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
