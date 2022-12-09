@@ -143,7 +143,7 @@ class LocationControllerTest < FunctionalTestCase
 
     login
     get(:location_search, params: { pattern: loc.id.to_s })
-    assert_redirected_to("#{location_show_location_path}/#{loc.id}")
+    assert_redirected_to(show_location_path(loc.id))
   end
 
   def test_location_advanced_search
