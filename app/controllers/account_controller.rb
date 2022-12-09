@@ -144,7 +144,7 @@ class AccountController < ApplicationController
     return true if @new_user.errors.none? && @new_user.save
 
     flash_object_errors(@new_user)
-    render(:new) and return false
+    false
   end
 
   # I think this is not in the User model validations because of tests or

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-#  ==== Admin utilities
-#  test_flash_redirection::      <tt>(R . .)</tt>
-
 class AdminController < ApplicationController
   # This changes the params of :login_required to restrict access to admins.
   # To work, admin namespaced controllers must inherit from AdminController
