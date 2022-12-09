@@ -541,6 +541,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Admin: resources and actions ------------------------------------
   namespace :admin do
+    # controls turning admin mode on and off, and switching users
+    resource :session, only: [:show, :edit, :update], controller: "session",
+                       as: "mode"
+    get("switch_users", to: "mode#edit") # alternate path
+
     resource :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
@@ -552,9 +557,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       resource :feature, only: [:new, :create], controller: "feature"
     end
   end
-
-  # ----- Admin Mode: turn on/off, and switch users -----------------------
-  resource :admin_mode, only: [:show, :edit, :update], controller: "admin_mode"
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
