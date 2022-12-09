@@ -102,7 +102,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     user.save
     sess = open_session
     sess.login!(user)
-    sess.click_mo_link(href: /admin\/session/)
+    sess.click_mo_link(href: %r{admin/session})
     teach_about_name_descriptions(sess)
     sess.user = user
     sess
