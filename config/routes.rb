@@ -672,10 +672,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Comment:
   get("/comment/show_comment/:id", to: "comment#show_comment",
                                    as: "show_comment")
-  # ----- Herbarium record:
-  get("/herbarium_record/show_herbarium_record/:id",
-      to: "herbarium_record#show_herbarium_record",
-      as: "show_herbarium_record")
   # ----- Image:
   get("/image/show_image/:id", to: "image#show_image",
                                as: "show_image")
