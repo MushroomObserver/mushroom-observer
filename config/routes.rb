@@ -548,11 +548,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :remove_observation, only: [:update], module: :collection_numbers
   end
 
-  # ----- Comment:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/comment/show_comment/:id", to: "comment#show_comment",
-                                   as: "show_comment")
-
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
@@ -606,11 +601,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :remove_observation, only: [:update], module: :herbarium_records
   end
 
-  # ----- Image:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/image/show_image/:id", to: "image#show_image",
-                               as: "show_image")
-
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
   get("/info/how_to_use", to: "info#how_to_use")
@@ -655,11 +645,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
-  # ----- Project:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/project/show_project/:id", to: "project#show_project",
-                                   as: "show_project")
-
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
@@ -697,6 +682,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
+  # ----- Comment:
+  get("/comment/show_comment/:id", to: "comment#show_comment",
+                                   as: "show_comment")
   # ----- Image:
   get("/image/show_image/:id", to: "image#show_image",
                                as: "show_image")
