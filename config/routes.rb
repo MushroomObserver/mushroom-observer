@@ -83,20 +83,6 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  herbarium_record: {
-    create_herbarium_record: {},
-    destroy_herbarium_record: {},
-    edit_herbarium_record: {},
-    herbarium_index: {},
-    herbarium_record_search: {},
-    index_herbarium_record: {},
-    list_herbarium_records: {},
-    next_herbarium_record: {},
-    observation_index: {},
-    prev_herbarium_record: {},
-    remove_observation: {}
-    # show_herbarium_record: {}
-  },
   image: {
     add_image: {},
     advanced_search: {},
@@ -606,6 +592,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
+
+  # ----- Herbarium Records: standard actions --------------------------------
+  resources :herbarium_records do
+    resource :remove_observation, only: [:update], module: :herbarium_records
+  end
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")

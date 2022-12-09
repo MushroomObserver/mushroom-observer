@@ -443,7 +443,7 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Comment, "/comment/show_comment")
     assert_show_url(ExternalSite, "/external_site/show_external_site")
     assert_show_url(Herbarium, "/herbaria")
-    assert_show_url(HerbariumRecord, "/herbarium_record/show_herbarium_record")
+    assert_show_url(HerbariumRecord, "/herbarium_records")
     assert_show_url(Image, "/image/show_image")
     assert_show_url(Location, "/location/show_location")
     assert_show_url(Name, "/name/show_name")

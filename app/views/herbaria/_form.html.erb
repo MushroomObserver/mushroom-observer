@@ -1,4 +1,4 @@
-<%= form_with model: @herbarium do |f| %>
+<%= form_with(model: @herbarium, id: "herbarium_form") do |f| %>
 
   <%= f.submit(button_name.t, class: %w[btn btn-default center-block mt-3]) %>
 
@@ -19,14 +19,12 @@
         <div class="form-inline">
           <%= f.label(:personal_user_name,
                       :edit_herbarium_admin_make_personal.t) %>:
-          <%# workaround for auto completer; creates an id %>
-          <%= text_field(:herbarium, :personal_user_name,
-                         class: "form-control-xxx") %>
+          <%= f.text_field(:personal_user_name,
+                           class: "form-control-xxx") %>
          <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
         </div>
         <% if button_name != :CREATE %>
-          <div class="well well-sm mt-3 help-block position-relative">
-            <div class="arrow-up mt-2"></div>
+          <%= help_block_with_arrow("up") do %>
             <% top_users = herbarium_top_users(@herbarium)
                top_users.each do |name, login, count| %>
               <%= :edit_herbarium_user_records.t(
@@ -34,7 +32,7 @@
                   ) %><br/>
             <% end %>
             <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
-          </div>
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -55,12 +53,11 @@
             <%= f.check_box(:personal, class: "form-control-xxx") %>
             <%= f.label(:personal, :create_herbarium_personal.t) %>
           </div>
-          <div class="well well-sm mt-3 help-block position-relative">
-            <div class="arrow-up"></div>
+          <%= help_block_with_arrow("up") do %>
             <%= :create_herbarium_personal_help.t(
                   name: @user.personal_herbarium_name
                 ) %>
-          </div>
+          <% end %>
         </div>
       </div>
     <% end %>
@@ -74,10 +71,9 @@
           <%= f.text_field(:code, size: 8, class: "form-control") %>
           <span class="help-note">(<%= :optional.t %>)</span>
         </div>
-        <div class="well well-sm mt-3 help-block position-relative">
-          <div class="arrow-up mt-2"></div>
+        <%= help_block_with_arrow("up") do %>
           <%= :create_herbarium_code_help.t %>
-        </div>
+        <% end %>
       </div>
     </div>
   <% end %>
@@ -87,7 +83,7 @@
       <%= f.label(:place_name, "#{:LOCATION.t}:") %>
       <span class="help-note">(<%= :optional.t %>)</span>
       <%# workaround for auto completer; creates an id %>
-      <%= text_field(:herbarium, :place_name, class: "form-control") %>
+      <%= f.text_field(:place_name, class: "form-control") %>
       <% turn_into_location_auto_completer(:herbarium_place_name) %>
     </div>
   </div>

@@ -12,7 +12,6 @@ class SearchController < ApplicationController
   #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
-  # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/AbcSize
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
@@ -22,34 +21,21 @@ class SearchController < ApplicationController
     session[:pattern] = pattern
     session[:search_type] = type
 
+    special_params = type == :herbarium ? { flavor: :all } : {}
+
     case type
-    when :herbarium
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: herbaria_path(pattern: pattern),
-        index_path: herbaria_path(flavor: :all)
-      )
-      return
-    when :observation
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: observations_path(pattern: pattern),
-        index_path: observations_path
-      )
-      return
-    when :user
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: users_path(pattern: pattern),
-        index_path: users_path
-      )
-      return
-    when :comment, :image, :location, :name, :project, :species_list,
-      :herbarium_record
-      ctrlr = type
     when :google
       site_google_search(pattern)
       return
+    when :herbarium, :herbarium_record, :observation, :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
+        index_path: send("#{type.to_s.pluralize}_path", special_params)
+      )
+      return
+    when :comment, :image, :location, :name, :project, :species_list
+      ctrlr = type
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
       redirect_back_or_default("/")
@@ -58,7 +44,6 @@ class SearchController < ApplicationController
 
     redirect_to_search_or_list(ctrlr, type, pattern)
   end
-  # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/AbcSize
 
   def site_google_search(pattern)
