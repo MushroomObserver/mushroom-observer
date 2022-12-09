@@ -1,11 +1,11 @@
 <!--[form:comment]-->
 <%= form_with(model: @comment, url: url, id: "comment_form") do |f| %>
-  <%= f.submit (button, class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
 
   <div class="form-group mt-3">
     <%= f.label(:summary, :form_comments_summary.t + ":") %>
     <%= f.text_field(:summary, size: 80, data: { autofocus: true },
-                  class: "form-control") %>
+                     class: "form-control") %>
   </div>
 
   <div class="form-group mt-3">

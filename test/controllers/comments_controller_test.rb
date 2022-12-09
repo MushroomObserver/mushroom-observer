@@ -71,7 +71,7 @@ class CommentsControllerTest < FunctionalTestCase
   def test_add_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:new, target: obs_id, type: "Observation")
-    assert_form_action(comments_path(target: obs_id, type: "Observation"))
+    assert_form_action(action: :create, target: obs_id, type: "Observation")
   end
 
   def test_add_comment_no_id
@@ -83,7 +83,7 @@ class CommentsControllerTest < FunctionalTestCase
   def test_add_comment_to_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
     requires_login(:new, target: name_id, type: "Name")
-    assert_form_action(comments_path(target: name_id, type: "Name"))
+    assert_form_action(action: :create, target: name_id, type: "Name")
   end
 
   def test_add_comment_to_unreadable_object
@@ -104,7 +104,7 @@ class CommentsControllerTest < FunctionalTestCase
     requires_user(:edit,
                   [{ controller: "/observations", action: :show,
                      id: obs.id }], params)
-    assert_form_action(comment_path(id: comment.id.to_s))
+    assert_form_action(action: :update, id: comment.id.to_s)
   end
 
   def test_destroy_comment
@@ -128,8 +128,8 @@ class CommentsControllerTest < FunctionalTestCase
     params = { target: obs.id,
                type: "Observation",
                comment: { summary: "A Summary", comment: "Some text." } }
-    post_requires_login(:new, params)
-    assert_redirected_to(observation_path(obs.id))
+    post_requires_login(:create, params)
+    assert_redirected_to(permanent_observation_path(obs.id))
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)

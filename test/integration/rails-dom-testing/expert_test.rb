@@ -277,8 +277,8 @@ class ExpertTest < IntegrationTestCase
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.
-    click_mo_link(href: /add_comment/)
-    assert_template("comment/add_comment")
+    click_mo_link(href: /#{new_comment_path}/)
+    assert_template("comments/add_comment")
     assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
     open_form do |form|

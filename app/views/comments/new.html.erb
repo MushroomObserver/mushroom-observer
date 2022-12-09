@@ -8,16 +8,14 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :full
+  url = comments_path(target: @comment.target_id,
+                      type: @comment.target_type, q: get_query_param)
 %>
 
 <div class="row">
   <div class="col-xs-12 col-sm-8">
-    <%= render(partial: "form", locals: {
-                 button: :comment_add_create.l,
-                 url: comments_path(target: @comment.target_id,
-                                    type: @comment.target_type,
-                                    q: get_query_param)
-               }) %>
+    <%= render(partial: "form",
+               locals: { button: :comment_add_create.l, url: url }) %>
     <%= render(partial: "object", object: @target) %>
   </div>
 

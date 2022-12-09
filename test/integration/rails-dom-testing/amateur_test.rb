@@ -160,7 +160,7 @@ class AmateurTest < IntegrationTestCase
 
     # Try changing it.
     click_mo_link(label: /edit/i, href: /#{edit_comment_path(com.id)}/)
-    assert_template("comment/edit")
+    assert_template("comments/edit")
     open_form do |form|
       form.assert_value("summary", summary)
       form.assert_value("comment", message)

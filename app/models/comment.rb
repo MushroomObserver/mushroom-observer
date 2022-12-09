@@ -30,10 +30,10 @@
 #
 #  4. Add show_comments partial at the bottom of the show_object view:
 #
-#       <%= render(:partial => 'comment/show_comments', :locals =>
+#       <%= render(:partial => 'comments/comments_for_object', :locals =>
 #             { :target => @target, :controls => true, :limit => nil }) %>
 #
-#  5. Tell comment/_object shared view how to display the object (used to
+#  5. Tell comments/_object shared view how to display the object (used to
 #     embed info about object while user is posting/editing a comment):
 #
 #       when 'YourModel'

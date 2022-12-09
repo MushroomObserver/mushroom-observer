@@ -158,7 +158,7 @@ class CommentsController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Show, Create and Edit
+  #  :section: Show
   #
   ##############################################################################
 
@@ -168,7 +168,7 @@ class CommentsController < ApplicationController
   # Outputs: @comment, @object
   def show
     store_location
-    return unless (@comment = find_or_goto_index(Comment, params[:id].to_s))
+    return unless comment_exists
 
     case params[:flow]
     when "next"
@@ -180,6 +180,35 @@ class CommentsController < ApplicationController
     @target = @comment.target
     allowed_to_see!(@target)
   end
+
+  private
+
+  def comment_exists
+    @comment = find_or_goto_index(Comment, params[:id].to_s)
+  end
+
+  # Make sure users can't see/add comments on objects they aren't allowed to
+  # view!  Redirect and return +false+ if they can't, else return +true+.
+  def allowed_to_see!(object)
+    if object.respond_to?(:is_reader?) && !object.is_reader?(@user) &&
+       !in_admin_mode?
+      flash_error(:runtime_show_description_denied.t)
+      parent = object.parent
+      redirect_to(controller: parent.show_controller,
+                  action: parent.show_action, id: parent.id)
+      false
+    else
+      true
+    end
+  end
+
+  public
+
+  ##############################################################################
+  #
+  #  :section: CRUD actions
+  #
+  ##############################################################################
 
   # Form to create comment for an object.
   # Linked from: show_<object>
@@ -194,13 +223,13 @@ class CommentsController < ApplicationController
   #   Renders add_comment again.
   #   Outputs: @comment, @object
   def new
-    return unless target_exists && allowed_to_see!(@target)
+    return unless target_is_valid
 
     @comment = Comment.new(target: @target)
   end
 
   def create
-    return unless target_exists && allowed_to_see!(@target)
+    return unless target_is_valid
 
     @comment = Comment.new(target: @target)
     @comment.attributes = whitelisted_comment_params if params[:comment]
@@ -214,6 +243,21 @@ class CommentsController < ApplicationController
       flash_object_errors(@comment)
     end
   end
+
+  private
+
+  # The `new` action needs params[:type] and params[:target] (id of the obj)
+  def target_is_valid
+    return false unless @target = load_target(params[:type], params[:target])
+
+    allowed_to_see!(@target)
+  end
+
+  def whitelisted_comment_params
+    params[:comment].permit([:summary, :comment])
+  end
+
+  public
 
   # Form to edit a comment for an object..
   # Linked from: show_comment, show_object.
@@ -238,21 +282,11 @@ class CommentsController < ApplicationController
     return unless comment_exists
 
     load_target_for_comment
-    return unless allowed_to_see!(@target)
-    return unless check_permission_or_redirect!(@comment, @target)
+    return unless allowed_to_see!(@target) &&
+                  check_permission_or_redirect!(@comment, @target)
 
     @comment.attributes = whitelisted_comment_params if params[:comment]
-    if !@comment.changed?
-      flash_notice(:runtime_no_changes.t)
-      done = true
-    elsif !@comment.save
-      flash_object_errors(@comment)
-    else
-      @comment.log_update
-      flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
-      done = true
-    end
-    return unless done
+    return unless comment_updated?
 
     redirect_with_query(controller: @target.show_controller,
                         action: @target.show_action, id: @target.id)
@@ -270,10 +304,10 @@ class CommentsController < ApplicationController
     if !check_permission!(@comment)
       # all cases redirect to object show page
     elsif !@comment.destroy
-      flash_error(:runtime_form_comments_destroy_failed.t(id: id))
+      flash_error(:runtime_form_comments_destroy_failed.t(id: params[:id]))
     else
       @comment.log_destroy
-      flash_notice(:runtime_form_comments_destroy_success.t(id: id))
+      flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     redirect_with_query(controller: @target.show_controller,
                         action: @target.show_action, id: @target.id)
@@ -281,35 +315,8 @@ class CommentsController < ApplicationController
 
   private
 
-  def target_exists
-    @target = load_target(params[:type], params[:id])
-  end
-
-  def comment_exists
-    @comment = find_or_goto_index(Comment, params[:id].to_s)
-  end
-
   def load_target_for_comment
     @target = load_target(@comment.target_type, @comment.target_id)
-  end
-
-  # Make sure users can't see/add comments on objects they aren't allowed to
-  # view!  Redirect and return +false+ if they can't, else return +true+.
-  def allowed_to_see!(object)
-    if object.respond_to?(:is_reader?) && !object.is_reader?(@user) &&
-       !in_admin_mode?
-      flash_error(:runtime_show_description_denied.t)
-      parent = object.parent
-      redirect_to(controller: parent.show_controller,
-                  action: parent.show_action, id: parent.id)
-      false
-    else
-      true
-    end
-  end
-
-  def whitelisted_comment_params
-    params[:comment].permit([:summary, :comment])
   end
 
   def load_target(type, id)
@@ -329,5 +336,19 @@ class CommentsController < ApplicationController
     redirect_with_query(controller: target.show_controller,
                         action: target.show_action, id: target.id)
     false
+  end
+
+  def comment_updated?
+    if !@comment.changed?
+      flash_notice(:runtime_no_changes.t)
+      true
+    elsif !@comment.save
+      flash_object_errors(@comment)
+      false
+    else
+      @comment.log_update
+      flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
+      true
+    end
   end
 end

@@ -16,13 +16,13 @@ class NPlusOneTest < IntegrationTestCase
   def test_indexes
     login
     get("/articles")
-    get("/comment/list_comments")
+    get("/comments")
     get("/herbaria?flavor=all")
     get("/location/list_locations")
     get("/name/list_names")
     get("/image/list_images")
-    get("/observations/index")
-    get("/activity_logs/index")
+    get("/observations")
+    get("/activity_logs")
     get("/project/list_projects")
     get("/publications")
     get("/sequences?flavor=all")

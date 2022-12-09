@@ -674,9 +674,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
-  # ----- Comment:
-  get("/comment/show_comment/:id", to: "comment#show_comment",
-                                   as: "show_comment")
   # ----- Image:
   get("/image/show_image/:id", to: "image#show_image",
                                as: "show_image")
