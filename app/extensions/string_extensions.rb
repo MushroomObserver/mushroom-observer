@@ -416,6 +416,21 @@ class String
     encode(charset, fallback: ->(c) { UTF8_TO_ASCII[c] || "?" })
   end
 
+  # This fixes a string which is supposed to be UTF-8 but which nevertheless
+  # might have invalid byte sequences and there's nothing we can do to fix it
+  # "correctly".  This just ignores the invalid sequences so we get at least
+  # *something* out of the string, and don't just dying and do nothing.
+  #
+  # Found this solution here:
+  # https://stackoverflow.com/questions/2982677/ruby-1-9-invalid-byte-sequence-in-utf-8
+  def fix_utf8
+    str = force_encoding("UTF-8")
+    return str if str.valid_encoding?
+
+    str.encode("UTF-8", "binary",
+               invalid: :replace, undef: :replace, replace: "")
+  end
+
   # Escape a string to be safe to place in double-quotes inside javascript.
   # TODO: Use the rails method "j" for this
   def escape_js_string
@@ -470,7 +485,7 @@ class String
         break
       end
     end
-    result += opens.reverse.map { |x| "<\/#{x}>" }.join
+    result += opens.reverse.map { |x| "</#{x}>" }.join
     # Disable cop; we need `html_safe` to prevent Rails from adding escaping
     result.html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -500,6 +515,45 @@ class String
     ) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety
+  end
+
+  # For integration test comparisons:
+  # Render special encoded characters as they appear in HTML
+  def render_html
+    CGI.unescapeHTML(self)
+  end
+
+  # Insert a line break between the scientific name and the author
+  # (for styling taxonomic names legibly)
+  def break_name
+    possibles = ["</i></b>", "</i>"]
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
+
+    offset = tag.length + 1
+    ind = rindex(tag)
+    return self if !ind || !offset || (length <= (ind + offset))
+
+    insert((ind + offset), "<br/>".html_safe)
+  end
+
+  # Wrap the author name in <small> HTML tag, with or without break
+  # (for styling taxonomic names legibly)
+  def small_author
+    possibles = ["<br/>", "</i></b>", "</i>"]
+    tag = possibles.each do |x|
+      break x if include?(x)
+    end
+    return self unless tag.is_a?(String)
+
+    offset = tag.length
+    ind = rindex(tag)
+    return self if !ind || !offset || (length <= (ind + offset))
+
+    insert(length, "</small>".html_safe)
+    insert((ind + offset), "<small>".html_safe)
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
@@ -605,10 +659,10 @@ class String
     d = (0..m).to_a
     x = nil
 
-    str1.each_char.each_with_index do |char1, i|
+    str1.each_char.with_index do |char1, i|
       e = i + 1
 
-      str2.each_char.each_with_index do |char2, j|
+      str2.each_char.with_index do |char2, j|
         cost = (char1 == char2 ? 0 : 1)
         x = [
           d[j + 1] + 1, # insertion

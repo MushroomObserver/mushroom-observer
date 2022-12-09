@@ -3,7 +3,7 @@
 <%= link_to(:app_blocked_ips.t, edit_admin_blocked_ips_path,
             { class: classes[:admin],
               id: "nav_admin_blocked_ips_link" }) %>
-<%= link_to(:app_switch_users.t, new_admin_switch_users_path,
+<%= link_to(:app_switch_users.t, edit_admin_mode_path,
             { class: classes[:admin],
               id: "nav_admin_switch_users_link" }) %>
 <%= link_to(:app_users.t, users_path(by: "name"),
@@ -18,6 +18,6 @@
 <%= link_to(:app_add_to_group.t, new_admin_add_user_to_group_path,
             { class: classes[:admin],
               id: "nav_admin_add_user_to_group_link" }) %>
-<%= link_to(:app_turn_admin_off.t, admin_turn_admin_off_path,
+<%= link_to(:app_turn_admin_off.t, admin_mode_path(turn_off: true),
             { class: classes[:admin],
               id: "nav_admin_off_link" }) %>

@@ -20,21 +20,16 @@
         <td><%= f.check_box("key_#{key.id}") %></td>
         <td><%= key.created_at.web_date %></td>
         <td id="key_time_<%= key.id %>">
-          <%= if key.verified
-            key.last_used ? key.last_used.web_date : '--'
-          else
-            link_to("[:ACTIVATE.t}]",
-                    account_activate_api_key_path(id: key.id),
-                    method: :post,
-                    data: { role: "activate_api_key", id: key.id })
-          end %>
+          <%= key.last_used ? key.last_used.web_date : '--' %>
         </td>
-        <td><%= key.num_uses > 0 ? key.num_uses : '--' %></td>
+        <td id="key_num_uses_<%= key.id %>">
+          <%= key.num_uses > 0 ? key.num_uses : '--' %>
+        </td>
         <td><%= h(key.key) %></td>
         <td id="key_notes_<%= key.id %>">
           <div class="edit_key_notes_container"
-                data-target-key="<%= key.id %>" style="display:none">
-            <%= f.text_field("key_notes_#{key.id}",
+               data-target-key="<%= key.id %>" style="display:none">
+            <%= f.text_field("key_notes_input_#{key.id}",
                              { value: key.notes,
                                data: { role: "key_notes_input",
                                        id: key.id } }) %>
@@ -45,7 +40,7 @@
                             data: { role: "key_notes_cancel", id: key.id }) %>
           </div>
           <div class="view_key_notes_container"
-                data-target-key="<%= key.id %>">
+               data-target-key="<%= key.id %>">
             <span class="current_notes"><%= key.notes.t %></span>
             <%= link_to(:EDIT.t, edit_account_api_key_path(id: key.id),
                         data: { role: "edit_api_key", id: key.id }) %>

@@ -353,11 +353,6 @@ class User < AbstractModel
   # password.
   attr_accessor :password_confirmation
 
-  # Override the default show_controller
-  def self.show_controller
-    "/users"
-  end
-
   # Find admin's record.
   def self.admin
     User.first
@@ -1167,13 +1162,19 @@ class User < AbstractModel
 
   validate :user_requirements
   validate :check_password, on: :create
+  # `if` accounts for existing invalid entries; otherwise users cannot update
+  validate :user_email_requirements, if: proc { |c|
+    c.new_record? || c.email_changed?
+  }
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
+  validate :check_content_filter_region, if: proc { |c|
+    c.new_record? || c.content_filter_changed?
+  }
 
   def user_requirements
     user_login_requirements
     user_password_requirements
-    user_email_requirements
     user_other_requirements
   end
 
@@ -1198,7 +1199,7 @@ class User < AbstractModel
   end
 
   def user_email_requirements
-    if email.to_s.blank?
+    if email.to_s.blank? || !ApplicationMailer.valid_email_address?(email.to_s)
       errors.add(:email, :validate_user_email_missing.t)
     elsif email.size > 80
       errors.add(:email, :validate_user_email_too_long.t)
@@ -1258,5 +1259,15 @@ class User < AbstractModel
 
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
+  end
+
+  # Check if region is provided and is in fact a valid region with locations,
+  # i.e. the end of a location name string
+  def check_content_filter_region
+    return if content_filter[:region].blank?
+    return if Location.in_region(content_filter[:region]).any?
+
+    # If we're here, there are no MO locations in that region.
+    errors.add(:region, :advanced_search_filter_region.t)
   end
 end

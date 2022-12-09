@@ -69,7 +69,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
   end
 
   def deliver_email
-    ObservationChangeEmail.build(user, to_user, observation, note, queued).
+    ObservationChangeMailer.build(user, to_user, observation, note, queued).
       deliver_now
   end
 

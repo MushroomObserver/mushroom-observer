@@ -35,7 +35,7 @@ module Herbaria
         "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
         "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
         "Notes: #{params[:notes]}"
-      WebmasterEmail.build(@user.email, content, subject).deliver_now
+      WebmasterMailer.build(@user.email, content, subject).deliver_now
       flash_notice(:show_herbarium_request_sent.t)
       redirect_to_referrer ||
         redirect_to(herbarium_path(id: @herbarium.id, q: get_query_param))

@@ -22,12 +22,10 @@ module Account
 
     # login post action
     def create
-      user_params = params[:user] || {}
-      @login = user_params[:login].to_s
-      @password = user_params[:password].to_s
-      @remember = user_params[:remember_me] == "1"
+      render(:new) and return unless params[:user]
+
+      normalize_login_params
       user = User.authenticate(login: @login, password: @password)
-      user ||= User.authenticate(login: @login, password: @password.strip)
 
       unless user
         flash_error(:runtime_login_failed.t)
@@ -58,7 +56,7 @@ module Account
     end
 
     def new_password_request
-      @login = params["new_user"]["login"]
+      @login = params[:new_user] && params[:new_user][:login]
       @new_user = User.where("login = ? OR name = ? OR email = ?",
                              @login, @login, @login).first
       if @new_user.nil?
@@ -69,16 +67,18 @@ module Account
       end
     end
 
-    ############################################################################
-    #
-    #  :section: Testing
-    #
-    ############################################################################
-
     # This is used to test the autologin feature.
     def test_autologin; end
 
+    ############################################################################
+
     private
+
+    def normalize_login_params
+      @login = param_lookup([:user, :login]).to_s.strip
+      @password = param_lookup([:user, :password]).to_s.strip
+      @remember = param_lookup([:user, :remember_me]) == "1"
+    end
 
     def login_success(user)
       flash_notice(:runtime_login_success.t)
@@ -103,7 +103,7 @@ module Account
       if @new_user.save
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
-        PasswordEmail.build(@new_user, password).deliver_now
+        PasswordMailer.build(@new_user, password).deliver_now
         render("account/login/new")
       else
         flash_object_errors(@new_user)

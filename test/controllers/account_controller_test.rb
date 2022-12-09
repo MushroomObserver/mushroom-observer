@@ -16,12 +16,12 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
     post(:create, params: { new_user: {
-           login: "newbob",
-           password: "newpassword",
-           password_confirmation: "newpassword",
-           email: "webmaster@mushroomobserver.org",
-           email_confirmation: "webmaster@mushroomobserver.org",
-           name: "needs a name!",
+           login: " newbob ",
+           password: " newpassword ",
+           password_confirmation: " newpassword ",
+           email: " webmaster@mushroomobserver.org ",
+           email_confirmation: "  webmaster@mushroomobserver.org  ",
+           name: " needs a name! ",
            theme: "NULL"
          } })
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
@@ -73,6 +73,13 @@ class AccountControllerTest < FunctionalTestCase
     assert(assigns("new_user").errors[:email].any?,
            assigns("new_user").dump_errors)
 
+    # Invalid email
+    post(:create, params: { new_user: params.merge(email: "wrong") })
+    assert_flash_error
+    assert_response(:success)
+    assert(assigns("new_user").errors[:email].any?,
+           assigns("new_user").dump_errors)
+
     # Email doesn't match.
     post(:create,
          params: { new_user: params.merge(email_confirmation: "wrong") })
@@ -83,7 +90,7 @@ class AccountControllerTest < FunctionalTestCase
     # Make sure correct request would have succeeded!
     post(:create, params: { new_user: params })
     assert_flash_success
-    assert_response(:redirect)
+    assert_redirected_to("/bogus/location")
     assert_not_nil(User.find_by(login: "newbob"))
   end
 

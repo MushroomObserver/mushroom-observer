@@ -9,7 +9,8 @@ module Account
       @place_name        = @user.location ? @user.location.display_name : ""
       @copyright_holder  = @user.legal_name
       @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license.id
+      # NOTE: @user.license is not set by default
+      @upload_license_id = @user.license ? @user.license.id : nil
     end
 
     def update
@@ -37,7 +38,7 @@ module Account
 
     def check_and_maybe_update_user_place_name
       # Make sure the given location exists before accepting it.
-      @place_name = params["user"]["place_name"].to_s
+      @place_name = params[:user][:place_name].to_s
       if @place_name.present?
         location = Location.find_by_name_or_reverse_name(@place_name)
         if !location
@@ -53,12 +54,12 @@ module Account
 
     def upload_the_image_if_present
       # Check if we need to upload an image.
-      upload = params["user"]["upload_image"]
+      upload = params[:user][:upload_image]
       return if upload.blank?
 
-      date = Date.parse("#{params["date"]["copyright_year"]}0101")
-      license = License.safe_find(params["upload"]["license_id"])
-      holder = params["copyright_holder"]
+      date = Date.parse("#{params[:date][:copyright_year]}0101")
+      license = License.safe_find(params[:upload][:license_id])
+      holder = params[:copyright_holder]
       image = Image.new(
         image: upload,
         user: @user,
@@ -93,6 +94,7 @@ module Account
         redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
+        render(:edit) and return
       else
         update_copyright_holder(legal_name_change)
         maybe_update_location_and_finish

@@ -1429,6 +1429,8 @@ class ObservationsControllerTest < FunctionalTestCase
     notifications = Notification.where(flavor: flavor, obj_id: name.id)
     assert_equal(2, notifications.length,
                  "Should be 2 name notifications for name ##{name.id}")
+    assert(notifications.map(&:user).include?(mary))
+    mary.update(no_emails: true)
 
     where = "Simple, Massachusetts, USA"
     generic_construct_observation({
@@ -1441,7 +1443,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_equal(name.id, nam.name_id) # Make sure it's the right name
     assert_not_nil(obs.rss_log)
-    assert_equal(count_before + 2, QueuedEmail.count)
+    assert_equal(count_before + 1, QueuedEmail.count)
     QueuedEmail.queue_emails(false)
   end
 
@@ -2448,8 +2450,7 @@ class ObservationsControllerTest < FunctionalTestCase
             }
           },
           good_image: {
-            new_image1.id.to_s => {
-            },
+            new_image1.id.to_s => {},
             new_image2.id.to_s => {
               notes: "notes_2_new"
             }

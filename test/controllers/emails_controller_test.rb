@@ -26,8 +26,12 @@ class EmailsControllerTest < FunctionalTestCase
     # Prove that trying to ask question of user who refuses questions
     # redirects to that user's page (instead of an email form).
     user = users(:no_general_questions_user)
-    login(user.name)
-    get(:ask_user_question, params: { id: user.id })
+    requires_login(:ask_user_question, id: user.id)
+    assert_flash_text(:permission_denied.t)
+
+    # Prove that it won't email someone who has opted out of all emails.
+    mary.update(no_emails: true)
+    requires_login(:ask_user_question, id: mary.id)
     assert_flash_text(:permission_denied.t)
   end
 

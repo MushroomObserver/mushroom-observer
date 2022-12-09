@@ -3826,7 +3826,7 @@ class API2Test < UnitTestCase
     assert_parse(:altitude, 123, "123")
     assert_parse(:altitude, 123, "123 m")
     assert_parse(:altitude, 123, "403 ft")
-    assert_parse(:altitude, 123, "403\'")
+    assert_parse(:altitude, 123, "403'")
     assert_parse(:altitude, API2::BadParameterValue, "sealevel")
     assert_parse(:altitude, API2::BadParameterValue, "123 FT")
     assert_parse_a(:altitude, nil, nil)

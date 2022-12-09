@@ -10,10 +10,11 @@ module Admin
       bonus = "7 lucky \n 13 unlucky"
 
       # Prove that non-admin cannot change bonuses and attempt to do so
-      # redirects to target user's page
+      # redirects to "/" (not target user's page)
       login("rolf")
       get(:edit, params: { id: user.id })
-      assert_redirected_to(user_path(user.id))
+      # assert_redirected_to(user_path(user.id))
+      assert_redirected_to("/")
 
       # Prove that admin posting bonuses in wrong format causes a flash error,
       # leaving bonuses and contributions unchanged.

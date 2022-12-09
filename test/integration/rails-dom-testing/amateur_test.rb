@@ -302,14 +302,14 @@ class AmateurTest < IntegrationTestCase
 
   module UserDsl
     def run_test
-      get("/admin/test_flash_redirection?tags=")
+      get("/test_pages/flash_redirection?tags=")
       click_mo_link(label: :app_edit_translations_on_page.t)
       assert_no_flash
       assert_select("span.tag", text: "test_tag1:", count: 0)
       assert_select("span.tag", text: "test_tag2:", count: 0)
       assert_select("span.tag", text: "test_flash_redirection_title:", count: 1)
 
-      get("/admin/test_flash_redirection?tags=test_tag1,test_tag2")
+      get("/test_pages/flash_redirection?tags=test_tag1,test_tag2")
       click_mo_link(label: :app_edit_translations_on_page.t)
       assert_no_flash
       assert_select("span.tag", text: "test_tag1:", count: 1)
@@ -318,6 +318,8 @@ class AmateurTest < IntegrationTestCase
     end
   end
 
+  # Note that this only tests non-JS vote submission.
+  # Most users will have their vote sent via AJAX from vote_by_ajax.js
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")

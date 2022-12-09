@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class BlockedIpsController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class BlockedIpsController < AdminController
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
     # GETting this page with params[:report] will show info about a chosen IP

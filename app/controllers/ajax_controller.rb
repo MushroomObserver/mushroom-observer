@@ -26,10 +26,12 @@
 #  multi_image_template:: HTML template for uploaded image.
 #  old_translation::  Return an old TranslationString by version id.
 #  pivotal::          Pivotal requests: look up, vote, or comment on story.
+#  visual_group_status:: Change image status wrt some visual group.
 #  vote::             Change vote on proposed name or image.
 #
 class AjaxController < ApplicationController
   include Vote
+  include VisualGroupStatus
   include UploadImage
   include Primers
   include Pivotal

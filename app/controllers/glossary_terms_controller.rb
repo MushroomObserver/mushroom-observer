@@ -20,7 +20,7 @@ class GlossaryTermsController < ApplicationController
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
-    @objects = @glossary_term.images.order(vote_cache: :desc)
+    @other_images = @glossary_term.other_images.order(vote_cache: :desc)
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -59,20 +59,32 @@ class GlossaryTermsController < ApplicationController
   end
 
   def destroy
-    return unless (@glossary_term = GlossaryTerm.find(params[:id]))
+    @glossary_term = GlossaryTerm.find(params[:id])
+    return if redirect_non_admins!
 
-    unless in_admin_mode?
-      flash_warning(:permission_denied.t)
-      return redirect_to(glossary_term_path(@glossary_term.id))
-    end
-
+    old_images = @glossary_term.images.to_a
     if @glossary_term.destroy
+      destroy_unused_images(old_images)
       flash_notice(
-        :runtime_destroyed_id.t(type: GlossaryTerm, value: params[:id])
+        :runtime_destroyed_id.t(type: :glossary_term, value: params[:id])
       )
       redirect_to(glossary_terms_path)
     else
       redirect_to(glossary_term_path(@glossary_term.id))
+    end
+  end
+
+  def redirect_non_admins!
+    return false if in_admin_mode?
+
+    flash_warning(:permission_denied.t)
+    redirect_to(glossary_term_path(@glossary_term.id))
+    true
+  end
+
+  def destroy_unused_images(images)
+    images.each do |image|
+      image.destroy if image&.all_subjects&.empty?
     end
   end
 

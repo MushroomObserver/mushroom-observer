@@ -636,7 +636,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(obs.rss_log.notes.include?("log_image_updated"))
     assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
     assert(
-      obs.rss_log.notes.include?("name Image%20##{image.id}")
+      obs.rss_log.notes.include?("name ##{image.id}")
     )
     assert_equal(new_name, image.reload.original_name)
   end
@@ -1245,7 +1245,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_show_image_has_okay_link
     login
     image = images(:in_situ_image)
-    image.update(ok_for_ml: false)
+    image.update(diagnostic: false)
     get(:show_image, params: { id: image.id })
     assert_true(@response.body.include?("type=image&amp;value=1"))
   end

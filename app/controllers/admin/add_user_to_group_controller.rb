@@ -1,16 +1,12 @@
 # frozen_string_literal: true
 
 module Admin
-  class AddUserToGroupController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class AddUserToGroupController < AdminController
     def new; end
 
     def create
-      user_name  = params["user_name"].to_s
-      group_name = params["group_name"].to_s
+      user_name  = params[:user_name].to_s
+      group_name = params[:group_name].to_s
       user       = User.find_by(login: user_name)
       group      = UserGroup.find_by(name: group_name)
 

@@ -66,12 +66,30 @@ module CapybaraSessionExtensions
     assert_selector("#flash_notices", text: text)
   end
 
+  def assert_no_flash_text(text = "")
+    refute_selector("#flash_notices", text: text)
+  end
+
   def assert_no_flash
     refute_selector("#flash_notices")
   end
 
   def assert_flash_success
     assert_selector("#flash_notices.alert-success")
+  end
+
+  def assert_flash_error
+    assert_any_of_selectors("#flash_notices.alert-error",
+                            "#flash_notices.alert-danger")
+  end
+
+  def assert_no_flash_errors
+    assert_none_of_selectors("#flash_notices.alert-error",
+                             "#flash_notices.alert-danger")
+  end
+
+  def assert_flash_warning
+    assert_selector("#flash_notices.alert-warning")
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers
@@ -85,6 +103,6 @@ module CapybaraSessionExtensions
 
   # Many forms have more than one submit button
   def click_commit
-    first(:button, type: "submit", name: "commit").click
+    first(:button, type: "submit").click
   end
 end

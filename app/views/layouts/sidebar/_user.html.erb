@@ -28,7 +28,7 @@
             class: classes[:mobile_only],
             id: "nav_mobile_mailing_list_link") %>
 <% if @user.admin && !in_admin_mode? %>
-  <%= link_to(:app_turn_admin_on.t, admin_turn_admin_on_path,
+  <%= link_to(:app_turn_admin_on.t, admin_mode_path(turn_on: true),
               { class: classes[:mobile_only],
                 id: "nav_mobile_admin_link" }) %>
 <% end %>

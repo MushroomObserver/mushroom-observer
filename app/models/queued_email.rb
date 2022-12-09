@@ -19,7 +19,7 @@
 #
 #  The specific email classes know which data are required for themselves: how
 #  to store it, how to retrieve it, and how to deliver the actual mail (via
-#  an AccountMailer subclass).
+#  an ApplicationMailer subclass).
 #
 #  == Typical execution flow
 #
@@ -50,11 +50,11 @@
 #
 #  7. QueuedEmail::Blah grabs all the attached data it needs (often done in the
 #     constructor, actually), and calls the build method of the appropriate
-#     AccountMailer subclass:
+#     ApplicationMailer subclass:
 #
-#       CommentEmail.build(from, to, observation, comment)
+#       CommentMailer.build(from, to, observation, comment)
 #
-#  8. AccountMailer subclass renders the email message and dispatches it
+#  8. ApplicationMailer subclass renders the email message and dispatches it
 #     to postfix or whichever mailserver is responsible for delivering email.
 #
 #  == Basic properties
@@ -128,18 +128,6 @@ class QueuedEmail < AbstractModel
   # is important to convince it not to strip the "QueuedEmail::" off the front.
   self.inheritance_column = "flavor"
   self.store_full_sti_class = true
-
-  # Ensure that all the subclasses get loaded.  Problem is some subclasses have
-  # the same name as toplevel classes, e.g., QueuedEmail::Comment.  Thus the
-  # constant QueuedEmail::Comment will already be "defined" if Comment is
-  # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
-  # soon as QueuedEmail is defined, we know that all subclasses are also
-  # properly defined, and we no longer have to rely on autoloading.
-  #
-  Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
-    match = /(\w+)\.rb$/.match(file)
-    require("queued_email/#{match[1]}") if match
-  end
 
   # ----------------------------
   # :section: General methods.

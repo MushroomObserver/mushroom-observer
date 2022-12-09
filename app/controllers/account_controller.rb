@@ -56,16 +56,24 @@ class AccountController < ApplicationController
     @new_user = User.new(theme: MO.default_theme)
 
     initialize_new_user
-    # return if block_evil_signups!
-    # return unless make_sure_theme_is_valid!
-    # return unless validate_and_save_new_user!
 
-    return if block_evil_signups!
-    return unless make_sure_theme_is_valid! && validate_and_save_new_user!
+    if block_evil_signups!
+      # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
+      render(status: :too_many_requests,
+             content_type: "text/plain",
+             plain: "We grow weary of this. Please go away.") and return
+    end
+
+    unless make_sure_theme_is_valid!
+      redirect_back_or_default(action: :welcome)
+      return
+    end
+
+    render(action: :new) and return unless validate_and_save_new_user!
 
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
-    VerifyEmail.build(@new_user).deliver_now
+    VerifyMailer.build(@new_user).deliver_now
     notify_root_of_blocked_verification_email(@new_user)
     redirect_back_or_default(account_welcome_path)
   end
@@ -84,10 +92,19 @@ class AccountController < ApplicationController
       admin: false,
       layout_count: 15,
       mailing_address: "",
-      notes: ""
-    }.merge(params.require(:new_user).
-                   permit(:login, :name, :theme, :email, :email_confirmation,
-                          :password, :password_confirmation))
+      notes: "",
+      login: strip_new_user_param(:login),
+      name: strip_new_user_param(:name),
+      theme: strip_new_user_param(:theme),
+      email: strip_new_user_param(:email),
+      email_confirmation: strip_new_user_param(:email_confirmation),
+      password: strip_new_user_param(:password),
+      password_confirmation: strip_new_user_param(:password_confirmation)
+    }
+  end
+
+  def strip_new_user_param(arg)
+    params[:new_user] && params[:new_user][arg].to_s.strip
   end
 
   # Block attempts to register by clients with known "evil" params,
@@ -97,10 +114,6 @@ class AccountController < ApplicationController
   def block_evil_signups!
     return false unless evil_signup_credentials?
 
-    # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
-    render(status: :too_many_requests,
-           content_type: "text/plain",
-           plain: "We grow weary of this. Please go away.")
     true
   end
 
@@ -120,9 +133,8 @@ class AccountController < ApplicationController
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
-      DeniedEmail.build(params["new_user"]).deliver_now
+      DeniedMailer.build(params[:new_user]).deliver_now
     end
-    redirect_back_or_default(action: :welcome)
     false
   end
 
@@ -169,15 +181,6 @@ class AccountController < ApplicationController
     return unless SPAM_BLOCKERS.any?(domain)
     return if user.login.to_s.match(BOGUS_LOGINS)
 
-    notify_root_of_verification_email(user)
-  end
-
-  def notify_root_of_verification_email(user)
-    url = "#{MO.http_domain}/account/verify/new/#{user.id}?" \
-          "auth_code=#{user.auth_code}"
-    subject = :email_subject_verify.l
-    content = :email_verify_intro.tp(user: user.login, link: url)
-    content = "email: #{user.email}\n\n" + content.html_to_ascii
-    WebmasterEmail.build(user.email, content, subject).deliver_now
+    Account::VerificationsController.notify_root_of_verification_email(user)
   end
 end

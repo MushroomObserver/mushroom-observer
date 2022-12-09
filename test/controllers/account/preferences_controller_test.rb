@@ -5,7 +5,54 @@ require("test_helper")
 # tests of Preferences controller
 module Account
   class PreferencesControllerTest < FunctionalTestCase
+    GOOD_PARAMS = {
+      login: "rolf",
+      password: "new_password",
+      password_confirmation: "new_password",
+      email: "new@email.com",
+      email_comments_all: "",
+      email_comments_owner: "1",
+      email_comments_response: "1",
+      email_general_commercial: "1",
+      email_general_feature: "1",
+      email_general_question: "1",
+      email_html: "1",
+      email_locations_admin: "1",
+      email_locations_all: "",
+      email_locations_author: "1",
+      email_locations_editor: "",
+      email_names_admin: "1",
+      email_names_all: "",
+      email_names_author: "1",
+      email_names_editor: "",
+      email_names_reviewer: "1",
+      email_observations_all: "",
+      email_observations_consensus: "1",
+      email_observations_naming: "1",
+      hide_authors: "above_species",
+      keep_filenames: "keep_but_hide",
+      # license_id: licenses(:publicdomain).id.to_s,
+      layout_count: "100",
+      locale: "el",
+      location_format: "scientific",
+      notes_template: "Collector's #",
+      theme: "Agaricus",
+      thumbnail_maps: "",
+      view_owner_id: "",
+      votes_anonymous: "yes",
+      has_images: "1",
+      has_specimen: "1",
+      lichen: "yes",
+      region: "California, USA",
+      clade: "Ascomycota"
+    }.freeze
+
     def test_edit
+      # Setup: this licenses fixture only available within test??
+      params = GOOD_PARAMS.merge(
+        { license_id: licenses(:publicdomain).id.to_s }
+      )
+
       # First make sure it can serve the form to start with.
       requires_login("edit")
       Language.all.each do |lang|
@@ -25,48 +72,6 @@ module Account
       assert_input_value(:user_clade, "")
 
       # Now change everything.
-      params = {
-        login: "rolf",
-        password: "new_password",
-        password_confirmation: "new_password",
-        email: "new@email.com",
-        email_comments_all: "",
-        email_comments_owner: "1",
-        email_comments_response: "1",
-        email_general_commercial: "1",
-        email_general_feature: "1",
-        email_general_question: "1",
-        email_html: "1",
-        email_locations_admin: "1",
-        email_locations_all: "",
-        email_locations_author: "1",
-        email_locations_editor: "",
-        email_names_admin: "1",
-        email_names_all: "",
-        email_names_author: "1",
-        email_names_editor: "",
-        email_names_reviewer: "1",
-        email_observations_all: "",
-        email_observations_consensus: "1",
-        email_observations_naming: "1",
-        hide_authors: "above_species",
-        keep_filenames: "keep_but_hide",
-        license_id: licenses(:publicdomain).id.to_s,
-        layout_count: "100",
-        locale: "el",
-        location_format: "scientific",
-        notes_template: "Collector's #",
-        theme: "Agaricus",
-        thumbnail_maps: "",
-        view_owner_id: "",
-        votes_anonymous: "yes",
-        has_images: "1",
-        has_specimen: "1",
-        lichen: "yes",
-        region: "California",
-        clade: "Ascomycota"
-      }
-
       # Prove that all the values are initialized correctly if reloading form.
       patch(:update,
             params: { user: params.merge(password_confirmation: "bogus") })
@@ -117,8 +122,18 @@ module Account
       assert_input_value(:user_has_images, "1")
       assert_input_value(:user_has_specimen, "1")
       assert_input_value(:user_lichen, "yes")
-      assert_input_value(:user_region, "California")
+      assert_input_value(:user_region, "California, USA")
       assert_input_value(:user_clade, "Ascomycota")
+
+      # Try a bogus email address
+      patch(:update, params: { user: params.merge(email: "bogus") })
+      assert_flash_error
+      # assert_flash_text(:validate_user_email_missing.t)
+
+      # Try an incomplete region
+      patch(:update, params: { user: params.merge(region: "California") })
+      assert_flash_error
+      # assert_flash_text(:advanced_search_filter_region.t)
 
       # Now do it correctly, and make sure changes were made.
       patch(:update, params: { user: params })
@@ -158,7 +173,7 @@ module Account
       assert_equal("yes", user.content_filter[:has_images])
       assert_equal("yes", user.content_filter[:has_specimen])
       assert_equal("yes", user.content_filter[:lichen])
-      assert_equal("California", user.content_filter[:region])
+      assert_equal("California, USA", user.content_filter[:region])
       assert_equal("Ascomycota", user.content_filter[:clade])
 
       # Prove user cannot pick "Other" as a notes_template heading
@@ -194,6 +209,53 @@ module Account
       post(:create,
            params: { user: { login: "steve", password: "new_password" } })
       assert_equal(rolf.id, @request.session["user_id"])
+    end
+
+    def test_edit_user_with_bogus_email
+      # licenses fixture only available within test??
+      params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                                   login: "flintstone" })
+
+      user = users(:flintstone)
+      login("flintstone")
+
+      get(:edit)
+      assert_input_value(:user_login, "flintstone")
+      assert_input_value(:user_email, "bogus")
+
+      # I don't know if we need all the PARAMS, but
+      patch(:update, params: { user: params })
+
+      assert_flash_text(:runtime_prefs_success.t)
+      assert_equal("new@email.com", user.reload.email)
+    end
+
+    def test_edit_prefs_with_email_with_trailing_space
+      params = GOOD_PARAMS.merge({ email: " trim@this.com " })
+      login("rolf")
+
+      patch(:update, params: { user: params })
+      assert_flash_text(:runtime_prefs_success.t)
+      assert_equal("trim@this.com", rolf.reload.email)
+    end
+
+    def test_edit_user_with_invalid_region
+      # licenses fixture only available within test??
+      params = GOOD_PARAMS.merge({ license_id: licenses(:publicdomain).id.to_s,
+                                   login: "nonregional" })
+
+      user = users(:nonregional)
+      login("nonregional")
+
+      get(:edit)
+      assert_input_value(:user_login, "nonregional")
+      assert_input_value(:user_region, "Massachusetts")
+
+      # I don't know if we need all the PARAMS, but
+      patch(:update, params: { user: params })
+
+      assert_flash_text(:runtime_prefs_success.t)
+      assert_equal("California, USA", user.reload.content_filter[:region])
     end
 
     def test_no_email_hooks

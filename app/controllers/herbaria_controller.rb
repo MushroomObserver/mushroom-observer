@@ -345,7 +345,7 @@ class HerbariaController < ApplicationController
               "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
               "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
               "Obj: #{@herbarium.show_url}\n"
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(@user.email, content, subject).deliver_now
   end
 
   def user_can_destroy_herbarium?

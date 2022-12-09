@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class BannerController < ApplicationController
-    include Admin::RestrictAccessToAdminMode
-
-    before_action :login_required
-
+  class BannerController < AdminController
     # Update banner across all translations.
     def edit
       @val = h(:app_banner_box.l.to_s)

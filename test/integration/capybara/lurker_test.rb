@@ -108,10 +108,9 @@ class LurkerTest < CapybaraIntegrationTestCase
     go_back_after do
       # Owner has done several things to Observation:
       #  Observation itself, naming, comment.
-      # (plus a link to it is also in table of names for mobile)
       assert(
         assert_selector("#content a[href^='/users/#{owner.id}']",
-                        minimum: 4)
+                        minimum: 3)
       )
 
       first(:link, owner.name).click
@@ -135,7 +134,7 @@ class LurkerTest < CapybaraIntegrationTestCase
                    page.title, "Wrong page")
 
       # (Make sure observation is shown somewhere.)
-      assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),
+      assert(has_selector?("a[href^='#{permanent_observation_path(obs.id)}']"),
              "Missing a link to Observation")
     end
     # back at Observation
@@ -222,7 +221,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     # assert_selector("a[href^='/#{obs}']")
     links = find_all("a[href^='/#{obs}']")
     assert(links.all? { |l| l[:href].match(/#{obs}\?q=/) },
-           "Expected a link to reference #{obs}\?q=??.\n" \
+           "Expected a link to reference #{obs}?q=??.\n" \
            "Found these: #{links.inspect}")
   end
 

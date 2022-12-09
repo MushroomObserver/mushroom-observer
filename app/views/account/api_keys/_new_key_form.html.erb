@@ -1,4 +1,5 @@
-<%= form_with(scope: :key, url: account_api_keys_path, method: :post) do |f| %>
+<%= form_with(scope: :key, url: account_api_keys_path, method: :post,
+              id: "account_new_api_key_form") do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label(:notes, :account_api_keys_notes_label.t) %>

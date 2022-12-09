@@ -3,19 +3,22 @@
 require("test_helper")
 
 class AdminTest < CapybaraIntegrationTestCase
+  # This test is not much more than a stub.
+  # Should test somebody making a donation, admin reviews.
   def test_review_donations
     visit("/admin/donations/edit")
-    # binding.break
     assert_flash_text(:permission_denied.t)
 
     put_user_in_admin_mode(rolf)
 
-    visit("/admin/donations/edit")
+    visit("/admin/review_donations")
+    assert_selector("body.donations__edit")
 
-    # There are two of these submit buttons too
-    click_commit
-    # If it fails it renders a simple text message.
-    assert_selector("form")
+    within("#admin_review_donations_form") do
+      click_commit
+    end
+
+    assert_selector("#admin_review_donations_form")
   end
 
   def test_switch_users
@@ -25,10 +28,16 @@ class AdminTest < CapybaraIntegrationTestCase
     click_on(id: "nav_admin_switch_users_link")
 
     within("#admin_switch_users_form") do
-      fill_in("id", with: "bogus")
+      fill_in("id", with: "something unlikely and bogus")
       click_commit
     end
-    assert_flash_text("Couldn't find")
+    assert_flash_text("Play again?")
+
+    within("#admin_switch_users_form") do
+      fill_in("id", with: "unverified")
+      click_commit
+    end
+    assert_flash_text("This user is not verified yet!")
 
     within("#admin_switch_users_form") do
       fill_in("id", with: "mary")

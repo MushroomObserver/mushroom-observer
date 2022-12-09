@@ -32,6 +32,7 @@ ACTIONS = {
     old_translation: {},
     pivotal: {},
     test: {},
+    visual_group_status: {},
     vote: {}
   },
   api: {
@@ -263,12 +264,10 @@ ACTIONS = {
   },
   support: {
     confirm: {},
-    # create_donation: {},
     donate: {},
     donors: {},
     governance: {},
     letter: {},
-    # review_donations: {},
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are to very old pages that we might get rid of.
@@ -494,12 +493,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
-  # NOTE: Nesting below is necessary to get nice path helpers
-  resource :account, only: [:new, :create]
+  # NOTE: The nesting below is necessary to get nice path helpers
+  resource :account, only: [:new, :create], controller: "account"
 
   namespace :account do
     get("welcome")
-    get("signup", to: "/account#new")
+    get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
     get("email_new_password", controller: "login")
@@ -508,12 +507,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("test_autologin", controller: "login")
 
     resource :preferences, only: [:edit, :update]
-    get("no_email", controller: "preferences")
+    get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    patch("profile/remove_image", controller: "profile")
+    patch("profile/remove_image", controller: "profile") # alternate path
 
     resource :verify, only: [:new, :create], controller: "verifications"
+    # Alternate path name for email verification
+    get("verify(/:id)", to: "verifications#new", as: "verify_email")
     get("reverify", controller: "verifications")
     post("verify/resend_email(/:id)", to: "verifications#resend_email",
                                       as: "resend_verification_email")
@@ -527,33 +528,31 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Admin: resources and actions ------------------------------------
   namespace :admin do
+    # controls turning admin mode on and off, and switching users
+    resource :session, only: [:show, :edit, :update], controller: "session",
+                       as: "mode"
+    get("switch_users", to: "mode#edit") # alternate path
+
     resource :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
-    get("review_donations", to: "admin/donations#edit")
-    resource :turn_admin_on, only: [:show], controller: "turn_on"
-    resource :turn_admin_off, only: [:show], controller: "turn_off"
+    get("review_donations", to: "donations#edit") # alternate path
     resource :banner, only: [:edit, :update], controller: "banner"
-    resource :switch_users, only: [:new, :create]
     resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
     namespace :emails do
       resource :feature, only: [:new, :create], controller: "feature"
     end
-    # get("show")
-    get("test_flash_redirection")
   end
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
-  # ----- Authors: no resources, just forms ------------------------------------
-  match("/authors/email_request(/:id)",
-        to: "authors#email_request", via: [:get, :post], id: /\d+/,
-        as: "authors_email_request")
-  match("/authors/review(/:id)",
-        to: "authors#review", via: [:get, :post], id: /\d+/,
-        as: "authors_review")
+  # ----- Authors: standard actions ------------------------------------
+  namespace :authors do
+    resource :review, only: [:show, :create, :destroy], id: /\d+/
+    resource :email_requests, only: [:new, :create]
+  end
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
@@ -571,7 +570,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
-  # ----- Emails: no resources, just forms -------------------------------------
+  # ----- Emails: no resources, just forms ------------------------------------
   match("/emails/ask_observation_question(/:id)",
         to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_observation_question")
@@ -584,9 +583,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/emails/commercial_inquiry(/:id)",
         to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
         as: "emails_commercial_inquiry")
-  # match("/emails/features(/:id)",
-  #       to: "emails#features", via: [:get, :post], id: /\d+/,
-  #       as: "emails_features")
   match("/emails/merge_request(/:id)",
         to: "emails#merge_request", via: [:get, :post], id: /\d+/,
         as: "emails_merge_request")
@@ -622,11 +618,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: "herbarium_record#show_herbarium_record",
       as: "show_herbarium_record")
 
-  # ----- Image:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/image/show_image/:id", to: "image#show_image",
-                               as: "show_image")
-
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
   get("/info/how_to_use", to: "info#how_to_use")
@@ -642,15 +633,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
-
-  # ----- Location:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/location/show_location/:id", to: "location#show_location",
-                                     as: "show_location")
-
-  # ----- Name:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/name/show_name/:id", to: "name#show_name", as: "show_name")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
@@ -673,21 +655,16 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
-  # ----- Project:
-  # ----- temporary show route for path_builder with id ---------------
-  get("/project/show_project/:id", to: "project#show_project",
-                                   as: "show_project")
-
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
-  # ----- RssLogs: nonstandard actions ----------------------------------------
-  # These routes must go before resources, or it will try to match
-  # "rss" to an rss_log
-  # resources :rss_logs, only: [:show, :index]
-  get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
-  get("/activity_logs", to: "rss_logs#index", as: "activity_logs")
-  get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
+  # ----- RssLogs: standard actions ----------------------------------------
+  # This route must go first, or it will try to match "rss" to an rss_log
+  namespace :activity_logs, controller: "rss_logs" do
+    get :rss, to: "/rss_logs#rss"
+  end
+
+  resources :activity_logs, only: [:show, :index], controller: "rss_logs"
 
   # ----- Searches: nonstandard actions --------------------------------------
   match("/search/pattern(/:id)",
@@ -700,14 +677,39 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
+  # ----- Test pages  -------------------------------------------
+  namespace :test_pages do
+    resource :flash_redirection, only: [:show], controller: "flash_redirection"
+  end
+
+  # ----- Users: standard actions -------------------------------------------
+  resources :users, id: /\d+/, only: [:index, :show]
+
+  # ----- VisualModels: standard actions ------------------------------------
+  resources :visual_models, id: /\d+/ do
+    resources :visual_groups, id: /\d+/, shallow: true
+  end
+
+  # Temporary shorter path builders for non-CRUDified controllers SHOW
+
+  # ----- Image:
+  get("/image/show_image/:id", to: "image#show_image",
+                               as: "show_image")
+  # ----- Location:
+  get("/location/show_location/:id", to: "location#show_location",
+                                     as: "show_location")
+  # ----- Name:
+  get("/name/show_name/:id", to: "name#show_name",
+                             as: "show_name")
+  # ----- Project:
+  get("/project/show_project/:id", to: "project#show_project",
+                                   as: "show_project")
   # ----- Species List:
-  # ----- temporary show route for path_builder with id ---------------
   get("/species_list/show_species_list/:id",
       to: "species_list#show_species_list",
       as: "show_species_list")
 
-  # ----- Users: standard actions -------------------------------------------
-  resources :users, id: /\d+/, only: [:index, :show]
+  # ----- end temporary show routes for path_builder with id ---------------
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

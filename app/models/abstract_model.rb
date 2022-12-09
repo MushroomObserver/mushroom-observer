@@ -440,12 +440,28 @@ class AbstractModel < ApplicationRecord
     self.class.index_action
   end
 
+  # Return the link_to args of the "index_<object>" action
+  # (the index, indexed to a particular id)
+  #
+  #   Name.index_link_args(12) => {controller: "/name", action: :index_name,
+  #                                id: 12}
+  #   name.index_link_args     => {controller: "/name", action: :index_name,
+  #                                id: 12}
+  #
+  def self.index_link_args(id)
+    { controller: show_controller, action: index_action, id: id }
+  end
+
+  def index_link_args
+    self.class.index_link_args(id)
+  end
+
   # Return the name of the "show_<object>" action (as a symbol)
   # that displays this object.
   #
   #   Article.show_action => :show # normalized controller
   #
-  #   Name.show_action => :show_name # unormalized
+  #   Name.show_action => :show_name # unnormalized
   #   name.show_action => :show_name
   #
   def self.show_action
@@ -461,7 +477,7 @@ class AbstractModel < ApplicationRecord
   # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
-  #   Article.index_action => "https://mushroomobserver.org/article/12"
+  #   Article.show_url(12) => "https://mushroomobserver.org/articles/12"
   #
   #   # unnormalized controller
   #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
@@ -522,8 +538,10 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "show_<object>" action
   #
-  #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
-  #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
+  #   Name.show_link_args(12) => {controller: "/name", action: :show_name,
+  #                               id: 12}
+  #   name.show_link_args     => {controller: "/name", action: :show_name,
+  #                               id: 12}
   #
   def self.show_link_args(id)
     { controller: show_controller, action: show_action, id: id }
