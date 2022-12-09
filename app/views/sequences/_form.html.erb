@@ -8,10 +8,9 @@
         <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
     </div>
     <div class="col-xs-12 col-sm-6">
-      <div class="well well-sm help-block position-relative">
-        <div class="arrow-left hidden-xs"></div>
+      <%= help_block_with_arrow("left", id: "sequence_locus_help") do %>
         <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
-      </div>
+      <% end %>
     </div>
   </div><!--.row-->
 
@@ -54,10 +53,9 @@
       <%= form.text_field(:accession, class: "form-control") %>
     </div>
     <div class="col-xs-12 col-md-6">
-      <div class="well well-sm help-block position-relative">
-        <div class="arrow-left hidden-xs"></div>
+      <%= help_block_with_arrow("left", id: "sequence_accession_help") do %>
         <%= :form_sequence_accession_help.t %>
-      </div>
+      <% end %>
     </div>
   </div><!--.row-->
 
@@ -69,10 +67,9 @@
       <%= form.text_area(:notes, rows: 3, class: "form-control") %>
     </div>
     <div class="col-xs-12 col-md-6">
-      <div class="well well-sm help-block position-relative mt-4">
-        <div class="arrow-left hidden-xs"></div>
+      <%= help_block_with_arrow("left", id: "textile_help") do %>
         <%= :field_textile_link.t %>
-      </div>
+      <% end %>
     </div>
   </div><!--.row-->
 

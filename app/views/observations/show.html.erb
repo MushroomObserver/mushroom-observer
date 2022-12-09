@@ -1,12 +1,13 @@
 <%
-  @owner_id = owner_id_line(@observation) # must go before show_obs_title
+  @owner_naming = owner_naming_line(@observation) # must before show_obs_title
   @title = show_obs_title(@observation)
   @tabsets = show_observation_tabset(obs: @observation, user: @user,
                                      mappable: @mappable)
   @container = :wide
 
+  # Needed here, because we reference these in the page before they're loaded
   javascript_include("suggestions")
-  javascript_include("vote_popup")
+  javascript_include("vote_by_ajax")
 
   show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
   show_lists = @user && @observation.species_lists.any?
@@ -15,37 +16,37 @@
 
 <div class="row">
   <div class="col-md-8 float-sm-left">
-    <%= render(partial: "show_observation",
+    <%= render(partial: "observations/show/observation",
                locals: { observation: @observation }) %>
   </div>
   <div class="col-md-4 float-sm-right">
     <% if @user %>
-      <%= render(partial: "show_name_info",
-                  locals: { observation: @observation }) %>
+      <%= render(partial: "observations/show/name_info",
+                 locals: { observation: @observation }) %>
 
       <% if show_lists %>
-        <%= render(partial: "show_lists",
+        <%= render(partial: "observations/show/lists",
                    locals: {observation: @observation}) %>
       <% end %>
 
       <% if show_links %>
-        <%= render(partial: "show_links",
+        <%= render(partial: "observations/show/links",
                    locals: {observation: @observation}) %>
       <% end %>
     <% end %>
 
     <% if show_map %>
-      <%= render(partial: "show_thumbnail_map",
+      <%= render(partial: "observations/show/thumbnail_map",
                  locals: { observation: @observation }) %>
     <% end %>
 
-    <%= render(partial: "show_images",
+    <%= render(partial: "observations/show/images",
                locals: { observation: @observation }) %>
   </div>
 
   <div class="col-md-8 float-sm-left">
     <% if @user %>
-      <%= render(partial: "naming/show",
+      <%= render(partial: "observations/show/namings",
                  locals: { observation: @observation }) %>
     <% end %>
 
