@@ -190,7 +190,7 @@ module ObjectLinkHelper
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
               controller: :herbarium_record, action: :observation_index,
-               id: obs.id)
+              id: obs.id)
     else
       return :show_observation_specimen_available.t if obs.specimen
 
