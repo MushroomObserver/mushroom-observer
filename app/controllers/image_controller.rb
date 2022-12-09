@@ -827,7 +827,7 @@ class ImageController < ApplicationController
           :image_vote_anonymity_invalid_submit_button.l(label: submit)
         )
       end
-      redirect_to(controller: "account", action: "prefs")
+      redirect_to(edit_account_preferences_path)
     else
       @num_anonymous = ImageVote.connection.select_value(%(
         SELECT count(id) FROM image_votes
@@ -845,7 +845,7 @@ class ImageController < ApplicationController
       UPDATE images SET original_name = '' WHERE user_id = #{User.current_id}
     ))
     flash_notice(:prefs_bulk_filename_purge_success.t)
-    redirect_to(controller: :account, action: :prefs)
+    redirect_to(edit_account_preferences_path)
   end
 
   ##############################################################################

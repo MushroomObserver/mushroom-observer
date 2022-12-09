@@ -1,6 +1,0 @@
-<%
-  @title = :email_welcome.t(user: @unverified_user.legal_name)
-%>
-
-<%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>
-<%= link_to(:reverify_link.t, action: :send_verify, id: @unverified_user.id) %>

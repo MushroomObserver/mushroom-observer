@@ -436,28 +436,28 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------
 
   def test_show_urls
-    assert_show_url(APIKey, "account/show_api_key")
+    assert_show_url(APIKey, "/account/show_api_key")
     assert_show_url(CollectionNumber,
-                    "collection_number/show_collection_number")
-    assert_show_url(Comment, "comment/show_comment")
-    assert_show_url(ExternalSite, "external_site/show_external_site")
-    assert_show_url(Herbarium, "herbaria")
-    assert_show_url(HerbariumRecord, "herbarium_record/show_herbarium_record")
-    assert_show_url(Image, "image/show_image")
-    assert_show_url(Location, "location/show_location")
-    assert_show_url(Name, "name/show_name")
-    assert_show_url(Naming, "observations/show_naming")
-    assert_show_url(Observation, "observations")
-    assert_show_url(Project, "project/show_project")
-    assert_show_url(Sequence, "sequences")
-    assert_show_url(SpeciesList, "species_list/show_species_list")
-    assert_show_url(User, "users")
+                    "/collection_number/show_collection_number")
+    assert_show_url(Comment, "/comment/show_comment")
+    assert_show_url(ExternalSite, "/external_site/show_external_site")
+    assert_show_url(Herbarium, "/herbaria")
+    assert_show_url(HerbariumRecord, "/herbarium_record/show_herbarium_record")
+    assert_show_url(Image, "/image/show_image")
+    assert_show_url(Location, "/location/show_location")
+    assert_show_url(Name, "/name/show_name")
+    assert_show_url(Naming, "/observations/show_naming")
+    assert_show_url(Observation, "/observations")
+    assert_show_url(Project, "/project/show_project")
+    assert_show_url(Sequence, "/sequences")
+    assert_show_url(SpeciesList, "/species_list/show_species_list")
+    assert_show_url(User, "/users")
   end
 
   def assert_show_url(model, path)
     domain = "https://mushroomobserver.org"
     obj = model.first
-    assert_equal("#{domain}/#{path}/#{obj.id}", obj.show_url)
+    assert_equal("#{domain}#{path}/#{obj.id}", obj.show_url)
   end
 
   # -------------------------------------------------------------------------

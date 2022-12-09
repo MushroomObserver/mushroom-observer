@@ -70,10 +70,10 @@
     "#{MO.http_domain}/interest/set_interest?id=#{new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
   if email_type && email_type != "interest"
     links.push([:email_links_stop_sending.t,
-      "#{MO.http_domain}/account/no_email_locations_#{email_type}/#{@user.id}"]) unless watching
+      "#{MO.http_domain}/account/no_email/#{@user.id}?type=locations_#{email_type}"]) unless watching
   end
   links.push([:email_links_change_prefs.t,
-    "#{MO.http_domain}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/preferences/edit"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

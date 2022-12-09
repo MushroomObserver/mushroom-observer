@@ -15,7 +15,7 @@ class ExportControllerTest < FunctionalTestCase
 
     # Require login.
     get(:set_export_status, params: params)
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(new_account_login_path)
 
     # Require reviewer.
     login("dick")
@@ -61,7 +61,7 @@ class ExportControllerTest < FunctionalTestCase
 
   def test_set_ml_status_login
     get(:set_ml_status, params: ml_params)
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(new_account_login_path)
   end
 
   def test_set_ml_status_require_reviewer
