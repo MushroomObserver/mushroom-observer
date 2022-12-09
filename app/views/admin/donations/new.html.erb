@@ -32,9 +32,9 @@
       <%= f.label(:email, :EMAIL.t + ":") %>
       <%= f.text_field(:email, size: 50, class: "form-control") %>
     </div>
-
-    <%= f.submit(:create_donation_add.l,
-                 class: "btn btn-default center-block") %>
   <% end %>
+
+  <%= form.submit(:create_donation_add.l,
+               class: "btn btn-default center-block") %>
 
 <% end %>
