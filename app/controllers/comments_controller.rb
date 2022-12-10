@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = Comment Controller
+#  = Comments Controller
 #
 #  == Actions
 #   L = login required
@@ -10,22 +10,23 @@
 #   P = prefetching allowed
 #
 #  ==== Searches and Indexes
-#  list_comments::
-#  show_comments_by_user::
-#  show_comments_for_target::
-#  show_comments_for_user::
-#  comment_search::
-#  index_comment::
-#  show_selected_comments::
+#  index:: (params call private methods below)
 #
-#  ==== Show, Create and Edit
-#  show_comment::
-#  next_comment::
-#  prev_comment::
-#  add_comment::
-#  edit_comment::
-#  destroy_comment::
-#  allowed_to_see!::
+#  - list_comments::
+#  - show_comments_by_user::
+#  - show_comments_for_target::
+#  - show_comments_for_user::
+#  - comment_search::
+#  - index_comment::
+#  - show_selected_comments::
+#
+#  ==== Show, CRUD actions
+#  show:: (use params for next and prev)
+#  new::
+#  create::
+#  edit::
+#  update::
+#  destroy::
 #
 ################################################################################
 class CommentsController < ApplicationController
