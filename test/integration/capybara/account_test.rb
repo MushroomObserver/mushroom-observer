@@ -3,7 +3,7 @@
 require("test_helper")
 
 class AccountTest < CapybaraIntegrationTestCase
-  def test_signup
+  def test_signup_verify_login_and_logout
     visit(account_signup_path)
     assert_selector("body.account__new")
     # Make a mistake with the password confirmation
@@ -63,7 +63,37 @@ class AccountTest < CapybaraIntegrationTestCase
       click_commit
     end
 
+    # Redirected to the Welcome page, but email not verified.
     assert_selector("body.account__welcome")
+
+    # At this point there should be an unverified account for Dumbledore.
+    wizard = User.find_by(email: "webmaster@hogwarts.org")
+    assert_false(wizard.verified)
+
+    # He receives an email with this link. A GET to this path should verify 'm
+    visit(account_verify_email_path(id: wizard.id, auth_code: wizard.auth_code))
+    assert_true(wizard.reload.verified)
+    # ...and send 'm to the "new" verifications page
+    assert_selector("body.verifications__new")
+
+    # They should be logged in now.
+    assert_link(:app_logout.t)
+    # Log out. (must use id, there are multiple links)
+    click_link(id: "nav_user_logout_link")
+    assert_no_link(:app_logout.t)
+
+    # Try to use that verification code again!
+    visit(account_verify_email_path(id: wizard.id, auth_code: wizard.auth_code))
+    assert_flash_warning(:runtime_reverify_already_verified.t.strip_squeeze)
+    assert_selector("body.login__new")
+
+    within("#account_login_form") do
+      fill_in("user_login", with: "Dumbledore")
+      fill_in("user_password", with: "Hagrid_24!")
+      click_commit
+    end
+    # They should still be able to log in ok.
+    assert_link(:app_logout.t)
   end
 
   def test_correct_invalid_preferences
