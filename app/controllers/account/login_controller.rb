@@ -94,7 +94,7 @@ module Account
 
     def login_unverified(user)
       @unverified_user = user
-      render("/account/reverify")
+      render("/account/verifications/reverify")
     end
 
     def set_random_password_for_new_user_and_email_them
