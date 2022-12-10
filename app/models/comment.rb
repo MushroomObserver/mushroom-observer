@@ -57,6 +57,20 @@
 #  summary::      Summary line (100 chars).
 #  comment::      Full text (any length).
 #
+#  ==== Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  by_user(user)
+#  for_user(user)
+#  for_target(target)
+#
 #  == Instance Methods
 #
 #  text_name::              Alias for +summary+ for debugging.
