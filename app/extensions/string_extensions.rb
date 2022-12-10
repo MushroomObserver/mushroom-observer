@@ -568,6 +568,10 @@ class String
   #
   #   names = text.split(/\n/).map(&:strip_squeeze)
   #
+  # Example: string = "This  type of string. "
+  #
+  #   string.strip_squeeze == "This type of string."
+  #
   def strip_squeeze
     strip.squeeze(" ")
   end
