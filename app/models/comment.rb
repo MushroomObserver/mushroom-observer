@@ -98,9 +98,22 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
+  scope :by_user,
+        ->(user) { where(user: user) }
+  scope :for_user,
+        lambda { |user|
+          targets = []
+          all_types.each do |model|
+            targets |= model.where(user: user).map(&:id)
+          end
+          where(target: targets)
+        }
+  scope :for_target,
+        ->(target) { where(target: target) }
+
   # Returns Array of all models (Classes) which take comments.
   def self.all_types
-    [Location, Name, Observation, Project, SpeciesList]
+    all_type_tags.map { |t| t.to_s.camelize.constantize }
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
