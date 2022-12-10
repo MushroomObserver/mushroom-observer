@@ -173,7 +173,7 @@ class CollectionNumbersController < ApplicationController
       @other_number.add_observation(@observation)
       @collection_number = @other_number
     end
-    redirect_to_observation_or_object(@collection_number)
+    redirect_to_back_object_or_object(@back_object, @collection_number)
   end
 
   def update_collection_number
@@ -199,7 +199,7 @@ class CollectionNumbersController < ApplicationController
       @collection_number = @other_number
     end
 
-    redirect_to_observation_or_object(@collection_number)
+    redirect_to_back_object_or_object(@back_object, @collection_number)
   end
 
   def check_for_form_errors?
@@ -231,7 +231,7 @@ class CollectionNumbersController < ApplicationController
     return true if in_admin_mode? || obj.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_observation_or_object(@collection_number)
+    redirect_to_back_object_or_object(@back_object, @collection_number)
     false
   end
 
