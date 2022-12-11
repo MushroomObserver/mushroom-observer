@@ -70,6 +70,18 @@ class AccountTest < CapybaraIntegrationTestCase
     wizard = User.find_by(email: "webmaster@hogwarts.org")
     assert_false(wizard.verified)
 
+    # Actually happens: User tries to sign in immediately, without verifying
+    click_link(id: "nav_login_link")
+    assert_selector("body.login__new")
+
+    within("#account_login_form") do
+      fill_in("user_login", with: "Dumbledore")
+      fill_in("user_password", with: "Hagrid_24!")
+      click_commit
+    end
+    # Should render reverify action where he can get another email link
+    assert_button("account_reverify_link")
+
     # He receives an email with this link. A GET to this path should verify 'm
     visit(account_verify_email_path(id: wizard.id, auth_code: wizard.auth_code))
     assert_true(wizard.reload.verified)
