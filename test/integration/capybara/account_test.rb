@@ -79,7 +79,7 @@ class AccountTest < CapybaraIntegrationTestCase
       fill_in("user_password", with: "Hagrid_24!")
       click_commit
     end
-    # Should render reverify action where he can get another email link
+    # Should render reverify action where they can get another email link
     assert_button("account_reverify_link")
 
     # He receives an email with this link. A GET to this path should verify 'm
