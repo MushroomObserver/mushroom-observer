@@ -68,7 +68,7 @@ module Account
       raise("This action should never occur!")
     end
 
-    # This is used by the "reverify" page to re-send the verification email.
+    # Route linked from the "reverify" template. Re-sends verification email.
     def resend_email
       return unless (user = find_or_goto_index(User, params[:id]))
 
@@ -82,7 +82,6 @@ module Account
     def self.notify_root_of_verification_email(user)
       url = "#{MO.http_domain}/account/verify/#{user.id}?" \
             "auth_code=#{user.auth_code}"
-      # url = account_verify_url(id: user.id, auth_code: user.auth_code)
       subject = :email_subject_verify.l
       content = :email_verify_intro.tp(user: user.login, link: url)
       content = "email: #{user.email}\n\n" + content.html_to_ascii
