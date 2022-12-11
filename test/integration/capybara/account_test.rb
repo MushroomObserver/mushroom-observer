@@ -3,7 +3,7 @@
 require("test_helper")
 
 class AccountTest < CapybaraIntegrationTestCase
-  def test_signup
+  def test_signup_verify_login_and_logout
     visit(account_signup_path)
     assert_selector("body.account__new")
     # Make a mistake with the password confirmation
@@ -17,7 +17,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     # We ought to be back at the form
     assert_flash_error
-    assert_flash_text(:validate_user_password_no_match.t.render_html)
+    assert_flash_text(:validate_user_password_no_match.t.as_displayed)
     assert_flash_text(:validate_user_email_missing.t)
     # This time, do it right
     within("#account_signup_form") do
@@ -29,7 +29,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     # Ah, but we didn't give an email address.
     assert_flash_error
-    assert_no_flash_text(:validate_user_password_no_match.t.render_html)
+    assert_no_flash_text(:validate_user_password_no_match.t.as_displayed)
     assert_flash_text(:validate_user_email_missing.t)
     within("#account_signup_form") do
       fill_in("new_user_login", with: "Dumbledore")
@@ -63,7 +63,66 @@ class AccountTest < CapybaraIntegrationTestCase
       click_commit
     end
 
+    # Redirected to the Welcome page, but email not verified.
     assert_selector("body.account__welcome")
+
+    # At this point there should be an unverified account for Dumbledore.
+    wizard = User.find_by(email: "webmaster@hogwarts.org")
+    assert_false(wizard.verified)
+
+    # Actually happens: User tries to sign in immediately, without verifying
+    click_link(id: "nav_login_link")
+    assert_selector("body.login__new")
+
+    within("#account_login_form") do
+      fill_in("user_login", with: wizard.login)
+      fill_in("user_password", with: "Hagrid_24!")
+      click_commit
+    end
+
+    # Rails should send another email with this link.
+    verify_mail_content = delivered_mail_html
+    assert(verify_mail_content.include?(wizard.login))
+    assert(verify_mail_content.include?("verify"))
+    # Store the link in that mail, so we can test the reverify link.
+    verify_link = first_link_in_mail
+
+    # Should render reverify where they can get another email link. Try it
+    click_on("account_reverify_link")
+    assert_flash_success(:runtime_reverify_sent.t.strip_squeeze)
+    # GOTCHA: last email sent is the webmaster notification for reverify.
+    # So check the second to last delivery: delivered_mail_html(2)
+    reverify_mail_content = delivered_mail_html(2)
+    assert(reverify_mail_content.include?(wizard.login))
+    assert(reverify_mail_content.include?("verify"))
+    reverify_link = first_link_in_mail(2)
+
+    assert_equal(verify_link, reverify_link)
+
+    # A GET to the verify_link should verify Dumbledore
+    visit(verify_link)
+    assert_true(wizard.reload.verified)
+    # ...and send them to the "new" verifications page
+    assert_selector("body.verifications__new")
+
+    # They should be logged in now.
+    assert_link(:app_logout.t)
+    # Log out. (must use id, there are multiple links)
+    click_link(id: "nav_user_logout_link")
+    assert_no_link(:app_logout.t)
+
+    # Try to use that verification code again. No can do
+    visit(account_verify_email_path(id: wizard.id, auth_code: wizard.auth_code))
+    assert_flash_warning(:runtime_reverify_already_verified.t.strip_squeeze)
+    assert_selector("body.login__new")
+
+    within("#account_login_form") do
+      fill_in("user_login", with: "Dumbledore")
+      fill_in("user_password", with: "Hagrid_24!")
+      click_commit
+    end
+    # They should still be able to log in ok.
+    assert_link(:app_logout.t)
   end
 
   def test_correct_invalid_preferences
@@ -93,7 +152,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(:validate_user_email_missing.t.render_html)
+    assert_flash_text(:validate_user_email_missing.t.as_displayed)
     within("#account_preferences_form") do
       fill_in("user_region", with: "Canada")
       fill_in("user_email", with: "valid@seemingly.com")
@@ -143,7 +202,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(:runtime_prefs_password_no_match.t.render_html)
+    assert_flash_text(:runtime_prefs_password_no_match.t.as_displayed)
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       fill_in("user_password_confirmation", with: "beverly")
@@ -151,7 +210,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(:runtime_prefs_password_no_match.t.render_html)
+    assert_flash_text(:runtime_prefs_password_no_match.t.as_displayed)
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       fill_in("user_password_confirmation", with: "wanda")
@@ -208,7 +267,7 @@ class AccountTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(:advanced_search_filter_region.t.render_html)
+    assert_flash_text(:advanced_search_filter_region.t.as_displayed)
     within("#account_preferences_form") do
       fill_in("user_region", with: "Massachusetts, USA")
       click_commit
@@ -234,7 +293,7 @@ class AccountTest < CapybaraIntegrationTestCase
 
     assert_flash_error
     assert_flash_text(
-      :prefs_notes_template_no_other.t(part: "Other").render_html
+      :prefs_notes_template_no_other.t(part: "Other").as_displayed
     )
     within("#account_preferences_form") do
       fill_in("user_notes_template", with: "Smells, Textures, Impressions")
@@ -316,11 +375,11 @@ class AccountTest < CapybaraIntegrationTestCase
     assert_selector("body.api_keys__index")
     within("#account_api_keys_form") do
       assert_field("key_#{marys_api_key.id}")
-      # needs `render_html` because single quote gets converted to "smart"
+      # needs `as_displayed` because single quote gets converted to "smart"
       # apostrophe and encoded by `t`. Otherwise Capybara will not find the
       # HTML entity `&#8217;` and the character `’` equivalent.
       assert_selector("#key_notes_#{marys_api_key.id} span.current_notes",
-                      text: marys_api_key.notes.t.render_html)
+                      text: marys_api_key.notes.t.as_displayed)
     end
     # Add a new api key
     within("#account_new_api_key_form") do

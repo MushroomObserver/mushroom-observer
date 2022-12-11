@@ -517,10 +517,14 @@ class String
       html_safe # rubocop:disable Rails/OutputSafety
   end
 
-  # For integration test comparisons:
-  # Render special encoded characters as they appear in HTML
-  def render_html
+  # Render special encoded characters as regular characters in HTML
+  def unescape_html
     CGI.unescapeHTML(self)
+  end
+
+  # For integration test comparisons: the whole string as rendered in browser
+  def as_displayed
+    unescape_html.strip_squeeze
   end
 
   # Insert a line break between the scientific name and the author
@@ -567,6 +571,10 @@ class String
   # Why?  Because it lets us do this:
   #
   #   names = text.split(/\n/).map(&:strip_squeeze)
+  #
+  # Example: string = "This  type of string. "
+  #
+  #   string.strip_squeeze == "This type of string."
   #
   def strip_squeeze
     strip.squeeze(" ")

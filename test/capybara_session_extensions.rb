@@ -61,6 +61,25 @@ module CapybaraSessionExtensions
     params["q"]
   end
 
+  # Mail parsing methods. Pass `pos` to get nth-from-last mail delivered
+  def delivered_mail(pos = 1)
+    ActionMailer::Base.deliveries.last(pos).first
+  end
+
+  # Just the HTML
+  def delivered_mail_html(pos = 1)
+    delivered_mail(pos).body.raw_source
+  end
+
+  def delivered_mail_data(pos = 1)
+    Nokogiri::HTML(delivered_mail_html(pos))
+  end
+
+  def first_link_in_mail(pos = 1)
+    href_value = delivered_mail_data(pos).at_css("a")[:href]
+    URI.parse(href_value).request_uri
+  end
+
   def assert_flash_text(text = "")
     assert_selector("#flash_notices")
     assert_selector("#flash_notices", text: text)
@@ -74,13 +93,15 @@ module CapybaraSessionExtensions
     refute_selector("#flash_notices")
   end
 
-  def assert_flash_success
+  def assert_flash_success(text = "")
     assert_selector("#flash_notices.alert-success")
+    assert_flash_text(text) if text
   end
 
-  def assert_flash_error
+  def assert_flash_error(text = "")
     assert_any_of_selectors("#flash_notices.alert-error",
                             "#flash_notices.alert-danger")
+    assert_flash_text(text) if text
   end
 
   def assert_no_flash_errors
@@ -88,8 +109,9 @@ module CapybaraSessionExtensions
                              "#flash_notices.alert-danger")
   end
 
-  def assert_flash_warning
+  def assert_flash_warning(text = "")
     assert_selector("#flash_notices.alert-warning")
+    assert_flash_text(text) if text
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers
