@@ -746,17 +746,17 @@ class ImageController < ApplicationController
     process_license_changes if request.method == "POST"
 
     # Gather data for form.
-    @data = Image.connection.select_all(%(
-      SELECT COUNT(*) AS license_count, copyright_holder, license_id
-      FROM images
-      WHERE user_id = #{@user.id.to_i}
-      GROUP BY copyright_holder, license_id
-    )).to_a
-    @data.each do |datum|
+    # map(&:attributes) gives you a hash of your selects with their keys
+    @data = Image.includes(:license).where(user_id: @user.id).
+            select(Arel.star.count.as("license_count"),
+                   :copyright_holder, :license_id).
+            group(:copyright_holder, :license_id).
+            map(&:attributes).map do |datum|
       next unless (license = License.safe_find(datum["license_id"].to_i))
 
       datum["license_name"] = license.display_name
       datum["licenses"]     = License.current_names_and_ids(license)
+      datum.except!("id")
     end
   end
 
