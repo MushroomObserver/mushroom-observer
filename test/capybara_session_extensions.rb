@@ -61,6 +61,25 @@ module CapybaraSessionExtensions
     params["q"]
   end
 
+  # Mail parsing methods. Pass `pos` to get nth-from-last mail delivered
+  def delivered_mail(pos = 1)
+    ActionMailer::Base.deliveries.last(pos).first
+  end
+
+  # Just the HTML
+  def delivered_mail_html(pos = 1)
+    delivered_mail(pos).body.raw_source
+  end
+
+  def delivered_mail_data(pos = 1)
+    Nokogiri::HTML(delivered_mail_html(pos))
+  end
+
+  def first_link_in_mail(pos = 1)
+    href_value = delivered_mail_data(pos).at_css("a")[:href]
+    URI.parse(href_value).request_uri
+  end
+
   def assert_flash_text(text = "")
     assert_selector("#flash_notices")
     assert_selector("#flash_notices", text: text)
