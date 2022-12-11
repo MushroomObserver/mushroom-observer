@@ -25,4 +25,4 @@ echo "id	content_type	copyright_holder	license	ok_for_export	diagnostic" > $publ
 mysql --defaults-extra-file=$config_file -q -s -e 'select i.id, i.content_type, i.copyright_holder, l.display_name, i.ok_for_export, i.diagnostic from images i, licenses l where i.license_id = l.id' >> $public/images.csv
 
 echo "model_id	model_name	label	image_id" > $public/ml_images.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select vm.id, vm.name, vg.name, vgi.image_id from visual_models vm, visual_groups vg, visual_group_images vgi where vgi.visual_group_id = vg.id and vg.visual_model_id = vm.id' >> $public/ml_images.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select vm.id, vm.name, vg.name, vgi.image_id from visual_models vm, visual_groups vg, visual_group_images vgi where vgi.visual_group_id = vg.id and vg.visual_model_id = vm.id and vgi.included = 1' >> $public/ml_images.csv
