@@ -813,15 +813,9 @@ class ImageController < ApplicationController
     if request.method == "POST"
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
-        # ImageVote.connection.update(%(
-        #   UPDATE image_votes SET anonymous = TRUE WHERE user_id = #{@user.id}
-        # ))
         ImageVote.where(user_id: @user.id).update_all(anonymous: true)
         flash_notice(:image_vote_anonymity_made_anonymous.t)
       elsif submit == :image_vote_anonymity_make_public.l
-        # ImageVote.connection.update(%(
-        #   UPDATE image_votes SET anonymous = FALSE WHERE user_id = #{@user.id}
-        # ))
         ImageVote.where(user_id: @user.id).update_all(anonymous: false)
         flash_notice(:image_vote_anonymity_made_public.t)
       else
@@ -831,31 +825,18 @@ class ImageController < ApplicationController
       end
       redirect_to(edit_account_preferences_path)
     else
-      # @num_anonymous = ImageVote.connection.select_value(%(
-      #   SELECT count(id) FROM image_votes
-      #   WHERE user_id = #{@user.id} AND anonymous
-      # ))
       @num_anonymous = ImageVote.where(user_id: @user.id).
                        where(anonymous: true).
-                       select(ImageVote[:id].count.as("total")).
-                       map(&:total).first # or pluck(:total)
-      # @num_public = ImageVote.connection.select_value(%(
-      #   SELECT count(id) FROM image_votes
-      #   WHERE user_id = #{@user.id} AND !anonymous
-      # ))
+                       pluck(ImageVote[:id].count.as("total"))&.first
       @num_public = ImageVote.where(user_id: @user.id).
                     where(anonymous: false).
-                    select(ImageVote[:id].count.as("total")).
-                    map(&:total).first
+                    pluck(ImageVote[:id].count.as("total"))&.first
 
     end
   end
 
   def bulk_filename_purge
-    # Image.connection.update(%(
-    #   UPDATE images SET original_name = '' WHERE user_id = #{User.current_id}
-    # ))
-    Image.where(user_id: User.current_id).update_all(original_name: nil)
+    Image.where(user_id: User.current_id).update_all(original_name: "")
     flash_notice(:prefs_bulk_filename_purge_success.t)
     redirect_to(edit_account_preferences_path)
   end
