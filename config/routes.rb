@@ -846,7 +846,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     patch("#{controller}/#{action}", controller: controller, action: action)
   end
 
-  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # Accept non-numeric ids for the /lookups/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
     get("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
     get("/observer/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
