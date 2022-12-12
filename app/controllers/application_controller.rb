@@ -283,11 +283,13 @@ class ApplicationController < ActionController::Base
   end
 
   # Objects that belong to a single observation:
-  def redirect_to_observation_or_object(obj)
-    if @back_object
-      redirect_with_query(@back_object.show_link_args)
-    else
+  def redirect_to_back_object_or_object(back_obj, obj)
+    if back_obj
+      redirect_with_query(back_obj.show_link_args)
+    elsif obj
       redirect_with_query(obj.index_link_args)
+    else
+      redirect_with_query("/")
     end
   end
 
