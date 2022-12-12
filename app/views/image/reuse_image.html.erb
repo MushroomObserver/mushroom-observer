@@ -1,4 +1,7 @@
 <%
+# NOTE: Move to account/images/new Account::ImagesController#new
+# NOTE: Move to observations/images/new Observations::ImagesController#new
+# Partial should be in shared
   if @mode == :profile
     @title = :image_reuse_title.t(name: @user.legal_name)
     url_args = { action: :reuse_image, mode: @mode }
