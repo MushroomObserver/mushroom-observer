@@ -27,9 +27,9 @@
       <% row = 0
       @data.each do |datum|
         row += 1
-        licenses = datum["licenses"]
-        license_id = datum["license_id"].to_i
-        copyright_holder = datum["copyright_holder"].to_s
+        licenses = datum[:licenses]
+        license_id = datum[:license_id].to_i
+        copyright_holder = datum[:copyright_holder].to_s
         %>
         <tr>
           <td>
