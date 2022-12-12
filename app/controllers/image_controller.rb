@@ -618,10 +618,9 @@ class ImageController < ApplicationController
 
   ##############################################################################
 
-  # NOTE:
-  # The reuse_image and remove_image actions have specialized controls for each
-  # potential object they're attached to. They also seem like they'd be more at
-  # home if moved to new controllers:
+  # NOTE: The reuse_image and remove_image actions have specialized controls
+  # for each potential object they're attached to.
+  # They also seem like they'd be more at home if moved to new controllers:
   # Account::Images::ReuseController#new #create
   # Observations::Images::ReuseController#new #create
   # GlossaryTerms::Images::ReuseController#new #create
@@ -763,11 +762,12 @@ class ImageController < ApplicationController
 
   ##############################################################################
 
-  # NOTE:
-  # Move to new namespaced controllers
-  # Observations::Images::RemoveController#new #create
-  # GlossaryTerms::Images::RemoveController#new #create
+  # NOTE: Move to new namespaced controllers
+  #
+  # Observations::ImagesController#edit #update
+  # GlossaryTerms::ImagesController#edit #update
   # Move tests from images_controller_test
+  # No need to remove_images from Account profile: reuse_image removes the image
 
   # Form used to remove one or more images from an observation (not destroy!)
   # Linked from: observations/show
@@ -776,7 +776,6 @@ class ImageController < ApplicationController
   #   params[:selected][image_id]  (value of "yes" means delete)
   # Outputs: @observation
   # Redirects to observations/show.
-  # NOTE: no need for remove_images from profile: reuse_image replaces image
   def remove_images
     remove_images_from_object(Observation, params)
   end
@@ -795,7 +794,8 @@ class ImageController < ApplicationController
 
     unless check_permission!(@object)
       return redirect_with_query(controller: target_class.show_controller,
-                                 action: target_class.show_action, id: @object.id)
+                                 action: target_class.show_action,
+                                 id: @object.id)
     end
 
     return unless request.method == "POST" && (images = params[:selected])
@@ -821,6 +821,7 @@ class ImageController < ApplicationController
 
   ##############################################################################
 
+  # NOTE: Move to new Images::TransformController
   # Used by show_image to rotate and flip image.
   def transform_image
     image = find_or_goto_index(Image, params[:id].to_s)
@@ -828,10 +829,10 @@ class ImageController < ApplicationController
 
     transform_image_file_and_flash_result(image)
 
-    # NIMMO NOTE: Removing this. params[:size] makes absolutely no difference
+    # NOTE: Removing this. params[:size] makes absolutely no difference
     # on the show_image template - try it and see. It gets passed back to the
     # transform links, but again, the only place it would make a difference is
-    # show_image, which ignores it and renders :medium always.
+    # show_image, which ignores it and renders :medium always. - AN 12/2022
 
     # if params[:size].blank? ||
     #    params[:size].to_sym == (@user ? @user.image_size.to_sym : :medium)
@@ -874,7 +875,7 @@ class ImageController < ApplicationController
   #   @data[n]["license_id"]        ID of current license.
   #   @data[n]["license_name"]      Name of current license.
   #   @data[n]["licenses"]          Options for select menu.
-  def license_updater # rubocop:disable Metrics/AbcSize
+  def license_updater
     # Process any changes.
     process_license_changes if request.method == "POST"
 
@@ -981,7 +982,7 @@ class ImageController < ApplicationController
   public
 
   # Linked from account/preferences/_privacy
-  # Move to Account::Preferences::Images#update
+  # Move to new controller Account::Preferences::ImagesController#update
   # Move test from images_controller_test
   def bulk_filename_purge
     Image.where(user_id: User.current_id).update_all(original_name: "")
