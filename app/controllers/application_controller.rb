@@ -282,6 +282,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Objects that belong to a single observation:
+  def redirect_to_back_object_or_object(back_obj, obj)
+    if back_obj
+      redirect_with_query(back_obj.show_link_args)
+    elsif obj
+      redirect_with_query(obj.index_link_args)
+    else
+      redirect_with_query("/")
+    end
+  end
+
   # Redirect from www.mo.org to mo.org.
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this
@@ -1025,6 +1036,9 @@ class ApplicationController < ActionController::Base
   end
   helper_method :get_query_param
 
+  # NOTE: these two methods add q: param to urls built from controllers/actions.
+  # Seem to be dodgy with Rails routes path helpers. If encountering problems,
+  # try redirect_to(whatever_objects_path(q: get_query_param)) instead.
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
   end

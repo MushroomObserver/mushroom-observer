@@ -4,7 +4,7 @@
   tabs = []
   if @back == "index"
     tabs << link_with_query(:edit_collection_number_back_to_index.t,
-                            action: :index_collection_number)
+                            action: :index)
   else
     tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
                             @back_object.show_link_args)
@@ -16,16 +16,15 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= form_tag(add_query_param(action: :edit_collection_number, id: @collection_number.id, back: @back)) do %>
-      <%= render(partial: "form", locals: {button: :SAVE}) %>
-    <% end %>
+    <%= render(partial: "form",
+               locals: { action: :update, button_name: :SAVE, back: @back }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">
     <ul class="row list-unstyled">
       <% @collection_number.observations.each do |obs| %>
         <%= render(partial: "shared/matrix_box",
-                  locals: { object: obs.rss_log, columns: "col-xs-12" }) %>
+                   locals: { object: obs.rss_log, columns: "col-xs-12" }) %>
       <% end %>
     </ul>
   </div>

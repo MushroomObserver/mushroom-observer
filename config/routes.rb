@@ -69,19 +69,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  collection_number: {
-    collection_number_search: {},
-    create_collection_number: {},
-    destroy_collection_number: {},
-    edit_collection_number: {},
-    index_collection_number: {},
-    list_collection_numbers: {},
-    next_collection_number: {},
-    observation_index: {},
-    prev_collection_number: {},
-    remove_observation: {},
-    show_collection_number: {}
-  },
   comment: {
     add_comment: {},
     comment_search: {},
@@ -91,24 +78,10 @@ ACTIONS = {
     list_comments: {},
     next_comment: {},
     prev_comment: {},
-    show_comment: {},
+    # show_comment: {},
     show_comments_by_user: {},
     show_comments_for_target: {},
     show_comments_for_user: {}
-  },
-  herbarium_record: {
-    create_herbarium_record: {},
-    destroy_herbarium_record: {},
-    edit_herbarium_record: {},
-    herbarium_index: {},
-    herbarium_record_search: {},
-    index_herbarium_record: {},
-    list_herbarium_records: {},
-    next_herbarium_record: {},
-    observation_index: {},
-    prev_herbarium_record: {},
-    remove_observation: {},
-    show_herbarium_record: {}
   },
   image: {
     add_image: {},
@@ -130,7 +103,7 @@ ACTIONS = {
     remove_images_for_glossary_term: {},
     reuse_image: {},
     reuse_image_for_glossary_term: {},
-    show_image: {},
+    # show_image: {},
     show_original: {},
     transform_image: {}
   },
@@ -171,7 +144,7 @@ ACTIONS = {
     prev_location_description: {},
     publish_description: {},
     reverse_name_order: {},
-    show_location: {},
+    # show_location: {},
     show_location_description: {},
     show_past_location: {},
     show_past_location_description: {}
@@ -220,7 +193,7 @@ ACTIONS = {
     publish_description: {},
     refresh_classification: {},
     set_review_status: {},
-    show_name: {},
+    # show_name: {},
     show_name_description: {},
     show_past_name: {},
     show_past_name_description: {},
@@ -245,8 +218,8 @@ ACTIONS = {
     list_projects: {},
     next_project: {},
     prev_project: {},
-    project_search: {},
-    show_project: {}
+    project_search: {}
+    # show_project: {}
   },
   species_list: {
     add_observation_to_species_list: {},
@@ -268,7 +241,7 @@ ACTIONS = {
     prev_species_list: {},
     print_labels: {},
     remove_observation_from_species_list: {},
-    show_species_list: {},
+    # show_species_list: {},
     species_list_search: {},
     species_lists_by_title: {},
     species_lists_by_user: {},
@@ -570,6 +543,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
 
+  # ----- Collection Numbers: standard actions --------------------------------
+  resources :collection_numbers do
+    resource :remove_observation, only: [:update], module: :collection_numbers
+  end
+
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
@@ -586,9 +564,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/emails/commercial_inquiry(/:id)",
         to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
         as: "emails_commercial_inquiry")
-  match("/emails/features(/:id)",
-        to: "emails#features", via: [:get, :post], id: /\d+/,
-        as: "emails_features")
   match("/emails/merge_request(/:id)",
         to: "emails#merge_request", via: [:get, :post], id: /\d+/,
         as: "emails_merge_request")
@@ -617,6 +592,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
+
+  # ----- Herbarium Records: standard actions --------------------------------
+  resources :herbarium_records do
+    resource :remove_observation, only: [:update], module: :herbarium_records
+  end
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -680,7 +660,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   # ----- Users: standard actions -------------------------------------------
-  resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
+  resources :users, id: /\d+/, only: [:index, :show]
 
   # ----- VisualModels: standard actions ------------------------------------
   resources :visual_models, id: /\d+/ do
@@ -689,6 +669,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
+  # ----- Comment:
+  get("/comment/show_comment/:id", to: "comment#show_comment",
+                                   as: "show_comment")
   # ----- Image:
   get("/image/show_image/:id", to: "image#show_image",
                                as: "show_image")
@@ -747,8 +730,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect(path: "/emails/ask_webmaster_question"))
   get("/observer/commercial_inquiry/:id",
       to: redirect(path: "/emails/commercial_inquiry/%{id}"))
-  get("/observer/email_features",
-      to: redirect(path: "/emails/features"))
   get("/observer/email_merge_request",
       to: redirect(path: "/emails/merge_request"))
   get("/observer/email_name_change_request",

@@ -16,7 +16,7 @@ module ThumbnailHelper
     image_id = image.is_a?(Integer) ? image : image.id
     locals = {
       image: image,
-      link: Image.show_link_args(image_id),
+      link: show_image_path(image_id),
       size: :small,
       votes: true,
       original: false,
@@ -32,7 +32,7 @@ module ThumbnailHelper
     return unless obs&.thumb_image
 
     thumbnail(obs.thumb_image,
-              link: obs.show_link_args,
+              link: observation_path(id: obs.id),
               size: :thumbnail,
               votes: true,
               responsive: false) + image_copyright(obs.thumb_image)
