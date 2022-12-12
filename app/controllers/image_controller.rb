@@ -878,19 +878,20 @@ class ImageController < ApplicationController
     # Process any changes.
     process_license_changes if request.method == "POST"
 
-    # Gather data for form.
-    # map(&:attributes) gives you a hash of your selects with their keys
+    # Gather data for form. Using select(columns) and map(&:attributes)
+    # gives you a hash of your selects with their keys, plus the extra key :id.
+    # pluck(selects) seems faster and we have to manually build the hash anyway.
     @data = Image.includes(:license).where(user_id: @user.id).
-            select(Arel.star.count.as("license_count"),
-                   :copyright_holder, :license_id).
             group(:copyright_holder, :license_id).
-            map(&:attributes).map do |datum|
-      next unless (license = License.safe_find(datum["license_id"].to_i))
+            pluck(Arel.star.count.as("license_count"),
+                  :copyright_holder, :license_id).
+            map do |lct, chr, lid|
+              next unless (license = License.safe_find(lid))
 
-      datum["license_name"] = license.display_name
-      datum["licenses"]     = License.current_names_and_ids(license)
-      datum.except!("id")
-    end
+              { license_count: lct, copyright_holder: chr, license_id: lid,
+                license_name: license.display_name,
+                licenses: License.current_names_and_ids(license) }
+            end
   end
 
   ##############################################################################
