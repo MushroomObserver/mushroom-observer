@@ -1287,7 +1287,8 @@ class ImageControllerTest < FunctionalTestCase
   #   image = images(:in_situ_image)
   #   user = image.user
   #   size = "huge"
-  #   assert_not_equal(size, user.image_size, "Test needs a different size value")
+  #   assert_not_equal(size, user.image_size,
+  #                    "Test needs a different size value")
   #   params = { id: image.id, op: "rotate_left", size: size }
 
   #   login(user.login)
