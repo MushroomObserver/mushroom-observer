@@ -1283,19 +1283,20 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   # Prove that if size is provided and is
-  def test_transform_show_with_size
-    image = images(:in_situ_image)
-    user = image.user
-    size = "huge"
-    assert_not_equal(size, user.image_size, "Test needs a different size value")
-    params = { id: image.id, op: "rotate_left", size: size }
+  # Maybe retiring this test, show_image ignores size even if params[:size]
+  # def test_transform_show_with_size
+  #   image = images(:in_situ_image)
+  #   user = image.user
+  #   size = "huge"
+  #   assert_not_equal(size, user.image_size, "Test needs a different size value")
+  #   params = { id: image.id, op: "rotate_left", size: size }
 
-    login(user.login)
-    get(:transform_image, params: params)
+  #   login(user.login)
+  #   get(:transform_image, params: params)
 
-    # Asserting the flash text is the best I can do because Image.transform
-    # does not transform images in the text environment. 2022-08-19 JDC
-    assert_flash_text(:image_show_transform_note.l)
-    assert_redirected_to("#{image_show_image_path}/#{image.id}?size=#{size}")
-  end
+  #   # Asserting the flash text is the best I can do because Image.transform
+  #   # does not transform images in the text environment. 2022-08-19 JDC
+  #   assert_flash_text(:image_show_transform_note.l)
+  #   assert_redirected_to("#{image_show_image_path}/#{image.id}?size=#{size}")
+  # end
 end

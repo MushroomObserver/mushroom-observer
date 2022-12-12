@@ -620,12 +620,14 @@ class ImageController < ApplicationController
 
   # NOTE:
   # The reuse_image and remove_image actions have specialized controls for each
-  # potential object they're attached to. Move to new namespaced controllers
-  # Account::ImagesController#new #create #destroy
-  # Observations::ImagesController#new #create #destroy
-  # GlossaryTerms::Images#new #create #destroy
+  # potential object they're attached to. They also seem like they'd be more at
+  # home if moved to new controllers:
+  # Account::Images::ReuseController#new #create
+  # Observations::Images::ReuseController#new #create
+  # GlossaryTerms::Images::ReuseController#new #create
+  # Move tests from images_controller_test
   #
-  # Clicking on an image currently fires a GET to this action... because it
+  # Clicking on an image currently fires a GET to these actions... because it
   # comes from a link made by thumbnail_helper#thumbnail(link: url_args)
   # with CRUD refactor, maybe change that to fire a POST somehow?
 
@@ -761,6 +763,12 @@ class ImageController < ApplicationController
 
   ##############################################################################
 
+  # NOTE:
+  # Move to new namespaced controllers
+  # Observations::Images::RemoveController#new #create
+  # GlossaryTerms::Images::RemoveController#new #create
+  # Move tests from images_controller_test
+
   # Form used to remove one or more images from an observation (not destroy!)
   # Linked from: observations/show
   # Inputs:
@@ -768,8 +776,13 @@ class ImageController < ApplicationController
   #   params[:selected][image_id]  (value of "yes" means delete)
   # Outputs: @observation
   # Redirects to observations/show.
+  # NOTE: no need for remove_images from profile: reuse_image replaces image
   def remove_images
     remove_images_from_object(Observation, params)
+  end
+
+  def remove_images_for_glossary_term
+    remove_images_from_object(GlossaryTerm, params)
   end
 
   ##############################################################################
@@ -780,60 +793,68 @@ class ImageController < ApplicationController
     @object = find_or_goto_index(target_class, params[:id].to_s)
     return unless @object
 
-    if check_permission!(@object)
-      if request.method == "POST" && (images = params[:selected])
-        images.each do |image_id, do_it|
-          next unless do_it == "yes"
-
-          next unless (image = Image.safe_find(image_id))
-
-          @object.remove_image(image)
-          image.log_remove_from(@object)
-          flash_notice(:runtime_image_remove_success.t(id: image_id))
-        end
-        redirect_with_query(controller: target_class.show_controller,
-                            action: target_class.show_action, id: @object.id)
-      end
-    else
-      redirect_with_query(controller: target_class.show_controller,
-                          action: target_class.show_action, id: @object.id)
+    unless check_permission!(@object)
+      return redirect_with_query(controller: target_class.show_controller,
+                                 action: target_class.show_action, id: @object.id)
     end
+
+    return unless request.method == "POST" && (images = params[:selected])
+
+    create_removal(images, target_class)
+  end
+
+  def create_removal(images, target_class)
+    images.each do |image_id, do_it|
+      next unless do_it == "yes"
+
+      next unless (image = Image.safe_find(image_id))
+
+      @object.remove_image(image)
+      image.log_remove_from(@object)
+      flash_notice(:runtime_image_remove_success.t(id: image_id))
+    end
+    redirect_with_query(controller: target_class.show_controller,
+                        action: target_class.show_action, id: @object.id)
   end
 
   public
 
   ##############################################################################
 
-  def remove_images_for_glossary_term
-    remove_images_from_object(GlossaryTerm, params)
-  end
-
   # Used by show_image to rotate and flip image.
   def transform_image
     image = find_or_goto_index(Image, params[:id].to_s)
-    return unless image
+    return unless image && check_permission!(image)
 
-    if check_permission!(image)
-      case params[:op]
-      when "rotate_left"
-        image.transform(:rotate_left)
-        flash_notice(:image_show_transform_note.t)
-      when "rotate_right"
-        image.transform(:rotate_right)
-        flash_notice(:image_show_transform_note.t)
-      when "mirror"
-        image.transform(:mirror)
-        flash_notice(:image_show_transform_note.t)
-      else
-        flash_error("Invalid operation #{params[:op].inspect}")
-      end
-    end
-    if params[:size].blank? ||
-       params[:size].to_sym == (@user ? @user.image_size.to_sym : :medium)
-      redirect_with_query(action: "show_image", id: image)
+    transform_image_file_and_flash_result(image)
+
+    # NIMMO NOTE: Removing this. params[:size] makes absolutely no difference
+    # on the show_image template - try it and see. It gets passed back to the
+    # transform links, but again, the only place it would make a difference is
+    # show_image, which ignores it and renders :medium always.
+
+    # if params[:size].blank? ||
+    #    params[:size].to_sym == (@user ? @user.image_size.to_sym : :medium)
+    # else
+    #   redirect_with_query(action: "show_image", id: image,
+    #                       size: params[:size])
+    # end
+    redirect_with_query(action: "show_image", id: image)
+  end
+
+  def transform_image_file_and_flash_result(image)
+    case params[:op]
+    when "rotate_left"
+      image.transform(:rotate_left)
+      flash_notice(:image_show_transform_note.t)
+    when "rotate_right"
+      image.transform(:rotate_right)
+      flash_notice(:image_show_transform_note.t)
+    when "mirror"
+      image.transform(:mirror)
+      flash_notice(:image_show_transform_note.t)
     else
-      redirect_with_query(action: "show_image", id: image,
-                          size: params[:size])
+      flash_error("Invalid operation #{params[:op].inspect}")
     end
   end
 
@@ -853,7 +874,7 @@ class ImageController < ApplicationController
   #   @data[n]["license_id"]        ID of current license.
   #   @data[n]["license_name"]      Name of current license.
   #   @data[n]["licenses"]          Options for select menu.
-  def license_updater
+  def license_updater # rubocop:disable Metrics/AbcSize
     # Process any changes.
     process_license_changes if request.method == "POST"
 
@@ -916,6 +937,10 @@ class ImageController < ApplicationController
 
   ##############################################################################
 
+  # NOTE: These two are more properly account preferences actions
+  # Move to Account::Preferences::ImageVotes#edit and update
+  # Move test from images_controller_test
+  #
   # Bulk update anonymity of user's image votes.
   # Input: params[:commit] - which button user pressed
   # Outputs:
@@ -923,19 +948,7 @@ class ImageController < ApplicationController
   #   @num_public    - number of existing puclic votes
   def bulk_vote_anonymity_updater
     if request.method == "POST"
-      submit = params[:commit]
-      if submit == :image_vote_anonymity_make_anonymous.l
-        ImageVote.where(user_id: @user.id).update_all(anonymous: true)
-        flash_notice(:image_vote_anonymity_made_anonymous.t)
-      elsif submit == :image_vote_anonymity_make_public.l
-        ImageVote.where(user_id: @user.id).update_all(anonymous: false)
-        flash_notice(:image_vote_anonymity_made_public.t)
-      else
-        flash_error(
-          :image_vote_anonymity_invalid_submit_button.l(label: submit)
-        )
-      end
-      redirect_to(edit_account_preferences_path)
+      create_anonymity_change
     else
       @num_anonymous = ImageVote.where(user_id: @user.id).
                        where(anonymous: true).
@@ -943,10 +956,32 @@ class ImageController < ApplicationController
       @num_public = ImageVote.where(user_id: @user.id).
                     where(anonymous: false).
                     pluck(ImageVote[:id].count.as("total"))&.first
-
     end
   end
 
+  private
+
+  def create_anonymity_change
+    submit = params[:commit]
+    if submit == :image_vote_anonymity_make_anonymous.l
+      ImageVote.where(user_id: @user.id).update_all(anonymous: true)
+      flash_notice(:image_vote_anonymity_made_anonymous.t)
+    elsif submit == :image_vote_anonymity_make_public.l
+      ImageVote.where(user_id: @user.id).update_all(anonymous: false)
+      flash_notice(:image_vote_anonymity_made_public.t)
+    else
+      flash_error(
+        :image_vote_anonymity_invalid_submit_button.l(label: submit)
+      )
+    end
+    redirect_to(edit_account_preferences_path)
+  end
+
+  public
+
+  # Linked from account/preferences/_privacy
+  # Move to Account::Preferences::Images#update
+  # Move test from images_controller_test
   def bulk_filename_purge
     Image.where(user_id: User.current_id).update_all(original_name: "")
     flash_notice(:prefs_bulk_filename_purge_success.t)
