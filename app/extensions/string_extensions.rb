@@ -518,13 +518,13 @@ class String
   end
 
   # Render special encoded characters as regular characters in HTML
-  def unescape_html
-    CGI.unescapeHTML(self)
+  def decode_html_entities
+    HTMLEntities.new.decode(self)
   end
 
   # For integration test comparisons: the whole string as rendered in browser
   def as_displayed
-    unescape_html.strip_squeeze
+    decode_html_entities.strip_squeeze
   end
 
   # Insert a line break between the scientific name and the author
