@@ -162,7 +162,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
     normalize_parameters
-    return if check_for_form_errors?
+    return if flash_error_and_reload_if_form_has_errors
 
     if name_and_number_free?
       @collection_number.save
@@ -173,14 +173,14 @@ class CollectionNumbersController < ApplicationController
       @other_number.add_observation(@observation)
       @collection_number = @other_number
     end
-    redirect_to_observation_or_object(@collection_number)
+    redirect_to_back_object_or_object(@back_object, @collection_number)
   end
 
   def update_collection_number
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
-    return if check_for_form_errors?
+    return if flash_error_and_reload_if_form_has_errors
 
     if name_and_number_free?
       @collection_number.save
@@ -199,10 +199,10 @@ class CollectionNumbersController < ApplicationController
       @collection_number = @other_number
     end
 
-    redirect_to_observation_or_object(@collection_number)
+    redirect_to_back_object_or_object(@back_object, @collection_number)
   end
 
-  def check_for_form_errors?
+  def flash_error_and_reload_if_form_has_errors
     redirect_params = case action_name # this is a rails var
                       when "create"
                         { action: :new }
@@ -231,7 +231,7 @@ class CollectionNumbersController < ApplicationController
     return true if in_admin_mode? || obj.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_observation_or_object(@collection_number)
+    redirect_to_back_object_or_object(@back_object, @collection_number)
     false
   end
 

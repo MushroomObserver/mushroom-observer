@@ -196,7 +196,7 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record =
       HerbariumRecord.new(whitelisted_herbarium_record_params)
     normalize_parameters
-    return if check_for_form_errors?
+    return if flash_error_and_reload_if_form_has_errors
 
     if herbarium_label_free?
       @herbarium_record.save
@@ -211,14 +211,14 @@ class HerbariumRecordsController < ApplicationController
       return
     end
 
-    redirect_to_observation_or_object(@herbarium_record)
+    redirect_to_back_object_or_object(@back_object, @herbarium_record)
   end
 
   def update_herbarium_record
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = whitelisted_herbarium_record_params
     normalize_parameters
-    return if check_for_form_errors?
+    return if flash_error_and_reload_if_form_has_errors
 
     if herbarium_label_free?
       @herbarium_record.save
@@ -229,10 +229,10 @@ class HerbariumRecordsController < ApplicationController
       return
     end
 
-    redirect_to_observation_or_object(@herbarium_record)
+    redirect_to_back_object_or_object(@back_object, @herbarium_record)
   end
 
-  def check_for_form_errors?
+  def flash_error_and_reload_if_form_has_errors
     redirect_params = case action_name # this is a rails var
                       when "create"
                         { action: :new }
@@ -244,7 +244,8 @@ class HerbariumRecordsController < ApplicationController
     redirect_to(redirect_params) and return true unless validate_herbarium_name!
 
     unless can_add_record_to_herbarium?
-      redirect_to_observation_or_object(@herbarium_record) and return true
+      redirect_to_back_object_or_object(@back_object, @herbarium_record) and
+        return true
     end
 
     false
@@ -262,7 +263,7 @@ class HerbariumRecordsController < ApplicationController
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
-    redirect_to_observation_or_object(@herbarium_record)
+    redirect_to_back_object_or_object(@back_object, @herbarium_record)
     false
   end
 
