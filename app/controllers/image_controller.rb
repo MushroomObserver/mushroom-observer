@@ -745,19 +745,20 @@ class ImageController < ApplicationController
     # Process any changes.
     process_license_changes if request.method == "POST"
 
-    # Gather data for form.
-    @data = Image.connection.select_all(%(
-      SELECT COUNT(*) AS license_count, copyright_holder, license_id
-      FROM images
-      WHERE user_id = #{@user.id.to_i}
-      GROUP BY copyright_holder, license_id
-    )).to_a
-    @data.each do |datum|
-      next unless (license = License.safe_find(datum["license_id"].to_i))
+    # Gather data for form. Using select(columns) and map(&:attributes)
+    # gives you a hash of your selects with their keys, plus the extra key :id.
+    # pluck(selects) seems faster and we have to manually build the hash anyway.
+    @data = Image.includes(:license).where(user_id: @user.id).
+            group(:copyright_holder, :license_id).
+            pluck(Arel.star.count.as("license_count"),
+                  :copyright_holder, :license_id).
+            map do |lct, chr, lid|
+              next unless (license = License.safe_find(lid))
 
-      datum["license_name"] = license.display_name
-      datum["licenses"]     = License.current_names_and_ids(license)
-    end
+              { license_count: lct, copyright_holder: chr, license_id: lid,
+                license_name: license.display_name,
+                licenses: License.current_names_and_ids(license) }
+            end
   end
 
   ##############################################################################
@@ -813,14 +814,10 @@ class ImageController < ApplicationController
     if request.method == "POST"
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
-        ImageVote.connection.update(%(
-          UPDATE image_votes SET anonymous = TRUE WHERE user_id = #{@user.id}
-        ))
+        ImageVote.where(user_id: @user.id).update_all(anonymous: true)
         flash_notice(:image_vote_anonymity_made_anonymous.t)
       elsif submit == :image_vote_anonymity_make_public.l
-        ImageVote.connection.update(%(
-          UPDATE image_votes SET anonymous = FALSE WHERE user_id = #{@user.id}
-        ))
+        ImageVote.where(user_id: @user.id).update_all(anonymous: false)
         flash_notice(:image_vote_anonymity_made_public.t)
       else
         flash_error(
@@ -829,21 +826,18 @@ class ImageController < ApplicationController
       end
       redirect_to(edit_account_preferences_path)
     else
-      @num_anonymous = ImageVote.connection.select_value(%(
-        SELECT count(id) FROM image_votes
-        WHERE user_id = #{@user.id} AND anonymous
-      ))
-      @num_public = ImageVote.connection.select_value(%(
-        SELECT count(id) FROM image_votes
-        WHERE user_id = #{@user.id} AND !anonymous
-      ))
+      @num_anonymous = ImageVote.where(user_id: @user.id).
+                       where(anonymous: true).
+                       pluck(ImageVote[:id].count.as("total"))&.first
+      @num_public = ImageVote.where(user_id: @user.id).
+                    where(anonymous: false).
+                    pluck(ImageVote[:id].count.as("total"))&.first
+
     end
   end
 
   def bulk_filename_purge
-    Image.connection.update(%(
-      UPDATE images SET original_name = '' WHERE user_id = #{User.current_id}
-    ))
+    Image.where(user_id: User.current_id).update_all(original_name: "")
     flash_notice(:prefs_bulk_filename_purge_success.t)
     redirect_to(edit_account_preferences_path)
   end
