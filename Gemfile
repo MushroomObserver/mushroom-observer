@@ -38,6 +38,10 @@ end
 # security fix for CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")
 
+# security fix for CVE-2022-23476 unchecked return value from
+# xmlTextReaderExpand
+gem("nokogiri", ">= 1.13.10")
+
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
 gem("mysql2")
