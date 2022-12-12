@@ -735,15 +735,15 @@ jQuery.extend(MOAutocompleter.prototype, {
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal: function() {
-    var val = "\n" + this.get_token().toLowerCase();
-    var options  = this.options;
-    var options2 = this.options.toLowerCase();
+    var val = this.get_token().toLowerCase().normalize();
+    var options = this.options.normalize();
     var matches = [];
-    if (val != "\n") {
-      for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
-        var j = options.indexOf("\n", i+1);
-        var s = options.substring(i+1, j>0 ? j : options.length);
-        if (s.length > 0) {
+    if (val != '') {
+      var i, j, s;
+      for (i=options.indexOf("\n"); i>=0; i=j) {
+        j = options.indexOf("\n", i+1);
+        s = options.substring(i+1, j>0 ? j : options.length);
+        if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
           if (matches.length >= this.max_matches)
             break;
@@ -755,34 +755,24 @@ jQuery.extend(MOAutocompleter.prototype, {
 
   // Grab matches ignoring order of words.
   update_unordered: function() {
-    var val = this.get_token().toLowerCase().
+    var val = this.get_token().normalize().toLowerCase().
                    replace(/^ */, '').replace(/  +/g, ' ');
     var vals = val.split(' ');
-    var options  = this.options;
-    var options2 = this.options.toLowerCase();
+    var options = this.options.normalize();
     var matches = [];
     if (val != '') {
-      var j, j1, j2;
-      var k, s, s2;
-      for (var i=0; i>=0; i=j) {
-        j1 = options2.indexOf("\n" + vals[0], i) + 1;
-        j2 = options2.indexOf(" " + vals[0], i) + 1;
-        if (!j1 && !j2) break;
-        j = j1 && j1 < j2 || !j2 ? j1 : j2;
-        i = options2.lastIndexOf("\n", j);
-        j = options2.indexOf("\n", i+1);
+      var i, j, k, s, s2;
+      for (i=options.indexOf("\n"); i>=0; i=j) {
+        j = options.indexOf("\n", i+1);
         s = options.substring(i+1, j>0 ? j : options.length);
-        if (s.length > 0) {
-          s2 = ' ' + options2.substring(i+1, j>0 ? j : options.length);
-          for (k=1; k<vals.length; k++) {
-            if (s2.indexOf(' ' + vals[k]) < 0)
-              break;
-          }
-          if (k >= vals.length) {
-            matches.push(s);
-            if (matches.length >= this.max_matches)
-              break;
-          }
+        s2 = ' ' + s.toLowerCase() + ' ';
+        for (k=0; k<vals.length; k++) {
+          if (s2.indexOf(' ' + vals[k]) < 0) break;
+        }
+        if (k >= vals.length) {
+          matches.push(s);
+          if (matches.length >= this.max_matches)
+            break;
         }
       }
     }
@@ -1071,6 +1061,7 @@ jQuery.extend(MOAutocompleter.prototype, {
   },
 
   verbose: function(str) {
+    // console.log(str);
     // jQuery("#log").append(str + "<br/>");
   }
 });
