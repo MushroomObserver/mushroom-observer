@@ -4,7 +4,8 @@
   <thead>
     <tr>
       <th colspan="<%= can_delete ? 2 : 1 %>">
-        <%= "#{herbarium.curators.length == 1 ? :herbarium_curator.t : :herbarium_curators.t}:" %>
+        <%= "#{herbarium.curators.length == 1 ?
+               :herbarium_curator.t : :herbarium_curators.t}:" %>
       </th>
     </tr>
   </thead>
@@ -15,7 +16,8 @@
           <td>
              <%= destroy_button(
                    name: "X",
-                   target: herbaria_curator_path(herbarium, user: user.id)
+                   target: herbaria_curator_path(herbarium, user: user.id),
+                   id: "delete_herbarium_curator_link_#{user.id}"
                  ) %>
           </td>
         <% end %>

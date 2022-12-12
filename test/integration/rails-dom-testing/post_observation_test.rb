@@ -204,15 +204,15 @@ class PostObservationTest < IntegrationTestCase
       assert_match(:show_observation_seen_at.l, response.body)
     end
     if new_obs.specimen
-      assert_match(/show_herbarium_record/, response.body)
+      assert_match(/herbarium_records/, response.body)
     else
       assert_no_match(/No specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations?where")
-    assert_link_exists_containing("show_location/#{new_loc.id}")
-    assert_link_exists_containing("show_image/#{new_img.id}")
+    assert_link_exists_containing(show_location_path(new_loc.id))
+    assert_link_exists_containing(show_image_path(new_img.id))
   end
 
   def review_flash(patterns)

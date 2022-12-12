@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
+# Handles requests to be a herbarium curators
 module Herbaria
-  # request to be a herbarium curators
-  class Herbaria::CuratorRequestsController < ApplicationController
+  class CuratorRequestsController < ApplicationController
     # filters
     before_action :login_required
     before_action :pass_query_params

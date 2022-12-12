@@ -345,7 +345,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_difference("ImageVote.count", 1, "Failed to cast vote") do
       get(:cast_vote, params: { id: image.id, value: value })
     end
-    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    assert_redirected_to(show_image_path(image.id))
     vote = ImageVote.last
     assert(vote.image == image && vote.user == user && vote.value == value,
            "Vote not cast correctly")
@@ -361,8 +361,7 @@ class ImageControllerTest < FunctionalTestCase
       get(:cast_vote, params: { id: image.id, value: value, next: true })
     end
     assert_redirected_to(
-      "#{image_show_image_path}/#{image.id}" \
-      "?q=#{QueryRecord.last.id.alphabetize}"
+      show_image_path(id: image.id, q: QueryRecord.last.id.alphabetize)
     )
     vote = ImageVote.last
     assert(vote.image == image && vote.user == user && vote.value == value,
@@ -1279,7 +1278,7 @@ class ImageControllerTest < FunctionalTestCase
     # Asserting the flash text is the best I can do because Image.transform
     # does not transform images in the text environment. 2022-08-19 JDC
     assert_flash_text(flash)
-    assert_redirected_to("#{image_show_image_path}/#{image.id}")
+    assert_redirected_to(show_image_path(image.id))
   end
 
   # Prove that if size is provided and is
