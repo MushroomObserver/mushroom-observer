@@ -299,7 +299,7 @@ class CommentsController < ApplicationController
   # Inputs: params[:id]
   # Outputs: none
   def destroy
-    return unless @comment = find_comment!
+    return unless (@comment = find_comment!)
 
     @target = @comment.target
     if !check_permission!(@comment)
