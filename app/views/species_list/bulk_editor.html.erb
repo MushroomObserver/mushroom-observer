@@ -94,6 +94,8 @@
     <%=
       args = { controller: :observations, action: :destroy, id: "XXX" }
       url = url_for(add_query_param(args, @query))
+      # NOTE: This doesn't work with new obs CRUD. Needs to be destroy button
+      # and the form tag needs to be tight around the form, not the table
       link_to(:DESTROY.l, "javascript:row_button(#{j url})",
               data: {confirm: :are_you_sure.l})
     %>
@@ -101,12 +103,12 @@
 
     <%= :NAMES.t %>: (<span id="number_of_names"></span>)
     <%=
-      args = { controller: :naming, action: :edit, observation_id: "XXX" }
+      args = edit_observation_naming_path("XXX")
       url = url_for(add_query_param(args, @query))
       link_to(:EDIT.l, "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :naming, action: :create, id: "XXX" }
+      args = new_observation_naming_path("XXX")
       url = url_for(add_query_param(args, @query))
       link_to(:species_list_bulk_editor_another.l,
               "javascript:row_button(#{j url})")
