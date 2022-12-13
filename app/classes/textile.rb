@@ -393,7 +393,7 @@ class Textile < String
       id.gsub!(/&#822[01];/, '"')
       id = CGI.unescapeHTML(id)
       id = CGI.escape(id)
-      url = "#{MO.http_domain}/observer/lookup_#{type.downcase}/#{id}"
+      url = "#{MO.http_domain}/lookups/lookup_#{type.downcase}/#{id}"
       "<a href=\"#{url}\">#{label}</a>"
     end
   end

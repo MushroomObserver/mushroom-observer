@@ -178,7 +178,7 @@ class AmateurTest < IntegrationTestCase
     # (There should be a link in there to look up Xylaria polymorpha.)
     assert_select("a[href*=lookup_name]", 1) do |links|
       url = links.first.attributes["href"]
-      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha",
+      assert_equal("#{MO.http_domain}/lookups/lookup_name/Xylaria+polymorpha",
                    url.value)
     end
 
