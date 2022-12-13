@@ -193,7 +193,7 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image
     store_location
-    return false unless image_exists
+    return false unless (@image = find_image!)
 
     # case params[:flow]
     # when "next"
@@ -208,8 +208,8 @@ class ImageController < ApplicationController
     # show_observation request.  We know we came from an observation-type page
     # because that's the only time the "obs" param will be set (with obs id).
     set_image_query_params
-    maybe_cast_user_vote
-    grab_list_of_votes
+    cast_user_vote!
+    @votes = find_list_of_votes!
 
     # Update view stats on image we're actually showing.
     update_view_stats(@image)
@@ -232,8 +232,8 @@ class ImageController < ApplicationController
 
   private
 
-  def image_exists
-    @image = find_or_goto_index(Image, params[:id].to_s)
+  def find_image!
+    find_or_goto_index(Image, params[:id].to_s)
   end
 
   def set_default_size
@@ -264,7 +264,8 @@ class ImageController < ApplicationController
     query_params_set(img_query)
   end
 
-  def maybe_cast_user_vote
+  # Changes the vote directly, does not call cast_vote below
+  def cast_user_vote!
     return unless @user &&
                   (val = params[:vote]) &&
                   (val == "0" || (val = Image.validate_vote(val)))
@@ -286,8 +287,8 @@ class ImageController < ApplicationController
     @image = query.current if query.index(@image) && (query = query.next)
   end
 
-  def grab_list_of_votes
-    @votes = @image.image_votes.sort_by do |v|
+  def find_list_of_votes!
+    @image.image_votes.sort_by do |v|
       (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
     rescue StandardError
       "?"
@@ -296,8 +297,11 @@ class ImageController < ApplicationController
 
   public
 
+  ##############################################################################
+
   # Change user's vote and go to next image.
-  # Does not call `image_exists` because will split to separate controller
+  # Does not call `find_image!` because will split to separate controller
+  # Images::VotesController#update
   def cast_vote
     image = find_or_goto_index(Image, params[:id].to_s)
     return unless image
@@ -329,18 +333,29 @@ class ImageController < ApplicationController
   #   @licenses     (options for license select menu)
   # Redirects to observations/show.
   def add_image
-    return unless observation_exists
+    return unless (@observation = find_observation!)
 
-    check_observation_permission
-
-    return new_image if request.method != "POST"
+    check_observation_permission!
+    @image = rough_cut_image
+    @licenses = current_license_names_and_ids
+    init_project_vars_for_add_or_edit(@observation)
+    return if request.method != "POST"
 
     create_image
   end
 
   private
 
-  def new_image
+  def find_observation!
+    find_or_goto_index(Observation, params[:id].to_s)
+  end
+
+  def check_observation_permission!
+    redirect_with_query(permanent_observation_path(id: @observation.id)) unless
+      check_permission!(@observation)
+  end
+
+  def rough_cut_image
     @image = Image.new
     @image.license = @user.license
     @image.copyright_holder = @user.legal_name
@@ -348,8 +363,7 @@ class ImageController < ApplicationController
     # Set the default date to the date of the observation
     # Don't know how to correctly test this.
     @image.when = @observation.when
-    @licenses = License.current_names_and_ids(@image.license)
-    init_project_vars_for_add_or_edit(@observation)
+    @image
   end
 
   def create_image
@@ -364,15 +378,6 @@ class ImageController < ApplicationController
       end
     end
     redirect_with_query(permanent_observation_path(id: @observation.id))
-  end
-
-  def observation_exists
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-  end
-
-  def check_observation_permission
-    redirect_with_query(permanent_observation_path(id: @observation.id)) unless
-      check_permission!(@observation)
   end
 
   def process_image(args, upload)
@@ -401,7 +406,7 @@ class ImageController < ApplicationController
       name = @image.original_name
       name = "##{@image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded_image.t(name: name))
-      update_projects(@image, params[:project])
+      update_related_projects(@image, params[:project])
     else
       name = @image.original_name
       name = "???" if name.empty?
@@ -421,10 +426,10 @@ class ImageController < ApplicationController
   #   params[:comment][:comment]
   # Outputs: @image, @licenses
   def edit_image
-    return unless image_exists
+    return unless (@image = find_image!)
 
-    set_licenses_ivar
-    check_image_permission
+    @licenses = current_license_names_and_ids
+    check_image_permission!
     if request.method == "POST"
       update_image
     else
@@ -437,15 +442,9 @@ class ImageController < ApplicationController
   private
 
   def update_image
-    return unless image_exists
-
-    set_licenses_ivar
-    check_image_permission
-
     @image.attributes = whitelisted_image_params
-    xargs = set_xargs
 
-    done = figure_out_if_done(xargs)
+    done = figure_out_if_done
     if done
       redirect_with_query(action: "show_image", id: @image.id)
     else
@@ -453,32 +452,26 @@ class ImageController < ApplicationController
     end
   end
 
-  def set_licenses_ivar
-    @licenses = License.current_names_and_ids(@image.license)
+  def current_license_names_and_ids
+    License.current_names_and_ids(@image.license)
   end
 
-  def check_image_permission
+  def check_image_permission!
     redirect_with_query(action: "show_image", id: @image) unless
       check_permission!(@image)
   end
 
-  def set_xargs
-    xargs = {}
-    xargs[:set_date] = @image.when if @image.when_changed?
-    xargs[:set_notes] = @image.notes if @image.notes_changed?
-    if @image.copyright_holder_changed?
-      xargs[:set_copyright_holder] = @image.copyright_holder
-    end
-    if @image.original_name_changed?
-      xargs[:set_original_name] = @image.original_name
-    end
-    xargs[:set_license] = @image.license if @image.license_id_changed?
-    xargs
+  def anything_changed?
+    @image.when_changed? ||
+      @image.notes_changed? ||
+      @image.copyright_holder_changed? ||
+      @image.original_name_changed? ||
+      @image.license_id_changed?
   end
 
-  def figure_out_if_done(xargs = {})
-    if xargs.empty?
-      maybe_update_projects
+  def figure_out_if_done
+    if anything_changed?
+      update_projects!
       true
     elsif !@image.save
       flash_object_errors(@image)
@@ -487,13 +480,13 @@ class ImageController < ApplicationController
       xargs[:id] = @image
       @image.log_update
       flash_notice(:runtime_image_edit_success.t(id: @image.id))
-      update_projects(@image, params[:project])
+      update_related_projects(@image, params[:project])
       true
     end
   end
 
-  def maybe_update_projects
-    if update_projects(@image, params[:project])
+  def update_projects!
+    if update_related_projects(@image, params[:project])
       flash_notice(:runtime_image_edit_success.t(id: @image.id))
     else
       flash_notice(:runtime_no_changes.t)
@@ -526,7 +519,7 @@ class ImageController < ApplicationController
     end
   end
 
-  def update_projects(img, checks)
+  def update_related_projects(img, checks)
     return false unless checks
 
     # Here's the problem: User can add image to obs he doesn't own
@@ -652,7 +645,7 @@ class ImageController < ApplicationController
     # Stop right here if they're trying to add an image to obs w/o permission
     if @mode == :observation
       @observation = Observation.safe_find(params[:obs_id])
-      # check_observation_permission plus return
+      # check_observation_permission! plus return
       unless check_permission!(@observation)
         return redirect_with_query(
           permanent_observation_path(id: @observation.id)
