@@ -169,7 +169,7 @@ class CommentsController < ApplicationController
   # Outputs: @comment, @object
   def show
     store_location
-    return unless comment_exists
+    return unless @comment = find_comment!
 
     case params[:flow]
     when "next"
@@ -184,8 +184,8 @@ class CommentsController < ApplicationController
 
   private
 
-  def comment_exists
-    @comment = find_or_goto_index(Comment, params[:id].to_s)
+  def find_comment!
+    find_or_goto_index(Comment, params[:id].to_s)
   end
 
   # Make sure users can't see/add comments on objects they aren't allowed to
@@ -224,13 +224,15 @@ class CommentsController < ApplicationController
   #   Renders add_comment again.
   #   Outputs: @comment, @object
   def new
-    return unless target_is_valid
+    return unless (@target = load_target(params[:type], params[:target])) &&
+                  allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
   end
 
   def create
-    return unless target_is_valid
+    return unless (@target = load_target(params[:type], params[:target])) &&
+                  allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
     @comment.attributes = whitelisted_comment_params if params[:comment]
@@ -247,13 +249,6 @@ class CommentsController < ApplicationController
   end
 
   private
-
-  # The `new` action needs params[:type] and params[:target] (id of the obj)
-  def target_is_valid
-    return false unless (@target = load_target(params[:type], params[:target]))
-
-    allowed_to_see!(@target)
-  end
 
   def whitelisted_comment_params
     params[:comment].permit([:summary, :comment])
@@ -273,17 +268,17 @@ class CommentsController < ApplicationController
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
   def edit
-    return unless comment_exists
+    return unless @comment = find_comment!
 
-    load_target_for_comment
+    @target = comment_target
     return unless allowed_to_see!(@target)
     return unless check_permission_or_redirect!(@comment, @target)
   end
 
   def update
-    return unless comment_exists
+    return unless @comment = find_comment!
 
-    load_target_for_comment
+    @target = comment_target
     return unless allowed_to_see!(@target) &&
                   check_permission_or_redirect!(@comment, @target)
 
@@ -300,7 +295,7 @@ class CommentsController < ApplicationController
   # Inputs: params[:id]
   # Outputs: none
   def destroy
-    return unless comment_exists
+    return unless @comment = find_comment!
 
     @target = @comment.target
     if !check_permission!(@comment)
@@ -317,8 +312,8 @@ class CommentsController < ApplicationController
 
   private
 
-  def load_target_for_comment
-    @target = load_target(@comment.target_type, @comment.target_id)
+  def comment_target
+    load_target(@comment.target_type, @comment.target_id)
   end
 
   def load_target(type, id)
