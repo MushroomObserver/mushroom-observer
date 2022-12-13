@@ -1325,18 +1325,18 @@
   ask_webmaster_question: Question or Comment
   ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  Please have a look at our \"feature tracker\":/pivotal/index or our \"account on Pivotal Tracker\":https://www.pivotaltracker.com/projects/224629 to see what we have planned.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
 
-  # comment/add_comment
+  # comments/new
   comment_add_title: Add Comment to [name]
   comment_add_create: "[:CREATE]"
 
-  # comment/edit_comment
+  # comments/edit
   comment_edit_title: Edit Comment on [name]
 
-  # comment/list_comments (This is used to describe the object the comment is
+  # comments/index (This is used to describe the object the comment is
   # about if the object has been deleted, orphaning the comment.)
   comment_list_deleted: object deleted
 
-  # comment/show_comment
+  # comments/show
   comment_show_title: Comment on [Name]
   comment_show_created_at: "[:Created]"
   comment_show_by: "[:By]"
@@ -1960,7 +1960,7 @@
 
   field_textile_link: This field can be formatted with <a href="/info/textile_sandbox" target="_new">Textile</a>.
 
-  # comment/_show_comments
+  # comments/_comments_for_object
   show_comments_add_comment: "[:add_object(type=:comment)]"
   show_comments_no_comments_yet: No one has commented yet.
   show_comments_and_more: And [num] more...
@@ -3379,7 +3379,7 @@
 
   # Note, glossary terms should appear in alphabetical order.
   how_glossary_body: "#(#comment)       [:how_comment]\n#(#image)         [:how_image]\n#(#license)       [:how_license]\n#(#location)      [:how_location]\n#(#name)          [:how_name]\n#(#observation)   [:how_observation]\n#(#proposed_name) [:how_proposed_name]\n#(#description)   [:how_description]\n#(#species_list)  [:how_species_list]\n#(#user)          [:how_user]\n#(#vote)          [:how_vote]"
-  how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image.  Each comment is owned by a particular \"User\":#user.  A comment may only be edited or deleted by the owner or a site administrator.  You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comment/show_comments_for_user' in the upper right of the page (the 'inbox' icon)."
+  how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image.  Each comment is owned by a particular \"User\":#user.  A comment may only be edited or deleted by the owner or a site administrator.  You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comments' in the upper right of the page (the 'inbox' icon)."
   how_contribution: "*Contribution* - A number or score that measures the quantity and quality of contributions a \"User\":#user has made to [:app_title].  Click '[:app_your_summary]' to see a break-down of your own contribution.  You earn points for every \"Observation\":#observation, \"Image\":#image, \"Comment\":#comment, etc. you have posted.  \"Describing Species\":#describing_species and \"Defining Locations\":defining_locations are some of the most important contributions a user can make.  (See \"How To Help\":/info/how_to_help for a list of other ways to help out.) Currently, contribution is used only in weighting your \"Votes\":#vote when voting on \"Proposed Names\":#proposed_names for observations."
   how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify.  Additional descriptions may be created by any \"User\":#user, including project members.  The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit.  Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process.  The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation.  A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder.  Only the owner or a site administrator can remove an image or edit the associated information.  All images in the site are required to be released under one of the \"Creative Commons licenses\":http://creativecommons.org or in the public domain.  If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/emails/ask_webmaster_question."

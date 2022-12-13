@@ -4,14 +4,16 @@
 class SearchController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
-  #   comment/image_search
-  #   image/image_search
-  #   location/location_search
-  #   name/name_search
-  #   observer/index
-  #   users/user_search
-  #   project/project_search
-  #   species_list/species_list_search
+  #   /comments/index (params[:pattern])
+  #   /herbaria/index (params[:pattern])
+  #   /herbarium_records/index (params[:pattern])
+  #   /image/image_search
+  #   /location/location_search
+  #   /name/name_search
+  #   /observations/index (params[:pattern])
+  #   /users/index (params[:pattern])
+  #   /project/project_search
+  #   /species_list/species_list_search
   # rubocop:disable Metrics/AbcSize
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
@@ -27,14 +29,14 @@ class SearchController < ApplicationController
     when :google
       site_google_search(pattern)
       return
-    when :herbarium, :herbarium_record, :observation, :user
+    when :comment, :herbarium, :herbarium_record, :observation, :user
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
         index_path: send("#{type.to_s.pluralize}_path", special_params)
       )
       return
-    when :comment, :image, :location, :name, :project, :species_list
+    when :image, :location, :name, :project, :species_list
       ctrlr = type
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))

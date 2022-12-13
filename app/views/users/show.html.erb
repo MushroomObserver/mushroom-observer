@@ -4,11 +4,12 @@
   @title = :show_user_title.t(user: name)
   @container = :full
 
-  # NOTE: refactored links will need params
+  # NOTE: Second arg is controller name - plural for normalized.
+  # Normalized controller links need hash of index params as the last argument.
   links = {}
   [
-    [ :comments, :comment, :show_comments_by_user, {} ],
-    [ :comments_for, :comment, :show_comments_for_user, {} ],
+    [ :comments, :comments, :index, { by_user: @show_user.id } ],
+    [ :comments_for, :comments, :index, { for_user: @show_user.id } ],
     [ :images, :image, :images_by_user, {} ],
     [ :location_description_authors, :location,
       :location_descriptions_by_author, {} ],

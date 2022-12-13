@@ -11,6 +11,7 @@
 #  * Name
 #  * Observation
 #  * Project
+#  * SpeciesList
 #
 #  == Adding Comments to Model
 #
@@ -30,10 +31,10 @@
 #
 #  4. Add show_comments partial at the bottom of the show_object view:
 #
-#       <%= render(:partial => 'comment/show_comments', :locals =>
+#       <%= render(:partial => 'comments/comments_for_object', :locals =>
 #             { :target => @target, :controls => true, :limit => nil }) %>
 #
-#  5. Tell comment/_object shared view how to display the object (used to
+#  5. Tell comments/_object shared view how to display the object (used to
 #     embed info about object while user is posting/editing a comment):
 #
 #       when 'YourModel'
@@ -56,6 +57,20 @@
 #  target::       Object it is attached to.
 #  summary::      Summary line (100 chars).
 #  comment::      Full text (any length).
+#
+#  ==== Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  by_user(user)
+#  for_user(user)
+#  for_target(target)
 #
 #  == Instance Methods
 #
@@ -98,9 +113,22 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
+  scope :by_user,
+        ->(user) { where(user: user) }
+  scope :for_user,
+        lambda { |user|
+          targets = []
+          all_types.each do |model|
+            targets |= model.where(user: user).map(&:id)
+          end
+          where(target: targets)
+        }
+  scope :for_target,
+        ->(target) { where(target: target) }
+
   # Returns Array of all models (Classes) which take comments.
   def self.all_types
-    [Location, Name, Observation, Project, SpeciesList]
+    all_type_tags.map { |t| t.to_s.camelize.constantize }
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).

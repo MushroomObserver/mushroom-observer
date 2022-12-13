@@ -19,7 +19,7 @@
     render(partial: "name/name_description", object: object, locals: { review: false })
 
   when "Observation"
-    render(partial: "observations/show_observation",
+    render(partial: "observations/show/observation",
            locals: { observation: object })
 
   when "Project"
@@ -33,5 +33,5 @@
           "how to display objects of type \"#{object.class.name}\".")
 end %>
 
-<%= render(partial: "show_comments",
+<%= render(partial: "comments_for_object",
            locals: { object: object, controls: false, limit: 10 }) %>

@@ -14,9 +14,9 @@ class LookupsControllerTest < FunctionalTestCase
     login
     c_id = comments(:minimal_unknown_obs_comment_1).id
     get(:lookup_comment, params: { id: c_id })
-    assert_redirected_to(controller: :comment, action: :show_comment, id: c_id)
+    assert_redirected_to(comment_path(id: c_id))
     get(:lookup_comment, params: { id: 10_000 })
-    assert_redirected_to(controller: :comment, action: :index_comment)
+    assert_redirected_to(comments_path)
     assert_flash_error
   end
 
