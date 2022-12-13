@@ -848,15 +848,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     patch("#{controller}/#{action}", controller: controller, action: action)
   end
 
-  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # Accept non-numeric ids for the /lookups/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
-    get("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
-    get("/observer/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
+    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
   end
 
   # declare routes for the actions in the ACTIONS hash
   route_actions_hash
 
   # routes for actions that Rails automatically creates from view templates
-  MO.themes.each { |scheme| get "theme/#{scheme}" }
+  MO.themes.each { |scheme| get "/theme/#{scheme}" }
 end
