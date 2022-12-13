@@ -191,6 +191,10 @@ class ImageController < ApplicationController
   # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
   # Outputs: @image
+  # Show the 640x640 ("normal" size) version of image.
+  # Linked from: thumbnails, next/prev_image, etc.
+  # Inputs: params[:id] (image)
+  # Outputs: @image
   def show_image
     store_location
     return false unless (@image = find_image!)
@@ -242,9 +246,9 @@ class ImageController < ApplicationController
     @size = params[:size].blank? ? @default_size : params[:size].to_sym
 
     # Maybe make this size the default image size for this user.
-    unless @user && (@default_size != @size) && (params[:make_default] == "1")
-      return
-    end
+    return unless @user &&
+                  (@default_size != @size) &&
+                  (params[:make_default] == "1")
 
     @user.image_size = @size
     @user.save_without_our_callbacks
@@ -264,7 +268,7 @@ class ImageController < ApplicationController
     query_params_set(img_query)
   end
 
-  # Changes the vote directly, does not call cast_vote below
+  # change_vote directly, does not call public cast_vote below
   def cast_user_vote!
     return unless @user &&
                   (val = params[:vote]) &&
@@ -396,127 +400,26 @@ class ImageController < ApplicationController
     @image.original_name = "" if @user.keep_filenames == "toss"
     return flash_object_errors(@image) unless @image.save
 
-    add_image_to_observation
+    add_image_to_observation!
   end
 
-  def add_image_to_observation
-    if @image.process_image(strip: @observation.gps_hidden)
-      @observation.add_image(@image)
-      @image.log_create_for(@observation)
-      name = @image.original_name
-      name = "##{@image.id}" if name.empty?
-      flash_notice(:runtime_image_uploaded_image.t(name: name))
-      update_related_projects(@image, params[:project])
-    else
-      name = @image.original_name
-      name = "???" if name.empty?
-      flash_error(:runtime_image_invalid_image.t(name: name))
-      flash_object_errors(@image)
-    end
+  def add_image_to_observation!
+    return revert_image_name_and_flash_errors unless
+      @image.process_image(strip: @observation.gps_hidden)
+
+    @observation.add_image(@image)
+    @image.log_create_for(@observation)
+    name = @image.original_name
+    name = "##{@image.id}" if name.empty?
+    flash_notice(:runtime_image_uploaded_image.t(name: name))
+    update_related_projects(@image, params[:project])
   end
 
-  public
-
-  ##############################################################################
-
-  # Form for editing date/license/notes on an image.
-  # Linked from: show_image/original
-  # Inputs: params[:id] (image)
-  #   params[:comment][:summary]
-  #   params[:comment][:comment]
-  # Outputs: @image, @licenses
-  def edit_image
-    return unless (@image = find_image!)
-
-    @licenses = current_license_names_and_ids
-    check_image_permission!
-    if request.method == "POST"
-      update_image
-    else
-      init_project_vars_for_add_or_edit(@image)
-    end
-  end
-
-  ##############################################################################
-
-  private
-
-  def update_image
-    @image.attributes = whitelisted_image_params
-
-    done = figure_out_if_done
-    if done
-      redirect_with_query(action: "show_image", id: @image.id)
-    else
-      init_project_vars_for_reload(@image)
-    end
-  end
-
-  def current_license_names_and_ids
-    License.current_names_and_ids(@image.license)
-  end
-
-  def check_image_permission!
-    redirect_with_query(action: "show_image", id: @image) unless
-      check_permission!(@image)
-  end
-
-  def anything_changed?
-    @image.when_changed? ||
-      @image.notes_changed? ||
-      @image.copyright_holder_changed? ||
-      @image.original_name_changed? ||
-      @image.license_id_changed?
-  end
-
-  def figure_out_if_done
-    if anything_changed?
-      update_projects!
-      true
-    elsif !@image.save
-      flash_object_errors(@image)
-      false
-    else
-      xargs[:id] = @image
-      @image.log_update
-      flash_notice(:runtime_image_edit_success.t(id: @image.id))
-      update_related_projects(@image, params[:project])
-      true
-    end
-  end
-
-  def update_projects!
-    if update_related_projects(@image, params[:project])
-      flash_notice(:runtime_image_edit_success.t(id: @image.id))
-    else
-      flash_notice(:runtime_no_changes.t)
-    end
-  end
-
-  def init_project_vars_for_add_or_edit(obs_or_img)
-    @projects = User.current.projects_member(order: :title)
-    @project_checks = {}
-    obs_or_img.projects.each do |proj|
-      @projects << proj unless @projects.include?(proj)
-      @project_checks[proj.id] = true
-    end
-  end
-
-  def init_project_vars_for_reload(obs_or_img)
-    # (Note: In practice, this is never called for add_image,
-    # so obs_or_img is always an image.)
-    @projects = User.current.projects_member(order: :title)
-    @project_checks = {}
-    obs_or_img.projects.each do |proj|
-      @projects << proj unless @projects.include?(proj)
-    end
-    @projects.each do |proj|
-      @project_checks[proj.id] = begin
-                                   params[:project]["id_#{proj.id}"] == "1"
-                                 rescue StandardError
-                                   false
-                                 end
-    end
+  def revert_image_name_and_flash_errors
+    name = @image.original_name
+    name = "???" if name.empty?
+    flash_error(:runtime_image_invalid_image.t(name: name))
+    flash_object_errors(@image)
   end
 
   def update_related_projects(img, checks)
@@ -572,6 +475,113 @@ class ImageController < ApplicationController
 
   ##############################################################################
 
+  # Form for editing date/license/notes on an image.
+  # Linked from: show_image/original
+  # Inputs: params[:id] (image)
+  #   params[:comment][:summary]
+  #   params[:comment][:comment]
+  # Outputs: @image, @licenses
+  def edit_image
+    return unless (@image = find_image!)
+
+    @licenses = current_license_names_and_ids
+    check_image_permission!
+    if request.method == "POST"
+      update_image
+    else
+      init_project_vars_for_add_or_edit(@image)
+    end
+  end
+
+  ##############################################################################
+
+  private
+
+  def update_image
+    return unless (@image = find_image!)
+
+    @licenses = current_license_names_and_ids
+    check_image_permission!
+
+    @image.attributes = whitelisted_image_params
+
+    if image_or_projects_updated
+      redirect_with_query(action: "show_image", id: @image.id)
+    else
+      init_project_vars_for_reload(@image)
+    end
+  end
+
+  def current_license_names_and_ids
+    License.current_names_and_ids(@image.license)
+  end
+
+  def check_image_permission!
+    redirect_with_query(action: "show_image", id: @image) unless
+      check_permission!(@image)
+  end
+
+  def image_or_projects_updated
+    if !image_data_changed?
+      update_projects_and_flash_notice!
+      true
+    elsif !@image.save
+      flash_object_errors(@image)
+      false
+    else
+      @image.log_update
+      flash_notice(:runtime_image_edit_success.t(id: @image.id))
+      update_related_projects(@image, params[:project])
+      true
+    end
+  end
+
+  def image_data_changed?
+    @image.when_changed? ||
+      @image.notes_changed? ||
+      @image.copyright_holder_changed? ||
+      @image.original_name_changed? ||
+      @image.license_id_changed?
+  end
+
+  def update_projects_and_flash_notice!
+    if update_related_projects(@image, params[:project])
+      flash_notice(:runtime_image_edit_success.t(id: @image.id))
+    else
+      flash_notice(:runtime_no_changes.t)
+    end
+  end
+
+  def init_project_vars_for_add_or_edit(obs_or_img)
+    @projects = User.current.projects_member(order: :title)
+    @project_checks = {}
+    obs_or_img.projects.each do |proj|
+      @projects << proj unless @projects.include?(proj)
+      @project_checks[proj.id] = true
+    end
+  end
+
+  def init_project_vars_for_reload(obs_or_img)
+    # (Note: In practice, this is never called for add_image,
+    # so obs_or_img is always an image.)
+    @projects = User.current.projects_member(order: :title)
+    @project_checks = {}
+    obs_or_img.projects.each do |proj|
+      @projects << proj unless @projects.include?(proj)
+    end
+    @projects.each do |proj|
+      @project_checks[proj.id] = begin
+                                   params[:project]["id_#{proj.id}"] == "1"
+                                 rescue StandardError
+                                   false
+                                 end
+    end
+  end
+
+  public
+
+  ##############################################################################
+
   # Callback to destroy an image.
   # Linked from: show_image/original
   # Inputs: params[:id] (image)
@@ -599,12 +609,10 @@ class ImageController < ApplicationController
     @image.log_destroy
     @image.destroy
     flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
-    if next_state
-      query_params_set(next_state)
-      redirect_with_query(action: "show_image", id: next_state.current_id)
-    else
-      redirect_to(action: "list_images")
-    end
+    return redirect_to(action: "list_images") unless next_state
+
+    query_params_set(next_state)
+    redirect_with_query(action: "show_image", id: next_state.current_id)
   end
 
   public
