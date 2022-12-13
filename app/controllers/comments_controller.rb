@@ -169,7 +169,7 @@ class CommentsController < ApplicationController
   # Outputs: @comment, @object
   def show
     store_location
-    return unless @comment = find_comment!
+    return unless (@comment = find_comment!)
 
     case params[:flow]
     when "next"
@@ -237,21 +237,25 @@ class CommentsController < ApplicationController
     @comment = Comment.new(target: @target)
     @comment.attributes = whitelisted_comment_params if params[:comment]
 
-    if @comment.save
-      @comment.log_create
-      flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
-      redirect_with_query(controller: @target.show_controller,
-                          action: @target.show_action, id: @target.id)
-    else
-      flash_object_errors(@comment)
-      render(:new) and return
-    end
+    save_comment_or_flash_errors_and_redirect!
   end
 
   private
 
   def whitelisted_comment_params
     params[:comment].permit([:summary, :comment])
+  end
+
+  def save_comment_or_flash_errors_and_redirect!
+    unless @comment.save
+      flash_object_errors(@comment)
+      render(:new) and return
+    end
+
+    @comment.log_create
+    flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
+    redirect_with_query(controller: @target.show_controller,
+                        action: @target.show_action, id: @target.id)
   end
 
   public
@@ -268,7 +272,7 @@ class CommentsController < ApplicationController
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
   def edit
-    return unless @comment = find_comment!
+    return unless (@comment = find_comment!)
 
     @target = comment_target
     return unless allowed_to_see!(@target)
@@ -276,7 +280,7 @@ class CommentsController < ApplicationController
   end
 
   def update
-    return unless @comment = find_comment!
+    return unless (@comment = find_comment!)
 
     @target = comment_target
     return unless allowed_to_see!(@target) &&
