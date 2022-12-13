@@ -250,7 +250,7 @@ class CommentsController < ApplicationController
 
   # The `new` action needs params[:type] and params[:target] (id of the obj)
   def target_is_valid
-    return false unless @target = load_target(params[:type], params[:target])
+    return false unless (@target = load_target(params[:type], params[:target]))
 
     allowed_to_see!(@target)
   end
