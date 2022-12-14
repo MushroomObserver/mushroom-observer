@@ -148,7 +148,7 @@ class Comment < AbstractModel
 
   # Returns Array of all models (Classes) which take comments.
   def self.all_types
-    all_type_tags.map { |t| t.to_s.camelize.constantize }
+    [Location, Name, Observation, Project, SpeciesList]
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
