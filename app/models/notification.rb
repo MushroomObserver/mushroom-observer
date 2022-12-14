@@ -32,19 +32,19 @@
 class Notification < AbstractModel
   belongs_to :user
 
+  scope :for_user,
+        ->(user) { where(user: user) }
+
   # Do not change the integer associated with a value
   enum flavor:
        {
-         name: 1,
-         observation: 2,
-         user: 3,
-         all_comments: 4
+         name: 1
        },
        _suffix: :flavor
 
   # List of all available flavors (strings).
   def self.all_flavors
-    ["name"]
+    flavors.keys
   end
 
   # Create body of the email we're about to send.  Each flavor requires a
@@ -54,7 +54,7 @@ class Notification < AbstractModel
   #   user::      Owner of Observation.
   #   naming::    Naming that triggered this email.
   #
-  def calc_note(args)
+  def calc_note(args) # rubocop:disable Metrics/AbcSize
     return nil unless (template = note_template) && flavor == "name"
 
     tracker  = user
