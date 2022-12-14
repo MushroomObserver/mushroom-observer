@@ -17,6 +17,11 @@
 class InterestController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching
+  before_action :pass_query_params,
+                except: [
+                  :list_interests,
+                  :destroy_notification
+                ]
 
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
@@ -62,29 +67,29 @@ class InterestController < ApplicationController
   # Redirects back (falls back on show_<object>)
   # Inputs: params[:type], params[:id], params[:state], params[:user]
   # Outputs: none
-  def set_interest # rubocop:disable Metrics/AbcSize
-    pass_query_params
+  def set_interest
     target_type = params[:type].to_s
     target_id   = params[:id].to_i
     @state      = params[:state].to_i
-    user_id     = params[:user]
-    @target     = Interest.find_object(target_type, target_id)
-    return unless @user
-
-    @interest = Interest.find_by(
+    @target     = AbstractModel.find_object(target_type, target_id)
+    @interest   = Interest.find_by(
       target_type: target_type, target_id: target_id, user_id: @user.id
     )
-    if user_id && @user.id != user_id.to_i
+    set_interest_or_flash_errors(target_type, target_id)
+    redirect_to_target_or_interests
+  end
+
+  private
+
+  def set_interest_or_flash_errors(target_type, target_id)
+    if (user_id = params[:user]) && @user.id != user_id.to_i
       flash_error(:set_interest_user_mismatch.l)
     elsif !@target && @state != 0
       flash_error(:set_interest_bad_object.l(type: target_type, id: target_id))
     else
       set_interest_state_for_target
     end
-    redirect_to_target_or_interests
   end
-
-  private
 
   def set_interest_state_for_target
     create_interest_if_not_exists
