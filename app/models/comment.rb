@@ -127,7 +127,8 @@ class Comment < AbstractModel
   #   where(target_id: target_ids)
   #
   # ...this `inject` iteration only generates one very complex sql statement,
-  # with inner selects, and it's faster because dbs are faster than Ruby.
+  # with inner selects, and it's faster because AR can figure out that all the
+  # chained selects constitute one giant SELECT, and SQL is faster than Ruby.
   #
   # Basically it's iterating over all the types doing this:
   #   where(target_type: :location,
