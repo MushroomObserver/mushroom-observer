@@ -17,11 +17,7 @@
 class InterestController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching
-  before_action :pass_query_params,
-                except: [
-                  :list_interests,
-                  :destroy_notification
-                ]
+  before_action :pass_query_params, except: [:list_interests]
 
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
@@ -72,28 +68,41 @@ class InterestController < ApplicationController
     target_id   = params[:id].to_i
     @state      = params[:state].to_i
     @target     = AbstractModel.find_object(target_type, target_id)
-    @interest   = Interest.find_by(
-      target_type: target_type, target_id: target_id, user_id: @user.id
-    )
-    set_interest_or_flash_errors(target_type, target_id)
-    redirect_to_target_or_interests
+
+    if check_params_or_flash_errors!(target_type, target_id)
+      @interest = find_or_create_interest
+      set_interest_state_for_target
+    end
+
+    redirect_to_target_or_list_interests
   end
 
   private
 
-  def set_interest_or_flash_errors(target_type, target_id)
+  def check_params_or_flash_errors!(target_type, target_id)
     if (user_id = params[:user]) && @user.id != user_id.to_i
       flash_error(:set_interest_user_mismatch.l)
+      return false
     elsif !@target && @state != 0
       flash_error(:set_interest_bad_object.l(type: target_type, id: target_id))
-    else
-      set_interest_state_for_target
+      return false
     end
+    true
+  end
+
+  def find_or_create_interest
+    interest = Interest.find_by(
+      target_type: @target.type_tag, target_id: @target.id, user_id: @user.id
+    )
+    return interest unless !interest && @state != 0
+
+    interest = Interest.new
+    interest.target = @target
+    interest.user = @user
+    interest
   end
 
   def set_interest_state_for_target
-    create_interest_if_not_exists
-
     if @state.zero?
       remove_interest_from_target_and_flash_notice
     elsif @interest.state == true && @state.positive?
@@ -107,14 +116,6 @@ class InterestController < ApplicationController
     else
       set_new_interest_state_and_flash_notice
     end
-  end
-
-  def create_interest_if_not_exists
-    return unless !@interest && @state != 0
-
-    @interest = Interest.new
-    @interest.target = @target
-    @interest.user = @user
   end
 
   def remove_interest_from_target_and_flash_notice
@@ -146,7 +147,7 @@ class InterestController < ApplicationController
     end
   end
 
-  def redirect_to_target_or_interests
+  def redirect_to_target_or_list_interests
     unless @target
       return redirect_back_or_default(controller: "/interest",
                                       action: "list_interests")
@@ -161,7 +162,6 @@ class InterestController < ApplicationController
   public
 
   def destroy_notification
-    pass_query_params
     Notification.find(params[:id].to_i).destroy
     redirect_with_query(action: "list_interests")
   end
