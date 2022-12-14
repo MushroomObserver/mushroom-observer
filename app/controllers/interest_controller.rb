@@ -66,88 +66,91 @@ class InterestController < ApplicationController
     pass_query_params
     target_type = params[:type].to_s
     target_id   = params[:id].to_i
-    state       = params[:state].to_i
+    @state      = params[:state].to_i
     user_id     = params[:user]
-    target      = Comment.find_object(target_type, target_id)
+    @target     = Interest.find_object(target_type, target_id)
     return unless @user
 
-    interest = Interest.find_by(
+    @interest = Interest.find_by(
       target_type: target_type, target_id: target_id, user_id: @user.id
     )
     if user_id && @user.id != user_id.to_i
       flash_error(:set_interest_user_mismatch.l)
-    elsif !target && state != 0
+    elsif !@target && @state != 0
       flash_error(:set_interest_bad_object.l(type: target_type, id: target_id))
     else
-      set_interest_state_for_target(interest, state, target)
+      set_interest_state_for_target
     end
-    redirect_to_target_or_interests(target, target_id)
+    redirect_to_target_or_interests
   end
 
   private
 
-  def redirect_to_target_or_interests(target, target_id)
-    unless target
-      return redirect_back_or_default(controller: "/interest",
-                                      action: "list_interests")
-    end
+  def set_interest_state_for_target
+    create_interest_if_not_exists
 
-    redirect_back_or_default(
-      add_query_param(controller: target.show_controller,
-                      action: target.show_action, id: target_id)
-    )
-  end
-
-  # rubocop:disable Metrics/AbcSize
-  def set_interest_state_for_target(interest, state, target)
-    if !interest && state != 0
-      interest = Interest.new
-      interest.target = target
-      interest.user = @user
-    end
-    if state.zero?
-      remove_interest_from_target_and_flash_notice(interest, target)
-    elsif interest.state == true && state.positive?
+    if @state.zero?
+      remove_interest_from_target_and_flash_notice
+    elsif @interest.state == true && @state.positive?
       flash_notice(
-        :set_interest_already_on.l(name: target.unique_text_name)
+        :set_interest_already_on.l(name: @target.unique_text_name)
       )
-    elsif interest.state == false && state.negative?
+    elsif @interest.state == false && @state.negative?
       flash_notice(
-        :set_interest_already_off.l(name: target.unique_text_name)
+        :set_interest_already_off.l(name: @target.unique_text_name)
       )
     else
-      set_new_interest_state_and_flash_notice(interest, state, target)
+      set_new_interest_state_and_flash_notice
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
-  def remove_interest_from_target_and_flash_notice(interest, target)
-    name = target ? target.unique_text_name : "--"
-    if !interest
+  def create_interest_if_not_exists
+    return unless !@interest && @state != 0
+
+    @interest = Interest.new
+    @interest.target = @target
+    @interest.user = @user
+  end
+
+  def remove_interest_from_target_and_flash_notice
+    name = @target ? @target.unique_text_name : "--"
+    if !@interest
       flash_notice(:set_interest_already_deleted.l(name: name))
-    elsif !interest.destroy
+    elsif !@interest.destroy
       flash_notice(:set_interest_failure.l(name: name))
-    elsif interest.state
+    elsif @interest.state
       flash_notice(:set_interest_success_was_on.l(name: name))
     else
       flash_notice(:set_interest_success_was_off.l(name: name))
     end
   end
 
-  def set_new_interest_state_and_flash_notice(interest, state, target)
-    interest.state = state.positive?
-    interest.updated_at = Time.zone.now
-    if !interest.save
-      flash_notice(:set_interest_failure.l(name: target.unique_text_name))
-    elsif state.positive?
+  def set_new_interest_state_and_flash_notice
+    @interest.state = @state.positive?
+    @interest.updated_at = Time.zone.now
+    if !@interest.save
+      flash_notice(:set_interest_failure.l(name: @target.unique_text_name))
+    elsif @state.positive?
       flash_notice(
-        :set_interest_success_on.l(name: target.unique_text_name)
+        :set_interest_success_on.l(name: @target.unique_text_name)
       )
     else
       flash_notice(
-        :set_interest_success_off.l(name: target.unique_text_name)
+        :set_interest_success_off.l(name: @target.unique_text_name)
       )
     end
+  end
+
+  def redirect_to_target_or_interests
+    unless @target
+      return redirect_back_or_default(controller: "/interest",
+                                      action: "list_interests")
+    end
+
+    redirect_back_or_default(
+      add_query_param(controller: @target.show_controller,
+                      action: @target.show_action, id: @target.id)
+    )
   end
 
   public
