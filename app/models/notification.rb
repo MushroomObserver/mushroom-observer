@@ -32,6 +32,9 @@
 class Notification < AbstractModel
   belongs_to :user
 
+  scope :for_user,
+        ->(user) { where(user: user) }
+
   # Do not change the integer associated with a value
   enum flavor:
        {

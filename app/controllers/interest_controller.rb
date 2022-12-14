@@ -26,13 +26,13 @@ class InterestController < ApplicationController
     store_location
     @title = :list_interests_title.t
     # notifications = Notification.find_all_by_user_id(@user.id).sort do |a,b|
-    notifications = Notification.where(user_id: @user.id).sort do |a, b|
+    notifications = Notification.for_user(@user).sort do |a, b|
       result = a.flavor.to_s <=> b.flavor.to_s
       result = a.summary.to_s <=> b.summary.to_s if result.zero?
       result
     end
     # interests = Interest.find_all_by_user_id(@user.id).sort do |a,b|
-    interests = Interest.where(user_id: @user.id).sort do |a, b|
+    interests = Interest.for_user(@user).sort do |a, b|
       result = a.target_type <=> b.target_type
       if result.zero?
         result = (a.target ? a.target.text_name : "") <=>
