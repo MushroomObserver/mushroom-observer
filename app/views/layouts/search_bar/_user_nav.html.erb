@@ -14,7 +14,7 @@
   <% end %>
   <li>
     <%= link_to(
-          "", "#{comment_show_comments_for_user_path}/#{@user.id}",
+          "", comments_path(for_user: @user.id),
           { class: "glyphicon glyphicon-inbox",
             id: "user_nav_inbox_link",
             title: :app_comments_for_you.t,

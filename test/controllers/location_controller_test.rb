@@ -103,7 +103,7 @@ class LocationControllerTest < FunctionalTestCase
     get(:show_location, params: { id: location.id })
     assert_template("show_location")
     assert_template("location/_location")
-    assert_template("comment/_show_comments")
+    assert_template("comments/_comments_for_object")
     assert_template("location/_location_description")
 
     location.reload
@@ -858,7 +858,7 @@ class LocationControllerTest < FunctionalTestCase
   def assert_show_location
     assert_template("location/show_location")
     assert_template("location/_location")
-    assert_template("comment/_show_comments")
+    assert_template("comments/_comments_for_object")
     assert_template("location/_location_description")
   end
 

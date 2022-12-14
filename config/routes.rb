@@ -69,20 +69,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  comment: {
-    add_comment: {},
-    comment_search: {},
-    destroy_comment: {},
-    edit_comment: {},
-    index_comment: {},
-    list_comments: {},
-    next_comment: {},
-    prev_comment: {},
-    # show_comment: {},
-    show_comments_by_user: {},
-    show_comments_for_target: {},
-    show_comments_for_user: {}
-  },
   image: {
     add_image: {},
     advanced_search: {},
@@ -537,6 +523,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :remove_observation, only: [:update], module: :collection_numbers
   end
 
+  # ----- Comments: standard actions --------------------------------------
+  resources :comments
+
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
@@ -671,9 +660,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
-  # ----- Comment:
-  get("/comment/show_comment/:id", to: "comment#show_comment",
-                                   as: "show_comment")
   # ----- Image:
   get("/image/show_image/:id", to: "image#show_image",
                                as: "show_image")

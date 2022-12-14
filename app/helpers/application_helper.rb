@@ -131,8 +131,9 @@ module ApplicationHelper
   # button to destroy object
   # Used instead of link_to because method: :delete requires jquery_ujs library
   # Sample usage:
-  #   destroy_button(object: article)
-  #   destroy_button(object: term, :destroy_object.t(type: :glossary_term)
+  #   destroy_button(target: article)
+  #   destroy_button(name: :destroy_object.t(type: :glossary_term),
+  #                  target: term)
   #   destroy_button(
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
