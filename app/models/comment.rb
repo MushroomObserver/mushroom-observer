@@ -29,7 +29,7 @@
 #
 #       draw_interest_icons(@target)
 #
-#  4. Add show_comments partial at the bottom of the show_object view:
+#  4. Add comments_for_object partial at the bottom of the show_object view:
 #
 #       <%= render(:partial => 'comments/comments_for_object', :locals =>
 #             { :target => @target, :controls => true, :limit => nil }) %>
