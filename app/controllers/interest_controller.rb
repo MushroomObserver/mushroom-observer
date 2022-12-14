@@ -64,37 +64,37 @@ class InterestController < ApplicationController
   # Outputs: none
   def set_interest # rubocop:disable Metrics/AbcSize
     pass_query_params
-    type   = params[:type].to_s
-    oid    = params[:id].to_i
-    state  = params[:state].to_i
-    uid    = params[:user]
-    target = Comment.find_object(type, oid)
+    target_type = params[:type].to_s
+    target_id   = params[:id].to_i
+    state       = params[:state].to_i
+    user_id     = params[:user]
+    target      = Comment.find_object(target_type, target_id)
     return unless @user
 
     interest = Interest.find_by(
-      target_type: type, target_id: oid, user_id: @user.id
+      target_type: target_type, target_id: target_id, user_id: @user.id
     )
-    if uid && @user.id != uid.to_i
+    if user_id && @user.id != user_id.to_i
       flash_error(:set_interest_user_mismatch.l)
     elsif !target && state != 0
-      flash_error(:set_interest_bad_object.l(type: type, id: oid))
+      flash_error(:set_interest_bad_object.l(type: target_type, id: target_id))
     else
       set_interest_state_for_target(interest, state, target)
     end
-    redirect_to_target_or_interests(target)
+    redirect_to_target_or_interests(target, target_id)
   end
 
   private
 
-  def redirect_to_target_or_interests(target)
+  def redirect_to_target_or_interests(target, target_id)
     unless target
-      redirect_back_or_default(controller: "interest",
-                               action: "list_interests")
+      return redirect_back_or_default(controller: "/interest",
+                                      action: "list_interests")
     end
 
     redirect_back_or_default(
       add_query_param(controller: target.show_controller,
-                      action: target.show_action, id: oid)
+                      action: target.show_action, id: target_id)
     )
   end
 
