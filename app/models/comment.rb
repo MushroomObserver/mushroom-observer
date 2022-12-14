@@ -115,13 +115,32 @@ class Comment < AbstractModel
 
   scope :by_user,
         ->(user) { where(user: user) }
+
+  # This scope starts with a `where`, and chains subsequent `where` clauses
+  # with `or`. So, rather than separately assembling `target_ids`, that would
+  # execute multiple db queries:
+  #
+  #   target_ids = []
+  #   all_types.each do |model|
+  #     target_ids |= model.where(user: user).pluck(:id)
+  #   end
+  #   where(target_id: target_ids)
+  #
+  # ...this `inject` iteration only generates one very complex sql statement,
+  # with inner selects, and it's faster because dbs are faster than Ruby.
+  #
+  # Basically it's iterating over all the types doing this:
+  #   where(target_type: :location,
+  #        target_id: Location.where(user: user)).
+  #   or(where(target_type: :name,
+  #            target_id: Name.where(user: user))) etc.
   scope :for_user,
         lambda { |user|
-          targets = []
-          all_types.each do |model|
-            targets |= model.where(user: user).map(&:id)
+          all_types.inject(nil) do |scope, model|
+            scope2 = where(target_type: model.name.underscore.to_sym,
+                           target_id: model.where(user: user))
+            scope ? scope.or(scope2) : scope2
           end
-          where(target: targets)
         }
   scope :for_target,
         ->(target) { where(target: target) }
