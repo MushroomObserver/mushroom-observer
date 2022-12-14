@@ -98,7 +98,7 @@
   </div>
 </div><!--.row-->
 
-<%= render(partial: "comment/show_comments",
+<%= render(partial: "comments/comments_for_object",
             locals: {object: @project, controls: true, limit: nil}) %>
 
 <%= show_object_footer(@project) %>

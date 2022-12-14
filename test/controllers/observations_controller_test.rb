@@ -643,7 +643,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("observations/_show_name_info")
     assert_template("observations/_show_observation")
     assert_template("naming/_show")
-    assert_template("comment/_show_comments")
+    assert_template("comments/_comments_for_object")
     assert_template("observations/_show_thumbnail_map")
     assert_template("observations/_show_images")
   end

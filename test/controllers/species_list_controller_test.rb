@@ -114,13 +114,13 @@ class SpeciesListControllerTest < FunctionalTestCase
     login("mary")
     get(:show_species_list, params: { id: sl_id })
     assert_template(:show_species_list)
-    assert_template("comment/_show_comments")
+    assert_template("comments/_comments_for_object")
 
     # Show non-empty list with owner logged in.
     get(:show_species_list,
         params: { id: species_lists(:unknown_species_list).id })
     assert_template(:show_species_list)
-    assert_template("comment/_show_comments")
+    assert_template("comments/_comments_for_object")
   end
 
   def test_show_species_lists_attached_to_projects

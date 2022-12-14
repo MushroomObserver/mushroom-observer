@@ -93,7 +93,7 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "90", type: :comment } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :comment, action: :comment_search,
+    assert_redirected_to(controller: :comments, action: :index,
                          pattern: "90")
 
     params = { search: { pattern: "12", type: :species_list } }

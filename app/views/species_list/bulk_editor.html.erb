@@ -115,14 +115,12 @@
 
     <%= :COMMENTS.t %>: (<span id="number_of_comments"></span>)
     <%=
-      args = { controller: :comment, action: :show_comments_for_target,
-               id: "XXX", type: "Observation" }
+      args = comments_path(target: "XXX", type: "Observation")
       url = url_for(add_query_param(args, @query))
       link_to(:SHOW.l, "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :comment, action: :add_comment, id: "XXX",
-               type: "Observation" }
+      args = new_comment_path(target: "XXX", type: "Observation")
       url = url_for(add_query_param(args, @query))
       link_to(:CREATE.l, "javascript:row_button(#{j url})")
     %>
