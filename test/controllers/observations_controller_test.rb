@@ -1462,8 +1462,7 @@ class ObservationsControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    flavor = Notification.flavors[:name]
-    notifications = Notification.where(flavor: flavor, obj_id: name.id)
+    notifications = Notification.where(obj_id: name.id)
     assert_equal(2, notifications.length,
                  "Should be 2 name notifications for name ##{name.id}")
     assert(notifications.map(&:user).include?(mary))

@@ -54,14 +54,14 @@ class Notification < AbstractModel
   #   user::      Owner of Observation.
   #   naming::    Naming that triggered this email.
   #
-  def calc_note(args) # rubocop:disable Metrics/AbcSize
-    return nil unless (template = note_template) && flavor == "name"
+  def calc_note(args)
+    return nil unless (template = note_template)
 
     tracker  = user
     observer = args[:user]
     naming   = args[:naming]
-    raise("Missing 'user' argument for #{flavor} notification.") unless observer
-    raise("Missing 'naming' argument for #{flavor} notification.") unless naming
+    raise("Missing 'user' argument for name notification.") unless observer
+    raise("Missing 'naming' argument for name notification.") unless naming
 
     template.
       gsub(":observer", observer.login).
@@ -77,16 +77,12 @@ class Notification < AbstractModel
   # name::   Name that User is tracking.
   #
   def target
-    @target ||= flavor == "name" ? Name.find(obj_id) : nil
+    @target ||= Name.find(obj_id)
   end
 
   # Return a string summarizing what this Notification is about.
   def summary
-    if flavor == "name"
-      "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
-    else
-      "Unrecognized notification flavor"
-    end
+    "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
   end
   alias text_name summary
 
@@ -96,11 +92,9 @@ class Notification < AbstractModel
   #
   def link_params
     result = {}
-    if flavor == "name"
-      result[:controller] = :name
-      result[:action] = :email_tracking
-      result[:id] = obj_id
-    end
+    result[:controller] = :name
+    result[:action] = :email_tracking
+    result[:id] = obj_id
     result
   end
 

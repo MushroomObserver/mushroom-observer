@@ -1,12 +1,12 @@
 <%
-  case @notification.flavor.to_s
-  when "name"
+  # case @notification.flavor.to_s
+  # when "name"
     obj  = @naming.observation
     type = :observation
-  else
-    obj  = @notification.object
-    type = obj.type_tag
-  end
+  # else
+  #   obj  = @notification.object
+  #   type = obj.type_tag
+  # end
 
   intro = :email_naming_for_observer_intro.l(
     user:  @notification.user.legal_name,
@@ -27,13 +27,13 @@
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  if obj.class.controller_normalized?
+  # if obj.class.controller_normalized?
     links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}#{obj.show_controller}/#{obj.id}"])
-  else
-    links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
-  end
+      "#{MO.http_domain}/#{obj.id}"])
+  # else
+  #   links.push([:email_links_show_object.t(type: type),
+  #     "#{MO.http_domain}#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
+  # end
 
   links.push([:email_links_latest_changes.t,
     MO.http_domain])

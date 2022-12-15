@@ -5,7 +5,6 @@
 # Specify obj association with id, not label.
 
 DEFAULTS: &DEFAULTS
-  flavor: <%= Notification.flavors[:name] %>
   obj_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
 
 coprinus_comatus_notification:
@@ -26,8 +25,3 @@ no_observation_notification:
   <<: *DEFAULTS
   user: dick
   obj_id: <%= ActiveRecord::FixtureSet.identify(:notification_but_no_observation) %>
-
-bad_flavor_notification:
-  <<: *DEFAULTS
-  user: mary
-  flavor: -1  # non-existent flavor
