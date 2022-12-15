@@ -35,12 +35,15 @@ group :rails do
   gem("sprockets-rails")
 end
 
-# security fix for CVE-2021-41817 regex denial of service vulnerability
+# Security fix updates via Dependabot
+# CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")
-
-# security fix for CVE-2022-23476 unchecked return value from
-# xmlTextReaderExpand
+# CVE-2022-23476
 gem("nokogiri", ">= 1.13.10")
+# CVE-2022-23515
+gem("loofah", ">= 2.19.1")
+# CVE-2022-23518
+gem("rails-html-sanitizer", ">= 1.4.4")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
