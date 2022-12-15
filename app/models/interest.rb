@@ -53,6 +53,9 @@ class Interest < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
 
+  scope :for_user,
+        ->(user) { where(user: user) }
+
   # Returns Array of all models (Classes) which take interests.
   def self.all_types
     [Location, Name, Observation, Project, SpeciesList]
