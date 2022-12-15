@@ -8,14 +8,9 @@
 #  id::               Locally unique numerical id, starting at 1
 #  updated_at::       Date/time it was last updated
 #  user::             User who created it
-#  flavor::           Type of Notification
 #  obj_id::           Id of principal object
 #  note_template::   Template for an email, context depends on Notification type
 #  require_specimen:: Require observation to have a specimen?
-#
-#  == Class methods
-#
-#  all_flavors::       List of Notifcation types available.
 #
 #  == Instance methods
 #
@@ -34,18 +29,6 @@ class Notification < AbstractModel
 
   scope :for_user,
         ->(user) { where(user: user) }
-
-  # Do not change the integer associated with a value
-  enum flavor:
-       {
-         name: 1
-       },
-       _suffix: :flavor
-
-  # List of all available flavors (strings).
-  def self.all_flavors
-    flavors.keys
-  end
 
   # Create body of the email we're about to send.  Each flavor requires a
   # different set of arguments:
