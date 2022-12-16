@@ -725,13 +725,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "glossary", new_controller: "/glossary_terms",
+    old_controller: "glossary", new_controller: "glossary_terms",
     actions: [:controller, :show, :list, :index, :show_past]
   )
 
   # ----- Herbaria: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "herbarium", new_controller: "/herbaria",
+    old_controller: "herbarium", new_controller: "herbaria",
     actions: [:show, :list, :index]
   )
 
@@ -748,7 +748,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Interests: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "interest", new_controller: "/interests",
+    old_controller: "interest", new_controller: "interests",
     actions: [:index]
   )
 
@@ -803,7 +803,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Sequences: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "sequence", new_controller: "/sequences",
+    old_controller: "sequence", new_controller: "sequences",
     actions: [:show, :index]
   )
   get("/sequence/create_sequence/:id",
