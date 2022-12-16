@@ -122,16 +122,16 @@ class InterestController < ApplicationController
   # OR BE SURE IT'S DONE IN NAME CTRLR?
   def remove_interest_from_target_and_flash_notice
     name = @target ? @target.unique_text_name : "--"
-    is_name_tracker? = (@interest.target_type == "name_tracker")
+    is_name_tracker = (@interest.target_type == "name_tracker")
     if !@interest
       flash_notice(:set_interest_already_deleted.l(name: name))
     elsif !@interest.destroy
       flash_notice(:set_interest_failure.l(name: name))
     elsif @interest.state
-      @target.destroy if is_name_tracker?
+      @target.destroy if is_name_tracker
       flash_notice(:set_interest_success_was_on.l(name: name))
     else
-      @target.destroy if is_name_tracker?
+      @target.destroy if is_name_tracker
       flash_notice(:set_interest_success_was_off.l(name: name))
     end
   end

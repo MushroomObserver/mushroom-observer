@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_15_065834) do
+ActiveRecord::Schema.define(version: 2022_12_15_233523) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -362,6 +362,14 @@ ActiveRecord::Schema.define(version: 2022_12_15_065834) do
     t.text "classification"
   end
 
+  create_table "name_trackers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "user_id", default: 0, null: false
+    t.integer "obj_id"
+    t.text "note_template"
+    t.datetime "updated_at"
+    t.boolean "require_specimen", default: false, null: false
+  end
+
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
@@ -422,14 +430,6 @@ ActiveRecord::Schema.define(version: 2022_12_15_065834) do
     t.integer "user_id"
     t.float "vote_cache", default: 0.0
     t.text "reasons"
-  end
-
-  create_table "notifications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "user_id", default: 0, null: false
-    t.integer "obj_id"
-    t.text "note_template"
-    t.datetime "updated_at"
-    t.boolean "require_specimen", default: false, null: false
   end
 
   create_table "observation_collection_numbers", charset: "utf8mb3", force: :cascade do |t|
