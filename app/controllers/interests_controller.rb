@@ -134,9 +134,11 @@ class InterestsController < ApplicationController
   end
 
   # For :update and :destroy
+  # AR stores polymorphic target_type as the class name string!
+  # find_by @target.target_type (a symbol) is unreliable!
   def find_interest
     Interest.find_by(
-      target_type: @target.type_tag, target_id: @target.id, user_id: @user.id
+      target_type: @target.class.to_s, target_id: @target.id, user_id: @user.id
     )
   end
 
@@ -215,7 +217,9 @@ class InterestsController < ApplicationController
 
   # All CRUD actions end with this
   def redirect_to_target_or_list_interests
-    return redirect_back_or_default(interests_path) unless @target
+    if !@target || @target.type_tag == :name_tracker
+      return redirect_back_or_default(interests_path)
+    end
 
     redirect_back_or_default(
       add_query_param(controller: @target.show_controller,

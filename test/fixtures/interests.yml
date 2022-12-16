@@ -19,25 +19,34 @@ agaricus_campestros_interest:
   target_type: Name
   target: agaricus_campestros
 
+first_species_list_interest:
+  <<: *DEFAULTS
+  target_type: SpeciesList
+  target: first_species_list
+
 coprinus_comatus_name_tracker_interest:
   <<: *DEFAULTS
   user: rolf
   target_type: NameTracker
   target: coprinus_comatus_name_tracker
+  state: true
 
 agaricus_campestris_name_tracker_with_note_interest:
   <<: *DEFAULTS
   user: mary
   target_type: NameTracker
   target: agaricus_campestris_name_tracker_with_note
+  state: true
 
 agaricus_campestris_name_tracker_without_note_interest:
   <<: *DEFAULTS
   user: katrina
   target_type: NameTracker
   target: agaricus_campestris_name_tracker_without_note
+  state: true
 
 no_observation_name_tracker_interest:
   user: dick
   target_type: NameTracker
   target: no_observation_name_tracker
+  state: true
