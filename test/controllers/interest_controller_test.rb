@@ -56,10 +56,11 @@ class InterestControllerTest < FunctionalTestCase
     # plus his abiding interest in the coprinus_comatus_tracker.
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
+    assert_equal(coprinus_comatus_tracker, rolfs_interests.first.target)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
     assert_equal(true, rolfs_interests.second.state)
 
-    # Succeed: Turn same interest off.
+    # Succeed: Turn same observation interest off.
     login("rolf")
     get(:set_interest,
         params: { type: "Observation", id: minimal_unknown.id, state: -1 })
@@ -71,7 +72,7 @@ class InterestControllerTest < FunctionalTestCase
     assert_equal(minimal_unknown, rolfs_interests.second.target)
     assert_equal(false, rolfs_interests.second.state)
 
-    # Succeed: Turn another interest off from no interest.
+    # Succeed: Turn a name interest off from no interest.
     login("rolf")
     get(:set_interest, params: { type: "Name", id: peltigera.id, state: -1 })
     assert_flash_success
@@ -109,8 +110,13 @@ class InterestControllerTest < FunctionalTestCase
     get(:set_interest, params: { type: "Name", id: peltigera.id, state: 0 })
     assert_flash_success
     assert_equal(1, Interest.where(user_id: rolf.id).length)
+  end
+
+  def test_delete_name_tracker_interest
+    coprinus_comatus_tracker = name_trackers(:coprinus_comatus_name_tracker)
 
     # Now, delete the interest in the name_tracker, and be sure also deleted
+    login("rolf")
     get(:set_interest, params: { type: "NameTracker",
                                  id: coprinus_comatus_tracker.id,
                                  state: 0 })

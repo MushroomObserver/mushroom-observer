@@ -80,11 +80,13 @@ class InterestController < ApplicationController
     true
   end
 
+  # Polymorphic stores target_type: as class name string.
+  # find_by @target.target_type (symbol) is unreliable
   def find_or_create_interest
     interest = Interest.find_by(
-      target_type: @target.type_tag, target_id: @target.id, user_id: @user.id
+      target_type: @target.class.to_s, target_id: @target.id, user_id: @user.id
     )
-    return interest unless !interest && @state != 0
+    return interest if interest # unless !interest && @state != 0
 
     interest = Interest.new
     interest.target = @target
@@ -115,7 +117,7 @@ class InterestController < ApplicationController
     elsif !@interest.destroy
       flash_notice(:set_interest_failure.l(name: name))
     else
-      @target.destroy if @interest.target_type == "NameTracker"
+      @target.destroy if @target.type_tag == :name_tracker
       if @interest.state
         flash_notice(:set_interest_success_was_on.l(name: name))
       else
@@ -141,7 +143,7 @@ class InterestController < ApplicationController
   end
 
   def redirect_to_target_or_list_interests
-    unless @target
+    if !@target || @target.type_tag == :name_tracker
       return redirect_back_or_default(controller: "/interest",
                                       action: "list_interests")
     end
