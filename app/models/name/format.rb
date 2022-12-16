@@ -105,8 +105,7 @@ module Name::Format
   end
 
   def interests_plus_notifications
-    interests.count +
-      Notification.where(flavor: Notification.flavors[:name], obj_id: id).count
+    interests.count + Notification.where(obj_id: id).count
   end
 
   #############################################################################
