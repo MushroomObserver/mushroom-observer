@@ -115,7 +115,7 @@ class InterestController < ApplicationController
     elsif !@interest.destroy
       flash_notice(:set_interest_failure.l(name: name))
     else
-      @target.destroy if @interest.target_type == "name_tracker"
+      @target.destroy if @interest.target_type == "NameTracker"
       if @interest.state
         flash_notice(:set_interest_success_was_on.l(name: name))
       else
