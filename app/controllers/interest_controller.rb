@@ -26,9 +26,9 @@ class InterestController < ApplicationController
   def list_interests
     store_location
     @title = :list_interests_title.t
-    name_trackers = find_relevant_name_trackers
+    # name_trackers = find_relevant_name_trackers
     interests = find_relevant_interests
-    @targets = name_trackers + interests
+    @targets = interests # name_trackers +
 
     @pages = paginate_numbers(:page, 50)
     @pages.num_total = @targets.length
@@ -118,15 +118,20 @@ class InterestController < ApplicationController
     end
   end
 
+  # TODO: DELETE THE TARGET IF IT'S A NAME_TRACKER.
+  # OR BE SURE IT'S DONE IN NAME CTRLR?
   def remove_interest_from_target_and_flash_notice
     name = @target ? @target.unique_text_name : "--"
+    is_name_tracker? = (@interest.target_type == "name_tracker")
     if !@interest
       flash_notice(:set_interest_already_deleted.l(name: name))
     elsif !@interest.destroy
       flash_notice(:set_interest_failure.l(name: name))
     elsif @interest.state
+      @target.destroy if is_name_tracker?
       flash_notice(:set_interest_success_was_on.l(name: name))
     else
+      @target.destroy if is_name_tracker?
       flash_notice(:set_interest_success_was_off.l(name: name))
     end
   end

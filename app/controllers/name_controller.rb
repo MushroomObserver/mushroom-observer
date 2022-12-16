@@ -1062,8 +1062,7 @@ class NameController < ApplicationController
     @name = find_or_goto_index(Name, name_id)
     return unless @name
 
-    @name_tracker = NameTracker.
-                    find_by(obj_id: name_id, user_id: @user.id)
+    @name_tracker = NameTracker.find_by(obj_id: name_id, user_id: @user.id)
     if request.method == "POST"
       submit_tracking_form(name_id)
     else
@@ -1078,6 +1077,7 @@ class NameController < ApplicationController
     end
     if @name_tracker
       @note_template = @name_tracker.note_template
+      @interest = Interest.find_by(target: @name_tracker)
     else
       @note_template = :email_tracking_note_template.l(
         species_name: @name.real_text_name,
@@ -1087,6 +1087,7 @@ class NameController < ApplicationController
     end
   end
 
+  # TODO: CREATE INTEREST TARGETING THIS NAMETRACKER & TEST
   def submit_tracking_form(name_id)
     case params[:commit]
     when :ENABLE.l, :UPDATE.l
@@ -1096,15 +1097,19 @@ class NameController < ApplicationController
         @name_tracker = NameTracker.new(user: @user,
                                         obj_id: name_id,
                                         note_template: note_template)
+        @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
         flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
       else
         @name_tracker.note_template = note_template
+        @interest = Interest.find_by(target: @name_tracker)
         flash_notice(:email_tracking_updated_messages.t)
       end
       notify_admins_of_name_tracker(@name_tracker)
       @name_tracker.save
+      @interest.save
     when :DISABLE.l
       @name_tracker.destroy
+      @interest.destroy
       flash_notice(
         :email_tracking_no_longer_tracking.t(name: @name.display_name)
       )
