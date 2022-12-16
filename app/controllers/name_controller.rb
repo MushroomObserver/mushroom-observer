@@ -1062,7 +1062,7 @@ class NameController < ApplicationController
     @name = find_or_goto_index(Name, name_id)
     return unless @name
 
-    @notification = Notification.
+    @name_tracker = NameTracker.
                     find_by(obj_id: name_id, user_id: @user.id)
     if request.method == "POST"
       submit_tracking_form(name_id)
@@ -1076,8 +1076,8 @@ class NameController < ApplicationController
       flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name,
                                                        rank: @name.rank))
     end
-    if @notification
-      @note_template = @notification.note_template
+    if @name_tracker
+      @note_template = @name_tracker.note_template
     else
       @note_template = :email_tracking_note_template.l(
         species_name: @name.real_text_name,
@@ -1090,21 +1090,21 @@ class NameController < ApplicationController
   def submit_tracking_form(name_id)
     case params[:commit]
     when :ENABLE.l, :UPDATE.l
-      note_template = params[:notification][:note_template]
+      note_template = params[:name_tracker][:note_template]
       note_template = nil if note_template.blank?
-      if @notification.nil?
-        @notification = Notification.new(user: @user,
-                                         obj_id: name_id,
-                                         note_template: note_template)
+      if @name_tracker.nil?
+        @name_tracker = NameTracker.new(user: @user,
+                                        obj_id: name_id,
+                                        note_template: note_template)
         flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
       else
-        @notification.note_template = note_template
+        @name_tracker.note_template = note_template
         flash_notice(:email_tracking_updated_messages.t)
       end
-      notify_admins_of_notification(@notification)
-      @notification.save
+      notify_admins_of_name_tracker(@name_tracker)
+      @name_tracker.save
     when :DISABLE.l
-      @notification.destroy
+      @name_tracker.destroy
       flash_notice(
         :email_tracking_no_longer_tracking.t(name: @name.display_name)
       )
@@ -1112,15 +1112,15 @@ class NameController < ApplicationController
     redirect_with_query(action: "show_name", id: name_id)
   end
 
-  def notify_admins_of_notification(notification)
-    return if notification.note_template.blank?
-    return if !notification.new_record? &&
-              notification.note_template_before_last_save.blank?
+  def notify_admins_of_name_tracker(name_tracker)
+    return if name_tracker.note_template.blank?
+    return if !name_tracker.new_record? &&
+              name_tracker.note_template_before_last_save.blank?
 
-    user = notification.user
-    name = Name.find(notification.obj_id)
-    note = notification.note_template
-    subject = "New Notification with Template"
+    user = name_tracker.user
+    name = Name.find(name_tracker.obj_id)
+    note = name_tracker.note_template
+    subject = "New Name Tracker with Template"
     content = "User: ##{user.id} / #{user.login}\n" \
               "Name: ##{name.id} / #{name.search_name}\n" \
               "Note: [[#{note}]]"

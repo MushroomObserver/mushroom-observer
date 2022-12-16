@@ -307,6 +307,10 @@
   name_description: name description
   NAME_DESCRIPTIONS: Name Descriptions
   name_descriptions: name descriptions
+  NAME_TRACKER: Name Tracker
+  name_tracker: name tracker
+  NAME_TRACKERS: Name Trackers
+  name_trackers: name trackers
   NAMING: Proposed Name
   naming: proposed name
   NAMINGS: Proposed Names

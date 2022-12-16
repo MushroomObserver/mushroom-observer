@@ -26,9 +26,9 @@ class InterestController < ApplicationController
   def list_interests
     store_location
     @title = :list_interests_title.t
-    notifications = find_relevant_notifications
+    name_trackers = find_relevant_name_trackers
     interests = find_relevant_interests
-    @targets = notifications + interests
+    @targets = name_trackers + interests
 
     @pages = paginate_numbers(:page, 50)
     @pages.num_total = @targets.length
@@ -37,8 +37,8 @@ class InterestController < ApplicationController
 
   private
 
-  def find_relevant_notifications
-    Notification.for_user(@user).sort do |a, b|
+  def find_relevant_name_trackers
+    NameTracker.for_user(@user).sort do |a, b|
       result = a.flavor.to_s <=> b.flavor.to_s
       result = a.summary.to_s <=> b.summary.to_s if result.zero?
       result
@@ -161,8 +161,8 @@ class InterestController < ApplicationController
 
   public
 
-  def destroy_notification
-    Notification.find(params[:id].to_i).destroy
+  def destroy_name_tracker
+    NameTracker.find(params[:id].to_i).destroy
     redirect_with_query(action: "list_interests")
   end
 end

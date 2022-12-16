@@ -12,11 +12,11 @@
             <strong><%= item.summary.t %></strong>
           </td>
           <td>
-            <% if item.is_a?(Notification) %>
+            <% if item.is_a?(NameTracker) %>
               <%= link_to(:show_object.t(type: obj.type_tag),
                           obj.show_link_args) %> |
               <%= link_to(:EDIT.t, item.link_params) %> |
-              <%= link_to(:DESTROY.t, action: :destroy_notification,
+              <%= link_to(:DESTROY.t, action: :destroy_name_tracker,
                                       id: item.id) %>
             <% else %>
               <%= link_to(:show_object.t(type: obj.type_tag),

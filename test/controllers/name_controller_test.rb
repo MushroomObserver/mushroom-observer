@@ -2667,10 +2667,10 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(2, new_name.namings.size)
   end
 
-  # Prove that notification is moved to new_name
+  # Prove that name_tracker is moved to new_name
   # when old_name with notication is merged to new_name
-  def test_update_name_merge_with_notification
-    note = notifications(:no_observation_notification)
+  def test_update_name_merge_with_name_tracker
+    note = name_trackers(:no_observation_notification)
     old_name = Name.find(note.obj_id)
     new_name = names(:fungi)
     login(old_name.user.name)
@@ -2688,7 +2688,7 @@ class NameControllerTest < FunctionalTestCase
     note.reload
 
     assert_equal(new_name.id, note.obj_id,
-                 "Notification was not redirected to target of Name merger")
+                 "Name Tracker was not redirected to target of Name merger")
   end
 
   # Test that misspellings are handle right when merging.
@@ -4223,7 +4223,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # ----------------------------
-  #  Naming Notifications.
+  #  Name Trackers.
   # ----------------------------
 
   def test_email_tracking
@@ -4236,38 +4236,38 @@ class NameControllerTest < FunctionalTestCase
 
   def test_email_tracking_enable_no_note
     name = names(:conocybe_filaris)
-    count_before = Notification.count
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert_nil(notification)
+    count_before = NameTracker.count
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert_nil(name_tracker)
     params = {
       id: name.id,
       commit: :ENABLE.t,
-      notification: {
+      name_tracker: {
         note_template: ""
       }
     }
     post_requires_login(:email_tracking, params)
     # This is needed before the next find for some reason
-    count_after = Notification.count
+    count_after = NameTracker.count
     assert_equal(count_before + 1, count_after)
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert(notification)
-    assert_nil(notification.note_template)
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert(name_tracker)
+    assert_nil(name_tracker.note_template)
     assert_nil(
-      notification.calc_note(user: rolf,
+      name_tracker.calc_note(user: rolf,
                              naming: namings(:coprinus_comatus_naming))
     )
   end
 
   def test_email_tracking_enable_with_note
     name = names(:conocybe_filaris)
-    count_before = Notification.count
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert_nil(notification)
+    count_before = NameTracker.count
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert_nil(name_tracker)
     params = {
       id: name.id,
       commit: :ENABLE.t,
-      notification: {
+      name_tracker: {
         note_template: "A note about :observation from :observer"
       }
     }
@@ -4275,25 +4275,25 @@ class NameControllerTest < FunctionalTestCase
     post(:email_tracking, params: params)
     assert_redirected_to(action: :show_name, id: name.id)
     # This is needed before the next find for some reason
-    count_after = Notification.count
+    count_after = NameTracker.count
     assert_equal(count_before + 1, count_after)
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert(notification)
-    assert(notification.note_template)
-    assert(notification.calc_note(user: mary,
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert(name_tracker)
+    assert(name_tracker.note_template)
+    assert(name_tracker.calc_note(user: mary,
                                   naming: namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_update_add_note
     name = names(:coprinus_comatus)
-    count_before = Notification.count
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert(notification)
-    assert_nil(notification.note_template)
+    count_before = NameTracker.count
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert(name_tracker)
+    assert_nil(name_tracker.note_template)
     params = {
       id: name.id,
       commit: "Update",
-      notification: {
+      name_tracker: {
         note_template: "A note about :observation from :observer"
       }
     }
@@ -4301,31 +4301,31 @@ class NameControllerTest < FunctionalTestCase
     post(:email_tracking, params: params)
     assert_redirected_to(action: :show_name, id: name.id)
     # This is needed before the next find for some reason
-    count_after = Notification.count
+    count_after = NameTracker.count
     assert_equal(count_before, count_after)
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert(notification)
-    assert(notification.note_template)
-    assert(notification.calc_note(user: rolf,
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert(name_tracker)
+    assert(name_tracker.note_template)
+    assert(name_tracker.calc_note(user: rolf,
                                   naming: namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_disable
     name = names(:coprinus_comatus)
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert(notification)
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert(name_tracker)
     params = {
       id: name.id,
       commit: :DISABLE.t,
-      notification: {
+      name_tracker: {
         note_template: "A note about :observation from :observer"
       }
     }
     login("rolf")
     post(:email_tracking, params: params)
     assert_redirected_to(action: :show_name, id: name.id)
-    notification = Notification.find_by(obj_id: name.id, user_id: rolf.id)
-    assert_nil(notification)
+    name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
+    assert_nil(name_tracker)
   end
 
   # ----------------------------

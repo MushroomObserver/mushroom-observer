@@ -49,7 +49,7 @@ module Name::Merge
     end
 
     # Move over any notifications on the old name.
-    Notification.where(obj_id: old_name.id).find_each do |note|
+    NameTracker.where(obj_id: old_name.id).find_each do |note|
       note.obj_id = id
       note.save
     end

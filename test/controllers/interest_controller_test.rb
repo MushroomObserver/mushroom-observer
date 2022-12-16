@@ -109,14 +109,14 @@ class InterestControllerTest < FunctionalTestCase
     assert_equal(0, Interest.where(user_id: rolf.id).length)
   end
 
-  def test_destroy_notification
+  def test_destroy_name_tracker
     login("rolf")
-    n = notifications(:coprinus_comatus_notification)
+    n = name_trackers(:coprinus_comatus_notification)
     assert(n)
     id = n.id
-    get(:destroy_notification, params: { id: id })
+    get(:destroy_name_tracker, params: { id: id })
     assert_raises(ActiveRecord::RecordNotFound) do
-      Notification.find(id)
+      NameTracker.find(id)
     end
   end
 end
