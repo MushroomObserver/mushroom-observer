@@ -117,7 +117,7 @@ class QueuedEmailTest < UnitTestCase
 
   def test_naming_email
     QueuedEmail::NameTracking.create_email(
-      name_trackers(:agaricus_campestris_notification_with_note),
+      name_trackers(:agaricus_campestris_name_tracker_with_note),
       namings(:agaricus_campestris_naming)
     )
     assert_email(
@@ -126,8 +126,8 @@ class QueuedEmailTest < UnitTestCase
       from: mary,
       to: rolf,
       naming: namings(:agaricus_campestris_naming).id,
-      notification:
-      name_trackers(:agaricus_campestris_notification_with_note).id
+      name_tracker:
+      name_trackers(:agaricus_campestris_name_tracker_with_note).id
     )
     email = QueuedEmail.first.deliver_email
     assert(email)
@@ -188,7 +188,7 @@ class QueuedEmailTest < UnitTestCase
 
   def test_author_request_email
     QueuedEmail::AuthorRequest.create_email(mary, dick,
-      name_descriptions(:peltigera_desc), "Hi", "Please make me the author")
+                                            name_descriptions(:peltigera_desc), "Hi", "Please make me the author")
     assert_email(0,
                  flavor: "QueuedEmail::AuthorRequest",
                  from: mary,

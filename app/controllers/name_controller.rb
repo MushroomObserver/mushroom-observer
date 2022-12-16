@@ -1087,34 +1087,52 @@ class NameController < ApplicationController
     end
   end
 
-  # TODO: CREATE INTEREST TARGETING THIS NAMETRACKER & TEST
   def submit_tracking_form(name_id)
     case params[:commit]
     when :ENABLE.l, :UPDATE.l
-      note_template = params[:name_tracker][:note_template]
-      note_template = nil if note_template.blank?
-      if @name_tracker.nil?
-        @name_tracker = NameTracker.new(user: @user,
-                                        obj_id: name_id,
-                                        note_template: note_template)
-        @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
-        flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
-      else
-        @name_tracker.note_template = note_template
-        @interest = Interest.find_by(target: @name_tracker)
-        flash_notice(:email_tracking_updated_messages.t)
-      end
-      notify_admins_of_name_tracker(@name_tracker)
-      @name_tracker.save
-      @interest.save
+      create_or_update_name_tracker_and_interest(name_id)
     when :DISABLE.l
-      @name_tracker.destroy
-      @interest.destroy
-      flash_notice(
-        :email_tracking_no_longer_tracking.t(name: @name.display_name)
-      )
+      destroy_name_tracker_interest_and_flash
     end
     redirect_with_query(action: "show_name", id: name_id)
+  end
+
+  private
+
+  def create_or_update_name_tracker_and_interest(name_id)
+    @note_template = param_lookup([:name_tracker, :note_template])
+    @note_template = nil if @note_template.blank?
+    if @name_tracker.nil?
+      create_name_tracker_interest_and_flash(name_id)
+    else
+      update_name_tracker_interest_and_flash
+    end
+    notify_admins_of_name_tracker(@name_tracker)
+    @name_tracker.save
+    @interest.save
+  end
+
+  def create_name_tracker_interest_and_flash(name_id)
+    @name_tracker = NameTracker.new(user: @user,
+                                    obj_id: name_id,
+                                    note_template: @note_template)
+    @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
+    flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
+  end
+
+  def update_name_tracker_interest_and_flash
+    @name_tracker.note_template = @note_template
+    @interest = Interest.find_by(target: @name_tracker)
+    flash_notice(:email_tracking_updated_messages.t)
+  end
+
+  def destroy_name_tracker_interest_and_flash
+    @interest = Interest.find_by(target: @name_tracker)
+    @name_tracker.destroy
+    @interest.destroy
+    flash_notice(
+      :email_tracking_no_longer_tracking.t(name: @name.display_name)
+    )
   end
 
   def notify_admins_of_name_tracker(name_tracker)
@@ -1131,6 +1149,8 @@ class NameController < ApplicationController
               "Note: [[#{note}]]"
     WebmasterMailer.build(user.email, content, subject).deliver_now
   end
+
+  public
 
   def edit_lifeform
     pass_query_params

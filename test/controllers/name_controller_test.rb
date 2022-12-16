@@ -2670,7 +2670,7 @@ class NameControllerTest < FunctionalTestCase
   # Prove that name_tracker is moved to new_name
   # when old_name with notication is merged to new_name
   def test_update_name_merge_with_name_tracker
-    note = name_trackers(:no_observation_notification)
+    note = name_trackers(:no_observation_name_tracker)
     old_name = Name.find(note.obj_id)
     new_name = names(:fungi)
     login(old_name.user.name)
@@ -4237,6 +4237,7 @@ class NameControllerTest < FunctionalTestCase
   def test_email_tracking_enable_no_note
     name = names(:conocybe_filaris)
     count_before = NameTracker.count
+    int_ct_before = Interest.count
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert_nil(name_tracker)
     params = {
@@ -4249,7 +4250,9 @@ class NameControllerTest < FunctionalTestCase
     post_requires_login(:email_tracking, params)
     # This is needed before the next find for some reason
     count_after = NameTracker.count
+    int_ct_after = Interest.count
     assert_equal(count_before + 1, count_after)
+    assert_equal(int_ct_before + 1, int_ct_after)
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert(name_tracker)
     assert_nil(name_tracker.note_template)
@@ -4257,11 +4260,14 @@ class NameControllerTest < FunctionalTestCase
       name_tracker.calc_note(user: rolf,
                              naming: namings(:coprinus_comatus_naming))
     )
+    interest = Interest.find_by(target: name_tracker)
+    assert(interest)
   end
 
   def test_email_tracking_enable_with_note
     name = names(:conocybe_filaris)
     count_before = NameTracker.count
+    int_ct_before = Interest.count
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert_nil(name_tracker)
     params = {
@@ -4276,17 +4282,22 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     # This is needed before the next find for some reason
     count_after = NameTracker.count
+    int_ct_after = Interest.count
     assert_equal(count_before + 1, count_after)
+    assert_equal(int_ct_before + 1, int_ct_after)
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert(name_tracker)
     assert(name_tracker.note_template)
     assert(name_tracker.calc_note(user: mary,
                                   naming: namings(:coprinus_comatus_naming)))
+    interest = Interest.find_by(target: name_tracker)
+    assert(interest)
   end
 
   def test_email_tracking_update_add_note
     name = names(:coprinus_comatus)
     count_before = NameTracker.count
+    int_ct_before = Interest.count
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert(name_tracker)
     assert_nil(name_tracker.note_template)
@@ -4302,18 +4313,24 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     # This is needed before the next find for some reason
     count_after = NameTracker.count
+    int_ct_after = Interest.count
     assert_equal(count_before, count_after)
+    assert_equal(int_ct_before, int_ct_after)
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert(name_tracker)
     assert(name_tracker.note_template)
     assert(name_tracker.calc_note(user: rolf,
                                   naming: namings(:coprinus_comatus_naming)))
+    interest = Interest.find_by(target: name_tracker)
+    assert(interest)
   end
 
   def test_email_tracking_disable
     name = names(:coprinus_comatus)
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert(name_tracker)
+    interest = Interest.find_by(target: name_tracker)
+    assert(interest)
     params = {
       id: name.id,
       commit: :DISABLE.t,
@@ -4326,6 +4343,8 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     name_tracker = NameTracker.find_by(obj_id: name.id, user_id: rolf.id)
     assert_nil(name_tracker)
+    interest = Interest.find_by(target: name_tracker)
+    assert_nil(interest)
   end
 
   # ----------------------------

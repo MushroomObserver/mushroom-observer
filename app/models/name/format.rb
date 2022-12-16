@@ -99,14 +99,10 @@ module Name::Format
   def merge_info
     num_obs     = observations.count
     num_namings = namings.count
-    num_notify  = interests.count # interests_plus_name_trackers
+    num_notify  = interests.count # includes name_trackers
     "#{:NAME.l} ##{id}: #{real_search_name} [#obs: #{num_obs}, " \
       "#namings: #{num_namings}, #users_with_interest: #{num_notify}]"
   end
-
-  # def interests_plus_name_trackers
-  #   interests.count + NameTracker.where(obj_id: id).count
-  # end
 
   #############################################################################
 

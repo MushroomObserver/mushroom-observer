@@ -111,7 +111,7 @@ class InterestControllerTest < FunctionalTestCase
 
   def test_destroy_name_tracker
     login("rolf")
-    n = name_trackers(:coprinus_comatus_notification)
+    n = name_trackers(:coprinus_comatus_name_tracker)
     assert(n)
     id = n.id
     get(:destroy_name_tracker, params: { id: id })
