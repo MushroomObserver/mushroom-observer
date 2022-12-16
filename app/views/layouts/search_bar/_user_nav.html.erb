@@ -24,7 +24,7 @@
   <li>
     <%= link_to(
           "",
-          interest_list_interests_path,
+          interests_path,
           { class: "glyphicon glyphicon-bullhorn",
             id: "user_nav_interests_link",
             title: :app_your_interests.t,
@@ -55,7 +55,7 @@
                       species_list_species_lists_by_user_path(id: @user.id),
                       { class: "", id: "user_drop_species_lists_link" } ) %></li>
       <li><%= link_to(:app_your_interests.t,
-                      interest_list_interests_path,
+                      interests_path,
                       { class: "", id: "user_drop_interests_link" }) %></li>
       <li><%= link_to(:app_your_summary.t,
                       user_path(@user.id),

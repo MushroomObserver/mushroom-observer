@@ -93,11 +93,6 @@ ACTIONS = {
     show_original: {},
     transform_image: {}
   },
-  interest: {
-    destroy_name_tracker: {},
-    list_interests: {},
-    set_interest: {}
-  },
   location: {
     add_to_location: {},
     adjust_permissions: {},
@@ -597,6 +592,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("/info/translators_note", to: "info#translators_note")
 
+  resources :interests, only: [:index, :create, :update, :destroy]
+
+  namespace :interests do
+    get "set_interest", to: "/interests#set_interest", as: "set_interest"
+    get "destroy_name_tracker", to: "/interests#destroy_name_tracker"
+  end
+
   # ----- Javascript: utility actions  ----------------------------
   get("/javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
@@ -723,13 +725,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "glossary", new_controller: "glossary_terms",
+    old_controller: "glossary", new_controller: "/glossary_terms",
     actions: [:controller, :show, :list, :index, :show_past]
   )
 
   # ----- Herbaria: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "herbarium", new_controller: "herbaria",
+    old_controller: "herbarium", new_controller: "/herbaria",
     actions: [:show, :list, :index]
   )
 
@@ -744,6 +746,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
+  # ----- Interests: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "interest", new_controller: "/interests",
+    actions: [:index]
+  )
+
   # ----- Info: legacy action redirects ---------------------------
   get("/observer/how_to_help", to: redirect("/info/how_to_help"))
   get("/observer/how_to_use", to: redirect("/info/how_to_use"))
@@ -754,10 +762,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/textile", to: redirect("/info/textile_sandbox"))
   get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
-
-  # ----- Javascript: legacy action redirects ----------------------------
-  get("/observer/hide_thumbnail_map/:id",
-      to: redirect("/javascript/hide_thumbnail_map?id=%{id}"))
 
   # ----- Observations: legacy action redirects ----------------------------
   get("/observer/create_observation", to: redirect("/observations/new"))
@@ -799,7 +803,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Sequences: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "sequence", new_controller: "sequences",
+    old_controller: "sequence", new_controller: "/sequences",
     actions: [:show, :index]
   )
   get("/sequence/create_sequence/:id",

@@ -80,9 +80,8 @@ module InterestIconsHelper
 
   # Create link to change interest state.
   def interest_link(label, object, state) # :nodoc:
-    link_with_query(label, controller: :interest, action: :set_interest,
-                           id: object.id, type: object.class.name,
-                           state: state)
+    link_with_query(label, interests_set_interest_path(id: object.id,
+                                                       type: object.class.name, state: state))
   end
 
   # Create large icon image.

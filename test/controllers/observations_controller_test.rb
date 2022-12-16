@@ -2815,12 +2815,12 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(
       /watch\d*.png/,
-      controller: :interest, action: :set_interest,
+      controller: "/interests", action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 1
     )
     assert_image_link_in_html(
       /ignore\d*.png/,
-      controller: :interest, action: :set_interest,
+      controller: "/interests", action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: -1
     )
 
@@ -2830,12 +2830,12 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(
       /halfopen\d*.png/,
-      controller: :interest, action: :set_interest,
+      controller: "/interests", action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 0
     )
     assert_image_link_in_html(
       /ignore\d*.png/,
-      controller: :interest, action: :set_interest,
+      controller: "/interests", action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: -1
     )
 
@@ -2846,12 +2846,12 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(
       /halfopen\d*.png/,
-      controller: :interest, action: :set_interest,
+      controller: "/interests", action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 0
     )
     assert_image_link_in_html(
       /watch\d*.png/,
-      controller: :interest, action: :set_interest,
+      controller: "/interests", action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 1
     )
   end

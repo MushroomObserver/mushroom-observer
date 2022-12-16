@@ -3,16 +3,16 @@
 require("test_helper")
 
 # users interests
-class InterestControllerTest < FunctionalTestCase
+class InterestsControllerTest < FunctionalTestCase
   # Test list feature from left-hand column.
-  def test_list_interests
+  def test_index
     login("rolf")
     Interest.create(target: observations(:minimal_unknown_obs),
                     user: rolf, state: true)
     Interest.create(target: names(:agaricus_campestris), user: rolf,
                     state: true)
-    get(:list_interests)
-    assert_template("list_interests")
+    get(:index)
+    assert_template("index")
   end
 
   def test_set_interest_another_user
@@ -20,7 +20,7 @@ class InterestControllerTest < FunctionalTestCase
     get(:set_interest,
         params: {
           type: "Observation",
-          id: observations(:minimal_unknown_obs),
+          id: observations(:minimal_unknown_obs).id,
           user: mary.id
         })
     assert_flash_error

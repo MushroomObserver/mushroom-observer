@@ -869,10 +869,10 @@ class LocationControllerTest < FunctionalTestCase
     get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Location", id: albion.id, state: 1)
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Location", id: albion.id, state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
@@ -880,10 +880,10 @@ class LocationControllerTest < FunctionalTestCase
     get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Location", id: albion.id, state: 0)
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Location", id: albion.id, state: -1)
 
     # Destroy that interest, create new one with interest off.
@@ -892,10 +892,10 @@ class LocationControllerTest < FunctionalTestCase
     get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Location", id: albion.id, state: 0)
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Location", id: albion.id, state: 1)
   end
 

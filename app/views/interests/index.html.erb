@@ -22,13 +22,11 @@
             <% end %>
             <%= link_to(item.state ? :list_interests_turn_off.t :
                                       :list_interests_turn_on.t,
-                        controller: :interest, action: :set_interest,
-                        type: item.target_type, id: item.target_id,
-                        state: item.state ? -1 : 1) %> |
+                        interests_set_interest_path(type: item.target_type,
+                        id: item.target_id, state: item.state ? -1 : 1)) %> |
             <%= link_to(:DESTROY.t,
-                        controller: :interest, action: :set_interest,
-                        type: item.target_type, id: item.target_id,
-                        state: 0) %>
+                        interests_set_interest_path(type: item.target_type,
+                        id: item.target_id, state: 0)) %>
           </td>
         </tr>
       <% end %>
