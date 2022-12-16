@@ -27,6 +27,10 @@ class InterestTest < UnitTestCase
     assert_equal(1, Interest.where_target(names(:agaricus_campestris)).length)
     assert_equal(0, Interest.where_target(names(:coprinus_comatus)).length)
 
+    assert_equal("NameTracker", Interest.where(user: rolf).first.target_type)
+    assert_equal("NameTracker", Interest.where(user: mary).first.target_type)
+    assert_equal("NameTracker", Interest.where(user: dick).first.target_type)
+    assert_equal("NameTracker", Interest.where(user: katrina).first.target_type)
     assert_equal(2, Interest.where(user: rolf).length)
     assert_equal(2, Interest.where(user: mary).length)
     assert_equal(2, Interest.where(user: dick).length)

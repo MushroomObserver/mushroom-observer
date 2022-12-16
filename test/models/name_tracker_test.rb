@@ -8,7 +8,9 @@ class NameTrackerTest < UnitTestCase
     name_tracker = name_trackers(:coprinus_comatus_name_tracker)
     obj = Name.find(name_tracker.obj_id)
     assert_match(obj.display_name, name_tracker.summary)
+
     interest = Interest.find_by(target: name_tracker)
+    assert_equal("NameTracker", interest.target_type)
     assert_equal(name_tracker.id, interest.target_id)
   end
 
