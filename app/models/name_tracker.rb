@@ -66,6 +66,7 @@ class NameTracker < AbstractModel
     "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
   end
   alias text_name summary
+  alias unique_text_name summary
 
   # Returns hash of options to pass into link_to to link to edit action:
   #
