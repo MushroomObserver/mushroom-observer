@@ -96,17 +96,11 @@ class Interest < AbstractModel
   #   "Ignoring Location: Albion, California, USA"
   #
   def summary
-    if target
-      subject = case target_type
-                when "NameTracker"
-                  Name.find(target.obj_id)
-                else
-                  target
-                end
-    end
+    return target.summary if target && (target_type == "NameTracker")
+
     (state ? :WATCHING.l : :IGNORING.l) + " " +
       target_type.underscore.to_sym.l + ": " +
-      (target ? subject.unique_format_name : "--")
+      (target ? target.unique_format_name : "--")
   end
   alias text_name summary
 
