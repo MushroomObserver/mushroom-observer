@@ -56,14 +56,27 @@ class Interest < AbstractModel
   scope :for_user,
         ->(user) { where(user: user) }
 
+  ALL_INTEREST_TYPES = %w[
+    Location
+    Name
+    NameTracker
+    Observation
+    Project
+    SpeciesList
+  ].freeze
+
+  validates :target_type, inclusion: { in: ALL_INTEREST_TYPES }
+
   # Returns Array of all models (Classes) which take interests.
   def self.all_types
-    [Location, Name, NameTracker, Observation, Project, SpeciesList]
+    types = ALL_INTEREST_TYPES.dup
+    types.map(&:constantize)
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_type_tags
-    [:location, :name, :name_tracker, :observation, :project, :species_list]
+    types = ALL_INTEREST_TYPES.dup
+    types.map { |t| t.underscore.to_sym }
   end
 
   # Find all Interests associated with a given object.  This should really be
