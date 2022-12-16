@@ -190,7 +190,7 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_naming_observer_email
     naming = namings(:agaricus_campestris_naming)
-    notification = notifications(:agaricus_campestris_notification_with_note)
+    notification = name_trackers(:agaricus_campestris_notification_with_note)
     run_mail_test("naming_for_observer", rolf) do
       NamingObserverMailer.build(rolf, naming, notification).deliver_now
     end
