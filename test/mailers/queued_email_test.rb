@@ -187,8 +187,10 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_author_request_email
-    QueuedEmail::AuthorRequest.create_email(mary, dick,
-                                            name_descriptions(:peltigera_desc), "Hi", "Please make me the author")
+    QueuedEmail::AuthorRequest.create_email(
+      mary, dick, name_descriptions(:peltigera_desc),
+      "Hi", "Please make me the author"
+    )
     assert_email(0,
                  flavor: "QueuedEmail::AuthorRequest",
                  from: mary,

@@ -51,11 +51,12 @@ class InterestControllerTest < FunctionalTestCase
         })
     assert_flash_success
 
-    # Make sure rolf now has one Interest: interested in minimal_unknown.
+    # Make sure rolf now has two Interests: interested in minimal_unknown,
+    # plus his abiding interest in the coprinus_comatus_name_tracker.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(1, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.target)
-    assert_equal(true, rolfs_interests.first.state)
+    assert_equal(2, rolfs_interests.length)
+    assert_equal(minimal_unknown, rolfs_interests.second.target)
+    assert_equal(true, rolfs_interests.second.state)
 
     # Succeed: Turn same interest off.
     login("rolf")
@@ -63,22 +64,22 @@ class InterestControllerTest < FunctionalTestCase
         params: { type: "Observation", id: minimal_unknown.id, state: -1 })
     assert_flash_success
 
-    # Make sure rolf now has one Interest: NOT interested in minimal_unknown.
+    # Make sure rolf now has two Interests: NOT interested in minimal_unknown.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(1, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.target)
-    assert_equal(false, rolfs_interests.first.state)
+    assert_equal(2, rolfs_interests.length)
+    assert_equal(minimal_unknown, rolfs_interests.second.target)
+    assert_equal(false, rolfs_interests.second.state)
 
     # Succeed: Turn another interest off from no interest.
     login("rolf")
     get(:set_interest, params: { type: "Name", id: peltigera.id, state: -1 })
     assert_flash_success
 
-    # Make sure rolf now has two Interests.
+    # Make sure rolf now has three Interests.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(2, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.target)
-    assert_equal(false, rolfs_interests.first.state)
+    assert_equal(3, rolfs_interests.length)
+    assert_equal(minimal_unknown, rolfs_interests.second.target)
+    assert_equal(false, rolfs_interests.second.state)
     assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
 
@@ -88,7 +89,7 @@ class InterestControllerTest < FunctionalTestCase
     get(:set_interest,
         params: { type: "Observation", id: detailed_unknown.id, state: 0 })
     assert_flash_success
-    assert_equal(2, Interest.where(user_id: rolf.id).length)
+    assert_equal(3, Interest.where(user_id: rolf.id).length)
 
     # Succeed: Delete first interest now.
     login("rolf")
@@ -96,9 +97,9 @@ class InterestControllerTest < FunctionalTestCase
         params: { type: "Observation", id: minimal_unknown.id, state: 0 })
     assert_flash_success
 
-    # Make sure rolf now has one Interest: NOT interested in peltigera.
+    # Make sure rolf now has twae Intereste: NOT interested in peltigera.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(1, rolfs_interests.length)
+    assert_equal(2, rolfs_interests.length)
     assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
 
@@ -106,7 +107,7 @@ class InterestControllerTest < FunctionalTestCase
     login("rolf")
     get(:set_interest, params: { type: "Name", id: peltigera.id, state: 0 })
     assert_flash_success
-    assert_equal(0, Interest.where(user_id: rolf.id).length)
+    assert_equal(1, Interest.where(user_id: rolf.id).length)
   end
 
   def test_destroy_name_tracker

@@ -9,7 +9,7 @@ class NameTrackerTest < UnitTestCase
     obj = Name.find(name_tracker.obj_id)
     assert_match(obj.display_name, name_tracker.summary)
     interest = Interest.find_by(target: name_tracker)
-    assert_match(interest.target_id, name_tracker.id)
+    assert_equal(name_tracker.id, interest.target_id)
   end
 
   def test_no_user

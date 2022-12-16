@@ -58,12 +58,12 @@ class Interest < AbstractModel
 
   # Returns Array of all models (Classes) which take interests.
   def self.all_types
-    [Location, Name, Observation, Project, SpeciesList]
+    [Location, Name, NameTracker, Observation, Project, SpeciesList]
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_type_tags
-    [:location, :name, :observation, :project, :species_list]
+    [:location, :name, :name_tracker, :observation, :project, :species_list]
   end
 
   # Find all Interests associated with a given object.  This should really be
@@ -77,15 +77,23 @@ class Interest < AbstractModel
     where(target_type: obj.class.to_s, target_id: obj.id)
   end
 
-  # To be compatible with Notification need to have summary string:
+  # To be compatible with NameTracker need to have summary string:
   #
   #   "Watching Observation: Amanita virosa"
   #   "Ignoring Location: Albion, California, USA"
   #
   def summary
+    if target
+      subject = case target_type
+                when "NameTracker"
+                  Name.find(target.obj_id)
+                else
+                  target
+                end
+    end
     (state ? :WATCHING.l : :IGNORING.l) + " " +
       target_type.underscore.to_sym.l + ": " +
-      (target ? target.unique_format_name : "--")
+      (target ? subject.unique_format_name : "--")
   end
   alias text_name summary
 
