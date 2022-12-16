@@ -1,6 +1,6 @@
 class RenameNotificationsToNameTrackers < ActiveRecord::Migration[6.1]
   def self.up
-    rename_table :notifications :name_trackers
+    rename_table :notifications, :name_trackers
     NameTracker.find_each do |n_t|
       Interest.create!({
         target_type: "name_tracker",
@@ -12,7 +12,7 @@ class RenameNotificationsToNameTrackers < ActiveRecord::Migration[6.1]
     end
   end
   def self.down
-    rename_table :name_trackers :notifications
+    rename_table :name_trackers, :notifications
     Interest.where(target_type: "name_tracker").delete_all
   end
 end
