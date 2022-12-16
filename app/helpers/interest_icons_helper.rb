@@ -80,7 +80,7 @@ module InterestIconsHelper
 
   # Create link to change interest state.
   def interest_link(label, object, state) # :nodoc:
-    link_with_query(label, interests_set_interest_path(id: object.id,
+    link_with_query(label, set_interest_path(id: object.id,
                                                        type: object.class.name, state: state))
   end
 

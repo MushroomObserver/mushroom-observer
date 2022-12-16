@@ -124,15 +124,4 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(0, Interest.where(user_id: rolf.id).length)
     assert_equal(0, NameTracker.where(user_id: rolf.id).length)
   end
-
-  def test_destroy_name_tracker
-    login("rolf")
-    n = name_trackers(:coprinus_comatus_name_tracker)
-    assert(n)
-    id = n.id
-    get(:destroy_name_tracker, params: { id: id })
-    assert_raises(ActiveRecord::RecordNotFound) do
-      NameTracker.find(id)
-    end
-  end
 end

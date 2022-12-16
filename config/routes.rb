@@ -593,11 +593,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/info/translators_note", to: "info#translators_note")
 
   resources :interests, only: [:index, :create, :update, :destroy]
-
-  namespace :interests do
-    get "set_interest", to: "/interests#set_interest", as: "set_interest"
-    get "destroy_name_tracker", to: "/interests#destroy_name_tracker"
-  end
+  get "/interests/set_interest", to: "interests#set_interest",
+                                 as: "set_interest"
 
   # ----- Javascript: utility actions  ----------------------------
   get("/javascript/turn_javascript_on", to: "javascript#turn_javascript_on")

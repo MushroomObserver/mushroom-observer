@@ -226,13 +226,4 @@ class InterestsController < ApplicationController
                       action: @target.show_action, id: @target.id)
     )
   end
-
-  public
-
-  # Not called anywhere. Email tracking form destroys name_tracker directly,
-  # as does #destroy action above.
-  def destroy_name_tracker
-    NameTracker.find(params[:id].to_i).destroy
-    redirect_with_query(action: "index")
-  end
 end
