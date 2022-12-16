@@ -128,14 +128,15 @@ class InterestsController < ApplicationController
   # Convenience for "set_interests"
   def find_or_create_interest
     interest = find_interest
-    return interest unless !interest && @state != 0
+    return interest if interest
 
     create_interest
   end
 
   # For :update and :destroy
-  # AR stores polymorphic target_type as the class name string!
-  # find_by @target.target_type (a symbol) is unreliable!
+  # NOTE: AR stores polymorphic target_type as the string "ClassName"!
+  # find_by(target_type: @target.type_tag) (:name_tracker) does not work when
+  # target_type is multi-word, PascalCase, for whatever reason.
   def find_interest
     Interest.find_by(
       target_type: @target.class.to_s, target_id: @target.id, user_id: @user.id
