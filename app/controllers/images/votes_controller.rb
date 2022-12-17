@@ -5,6 +5,7 @@ module Images
     before_action :login_required
 
     # Change user's vote and go to next image.
+    # Images::VotesController#update
     def cast_vote
       image = find_or_goto_index(Image, params[:id].to_s)
       return unless image
@@ -13,7 +14,7 @@ module Images
       if params[:next]
         redirect_to_next_object(:next, Image, params[:id].to_s)
       else
-        redirect_with_query(action: "show_image", id: params[:id])
+        redirect_with_query(image_path(id: params[:id]))
       end
     end
   end
