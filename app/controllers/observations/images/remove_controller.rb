@@ -10,7 +10,10 @@
 module Observations::Images
   class RemoveController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
+    before_action :disable_link_prefetching
 
+    # Maybe use shared form (but there's nothing to the "form")
     # Form used to remove one or more images from an observation (not destroy!)
     # Linked from: observations/show
     # Inputs:
@@ -18,34 +21,32 @@ module Observations::Images
     #   params[:selected][image_id]  (value of "yes" means delete)
     # Outputs: @observation
     # Redirects to observations/show.
-    def remove_images
-      remove_images_from_object(Observation, params)
+    def new # remove_images
+      @object = find_or_goto_index(Observation, params[:id].to_s)
+      return unless @object
+
+      return if check_permission!(@object)
+
+      redirect_with_query(permanent_observation_path(@object.id))
     end
 
-    def remove_images_for_glossary_term
-      remove_images_from_object(GlossaryTerm, params)
+    def create
+      @object = find_or_goto_index(Observation, params[:id].to_s)
+      return unless @object
+
+      unless check_permission!(@object)
+        return redirect_with_query(permanent_observation_path(@object.id))
+      end
+      return unless (images = params[:selected])
+
+      remove_images_from_object(images)
     end
 
     ############################################################################
 
     private
 
-    def remove_images_from_object(target_class, params)
-      @object = find_or_goto_index(target_class, params[:id].to_s)
-      return unless @object
-
-      unless check_permission!(@object)
-        return redirect_with_query(controller: target_class.show_controller,
-                                   action: target_class.show_action,
-                                   id: @object.id)
-      end
-
-      return unless request.method == "POST" && (images = params[:selected])
-
-      create_removal(images, target_class)
-    end
-
-    def create_removal(images, target_class)
+    def remove_images_from_object(images)
       images.each do |image_id, do_it|
         next unless do_it == "yes"
 
@@ -55,8 +56,7 @@ module Observations::Images
         image.log_remove_from(@object)
         flash_notice(:runtime_image_remove_success.t(id: image_id))
       end
-      redirect_with_query(controller: target_class.show_controller,
-                          action: target_class.show_action, id: @object.id)
+      redirect_with_query(permanent_observation_path(@object.id))
     end
   end
 end
