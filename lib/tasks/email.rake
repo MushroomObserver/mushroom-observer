@@ -3,7 +3,7 @@
 namespace :email do
   desc "List queued emails"
   task(list: :environment) do
-    print "#{MO.http_domain}, #{::Rails.env}\n"
+    print "#{MO.http_domain}, #{Rails.env}\n"
     QueuedEmail.all.includes(:queued_email_integers,
                              :queued_email_note,
                              :queued_email_strings, :user).each(&:dump)
@@ -11,7 +11,7 @@ namespace :email do
 
   desc "Send queued emails"
   task(send: :environment) do
-    require "#{::Rails.root}/app/extensions/extensions.rb"
+    require "#{Rails.root}/app/extensions/extensions.rb"
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     QueuedEmail.all.each do |e|
@@ -23,7 +23,7 @@ namespace :email do
         # This shouldn't happen, but just in case, better safe...)
         if e.to_user
           result = nil
-          File.open("#{::Rails.root}/log/email-low-level.log", "a") do |fh|
+          File.open("#{Rails.root}/log/email-low-level.log", "a") do |fh|
             fh.puts("sending #{e.id.inspect}...")
             result = e.send_email
             fh.puts(

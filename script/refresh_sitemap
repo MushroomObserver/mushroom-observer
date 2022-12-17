@@ -39,10 +39,10 @@ DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
 INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html".freeze
 
-ROBOTS_FILE     = "#{::Rails.root}/public/robots.txt".freeze
-SITEMAP_FILE    = "#{::Rails.root}/public/sitemap/NAME.xml".freeze
-INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html".freeze
-CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
+ROBOTS_FILE     = "#{Rails.root}/public/robots.txt".freeze
+SITEMAP_FILE    = "#{Rails.root}/public/sitemap/NAME.xml".freeze
+INDEX_FILE      = "#{Rails.root}/public/sitemap/NAME.html".freeze
+CONTROLLER_FILE = "#{Rails.root}/app/controllers/NAME_controller.rb".freeze
 
 # Values: [ table_name, comments.target_type, show_URL ]
 OBJECT_TYPES = [
