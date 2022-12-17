@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_25_111600) do
+ActiveRecord::Schema.define(version: 2022_12_15_065834) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -426,7 +426,6 @@ ActiveRecord::Schema.define(version: 2022_11_25_111600) do
 
   create_table "notifications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
-    t.integer "flavor"
     t.integer "obj_id"
     t.text "note_template"
     t.datetime "updated_at"

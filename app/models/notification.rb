@@ -8,14 +8,9 @@
 #  id::               Locally unique numerical id, starting at 1
 #  updated_at::       Date/time it was last updated
 #  user::             User who created it
-#  flavor::           Type of Notification
 #  obj_id::           Id of principal object
 #  note_template::   Template for an email, context depends on Notification type
 #  require_specimen:: Require observation to have a specimen?
-#
-#  == Class methods
-#
-#  all_flavors::       List of Notifcation types available.
 #
 #  == Instance methods
 #
@@ -32,20 +27,8 @@
 class Notification < AbstractModel
   belongs_to :user
 
-  # Do not change the integer associated with a value
-  enum flavor:
-       {
-         name: 1,
-         observation: 2,
-         user: 3,
-         all_comments: 4
-       },
-       _suffix: :flavor
-
-  # List of all available flavors (strings).
-  def self.all_flavors
-    ["name"]
-  end
+  scope :for_user,
+        ->(user) { where(user: user) }
 
   # Create body of the email we're about to send.  Each flavor requires a
   # different set of arguments:
@@ -55,13 +38,13 @@ class Notification < AbstractModel
   #   naming::    Naming that triggered this email.
   #
   def calc_note(args)
-    return nil unless (template = note_template) && flavor == "name"
+    return nil unless (template = note_template)
 
     tracker  = user
     observer = args[:user]
     naming   = args[:naming]
-    raise("Missing 'user' argument for #{flavor} notification.") unless observer
-    raise("Missing 'naming' argument for #{flavor} notification.") unless naming
+    raise("Missing 'user' argument for name notification.") unless observer
+    raise("Missing 'naming' argument for name notification.") unless naming
 
     template.
       gsub(":observer", observer.login).
@@ -77,16 +60,12 @@ class Notification < AbstractModel
   # name::   Name that User is tracking.
   #
   def target
-    @target ||= flavor == "name" ? Name.find(obj_id) : nil
+    @target ||= Name.find(obj_id)
   end
 
   # Return a string summarizing what this Notification is about.
   def summary
-    if flavor == "name"
-      "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
-    else
-      "Unrecognized notification flavor"
-    end
+    "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
   end
   alias text_name summary
 
@@ -96,11 +75,9 @@ class Notification < AbstractModel
   #
   def link_params
     result = {}
-    if flavor == "name"
-      result[:controller] = :name
-      result[:action] = :email_tracking
-      result[:id] = obj_id
-    end
+    result[:controller] = :name
+    result[:action] = :email_tracking
+    result[:id] = obj_id
     result
   end
 

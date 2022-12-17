@@ -41,7 +41,7 @@
 
 <%= render(partial: "location", object: @location) %>
 
-<%= render(partial: "comment/show_comments",
+<%= render(partial: "comments/comments_for_object",
             locals: {object: @location, controls: true, limit: 2}) %>
 
 <div class="container-text">
@@ -49,7 +49,7 @@
     <hr/>
     <%= show_embedded_description_title(@description, @location) %>
     <%= render(partial: "location_description", object: @description) %>
-    <%= render(partial: "comment/show_comments",
+    <%= render(partial: "comments/comments_for_object",
                 locals: {object: @description, controls: true, limit: 2}) %>
     <hr/>
   <% end %>

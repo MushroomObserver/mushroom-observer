@@ -20,7 +20,7 @@
 
 <%= render(partial: "name_description", object: @description,
            locals: { review: true }) %>
-<%= render(partial: "comment/show_comments",
+<%= render(partial: "comments/comments_for_object",
            locals: { object: @description, controls: true, limit: 10 }
           ) if false%>
 <%= show_object_footer(@description) %>

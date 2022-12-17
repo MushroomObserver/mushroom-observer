@@ -1062,9 +1062,8 @@ class NameController < ApplicationController
     @name = find_or_goto_index(Name, name_id)
     return unless @name
 
-    flavor = Notification.flavors[:name]
     @notification = Notification.
-                    find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
+                    find_by(obj_id: name_id, user_id: @user.id)
     if request.method == "POST"
       submit_tracking_form(name_id)
     else
@@ -1094,8 +1093,7 @@ class NameController < ApplicationController
       note_template = params[:notification][:note_template]
       note_template = nil if note_template.blank?
       if @notification.nil?
-        @notification = Notification.new(flavor: "name",
-                                         user: @user,
+        @notification = Notification.new(user: @user,
                                          obj_id: name_id,
                                          note_template: note_template)
         flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))

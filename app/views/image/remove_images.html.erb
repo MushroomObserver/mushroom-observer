@@ -1,5 +1,11 @@
-<% @container = :full %>
+<%
+# NOTE: Move template to observations/images/edit
+#       Observations::ImagesController#edit
+# Move partial to shared/remove_images, send target_class as local
+
+@container = :full
+%>
 
 <%= render(partial: "remove_images",
-            locals: {target_class: Observation,
-                    form_action: :remove_images}) %>
+            locals: { target_class: Observation,
+                      form_action: :remove_images }) %>

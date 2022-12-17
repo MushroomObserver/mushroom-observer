@@ -643,7 +643,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("observations/_show_name_info")
     assert_template("observations/_show_observation")
     assert_template("naming/_show")
-    assert_template("comment/_show_comments")
+    assert_template("comments/_comments_for_object")
     assert_template("observations/_show_thumbnail_map")
     assert_template("observations/_show_images")
   end
@@ -1462,8 +1462,7 @@ class ObservationsControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    flavor = Notification.flavors[:name]
-    notifications = Notification.where(flavor: flavor, obj_id: name.id)
+    notifications = Notification.where(obj_id: name.id)
     assert_equal(2, notifications.length,
                  "Should be 2 name notifications for name ##{name.id}")
     assert(notifications.map(&:user).include?(mary))

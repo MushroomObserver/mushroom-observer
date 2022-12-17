@@ -49,7 +49,7 @@
                  locals: { observation: @observation }) %>
     <% end %>
 
-    <%= render(partial: "comment/show_comments",
+    <%= render(partial: "comments/comments_for_object",
                locals: { object: @observation, controls: true, limit: nil }) %>
   </div>
 
