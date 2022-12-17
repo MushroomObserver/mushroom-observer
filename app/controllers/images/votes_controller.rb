@@ -4,7 +4,7 @@ module Images
   class VotesController < ApplicationController
     before_action :login_required
 
-    # Change user's vote and go to next image.
+    # Change user's vote (on anyone's image) and go to next image.
     # Images::VotesController#update
     def cast_vote
       image = find_or_goto_index(Image, params[:id].to_s)

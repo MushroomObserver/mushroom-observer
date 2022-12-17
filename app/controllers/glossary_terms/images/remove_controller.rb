@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-module Images
+# NOTE: Move to new namespaced controllers
+#
+# Observations::Images::RemoveController#edit #update
+# GlossaryTerms::Images::RemoveController#edit #update
+# Move tests from images_controller_test
+# No need to remove_images from Account profile: reuse_image removes image
+
+module GlossaryTerms::Images
   class RemoveController < ApplicationController
     before_action :login_required
-
-    # NOTE: Move to new namespaced controllers
-    #
-    # Observations::ImagesController#edit #update
-    # GlossaryTerms::ImagesController#edit #update
-    # Move tests from images_controller_test
-    # No need to remove_images from Account profile: reuse_image removes image
 
     # Form used to remove one or more images from an observation (not destroy!)
     # Linked from: observations/show

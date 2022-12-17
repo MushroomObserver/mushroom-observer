@@ -4,7 +4,7 @@ module Images
   class TransformController < ApplicationController
     before_action :login_required
 
-    # Used by show_image to rotate and flip image.
+    # Used by show_image to rotate and flip image. Currently GET
     def transform_image
       pass_query_params
       image = find_or_goto_index(Image, params[:id].to_s)

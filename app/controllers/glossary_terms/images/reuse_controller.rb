@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
-module Images
+# NOTE: Move to new namespaced controllers
+#
+# Observations::Images::ReuseController#edit #update
+# GlossaryTerms::Images::ReuseController#edit #update
+# Account::Profile::ImagesController#edit #update
+# Move tests from images_controller_test
+# No need to remove_images from Account profile: reuse_image removes image
+
+module GlossaryTerms::Images
   class ReuseController < ApplicationController
     before_action :login_required
 
