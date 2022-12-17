@@ -15,7 +15,7 @@ class CollectionNumbersController < ApplicationController
   before_action :store_location, except: [:index, :destroy]
 
   def index # rubocop:disable Metrics/AbcSize
-    if params[:pattern].present? # rubocop:disable Style/GuardClause
+    if params[:pattern].present?
       collection_number_search and return
     elsif params[:observation_id].present?
       observation_index and return
