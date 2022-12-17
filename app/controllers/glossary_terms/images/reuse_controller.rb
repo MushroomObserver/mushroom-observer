@@ -16,28 +16,16 @@ module GlossaryTerms::Images
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
-    def new # reuse_image params[:mode] = observation
+    def new # reuse_image_for_glossary_term
       # Stop right here if they're trying to add an image to obs w/o permission
-      @observation = GlossaryTerm.safe_find(params[:obs_id])
-      # check_observation_permission! plus return
-      unless check_permission!(@observation)
-        return redirect_with_query(
-          permanent_observation_path(id: @observation.id)
-        )
-      end
+      @object = GlossaryTerm.safe_find(params[:obs_id])
 
       serve_reuse_form(params)
     end
 
     def create
       # Stop right here if they're trying to add an image to obs w/o permission
-      @observation = GlossaryTerm.safe_find(params[:obs_id])
-      # check_observation_permission! plus return
-      unless check_permission!(@observation)
-        return redirect_with_query(
-          permanent_observation_path(id: @observation.id)
-        )
-      end
+      @object = GlossaryTerm.safe_find(params[:obs_id])
 
       image = Image.safe_find(params[:img_id])
       unless image
@@ -75,8 +63,6 @@ module GlossaryTerms::Images
     end
 
     def reuse_image_for_glossary_term(image = nil)
-      @object = GlossaryTerm.safe_find(params[:id])
-      image ||= look_for_image(request.method, params)
       if image &&
          @object.add_image(image) &&
          @object.save
