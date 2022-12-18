@@ -38,7 +38,7 @@ class Pivotal
       @votes = []
       @description = parse_description(data["description"])
       @labels =
-        data["labels"] == [] ? ["other"] : data["labels"].map { |l| l["name"] }
+        data["labels"] == [] ? ["other"] : data["labels"].pluck("name")
       @comments = if data["comments"]
                     data["comments"].map { |c| Pivotal::Comment.new(c) }
                   else

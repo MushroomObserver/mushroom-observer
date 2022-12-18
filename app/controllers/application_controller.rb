@@ -637,7 +637,7 @@ class ApplicationController < ActionController::Base
 
     locale_weights = map_locales_to_weights(accepted_locales)
     # Sort by decreasing weights.
-    result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
+    result = locale_weights.sort { |a, b| b[1] <=> a[1] }.pluck(0)
     logger.debug("[globalite] client accepted locales: #{result.join(", ")}")
     result
   end
