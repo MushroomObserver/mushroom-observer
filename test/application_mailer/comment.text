@@ -21,7 +21,7 @@ Here are some handy links:
 
 Show this observation: https://mushroomobserver.org/observations/<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
 Post a comment: https://mushroomobserver.org/comments/new?target=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation
-I'm not interested in this observation: https://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+I'm not interested in this observation: https://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
 Stop sending me email like this: https://mushroomobserver.org/account/no_email/<%= ActiveRecord::FixtureSet.identify(:mary) %>?type=comments_owner
 Change your preferences: https://mushroomobserver.org/account/preferences/edit
 Latest changes at Mushroom Observer: https://mushroomobserver.org
