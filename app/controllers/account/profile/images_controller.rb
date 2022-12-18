@@ -12,28 +12,15 @@ module Account::Profile
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
-    def new # reuse_image params[:mode] = observation
-      # Stop right here if they're trying to add an image to obs w/o permission
-      @observation = Observation.safe_find(params[:obs_id])
-      # check_observation_permission! plus return
-      unless check_permission!(@observation)
-        return redirect_with_query(
-          permanent_observation_path(id: @observation.id)
-        )
-      end
+    # reuse_image params[:mode] = profile
+    def new
+      return unless User.safe_find(params[:obj_id]) == User.current
 
       serve_reuse_form(params)
     end
 
     def create
-      # Stop right here if they're trying to add an image to obs w/o permission
-      @observation = Observation.safe_find(params[:obs_id])
-      # check_observation_permission! plus return
-      unless check_permission!(@observation)
-        return redirect_with_query(
-          permanent_observation_path(id: @observation.id)
-        )
-      end
+      return unless User.safe_find(params[:obj_id]) == User.current
 
       image = Image.safe_find(params[:img_id])
       unless image

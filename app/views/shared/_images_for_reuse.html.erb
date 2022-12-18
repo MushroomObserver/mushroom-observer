@@ -1,4 +1,13 @@
-<%= form_with(url: add_query_param(url_args)) do |form|%>
+<%
+# Need to pass a param to thumbnail that generates a post_link to :create
+# and passes the form action path.
+
+# Change this from single form, to each box is form with method: :post
+# plus the form at the top with text input
+
+# Note this uses a specialized matrix box here, not using the general partial.
+%>
+<%= form_with(url: form_action) do |form|%>
   <div class="container-text">
     <div class="form-group form-inline">
       <%= form.label(:img_id, "#{:image_reuse_id.t}:") %>
@@ -14,7 +23,8 @@
     <div class="form-group mt-3">
       <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
                             :image_reuse_all_users.t),
-                          url_args.merge(all_users: @all_users ? 0 : 1),
+                          form_action.merge(action: :new,
+                                            all_users: @all_users ? 0 : 1),
                           class: "btn btn-default") %>
     </div>
   </div><!--.container-text-->
@@ -23,12 +33,13 @@
     <ul class="row list-unstyled mt-3">
 
       <%= render(layout: "shared/matrix_table",
-                locals: {objects: @objects}) do |image| %>
+                 locals: { objects: @objects }) do |image| %>
         <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
           <div class="panel panel-default">
             <div class="panel-body">
               <%= thumbnail(image,
-                            link: url_args.merge(img_id: image.id),
+                            # add special link-or-button param here
+                            link: form_action.merge(img_id: image.id),
                             original: true) %>
             </div>
           </div>

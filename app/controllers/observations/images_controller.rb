@@ -1,40 +1,31 @@
 # frozen_string_literal: true
 
-# NOTE: The reuse_image and remove_image actions have specialized controls
-# for each potential object they're attached to.
-# They also seem like they'd be more at home if moved to new controllers:
-# Account::Images::ReuseController#new #create
-# Observations::Images::ReuseController#new #create
-# GlossaryTerms::Images::ReuseController#new #create
-# Move tests from images_controller_test
-#
 # Clicking on an image currently fires a GET to these actions... because it
 # comes from a link made by thumbnail_helper#thumbnail(link: url_args)
-# with CRUD refactor, maybe change that to fire a POST somehow?
+# with CRUD refactor, change thumbnail helper to fire a POST somehow?
 
-module Observations::Images
-  class ReuseController < ApplicationController
+module Observations
+  class ImagesController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
-    def new # reuse_image params[:mode] = observation
-      # Stop right here if they're trying to add an image to obs w/o permission
+    # reuse_image params[:mode] = observation
+    def new
       @observation = Observation.safe_find(params[:obs_id])
-      # check_observation_permission! plus return
+      # Stop right here if they're trying to add an image to obs w/o permission
       unless check_permission!(@observation)
         return redirect_with_query(
           permanent_observation_path(id: @observation.id)
         )
       end
 
-      serve_reuse_form(params)
+      serve_image_reuse_selections(params)
     end
 
     def create
+      @observation = Observation.safe_find(params[:obj_id])
       # Stop right here if they're trying to add an image to obs w/o permission
-      @observation = Observation.safe_find(params[:obs_id])
-      # check_observation_permission! plus return
       unless check_permission!(@observation)
         return redirect_with_query(
           permanent_observation_path(id: @observation.id)
@@ -44,7 +35,7 @@ module Observations::Images
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        return serve_reuse_form(params)
+        return serve_image_reuse_selections(params)
       end
 
       reuse_image_for_observation(image)
@@ -54,10 +45,10 @@ module Observations::Images
 
     ############################################################################
 
-    # The actual grid of images (partial) is basically a shared layout.
-    # CRUD refactor could make each image link POST to create or delete.
+    # The actual grid of images (partial) is a shared layout.
+    # CRUD refactor, each image has a link that POSTs to :create.
     #
-    def serve_reuse_form(params)
+    def serve_image_reuse_selections(params)
       # params[:all_users] is a query param for rendering form images (possible
       # selections), not a form param for the submit.
       # It's toggled by a button on the page "Include other users' images"
@@ -76,8 +67,8 @@ module Observations::Images
                                 include: [:user, { observations: :name }])
     end
 
+    # Add an image to observation.
     def reuse_image_for_observation(image)
-      # Add image to observation.
       @observation.add_image(image)
       image.log_reuse_for(@observation)
       if @observation.gps_hidden
@@ -87,13 +78,55 @@ module Observations::Images
       redirect_with_query(permanent_observation_path(id: @observation.id))
     end
 
-    def look_for_image(method, params)
-      return nil unless (method == "POST") || params[:img_id].present?
+    public
 
-      unless (img = Image.safe_find(params[:img_id]))
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+    ############################################################################
+
+    # REMOVE IMAGES: Maybe use shared form (but there's nothing to the "form")
+    # Form used to remove one or more images from an observation (not destroy!)
+    # Linked from: observations/show
+    # Inputs:
+    #   params[:obj_id]              (observation)
+    #   params[:selected][image_id]  (value of "yes" means remove)
+    # Outputs: @observation
+    # Redirects to observations/show.
+    # remove_images
+    def edit
+      @object = find_or_goto_index(Observation, params[:obj_id].to_s)
+      return unless @object
+
+      return unless check_permission!(@object)
+
+      redirect_with_query(permanent_observation_path(@object.id))
+    end
+
+    def update
+      @object = find_or_goto_index(Observation, params[:obj_id].to_s)
+      return unless @object
+
+      unless check_permission!(@object)
+        return redirect_with_query(permanent_observation_path(@object.id))
       end
-      img
+      return unless (images = params[:selected])
+
+      remove_images_from_object(images)
+    end
+
+    ############################################################################
+
+    private
+
+    def remove_images_from_object(images)
+      images.each do |image_id, do_it|
+        next unless do_it == "yes"
+
+        next unless (image = Image.safe_find(image_id))
+
+        @object.remove_image(image)
+        image.log_remove_from(@object)
+        flash_notice(:runtime_image_remove_success.t(id: image_id))
+      end
+      redirect_with_query(permanent_observation_path(@object.id))
     end
   end
 end

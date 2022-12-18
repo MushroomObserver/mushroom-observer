@@ -5,6 +5,7 @@ module Account::Images
   class LicensesController < ApplicationController
     before_action :login_required
 
+    # Linked from show_obs, account prefs tabs and section, acct profile
     # Tabular form that lets user change licenses of their images.  The table
     # groups all the images of a given copyright holder and license type into
     # a single row.  This lets you change all Rolf's licenses in one stroke.
@@ -28,23 +29,9 @@ module Account::Images
     #    "license_id"=>3},
     #   {"license_count"=>1, "copyright_holder"=>"Tim Wheeler", "license_id"=>2}]
 
-    def license_updater
-      # Process any changes.
-      process_license_changes if request.method == "POST"
-
+    # license_updater
+    def edit
       # Gather data for form.
-      # @data = Image.connection.select_all(%(
-      #   SELECT COUNT(*) AS license_count, copyright_holder, license_id
-      #   FROM images
-      #   WHERE user_id = #{@user.id.to_i}
-      #   GROUP BY copyright_holder, license_id
-      # )).to_a
-      # @data.each do |datum|
-      #   next unless (license = License.safe_find(datum["license_id"].to_i))
-
-      #   datum["license_name"] = license.display_name
-      #   datum["licenses"]     = License.current_names_and_ids(license)
-      # end
 
       # map(&:attributes) gives you a hash of your selects with their keys
       @data = Image.includes(:license).where(user_id: @user.id).
@@ -60,12 +47,9 @@ module Account::Images
       end
     end
 
-    ##############################################################################
-
-    private # private methods used by license updater
-
-    def process_license_changes
-      params[:updates].values.each do |row|
+    # process_license_changes
+    def update
+      params[:updates].each_value do |row|
         next unless row_changed?(row)
 
         images_to_update = Image.where(
@@ -79,6 +63,10 @@ module Account::Images
                                     copyright_holder: row[:new_holder])
       end
     end
+
+    ############################################################################
+
+    private # private methods used by license updater
 
     def row_changed?(row)
       row[:old_id] != row[:new_id] ||
