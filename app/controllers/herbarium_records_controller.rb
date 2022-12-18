@@ -54,14 +54,6 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = default_herbarium_record
   end
 
-  def create
-    set_ivars_for_new
-    return unless @observation
-
-    @back_object = @observation
-    create_herbarium_record
-  end
-
   def edit
     set_ivars_for_edit
     return unless @herbarium_record
@@ -70,6 +62,14 @@ class HerbariumRecordsController < ApplicationController
     return unless make_sure_can_edit!
 
     @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
+  end
+
+  def create
+    set_ivars_for_new
+    return unless @observation
+
+    @back_object = @observation
+    create_herbarium_record
   end
 
   def update
