@@ -230,5 +230,5 @@
 %>
 <%= render(partial: "comments/comments_for_object",
           locals: {object: @name, controls: true, limit: nil}) %>
-<%= :show_name_num_notifications.t(num: @name.interests_plus_notifications) %>
+<%= :show_name_num_notifications.t(num: @name.interests) %>
 <%= show_object_footer(@name) %>

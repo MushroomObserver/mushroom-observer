@@ -1,36 +1,34 @@
 <%
-  flash_error(@error) if @error && !@targets.any?(&:target)
+  flash_error(@error) if @error && !@interests.any?(&:target)
 %>
 
 <%= paginate_block(@pages) do %>
-  <% if @targets.any?(&:target) %>
+  <% if @interests.any?(&:target) %>
     <table class="table table-striped">
-      <% @targets.select(&:target).each do |item|
+      <% @interests.select(&:target).each do |item|
         obj = item.target %>
         <tr>
           <td>
             <strong><%= item.summary.t %></strong>
           </td>
           <td>
-            <% if item.is_a?(Notification) %>
+            <% if item.target_type == "NameTracker" %>
               <%= link_to(:show_object.t(type: obj.type_tag),
-                          obj.show_link_args) %> |
-              <%= link_to(:EDIT.t, item.link_params) %> |
-              <%= link_to(:DESTROY.t, action: :destroy_notification,
-                                      id: item.id) %>
+                          { controller: :name, action: :email_tracking,
+                            id: obj.obj_id }) %> |
             <% else %>
               <%= link_to(:show_object.t(type: obj.type_tag),
                           obj.show_link_args) %> |
-              <%= link_to(item.state ? :list_interests_turn_off.t :
-                                       :list_interests_turn_on.t,
-                          controller: :interest, action: :set_interest,
-                          type: item.target_type, id: item.target_id,
-                          state: item.state ? -1 : 1) %> |
-              <%= link_to(:DESTROY.t,
-                          controller: :interest, action: :set_interest,
-                          type: item.target_type, id: item.target_id,
-                          state: 0) %>
             <% end %>
+            <%= link_to(item.state ? :list_interests_turn_off.t :
+                                      :list_interests_turn_on.t,
+                        controller: :interest, action: :set_interest,
+                        type: item.target_type, id: item.target_id,
+                        state: item.state ? -1 : 1) %> |
+            <%= link_to(:DESTROY.t,
+                        controller: :interest, action: :set_interest,
+                        type: item.target_type, id: item.target_id,
+                        state: 0) %>
           </td>
         </tr>
       <% end %>
