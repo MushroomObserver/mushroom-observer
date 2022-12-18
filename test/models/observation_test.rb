@@ -192,7 +192,7 @@ class ObservationTest < UnitTestCase
   #  Test email notification heuristics.
   # --------------------------------------
   def test_email_notification_1
-    Notification.all.map(&:destroy)
+    NameTracker.all.map(&:destroy)
     QueuedEmail.queue_emails(true)
 
     obs = observations(:coprinus_comatus_obs)
@@ -270,7 +270,7 @@ class ObservationTest < UnitTestCase
   end
 
   def test_email_notification_2
-    Notification.all.map(&:destroy)
+    NameTracker.all.map(&:destroy)
     QueuedEmail.queue_emails(true)
 
     obs = observations(:coprinus_comatus_obs)
@@ -355,7 +355,7 @@ class ObservationTest < UnitTestCase
   end
 
   def test_email_notification_3
-    Notification.all.map(&:destroy)
+    NameTracker.all.map(&:destroy)
     QueuedEmail.queue_emails(true)
 
     obs = observations(:coprinus_comatus_obs)
@@ -465,7 +465,7 @@ class ObservationTest < UnitTestCase
   end
 
   def test_email_notification_4
-    Notification.all.map(&:destroy)
+    NameTracker.all.map(&:destroy)
     QueuedEmail.queue_emails(true)
 
     obs = observations(:coprinus_comatus_obs)

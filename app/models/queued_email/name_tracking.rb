@@ -2,24 +2,24 @@
 
 # Name Tracking Email
 class QueuedEmail::NameTracking < QueuedEmail
-  def notification
-    get_object(:notification, Notification)
+  def name_tracker
+    get_object(:name_tracker, NameTracker)
   end
 
   def naming
     get_object(:naming, Naming)
   end
 
-  def self.create_email(notification, naming)
-    raise("Missing notification!") unless notification
+  def self.create_email(name_tracker, naming)
+    raise("Missing name_tracker!") unless name_tracker
     raise("Missing naming!")       unless naming
 
-    sender = notification.user
+    sender = name_tracker.user
     observer = naming.observation.user
     result = nil
     if sender != observer
       result = create(sender, observer)
-      result.add_integer(:notification, notification.id)
+      result.add_integer(:name_tracker, name_tracker.id)
       result.add_integer(:naming, naming.id)
       result.finish
     end
@@ -30,9 +30,9 @@ class QueuedEmail::NameTracking < QueuedEmail
     # Make sure naming wasn't deleted since email was queued.
     if naming
       result = NamingTrackerMailer.build(user, naming).deliver_now
-      if notification.note_template
+      if name_tracker.note_template
         result = NamingObserverMailer.build(
-          to_user, naming, notification
+          to_user, naming, name_tracker
         ).deliver_now
       end
     end

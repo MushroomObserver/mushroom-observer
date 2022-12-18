@@ -116,7 +116,7 @@ Donation::          Records User's financial donations to MO.
 ImageVote::         Votes on quality of Image's.
 Interest::          Registers User's interest in various objects (for email notification of activity in those objects).
 License::           Types of licenses available for Image's and Name/LocationDescription's to use.
-Notification::      Used to generate notification emails under more complex conditions, like use of Name's a User is interested in.
+NameTracker::       Used to generate notification emails under more complex conditions, like use of Name's a User is interested in.
 Query::             Saves the description of an arbitrary query of one of the major objects (above), allows prev/next/index and refining searches.
 RssLog::            Used to report changes via RSS feed.
 Synonym::           Used to group synonymized Name's.

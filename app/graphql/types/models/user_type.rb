@@ -85,7 +85,7 @@ module Types
       # field :name_descriptions, [Types::Models::NameDescriptionType],
       #                           null: true
       # field :namings, [Types::Models::NamingType], null: true
-      # field :notifications, [Types::Models::NotificationType], null: true
+      # field :name_trackers, [Types::Models::NameTrackerType], null: true
       # field :observations, [Types::Models::ObservationType], null: true
       # field :projects_created, [Types::Models::ProjectType], null: true
       # field :publications, [Types::Models::PublicationType], null: true

@@ -26,24 +26,14 @@ class InterestController < ApplicationController
   def list_interests
     store_location
     @title = :list_interests_title.t
-    notifications = find_relevant_notifications
-    interests = find_relevant_interests
-    @targets = notifications + interests
+    @interests = find_relevant_interests
 
     @pages = paginate_numbers(:page, 50)
-    @pages.num_total = @targets.length
-    @targets = @targets[@pages.from..@pages.to]
+    @pages.num_total = @interests.length
+    @interests = @interests[@pages.from..@pages.to]
   end
 
   private
-
-  def find_relevant_notifications
-    Notification.for_user(@user).sort do |a, b|
-      result = a.flavor.to_s <=> b.flavor.to_s
-      result = a.summary.to_s <=> b.summary.to_s if result.zero?
-      result
-    end
-  end
 
   def find_relevant_interests
     Interest.for_user(@user).sort do |a, b|
@@ -90,11 +80,13 @@ class InterestController < ApplicationController
     true
   end
 
+  # Polymorphic stores target_type: as class name string.
+  # find_by @target.target_type (symbol) is unreliable
   def find_or_create_interest
     interest = Interest.find_by(
-      target_type: @target.type_tag, target_id: @target.id, user_id: @user.id
+      target_type: @target.class.to_s, target_id: @target.id, user_id: @user.id
     )
-    return interest unless !interest && @state != 0
+    return interest if interest # unless !interest && @state != 0
 
     interest = Interest.new
     interest.target = @target
@@ -124,10 +116,13 @@ class InterestController < ApplicationController
       flash_notice(:set_interest_already_deleted.l(name: name))
     elsif !@interest.destroy
       flash_notice(:set_interest_failure.l(name: name))
-    elsif @interest.state
-      flash_notice(:set_interest_success_was_on.l(name: name))
     else
-      flash_notice(:set_interest_success_was_off.l(name: name))
+      @target.destroy if @target.type_tag == :name_tracker
+      if @interest.state
+        flash_notice(:set_interest_success_was_on.l(name: name))
+      else
+        flash_notice(:set_interest_success_was_off.l(name: name))
+      end
     end
   end
 
@@ -148,7 +143,7 @@ class InterestController < ApplicationController
   end
 
   def redirect_to_target_or_list_interests
-    unless @target
+    if !@target || @target.type_tag == :name_tracker
       return redirect_back_or_default(controller: "/interest",
                                       action: "list_interests")
     end
@@ -161,8 +156,8 @@ class InterestController < ApplicationController
 
   public
 
-  def destroy_notification
-    Notification.find(params[:id].to_i).destroy
+  def destroy_name_tracker
+    NameTracker.find(params[:id].to_i).destroy
     redirect_with_query(action: "list_interests")
   end
 end
