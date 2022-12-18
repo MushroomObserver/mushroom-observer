@@ -345,7 +345,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def term_with_image_params
     setup_image_dirs
-    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
     {

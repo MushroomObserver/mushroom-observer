@@ -90,7 +90,7 @@ module SessionExtensions
 
   # Save response from last request so you can look at it in a browser.
   def save_page(file = nil)
-    file ||= "#{::Rails.root}/public/test.html"
+    file ||= Rails.public_path.join("test.html")
     File.write(file, response.body)
   end
 
