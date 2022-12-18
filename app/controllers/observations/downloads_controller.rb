@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Observations
-  # Controls viewing and modifying herbaria.
   class DownloadsController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
