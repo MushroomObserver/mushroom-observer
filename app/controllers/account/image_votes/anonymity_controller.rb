@@ -13,22 +13,18 @@ module Account::ImageVotes
     # Outputs:
     #   @num_anonymous - number of existing anonymous votes
     #   @num_public    - number of existing puclic votes
-    def bulk_vote_anonymity_updater
-      if request.method == "GET"
-        @num_anonymous = ImageVote.where(user_id: @user.id).
-                         where(anonymous: true).
-                         pluck(ImageVote[:id].count.as("total"))&.first
-        @num_public = ImageVote.where(user_id: @user.id).
-                      where(anonymous: false).
-                      pluck(ImageVote[:id].count.as("total"))&.first
-      else
-        create_anonymity_change
-      end
+
+    # bulk_vote_anonymity_updater
+    def edit
+      @num_anonymous = ImageVote.where(user_id: @user.id).
+                       where(anonymous: true).
+                       pluck(ImageVote[:id].count.as("total"))&.first
+      @num_public = ImageVote.where(user_id: @user.id).
+                    where(anonymous: false).
+                    pluck(ImageVote[:id].count.as("total"))&.first
     end
 
-    private
-
-    def create_anonymity_change
+    def update
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
         ImageVote.where(user_id: @user.id).update_all(anonymous: true)

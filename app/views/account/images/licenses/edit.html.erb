@@ -7,7 +7,7 @@
   }
 %>
 
-<%= form_with(url: form_action) do |f| %>
+<%= form_with(url: form_action, method: :patch) do |f| %>
   <div class="container-text">
     <%= :image_updater_help.tp %>
   </div><!--.container-text-->
