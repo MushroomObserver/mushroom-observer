@@ -65,7 +65,7 @@ delete from t using name_description_writers as t
 
 delete from name_descriptions where public = false;
 
-# delete from notifications;
+# delete from name_trackers;
 
 delete from query_records;
 

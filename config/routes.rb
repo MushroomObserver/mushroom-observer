@@ -94,7 +94,7 @@ ACTIONS = {
     transform_image: {}
   },
   interest: {
-    destroy_notification: {},
+    destroy_name_tracker: {},
     list_interests: {},
     set_interest: {}
   },

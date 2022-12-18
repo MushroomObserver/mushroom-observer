@@ -358,11 +358,11 @@ class UserTest < UnitTestCase
     assert_equal(0, Interest.where(user: junk).count)
   end
 
-  def test_delete_notifications
-    assert_operator(0, "<", Notification.where(user: rolf).count)
+  def test_delete_name_trackers
+    assert_operator(0, "<", NameTracker.where(user: rolf).count)
 
-    rolf.delete_notifications
-    assert_equal(0, Notification.where(user: rolf).count)
+    rolf.delete_name_trackers
+    assert_equal(0, NameTracker.where(user: rolf).count)
   end
 
   def test_delete_queued_emails

@@ -152,16 +152,16 @@ module Query
         names_versions: {
           names: :name_id
         },
+        name_trackers: {
+          names: :obj,
+          users: :user_id
+        },
         naming_reasons: {
           namings: :naming_id
         },
         namings: {
           names: :name_id,
           observations: :observation_id,
-          users: :user_id
-        },
-        notifications: {
-          names: :obj,
           users: :user_id
         },
         observations: {
