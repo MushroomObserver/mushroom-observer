@@ -12,7 +12,7 @@ namespace :graphql do
     # Choose a place to write the schema dump:
     schema_path = "public/graphql/schema.graphql"
     # Write the schema dump to that file:
-    File.write(Rails.root.join(schema_path), schema_defn)
+    Rails.root.join(schema_path).write(schema_defn)
     puts "Updated #{schema_path}"
   end
 end
