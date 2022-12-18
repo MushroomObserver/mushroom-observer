@@ -164,7 +164,7 @@
 #  locations::          Location's they were last to edit.
 #  names::              Name's they were last to edit.
 #  namings::            Naming's they've proposed.
-#  notifications::      Notification's they've requested.
+#  name_trackers::      NameTracker's they've requested.
 #  observations::       Observation's they've posted.
 #  projects_created::   Project's they've created.
 #  queued_emails::      QueuedEmail's they're scheduled to receive.
@@ -269,8 +269,8 @@ class User < AbstractModel
   has_many :location_descriptions
   has_many :names
   has_many :name_descriptions
+  has_many :name_trackers
   has_many :namings
-  has_many :notifications
   has_many :observations
   has_many :projects_created, class_name: "Project"
   has_many :publications
@@ -899,7 +899,7 @@ class User < AbstractModel
     [:location_description_editors,   :user_id],
     [:name_description_authors,       :user_id],
     [:name_description_editors,       :user_id],
-    [:notifications,                  :user_id],
+    [:name_trackers,                  :user_id],
     [:observations,                   :user_id],
     [:publications,                   :user_id],
     [:queued_emails,                  :user_id],
@@ -950,7 +950,7 @@ class User < AbstractModel
     disable_account
     delete_api_keys
     delete_interests
-    delete_notifications
+    delete_name_trackers
     delete_queued_emails
     delete_observations
     delete_private_name_descriptions
@@ -984,8 +984,8 @@ class User < AbstractModel
     interests.delete_all
   end
 
-  def delete_notifications
-    Notification.where(user: self).delete_all
+  def delete_name_trackers
+    NameTracker.where(user: self).delete_all
   end
 
   def delete_queued_emails
@@ -1115,7 +1115,7 @@ class User < AbstractModel
     NameDescriptionAuthor,
     NameDescriptionEditor,
     Naming,
-    # Notification,                  (just deleted all of these)
+    # NameTracker,                  (just deleted all of these)
     # ObservationView,               (okay if these are all that's left)
     # Observation,                   (just deleted all of these)
     Project,

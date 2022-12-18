@@ -11,7 +11,7 @@ module Name::Merge
   # to notifications for every name in the database as a side-effect of merging
   # an unwanted name into Fungi, say. -JPH 20200120, - JDC 20201127
   def merger_destructive?
-    namings.any? || interests_plus_notifications.positive?
+    namings.any? || interests.any?
   end
 
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
@@ -49,8 +49,7 @@ module Name::Merge
     end
 
     # Move over any notifications on the old name.
-    Notification.where(flavor: Notification.flavors[:name],
-                       obj_id: old_name.id).find_each do |note|
+    NameTracker.where(obj_id: old_name.id).find_each do |note|
       note.obj_id = id
       note.save
     end

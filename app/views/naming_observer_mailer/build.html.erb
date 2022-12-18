@@ -1,39 +1,39 @@
 <%
-  case @notification.flavor.to_s
-  when "name"
+  # case @name_tracker.flavor.to_s
+  # when "name"
     obj  = @naming.observation
     type = :observation
-  else
-    obj  = @notification.object
-    type = obj.type_tag
-  end
+  # else
+  #   obj  = @name_tracker.object
+  #   type = obj.type_tag
+  # end
 
   intro = :email_naming_for_observer_intro.l(
-    user:  @notification.user.legal_name,
-    email: @notification.user.email,
+    user:  @name_tracker.user.legal_name,
+    email: @name_tracker.user.email,
     type:  type,
     name:  obj.unique_format_name
   )
 
-  message = @notification.calc_note(
+  message = @name_tracker.calc_note(
     user:   @user,
     naming: @naming
   )
 
   handy_links = :email_can_respond.l(
-    name:  @notification.user.legal_name,
-    email: @notification.user.email
+    name:  @name_tracker.user.legal_name,
+    email: @name_tracker.user.email
   )
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  if obj.class.controller_normalized?
+  # if obj.class.controller_normalized?
     links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}#{obj.show_controller}/#{obj.id}"])
-  else
-    links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
-  end
+      "#{MO.http_domain}/#{obj.id}"])
+  # else
+  #   links.push([:email_links_show_object.t(type: type),
+  #     "#{MO.http_domain}#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
+  # end
 
   links.push([:email_links_latest_changes.t,
     MO.http_domain])

@@ -42,6 +42,7 @@ class InterestControllerTest < FunctionalTestCase
     peltigera = names(:peltigera)
     minimal_unknown = observations(:minimal_unknown_obs)
     detailed_unknown = observations(:detailed_unknown_obs)
+    coprinus_comatus_tracker = name_trackers(:coprinus_comatus_name_tracker)
 
     # Succeed: Turn interest on in minimal_unknown.
     login("rolf")
@@ -51,34 +52,36 @@ class InterestControllerTest < FunctionalTestCase
         })
     assert_flash_success
 
-    # Make sure rolf now has one Interest: interested in minimal_unknown.
+    # Make sure rolf now has two Interests: interested in minimal_unknown,
+    # plus his abiding interest in the coprinus_comatus_tracker.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(1, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.target)
-    assert_equal(true, rolfs_interests.first.state)
+    assert_equal(2, rolfs_interests.length)
+    assert_equal(coprinus_comatus_tracker, rolfs_interests.first.target)
+    assert_equal(minimal_unknown, rolfs_interests.second.target)
+    assert_equal(true, rolfs_interests.second.state)
 
-    # Succeed: Turn same interest off.
+    # Succeed: Turn same observation interest off.
     login("rolf")
     get(:set_interest,
         params: { type: "Observation", id: minimal_unknown.id, state: -1 })
     assert_flash_success
 
-    # Make sure rolf now has one Interest: NOT interested in minimal_unknown.
+    # Make sure rolf now has two Interests: NOT interested in minimal_unknown.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(1, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.target)
-    assert_equal(false, rolfs_interests.first.state)
+    assert_equal(2, rolfs_interests.length)
+    assert_equal(minimal_unknown, rolfs_interests.second.target)
+    assert_equal(false, rolfs_interests.second.state)
 
-    # Succeed: Turn another interest off from no interest.
+    # Succeed: Turn a name interest off from no interest.
     login("rolf")
     get(:set_interest, params: { type: "Name", id: peltigera.id, state: -1 })
     assert_flash_success
 
-    # Make sure rolf now has two Interests.
+    # Make sure rolf now has three Interests.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(2, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.target)
-    assert_equal(false, rolfs_interests.first.state)
+    assert_equal(3, rolfs_interests.length)
+    assert_equal(minimal_unknown, rolfs_interests.second.target)
+    assert_equal(false, rolfs_interests.second.state)
     assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
 
@@ -88,7 +91,7 @@ class InterestControllerTest < FunctionalTestCase
     get(:set_interest,
         params: { type: "Observation", id: detailed_unknown.id, state: 0 })
     assert_flash_success
-    assert_equal(2, Interest.where(user_id: rolf.id).length)
+    assert_equal(3, Interest.where(user_id: rolf.id).length)
 
     # Succeed: Delete first interest now.
     login("rolf")
@@ -96,27 +99,40 @@ class InterestControllerTest < FunctionalTestCase
         params: { type: "Observation", id: minimal_unknown.id, state: 0 })
     assert_flash_success
 
-    # Make sure rolf now has one Interest: NOT interested in peltigera.
+    # Make sure rolf now has twae Intereste: NOT interested in peltigera.
     rolfs_interests = Interest.where(user_id: rolf.id)
-    assert_equal(1, rolfs_interests.length)
+    assert_equal(2, rolfs_interests.length)
     assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
 
-    # Succeed: Delete last interest.
+    # Succeed: Delete last non-name-tracker interest.
     login("rolf")
     get(:set_interest, params: { type: "Name", id: peltigera.id, state: 0 })
     assert_flash_success
-    assert_equal(0, Interest.where(user_id: rolf.id).length)
+    assert_equal(1, Interest.where(user_id: rolf.id).length)
   end
 
-  def test_destroy_notification
+  def test_delete_name_tracker_interest
+    coprinus_comatus_tracker = name_trackers(:coprinus_comatus_name_tracker)
+
+    # Now, delete the interest in the name_tracker, and be sure also deleted
     login("rolf")
-    n = notifications(:coprinus_comatus_notification)
+    get(:set_interest, params: { type: "NameTracker",
+                                 id: coprinus_comatus_tracker.id,
+                                 state: 0 })
+    assert_flash_success
+    assert_equal(0, Interest.where(user_id: rolf.id).length)
+    assert_equal(0, NameTracker.where(user_id: rolf.id).length)
+  end
+
+  def test_destroy_name_tracker
+    login("rolf")
+    n = name_trackers(:coprinus_comatus_name_tracker)
     assert(n)
     id = n.id
-    get(:destroy_notification, params: { id: id })
+    get(:destroy_name_tracker, params: { id: id })
     assert_raises(ActiveRecord::RecordNotFound) do
-      Notification.find(id)
+      NameTracker.find(id)
     end
   end
 end

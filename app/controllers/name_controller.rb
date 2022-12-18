@@ -1062,9 +1062,7 @@ class NameController < ApplicationController
     @name = find_or_goto_index(Name, name_id)
     return unless @name
 
-    flavor = Notification.flavors[:name]
-    @notification = Notification.
-                    find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
+    @name_tracker = NameTracker.find_by(obj_id: name_id, user_id: @user.id)
     if request.method == "POST"
       submit_tracking_form(name_id)
     else
@@ -1077,8 +1075,9 @@ class NameController < ApplicationController
       flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name,
                                                        rank: @name.rank))
     end
-    if @notification
-      @note_template = @notification.note_template
+    if @name_tracker
+      @note_template = @name_tracker.note_template
+      @interest = Interest.find_by(target: @name_tracker)
     else
       @note_template = :email_tracking_note_template.l(
         species_name: @name.real_text_name,
@@ -1091,43 +1090,67 @@ class NameController < ApplicationController
   def submit_tracking_form(name_id)
     case params[:commit]
     when :ENABLE.l, :UPDATE.l
-      note_template = params[:notification][:note_template]
-      note_template = nil if note_template.blank?
-      if @notification.nil?
-        @notification = Notification.new(flavor: "name",
-                                         user: @user,
-                                         obj_id: name_id,
-                                         note_template: note_template)
-        flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
-      else
-        @notification.note_template = note_template
-        flash_notice(:email_tracking_updated_messages.t)
-      end
-      notify_admins_of_notification(@notification)
-      @notification.save
+      create_or_update_name_tracker_and_interest(name_id)
     when :DISABLE.l
-      @notification.destroy
-      flash_notice(
-        :email_tracking_no_longer_tracking.t(name: @name.display_name)
-      )
+      destroy_name_tracker_interest_and_flash
     end
     redirect_with_query(action: "show_name", id: name_id)
   end
 
-  def notify_admins_of_notification(notification)
-    return if notification.note_template.blank?
-    return if !notification.new_record? &&
-              notification.note_template_before_last_save.blank?
+  private
 
-    user = notification.user
-    name = Name.find(notification.obj_id)
-    note = notification.note_template
-    subject = "New Notification with Template"
+  def create_or_update_name_tracker_and_interest(name_id)
+    @note_template = param_lookup([:name_tracker, :note_template])
+    @note_template = nil if @note_template.blank?
+    if @name_tracker.nil?
+      create_name_tracker_interest_and_flash(name_id)
+    else
+      update_name_tracker_interest_and_flash
+    end
+    notify_admins_of_name_tracker(@name_tracker)
+    @name_tracker.save
+    @interest.save
+  end
+
+  def create_name_tracker_interest_and_flash(name_id)
+    @name_tracker = NameTracker.new(user: @user,
+                                    obj_id: name_id,
+                                    note_template: @note_template)
+    @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
+    flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
+  end
+
+  def update_name_tracker_interest_and_flash
+    @name_tracker.note_template = @note_template
+    @interest = Interest.find_by(target: @name_tracker)
+    flash_notice(:email_tracking_updated_messages.t)
+  end
+
+  def destroy_name_tracker_interest_and_flash
+    @interest = Interest.find_by(target: @name_tracker)
+    @name_tracker.destroy
+    @interest.destroy
+    flash_notice(
+      :email_tracking_no_longer_tracking.t(name: @name.display_name)
+    )
+  end
+
+  def notify_admins_of_name_tracker(name_tracker)
+    return if name_tracker.note_template.blank?
+    return if !name_tracker.new_record? &&
+              name_tracker.note_template_before_last_save.blank?
+
+    user = name_tracker.user
+    name = Name.find(name_tracker.obj_id)
+    note = name_tracker.note_template
+    subject = "New Name Tracker with Template"
     content = "User: ##{user.id} / #{user.login}\n" \
               "Name: ##{name.id} / #{name.search_name}\n" \
               "Note: [[#{note}]]"
     WebmasterMailer.build(user.email, content, subject).deliver_now
   end
+
+  public
 
   def edit_lifeform
     pass_query_params

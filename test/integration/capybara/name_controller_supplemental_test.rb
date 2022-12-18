@@ -11,7 +11,7 @@ class NameControllerSupplementalTest < CapybaraIntegrationTestCase
     login(rolf)
 
     visit("/name/email_tracking/#{names(:boletus_edulis).id}")
-    template = find("#notification_note_template")
+    template = find("#name_tracker_note_template")
     template.assert_no_text(":mailing_address")
   end
 end

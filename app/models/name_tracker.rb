@@ -1,27 +1,22 @@
 # frozen_string_literal: true
 
 #
-#  = Notification Model
+#  = Name Tracker Model
 #
 #  == Attributes
 #
 #  id::               Locally unique numerical id, starting at 1
 #  updated_at::       Date/time it was last updated
 #  user::             User who created it
-#  flavor::           Type of Notification
 #  obj_id::           Id of principal object
-#  note_template::   Template for an email, context depends on Notification type
+#  note_template::    Template for an email
 #  require_specimen:: Require observation to have a specimen?
-#
-#  == Class methods
-#
-#  all_flavors::       List of Notifcation types available.
 #
 #  == Instance methods
 #
 #  calc_note::         Create body of the email we're about to send.
 #  target::            Return principle object involved.
-#  summary::           String summarizing what this Notification is about
+#  summary::           String summarizing what this Name Tracker is about
 #  link_params::       Hash of link_to options for edit action
 #  text_name::         Alias for +summary+ for debugging
 #
@@ -29,39 +24,26 @@
 #
 #  None.
 #
-class Notification < AbstractModel
+class NameTracker < AbstractModel
   belongs_to :user
 
   scope :for_user,
         ->(user) { where(user: user) }
 
-  # Do not change the integer associated with a value
-  enum flavor:
-       {
-         name: 1
-       },
-       _suffix: :flavor
-
-  # List of all available flavors (strings).
-  def self.all_flavors
-    flavors.keys
-  end
-
-  # Create body of the email we're about to send.  Each flavor requires a
-  # different set of arguments:
+  # Create body of the email we're about to send.
   #
   # [name]
   #   user::      Owner of Observation.
   #   naming::    Naming that triggered this email.
   #
-  def calc_note(args) # rubocop:disable Metrics/AbcSize
-    return nil unless (template = note_template) && flavor == "name"
+  def calc_note(args)
+    return nil unless (template = note_template)
 
     tracker  = user
     observer = args[:user]
     naming   = args[:naming]
-    raise("Missing 'user' argument for #{flavor} notification.") unless observer
-    raise("Missing 'naming' argument for #{flavor} notification.") unless naming
+    raise("Missing 'user' argument for name tracker.") unless observer
+    raise("Missing 'naming' argument for name tracker.") unless naming
 
     template.
       gsub(":observer", observer.login).
@@ -71,36 +53,30 @@ class Notification < AbstractModel
       gsub(":name", naming.format_name)
   end
 
-  # Return principal target involved.  Again, this is different for each
-  # flavor:
+  # Return principal target involved.
   #
   # name::   Name that User is tracking.
   #
   def target
-    @target ||= flavor == "name" ? Name.find(obj_id) : nil
+    @target ||= Name.find(obj_id)
   end
 
-  # Return a string summarizing what this Notification is about.
+  # Return a string summarizing what this NameTracker is about.
   def summary
-    if flavor == "name"
-      "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
-    else
-      "Unrecognized notification flavor"
-    end
+    "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
   end
   alias text_name summary
+  alias unique_text_name summary
 
   # Returns hash of options to pass into link_to to link to edit action:
   #
-  #   link_to("edit", notification.link_params)
+  #   link_to("edit", name_tracker.link_params)
   #
   def link_params
     result = {}
-    if flavor == "name"
-      result[:controller] = :name
-      result[:action] = :email_tracking
-      result[:id] = obj_id
-    end
+    result[:controller] = :name
+    result[:action] = :email_tracking
+    result[:id] = obj_id
     result
   end
 
