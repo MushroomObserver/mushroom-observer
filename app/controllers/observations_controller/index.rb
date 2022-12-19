@@ -10,7 +10,7 @@ module ObservationsController::Index
   def index # rubocop:disable Metrics/AbcSize
     # cop disabled because immediate fix is ugly and the offense is avoidable
     # by fixing the ABC offense. See above
-    if params[:advanced_search].present?
+    if params[:advanced_search].present? # rubocop:disable Style/GuardClause
       advanced_search and return
     elsif params[:pattern].present?
       observation_search and return

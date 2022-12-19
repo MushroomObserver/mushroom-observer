@@ -367,7 +367,7 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
       <div class="infobox">
         <div class="total">
           895 files inspected,
-          5 offenses detected:
+          no offenses detected:
         </div>
         <ul class="offenses-list">
           
@@ -555,12 +555,6 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
             
             
             
-            <li>
-              <a href="#offense_app/classes/pivotal/story.rb">
-                app/classes/pivotal/story.rb - 1 offense
-              </a>
-            </li>
-          
             
             
             
@@ -650,12 +644,6 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
             
             
             
-            <li>
-              <a href="#offense_app/classes/query/modules/lookup_names.rb">
-                app/classes/query/modules/lookup_names.rb - 3 offenses
-              </a>
-            </li>
-          
             
             
             
@@ -781,12 +769,6 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
             
             
             
-            <li>
-              <a href="#offense_app/controllers/application_controller.rb">
-                app/controllers/application_controller.rb - 1 offense
-              </a>
-            </li>
-          
             
             
             
@@ -1656,24 +1638,6 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
       
       
       
-      <div class="offense-box" id="offense_app/classes/pivotal/story.rb">
-        <div class="box-title-placeholder"><h3>&nbsp;</h3></div>
-        <div class="box-title"><h3>app/classes/pivotal/story.rb - 1 offense</h3></div>
-        <div class="offense-reports">
-          
-          <div class="report">
-            <div class="meta">
-              <span class="location">Line #41</span> –
-              <span class="severity convention">convention:</span>
-              <span class="message">Rails/Pluck: Prefer <code>pluck("name")</code> over <code>map { |l| l["name"] }</code>.</span>
-            </div>
-            
-            <pre><code>        data[&quot;labels&quot;] == [] ? [&quot;other&quot;] : data[&quot;labels&quot;].<span class="highlight convention">map { |l| l[&quot;name&quot;] }</span></code></pre>
-            
-          </div>
-          
-        </div>
-      </div>
       
       
       
@@ -1853,46 +1817,6 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
       
       
       
-      <div class="offense-box" id="offense_app/classes/query/modules/lookup_names.rb">
-        <div class="box-title-placeholder"><h3>&nbsp;</h3></div>
-        <div class="box-title"><h3>app/classes/query/modules/lookup_names.rb - 3 offenses</h3></div>
-        <div class="offense-reports">
-          
-          <div class="report">
-            <div class="meta">
-              <span class="location">Line #18</span> –
-              <span class="severity convention">convention:</span>
-              <span class="message">Rails/Pluck: Prefer <code>pluck(0)</code> over <code>map { |min_name| min_name[0] }</code>.</span>
-            </div>
-            
-            <pre><code>        min_names.<span class="highlight convention">map { |min_name| min_name[0] }</span></code></pre>
-            
-          </div>
-          
-          <div class="report">
-            <div class="meta">
-              <span class="location">Line #159</span> –
-              <span class="severity convention">convention:</span>
-              <span class="message">Rails/Pluck: Prefer <code>pluck(3)</code> over <code>map { |min_name| min_name[3] }</code>.</span>
-            </div>
-            
-            <pre><code>        min_names.<span class="highlight convention">map { |min_name| min_name[3] }</span>.</code></pre>
-            
-          </div>
-          
-          <div class="report">
-            <div class="meta">
-              <span class="location">Line #165</span> –
-              <span class="severity convention">convention:</span>
-              <span class="message">Rails/Pluck: Prefer <code>pluck(3)</code> over <code>map { |min_name| min_name[3] }</code>.</span>
-            </div>
-            
-            <pre><code>        text_names = min_names.<span class="highlight convention">map { |min_name| min_name[3] }</span></code></pre>
-            
-          </div>
-          
-        </div>
-      </div>
       
       
       
@@ -2141,27 +2065,6 @@ TvFXMeuCkZPcaEBLqvgPBhCuiZo8+sAAAAAASUVORK5CYII=
       
       
       
-      
-      
-      
-      <div class="offense-box" id="offense_app/controllers/application_controller.rb">
-        <div class="box-title-placeholder"><h3>&nbsp;</h3></div>
-        <div class="box-title"><h3>app/controllers/application_controller.rb - 1 offense</h3></div>
-        <div class="offense-reports">
-          
-          <div class="report">
-            <div class="meta">
-              <span class="location">Line #640</span> –
-              <span class="severity convention">convention:</span>
-              <span class="message">Rails/Pluck: Prefer <code>pluck(0)</code> over <code>map { |a| a[0] }</code>.</span>
-            </div>
-            
-            <pre><code>    result = locale_weights.sort { |a, b| b[1] &lt;=&gt; a[1] }.<span class="highlight convention">map { |a| a[0] }</span></code></pre>
-            
-          </div>
-          
-        </div>
-      </div>
       
       
       

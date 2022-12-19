@@ -19,7 +19,7 @@ class HerbariumRecordsController < ApplicationController
 
   # rubocop:disable Metrics/AbcSize
   def index
-    if params[:pattern].present?
+    if params[:pattern].present? # rubocop:disable Style/GuardClause
       herbarium_record_search and return
     elsif params[:herbarium_id].present?
       herbarium_index and return
