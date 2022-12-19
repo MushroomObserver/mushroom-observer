@@ -6,7 +6,8 @@ module Images
 
     # Change user's vote (on anyone's image) and go to next image.
     # Images::VotesController#update
-    def cast_vote
+    # cast_vote
+    def update
       image = find_or_goto_index(Image, params[:id].to_s)
       return unless image
 

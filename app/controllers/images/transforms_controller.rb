@@ -4,8 +4,8 @@ module Images
   class TransformsController < ApplicationController
     before_action :login_required
 
-    # Used by show_image to rotate and flip image. Currently GET
-    def create
+    # Used by show_image to rotate and flip image. Currently a GET
+    def show
       pass_query_params
       image = find_or_goto_index(Image, params[:id].to_s)
       return unless image
@@ -15,6 +15,8 @@ module Images
       # NOTE: 2022/12 params[:size] is unused in show_image
       redirect_with_query(show_image_path(image))
     end
+
+    private
 
     def transform_image_and_flash_notices(image)
       case params[:op]

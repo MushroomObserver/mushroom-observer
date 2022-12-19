@@ -69,30 +69,30 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  image: {
-    add_image: {},
-    advanced_search: {},
-    bulk_filename_purge: {},
-    bulk_vote_anonymity_updater: {},
-    cast_vote: {},
-    destroy_image: {},
-    edit_image: {},
-    image_search: {},
-    images_by_user: {},
-    images_for_project: {},
-    index_image: {},
-    license_updater: {},
-    list_images: {},
-    next_image: {},
-    prev_image: {},
-    remove_images: {},
-    remove_images_for_glossary_term: {},
-    reuse_image: {},
-    reuse_image_for_glossary_term: {},
-    # show_image: {},
-    show_original: {},
-    transform_image: {}
-  },
+  # image: {
+  #   add_image: {},
+  #   advanced_search: {},
+  #   bulk_filename_purge: {},
+  #   bulk_vote_anonymity_updater: {},
+  #   cast_vote: {},
+  #   destroy_image: {},
+  #   edit_image: {},
+  #   image_search: {},
+  #   images_by_user: {},
+  #   images_for_project: {},
+  #   index_image: {},
+  #   license_updater: {},
+  #   list_images: {},
+  #   next_image: {},
+  #   prev_image: {},
+  #   remove_images: {},
+  #   remove_images_for_glossary_term: {},
+  #   reuse_image: {},
+  #   reuse_image_for_glossary_term: {},
+  #   # show_image: {},
+  #   show_original: {},
+  #   transform_image: {}
+  # },
   interest: {
     destroy_name_tracker: {},
     list_interests: {},
@@ -605,6 +605,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :herbarium_records do
     resource :remove_observation, only: [:update], module: :herbarium_records
   end
+
+  namespace :image do
+    get "/image/:id/transform", to: "/images/transforms#show", as: "transform"
+    match "/image/:id/vote", to: "/images/votes#update",
+                             via: [:put, :patch], as: "vote"
+  end
+  resources :images
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")

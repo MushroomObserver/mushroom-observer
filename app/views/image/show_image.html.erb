@@ -19,10 +19,9 @@
   if check_permission(@image)
     tabs += [
       link_with_query(:edit_object.t(type: :image),
-                      action: :edit_image, id: @image.id),
-      link_with_query(:destroy_object.t(type: :image),
-                      { action: :destroy_image, id: @image.id },
-                      data: {confirm: :are_you_sure.l})
+                      action: :edit, id: @image.id),
+      destroy_button(name: :destroy_object.t(type: :image),
+                     target: @image.id)
     ]
   end
   if @image.user.email_general_commercial && !@image.user.no_emails
@@ -45,13 +44,13 @@
         <div class="text-center small image-controls">
           <% if check_permission(@image) %>
             <%= link_with_query(:image_show_rotate_left.t,
-                  action: :transform_image,
+                  controller: "/images/transforms", action: :show,
                   op: :rotate_left, id: @image.id, size: @size) %> |
             <%= link_with_query(:image_show_rotate_right.t,
-                  action: :transform_image,
+                  controller: "/images/transforms", action: :show,
                   op: :rotate_right, id: @image.id, size: @size) %> |
             <%= link_with_query(:image_show_mirror.t,
-                  action: :transform_image,
+                  controller: "/images/transforms", action: :show,
                   op: :mirror, id: @image.id, size: @size) %> |
           <% end %>
           <%= link_to(:image_show_original.t,
