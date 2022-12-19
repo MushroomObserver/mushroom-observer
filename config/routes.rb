@@ -359,6 +359,9 @@ end
 
 # ----------------------------
 #  Helpers.
+#
+#  To access paths in the console:
+#    include Rails.application.routes.url_helpers
 # ----------------------------
 
 # Get an array of API endpoints for all versions of API.
@@ -482,7 +485,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    patch("profile/remove_image", controller: "profile") # alternate path
+    get("profile/images", to: "preferences/profile/images#new",
+                          as: "edit_profile_image")
+    post("profile/images", to: "preferences/profile/images#create",
+                           as: "update_profile_image")
+    match("profile/images", to: "preferences/profile/images#update",
+                            as: "remove_profile_image", via: [:put, :patch])
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -571,6 +579,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
+
+    member do
+      get("images/new", to: "glossary_terms/images#new",
+                        as: "reuse_images_for")
+      post("images", to: "glossary_terms/images#create",
+                     as: "attach_image_to")
+      get("images/edit", to: "glossary_terms/images#edit",
+                         as: "remove_images_for")
+      match("images", to: "glossary_terms/images#update",
+                      as: "detach_image_from", via: [:put, :patch])
+    end
   end
 
   # ----- Herbaria: standard actions -------------------------------------------
@@ -608,6 +627,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     member do
       get("map")
       get("suggestions")
+      get("images/new", to: "observations/images#new",
+                        as: "reuse_images_for")
+      post("images", to: "observations/images#create",
+                     as: "attach_image_to")
+      get("images/edit", to: "observations/images#edit",
+                         as: "remove_images_for")
+      match("images", to: "observations/images#update",
+                      as: "detach_image_from", via: [:put, :patch])
     end
     collection do
       get("map")
