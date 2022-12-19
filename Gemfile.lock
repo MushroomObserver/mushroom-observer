@@ -159,6 +159,7 @@ GEM
       timeout
     net-smtp (0.3.2)
       net-protocol
+    newrelic_rpm (8.14.0)
     nokogiri (1.13.10-arm64-darwin)
       racc (~> 1.4)
     nokogiri (1.13.10-x86_64-linux)
@@ -321,6 +322,7 @@ DEPENDENCIES
   net-imap
   net-pop
   net-smtp
+  newrelic_rpm
   nokogiri (>= 1.13.10)
   rack-cors
   rails-controller-testing
