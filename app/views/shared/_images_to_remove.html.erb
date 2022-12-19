@@ -7,7 +7,7 @@
 # Note this uses a specialized matrix box here, not using the general partial.
 %>
 
-<%= form_with( url: form_action) do |form| %>
+<%= form_with(url: form_action, method: :put) do |form| %>
 
   <%= form.submit(:image_remove_remove.l,
                   class: "btn btn-default d-block mx-auto my-3") %>
