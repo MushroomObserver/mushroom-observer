@@ -12,7 +12,7 @@ module Observations
 
     # reuse_image params[:mode] = observation
     def new
-      @observation = Observation.safe_find(params[:obs_id])
+      @observation = Observation.safe_find(params[:id])
       # Stop right here if they're trying to add an image to obs w/o permission
       unless check_permission!(@observation)
         return redirect_with_query(
@@ -24,7 +24,7 @@ module Observations
     end
 
     def create
-      @observation = Observation.safe_find(params[:obj_id])
+      @observation = Observation.safe_find(params[:id])
       # Stop right here if they're trying to add an image to obs w/o permission
       unless check_permission!(@observation)
         return redirect_with_query(
@@ -92,7 +92,7 @@ module Observations
     # Redirects to observations/show.
     # remove_images
     def edit
-      @object = find_or_goto_index(Observation, params[:obj_id].to_s)
+      @object = find_or_goto_index(Observation, params[:id].to_s)
       return unless @object
 
       return unless check_permission!(@object)
@@ -101,7 +101,7 @@ module Observations
     end
 
     def update
-      @object = find_or_goto_index(Observation, params[:obj_id].to_s)
+      @object = find_or_goto_index(Observation, params[:id].to_s)
       return unless @object
 
       unless check_permission!(@object)

@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# NOTE: Move to new namespaced controllers
-#
-# Account::Profile::ImagesController#edit #update
-# Move tests from images_controller_test
-# No need to remove_images from Account profile: reuse_image removes image
+# Clicking on an image currently fires a GET to these actions... because it
+# comes from a link made by thumbnail_helper#thumbnail(link: url_args)
+# with CRUD refactor, change thumbnail helper to fire a POST somehow?
 
+# No need to remove_images from Account profile: reuse_image removes image
 module Account::Profile
   class ImagesController < ApplicationController
     before_action :login_required
@@ -14,13 +13,13 @@ module Account::Profile
 
     # reuse_image params[:mode] = profile
     def new
-      return unless User.safe_find(params[:obj_id]) == User.current
+      return unless User.safe_find(params[:id]) == User.current
 
       serve_reuse_form(params)
     end
 
     def create
-      return unless User.safe_find(params[:obj_id]) == User.current
+      return unless User.safe_find(params[:id]) == User.current
 
       image = Image.safe_find(params[:img_id])
       unless image
@@ -28,7 +27,16 @@ module Account::Profile
         return serve_reuse_form(params)
       end
 
-      attach_image_for_profile(image)
+      attach_image_for_profile_and_flash_notice(image)
+      redirect_to(user_path(@user.id))
+    end
+
+    def destroy
+      if @user&.image
+        @user.update(image: nil)
+        flash_notice(:runtime_profile_removed_image.t)
+      end
+      redirect_to(user_path(@user.id))
     end
 
     private
@@ -55,7 +63,7 @@ module Account::Profile
                                 include: [:user, { observations: :name }])
     end
 
-    def attach_image_for_profile(image)
+    def attach_image_for_profile_and_flash_notice(image)
       # Change user's profile image.
       if @user.image == image
         flash_notice(:runtime_no_changes.t)
@@ -63,16 +71,6 @@ module Account::Profile
         @user.update(image: image)
         flash_notice(:runtime_image_changed_your_image.t(id: image.id))
       end
-      redirect_to(user_path(@user.id))
-    end
-
-    def look_for_image(method, params)
-      return nil unless (method == "POST") || params[:img_id].present?
-
-      unless (img = Image.safe_find(params[:img_id]))
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-      end
-      img
     end
   end
 end

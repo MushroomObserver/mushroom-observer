@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
-# NOTE: Move to new namespaced controllers
-#
-# Observations::Images::ReuseController#edit #update
-# GlossaryTerms::Images::ReuseController#edit #update
-# Account::Profile::ImagesController#edit #update
-# Move tests from images_controller_test
-# No need to remove_images from Account profile: reuse_image removes image
+# Clicking on an image currently fires a GET to these actions... because it
+# comes from a link made by thumbnail_helper#thumbnail(link: url_args)
+# with CRUD refactor, change thumbnail helper to fire a POST somehow?
 
 module GlossaryTerms::Images
   class ReuseController < ApplicationController
@@ -18,13 +14,13 @@ module GlossaryTerms::Images
 
     # reuse_image_for_glossary_term
     def new
-      @object = GlossaryTerm.safe_find(params[:obj_id])
+      @object = GlossaryTerm.safe_find(params[:id])
 
       serve_image_reuse_selections(params)
     end
 
     def create
-      @object = GlossaryTerm.safe_find(params[:obj_id])
+      @object = GlossaryTerm.safe_find(params[:id])
 
       image = Image.safe_find(params[:img_id])
       unless image
@@ -88,7 +84,7 @@ module GlossaryTerms::Images
     # Redirects to glossary_term/show.
     # remove_images
     def edit
-      @object = find_or_goto_index(GlossaryTerm, params[:obj_id].to_s)
+      @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
 
       return if check_permission!(@object)
@@ -97,7 +93,7 @@ module GlossaryTerms::Images
     end
 
     def update
-      @object = find_or_goto_index(GlossaryTerm, params[:obj_id].to_s)
+      @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
 
       unless check_permission!(@object)
