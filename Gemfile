@@ -320,3 +320,9 @@ group :development do
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")
 end
+
+group :production do
+  # New Relic for application and other monitoring
+  # https://newrelic.com/
+  gem("newrelic_rpm")
+end
