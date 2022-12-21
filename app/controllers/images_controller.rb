@@ -6,7 +6,8 @@
 #  == Actions
 #
 #  ==== Searches and Indexes
-#                          Display a matrix of images:
+#  index::                 Display a matrix of images:
+#      (private methods)
 #  list_images::           all images, by creation date descending
 #  images_by_user::        by a given user
 #  images_for_project      attached to a given project
@@ -16,7 +17,7 @@
 #  show_selected_images::  search results
 #
 #  ==== Show Images
-#  show_image::
+#  show::
 #  show_original::         show full_size image (for backwards compatibility)
 #  next_image::
 #  prev_image::
@@ -69,7 +70,6 @@ class ImagesController < ApplicationController
 
   private
 
-  # Display matrix of selected images, based on current Query.
   # Display matrix of selected images, based on current Query.
   def index_image
     query = find_or_create_query(:Image, by: params[:by])
