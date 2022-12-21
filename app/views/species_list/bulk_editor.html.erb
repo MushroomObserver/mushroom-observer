@@ -128,19 +128,19 @@
 
     <%= :IMAGES.t %>: (<span id="number_of_images"></span>)
     <%=
-      args = { controller: :image, action: :add_image, id: "XXX" }
+      args = { controller: "/observations/images", action: :new, id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:UPLOAD.l, "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :image, action: :reuse_image, obs_id: "XXX",
-               mode: "observation" }
+      args = { controller: "/observations/images", action: :new, id: "XXX",
+               mode: :reuse }
       url = url_for(add_query_param(args, @query))
       link_to(:species_list_bulk_editor_reuse.l,
               "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :image, action: :remove_images, id: "XXX" }
+      args = { controller: "/observations/images", action: :edit, id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:REMOVE.l, "javascript:row_button(#{j url})")
     %>

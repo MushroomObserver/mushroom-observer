@@ -5,9 +5,127 @@ require("test_helper")
 # tests of Images controller
 module Observations
   class ImagesControllerTest < FunctionalTestCase
+    def test_add_image_to_obs_not_yours
+      obs = observations(:coprinus_comatus_obs)
+      requires_login(:new, id: obs.id)
+      assert_form_action(action: :create, id: obs.id, q: get_query_param)
+      # Check that image cannot be added to an observation the user doesn't own.
+      post(:create, params: { id: observations(:minimal_unknown_obs).id })
+      assert_redirected_to(controller: :observations, action: :show)
+    end
+
+    def test_add_images_empty
+      login("rolf")
+      obs = observations(:coprinus_comatus_obs)
+      post(:create, params: { id: obs.id })
+      assert_flash_text(/no changes/i)
+    end
+
+    def test_upload_image
+      setup_image_dirs
+      obs = observations(:coprinus_comatus_obs)
+      updated_at = obs.updated_at
+      proj = projects(:bolete_project)
+      proj.observations << obs
+      img_count = obs.images.size
+      assert(img_count.positive?)
+      assert(obs.thumb_image)
+      file = Rack::Test::UploadedFile.new(
+        "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+      )
+      params = {
+        id: obs.id,
+        image: {
+          "when(1i)" => "2007",
+          "when(2i)" => "3",
+          "when(3i)" => "29",
+          copyright_holder: "Douglas Smith",
+          notes: "Some notes."
+        },
+        upload: {
+          image1: file,
+          image2: "",
+          image3: "",
+          image4: ""
+        },
+        project: {
+          # This is a good test: Rolf doesn't belong to the Bolete project,
+          # but we still want this image to attach to that project by default,
+          # because the *observation* is attached to that project.
+          "id_#{proj.id}" => "1"
+        }
+      }
+      File.stub(:rename, false) do
+        login("rolf", "testpassword")
+        post(:create, params: params)
+      end
+      assert_equal(20, rolf.reload.contribution)
+      assert(obs.reload.images.size == (img_count + 1))
+      assert(updated_at != obs.updated_at)
+      message = :runtime_image_uploaded_image.t(
+        name: "##{obs.images.last.id}"
+      )
+      assert_flash_text(/#{message}/)
+      img = Image.last
+      assert_obj_list_equal([obs], img.observations)
+      assert_obj_list_equal([proj], img.projects)
+      assert_false(obs.gps_hidden)
+      assert_false(img.gps_stripped)
+    end
+
+    def test_add_images_strip_gps
+      login("rolf")
+      obs = observations(:coprinus_comatus_obs)
+      obs.update_attribute(:gps_hidden, true)
+
+      setup_image_dirs
+      fixture = "#{MO.root}/test/images/geotagged.jpg"
+      fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+
+      post(:create,
+          params: { id: obs.id,
+                    image: { "when(1i)" => "2007",
+                              "when(2i)" => "3",
+                              "when(3i)" => "29",
+                              copyright_holder: "Douglas Smith",
+                              notes: "Some notes." },
+                    upload: { image1: fixture,
+                              image2: "",
+                              image3: "",
+                              image4: "" } })
+
+      img = Image.last
+      assert_true(img.gps_stripped)
+    end
+
+    def test_add_images_process_image_fail
+      login("rolf")
+      obs = observations(:coprinus_comatus_obs)
+      setup_image_dirs
+      fixture = "#{MO.root}/test/images/geotagged.jpg"
+      fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+      Image.any_instance.stubs(:process_image).returns(false)
+
+      post(:create,
+          params: { id: obs.id,
+                    image: { "when(1i)" => "2007",
+                              "when(2i)" => "3",
+                              "when(3i)" => "29",
+                              copyright_holder: "Douglas Smith",
+                              notes: "Some notes." },
+                    upload: { image1: fixture,
+                              image2: "",
+                              image3: "",
+                              image4: "" } })
+
+      assert_flash_error("image.process_image failure should cause flash error")
+      assert_redirected_to(controller: :observations, action: :show, id: obs.id)
+    end
+    
+    # You get to the reuse image form by getting :new, mode: :reuse
     def test_reuse_image_page_access
       obs = observations(:agaricus_campestris_obs)
-      params = { id: obs.id }
+      params = { id: obs.id, mode: :reuse }
       assert_equal("rolf", obs.user.login)
 
       logout
@@ -25,22 +143,23 @@ module Observations
       get(:new, params: params)
 
       assert_response(:success)
-      assert_form_action(action: :create, id: obs.id, q: get_query_param)
+      assert_form_action(action: :create, id: obs.id, mode: :reuse, q: get_query_param)
     end
 
     def test_reuse_image_page_access__all_images
       obs = observations(:agaricus_campestris_obs)
-      params = { all_users: 1, mode: "observation", id: obs.id }
+      params = { all_users: 1, mode: :reuse, id: obs.id }
 
       login(obs.user.login)
       get(:new, params: params)
 
-      assert_form_action(action: :create, id: obs.id, q: get_query_param)
+      assert_form_action(action: :create, id: obs.id, mode: :reuse, q: get_query_param)
       assert_select("a", { text: :image_reuse_just_yours.l },
                     "Form should have a link to show only the user's images.")
     end
 
-    # Test reusing an image by id number. Same as the next test (?!)
+    # Test reusing an image by id number. Not sure how it differs from the next test (?!)
+    # except now it doesn't have mode: :reuse
     def test_add_image_to_obs_by_id
       obs = observations(:coprinus_comatus_obs)
       updated_at = obs.updated_at
@@ -59,7 +178,7 @@ module Observations
       image = images(:commercial_inquiry_image)
       assert_not(obs.images.member?(image))
       params = {
-        id: obs.id.to_s,
+        id: obs.id.to_s, mode: :reuse,
         img_id: image.id.to_s
       }
       owner = obs.user.login
@@ -81,7 +200,7 @@ module Observations
 
     def test_reuse_image_for_observation_bad_image_id
       obs = observations(:agaricus_campestris_obs)
-      params = { id: obs.id, img_id: "bad_id" }
+      params = { id: obs.id, mode: :reuse, img_id: "bad_id" }
 
       login(obs.user.login)
       post(:create, params: params)
@@ -95,7 +214,7 @@ module Observations
       img = images(:in_situ_image)
       obs.update_attribute(:gps_hidden, true)
       assert_false(img.gps_stripped)
-      post(:create, params: { id: obs.id, img_id: img.id })
+      post(:create, params: { id: obs.id, mode: :reuse, img_id: img.id })
       assert_false(img.reload.gps_stripped)
     end
 
@@ -113,7 +232,7 @@ module Observations
       FileUtils.mkdir_p(path) unless File.directory?(path)
       FileUtils.cp(fixture, orig_file)
 
-      post(:create, params: { id: obs.id, img_id: img.id })
+      post(:create, params: { id: obs.id, mode: :reuse, img_id: img.id })
       assert_true(img.reload.gps_stripped)
       assert_not_equal(File.size(fixture),
                        File.size(img.local_file_name("orig")))

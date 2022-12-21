@@ -611,7 +611,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     match "/image/:id/vote", to: "/images/votes#update",
                              via: [:put, :patch], as: "vote"
   end
-  resources :images
+  resources :images, only: [:edit, :update, :destroy, :index]
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")

@@ -1,23 +1,56 @@
 <%
-# NOTE: Move to observations/reuse_images/new
-#       Observations::ReuseImagesController#new
-# Partial should be in shared
-@title = :image_reuse_title.t(name: @observation.unique_format_name)
-obs_id = @observation.id
-tabs = [
-  link_with_query(:show_object.t(type: :observation),
-                  permanent_observation_path(obs_id)),
-  link_with_query(:image_reuse_edit.t,
-                  edit_observation_path(obs_id))
-]
-@tabsets = { right: draw_tab_set(tabs) }
-@container = :full
-# Use a path here:
-form_action = { controller: "/observations/images",
-                action: :create,
-                id: obs_id,
-                q: get_query_param }
+  @title = :image_add_title.t(name: @observation.unique_format_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args),
+    link_with_query(:image_add_edit.t, controller: :observations,
+                    action: :edit, id: @observation.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render(partial: "shared/images_to_reuse",
-           locals: { form_action: form_action }) %>
+<%= form_with(model: @image,
+      url: add_query_param(action: :create, id: @observation.id),
+      html: { multipart: true }) do |f| %>
+  <%= f.hidden_field(:observation, :id) %>
+
+  <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
+
+  <%= f.submit(:image_add_upload.l,
+               class: "btn btn-default center-block mt-3") %>
+
+  <div class="form-group form-inline mt-3">
+    <%= fields_for(:upload) do |f_u| %>
+      <%= f_u.label(:image1, :image_add_image.t + " 1:") %>
+        <%= custom_file_field(:upload, :image1) %>
+        (<%= :image_add_default.t %>)<br/>
+      <%= f_u.label(:image2, :image_add_image.t + " 2:") %>
+        <%= custom_file_field(:upload, :image2) %>
+        (<%= :image_add_optional.t %>)<br/>
+      <%= f_u.label(:image3, :image_add_image.t + " 3:") %>
+        <%= custom_file_field(:upload, :image3) %>
+        (<%= :image_add_optional.t %>)<br/>
+      <%= f_u.label(:image4, :image_add_image.t + " 4:") %>
+        <%= custom_file_field(:upload, :image4) %>
+        (<%= :image_add_optional.t %>)<br/>
+    <% end %>
+  </div>
+
+  <%= render(partial: "fields_for_images",
+             locals: { form: f, width: 80,
+                       leave_out_original_file_name: true }) %>
+
+  <% if @projects.any? %>
+    <div class="form-group form-inline">
+      <%= content_tag(:p, class: "font-weight-bold") { :PROJECTS.t + ":" } %>
+      <%= content_tag(:p, class: "help-block") { :form_images_project_help.t } %>
+      <%= fields_for(:project) do |f_p| %>
+        <%= render(partial: "fields_for_project", collection: @projects) %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= f.submit(:image_add_upload.l,
+               class: "btn btn-default center-block mt-3") %>
+<% end %>
