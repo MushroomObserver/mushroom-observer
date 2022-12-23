@@ -485,11 +485,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    get("profile/images", to: "preferences/profile/images#new",
+    get("profile/images", to: "profile/images#new",
                           as: "edit_profile_image")
-    post("profile/images", to: "preferences/profile/images#create",
+    post("profile/images", to: "profile/images#create",
                            as: "update_profile_image")
-    match("profile/images", to: "preferences/profile/images#update",
+    match("profile/images", to: "profile/images#update",
                             as: "remove_profile_image", via: [:put, :patch])
 
     resource :verify, only: [:new, :create], controller: "verifications"
@@ -607,10 +607,27 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   namespace :image do
-    put "/image/:id/transform", to: "/images/transforms#update", as: "transform"
-    put "/image/:id/vote", to: "/images/votes#update", as: "vote"
+    put("/:id/transform", to: "/images/transformations#update", as: "transform")
+    put("/:id/vote", to: "/images/votes#update", as: "vote")
+  end
+  namespace :images do
+    put("/purge_filenames", to: "/images/filenames#update",
+                            as: "bulk_filename_purge")
+    put("/update_licenses", to: "/images/licenses#update",
+                            as: "license_updater")
+    put("/votes/anonymity", to: "/images/votes/anonymity#update",
+                            as: "bulk_vote_anonymity_updater")
   end
   resources :images, only: [:edit, :update, :destroy, :index]
+  # put("/image/:id/transform", to: "images/transformations#update",
+  #                             as: "image_transform")
+  # put("/image/:id/vote", to: "images/votes#update", as: "image_vote")
+  # put("/images/purge_filenames", to: "images/filenames#update",
+  #                                as: "bulk_image_filename_purge")
+  # put("/images/update_licenses", to: "images/licenses#update",
+  #                                as: "image_license_updater")
+  # put("/images/votes/anonymity", to: "images/votes/anonymity#update",
+  #                                as: "bulk_image_vote_anonymity_updater")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -634,9 +651,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("map")
       get("suggestions")
       get("images/new", to: "observations/images#new",
-                        as: "reuse_images_for")
+                        as: "new_image_for")
       post("images", to: "observations/images#create",
-                     as: "attach_image_to")
+                     as: "upload_image_for")
+      get("images/reuse", to: "observations/images#new?mode=reuse",
+                          as: "reuse_images_for")
+      post("images/:mode", to: "observations/images#create?mode=reuse",
+                           as: "attach_image_to")
       get("images/edit", to: "observations/images#edit",
                          as: "remove_images_for")
       match("images", to: "observations/images#update",
@@ -691,9 +712,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
-  # ----- Image:
-  get("/image/show_image/:id", to: "image#show_image",
-                               as: "show_image")
   # ----- Location:
   get("/location/show_location/:id", to: "location#show_location",
                                      as: "show_location")

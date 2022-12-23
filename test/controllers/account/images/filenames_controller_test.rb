@@ -10,7 +10,7 @@ module Account::Images
       assert(imgs.any?)
 
       login("rolf")
-      get(:bulk_filename_purge)
+      put(:update)
       imgs = Image.where("original_name != '' AND user_id = #{rolf.id}")
       assert(imgs.empty?)
     end

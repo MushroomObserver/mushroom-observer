@@ -4,8 +4,8 @@
 # comes from a link made by thumbnail_helper#thumbnail(link: url_args)
 # with CRUD refactor, change thumbnail helper to fire a POST somehow?
 
-module GlossaryTerms::Images
-  class ReuseController < ApplicationController
+module GlossaryTerms
+  class ImagesController < ApplicationController
     before_action :login_required
 
     before_action :login_required

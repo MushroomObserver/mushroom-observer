@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # NOTE: These two are more properly account preferences actions
-# Move to Account::ImageVotes::AnonymityController#edit and update
+# Move to Images::Votes::AnonymityController#edit and update
 # Move test from images_controller_test
 #
-module Account::ImageVotes
+module Images::Votes
   class AnonymityController < ApplicationController
     before_action :login_required
 

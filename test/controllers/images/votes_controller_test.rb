@@ -12,9 +12,9 @@ module Images
       login(user.login)
 
       assert_difference("ImageVote.count", 1, "Failed to cast vote") do
-        post(:create, params: { id: image.id, value: value })
+        put(:update, params: { id: image.id, value: value })
       end
-      assert_redirected_to(show_image_path(image.id))
+      assert_redirected_to(image_path(image.id))
       vote = ImageVote.last
       assert(vote.image == image && vote.user == user && vote.value == value,
              "Vote not cast correctly")
@@ -27,10 +27,10 @@ module Images
       login(user.login)
 
       assert_difference("ImageVote.count", 1, "Failed to cast vote") do
-        post(:create, params: { id: image.id, value: value, next: true })
+        put(:update, params: { id: image.id, value: value, next: true })
       end
       assert_redirected_to(
-        show_image_path(id: image.id, q: QueryRecord.last.id.alphabetize)
+        image_path(id: image.id, q: QueryRecord.last.id.alphabetize)
       )
       vote = ImageVote.last
       assert(vote.image == image && vote.user == user && vote.value == value,

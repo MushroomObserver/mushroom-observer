@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Account::Images::FilenamesController
-module Account::Images
+# Images::FilenamesController
+module Images
   class FilenamesController < ApplicationController
     before_action :login_required
     # Linked from account/preferences/_privacy
-    # Move to new controller Account::Images::FilenamesController#update
+    # Move to new controller Images::FilenamesController#update
     # Move test from images_controller_test
 
     # bulk_filename_purge

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Images
-  class TransformsController < ApplicationController
+  class TransformationsController < ApplicationController
     before_action :login_required
 
     # Used by show_image to rotate and flip image. Currently a GET

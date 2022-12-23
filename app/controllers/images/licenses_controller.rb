@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Account::Images::LicensesController
-module Account::Images
+# Images::LicensesController
+module Images
   class LicensesController < ApplicationController
     before_action :login_required
 
