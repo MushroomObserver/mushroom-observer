@@ -1,0 +1,48 @@
+<%
+  @title = :image_show_title.t(name: @image.unique_format_name)
+  @tabsets = show_image_tabset(image: @image)
+  @container = :wide
+%>
+
+<div class="row">
+  <div class="col-md-6 col-lg-8">
+
+    <%= render(partial: "show/image_panel") %>
+    <%= render(partial: "show/license_history_panel") %>
+
+  </div><!--.col-lg-8-->
+  <div class="col-md-6 col-lg-4">
+
+    <%= render(partial: "show/info_panel") %>
+
+    <% if reviewer? %>
+      <div class="mb-3 text-center">
+        <%= set_export_status_controls(@image) %>
+      </div>
+      <div class="mb-3 text-center">
+        <%= set_ml_status_controls(@image) %>
+      </div>
+    <% end %>
+
+    <%= render(partial: "show/vote_panel") %>
+
+  </div><!--.col-lg-4-->
+</div><!--.row-->
+
+<!-- LICENSE_AND_FOOTER -->
+<div class="row">
+  <div class="col-sm-6">
+    <div class="small text-center">
+      <div>
+        <%= image_copyright(@image) %>
+      </div>
+      <div class="py-5px mb-3">
+        <%= render(partial: "shared/form_#{@image.license.form_name}") %>
+      </div>
+    </div>
+  </div><!--.col-->
+  <div class="col-sm-6">
+    <%= show_object_footer(@image) %>
+  </div><!--.col-sm-6-->
+</div><!--.row-->
+<!-- /LICENSE_AND_FOOTER -->

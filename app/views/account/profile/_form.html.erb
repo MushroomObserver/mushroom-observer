@@ -25,7 +25,7 @@
                 (@user.image_id ? :profile_image_change.t :
                   :profile_image_create.t) + ":") %> (33%)
     <%= link_to(:profile_image_reuse.t,
-                image_reuse_image_path, mode: :profile) %>
+                account_edit_profile_image_path) %>
     <%= custom_file_field(:user, :upload_image) %>
   </div>
 

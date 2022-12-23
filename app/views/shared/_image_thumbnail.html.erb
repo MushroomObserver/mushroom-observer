@@ -39,7 +39,7 @@
       %>
       <div class="mt-3">
         <% if User.current and votes and image %>
-          <%= render(partial: "image/image_vote_links",
+          <%= render(partial: "shared/image_vote_links",
                      locals: { image: image }) %>
         <% end %>
         <% if original && image && !image.original_name.blank? &&

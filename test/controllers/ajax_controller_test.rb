@@ -293,7 +293,7 @@ class AjaxControllerTest < FunctionalTestCase
     # Assert
     assert_template(layout: nil)
     assert_template(layout: false)
-    assert_template(partial: "image/_image_vote_links")
+    assert_template(partial: "shared/_image_vote_links")
   end
 
   def test_image_vote_renders_correct_links
@@ -305,16 +305,16 @@ class AjaxControllerTest < FunctionalTestCase
                       type: :image, id: images(:in_situ_image).id, value: 3)
 
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']"
+      "a[href='/images/#{images(:in_situ_image).id}?vote=0']"
     )
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']"
+      "a[href='/images/#{images(:in_situ_image).id}?vote=1']"
     )
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']"
+      "a[href='/images/#{images(:in_situ_image).id}?vote=2']"
     )
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']"
+      "a[href='/images/#{images(:in_situ_image).id}?vote=4']"
     )
   end
 

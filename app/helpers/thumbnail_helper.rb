@@ -25,7 +25,7 @@ module ThumbnailHelper
       html_options: {},
       notes: ""
     }.merge(args)
-    render(partial: "image/image_thumbnail", locals: locals)
+    render(partial: "shared/image_thumbnail", locals: locals)
   end
 
   def show_best_image(obs)
@@ -57,13 +57,13 @@ module ThumbnailHelper
     end
 
     # return a link if the user has NOT voted this way
-    link_to(vote_text,
-            { controller: :image,
-              action: :show_image,
-              id: image.id,
-              vote: vote },
-            title: image_vote_as_help_string(vote),
-            data: { role: "image_vote", id: image.id, val: vote })
+    # FIXME: JS is prolly checking a[data-role="image_vote"],
+    # but this is not an anchor tag now, it's an input.
+    # Also be sure inputs can have titles
+    put_button(name: vote_text,
+               path: image_vote_path(id: image.id, vote: vote),
+               title: image_vote_as_help_string(vote),
+               data: { role: "image_vote", id: image.id, val: vote })
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)
@@ -71,15 +71,14 @@ module ThumbnailHelper
     state_text = visual_group_status_text(state)
     return content_tag(:span, link_text) if link_text == state_text
 
-    link_to(link_text,
-            { controller: :image,
-              action: :show_image,
-              id: image_id,
-              vote: 1 },
-            title: link_text,
-            data: { role: "visual_group_status",
-                    imgid: image_id,
-                    vgid: visual_group.id,
-                    status: link })
+    # FIXME: JS is prolly checking a[data-role="visual_group_status"],
+    # but this is not an anchor tag now, it's an input.
+    put_button(name: link_text,
+               path: image_vote_path(id: image_id, vote: 1),
+               title: link_text,
+               data: { role: "visual_group_status",
+                       imgid: image_id,
+                       vgid: visual_group.id,
+                       status: link })
   end
 end

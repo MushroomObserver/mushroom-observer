@@ -55,7 +55,7 @@ module GlossaryTerms
     end
 
     def test_reuse_image_for_glossary_term_add_image_fails
-      GlossaryTerm.any_instance.stubs(:add_image).returns(false)
+      GlossaryTerm.any_instance.stubs(:new).returns(false)
       glossary_term = glossary_terms(:convex_glossary_term)
       image = images(:commercial_inquiry_image)
       assert_empty(glossary_term.images)

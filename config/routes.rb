@@ -607,9 +607,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   namespace :image do
-    get "/image/:id/transform", to: "/images/transforms#show", as: "transform"
-    match "/image/:id/vote", to: "/images/votes#update",
-                             via: [:put, :patch], as: "vote"
+    put "/image/:id/transform", to: "/images/transforms#update", as: "transform"
+    put "/image/:id/vote", to: "/images/votes#update", as: "vote"
   end
   resources :images, only: [:edit, :update, :destroy, :index]
 

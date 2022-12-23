@@ -579,6 +579,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_true(@response.body.include?("áč€εиts"))
   end
 
+  # Appear on both observations/images/new and images/edit
   def test_project_checkboxes
     proj1 = projects(:eol_project)
     proj2 = projects(:bolete_project)

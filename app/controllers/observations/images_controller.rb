@@ -10,20 +10,19 @@ module Observations
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
+    # NOTE: new handles both uploads and reuse via params[:mode]
     # was ImageController#add_image
     # was ImageController#reuse_image params[:mode] = observation
-    # NOTE: new handles both uploads and reuse via params[:mode]
     def new
       return unless (@observation = find_observation!)
 
       check_observation_permission!
-  
-      if params[:mode] == "reuse"
-        return serve_image_reuse_selections(params)
+
+      return serve_image_reuse_selections(params) if params[:mode] == "reuse"
 
       @image = rough_cut_image
       @licenses = current_license_names_and_ids
-      init_project_vars_for_add_or_edit(@observation)  
+      init_project_vars_for_add_or_edit(@observation)
     end
 
     def create
@@ -43,12 +42,12 @@ module Observations
     def find_observation!
       find_or_goto_index(Observation, params[:id].to_s)
     end
-  
+
     def check_observation_permission!
       redirect_with_query(permanent_observation_path(id: @observation.id)) unless
         check_permission!(@observation)
     end
-  
+
     def rough_cut_image
       @image = Image.new
       @image.license = @user.license
@@ -59,7 +58,7 @@ module Observations
       @image.when = @observation.when
       @image
     end
-  
+
     def create_image
       if params[:upload].blank?
         flash_warning(:runtime_no_changes.t)
@@ -73,29 +72,29 @@ module Observations
       end
       redirect_with_query(permanent_observation_path(id: @observation.id))
     end
-  
-    def process_image(args, upload)
+
+    def process_image(args, upload) # rubocop:disable Metrics/AbcSize
       return if upload.blank?
-  
+
       @image = Image.new(args.permit(whitelisted_image_args))
       @image.created_at = Time.current
       @image.updated_at = @image.created_at
       @image.user       = @user
       @image.image      = upload
       @image.save
-  
+
       # The 1st save (or !save) puts the image's original filename in the db,
       # whether or not the user wants it.  So if we don't want it,
       # we must empty it and save a 2nd time.
       @image.original_name = "" if @user.keep_filenames == "toss"
       return flash_object_errors(@image) unless @image.save
-  
+
       return revert_image_name_and_flash_errors unless
         @image.process_image(strip: @observation.gps_hidden)
 
       add_image_to_observation!
     end
-  
+
     def add_image_to_observation!
       @observation.add_image(@image)
       @image.log_create_for(@observation)
@@ -104,17 +103,17 @@ module Observations
       flash_notice(:runtime_image_uploaded_image.t(name: name))
       update_related_projects(@image, params[:project])
     end
-  
+
     def revert_image_name_and_flash_errors
       name = @image.original_name
       name = "???" if name.empty?
       flash_error(:runtime_image_invalid_image.t(name: name))
       flash_object_errors(@image)
     end
-  
+
     def update_related_projects(img, checks)
       return false unless checks
-  
+
       # Here's the problem: User can add image to obs he doesn't own
       # if it is attached to one of his projects.
       # Observation can be attached to other projects, too,
@@ -136,17 +135,17 @@ module Observations
           projects << project unless projects.include?(project)
         end
       end
-  
+
       attach_images_to_projects_and_flash_notices(img, projects, checks)
     end
-  
+
     def attach_images_to_projects_and_flash_notices(img, projects, checks)
       any_changes = false
       projects.each do |project|
         before = img.projects.include?(project)
         after = checks["id_#{project.id}"] == "1"
         next if before == after
-  
+
         if after
           project.add_image(img)
           flash_notice(:attached_to_project.t(object: :image,
@@ -160,7 +159,7 @@ module Observations
       end
       any_changes
     end
-    
+
     ############################################################################
     # NEW IMAGE MODE: REUSE
 
@@ -187,7 +186,7 @@ module Observations
       render(:reuse)
     end
 
-    def reuse_image 
+    def reuse_image
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
@@ -196,7 +195,7 @@ module Observations
 
       reuse_image_for_observation(image)
     end
-    
+
     # Add an image to observation.
     def reuse_image_for_observation(image)
       @observation.add_image(image)
@@ -212,7 +211,7 @@ module Observations
 
     ############################################################################
 
-    # REMOVE IMAGES: Maybe use shared form (but there's nothing to the "form")
+    # REMOVE IMAGES: Uses shared template
     # Form used to remove one or more images from an observation (not destroy!)
     # Linked from: observations/show
     # Inputs:
