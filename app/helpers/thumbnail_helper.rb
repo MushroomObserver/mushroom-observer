@@ -59,6 +59,7 @@ module ThumbnailHelper
     # return a link if the user has NOT voted this way
     # FIXME: JS is prolly checking a[data-role="image_vote"],
     # but this is not an anchor tag now, it's an input.
+    # Also check show image vote panel
     # Also be sure inputs can have titles
     put_button(name: vote_text,
                path: image_vote_path(id: image.id, vote: vote),
