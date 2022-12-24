@@ -11,39 +11,59 @@
   orig_url   = Image.url(:original, image_id)
   # If the image is part of an image set.
   is_set = is_set || false
+
+  # Lightbox stuff:
+  lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
+  show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
+  show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
+  caption = "#{show_orig} | #{show_exif}".html_safe
+
+  # Show original name?
+  show_original_name = original && image && !image.original_name.blank? &&
+    (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show") 
   # NOTE: The local var `link` might be to #show_image as you'd expect,
   # or it may be a GET with params[:img_id] to the actions for #reuse_image
   # or #remove_image ...or any other link. Firing a POST to those actions
   # might require printing a Rails post_button and putting something like
   # Bootstrap's .stretched-link class on the generated form input.
   # However, the whole reuse_image page is currently a form - refactor?
+
+  # CHANGES - 
+  # remove responsive param, all responsive
+  # make link a stretched-link
+  # html_options = html_options.merge({ class: "stretched-link" })
+  image_link = case link_method
+                when :get
+                  link_with_query("", link, class: "stretched-link")
+                when :post
+                  post_button(name: "", path: link, class: "stretched-link")
+                when :put
+                  put_button(name: "", path: link, class: "stretched-link")
+                when :patch
+                  patch_button(name: "", path: link, class: "stretched-link")
+                when :delete
+                  destroy_button(name: "", target: link, class: "stretched-link")
+                end
 %>
 
 <div class="position-relative">
   <div class="d-inline">
     <div data-toggle="expand-icon" class="text-center">
-      <% style = "max-width: 100%; height: auto; margin: auto;" if responsive
-      img_class = "img-unresponsive #{img_class}" if !responsive
-      img_tag = image_tag(size_url, title: notes, style: style,
-                          class: img_class,
-                          data: { toggle: "tooltip", placement: "bottom" }) %>
-      <%= link_with_query(img_tag, link, html_options) %>
-      <%=
-        lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-        show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
-        show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
-        caption = "#{show_orig} | #{show_exif}".html_safe
-        link_to("", huge_url,
-                class: "glyphicon glyphicon-fullscreen theater-btn",
-                data: { lightbox: lightbox_id, title: caption })
-      %>
+      <div class="position-relative">
+        <%= image_tag(size_url, title: notes, style: style,
+                      class: "img-fluid #{img_class}",
+                      data: { toggle: "tooltip", placement: "bottom" }) %>
+        <%= image_link %>
+      </div>
+      <%= link_to("", huge_url, # FIX. Pass a srcset attribute from context?
+                  class: "glyphicon glyphicon-fullscreen theater-btn",
+                  data: { lightbox: lightbox_id, title: caption }) %>
       <div class="mt-3">
         <% if User.current and votes and image %>
           <%= render(partial: "shared/image_vote_links",
                      locals: { image: image }) %>
         <% end %>
-        <% if original && image && !image.original_name.blank? &&
-              (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show") %>
+        <% if show_original_name %>
           <div class="text-center">
             <span><%= image.original_name %></span>
           </div><!-- .text-center -->
