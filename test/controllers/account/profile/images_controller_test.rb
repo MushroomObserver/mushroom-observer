@@ -9,7 +9,7 @@ module Account::Profile
     def test_reuse_user_profile_image_as_itself
       user = users(:rolf)
       assert((img = user.image), "Test needs User fixture with profile image")
-      params = { img_id: img.id }
+      params = { id: img.id }
 
       login(user.login)
       get(:reuse, params: params)
@@ -28,7 +28,7 @@ module Account::Profile
     # This would happen if user clicked on image.
     def test_reuse_image_for_user_post1
       image = images(:commercial_inquiry_image)
-      params = { img_id: image.id.to_s }
+      params = { id: image.id.to_s }
       post_requires_login(:attach, params)
       assert_redirected_to(user_path(rolf.id))
       assert_equal(rolf.id, session[:user_id])
@@ -38,7 +38,7 @@ module Account::Profile
     # This would happen if user typed in id and submitted.
     def test_reuse_image_for_user_post2
       image = images(:commercial_inquiry_image)
-      params = { img_id: image.id.to_s }
+      params = { id: image.id.to_s }
       post_requires_login(:attach, params)
       assert_redirected_to(user_path(rolf.id))
       assert_equal(rolf.id, session[:user_id])

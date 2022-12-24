@@ -16,7 +16,7 @@ module GlossaryTerms
     def reuse
       @object = GlossaryTerm.safe_find(params[:id])
 
-      serve_image_reuse_selections(params)
+      # serve_image_reuse_selections(params)
     end
 
     def attach
@@ -25,7 +25,7 @@ module GlossaryTerms
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        return serve_image_reuse_selections(params)
+        redirect_to(:reuse) and return
       end
 
       reuse_image_for_glossary_term(image)
@@ -38,24 +38,24 @@ module GlossaryTerms
     # The actual grid of images (partial) is basically a shared layout.
     # CRUD refactor makes each image link POST to create or edit.
     #
-    def serve_image_reuse_selections(params)
-      # params[:all_users] is a query param for rendering form images (possible
-      # selections), not a form param for the submit.
-      # It's toggled by a button on the page "Include other users' images"
-      # that reloads the page with this param on or off
+    # def serve_image_reuse_selections(params)
+    # params[:all_users] is a query param for rendering form images (possible
+    # selections), not a form param for the submit.
+    # It's toggled by a button on the page "Include other users' images"
+    # that reloads the page with this param on or off
 
-      # These could be set (except @objects) on shared layout
-      if params[:all_users] == "1"
-        @all_users = true
-        query = create_query(:Image, :all, by: :updated_at)
-      else
-        query = create_query(:Image, :by_user, user: @user, by: :updated_at)
-      end
-      @layout = calc_layout_params
-      @pages = paginate_numbers(:page, @layout["count"])
-      @objects = query.paginate(@pages,
-                                include: [:user, { observations: :name }])
-    end
+    # These could be set (except @objects) on shared layout
+    #   if params[:all_users] == "1"
+    #     @all_users = true
+    #     query = create_query(:Image, :all, by: :updated_at)
+    #   else
+    #     query = create_query(:Image, :by_user, user: @user, by: :updated_at)
+    #   end
+    #   @layout = calc_layout_params
+    #   @pages = paginate_numbers(:page, @layout["count"])
+    #   @objects = query.paginate(@pages,
+    #                             include: [:user, { observations: :name }])
+    # end
 
     def reuse_image_for_glossary_term(image = nil)
       if image &&

@@ -1848,6 +1848,13 @@ class ApplicationController < ActionController::Base
       flash_error_and_goto_index(Observation, id)
   end
 
+  def query_images_to_reuse(all_users, user)
+    return create_query(:Image, :all, by: :updated_at) if all_users || !user
+
+    create_query(:Image, :by_user, user: user, by: :updated_at)
+  end
+  helper_method :query_images_to_reuse
+
   ##############################################################################
 
   private

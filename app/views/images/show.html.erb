@@ -7,13 +7,13 @@
 <div class="row">
   <div class="col-md-6 col-lg-8">
 
-    <%= render(partial: "show/image_panel") %>
-    <%= render(partial: "show/license_history_panel") %>
+    <%= render(partial: "images/show/image_panel") %>
+    <%= render(partial: "images/show/license_history_panel") %>
 
   </div><!--.col-lg-8-->
   <div class="col-md-6 col-lg-4">
 
-    <%= render(partial: "show/info_panel") %>
+    <%= render(partial: "images/show/info_panel") %>
 
     <% if reviewer? %>
       <div class="mb-3 text-center">
@@ -24,7 +24,7 @@
       </div>
     <% end %>
 
-    <%= render(partial: "show/vote_panel") %>
+    <%= render(partial: "images/show/vote_panel") %>
 
   </div><!--.col-lg-4-->
 </div><!--.row-->

@@ -27,7 +27,7 @@ module Images
       params = { id: image.id, op: opr, size: user.image_size }
 
       login(user.login)
-      post(:create, params: params)
+      put(:update, params: params)
 
       # Asserting the flash text is the best I can do because Image.transform
       # does not transform images in the text environment. 2022-08-19 JDC

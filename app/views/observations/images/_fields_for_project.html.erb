@@ -1,7 +1,13 @@
-<div class="text-nowrap">
-  <%= f_p.label("id_#{project.id}", link_to_object(project)) %>
-  <%= f_p.check_box("id_#{project.id}",
-                    checked: @project_checks[project.id],
-                    disabled: @image.user != @user && !project.is_member?(@user),
-                    class: "form-control") %>
+<div class="form-group form-inline">
+  <%= content_tag(:p, class: "font-weight-bold") { :PROJECTS.t + ":" } %>
+  <%= content_tag(:p, class: "help-block") { :form_images_project_help.t } %>
+  <div class="text-nowrap">
+    <%= fields_for(:project) do |f_p| %>
+      <%= f_p.label("id_#{project.id}", link_to_object(project)) %>
+      <%= f_p.check_box("id_#{project.id}",
+                        checked: @project_checks[project.id],
+                        disabled: @image.user != @user && !project.is_member?(@user),
+                        class: "form-control") %>
+    <% end %>
+  </div>
 </div>

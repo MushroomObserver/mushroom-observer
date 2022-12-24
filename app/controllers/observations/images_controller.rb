@@ -23,6 +23,22 @@ module Observations
       init_project_vars_for_add_or_edit(@observation)
     end
 
+    ##############################################################################
+
+    # Form for editing date/license/notes on an observation image.
+    # Linked from: show_image/original
+    # Inputs: params[:id] (image)
+    #   params[:comment][:summary]
+    #   params[:comment][:comment]
+    # Outputs: @image, @licenses
+    def edit
+      return unless (@image = find_image!)
+
+      @licenses = current_license_names_and_ids
+      check_image_permission!
+      init_project_vars_for_add_or_edit(@image)
+    end
+
     # new (upload) image commits here
     def create
       return unless (@observation = find_observation!)
@@ -164,12 +180,12 @@ module Observations
     ############################################################################
     # NEW IMAGE MODE: REUSE
 
-    def reuse 
+    def reuse
       return unless (@observation = find_observation!)
-  
+
       return unless check_observation_permission!
-  
-      serve_image_reuse_selections(params)
+
+      # serve_image_reuse_selections(params)
     end
 
     # reuse images "put buttons" commit here
@@ -181,7 +197,7 @@ module Observations
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        return serve_image_reuse_selections(params)
+        redirect_to(:reuse) and return
       end
 
       attach_image_to_observation(image)
@@ -193,19 +209,19 @@ module Observations
     # (the possible selections), not a form param for the submit.
     # It's toggled by a button on the page "Include other users' images"
     # that reloads the page with this param on or off
-    def serve_image_reuse_selections(params)
-      if params[:all_users] == "1"
-        @all_users = true
-        query = create_query(:Image, :all, by: :updated_at)
-      else
-        query = create_query(:Image, :by_user, user: @user, by: :updated_at)
-      end
-      @layout = calc_layout_params
-      @pages = paginate_numbers(:page, @layout["count"])
-      @objects = query.paginate(@pages,
-                                include: [:user, { observations: :name }])
-      render(:reuse)
-    end
+    # def serve_image_reuse_selections(_params)
+    # if params[:all_users] == "1"
+    #   @all_users = true
+    #   query = create_query(:Image, :all, by: :updated_at)
+    # else
+    #   query = create_query(:Image, :by_user, user: @user, by: :updated_at)
+    # end
+    # @layout = calc_layout_params
+    # @pages = paginate_numbers(:page, @layout["count"])
+    # @objects = query.paginate(@pages,
+    #                           include: [:user, { observations: :name }])
+    # render(:reuse)
+    # end
 
     # Attach an image to observation.
     def attach_image_to_observation(image)
@@ -219,22 +235,6 @@ module Observations
     end
 
     public
-
-    ##############################################################################
-
-    # Form for editing date/license/notes on an observation image.
-    # Linked from: show_image/original
-    # Inputs: params[:id] (image)
-    #   params[:comment][:summary]
-    #   params[:comment][:comment]
-    # Outputs: @image, @licenses
-    def edit
-      return unless (@image = find_image!)
-
-      @licenses = current_license_names_and_ids
-      check_image_permission!
-      init_project_vars_for_add_or_edit(@image)
-    end
 
     def update
       return unless (@image = find_image!)
