@@ -613,8 +613,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   namespace :images do
     put("/purge_filenames", to: "/images/filenames#update",
                             as: "bulk_filename_purge")
-    put("/update_licenses", to: "/images/licenses#update",
-                            as: "license_updater")
+    get("/licenses/edit", to: "/images/licenses#edit",
+                          as: "edit_licenses")
+    put("/licenses", to: "/images/licenses#update",
+                     as: "license_updater")
+    get("/votes/anonymity", to: "/images/votes/anonymity#edit",
+                            as: "edit_vote_anonymity")
     put("/votes/anonymity", to: "/images/votes/anonymity#update",
                             as: "bulk_vote_anonymity_updater")
   end
