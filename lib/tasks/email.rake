@@ -11,7 +11,8 @@ namespace :email do
 
   desc "Send queued emails"
   task(send: :environment) do
-    require Rails.root.join("/app/extensions/extensions.rb")
+    # disable cop because `require`` wants a string, not a pathname
+    require "#{Rails.root}/app/extensions/extensions.rb" # rubocop disable:Rails/RootPathnameMethods
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     QueuedEmail.all.each do |e|
