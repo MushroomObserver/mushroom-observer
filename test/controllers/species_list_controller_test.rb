@@ -1093,10 +1093,10 @@ class SpeciesListControllerTest < FunctionalTestCase
     # gets a TempFile or a StringIO.
     spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
-    filename = "#{::Rails.root}/test/species_lists/small_list.txt"
-    file = File.new(filename)
+    path = Rails.root.join("test/species_lists/small_list.txt")
+    file = File.new(path)
     list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
-    file = Rack::Test::UploadedFile.new(filename, "text/plain")
+    file = Rack::Test::UploadedFile.new(path, "text/plain")
     params = {
       "id" => spl.id,
       "species_list" => {
@@ -1114,10 +1114,10 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_read_species_list_two
     spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
-    filename = "#{::Rails.root}/test/species_lists/foray_notes.txt"
-    file = File.new(filename)
+    path = Rails.root.join("test/species_lists/foray_notes.txt")
+    file = File.new(path)
     list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
-    file = Rack::Test::UploadedFile.new(filename, "text/plain")
+    file = Rack::Test::UploadedFile.new(path, "text/plain")
     params = {
       "id" => spl.id,
       "species_list" => {
@@ -1167,7 +1167,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     list.construct_observation(names(:lactarius_alpigenes), args)
     list.save # just in case
 
-    path = "#{::Rails.root}/test/reports"
+    path = Rails.root.join("test/reports")
 
     get(:make_report, params: { id: list.id, type: "csv" })
     assert_response_equal_file(["#{path}/test.csv", "ISO-8859-1"])
@@ -1241,7 +1241,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                  ids)
     assert_create_species_list
 
-    path = "#{::Rails.root}/test/reports"
+    path = Rails.root.join("test/reports")
 
     post(:name_lister, params: params.merge(commit: :name_lister_submit_csv.l))
     assert_response_equal_file(["#{path}/test2.csv", "ISO-8859-1"])

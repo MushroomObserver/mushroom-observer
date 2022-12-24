@@ -126,13 +126,13 @@ class ImageTest < UnitTestCase
   end
 
   def test_presence_of_critical_external_scripts
-    assert_not(File.exist?("#{::Rails.root}/script/bogus_script"),
+    assert_not(Rails.root.join("script/bogus_script").exist?,
                "script/bogus_script should not exist!")
-    assert(File.exist?("#{::Rails.root}/script/process_image"),
+    assert(Rails.root.join("script/process_image").exist?,
            "Missing script/process_image!")
-    assert(File.exist?("#{::Rails.root}/script/rotate_image"),
+    assert(Rails.root.join("script/rotate_image").exist?,
            "Missing script/rotate_image!")
-    assert(File.exist?("#{::Rails.root}/script/retransfer_images"),
+    assert(Rails.root.join("script/retransfer_images").exist?,
            "Missing script/retransfer_images!")
   end
 

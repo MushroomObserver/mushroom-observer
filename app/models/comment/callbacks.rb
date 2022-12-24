@@ -31,8 +31,8 @@ module Comment::Callbacks
   # the same comment.
   def oil_and_water
     user_ids = users_with_other_comments.map(&:id).sort
-    return unless (user_ids & ::MO.water_users).any?
-    return unless (user_ids & ::MO.oil_users).any?
+    return unless user_ids.intersect?(::MO.water_users)
+    return unless user_ids.intersect?(::MO.oil_users)
 
     ::WebmasterMailer.build(
       MO.noreply_email_address,

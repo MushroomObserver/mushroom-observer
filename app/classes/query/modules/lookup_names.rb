@@ -15,7 +15,7 @@ module Query
         min_names2 = add_subtaxa_if_necessary(min_names, args)
         min_names  = add_synonyms_again(min_names, min_names2, args)
         min_names -= orig_names if args[:exclude_original_names]
-        min_names.map { |min_name| min_name[0] }
+        min_names.pluck(0)
       end
 
       # ------------------------------------------------------------------------
@@ -156,13 +156,13 @@ module Query
       end
 
       def genera_and_up(min_names)
-        min_names.map { |min_name| min_name[3] }.
+        min_names.pluck(3).
           reject { |min_name| min_name.include?(" ") }
       end
 
       def genera_and_down(min_names)
         genera = {}
-        text_names = min_names.map { |min_name| min_name[3] }
+        text_names = min_names.pluck(3)
         # Make hash of all genera present.
         text_names.each do |text_name|
           genera[text_name] = true unless text_name.include?(" ")

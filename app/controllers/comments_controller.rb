@@ -229,6 +229,25 @@ class CommentsController < ApplicationController
     @comment = Comment.new(target: @target)
   end
 
+  # Form to edit a comment for an object..
+  # Linked from: show_comment, show_object.
+  # Inputs:
+  #   params[:id]
+  #   params[:comment][:summary]
+  #   params[:comment][:comment]
+  # Success:
+  #   Redirects to show_object.
+  # Failure:
+  #   Renders edit_comment again.
+  #   Outputs: @comment, @object
+  def edit
+    return unless (@comment = find_comment!)
+
+    @target = comment_target
+    return unless allowed_to_see!(@target)
+    return unless check_permission_or_redirect!(@comment, @target)
+  end
+
   def create
     return unless (@target = load_target(params[:type], params[:target])) &&
                   allowed_to_see!(@target)
@@ -258,25 +277,6 @@ class CommentsController < ApplicationController
   end
 
   public
-
-  # Form to edit a comment for an object..
-  # Linked from: show_comment, show_object.
-  # Inputs:
-  #   params[:id]
-  #   params[:comment][:summary]
-  #   params[:comment][:comment]
-  # Success:
-  #   Redirects to show_object.
-  # Failure:
-  #   Renders edit_comment again.
-  #   Outputs: @comment, @object
-  def edit
-    return unless (@comment = find_comment!)
-
-    @target = comment_target
-    return unless allowed_to_see!(@target)
-    return unless check_permission_or_redirect!(@comment, @target)
-  end
 
   def update
     return unless (@comment = find_comment!)

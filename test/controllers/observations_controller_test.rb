@@ -2440,7 +2440,7 @@ class ObservationsControllerTest < FunctionalTestCase
     week_ago = 1.week.ago
 
     setup_image_dirs
-    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file1 = Rack::Test::UploadedFile.new(file, "image/jpeg")
     file2 = Rack::Test::UploadedFile.new(file, "image/jpeg")
     file3 = Rack::Test::UploadedFile.new(file, "image/jpeg")
@@ -2526,7 +2526,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
 
     setup_image_dirs
-    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
     File.stub(:rename, false) do
       post(
@@ -2556,7 +2556,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
 
     setup_image_dirs
-    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
     # Simulate process_image failure.

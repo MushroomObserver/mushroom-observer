@@ -112,7 +112,7 @@ GEM
       activerecord (>= 5)
       graphql (>= 1.10, < 3.0)
     hashdiff (1.0.1)
-    i18n (1.11.0)
+    i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     io-console (0.5.11)
     irb (1.4.1)
@@ -126,7 +126,7 @@ GEM
       thor (>= 0.14, < 2.0)
     jquery-slick-rails (1.10.0)
       railties (>= 3.1)
-    json (2.6.2)
+    json (2.6.3)
     kgio (2.11.4)
     libv8-node (16.10.0.0-arm64-darwin)
     libv8-node (16.10.0.0-x86_64-linux)
@@ -143,7 +143,7 @@ GEM
     mini_mime (1.1.2)
     mini_racer (0.6.2)
       libv8-node (~> 16.10.0.0)
-    minitest (5.16.2)
+    minitest (5.16.3)
     minitest-reporters (1.5.0)
       ansi
       builder
@@ -159,6 +159,7 @@ GEM
       timeout
     net-smtp (0.3.2)
       net-protocol
+    newrelic_rpm (8.14.0)
     nokogiri (1.13.10-arm64-darwin)
       racc (~> 1.4)
     nokogiri (1.13.10-x86_64-linux)
@@ -198,7 +199,7 @@ GEM
       io-console (~> 0.5)
     rexml (3.2.5)
     rtf (0.3.3)
-    rubocop (1.39.0)
+    rubocop (1.40.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.2.1)
@@ -215,10 +216,10 @@ GEM
     rubocop-performance (1.14.0)
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
-    rubocop-rails (2.14.2)
+    rubocop-rails (2.17.3)
       activesupport (>= 4.2.0)
       rack (>= 1.1)
-      rubocop (>= 1.7.0, < 2.0)
+      rubocop (>= 1.33.0, < 2.0)
     ruby-progressbar (1.11.0)
     rubyzip (2.3.2)
     sassc (2.4.0)
@@ -250,7 +251,7 @@ GEM
     thor (1.2.1)
     tilt (2.0.10)
     timeout (0.3.0)
-    tzinfo (2.0.4)
+    tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     uglifier (4.2.0)
       execjs (>= 0.3.0, < 3)
@@ -273,7 +274,7 @@ GEM
       webrick
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.6.0)
+    zeitwerk (2.6.6)
 
 PLATFORMS
   arm64-darwin-21
@@ -321,6 +322,7 @@ DEPENDENCIES
   net-imap
   net-pop
   net-smtp
+  newrelic_rpm
   nokogiri (>= 1.13.10)
   rack-cors
   rails-controller-testing

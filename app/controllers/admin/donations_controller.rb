@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
 module Admin
+  # Allow users to make monetary donations via the website
   class DonationsController < AdminController
     def new
       @donation = Donation.new
-    end
-
-    def create
-      @donation = create_donation(params)
     end
 
     # Review donations
@@ -17,6 +14,10 @@ module Admin
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed
       end
+    end
+
+    def create
+      @donation = create_donation(params)
     end
 
     def update

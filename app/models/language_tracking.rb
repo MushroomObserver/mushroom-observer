@@ -93,7 +93,7 @@ module LanguageTracking
   private
 
   def tag_file(name)
-    path = "#{::Rails.root}/tmp/language_tracking"
+    path = Rails.root.join("tmp/language_tracking")
     FileUtils.mkpath(path) unless File.exist?(path)
     "#{path}/#{name}.txt"
   end
