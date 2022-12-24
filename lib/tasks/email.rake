@@ -11,7 +11,8 @@ namespace :email do
 
   desc "Send queued emails"
   task(send: :environment) do
-    require Rails.root.join("/app/extensions/extensions.rb")
+    # disable cop; `require` needs a String, not a PathName
+    require "#{Rails.root}/app/extensions/extensions.rb" # rubocop disable:Rails/FilePath
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     QueuedEmail.all.each do |e|
@@ -23,7 +24,7 @@ namespace :email do
         # This shouldn't happen, but just in case, better safe...)
         if e.to_user
           result = nil
-          Rails.root.join("/log/email-low-level.log").open("a") do |fh|
+          Rails.root.join("log/email-low-level.log").open("a") do |fh|
             fh.puts("sending #{e.id.inspect}...")
             result = e.send_email
             fh.puts(
