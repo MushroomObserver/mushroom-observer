@@ -70,10 +70,9 @@ module ObservationTabsHelper
 
   def prefs_tabset
     tabs = [
-      link_to(:bulk_license_link.t,
-              controller: :image, action: :license_updater),
+      link_to(:bulk_license_link.t, images_edit_licenses_path),
       link_to(:prefs_change_image_vote_anonymity.t,
-              controller: :image, action: :bulk_vote_anonymity_updater),
+              images_edit_vote_anonymity_path),
       link_to(:profile_link.t, action: :profile),
       link_to(:show_user_your_notifications.t, interests_path),
       link_to(:account_api_keys_link.t, action: :api_keys)
