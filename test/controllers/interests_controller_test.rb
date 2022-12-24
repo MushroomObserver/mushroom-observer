@@ -3,16 +3,16 @@
 require("test_helper")
 
 # users interests
-class InterestControllerTest < FunctionalTestCase
+class InterestsControllerTest < FunctionalTestCase
   # Test list feature from left-hand column.
-  def test_list_interests
+  def test_index
     login("rolf")
     Interest.create(target: observations(:minimal_unknown_obs),
                     user: rolf, state: true)
     Interest.create(target: names(:agaricus_campestris), user: rolf,
                     state: true)
-    get(:list_interests)
-    assert_template("list_interests")
+    get(:index)
+    assert_template("index")
   end
 
   def test_set_interest_another_user
@@ -20,7 +20,7 @@ class InterestControllerTest < FunctionalTestCase
     get(:set_interest,
         params: {
           type: "Observation",
-          id: observations(:minimal_unknown_obs),
+          id: observations(:minimal_unknown_obs).id,
           user: mary.id
         })
     assert_flash_error
@@ -123,16 +123,5 @@ class InterestControllerTest < FunctionalTestCase
     assert_flash_success
     assert_equal(0, Interest.where(user_id: rolf.id).length)
     assert_equal(0, NameTracker.where(user_id: rolf.id).length)
-  end
-
-  def test_destroy_name_tracker
-    login("rolf")
-    n = name_trackers(:coprinus_comatus_name_tracker)
-    assert(n)
-    id = n.id
-    get(:destroy_name_tracker, params: { id: id })
-    assert_raises(ActiveRecord::RecordNotFound) do
-      NameTracker.find(id)
-    end
   end
 end
