@@ -18,10 +18,10 @@
 
   <div class="col-sm-5 text-center">
     <% if @user.image %>
-      <%= thumbnail(@user.image_id, {votes: false}) %>
-      <%= patch_link(:profile_image_remove.t,
-                     account_remove_profile_image_path,
-                     { data: { confirm: :are_you_sure.l } }) %>
+      <%= thumbnail(@user.image_id, { votes: false }) %>
+      <%= put_button(name: :profile_image_remove.t,
+                     path: account_remove_profile_image_path,
+                     data: { confirm: :are_you_sure.l }) %>
     <% end %>
   </div>
 </div><!--.row-->

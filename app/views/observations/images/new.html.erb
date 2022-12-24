@@ -3,17 +3,19 @@
 
   tabs = [
     link_with_query(:cancel_and_show.t(type: :observation),
-                    @observation.show_link_args),
-    link_with_query(:image_add_edit.t, controller: :observations,
-                    action: :edit, id: @observation.id)
+                    observation_path(@observation.id)),
+    link_with_query(:image_add_edit.t, edit_observation_path(@observation.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= form_with(model: @image,
-      url: add_query_param(action: :create, id: @observation.id),
-      html: { multipart: true }) do |f| %>
-  <%= f.hidden_field(:observation, :id) %>
+              url: add_query_param(action: :create, id: @observation.id),
+              html: { multipart: true }) do |f| %>
+
+  <%= fields_for(:observation) do |f_o| %>
+    <%= f_o.hidden_field(:id) %>
+  <% end %>
 
   <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
 
@@ -38,7 +40,7 @@
   </div>
 
   <%= render(partial: "fields_for_images",
-             locals: { form: f, width: 80,
+             locals: { f: f, width: 80,
                        leave_out_original_file_name: true }) %>
 
   <% if @projects.any? %>

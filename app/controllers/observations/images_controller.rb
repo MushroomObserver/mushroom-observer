@@ -16,25 +16,20 @@ module Observations
     def new
       return unless (@observation = find_observation!)
 
-      check_observation_permission!
-
-      return serve_image_reuse_selections(params) if params[:mode] == "reuse"
+      return unless check_observation_permission!
 
       @image = rough_cut_image
       @licenses = current_license_names_and_ids
       init_project_vars_for_add_or_edit(@observation)
     end
 
+    # new (upload) image commits here
     def create
       return unless (@observation = find_observation!)
 
-      check_observation_permission!
+      return unless check_observation_permission!
 
-      if params[:mode] == "reuse"
-        reuse_image
-      else
-        create_image
-      end
+      create_image
     end
 
     private
@@ -44,8 +39,14 @@ module Observations
     end
 
     def check_observation_permission!
-      redirect_with_query(permanent_observation_path(id: @observation.id)) unless
-        check_permission!(@observation)
+      return true if check_permission!(@observation)
+
+      redirect_with_query(permanent_observation_path(id: @observation.id))
+      false
+    end
+
+    def current_license_names_and_ids
+      License.current_names_and_ids(@image.license)
     end
 
     def rough_cut_image
@@ -163,16 +164,36 @@ module Observations
     ############################################################################
     # NEW IMAGE MODE: REUSE
 
+    def reuse 
+      return unless (@observation = find_observation!)
+  
+      return unless check_observation_permission!
+  
+      serve_image_reuse_selections(params)
+    end
+
+    # reuse images "put buttons" commit here
+    def attach
+      return unless (@observation = find_observation!)
+
+      return unless check_observation_permission!
+
+      image = Image.safe_find(params[:img_id])
+      unless image
+        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+        return serve_image_reuse_selections(params)
+      end
+
+      attach_image_to_observation(image)
+    end
+
     # The grid of images to reuse is a shared partial layout.
     # CRUD refactor, each image has a link that POSTs to :create.
-    #
+    # params[:all_users] is a show param for rendering form images
+    # (the possible selections), not a form param for the submit.
+    # It's toggled by a button on the page "Include other users' images"
+    # that reloads the page with this param on or off
     def serve_image_reuse_selections(params)
-      # params[:all_users] is a show param for rendering form images (possible
-      # selections), not a form param for the submit.
-      # It's toggled by a button on the page "Include other users' images"
-      # that reloads the page with this param on or off
-
-      # These could be set (except @objects) on shared layout
       if params[:all_users] == "1"
         @all_users = true
         query = create_query(:Image, :all, by: :updated_at)
@@ -186,18 +207,8 @@ module Observations
       render(:reuse)
     end
 
-    def reuse_image
-      image = Image.safe_find(params[:img_id])
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        return serve_image_reuse_selections(params)
-      end
-
-      reuse_image_for_observation(image)
-    end
-
-    # Add an image to observation.
-    def reuse_image_for_observation(image)
+    # Attach an image to observation.
+    def attach_image_to_observation(image)
       @observation.add_image(image)
       image.log_reuse_for(@observation)
       if @observation.gps_hidden
@@ -209,9 +220,106 @@ module Observations
 
     public
 
+    ##############################################################################
+
+    # Form for editing date/license/notes on an observation image.
+    # Linked from: show_image/original
+    # Inputs: params[:id] (image)
+    #   params[:comment][:summary]
+    #   params[:comment][:comment]
+    # Outputs: @image, @licenses
+    def edit
+      return unless (@image = find_image!)
+
+      @licenses = current_license_names_and_ids
+      check_image_permission!
+      init_project_vars_for_add_or_edit(@image)
+    end
+
+    def update
+      return unless (@image = find_image!)
+
+      @licenses = current_license_names_and_ids
+      check_image_permission!
+
+      @image.attributes = whitelisted_image_params
+
+      if image_or_projects_updated
+        redirect_with_query(action: "show", id: @image.id)
+      else
+        init_project_vars_for_reload(@image)
+      end
+    end
+
+    private
+
+    def check_image_permission!
+      redirect_with_query(action: "show", id: @image) unless
+        check_permission!(@image)
+    end
+
+    def image_or_projects_updated
+      if !image_data_changed?
+        update_projects_and_flash_notice!
+        true
+      elsif !@image.save
+        flash_object_errors(@image)
+        false
+      else
+        @image.log_update
+        flash_notice(:runtime_image_edit_success.t(id: @image.id))
+        update_related_projects(@image, params[:project])
+        true
+      end
+    end
+
+    def image_data_changed?
+      @image.when_changed? ||
+        @image.notes_changed? ||
+        @image.copyright_holder_changed? ||
+        @image.original_name_changed? ||
+        @image.license_id_changed?
+    end
+
+    def update_projects_and_flash_notice!
+      if update_related_projects(@image, params[:project])
+        flash_notice(:runtime_image_edit_success.t(id: @image.id))
+      else
+        flash_notice(:runtime_no_changes.t)
+      end
+    end
+
+    def init_project_vars_for_add_or_edit(obs_or_img)
+      @projects = User.current.projects_member(order: :title)
+      @project_checks = {}
+      obs_or_img.projects.each do |proj|
+        @projects << proj unless @projects.include?(proj)
+        @project_checks[proj.id] = true
+      end
+    end
+
+    def init_project_vars_for_reload(obs_or_img)
+      # (Note: In practice, this is never called for add_image,
+      # so obs_or_img is always an image.)
+      @projects = User.current.projects_member(order: :title)
+      @project_checks = {}
+      obs_or_img.projects.each do |proj|
+        @projects << proj unless @projects.include?(proj)
+      end
+      @projects.each do |proj|
+        @project_checks[proj.id] = begin
+                                     params[:project]["id_#{proj.id}"] == "1"
+                                   rescue StandardError
+                                     false
+                                   end
+      end
+    end
+
+    public
+
     ############################################################################
 
-    # REMOVE IMAGES: Uses shared template
+    # REMOVE IMAGES: Uses shared partial "shared/images_to_remove"
     # Form used to remove one or more images from an observation (not destroy!)
     # Linked from: observations/show
     # Inputs:
@@ -220,7 +328,7 @@ module Observations
     # Outputs: @observation
     # Redirects to observations/show.
     # remove_images
-    def edit
+    def remove
       @object = find_or_goto_index(Observation, params[:id].to_s)
       return unless @object
 
@@ -229,7 +337,8 @@ module Observations
       redirect_with_query(permanent_observation_path(@object.id))
     end
 
-    def update
+    # Callback to DETACH images from an observation, form :put commits here
+    def detach
       @object = find_or_goto_index(Observation, params[:id].to_s)
       return unless @object
 

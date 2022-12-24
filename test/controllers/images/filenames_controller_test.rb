@@ -3,15 +3,15 @@
 require("test_helper")
 
 # tests of Images controller
-module Account::Images
+module Images
   class FilenamesControllerTest < FunctionalTestCase
     def test_bulk_original_filename_purge
-      imgs = Image.where("original_name != '' AND user_id = #{rolf.id}")
+      imgs = Image.where.not(original_name: "").where(user_id: rolf.id)
       assert(imgs.any?)
 
       login("rolf")
       put(:update)
-      imgs = Image.where("original_name != '' AND user_id = #{rolf.id}")
+      imgs = Image.where.not(original_name: "").where(user_id: rolf.id)
       assert(imgs.empty?)
     end
   end

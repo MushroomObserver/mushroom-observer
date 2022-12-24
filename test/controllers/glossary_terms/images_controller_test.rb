@@ -8,18 +8,16 @@ module GlossaryTerms
     def test_reuse_image_page_access
       glossary_term = glossary_terms(:conic_glossary_term)
       params = { id: glossary_term.id }
-      requires_login(:new, params)
-      assert_form_action(action: :create, id: glossary_term.id,
-                         q: get_query_param)
+      requires_login(:reuse, params)
+      assert_form_action(action: :attach, id: glossary_term.id)
     end
 
     def test_reuse_image_page_access__all_images
       glossary_term = glossary_terms(:conic_glossary_term)
       params = { all_users: 1, id: glossary_term.id }
-      requires_login(:new, params)
+      requires_login(:reuse, params)
 
-      assert_form_action(action: :create, id: glossary_term.id,
-                         q: get_query_param)
+      assert_form_action(action: :attach, id: glossary_term.id)
       assert_select("a", { text: :image_reuse_just_yours.l },
                     "Form should have a link to show only the user's images.")
     end
@@ -33,7 +31,7 @@ module GlossaryTerms
         img_id: image.id.to_s
       }
       login("mary")
-      post(:create, params: params)
+      post(:attach, params: params)
       assert_redirected_to(glossary_term_path(glossary_term.id))
       assert(glossary_term.reload.images.member?(image))
     end
@@ -48,14 +46,14 @@ module GlossaryTerms
         img_id: image.id.to_s
       }
       login("mary")
-      post(:create, params: params)
+      post(:attach, params: params)
       assert_redirected_to(glossary_term_path(glossary_term.id))
       assert(glossary_term.reload.images.member?(image))
       assert_objs_equal(image, glossary_term.thumb_image)
     end
 
     def test_reuse_image_for_glossary_term_add_image_fails
-      GlossaryTerm.any_instance.stubs(:new).returns(false)
+      GlossaryTerm.any_instance.stubs(:reuse).returns(false)
       glossary_term = glossary_terms(:convex_glossary_term)
       image = images(:commercial_inquiry_image)
       assert_empty(glossary_term.images)
@@ -65,9 +63,8 @@ module GlossaryTerms
         img_id: image.id.to_s
       }
       login("mary")
-      post(:create, params: params)
-      assert_form_action(action: :create,
-                         id: glossary_term.id, q: get_query_param)
+      post(:attach, params: params)
+      assert_form_action(action: :attach, id: glossary_term.id)
       assert_flash_error
     end
 
@@ -75,7 +72,7 @@ module GlossaryTerms
       glossary_term = glossary_terms(:conic_glossary_term)
       params = { id: glossary_term.id, img_id: "bad_id" }
 
-      post_requires_login(:create, params)
+      post_requires_login(:attach, params)
 
       assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
     end
@@ -83,9 +80,8 @@ module GlossaryTerms
     def test_remove_images_for_glossary_term
       glossary_term = glossary_terms(:plane_glossary_term)
       params = { id: glossary_term.id }
-      requires_login(:edit, params)
-      assert_form_action(action: :update, id: glossary_term.id,
-                         q: get_query_param)
+      requires_login(:remove, params)
+      assert_form_action(action: :detach, id: glossary_term.id)
     end
   end
 end

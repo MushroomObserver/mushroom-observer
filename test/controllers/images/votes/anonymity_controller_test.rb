@@ -3,7 +3,7 @@
 require("test_helper")
 
 # tests of Images controller
-module Account::ImageVotes
+module Images::Votes
   class AnonymityControllerTest < FunctionalTestCase
     # Test setting anonymity of all image votes.
     def test_bulk_image_vote_anonymity_thingy

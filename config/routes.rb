@@ -485,12 +485,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    get("profile/images", to: "profile/images#new",
-                          as: "edit_profile_image")
-    post("profile/images", to: "profile/images#create",
-                           as: "update_profile_image")
-    match("profile/images", to: "profile/images#update",
-                            as: "remove_profile_image", via: [:put, :patch])
+    get("profile/images", to: "profile/images#reuse",
+                          as: "reuse_profile_image")
+    post("profile/images/:id", to: "profile/images#attach",
+                               as: "update_profile_image")
+    put("profile/images/:id", to: "profile/images#detach",
+                              as: "detach_profile_image")
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -581,14 +581,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get "show_past", on: :member
 
     member do
-      get("images/new", to: "glossary_terms/images#new",
-                        as: "reuse_images_for")
-      post("images", to: "glossary_terms/images#create",
-                     as: "attach_image_to")
-      get("images/edit", to: "glossary_terms/images#edit",
-                         as: "remove_images_for")
-      match("images", to: "glossary_terms/images#update",
-                      as: "detach_image_from", via: [:put, :patch])
+      get("images/reuse", to: "glossary_terms/images#reuse",
+                          as: "reuse_images_for")
+      post("images/attach", to: "glossary_terms/images#attach",
+                            as: "attach_image_to")
+      get("images/remove", to: "glossary_terms/images#remove",
+                           as: "remove_images_from")
+      put("images/detach", to: "glossary_terms/images#detach",
+                           as: "detach_image_from")
     end
   end
 
@@ -618,16 +618,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     put("/votes/anonymity", to: "/images/votes/anonymity#update",
                             as: "bulk_vote_anonymity_updater")
   end
-  resources :images, only: [:edit, :update, :destroy, :index]
-  # put("/image/:id/transform", to: "images/transformations#update",
-  #                             as: "image_transform")
-  # put("/image/:id/vote", to: "images/votes#update", as: "image_vote")
-  # put("/images/purge_filenames", to: "images/filenames#update",
-  #                                as: "bulk_image_filename_purge")
-  # put("/images/update_licenses", to: "images/licenses#update",
-  #                                as: "image_license_updater")
-  # put("/images/votes/anonymity", to: "images/votes/anonymity#update",
-  #                                as: "bulk_image_vote_anonymity_updater")
+  resources :images, only: [:edit, :update, :destroy, :index, :show]
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -654,14 +645,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                         as: "new_image_for")
       post("images", to: "observations/images#create",
                      as: "upload_image_for")
-      get("images/reuse", to: "observations/images#new?mode=reuse",
+      get("images/reuse", to: "observations/images#reuse",
                           as: "reuse_images_for")
-      post("images/:mode", to: "observations/images#create?mode=reuse",
-                           as: "attach_image_to")
-      get("images/edit", to: "observations/images#edit",
-                         as: "remove_images_for")
-      match("images", to: "observations/images#update",
-                      as: "detach_image_from", via: [:put, :patch])
+      post("images/attach", to: "observations/images#attach",
+                            as: "attach_image_to")
+      get("images/remove", to: "observations/images#remove",
+                           as: "remove_images_from")
+      put("images/detach", to: "observations/images#detach",
+                           as: "detach_images_from")
     end
     collection do
       get("map")

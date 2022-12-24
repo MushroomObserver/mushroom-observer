@@ -3,7 +3,7 @@
 require("test_helper")
 
 # tests of Images controller
-module Account::Images
+module Images
   class LicensesControllerTest < FunctionalTestCase
     def test_license_updater
       requires_login(:edit)

@@ -11,14 +11,14 @@ module Account::Profile
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
-    # reuse_image params[:mode] = profile
-    def new
+    # was reuse_image params[:mode] = profile
+    def reuse
       return unless User.safe_find(params[:id]) == User.current
 
       serve_reuse_form(params)
     end
 
-    def create
+    def attach
       return unless User.safe_find(params[:id]) == User.current
 
       image = Image.safe_find(params[:img_id])
@@ -31,7 +31,7 @@ module Account::Profile
       redirect_to(user_path(@user.id))
     end
 
-    def destroy
+    def detach
       if @user&.image
         @user.update(image: nil)
         flash_notice(:runtime_profile_removed_image.t)

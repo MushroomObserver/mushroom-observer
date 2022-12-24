@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-# tests of Transforms controller
+# tests of Transformations controller
 module Images
-  class TransformsControllerTest < FunctionalTestCase
+  class TransformationsControllerTest < FunctionalTestCase
     def test_transform_rotate_left
       run_transform(opr: "rotate_left")
     end
@@ -32,7 +32,7 @@ module Images
       # Asserting the flash text is the best I can do because Image.transform
       # does not transform images in the text environment. 2022-08-19 JDC
       assert_flash_text(flash)
-      assert_redirected_to(show_image_path(image.id))
+      assert_redirected_to(image_path(image.id))
     end
   end
 end

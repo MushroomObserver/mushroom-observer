@@ -8,10 +8,11 @@ module Observations
     def test_add_image_to_obs_not_yours
       obs = observations(:coprinus_comatus_obs)
       requires_login(:new, id: obs.id)
-      assert_form_action(action: :create, id: obs.id, q: get_query_param)
+      # qr = QueryRecord.last.id.alphabetize
+      assert_form_action(action: :create, id: obs.id)
       # Check that image cannot be added to an observation the user doesn't own.
       post(:create, params: { id: observations(:minimal_unknown_obs).id })
-      assert_redirected_to(controller: :observations, action: :show)
+      assert_redirected_to(controller: "/observations", action: :show)
     end
 
     def test_add_images_empty
@@ -83,16 +84,16 @@ module Observations
       fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
 
       post(:create,
-          params: { id: obs.id,
-                    image: { "when(1i)" => "2007",
+           params: { id: obs.id,
+                     image: { "when(1i)" => "2007",
                               "when(2i)" => "3",
                               "when(3i)" => "29",
                               copyright_holder: "Douglas Smith",
                               notes: "Some notes." },
-                    upload: { image1: fixture,
-                              image2: "",
-                              image3: "",
-                              image4: "" } })
+                     upload: { image1: fixture,
+                               image2: "",
+                               image3: "",
+                               image4: "" } })
 
       img = Image.last
       assert_true(img.gps_stripped)
@@ -107,66 +108,69 @@ module Observations
       Image.any_instance.stubs(:process_image).returns(false)
 
       post(:create,
-          params: { id: obs.id,
-                    image: { "when(1i)" => "2007",
+           params: { id: obs.id,
+                     image: { "when(1i)" => "2007",
                               "when(2i)" => "3",
                               "when(3i)" => "29",
                               copyright_holder: "Douglas Smith",
                               notes: "Some notes." },
-                    upload: { image1: fixture,
-                              image2: "",
-                              image3: "",
-                              image4: "" } })
+                     upload: { image1: fixture,
+                               image2: "",
+                               image3: "",
+                               image4: "" } })
 
       assert_flash_error("image.process_image failure should cause flash error")
-      assert_redirected_to(controller: :observations, action: :show, id: obs.id)
+      assert_redirected_to(controller: "/observations", action: :show,
+                           id: obs.id)
     end
-    
-    # You get to the reuse image form by getting :new, mode: :reuse
+
+    # You get to the reuse image form by getting :reuse
     def test_reuse_image_page_access
       obs = observations(:agaricus_campestris_obs)
-      params = { id: obs.id, mode: :reuse }
+      params = { id: obs.id }
       assert_equal("rolf", obs.user.login)
 
       logout
-      get(:new, params: params)
+      get(:reuse, params: params)
       assert_response(:login, "No user: ")
 
       login("mary", "testpassword")
-      get(:new, params: params)
+      get(:reuse, params: params)
 
       # assert_redirected_to(%r{/#{obs.id}$})
-      assert_redirected_to(controller: :observations, action: :show,
+      assert_redirected_to(controller: "/observations", action: :show,
                            id: obs.id)
 
       login("rolf", "testpassword")
-      get(:new, params: params)
+      get(:reuse, params: params)
 
       assert_response(:success)
-      assert_form_action(action: :create, id: obs.id, mode: :reuse, q: get_query_param)
+      # qr = QueryRecord.last.id.alphabetize
+      assert_form_action(action: :attach, id: obs.id)
     end
 
     def test_reuse_image_page_access__all_images
       obs = observations(:agaricus_campestris_obs)
-      params = { all_users: 1, mode: :reuse, id: obs.id }
+      params = { all_users: 1, id: obs.id }
 
       login(obs.user.login)
-      get(:new, params: params)
+      get(:reuse, params: params)
 
-      assert_form_action(action: :create, id: obs.id, mode: :reuse, q: get_query_param)
+      # qr = QueryRecord.last.id.alphabetize
+      assert_form_action(action: :attach, id: obs.id)
       assert_select("a", { text: :image_reuse_just_yours.l },
                     "Form should have a link to show only the user's images.")
     end
 
-    # Test reusing an image by id number. Not sure how it differs from the next test (?!)
-    # except now it doesn't have mode: :reuse
+    # Test reusing an image by id number. Not sure how it differs from the
+    # next test (?!) except now it doesn't have mode: :reuse
     def test_add_image_to_obs_by_id
       obs = observations(:coprinus_comatus_obs)
       updated_at = obs.updated_at
       image = images(:disconnected_coprinus_comatus_image)
       assert_not(obs.images.member?(image))
       post_requires_login(:create, id: obs.id, img_id: image.id)
-      assert_redirected_to(controller: :observations, action: :show,
+      assert_redirected_to(controller: "/observations", action: :show,
                            id: obs.id)
       assert(obs.reload.images.member?(image))
       assert(updated_at != obs.updated_at)
@@ -178,21 +182,21 @@ module Observations
       image = images(:commercial_inquiry_image)
       assert_not(obs.images.member?(image))
       params = {
-        id: obs.id.to_s, mode: :reuse,
+        id: obs.id.to_s,
         img_id: image.id.to_s
       }
       owner = obs.user.login
       assert_not_equal("mary", owner)
-      post_requires_login(:create, params, "mary")
-      # assert_template(controller: :observations, action: :show)
-      assert_redirected_to(controller: :observations, action: :show,
+      post_requires_login(:attach, params, "mary")
+      # assert_template(controller: "/observations", action: :show)
+      assert_redirected_to(controller: "/observations", action: :show,
                            id: obs.id)
       assert_not(obs.reload.images.member?(image))
 
       login(owner)
-      post(:create, params: params)
-      # assert_template(controller: :observations, action: :show)
-      assert_redirected_to(controller: :observations, action: :show,
+      post(:attach, params: params)
+      # assert_template(controller: "/observations", action: :show)
+      assert_redirected_to(controller: "/observations", action: :show,
                            id: obs.id)
       assert(obs.reload.images.member?(image))
       assert(updated_at != obs.updated_at)
@@ -200,10 +204,10 @@ module Observations
 
     def test_reuse_image_for_observation_bad_image_id
       obs = observations(:agaricus_campestris_obs)
-      params = { id: obs.id, mode: :reuse, img_id: "bad_id" }
+      params = { id: obs.id, img_id: "bad_id" }
 
       login(obs.user.login)
-      post(:create, params: params)
+      post(:attach, params: params)
 
       assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
     end
@@ -214,7 +218,7 @@ module Observations
       img = images(:in_situ_image)
       obs.update_attribute(:gps_hidden, true)
       assert_false(img.gps_stripped)
-      post(:create, params: { id: obs.id, mode: :reuse, img_id: img.id })
+      post(:attach, params: { id: obs.id, mode: :reuse, img_id: img.id })
       assert_false(img.reload.gps_stripped)
     end
 
@@ -232,7 +236,7 @@ module Observations
       FileUtils.mkdir_p(path) unless File.directory?(path)
       FileUtils.cp(fixture, orig_file)
 
-      post(:create, params: { id: obs.id, mode: :reuse, img_id: img.id })
+      post(:attach, params: { id: obs.id, mode: :reuse, img_id: img.id })
       assert_true(img.reload.gps_stripped)
       assert_not_equal(File.size(fixture),
                        File.size(img.local_file_name("orig")))
@@ -243,11 +247,11 @@ module Observations
       params = { id: obs.id }
       assert_equal("rolf", obs.user.login)
       requires_user(
-        :edit,
-        { controller: :observations, action: :show, id: obs.id },
+        :remove,
+        { controller: "/observations", action: :show, id: obs.id },
         params
       )
-      assert_form_action(action: :update, id: obs.id, q: get_query_param)
+      assert_form_action(action: :detach, id: obs.id)
     end
 
     def test_remove_images
@@ -265,8 +269,8 @@ module Observations
         id: obs.id.to_s,
         selected: selected
       }
-      put_requires_login(:update, params, "mary")
-      assert_redirected_to(controller: :observations, action: :show)
+      put_requires_login(:detach, params, "mary")
+      assert_redirected_to(controller: "/observations", action: :show)
       assert_equal(10, mary.reload.contribution)
       assert(obs.reload.images.member?(keep))
       assert_not(obs.images.member?(remove))
@@ -278,8 +282,8 @@ module Observations
         id: obs.id.to_s,
         selected: selected
       }
-      put(:update, params: params)
-      assert_redirected_to(controller: :observations, action: :show)
+      put(:detach, params: params)
+      assert_redirected_to(controller: "/observations", action: :show)
       # Observation gets downgraded to 1 point because it no longer has images.
       # assert_equal(1, mary.reload.contribution)
       assert_equal(10, mary.reload.contribution)
@@ -294,12 +298,12 @@ module Observations
              "Use Observation fixture with multiple images for best coverage")
       user = obs.user
       selected = images.ids.each_with_object({}) do |item, hash|
-        hash[item.to_s] = "yes" # "img_id" => "yes" (yes means delete that image˝)
+        hash[item.to_s] = "yes" # "img_id" => "yes" (yes means detach that image˝)
       end
       params = { id: obs.id, selected: selected }
 
       login(user.login)
-      put(:update, params: params)
+      put(:detach, params: params)
 
       assert_empty(obs.reload.images)
     end

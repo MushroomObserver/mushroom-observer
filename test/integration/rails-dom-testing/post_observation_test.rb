@@ -212,7 +212,7 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations?where")
     assert_link_exists_containing(show_location_path(new_loc.id))
-    assert_link_exists_containing(show_image_path(new_img.id))
+    assert_link_exists_containing(image_path(new_img.id))
   end
 
   def review_flash(patterns)

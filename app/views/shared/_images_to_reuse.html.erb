@@ -7,7 +7,7 @@
 
 # Note this uses a specialized matrix box here, not using the general partial.
 %>
-<%= form_with(url: form_action) do |form|%>
+<%= form_with(url: form_action, method: :put) do |form|%>
   <div class="container-text">
     <div class="form-group form-inline">
       <%= form.label(:img_id, "#{:image_reuse_id.t}:") %>
@@ -23,7 +23,7 @@
     <div class="form-group mt-3">
       <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
                             :image_reuse_all_users.t),
-                          form_action.merge(action: :new,
+                          form_action.merge(action: :reuse,
                                             all_users: @all_users ? 0 : 1),
                           class: "btn btn-default") %>
     </div>

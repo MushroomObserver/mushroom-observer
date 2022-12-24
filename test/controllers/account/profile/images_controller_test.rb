@@ -12,7 +12,7 @@ module Account::Profile
       params = { img_id: img.id }
 
       login(user.login)
-      get(:new, params: params)
+      get(:reuse, params: params)
 
       assert_equal(img, user.image)
       assert_flash_text(:runtime_no_changes.l)
@@ -20,16 +20,16 @@ module Account::Profile
 
     # This is what would happen when user first opens form.
     def test_reuse_image_for_user_page_access
-      requires_login(:new)
-      assert_template("new", partial: "shared/_images_to_reuse")
-      assert_form_action(action: :create)
+      requires_login(:reuse)
+      assert_template("reuse", partial: "shared/_images_to_reuse")
+      assert_form_action(action: :attach)
     end
 
     # This would happen if user clicked on image.
     def test_reuse_image_for_user_post1
       image = images(:commercial_inquiry_image)
       params = { img_id: image.id.to_s }
-      post_requires_login(:create, params)
+      post_requires_login(:attach, params)
       assert_redirected_to(user_path(rolf.id))
       assert_equal(rolf.id, session[:user_id])
       assert_equal(image.id, rolf.reload.image_id)
@@ -39,7 +39,7 @@ module Account::Profile
     def test_reuse_image_for_user_post2
       image = images(:commercial_inquiry_image)
       params = { img_id: image.id.to_s }
-      post_requires_login(:create, params)
+      post_requires_login(:attach, params)
       assert_redirected_to(user_path(rolf.id))
       assert_equal(rolf.id, session[:user_id])
       assert_equal(image.id, rolf.reload.image_id)
