@@ -344,7 +344,7 @@ class AjaxControllerTest < FunctionalTestCase
     setup_image_dirs
     login("dick")
     file = Rack::Test::UploadedFile.new(
-      "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+      Rails.root.join("test/images/Coprinus_comatus.jpg").to_s, "image/jpeg"
     )
     copyright_holder = "Douglas Smith"
     notes = "Some notes."

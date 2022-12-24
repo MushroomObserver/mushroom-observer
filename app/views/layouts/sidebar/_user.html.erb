@@ -14,7 +14,7 @@
             observations_path(user: @user.id),
             { class: classes[:mobile_only],
               id: "nav_mobile_your_observations_link" }) %>
-<%= link_to(:app_your_interests.t, interest_list_interests_path,
+<%= link_to(:app_your_interests.t, interests_path,
             { class: classes[:mobile_only],
               id: "nav_mobile_interests_link" }) %>
 <%= link_to(:app_your_summary.t, user_path(@user.id),

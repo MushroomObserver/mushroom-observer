@@ -199,7 +199,7 @@ class API2ControllerTest < FunctionalTestCase
   def test_post_minimal_image
     setup_image_dirs
     count = Image.count
-    file = "#{::Rails.root}/test/images/sticky.jpg"
+    file = Rails.root.join("test/images/sticky.jpg").to_s
     checksum = file_checksum(file)
     File.stub(:rename, false) do
       post_and_send_file(:images, file, "image/jpeg",
@@ -229,7 +229,7 @@ class API2ControllerTest < FunctionalTestCase
   def test_post_minimal_image_via_multipart_form_data
     setup_image_dirs
     count = Image.count
-    file = "#{::Rails.root}/test/images/sticky.jpg"
+    file = Rails.root.join("test/images/sticky.jpg").to_s
     upload = UploadedFileWithChecksum.new(file, "image/jpeg")
     checksum = file_checksum(file)
     File.stub(:rename, false) do
@@ -252,7 +252,7 @@ class API2ControllerTest < FunctionalTestCase
   def test_post_corrupt_image
     setup_image_dirs
     count = Image.count
-    file = "#{::Rails.root}/test/images/sticky.jpg"
+    file = Rails.root.join("test/images/sticky.jpg").to_s
     upload = UploadedFileWithChecksum.new(file, "image/jpeg")
     checksum = file_checksum(file).reverse
     File.stub(:rename, false) do
@@ -274,7 +274,7 @@ class API2ControllerTest < FunctionalTestCase
     setup_image_dirs
     rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
-    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rails.root.join("test/images/Coprinus_comatus.jpg").to_s
     proj = rolf.projects_member.first
     obs = rolf.observations.first
     File.stub(:rename, false) do

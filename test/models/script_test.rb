@@ -4,7 +4,7 @@ require("test_helper")
 
 class ScriptTest < UnitTestCase
   def script_file(cmd)
-    "#{::Rails.root}/script/#{cmd}"
+    Rails.root.join("script/#{cmd}").to_s
   end
 
   ##############################################################################
@@ -104,11 +104,11 @@ class ScriptTest < UnitTestCase
            "#{script} failed to write #{output_file}")
 
     output = File.read(output_file)
-    fixture = "#{::Rails.root}/test/reports/name_list_data.js"
+    fixture = Rails.root.join("test/reports/name_list_data.js")
     if sql_collates_accents?
       assert_string_equal_file(output, fixture)
     else
-      expect = File.read(fixture)
+      expect = fixture.read
       assert_equal(expect.tr("ü", "u"), output.tr("ü", "u"),
                    "File #{output} is wrong.")
     end

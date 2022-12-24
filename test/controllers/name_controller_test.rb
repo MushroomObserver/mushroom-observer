@@ -4389,10 +4389,10 @@ class NameControllerTest < FunctionalTestCase
     get(:show_name, params: { id: peltigera.id })
     assert_response(:success)
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Name", id: peltigera.id, state: 1)
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Name", id: peltigera.id, state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
@@ -4400,10 +4400,10 @@ class NameControllerTest < FunctionalTestCase
     get(:show_name, params: { id: peltigera.id })
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Name", id: peltigera.id, state: 0)
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Name", id: peltigera.id, state: -1)
 
     # Destroy that interest, create new one with interest off.
@@ -4412,10 +4412,10 @@ class NameControllerTest < FunctionalTestCase
     get(:show_name, params: { id: peltigera.id })
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Name", id: peltigera.id, state: 0)
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "interest", action: "set_interest",
+                              controller: "/interests", action: "set_interest",
                               type: "Name", id: peltigera.id, state: 1)
   end
 

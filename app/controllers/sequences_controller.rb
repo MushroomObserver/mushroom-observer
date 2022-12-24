@@ -78,13 +78,6 @@ class SequencesController < ApplicationController
     @sequence = Sequence.new
   end
 
-  def create
-    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
-    return unless @observation
-
-    build_sequence
-  end
-
   def edit
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
@@ -94,6 +87,13 @@ class SequencesController < ApplicationController
 
     flash_warning(:permission_denied.t)
     redirect_with_query(@sequence.observation.show_link_args)
+  end
+
+  def create
+    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
+    return unless @observation
+
+    build_sequence
   end
 
   def update

@@ -2779,7 +2779,7 @@
   interest_watching: You have told us to email you about changes in this [object].  Click one of the small icons below to change.
   interest_ignoring: You have told us never to email you about changes in this [object].  Click one of the small icons below to change.
 
-  # interest/list_interests
+  # interests/index
   list_interests_title: Your Notification Requests
   list_interests_turn_on: Change to Watch
   list_interests_turn_off: Change to Ignore
@@ -2985,7 +2985,7 @@
   sandbox_title: Textile Sandbox
   sandbox_web_refs: Web References
 
-  # interest/set_interest
+  # interests/set_interest
   set_interest_already_deleted: You have expressed no interest in [name].
   set_interest_already_off: You have already told us to ignore [name].
   set_interest_already_on: You have already told us to watch [name].

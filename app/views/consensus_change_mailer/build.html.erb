@@ -25,7 +25,7 @@
   links.push([:email_links_post_comment.t,
     "#{MO.http_domain}/comments/new?target=#{@observation.id}&type=Observation"])
   links.push([:email_links_not_interested.t(type: :observation),
-    "#{MO.http_domain}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+    "#{MO.http_domain}/interests/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,
     "#{MO.http_domain}/account/no_email/#{@user.id}?type=observations_consensus"]) unless watching
   links.push([:email_links_change_prefs.t,
