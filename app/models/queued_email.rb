@@ -142,7 +142,7 @@ class QueuedEmail < AbstractModel
   def self.all_flavors
     unless defined? @@all_flavors
       @@all_flavors = []
-      Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
+      Dir[Rails.root.join("app/models/queued_email/*.rb").to_s].each do |file|
         if /(\w+).rb/.match?(file)
           @@all_flavors << "QueuedEmail::#{Regexp.last_match(1).camelize}"
         end
@@ -291,7 +291,7 @@ class QueuedEmail < AbstractModel
   # Add line to log to help keep track of what/when/why emails are being queued
   # and when they are actually sent.
   def self.debug_log(msg)
-    File.open("#{::Rails.root}/log/email-debug.log", "a:utf-8") do |fh|
+    Rails.root.join("log/email-debug.log").open("a:utf-8") do |fh|
       fh.puts("#{Time.zone.now} #{msg}")
     end
   end

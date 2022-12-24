@@ -5,7 +5,7 @@ require("fileutils")
 
 class IpStatsTest < UnitTestCase
   def setup
-    fixture_path = "#{::Rails.root}/test/fixtures"
+    fixture_path = Rails.root.join("test/fixtures")
     setup_file(MO.blocked_ips_file, "#{fixture_path}/blocked_ips.txt")
     setup_file(MO.okay_ips_file, "#{fixture_path}/okay_ips.txt")
   end
