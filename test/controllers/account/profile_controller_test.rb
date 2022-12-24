@@ -36,7 +36,7 @@ module Account
 
       # Open file we want to upload.
       file = Rack::Test::UploadedFile.new(
-        "#{::Rails.root}/test/images/sticky.jpg", "image/jpeg"
+        Rails.root.join("test/images/sticky.jpg").to_s, "image/jpeg"
       )
 
       # It should create a new image: this is the current number of images.

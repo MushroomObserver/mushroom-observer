@@ -9,7 +9,7 @@ class LanguageExporterTest < UnitTestCase
     @official = Language.official
     Language.clear_verbose_messages
     Language.override_input_files
-    self.tmp_dir = "#{::Rails.root}/tmp"
+    self.tmp_dir = Rails.root.join("tmp")
     FileUtils.mkdir_p(tmp_dir)
     super
   end
@@ -170,7 +170,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_export_round_trip
-    template = Rails.root.join("test", "templates", "export_round_trip.yml")
+    template = Rails.root.join("test/templates/export_round_trip.yml")
     use_test_locales do
       file = @official.export_file
       FileUtils.copy(template, file)

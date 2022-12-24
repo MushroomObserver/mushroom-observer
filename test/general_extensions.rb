@@ -88,7 +88,7 @@ module GeneralExtensions
 
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
-    FileUtils.remove_dir("#{Rails.root}/config/test_locales", force: true)
+    FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)
   end
 
   # Create test image dirs for tests that do image uploads.
@@ -289,14 +289,14 @@ module GeneralExtensions
 
   def read_fixture_labels(table)
     result = []
-    file = "#{Rails.root}/test/fixtures/#{table}.yml"
+    file = Rails.root.join("test/fixtures/#{table}.yml")
     unless File.exist?(file)
       raise("Can't find fixtures file for #{table}! Should be #{file}.")
     end
 
     last_id = 0
     line_num = 0
-    File.readlines(file).each do |line|
+    file.readlines.each do |line|
       line_num += 1
       match = line.match(/^(\w+):\s+#\s*(\d+)\s*$/)
       next unless match

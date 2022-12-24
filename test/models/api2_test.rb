@@ -1379,7 +1379,7 @@ class API2Test < UnitTestCase
       method: :post,
       action: :image,
       api_key: @api_key.key,
-      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: "strip_this"
     }
     assert_equal("toss", @user.keep_filenames)
@@ -1418,7 +1418,7 @@ class API2Test < UnitTestCase
       vote: "3",
       observations: @obs.id,
       projects: @proj.id,
-      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: @orig
     }
     File.stub(:rename, true) do
@@ -1444,7 +1444,7 @@ class API2Test < UnitTestCase
     setup_image_dirs
     url = "https://mushroomobserver.org/images/thumb/459340.jpg"
     stub_request(:any, url).
-      to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
+      to_return(Rails.root.join("test/images/test_image.curl").read)
     params = {
       method: :post,
       action: :image,
@@ -1457,7 +1457,7 @@ class API2Test < UnitTestCase
       img = Image.last
       assert_obj_list_equal([img], api.results)
       actual = File.read(img.local_file_name(:full_size))
-      expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
+      expect = Rails.root.join("test/images/test_image.jpg").read
       assert_equal(expect, actual, "Uploaded image differs from original!")
     end
   end
