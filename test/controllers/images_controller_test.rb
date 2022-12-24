@@ -19,42 +19,42 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_images_by_user
     login
-    get(:images_by_user, params: { id: rolf.id })
+    get(:index, params: { by_user: rolf.id })
     assert_template("index", partial: "_image")
   end
 
   def test_index_image_by_user
     login
-    get(:index_image, params: { by: "user" })
+    get(:index, params: { by: "user" })
     assert_select("title", text: "Mushroom Observer: Images by User")
   end
 
   def test_index_image_by_copyright_holder
     login
-    get(:index_image, params: { by: "copyright_holder" })
+    get(:index, params: { by: "copyright_holder" })
     assert_select("title",
                   text: "Mushroom Observer: Images by Copyright Holder")
   end
 
   def test_index_image_by_name
     login
-    get(:index_image, params: { by: "name" })
+    get(:index, params: { by: "name" })
     assert_select("title", text: "Mushroom Observer: Images by Name")
   end
 
   def test_images_for_project
     login
-    get(:images_for_project,
-        params: { id: projects(:bolete_project).id })
+    get(:index,
+        params: { for_project: projects(:bolete_project).id })
     assert_template("index", partial: "_image")
   end
 
   def test_next_image
     login
-    get(:next_image, params: { id: images(:turned_over_image).id })
+    get(:show, params: { id: images(:turned_over_image).id, flow: :next })
     # Default sort order is inverse chronological (created_at DESC, id DESC).
     # So here, "next" image is one created immediately previously.
-    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|?]})
+    assert_redirected_to(%r{images/#{images(:in_situ_image).id}[\b|?]})
   end
 
   def test_next_image_ss
@@ -113,10 +113,10 @@ class ImagesControllerTest < FunctionalTestCase
 
     params = {
       id: det_unknown.images.last.id,
-      params: @controller.query_params(inner) # inner for first obs
+      params: @controller.query_params(inner).merge({ flow: :next }) # inner for first obs
     }.flatten
     login
-    get(:next_image, params: params)
+    get(:show, params: params)
     assert_redirected_to(action: :show,
                          id: images(:agaricus_campestris_image).id,
                          params: @controller.query_params(save_query))
@@ -145,10 +145,10 @@ class ImagesControllerTest < FunctionalTestCase
     # Now do it for real.
     params = {
       id: rolfs_favorite_image_id,
-      params: @controller.query_params(query)
+      params: @controller.query_params(query).merge({ flow: :next })
     }.flatten
     login
-    get(:next_image, params: params)
+    get(:show, params: params)
     assert_redirected_to(action: :show, id: expected_next,
                          params: @controller.query_params(query))
   end
@@ -156,7 +156,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_prev_image
     login
     # oldest image
-    get(:prev_image, params: { id: images(:in_situ_image).id })
+    get(:show, params: { id: images(:in_situ_image).id, flow: :prev })
     # so "prev" is the 2nd oldest
     assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|?]})
   end
@@ -208,7 +208,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     params = {
       id: images(:agaricus_campestris_image).id,
-      params: @controller.query_params(inner)
+      params: @controller.query_params(inner).merge({ flow: :prev })
     }.flatten
     login
     get(:prev_image, params: params)
@@ -222,7 +222,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_show_original
     img_id = images(:in_situ_image).id
     login
-    get(:show_original, params: { id: img_id })
+    get(:show, params: { id: img_id, size: :full_size })
     assert_redirected_to(action: :show, size: "full_size", id: img_id)
   end
 
@@ -370,13 +370,14 @@ class ImagesControllerTest < FunctionalTestCase
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
     login
-    get(:advanced_search, params: @controller.query_params(query))
+    get(:index,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
     assert_template("index")
   end
 
   def test_advanced_search_invalid_q_param
     login
-    get(:advanced_search, params: { q: "xxxxx" })
+    get(:index, params: { q: "xxxxx", advanced_search: "1" })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
     assert_redirected_to(search_advanced_path)
@@ -392,7 +393,8 @@ class ImagesControllerTest < FunctionalTestCase
       raises(StandardError)
     login
 
-    get(:advanced_search, params: @controller.query_params(query))
+    get(:advanced_search,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
     assert_redirected_to(search_advanced_path)
   end
 

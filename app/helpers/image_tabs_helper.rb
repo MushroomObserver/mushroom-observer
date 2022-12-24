@@ -41,7 +41,7 @@ module ImageTabsHelper
       link_with_query(:edit_object.t(type: :image),
                       edit_image_path(image.id)),
       destroy_button(name: :destroy_object.t(type: :image),
-                     target: image.id)
+                     target: image)
     ]
   end
 

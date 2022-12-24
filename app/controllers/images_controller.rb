@@ -97,7 +97,7 @@ class ImagesController < ApplicationController # :ClassLength
 
   # Display matrix of images by a given user.
   def images_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = params[:by_user] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
     query = create_query(:Image, :by_user, user: user)
@@ -106,7 +106,7 @@ class ImagesController < ApplicationController # :ClassLength
 
   # Display matrix of Image's attached to a given project.
   def images_for_project
-    project = find_or_goto_index(Project, params[:id].to_s)
+    project = find_or_goto_index(Project, params[:for_project].to_s)
     return unless project
 
     query = create_query(:Image, :for_project, project: project)

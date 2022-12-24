@@ -13,13 +13,13 @@ module GlossaryTerms
     before_action :disable_link_prefetching
 
     # reuse_image_for_glossary_term
-    def new
+    def reuse
       @object = GlossaryTerm.safe_find(params[:id])
 
       serve_image_reuse_selections(params)
     end
 
-    def create
+    def attach
       @object = GlossaryTerm.safe_find(params[:id])
 
       image = Image.safe_find(params[:img_id])

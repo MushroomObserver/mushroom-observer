@@ -10,7 +10,7 @@
   [
     [ :comments, :comments, :index, { by_user: @show_user.id } ],
     [ :comments_for, :comments, :index, { for_user: @show_user.id } ],
-    [ :images, :image, :images_by_user, {} ],
+    [ :images, :images, :index, { by_user: @show_user.id } ],
     [ :location_description_authors, :location,
       :location_descriptions_by_author, {} ],
     [ :location_description_editors, :location,
