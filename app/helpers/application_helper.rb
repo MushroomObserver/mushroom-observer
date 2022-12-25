@@ -301,7 +301,7 @@ module ApplicationHelper
     colspan = td_opts[:colspan]
     if colspan
       content_tag(:tr, class: "MatrixLine") do
-        content_tag(:td, tag.hr(), class: "MatrixLine", colspan: colspan)
+        content_tag(:td, tag.hr, class: "MatrixLine", colspan: colspan)
       end
     else
       safe_empty
