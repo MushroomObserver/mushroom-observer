@@ -23,22 +23,6 @@ module Observations
       init_project_vars_for_add_or_edit(@observation)
     end
 
-    ##############################################################################
-
-    # Form for editing date/license/notes on an observation image.
-    # Linked from: show_image/original
-    # Inputs: params[:id] (image)
-    #   params[:comment][:summary]
-    #   params[:comment][:comment]
-    # Outputs: @image, @licenses
-    def edit
-      return unless (@image = find_image!)
-
-      @licenses = current_license_names_and_ids
-      check_image_permission!
-      init_project_vars_for_add_or_edit(@image)
-    end
-
     # new (upload) image commits here
     def create
       return unless (@observation = find_observation!)
@@ -177,66 +161,33 @@ module Observations
       any_changes
     end
 
-    ############################################################################
-    # NEW IMAGE MODE: REUSE
-
-    def reuse
-      return unless (@observation = find_observation!)
-
-      return unless check_observation_permission!
-
-      # serve_image_reuse_selections(params)
-    end
-
-    # reuse images "put buttons" commit here
-    def attach
-      return unless (@observation = find_observation!)
-
-      return unless check_observation_permission!
-
-      image = Image.safe_find(params[:img_id])
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        redirect_to(:reuse) and return
-      end
-
-      attach_image_to_observation(image)
-    end
-
-    # The grid of images to reuse is a shared partial layout.
-    # CRUD refactor, each image has a link that POSTs to :create.
-    # params[:all_users] is a show param for rendering form images
-    # (the possible selections), not a form param for the submit.
-    # It's toggled by a button on the page "Include other users' images"
-    # that reloads the page with this param on or off
-    # def serve_image_reuse_selections(_params)
-    # if params[:all_users] == "1"
-    #   @all_users = true
-    #   query = create_query(:Image, :all, by: :updated_at)
-    # else
-    #   query = create_query(:Image, :by_user, user: @user, by: :updated_at)
-    # end
-    # @layout = calc_layout_params
-    # @pages = paginate_numbers(:page, @layout["count"])
-    # @objects = query.paginate(@pages,
-    #                           include: [:user, { observations: :name }])
-    # render(:reuse)
-    # end
-
-    # Attach an image to observation.
-    def attach_image_to_observation(image)
-      @observation.add_image(image)
-      image.log_reuse_for(@observation)
-      if @observation.gps_hidden
-        error = image.strip_gps!
-        flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
-      end
-      redirect_with_query(permanent_observation_path(id: @observation.id))
-    end
-
     public
 
+    ###########################################################################
+
+    # Form for editing date/license/notes on an observation image.
+    # Linked from: show_image/original
+    # Inputs: params[:id] (image)
+    #   params[:comment][:summary]
+    #   params[:comment][:comment]
+    # Outputs: @image, @licenses
+    def edit
+      return unless (@observation = find_observation!)
+
+      return unless check_observation_permission!
+
+      return unless (@image = find_image!)
+
+      @licenses = current_license_names_and_ids
+      check_image_permission!
+      init_project_vars_for_add_or_edit(@image)
+    end
+
     def update
+      return unless (@observation = find_observation!)
+
+      return unless check_observation_permission!
+
       return unless (@image = find_image!)
 
       @licenses = current_license_names_and_ids
@@ -252,6 +203,10 @@ module Observations
     end
 
     private
+
+    def find_image!
+      find_or_goto_index(Image, params[:id].to_s)
+    end
 
     def check_image_permission!
       redirect_with_query(action: "show", id: @image) unless
@@ -313,6 +268,67 @@ module Observations
                                      false
                                    end
       end
+    end
+
+    public
+
+    ############################################################################
+    # NEW IMAGE MODE: REUSE
+
+    def reuse
+      return unless (@observation = find_observation!)
+
+      return unless check_observation_permission!
+
+      # serve_image_reuse_selections(params)
+    end
+
+    # reuse images "put buttons" commit here
+    def attach
+      return unless (@observation = find_observation!)
+
+      return unless check_observation_permission!
+
+      image = Image.safe_find(params[:img_id])
+      unless image
+        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+        redirect_to(:reuse) and return
+      end
+
+      attach_image_to_observation(image)
+    end
+
+    # The grid of images to reuse is a shared partial layout.
+    # CRUD refactor, each image has a link that POSTs to :create.
+    # params[:all_users] is a show param for rendering form images
+    # (the possible selections), not a form param for the submit.
+    # It's toggled by a button on the page "Include other users' images"
+    # that reloads the page with this param on or off
+    # def serve_image_reuse_selections(_params)
+    # if params[:all_users] == "1"
+    #   @all_users = true
+    #   query = create_query(:Image, :all, by: :updated_at)
+    # else
+    #   query = create_query(:Image, :by_user, user: @user, by: :updated_at)
+    # end
+    # @layout = calc_layout_params
+    # @pages = paginate_numbers(:page, @layout["count"])
+    # @objects = query.paginate(@pages,
+    #                           include: [:user, { observations: :name }])
+    # render(:reuse)
+    # end
+
+    private
+
+    # Attach an image to observation.
+    def attach_image_to_observation(image)
+      @observation.add_image(image)
+      image.log_reuse_for(@observation)
+      if @observation.gps_hidden
+        error = image.strip_gps!
+        flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
+      end
+      redirect_with_query(permanent_observation_path(id: @observation.id))
     end
 
     public

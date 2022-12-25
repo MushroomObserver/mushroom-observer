@@ -617,7 +617,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     put("/votes/anonymity", to: "/images/votes/anonymity#update",
                             as: "bulk_vote_anonymity_updater")
   end
-  resources :images, only: [:edit, :update, :destroy, :index, :show]
+  resources :images, only: [:index, :show, :edit, :update, :destroy]
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -665,6 +665,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       post("print_labels")
     end
   end
+  get("observations/:id/images/:img_id/edit", to: "observations/images#edit",
+                                              as: "edit_observation_image")
+  put("observations/:id/images/:img_id", to: "observations/images#update",
+                                         as: "update_observation_image")
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
