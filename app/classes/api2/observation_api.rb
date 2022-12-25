@@ -79,6 +79,8 @@ class API2
         gps_hidden: parse(:boolean, :gps_hidden, default: false,
                                                  help: 1),
         notes: @notes,
+        source: parse(:enum, :source, limit: Observation.all_sources,
+                      default: "mo_api"),
         thumb_image: @thumbnail,
         images: @images,
         projects: parse_array(:project, :projects, must_be_member: true) || [],
