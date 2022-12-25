@@ -1266,12 +1266,12 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.source)
     assert_nil(obs.source_credit)
 
-    obs = observations(:detailed_unknown)
-    assert_equal(:mo_website, obs.source)
+    obs = observations(:detailed_unknown_obs)
+    assert_equal("mo_website", obs.source)
     assert_equal(:source_credit_mo_website, obs.source_credit)
 
     obs = observations(:amateur_obs)
-    assert_equal(:mo_iphone_app, obs.source)
+    assert_equal("mo_iphone_app", obs.source)
     assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
   end
 end
