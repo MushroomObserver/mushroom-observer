@@ -1,9 +1,9 @@
 <%
-# Need to pass a param to thumbnail that generates a post_link to :create
+# Passes a param to thumbnail that generates a post_link to :attach
 # and passes the form action path.
 
-# Change this from single form, to each box is form with method: :post
-# plus the form at the top with text input
+# Multiple forms, the form at the top with text input
+# plus each thumbnail box is a little form with method: :post
 
 # Note this uses a specialized matrix box here, not using the general partial.
 @all_users = (params[:all_users] == "1") ? true : false
@@ -14,7 +14,7 @@ query = query_images_to_reuse(@all_users, @user)
 @objects = query.paginate(@pages, include: [:user, { observations: :name }])
 
 %>
-<%= form_with(url: form_action, method: :put) do |form|%>
+<%= form_with(url: form_action, method: :post) do |form|%>
   <div class="container-text">
     <div class="form-group form-inline">
       <%= form.label(:img_id, "#{:image_reuse_id.t}:") %>
@@ -35,24 +35,25 @@ query = query_images_to_reuse(@all_users, @user)
                           class: "btn btn-default") %>
     </div>
   </div><!--.container-text-->
+<% end %>
 
-  <%= paginate_block(@pages) do %>
-    <ul class="row list-unstyled mt-3">
+<%= paginate_block(@pages) do %>
+  <ul class="row list-unstyled mt-3">
 
-      <%= render(layout: "shared/matrix_table",
-                 locals: { objects: @objects }) do |image| %>
-        <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <%= thumbnail(image,
-                            # add special link-or-button param here
-                            link: form_action.merge(img_id: image.id),
-                            original: true) %>
-            </div>
+    <%= render(layout: "shared/matrix_table",
+                locals: { objects: @objects }) do |image| %>
+      <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <%= thumbnail(image,
+                          # add special link-or-button param here
+                          link: form_action.merge(img_id: image.id),
+                          link_method: :post,
+                          original: true) %>
           </div>
-        </li>
-      <% end %>
+        </div>
+      </li>
+    <% end %>
 
-    </ul>
-  <% end %>
+  </ul>
 <% end %>

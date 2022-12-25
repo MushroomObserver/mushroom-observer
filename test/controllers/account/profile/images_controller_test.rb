@@ -22,13 +22,13 @@ module Account::Profile
     def test_reuse_image_for_user_page_access
       requires_login(:reuse)
       assert_template("reuse", partial: "shared/_images_to_reuse")
-      assert_form_action(action: :attach)
+      assert_form_action(account_profile_update_image_path(id: rolf.id))
     end
 
     # This would happen if user clicked on image.
-    def test_reuse_image_for_user_post1
+    def test_update_image_for_user_via_img_click
       image = images(:commercial_inquiry_image)
-      params = { id: image.id.to_s }
+      params = { id: rolf.id, img_id: image.id.to_s }
       post_requires_login(:attach, params)
       assert_redirected_to(user_path(rolf.id))
       assert_equal(rolf.id, session[:user_id])
@@ -36,9 +36,9 @@ module Account::Profile
     end
 
     # This would happen if user typed in id and submitted.
-    def test_reuse_image_for_user_post2
+    def test_update_image_for_user_via_img_id
       image = images(:commercial_inquiry_image)
-      params = { id: image.id.to_s }
+      params = { id: rolf.id, img_id: image.id.to_s }
       post_requires_login(:attach, params)
       assert_redirected_to(user_path(rolf.id))
       assert_equal(rolf.id, session[:user_id])

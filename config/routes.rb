@@ -481,11 +481,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
     resource :profile, only: [:edit, :update], controller: "profile"
     get("profile/images", to: "profile/images#reuse",
-                          as: "reuse_profile_image")
-    post("profile/images/:id", to: "profile/images#attach",
-                               as: "update_profile_image")
-    put("profile/images/:id", to: "profile/images#detach",
-                              as: "detach_profile_image")
+                          as: "profile_select_image")
+    post("profile/images(/:id)", to: "profile/images#attach",
+                                 as: "profile_update_image")
+    put("profile/images(/:id)", to: "profile/images#detach",
+                                as: "profile_remove_image")
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification

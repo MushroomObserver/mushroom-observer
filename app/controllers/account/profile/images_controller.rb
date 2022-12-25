@@ -14,11 +14,11 @@ module Account::Profile
     # was reuse_image params[:mode] = profile
     def reuse
       return unless User.safe_find(params[:id]) == User.current
-
-      serve_reuse_form(params)
     end
 
+    # POST action
     def attach
+      binding.break
       return unless User.safe_find(params[:id]) == User.current
 
       image = Image.safe_find(params[:img_id])
@@ -31,6 +31,7 @@ module Account::Profile
       redirect_to(user_path(@user.id))
     end
 
+    # PUT action
     def detach
       if @user&.image
         @user.update(image: nil)
@@ -46,22 +47,22 @@ module Account::Profile
     # The actual grid of images (partial) is basically a shared layout.
     # CRUD refactor could make each image link POST to create or delete.
     #
-    def serve_reuse_form(params)
-      # params[:all_users] is a query param for rendering form images (possible
-      # selections), not a form param for the submit.
-      # It's toggled by a button on the page "Include other users' images"
-      # that reloads the page with this param on or off
-      # if params[:all_users] == "1"
-      #   @all_users = true
-      #   query = create_query(:Image, :all, by: :updated_at)
-      # else
-      #   query = create_query(:Image, :by_user, user: @user, by: :updated_at)
-      # end
-      # @layout = calc_layout_params
-      # @pages = paginate_numbers(:page, @layout["count"])
-      # @objects = query.paginate(@pages,
-      #                           include: [:user, { observations: :name }])
-    end
+    # def serve_reuse_form(params)
+    # params[:all_users] is a query param for rendering form images (possible
+    # selections), not a form param for the submit.
+    # It's toggled by a button on the page "Include other users' images"
+    # that reloads the page with this param on or off
+    # if params[:all_users] == "1"
+    #   @all_users = true
+    #   query = create_query(:Image, :all, by: :updated_at)
+    # else
+    #   query = create_query(:Image, :by_user, user: @user, by: :updated_at)
+    # end
+    # @layout = calc_layout_params
+    # @pages = paginate_numbers(:page, @layout["count"])
+    # @objects = query.paginate(@pages,
+    #                           include: [:user, { observations: :name }])
+    # end
 
     def attach_image_for_profile_and_flash_notice(image)
       # Change user's profile image.
