@@ -73,7 +73,7 @@ module Name::PropagateGenericClassifications
 
     def execute_propagation_fixes(fixes, dry_run)
       bundles = {}
-\      used_names = hash_of_names_with_observations
+      used_names = hash_of_names_with_observations
       fixes.each_with_object([]) do |fix, msgs|
         name, old_class, new_class = fix
         bundles[new_class] = [] if bundles[new_class].blank?
