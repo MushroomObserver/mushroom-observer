@@ -1241,7 +1241,7 @@ class Observation < AbstractModel
   # Intended to be used with .tpl to render as HTML:
   #   <%= observation.source_credit.tpl %>
   def source_credit
-    source.present? && :"source_credit_#{source}"
+    :"source_credit_#{source}" if source.present?
   end
 
   ##############################################################################
