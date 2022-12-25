@@ -51,6 +51,8 @@
 
     <%= render(partial: "comments/comments_for_object",
                locals: { object: @observation, controls: true, limit: nil }) %>
+
+    <%= @observation.source_credit.tpl if @observation.source.present? %>
   </div>
 
 </div><!--.row-->
