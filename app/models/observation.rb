@@ -1224,6 +1224,7 @@ class Observation < AbstractModel
   #
   ##############################################################################
 
+  # Which agent created this observation?
   enum source:
         {
           mo_website: 1,
@@ -1231,11 +1232,6 @@ class Observation < AbstractModel
           mo_iphone_app: 3,
           mo_api: 4
         }
-
-  # Which agent created this observation?
-  def self.all_sources
-    [:mo_website, :mo_android_app, :mo_iphone_app, :mo_api]
-  end
 
   # Message to use to credit the agent which created this observation.
   # Intended to be used with .tpl to render as HTML:
