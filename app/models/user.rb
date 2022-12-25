@@ -733,7 +733,7 @@ class User < AbstractModel
 
   def self.parse_notes_template(str)
     str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
-      split(",").map(&:squish).reject(&:blank?)
+      split(",").map(&:squish).compact_blank
   end
 
   ##############################################################################
