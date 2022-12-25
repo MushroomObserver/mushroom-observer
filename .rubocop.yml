@@ -1,4 +1,4 @@
-inherit_from: .rubocop_todo.yml
+#inherit_from: .rubocop_todo.yml
 
 require:
   - rubocop-performance
@@ -156,6 +156,18 @@ Performance/StringInclude:
   # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
   Enabled: false
 
+Rails/ActionOrder:
+  # Allow `edit` after `create`
+  # default order is ... edit, create
+  # See https://github.com/MushroomObserver/mushroom-observer/pull/1241#issuecomment-1364636450
+  ExpectedOrder:
+    - index
+    - show
+    - new
+    # - edit
+    - create
+    - update
+    - destroy
 Rails/DynamicFindBy:
   # Make autocorrect saf(er) by whitelisting our find_by methods
   AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
