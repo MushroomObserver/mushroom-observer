@@ -1716,6 +1716,7 @@ class ApplicationController < ActionController::Base
       num_per_page: num_per_page
     )
   end
+  helper_method :paginate_numbers
 
   private ##########
 
@@ -1804,6 +1805,7 @@ class ApplicationController < ActionController::Base
     count = @user&.layout_count || MO.default_layout_count
     { "count" => count }
   end
+  helper_method :calc_layout_params
 
   def permission?(obj, error_message)
     result = (in_admin_mode? || obj.can_edit?(@user))
