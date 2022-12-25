@@ -80,7 +80,7 @@ class API2
                                                  help: 1),
         notes: @notes,
         source: parse(:enum, :source, limit: Observation.all_sources,
-                      default: "mo_api"),
+                                      default: "mo_api"),
         thumb_image: @thumbnail,
         images: @images,
         projects: parse_array(:project, :projects, must_be_member: true) || [],
