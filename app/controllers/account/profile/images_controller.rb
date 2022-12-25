@@ -18,7 +18,6 @@ module Account::Profile
 
     # POST action
     def attach
-      binding.break
       return unless User.safe_find(params[:id]) == User.current
 
       image = Image.safe_find(params[:img_id])
