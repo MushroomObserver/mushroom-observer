@@ -48,14 +48,6 @@ class CollectionNumbersController < ApplicationController
     @collection_number = CollectionNumber.new(name: @user.legal_name)
   end
 
-  def edit
-    set_ivars_for_edit
-    return unless @collection_number
-
-    figure_out_where_to_go_back_to
-    return unless make_sure_can_edit!(@collection_number)
-  end
-
   def create
     set_ivars_for_new
     return unless @observation
@@ -64,6 +56,14 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_edit!(@observation)
 
     create_collection_number
+  end
+
+  def edit
+    set_ivars_for_edit
+    return unless @collection_number
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
   end
 
   def update
