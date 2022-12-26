@@ -1462,7 +1462,7 @@ class ObservationsControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    name_trackers = NameTracker.where(obj_id: name.id)
+    name_trackers = NameTracker.where(name: name)
     assert_equal(2, name_trackers.length,
                  "Should be 2 name name_trackers for name ##{name.id}")
     assert(name_trackers.map(&:user).include?(mary))

@@ -30,7 +30,7 @@ class QueuedEmail::NameTracking < QueuedEmail
     # Make sure naming wasn't deleted since email was queued.
     if naming
       result = NamingTrackerMailer.build(user, naming).deliver_now
-      if name_tracker.note_template
+      if name_tracker.note_template.present? && name_tracker.approved
         result = NamingObserverMailer.build(
           to_user, naming, name_tracker
         ).deliver_now

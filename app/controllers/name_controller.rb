@@ -1062,7 +1062,7 @@ class NameController < ApplicationController
     @name = find_or_goto_index(Name, name_id)
     return unless @name
 
-    @name_tracker = NameTracker.find_by(obj_id: name_id, user_id: @user.id)
+    @name_tracker = NameTracker.find_by(name_id: name_id, user_id: @user.id)
     if request.method == "POST"
       submit_tracking_form(name_id)
     else
@@ -1114,7 +1114,7 @@ class NameController < ApplicationController
 
   def create_name_tracker_interest_and_flash(name_id)
     @name_tracker = NameTracker.new(user: @user,
-                                    obj_id: name_id,
+                                    name_id: name_id,
                                     note_template: @note_template)
     @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
     flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
@@ -1137,17 +1137,37 @@ class NameController < ApplicationController
 
   def notify_admins_of_name_tracker(name_tracker)
     return if name_tracker.note_template.blank?
+    # Only give notifications when users turn on the template function,
+    # not when they edit the template after its already been approved.
     return if !name_tracker.new_record? &&
-              name_tracker.note_template_before_last_save.blank?
+              !name_tracker.note_template_before_last_save.blank?
 
     user = name_tracker.user
-    name = Name.find(name_tracker.obj_id)
+    name = name_tracker.name
     note = name_tracker.note_template
     subject = "New Name Tracker with Template"
     content = "User: ##{user.id} / #{user.login}\n" \
               "Name: ##{name.id} / #{name.search_name}\n" \
-              "Note: [[#{note}]]"
+              "Note: [[#{note}]]\n\n" \
+              "#{MO.http_domain}/name/approve_tracker/#{name_tracker.id}"
     WebmasterMailer.build(user.email, content, subject).deliver_now
+  end
+
+  def approve_tracker
+    return unless (tracker = find_or_goto_index(NameTracker, params[:id]))
+
+    approve_tracker_if_everything_okay(tracker)
+    redirect("/")
+  end
+
+  def approve_tracker_if_everything_okay(tracker)
+    flash_warning(:permission_denied.t), return unless @user.admin
+    flash_warning("Already approved."), return if tracker.approved
+    flash_warning("Not a spammy stalker."), return \
+      unless tracker.template.present?
+
+    tracker.update(approved: true)
+    flash_notice("Name stalked approved.")
   end
 
   public

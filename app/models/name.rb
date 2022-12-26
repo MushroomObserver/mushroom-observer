@@ -383,6 +383,7 @@ class Name < AbstractModel
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
+  has_many :name_trackers
   has_many :namings
   has_many :observations
 
