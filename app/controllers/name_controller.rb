@@ -1153,18 +1153,22 @@ class NameController < ApplicationController
     WebmasterMailer.build(user.email, content, subject).deliver_now
   end
 
+  public
+
   def approve_tracker
     return unless (tracker = find_or_goto_index(NameTracker, params[:id]))
 
     approve_tracker_if_everything_okay(tracker)
-    redirect("/")
+    redirect_to("/")
   end
 
+  private
+
   def approve_tracker_if_everything_okay(tracker)
-    flash_warning(:permission_denied.t), return unless @user.admin
-    flash_warning("Already approved."), return if tracker.approved
-    flash_warning("Not a spammy stalker."), return \
-      unless tracker.template.present?
+    return flash_warning(:permission_denied.t) unless @user.admin
+    return flash_warning("Already approved.") if tracker.approved
+    return flash_warning("Not a spammy stalker.") \
+      unless tracker.note_template.present?
 
     tracker.update(approved: true)
     flash_notice("Name stalked approved.")

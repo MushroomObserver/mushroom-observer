@@ -4349,14 +4349,14 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(interest)
   end
 
-  def test_approve_template
+  def test_approve_tracker_with_template
     tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
     NameTracker.update(tracker.id, approved: false)
     assert(!tracker.reload.approved)
 
     params = { id: tracker.id }
     get(:approve_tracker, params: params)
-    assert_flash_warning
+    assert_no_flash
     assert(!tracker.reload.approved)
 
     login("rolf")
