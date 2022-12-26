@@ -181,7 +181,10 @@ module Observations
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        redirect_to(:reuse) and return
+        # redirect_to(:reuse) and return
+        render(:reuse,
+               location: reuse_images_for_observation_path(@observation.id))
+        return
       end
 
       attach_image_to_observation(image)
@@ -198,6 +201,9 @@ module Observations
         flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
       end
       redirect_with_query(permanent_observation_path(id: @observation.id))
+      # render("observations/show",
+      #        location: permanent_observation_path(id: @observation.id,
+      #                                             q: get_query_param))
     end
 
     public

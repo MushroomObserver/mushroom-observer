@@ -3,6 +3,11 @@
 # Images::LicensesController
 module Images
   class LicensesController < ApplicationController
+    # def access_denied
+    #   flash_error(:permission_denied.t)
+    #   redirect_to(edit_account_preferences_path)
+    # end
+
     before_action :login_required
 
     # Linked from show_obs, account prefs tabs and section, acct profile
@@ -29,22 +34,10 @@ module Images
     #    "license_id"=>3},
     #   {"license_count"=>1, "copyright_holder"=>"Tim Wheeler", "license_id"=>2}]
 
-    # license_updater
+    # was #license_updater.
     def edit
       # Gather data for form.
-
-      # map(&:attributes) gives you a hash of your selects with their keys
-      @data = Image.includes(:license).where(user_id: @user.id).
-              select(Arel.star.count.as("license_count"),
-                     :copyright_holder, :license_id).
-              group(:copyright_holder, :license_id).
-              map(&:attributes).map do |datum|
-        next unless (license = License.safe_find(datum["license_id"].to_i))
-
-        datum["license_name"] = license.display_name
-        datum["licenses"]     = License.current_names_and_ids(license)
-        datum.except!("id")
-      end
+      @data = license_data
     end
 
     # process_license_changes
@@ -62,11 +55,28 @@ module Images
         images_to_update.update_all(license_id: row[:new_id],
                                     copyright_holder: row[:new_holder])
       end
+      @data = license_data
+      render(:edit, location: images_edit_licenses_path)
     end
 
     ############################################################################
 
-    private # private methods used by license updater
+    private
+
+    def license_data
+      Image.includes(:license).where(user_id: @user.id).
+        select(Arel.star.count.as("license_count"),
+               :copyright_holder, :license_id).
+        group(:copyright_holder, :license_id).
+        # map(&:attributes) gives you a hash of your selects with their keys
+        map(&:attributes).map do |datum|
+        next unless (license = License.safe_find(datum["license_id"].to_i))
+
+        datum["license_name"] = license.display_name
+        datum["licenses"]     = License.current_names_and_ids(license)
+        datum.except!("id")
+      end
+    end
 
     def row_changed?(row)
       row[:old_id] != row[:new_id] ||

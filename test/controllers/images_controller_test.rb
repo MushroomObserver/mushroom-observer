@@ -51,12 +51,12 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_image_search
     login
-    get(:image_search, params: { pattern: "Notes" })
+    get(:index, params: { pattern: "Notes" })
     assert_template("index", partial: "_image")
     assert_equal(:query_title_pattern_search.t(types: "Images",
                                                pattern: "Notes"),
                  @controller.instance_variable_get(:@title))
-    get(:image_search, params: { pattern: "Notes", page: 2 })
+    get(:index, params: { pattern: "Notes", page: 2 })
     assert_template("index")
     assert_equal(:query_title_pattern_search.t(types: "Images",
                                                pattern: "Notes"),
@@ -65,14 +65,14 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_image_search_next
     login
-    get(:image_search, params: { pattern: "Notes" })
+    get(:index, params: { pattern: "Notes" })
     assert_template("index", partial: "_image")
   end
 
   def test_image_search_by_number
     img_id = images(:commercial_inquiry_image).id
     login
-    get(:image_search, params: { pattern: img_id })
+    get(:index, params: { pattern: img_id })
     assert_redirected_to(action: :show, id: img_id)
   end
 
@@ -336,7 +336,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:show, params: { id: img.id })
-    assert_select("a[href=?]", edit_image_path(obs.id), count: 0)
+    assert_select("a[href=?]", edit_image_path(img.id), count: 0)
     assert_select("input[value='#{:DESTROY.t}']", count: 0)
     get(:edit, params: { id: img.id })
     assert_response(:redirect)
@@ -345,15 +345,15 @@ class ImagesControllerTest < FunctionalTestCase
 
     login("mary")
     get(:show, params: { id: img.id })
-    assert_select("a[href*=edit_image]", minimum: 1)
-    assert_select("a[href*=destroy_image]", minimum: 1)
+    assert_select("a[href=?]", edit_image_path(img.id), minimum: 1)
+    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
     get(:edit, params: { id: img.id })
     assert_response(:success)
 
     login("dick")
     get(:show, params: { id: img.id })
-    assert_select("a[href*=edit_image]", minimum: 1)
-    assert_select("a[href*=destroy_image]", minimum: 1)
+    assert_select("a[href=?]", edit_image_path(img.id), minimum: 1)
+    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
     get(:edit, params: { id: img.id })
     assert_response(:success)
     get(:destroy, params: { id: img.id })
@@ -516,9 +516,9 @@ class ImagesControllerTest < FunctionalTestCase
     image = images(:turned_over_image)
     obs = image.observations.first
     assert(obs.images.member?(image))
-    params = { id: image.id.to_s }
+    params = { id: image.id }
     assert_equal("mary", image.user.login)
-    requires_user(:destroy, :show, params, "mary")
+    requires_user(:destroy, image_path(image.id), params, "mary")
     assert_redirected_to(action: :index)
     assert_equal(0, mary.reload.contribution)
     assert_not(obs.reload.images.member?(image))
@@ -534,9 +534,10 @@ class ImagesControllerTest < FunctionalTestCase
     assert(obs.images.member?(image))
     query = Query.lookup_and_save(:Image, :by_user, user: user)
     q = query.id.alphabetize
-    params = { id: image.id.to_s, q: q }
+    params = { id: image.id, q: q }
 
-    requires_user(:destroy, :show, params, user.login)
+    delete_requires_user(:destroy, { action: :show, id: image.id, q: q }, params,
+                         user.login)
 
     assert_redirected_to(action: :show, id: next_image.id, q: q)
     assert_equal(0, user.reload.contribution)

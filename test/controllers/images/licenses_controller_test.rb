@@ -5,7 +5,7 @@ require("test_helper")
 # tests of Images controller
 module Images
   class LicensesControllerTest < FunctionalTestCase
-    def test_license_updater
+    def test_edit_license_page_access
       requires_login(:edit)
       assert_form_action(action: :update)
     end
@@ -41,7 +41,8 @@ module Images
         }
       }
       put_requires_login(:update, params)
-      assert_template("account/images/edit")
+      # assert_redirected_to(images_edit_licenses_path)
+      assert_template("images/licenses/edit")
       assert_equal(10, rolf.reload.contribution)
 
       target_count_after = Image.where(user_id: user_id,
@@ -78,7 +79,7 @@ module Images
         }
       }
       put_requires_login(:update, params)
-      assert_template("license_updater")
+      assert_template("images/licenses/edit")
       example_image.reload
       assert_equal("A. H. Smith", example_image.copyright_holder,
                    "Name of new copyright holder is incorrect")
