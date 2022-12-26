@@ -774,9 +774,9 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
     assert_select("a:match('href',?)", observation_path(obs.id),
                   count: 0, text: :DESTROY.t)
-    assert_select("a[href*=add_image]", count: 0)
-    assert_select("a[href*=remove_image]", count: 0)
-    assert_select("a[href*=reuse_image]", count: 0)
+    assert_select("a[href*=images/new]", count: 0)
+    assert_select("a[href*=images/remove]", count: 0)
+    assert_select("a[href*=images/reuse]", count: 0)
     get(:edit, params: { id: obs.id })
     assert_response(:redirect)
     get(:destroy, params: { id: obs.id })
@@ -788,9 +788,9 @@ class ObservationsControllerTest < FunctionalTestCase
     # Destroy button is in a form, not a link_to
     assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
     assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
-    assert_select("a[href*=add_image]", minimum: 1)
-    assert_select("a[href*=remove_image]", minimum: 1)
-    assert_select("a[href*=reuse_image]", minimum: 1)
+    assert_select("a[href*=images/new]", minimum: 1)
+    assert_select("a[href*=images/remove]", minimum: 1)
+    assert_select("a[href*=images/reuse]", minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_response(:success)
 
@@ -800,9 +800,9 @@ class ObservationsControllerTest < FunctionalTestCase
     # Destroy button is in a form, not a link_to
     assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
     assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
-    assert_select("a[href*=add_image]", minimum: 1)
-    assert_select("a[href*=remove_image]", minimum: 1)
-    assert_select("a[href*=reuse_image]", minimum: 1)
+    assert_select("a[href*=images/new]", minimum: 1)
+    assert_select("a[href*=images/remove]", minimum: 1)
+    assert_select("a[href*=images/reuse]", minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_response(:success)
     get(:destroy, params: { id: obs.id })

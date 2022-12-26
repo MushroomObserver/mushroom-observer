@@ -6,10 +6,9 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
-  form_action = { controller: "/observations/images",
+  form_action = { controller: "/images",
                   action: :update,
-                  id: @observation.id,
-                  img_id: @image.id,
+                  id: @image.id,
                   q: get_query_param }
 %>
 
@@ -17,7 +16,7 @@
   <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
     <%= form.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
 
-    <%= render(partial: "fields_for_images",
+    <%= render(partial: "images/form/fields_for_images",
                locals: { form: form, leave_out_original_file_name: false }) %>
 
     <div class="text-center mt-3 mb-5">

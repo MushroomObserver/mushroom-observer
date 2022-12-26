@@ -49,12 +49,66 @@ class ImagesControllerTest < FunctionalTestCase
     assert_template("index", partial: "_image")
   end
 
-  def test_next_image
+  def test_image_search
     login
-    get(:show, params: { id: images(:turned_over_image).id, flow: :next })
-    # Default sort order is inverse chronological (created_at DESC, id DESC).
-    # So here, "next" image is one created immediately previously.
-    assert_redirected_to(%r{images/#{images(:in_situ_image).id}[\b|?]})
+    get(:image_search, params: { pattern: "Notes" })
+    assert_template("index", partial: "_image")
+    assert_equal(:query_title_pattern_search.t(types: "Images",
+                                               pattern: "Notes"),
+                 @controller.instance_variable_get(:@title))
+    get(:image_search, params: { pattern: "Notes", page: 2 })
+    assert_template("index")
+    assert_equal(:query_title_pattern_search.t(types: "Images",
+                                               pattern: "Notes"),
+                 @controller.instance_variable_get(:@title))
+  end
+
+  def test_image_search_next
+    login
+    get(:image_search, params: { pattern: "Notes" })
+    assert_template("index", partial: "_image")
+  end
+
+  def test_image_search_by_number
+    img_id = images(:commercial_inquiry_image).id
+    login
+    get(:image_search, params: { pattern: img_id })
+    assert_redirected_to(action: :show, id: img_id)
+  end
+
+  def test_advanced_search
+    query = Query.lookup_and_save(:Image, :advanced_search,
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma")
+    login
+    get(:index,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    assert_template("index")
+  end
+
+  def test_advanced_search_invalid_q_param
+    login
+    get(:index, params: { q: "xxxxx", advanced_search: "1" })
+
+    assert_flash_text(:advanced_search_bad_q_error.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  def test_advanced_search_error
+    query = Query.lookup_and_save(:Image, :advanced_search,
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma")
+    ImagesController.any_instance.expects(:show_selected_images).
+      raises(StandardError)
+    login
+
+    get(:advanced_search,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    assert_redirected_to(search_advanced_path)
   end
 
   def test_next_image_ss
@@ -151,14 +205,6 @@ class ImagesControllerTest < FunctionalTestCase
     get(:show, params: params)
     assert_redirected_to(action: :show, id: expected_next,
                          params: @controller.query_params(query))
-  end
-
-  def test_prev_image
-    login
-    # oldest image
-    get(:show, params: { id: images(:in_situ_image).id, flow: :prev })
-    # so "prev" is the 2nd oldest
-    assert_redirected_to(%r{images/#{images(:turned_over_image).id}[\b|?]})
   end
 
   def test_prev_image_ss
@@ -290,8 +336,8 @@ class ImagesControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:show, params: { id: img.id })
-    assert_select("a[href*=edit_image]", count: 0)
-    assert_select("a[href*=destroy_image]", count: 0)
+    assert_select("a[href=?]", edit_image_path(obs.id), count: 0)
+    assert_select("input[value='#{:DESTROY.t}']", count: 0)
     get(:edit, params: { id: img.id })
     assert_response(:redirect)
     get(:destroy, params: { id: img.id })
@@ -336,66 +382,134 @@ class ImagesControllerTest < FunctionalTestCase
                  "Failed to change user's vote for image")
   end
 
-  def test_image_search
+  def test_next_image
     login
-    get(:image_search, params: { pattern: "Notes" })
-    assert_template("index", partial: "_image")
-    assert_equal(:query_title_pattern_search.t(types: "Images",
-                                               pattern: "Notes"),
-                 @controller.instance_variable_get(:@title))
-    get(:image_search, params: { pattern: "Notes", page: 2 })
-    assert_template("index")
-    assert_equal(:query_title_pattern_search.t(types: "Images",
-                                               pattern: "Notes"),
-                 @controller.instance_variable_get(:@title))
+    get(:show, params: { id: images(:turned_over_image).id, flow: :next })
+    # Default sort order is inverse chronological (created_at DESC, id DESC).
+    # So here, "next" image is one created immediately previously.
+    assert_redirected_to(%r{images/#{images(:in_situ_image).id}[\b|?]})
   end
 
-  def test_image_search_next
+  def test_prev_image
     login
-    get(:image_search, params: { pattern: "Notes" })
-    assert_template("index", partial: "_image")
+    # oldest image
+    get(:show, params: { id: images(:in_situ_image).id, flow: :prev })
+    # so "prev" is the 2nd oldest
+    assert_redirected_to(%r{images/#{images(:turned_over_image).id}[\b|?]})
   end
 
-  def test_image_search_by_number
-    img_id = images(:commercial_inquiry_image).id
-    login
-    get(:image_search, params: { pattern: img_id })
-    assert_redirected_to(action: :show, id: img_id)
+  def test_edit_image
+    image = images(:connected_coprinus_comatus_image)
+    params = { "id" => image.id.to_s }
+    assert(image.user.login == "rolf")
+    requires_user(:edit, %w[image show], params)
+    assert_form_action(action: :edit, id: image.id.to_s)
   end
 
-  def test_advanced_search
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_template("index")
+  def test_update_image
+    image = images(:agaricus_campestris_image)
+    obs = image.observations.first
+    assert(obs)
+    assert(obs.rss_log.nil?)
+    new_name = "new nāme.jpg"
+
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => "2001",
+        "when(2i)" => "5",
+        "when(3i)" => "12",
+        "copyright_holder" => "Rolf Singer",
+        "notes" => "",
+        "original_name" => new_name
+      }
+    }
+    post_requires_login(:update, params)
+    assert_redirected_to(controller: "/images", action: :show, id: image.id)
+    assert_equal(10, rolf.reload.contribution)
+
+    assert(obs.reload.rss_log)
+    assert(obs.rss_log.notes.include?("log_image_updated"))
+    assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
+    assert(
+      obs.rss_log.notes.include?("name ##{image.id}")
+    )
+    assert_equal(new_name, image.reload.original_name)
   end
 
-  def test_advanced_search_invalid_q_param
-    login
-    get(:index, params: { q: "xxxxx", advanced_search: "1" })
+  def test_update_image_no_changes
+    image = images(:agaricus_campestris_image)
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => image.when.year.to_s,
+        "when(2i)" => image.when.month.to_s,
+        "when(3i)" => image.when.day.to_s,
+        "copyright_holder" => image.copyright_holder,
+        "notes" => image.notes,
+        "original_name" => image.original_name,
+        "license" => image.license
+      }
+    }
 
-    assert_flash_text(:advanced_search_bad_q_error.l)
-    assert_redirected_to(search_advanced_path)
+    post_requires_login(:update, params)
+
+    assert_flash_text(:runtime_no_changes.l,
+                      "Flash should say no changes " \
+                      "if no changes made when editing image")
   end
 
-  def test_advanced_search_error
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
-    ImagesController.any_instance.expects(:show_selected_images).
-      raises(StandardError)
-    login
+  # Prove that user can remove image from project
+  # by updating image without changes
+  def test_update_image_unchanged_remove_from_project
+    project = projects(:bolete_project)
+    assert(project.images.present?,
+           "Test needs Project fixture that has an Image")
+    image = project.images.first
+    user = image.user
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => image.when.year.to_s,
+        "when(2i)" => image.when.month.to_s,
+        "when(3i)" => image.when.day.to_s,
+        "copyright_holder" => image.copyright_holder,
+        "notes" => image.notes,
+        "original_name" => image.original_name,
+        "license" => image.license
+      },
+      project: project
+    }
+    login(user.login)
 
-    get(:advanced_search,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_redirected_to(search_advanced_path)
+    post(:update, params: params)
+
+    assert(project.reload.images.exclude?(image),
+           "Failed to remove image from project")
+  end
+
+  def test_update_image_save_fail
+    image = images(:turned_over_image)
+    assert_not_empty(image.projects,
+                     "Use Image fixture with a Project for best coverage")
+    params = {
+      "id" => image.id,
+      "image" => {
+        "when(1i)" => "2001",
+        "when(2i)" => "5",
+        "when(3i)" => "12",
+        "copyright_holder" => "Rolf Singer",
+        "notes" => "",
+        "original_name" => "new name"
+      }
+    }
+
+    login(image.user.login)
+    Image.any_instance.stubs(:save).returns(false)
+    post(:update, params: params)
+
+    assert(assert_select("#title").text.start_with?("Editing Image"),
+           "It should return to form if image save fails")
   end
 
   def test_destroy_image

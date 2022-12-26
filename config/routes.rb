@@ -601,10 +601,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :remove_observation, only: [:update], module: :herbarium_records
   end
 
-  namespace :image do
-    put("/:id/transform", to: "/images/transformations#update", as: "transform")
-    put("/:id/vote", to: "/images/votes#update", as: "vote")
-  end
+  # ----- Images: Namespace differences are for memorable path names
   namespace :images do
     put("/purge_filenames", to: "/images/filenames#update",
                             as: "bulk_filename_purge")
@@ -617,7 +614,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     put("/votes/anonymity", to: "/images/votes/anonymity#update",
                             as: "bulk_vote_anonymity_updater")
   end
-  resources :images, only: [:index, :show, :edit, :update, :destroy]
+  resources :images, only: [:index, :show, :edit, :update, :destroy] do
+    member do
+      put("transform", to: "images/transformations#update", as: "transform")
+    end
+  end
+  put("/images/:id/vote", to: "images/votes#update", as: "image_vote")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -665,10 +667,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       post("print_labels")
     end
   end
-  get("observations/:id/images/:img_id/edit", to: "observations/images#edit",
-                                              as: "edit_observation_image")
-  put("observations/:id/images/:img_id", to: "observations/images#update",
-                                         as: "update_observation_image")
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")

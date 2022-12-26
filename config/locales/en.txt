@@ -1602,7 +1602,7 @@
   form_synonyms_missing_names: The following names could not be found.
   form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names.  If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
-  # image/add_image
+  # images/new
   image_set_default: Set as default thumbnail
   image_add_title: Add an Image for [name]
   image_add_edit: "[:edit_object(type=:observation)]"
@@ -1612,26 +1612,26 @@
   image_add_upload: "[:UPLOAD]"
   image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":http://creativecommons.org/licenses/by-nc-sa/2.5/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
 
-  # image/reuse_image_for_user
+  # account/profile/images/reuse
   image_reuse_all_users: Include other users' images.
   image_reuse_just_yours: Only show your images.
 
-  # image/edit_image
+  # observations/images/edit
   image_edit_title: "Editing Image: [name]"
 
-  # image/remove_images
+  # observations/images/remove
   image_remove_edit: "[:edit_object(type=:observation)]"
   image_remove_remove: Remove
   image_remove_title: Remove Images from [name]
 
-  # image/reuse_images
+  # observations/images/reuse
   image_reuse_title: Reuse Image for [name]
   image_reuse_edit: "[:edit_object(type=:observation)]"
   image_reuse_id: Image ID
   image_reuse_reuse: Reuse
   image_reuse_id_help: Either click one of the images below, or if you know the image ID, just enter it here and click '[:image_reuse_reuse]'.
 
-  # image/show_image
+  # images/show
   image_show_title: "[:IMAGE]: [name]"
   image_show_inquiry: Send Commercial Inquiry
   image_show_rotate_left: Rotate Left
