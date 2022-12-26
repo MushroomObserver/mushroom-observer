@@ -13,19 +13,19 @@ module Account
       @key = APIKey.new
     end
 
+    def create
+      @key = APIKey.new
+
+      create_api_key
+      redirect_to(account_api_keys_path)
+    end
+
     # The edit view seems to be only for no-js users.
     def edit
       unless (@key = find_or_goto_index(APIKey, params[:id].to_s)) &&
              check_permission!(@key)
         redirect_to(account_api_keys_path)
       end
-    end
-
-    def create
-      @key = APIKey.new
-
-      create_api_key
-      redirect_to(account_api_keys_path)
     end
 
     def update
