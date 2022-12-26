@@ -36,13 +36,13 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   def test_make_table_with_colspan
-    expect = %q(<table><tr colspan="2"><td>5</td><td>6</td></tr></table>)
+    expect = '<table><tr colspan="2"><td>5</td><td>6</td></tr></table>'
     table = make_table([[5, 6]], {}, { colspan: 2 })
     assert_equal(expect, table)
   end
 
   def test_make_table_row_without_columns
-    expect = %q(<table><tr>row without columns</tr></table>)
+    expect = "<table><tr>row without columns</tr></table>"
     table = make_table(["row without columns"])
     assert_equal(expect, table)
   end
