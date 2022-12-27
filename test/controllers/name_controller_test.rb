@@ -4325,7 +4325,7 @@ class NameControllerTest < FunctionalTestCase
     assert(name_tracker.note_template)
     assert(name_tracker.calc_note(user: rolf,
                                   naming: namings(:coprinus_comatus_naming)))
-    assert_equal(false, name_tracker.approved)
+    assert_equal(true, name_tracker.approved)
     interest = Interest.find_by(target: name_tracker)
     assert(interest)
   end
