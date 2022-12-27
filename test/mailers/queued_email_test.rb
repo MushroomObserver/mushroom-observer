@@ -27,7 +27,7 @@ class QueuedEmailTest < UnitTestCase
       from: User.admin,
       to: user,
       subject: subject,
-      content: content
+      note: content
     )
     assert(email.deliver_email)
   end
