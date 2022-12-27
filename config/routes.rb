@@ -614,7 +614,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     put("/votes/anonymity", to: "/images/votes/anonymity#update",
                             as: "bulk_vote_anonymity_updater")
   end
-  resources :images, only: [:index, :show, :edit, :update, :destroy] do
+  resources :images, only: [:index, :show, :destroy] do
     member do
       put("transform", to: "images/transformations#update", as: "transform")
     end
@@ -667,6 +667,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       post("print_labels")
     end
   end
+  # These are in observations because they share private methods with
+  # :new and :create, which are currently observation-specific
+  get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
+  match("/images/:id", to: "observations/images#update", via: [:put, :patch])
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")

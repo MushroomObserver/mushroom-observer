@@ -39,12 +39,13 @@
     <% end %>
   </div>
 
-  <%= render(partial: "images/form/fields_for_images",
+  <%= render(partial: "observations/images/form/fields_for_images",
              locals: { f: f, width: 80,
                        leave_out_original_file_name: true }) %>
 
   <% if @projects.any? %>
-    <%= render(partial: "fields_for_project", collection: @projects) %>
+    <%= render(partial: "observations/images/form/project", 
+               collection: @projects) %>
   <% end %>
 
   <%= f.submit(:image_add_upload.l,

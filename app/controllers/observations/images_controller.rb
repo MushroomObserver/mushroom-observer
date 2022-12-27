@@ -171,6 +171,107 @@ module Observations
 
     public
 
+    ###########################################################################
+
+    # Form for editing date/license/notes on an observation image.
+    # Linked from: show_image/original
+    # Inputs: params[:id] (image)
+    #   params[:comment][:summary]
+    #   params[:comment][:comment]
+    # Outputs: @image, @licenses
+    def edit
+      return unless (@image = find_image!)
+
+      @licenses = current_license_names_and_ids
+      check_image_permission!
+      init_project_vars_for_add_or_edit(@image)
+    end
+
+    def update
+      return unless (@image = find_image!)
+
+      @licenses = current_license_names_and_ids
+      check_image_permission!
+
+      @image.attributes = whitelisted_image_params
+
+      if image_or_projects_updated
+        # redirect_with_query(image_path(@image.id))
+        render("images/show",
+               location: image_path(@image.id, q: get_query_param))
+      else
+        init_project_vars_for_reload(@image)
+        render(:edit, location: edit_image_path(@image.id))
+      end
+    end
+
+    private
+
+    def find_image!
+      find_or_goto_index(Image, params[:id].to_s)
+    end
+
+    def check_image_permission!
+      unless check_permission!(@image)
+        redirect_with_query(controller: "/images", action: :show,
+                            id: @image)
+      end
+    end
+
+    def whitelisted_image_params
+      params.require(:image).permit(whitelisted_image_args)
+    end
+
+    def image_or_projects_updated
+      if !image_data_changed?
+        update_projects_and_flash_notice!
+        true
+      elsif !@image.save
+        flash_object_errors(@image)
+        false
+      else
+        @image.log_update
+        flash_notice(:runtime_image_edit_success.t(id: @image.id))
+        update_related_projects(@image, params[:project])
+        true
+      end
+    end
+
+    def image_data_changed?
+      @image.when_changed? ||
+        @image.notes_changed? ||
+        @image.copyright_holder_changed? ||
+        @image.original_name_changed? ||
+        @image.license_id_changed?
+    end
+
+    def update_projects_and_flash_notice!
+      if update_related_projects(@image, params[:project])
+        flash_notice(:runtime_image_edit_success.t(id: @image.id))
+      else
+        flash_notice(:runtime_no_changes.t)
+      end
+    end
+
+    def init_project_vars_for_reload(obs_or_img)
+      # (Note: In practice, this is never called for add_image,
+      # so obs_or_img is always an image.)
+      @projects = User.current.projects_member(order: :title)
+      @project_checks = {}
+      obs_or_img.projects.each do |proj|
+        @projects << proj unless @projects.include?(proj)
+      end
+      @projects.each do |proj|
+        @project_checks[proj.id] = begin
+                                     params[:project]["id_#{proj.id}"] == "1"
+                                   rescue StandardError
+                                     false
+                                   end
+      end
+    end
+
+    public
+
     ############################################################################
 
     # REUSE: Attach an Image to an Observation from existing uploads
