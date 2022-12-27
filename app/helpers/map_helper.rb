@@ -114,7 +114,7 @@ module MapHelper
           "#{format_latitude(obj.lat)} #{format_longitude(obj.long)}"
         end
       end
-    end.reject(&:blank?).uniq
+    end.compact_blank.uniq
   end
 
   def mapset_info_window(set, args) # rubocop:disable Metrics/AbcSize

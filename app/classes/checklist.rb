@@ -128,7 +128,7 @@ class Checklist
   def count_synonyms(synonyms)
     synonyms.each do |syn_id, text_name|
       text_name ||= Name.where(synonym_id: syn_id, rank: ranks_to_consider).
-                    order(deprecated: :asc).pluck(:text_name).first
+                    order(deprecated: :asc).pick(:text_name)
       count_species(text_name)
     end
   end

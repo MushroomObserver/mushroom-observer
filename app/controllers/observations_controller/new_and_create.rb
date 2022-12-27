@@ -121,7 +121,7 @@ module ObservationsController::NewAndCreate
     return Observation.no_notes unless notes_param_present?
 
     symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
-    symbolized.delete_if { |_key, value| value.blank? }
+    symbolized.compact_blank!
   end
 
   def notes_param_present?

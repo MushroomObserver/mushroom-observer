@@ -52,10 +52,9 @@ module PivotalHelper
                        id: "pivotal_comment",
                        cols: 80,
                        rows: 10) + safe_br
-    form += tag(:input,
-                type: :button,
-                value: :pivotal_post_comment.l,
-                data: { role: "post_comment", story: story.id })
+    form += tag.input(type: :button,
+                      value: :pivotal_post_comment.l,
+                      data: { role: "post_comment", story: story.id })
     result += content_tag(:form, form, action: "", class: "mt-3")
     result
   end
