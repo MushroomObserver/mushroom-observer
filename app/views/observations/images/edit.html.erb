@@ -12,12 +12,18 @@
                   q: get_query_param }
 %>
 
-<%= form_with(model: @image, url: form_action, method: :put) do |f| %>
-  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+<div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+  <%= form_with(model: @image, url: form_action, method: :put) do |f| %>
+
     <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
 
     <%= render(partial: "observations/images/form/fields_for_images",
                locals: { f: f, leave_out_original_file_name: false }) %>
+
+    <% if @projects.any? %>
+      <%= render(partial: "observations/images/form/project", 
+                collection: @projects) %>
+    <% end %>
 
     <div class="text-center mt-3 mb-5">
       <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default") %>
@@ -25,8 +31,10 @@
                           image_path(@image.id),
                           { class: "btn btn-default" }) %>
     </div>
-  </div>
-  <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
-    <%= thumbnail(@image, { size: :medium, votes: true, responsive: true }) %>
-  </div>
-<% end %>
+
+  <% end %>
+</div>
+
+<div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
+  <%= thumbnail(@image, { size: :medium, votes: true, responsive: true }) %>
+</div>

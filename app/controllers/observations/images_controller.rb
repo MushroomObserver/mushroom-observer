@@ -333,9 +333,9 @@ module Observations
       @object = find_or_goto_index(Observation, params[:id].to_s)
       return unless @object
 
-      return unless check_permission!(@object)
-
-      redirect_with_query(permanent_observation_path(@object.id))
+      unless check_permission!(@object)
+        redirect_with_query(permanent_observation_path(@object.id))
+      end
     end
 
     # Callback to DETACH images from an observation, form :put commits here
