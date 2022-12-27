@@ -1179,7 +1179,7 @@ class NameController < ApplicationController
 
   def notify_user_name_tracking_approved(tracker)
     subject = :email_subject_name_tracker_approval.l(
-      name: tracker.name.display_name,
+      name: tracker.name.display_name
     )
     content = :email_name_tracker_body.l(
       user: tracker.user.legal_name,
