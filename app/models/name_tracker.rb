@@ -31,6 +31,9 @@ class NameTracker < AbstractModel
   scope :for_user,
         ->(user) { where(user: user) }
 
+  # Used as an "opt-in" check-box in the UI form.
+  attr_accessor :note_template_enabled
+
   # Create body of the email we're about to send.
   #
   # [name]

@@ -1075,7 +1075,7 @@ class NameController < ApplicationController
   def initialize_tracking_form
     if @name_tracker
       @note_template = @name_tracker.note_template
-      @note_template_enabled = @note_template.present?
+      @name_tracker.note_template_enabled = @note_template.present?
       @interest = Interest.find_by(target: @name_tracker)
     else
       @note_template = :email_tracking_note_template.l(
@@ -1083,7 +1083,6 @@ class NameController < ApplicationController
         mailing_address: @user.mailing_address_for_tracking_template,
         users_name: @user.legal_name
       )
-      @note_template_enabled = false
     end
   end
 
@@ -1098,9 +1097,10 @@ class NameController < ApplicationController
   end
 
   def create_or_update_name_tracker_and_interest(name_id)
-    @note_template_enabled = params[:note_template_enabled] == "1"
     @note_template = param_lookup([:name_tracker, :note_template])
-    @note_template = nil if @note_template.blank? || !@note_template_enabled
+    note_template_enabled = \
+      param_lookup([:name_tracker, :note_template_enabled]) == "1"
+    @note_template = nil if @note_template.blank? || !note_template_enabled
     if @name_tracker.nil?
       create_name_tracker_interest_and_flash(name_id)
     else

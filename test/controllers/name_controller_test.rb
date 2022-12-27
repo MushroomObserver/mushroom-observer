@@ -4244,6 +4244,7 @@ class NameControllerTest < FunctionalTestCase
       id: name.id,
       commit: :ENABLE.t,
       name_tracker: {
+        note_template_enabled: "",
         note_template: ""
       }
     }
@@ -4274,6 +4275,7 @@ class NameControllerTest < FunctionalTestCase
       id: name.id,
       commit: :ENABLE.t,
       name_tracker: {
+        note_template_enabled: "1",
         note_template: "A note about :observation from :observer"
       }
     }
@@ -4306,6 +4308,7 @@ class NameControllerTest < FunctionalTestCase
       id: name.id,
       commit: "Update",
       name_tracker: {
+        note_template_enabled: "1",
         note_template: "A note about :observation from :observer"
       }
     }
@@ -4337,6 +4340,7 @@ class NameControllerTest < FunctionalTestCase
       id: name.id,
       commit: :DISABLE.t,
       name_tracker: {
+        note_template_enabled: "1",
         note_template: "A note about :observation from :observer"
       }
     }

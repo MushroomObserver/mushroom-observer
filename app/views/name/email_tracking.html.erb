@@ -25,13 +25,17 @@
   </div><!-- .text-center -->
 
   <div class="mt-5">
-    <%= check_box_tag("note_template_enabled", "1", @note_template_enabled,
-                      class: "form-control-xxx") %>
-    <label for="enable_template"><%= :email_tracking_note.t %></label>
+    <%= check_box(:name_tracker, :note_template_enabled,
+                  class: "form-control-xxx") %>
+    <label for="name_tracker_note_template_enabled">
+      <%= :email_tracking_note.t %>
+    </label>
   </div>
+
   <div class="help-note mt-2 mb-5">
     <%= :email_tracking_note_help.t %>
   </div>
+
   <%= text_area(:name_tracker, :note_template, cols: 80, rows: 16,
                 value: @note_template, data: {autofocus: true}) %><br/>
 <% end %>
