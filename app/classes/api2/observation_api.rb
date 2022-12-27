@@ -262,8 +262,7 @@ class API2
       declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
       return notes if set
 
-      notes.delete_if { |_key, val| val.blank? }
-      notes
+      notes.compact_blank!
     end
 
     def look_for_note_field_parameters(prefix)
