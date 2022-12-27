@@ -4354,6 +4354,9 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_approve_tracker_with_template
+    QueuedEmail.queue_emails(true)
+    assert_equal(0, QueuedEmail.count)
+
     tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
     NameTracker.update(tracker.id, approved: false)
     assert_not(tracker.reload.approved)
@@ -4362,20 +4365,24 @@ class NameControllerTest < FunctionalTestCase
     get(:approve_tracker, params: params)
     assert_no_flash
     assert_not(tracker.reload.approved)
+    assert_equal(0, QueuedEmail.count)
 
     login("rolf")
     get(:approve_tracker, params: params)
     assert_flash_warning
     assert_not(tracker.reload.approved)
+    assert_equal(0, QueuedEmail.count)
 
     login("admin")
     get(:approve_tracker, params: params)
     assert_flash_success
     assert(tracker.reload.approved)
+    assert_equal(1, QueuedEmail.count)
 
     get(:approve_tracker, params: params)
     assert_flash_warning
     assert(tracker.reload.approved)
+    assert_equal(1, QueuedEmail.count)
   end
 
   # ----------------------------

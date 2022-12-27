@@ -1174,6 +1174,19 @@ class NameController < ApplicationController
 
     tracker.update(approved: true)
     flash_notice("Name stalker approved.")
+    notify_user_name_tracking_approved(tracker)
+  end
+
+  def notify_user_name_tracking_approved(tracker)
+    subject = :email_subject_name_tracker_approval.l(
+      name: tracker.name.display_name,
+    )
+    content = :email_name_tracker_body.l(
+      user: tracker.user.legal_name,
+      name: tracker.name.display_name,
+      link: "#{MO.http_domain}/interests/?type=NameTracker"
+    )
+    QueuedEmail::Approval.find_or_create_email(tracker.user, subject, content)
   end
 
   public

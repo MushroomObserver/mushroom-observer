@@ -84,6 +84,13 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
+  def test_approval_email
+    run_mail_test("approval", rolf) do
+      ApprovalMailer.build(katrina, "test subject", "test content").
+        deliver_now
+    end
+  end
+
   def test_author_email
     obj = names(:coprinus_comatus)
     run_mail_test("author_request", rolf) do
