@@ -15,8 +15,6 @@ module GlossaryTerms
     # reuse_image_for_glossary_term
     def reuse
       @object = GlossaryTerm.safe_find(params[:id])
-
-      # serve_image_reuse_selections(params)
     end
 
     def attach
@@ -25,39 +23,22 @@ module GlossaryTerms
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        redirect_to(:reuse) and return
+        render(:reuse,
+               location: reuse_images_for_glossary_term_path(params[:img_id]))
+        return
       end
 
-      reuse_image_for_glossary_term(image)
+      attach_image_to_glossary_term(image)
     end
 
     private
 
     ############################################################################
 
-    # The actual grid of images (partial) is basically a shared layout.
+    # The actual grid of attachable images (partial) is a shared layout.
     # CRUD refactor makes each image link POST to create or edit.
-    #
-    # def serve_image_reuse_selections(params)
-    # params[:all_users] is a query param for rendering form images (possible
-    # selections), not a form param for the submit.
-    # It's toggled by a button on the page "Include other users' images"
-    # that reloads the page with this param on or off
 
-    # These could be set (except @objects) on shared layout
-    #   if params[:all_users] == "1"
-    #     @all_users = true
-    #     query = create_query(:Image, :all, by: :updated_at)
-    #   else
-    #     query = create_query(:Image, :by_user, user: @user, by: :updated_at)
-    #   end
-    #   @layout = calc_layout_params
-    #   @pages = paginate_numbers(:page, @layout["count"])
-    #   @objects = query.paginate(@pages,
-    #                             include: [:user, { observations: :name }])
-    # end
-
-    def reuse_image_for_glossary_term(image = nil)
+    def attach_image_to_glossary_term(image = nil)
       if image &&
          @object.add_image(image) &&
          @object.save
@@ -65,7 +46,8 @@ module GlossaryTerms
         redirect_with_query(glossary_term_path(@object.id))
       else
         flash_error(:runtime_no_save.t(:glossary_term)) if image
-        serve_reuse_form(params)
+        render(:reuse,
+               location: reuse_images_for_glossary_term_path(params[:img_id]))
       end
     end
 
@@ -78,12 +60,12 @@ module GlossaryTerms
     # form used to remove one or more images from a glossary_term (not destroy!)
     # Linked from: glossary_terms/show
     # Inputs:
-    #   params[:obj_id]              (glossary_term)
+    #   params[:id]                  (glossary_term)
     #   params[:selected][image_id]  (value of "yes" means delete)
     # Outputs: @object
-    # Redirects to glossary_term/show.
+    # Redirects to glossary_terms/show.
     # remove_images
-    def edit
+    def remove
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
 
@@ -92,24 +74,24 @@ module GlossaryTerms
       redirect_with_query(glossary_term_path(@object.id))
     end
 
-    def update
+    def detach
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
 
       unless check_permission!(@object)
         return redirect_with_query(glossary_term_path(@object.id))
       end
-      return unless (images = params[:selected])
+      return unless (images_data = params[:selected])
 
-      remove_images_from_object(images)
+      detach_images_from_glossary_term(images_data)
     end
 
     ############################################################################
 
     private
 
-    def remove_images_from_object(images)
-      images.each do |image_id, do_it|
+    def detach_images_from_glossary_term(images_data)
+      images_data.each do |image_id, do_it|
         next unless do_it == "yes"
 
         next unless (image = Image.safe_find(image_id))
@@ -119,6 +101,8 @@ module GlossaryTerms
         flash_notice(:runtime_image_remove_success.t(id: image_id))
       end
       redirect_with_query(glossary_term_path(@object.id))
+      # render("glossary_terms/show",
+      #        location: glossary_term_path(@object.id, q: get_query_param))
     end
   end
 end

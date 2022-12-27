@@ -3,13 +3,14 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
-  def test_list_images
+  def test_index
     login
     get(:index)
-    assert_template("index", partial: "_image")
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
   end
 
-  def test_list_images_too_many_pages
+  def test_index_too_many_pages
     login
     get(:index, params: { page: 1_000_000 })
     # 429 == :too_many_requests. The symbolic response code does not work.
@@ -20,7 +21,8 @@ class ImagesControllerTest < FunctionalTestCase
   def test_images_by_user
     login
     get(:index, params: { by_user: rolf.id })
-    assert_template("index", partial: "_image")
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
   end
 
   def test_index_image_by_user
@@ -102,11 +104,11 @@ class ImagesControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
-    ImagesController.any_instance.expects(:show_selected_images).
+    ImagesController.any_instance.expects(:index).
       raises(StandardError)
     login
 
-    get(:advanced_search,
+    get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
     assert_redirected_to(search_advanced_path)
   end
@@ -257,19 +259,12 @@ class ImagesControllerTest < FunctionalTestCase
       params: @controller.query_params(inner).merge({ flow: :prev })
     }.flatten
     login
-    get(:prev_image, params: params)
+    get(:show, params: params)
     assert_redirected_to(
       action: :show,
       id: observations(:detailed_unknown_obs).images.second.id,
       params: @controller.query_params(QueryRecord.last)
     )
-  end
-
-  def test_show_original
-    img_id = images(:in_situ_image).id
-    login
-    get(:show, params: { id: img_id, size: :full_size })
-    assert_redirected_to(action: :show, size: "full_size", id: img_id)
   end
 
   def test_show_image
@@ -337,26 +332,26 @@ class ImagesControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: img.id })
     assert_select("a[href=?]", edit_image_path(img.id), count: 0)
-    assert_select("input[value='#{:DESTROY.t}']", count: 0)
+    assert_select("input[value*='#{:DESTROY.t}']", count: 0)
     get(:edit, params: { id: img.id })
     assert_response(:redirect)
-    get(:destroy, params: { id: img.id })
+    delete(:destroy, params: { id: img.id })
     assert_flash_error
 
     login("mary")
     get(:show, params: { id: img.id })
     assert_select("a[href=?]", edit_image_path(img.id), minimum: 1)
-    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
+    assert_select("input[value*='#{:DESTROY.t}']", minimum: 1)
     get(:edit, params: { id: img.id })
     assert_response(:success)
 
     login("dick")
     get(:show, params: { id: img.id })
     assert_select("a[href=?]", edit_image_path(img.id), minimum: 1)
-    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
+    assert_select("input[value*='#{:DESTROY.t}']", minimum: 1)
     get(:edit, params: { id: img.id })
     assert_response(:success)
-    get(:destroy, params: { id: img.id })
+    delete(:destroy, params: { id: img.id })
     assert_flash_success
   end
 
@@ -402,8 +397,8 @@ class ImagesControllerTest < FunctionalTestCase
     image = images(:connected_coprinus_comatus_image)
     params = { "id" => image.id.to_s }
     assert(image.user.login == "rolf")
-    requires_user(:edit, %w[image show], params)
-    assert_form_action(action: :edit, id: image.id.to_s)
+    requires_user(:edit, { action: :show, id: image.id }, params)
+    assert_form_action(action: :update, id: image.id.to_s)
   end
 
   def test_update_image
@@ -506,7 +501,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     login(image.user.login)
     Image.any_instance.stubs(:save).returns(false)
-    post(:update, params: params)
+    put(:update, params: params)
 
     assert(assert_select("#title").text.start_with?("Editing Image"),
            "It should return to form if image save fails")
@@ -518,7 +513,8 @@ class ImagesControllerTest < FunctionalTestCase
     assert(obs.images.member?(image))
     params = { id: image.id }
     assert_equal("mary", image.user.login)
-    requires_user(:destroy, image_path(image.id), params, "mary")
+    delete_requires_user(:destroy, { action: :show, id: image.id }, params,
+                         "mary")
     assert_redirected_to(action: :index)
     assert_equal(0, mary.reload.contribution)
     assert_not(obs.reload.images.member?(image))

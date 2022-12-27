@@ -9,10 +9,10 @@ module Account::Profile
     def test_reuse_user_profile_image_as_itself
       user = users(:rolf)
       assert((img = user.image), "Test needs User fixture with profile image")
-      params = { id: img.id }
 
       login(user.login)
-      get(:reuse, params: params)
+      params = { id: rolf.id, img_id: img.id }
+      post(:attach, params: params)
 
       assert_equal(img, user.image)
       assert_flash_text(:runtime_no_changes.l)
@@ -21,8 +21,9 @@ module Account::Profile
     # This is what would happen when user first opens form.
     def test_reuse_image_for_user_page_access
       requires_login(:reuse)
-      assert_template("reuse", partial: "shared/_images_to_reuse")
-      assert_form_action(account_profile_update_image_path(id: rolf.id))
+      assert_template("reuse")
+      assert_template(partial: "shared/_images_to_reuse")
+      assert_form_action(action: :attach, id: rolf.id)
     end
 
     # This would happen if user clicked on image.

@@ -96,7 +96,11 @@ class ImagesController < ApplicationController # rubocop:disable Metrics:ClassLe
 
   # Display matrix of images by a given user.
   def images_by_user
-    user = params[:by_user] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = if params[:by_user]
+             find_or_goto_index(User, params[:by_user].to_s)
+           else
+             @user
+           end
     return unless user
 
     query = create_query(:Image, :by_user, user: user)
@@ -318,6 +322,7 @@ class ImagesController < ApplicationController # rubocop:disable Metrics:ClassLe
       redirect_with_query(action: "show", id: @image.id)
     else
       init_project_vars_for_reload(@image)
+      render(:edit, location: edit_image_path(@image.id))
     end
   end
 

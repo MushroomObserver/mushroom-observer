@@ -63,14 +63,15 @@ module GlossaryTerms
         img_id: image.id.to_s
       }
       login("mary")
-      post(:attach, params: params)
+      get(:reuse, params: { id: glossary_term.id.to_s })
       assert_form_action(action: :attach, id: glossary_term.id)
-      assert_flash_error
+      post(:attach, params: params)
+      assert_flash_error # Why should this fail? It doesn't at the moment.
     end
 
     def test_reuse_image_for_glossary_bad_image_id
       glossary_term = glossary_terms(:conic_glossary_term)
-      params = { id: glossary_term.id, img_id: "bad_id" }
+      params = { id: glossary_term.id, img_id: "111" }
 
       post_requires_login(:attach, params)
 

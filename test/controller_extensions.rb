@@ -204,6 +204,7 @@ module ControllerExtensions
   #
   def either_requires_either(method, page, altpage, params = {},
                              username = "rolf", password = "testpassword")
+    # binding.break
     assert_request(
       method: method,
       action: page,

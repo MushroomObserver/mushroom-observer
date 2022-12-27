@@ -12,15 +12,15 @@
                   q: get_query_param }
 %>
 
-<%= form_with(model: @image, url: form_action, method: :put) do |form| %>
+<%= form_with(model: @image, url: form_action, method: :put) do |f| %>
   <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
-    <%= form.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+    <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
 
     <%= render(partial: "images/form/fields_for_images",
-               locals: { form: form, leave_out_original_file_name: false }) %>
+               locals: { f: f, leave_out_original_file_name: false }) %>
 
     <div class="text-center mt-3 mb-5">
-      <%= form.submit(:SAVE_EDITS.l, class: "btn btn-default") %>
+      <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default") %>
       <%= link_with_query(:cancel_and_show.t(type: :image),
                           image_path(@image.id),
                           { class: "btn btn-default" }) %>

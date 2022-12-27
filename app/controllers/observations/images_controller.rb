@@ -44,6 +44,15 @@ module Observations
       false
     end
 
+    def init_project_vars_for_add_or_edit(obs_or_img)
+      @projects = User.current.projects_member(order: :title)
+      @project_checks = {}
+      obs_or_img.projects.each do |proj|
+        @projects << proj unless @projects.include?(proj)
+        @project_checks[proj.id] = true
+      end
+    end
+
     def current_license_names_and_ids
       License.current_names_and_ids(@image.license)
     end
