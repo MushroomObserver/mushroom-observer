@@ -7,7 +7,13 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= :email_tracking_help.tp %>
+<div class="mt-5 mb-5">
+  <%= if @name.at_or_below_species?
+    :email_tracking_help_below_species.tp(name: @name.display_name_without_authors)
+  else
+    :email_tracking_help_above_species.tp(rank: @name.rank_translated)
+  end %>
+</div>
 
 <%= form_tag(action: :email_tracking, id: @name.id) do %>
   <div class="text-center my-3">
@@ -18,8 +24,14 @@
     end %>
   </div><!-- .text-center -->
 
-  <label for="name_tracker_note_template"><%= :email_tracking_note.t %></label>:<br/>
-  <span class="help-note"><%= :email_tracking_note_help.t %></span><br/>
+  <div class="mt-5">
+    <%= check_box_tag("note_template_enabled", "1", @note_template_enabled,
+                      class: "form-control-xxx") %>
+    <label for="enable_template"><%= :email_tracking_note.t %></label>
+  </div>
+  <div class="help-note mt-2 mb-5">
+    <%= :email_tracking_note_help.t %>
+  </div>
   <%= text_area(:name_tracker, :note_template, cols: 80, rows: 16,
                 value: @note_template, data: {autofocus: true}) %><br/>
 <% end %>

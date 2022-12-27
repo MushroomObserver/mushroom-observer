@@ -1070,13 +1070,12 @@ class NameController < ApplicationController
     end
   end
 
+  private
+
   def initialize_tracking_form
-    unless @name.at_or_below_genus?
-      flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name,
-                                                       rank: @name.rank))
-    end
     if @name_tracker
       @note_template = @name_tracker.note_template
+      @note_template_enabled = @note_template.present?
       @interest = Interest.find_by(target: @name_tracker)
     else
       @note_template = :email_tracking_note_template.l(
@@ -1084,6 +1083,7 @@ class NameController < ApplicationController
         mailing_address: @user.mailing_address_for_tracking_template,
         users_name: @user.legal_name
       )
+      @note_template_enabled = false
     end
   end
 
@@ -1097,11 +1097,10 @@ class NameController < ApplicationController
     redirect_with_query(action: "show_name", id: name_id)
   end
 
-  private
-
   def create_or_update_name_tracker_and_interest(name_id)
+    @note_template_enabled = params[:note_template_enabled] == "1"
     @note_template = param_lookup([:name_tracker, :note_template])
-    @note_template = nil if @note_template.blank?
+    @note_template = nil if @note_template.blank? || !@note_template_enabled
     if @name_tracker.nil?
       create_name_tracker_interest_and_flash(name_id)
     else
@@ -1115,7 +1114,8 @@ class NameController < ApplicationController
   def create_name_tracker_interest_and_flash(name_id)
     @name_tracker = NameTracker.new(user: @user,
                                     name_id: name_id,
-                                    note_template: @note_template)
+                                    note_template: @note_template,
+                                    approved: false)
     @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
     flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
   end
@@ -1139,8 +1139,8 @@ class NameController < ApplicationController
     return if name_tracker.note_template.blank?
     # Only give notifications when users turn on the template function,
     # not when they edit the template after its already been approved.
-    return if !name_tracker.new_record? &&
-              !name_tracker.note_template_before_last_save.blank?
+    return unless name_tracker.new_record? ||
+                  name_tracker.note_template_before_last_save.blank?
 
     user = name_tracker.user
     name = name_tracker.name
@@ -1151,6 +1151,9 @@ class NameController < ApplicationController
               "Note: [[#{note}]]\n\n" \
               "#{MO.http_domain}/name/approve_tracker/#{name_tracker.id}"
     WebmasterMailer.build(user.email, content, subject).deliver_now
+
+    # Let the user know that the note_template feature requires approval.
+    flash_notice(:email_tracking_awaiting_approval.t)
   end
 
   public
@@ -1167,11 +1170,10 @@ class NameController < ApplicationController
   def approve_tracker_if_everything_okay(tracker)
     return flash_warning(:permission_denied.t) unless @user.admin
     return flash_warning("Already approved.") if tracker.approved
-    return flash_warning("Not a spammy stalker.") \
-      unless tracker.note_template.present?
+    return flash_warning("Not a spammer.") if tracker.note_template.blank?
 
     tracker.update(approved: true)
-    flash_notice("Name stalked approved.")
+    flash_notice("Name stalker approved.")
   end
 
   public
