@@ -151,8 +151,8 @@ module Observations
           "original_name" => new_name
         }
       }
-      post_requires_login(:update, params)
-      assert_redirected_to(controller: "/images", action: :show, id: image.id)
+      put_requires_login(:update, params)
+      assert_template("images/show")
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)
@@ -179,7 +179,7 @@ module Observations
         }
       }
 
-      post_requires_login(:update, params)
+      put_requires_login(:update, params)
 
       assert_flash_text(:runtime_no_changes.l,
                         "Flash should say no changes " \
@@ -209,7 +209,7 @@ module Observations
       }
       login(user.login)
 
-      post(:update, params: params)
+      put(:update, params: params)
 
       assert(project.reload.images.exclude?(image),
              "Failed to remove image from project")
@@ -339,14 +339,13 @@ module Observations
                     "Form should have a link to show only the user's images.")
     end
 
-    # Test reusing an image by id number. Not sure how it differs from the
-    # next test (?!) except now it doesn't have mode: :reuse
+    # Test reusing an image by id number. Not sure how differs from next test
     def test_add_image_to_obs_by_id
       obs = observations(:coprinus_comatus_obs)
       updated_at = obs.updated_at
       image = images(:disconnected_coprinus_comatus_image)
       assert_not(obs.images.member?(image))
-      post_requires_login(:create, id: obs.id, img_id: image.id)
+      post_requires_login(:attach, id: obs.id, img_id: image.id)
       assert_redirected_to(controller: "/observations", action: :show,
                            id: obs.id)
       assert(obs.reload.images.member?(image))

@@ -212,10 +212,10 @@ module Observations
     end
 
     def check_image_permission!
-      unless check_permission!(@image)
-        redirect_with_query(controller: "/images", action: :show,
-                            id: @image)
-      end
+      return if check_permission!(@image)
+
+      redirect_with_query(controller: "/images", action: :show,
+                          id: @image)
     end
 
     def whitelisted_image_params
@@ -333,9 +333,9 @@ module Observations
       @object = find_or_goto_index(Observation, params[:id].to_s)
       return unless @object
 
-      unless check_permission!(@object)
-        redirect_with_query(permanent_observation_path(@object.id))
-      end
+      return if check_permission!(@object)
+
+      redirect_with_query(permanent_observation_path(@object.id))
     end
 
     # Callback to DETACH images from an observation, form :put commits here
