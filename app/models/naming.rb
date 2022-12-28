@@ -155,7 +155,7 @@ class Naming < AbstractModel
   end
 
   # Send email notifications after creating or changing the Name.
-  def create_emails
+  def create_emails # rubocop:disable Metrics/AbcSize
     return unless @name_changed
 
     @name_changed = false
@@ -350,7 +350,7 @@ class Naming < AbstractModel
   #     votes  = record[:votes]  # List of actual votes.
   #   end
   #
-  def calc_vote_table
+  def calc_vote_table # rubocop:disable Metrics/AbcSize
     # Initialize table.
     table = {}
     Vote.opinion_menu.each do |str, val|
@@ -478,9 +478,9 @@ class Naming < AbstractModel
     end
 
     # Initialize Reason.
-    def initialize(reason, num)
-      @reason  = reason
-      @num     = num
+    def initialize(reason_structure, num)
+      @reason_structure = reason_structure
+      @num              = num
     end
 
     # Get localization string for this reason.  For example:
@@ -502,22 +502,22 @@ class Naming < AbstractModel
 
     # Is this Reason being used by the parent Naming?
     def used?
-      @reason.key?(@num)
+      @reason_structure.key?(@num)
     end
 
     # Get notes, or +nil+ if Reason not used.
     def notes
-      @reason[@num]
+      @reason_structure[@num]
     end
 
     # Set notes, and mark this Reason as "used".
     def notes=(val)
-      @reason[@num] = val.to_s
+      @reason_structure[@num] = val.to_s
     end
 
     # Mark this Reason as "unused".
     def delete
-      @reason.delete(@num)
+      @reason_structure.delete(@num)
     end
   end
 
