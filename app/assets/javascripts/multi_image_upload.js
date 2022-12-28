@@ -24,15 +24,15 @@ function MultiImageUploader(localized_text) {
   // Internal Variable Definitions.
   var fileStore = new FileStore(),
     dateUpdater = new DateUpdater(),
-    _maxImageSize = <%= MO.image_upload_max_size %>,
+    $addedImagesContainer = jQuery("#added_images_container"), // container to insert images into
+    _maxImageSize = $addedImagesContainer.data("upload_max_size"),
     _getTemplateUri = "/ajax/multi_image_template",
     _uploadImageUri = "/ajax/create_image_object",
     _progressUri = "/ajax/upload_progress",
     _dots = [".", "..", "..."],
     blockFormSubmission = true,
-    $addedImagesContainer = jQuery("#added_images_container"), // container to insert images into
     $form = jQuery(document.forms.namedItem("observation_form")),
-    $submitButtons= $form.find('input[type="submit"]'),
+    $submitButtons = $form.find('input[type="submit"]'),
     $goodImages = jQuery('#good_images'),
     $removeLinks = jQuery(".remove_image_link"),
     $selectFilesButton = jQuery('#multiple_images_button'),
@@ -68,9 +68,9 @@ function MultiImageUploader(localized_text) {
     return _this.month == simpleDate.month && _this.day == simpleDate.day && _this.year == simpleDate.year;
   };
 
-  SimpleDate.prototype.asDateString = function() {
+  SimpleDate.prototype.asDateString = function () {
     var _months = localized_text.months.split(' ');
-    return this.day + "-" + _months[this.month-1] + "-" + this.year;
+    return this.day + "-" + _months[this.month - 1] + "-" + this.year;
   };
 
   /*********************/
@@ -80,14 +80,14 @@ function MultiImageUploader(localized_text) {
   // Deals with synchronizing image and observation dates through
   // a message box.
 
-  function DateUpdater() {}
+  function DateUpdater() { }
 
-  DateUpdater.prototype.areDatesInconsistent = function() {  //will check differences between the image dates and observation dates
+  DateUpdater.prototype.areDatesInconsistent = function () {  //will check differences between the image dates and observation dates
     var _this = this,
       _obsDate = _this.observationDate(),
       _distinctDates = fileStore.getDistinctImageDates();
 
-    for(var i = 0; i < _distinctDates.length; i++) {
+    for (var i = 0; i < _distinctDates.length; i++) {
       if (!_distinctDates[i].areEqual(_obsDate))
         return true;
     }
@@ -105,7 +105,7 @@ function MultiImageUploader(localized_text) {
     $obsRadioContainer.html('');
     _this.makeObservationDateRadio(obsDate);
 
-    _distinctImgDates.forEach(function (simpleDate){
+    _distinctImgDates.forEach(function (simpleDate) {
       if (!obsDate.areEqual(simpleDate))
         _this.makeImageDateRadio(simpleDate);
     });
@@ -141,7 +141,7 @@ function MultiImageUploader(localized_text) {
 
     var html = "<div class='radio'><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
     html = html.replace('{{date}}', JSON.stringify(simpleDate));
-    html = html.replace('{{dateStr}}',  simpleDate.asDateString());
+    html = html.replace('{{dateStr}}', simpleDate.asDateString());
 
     var $obsRadio = jQuery(html);
     $obsRadioContainer.append($obsRadio);
@@ -177,7 +177,7 @@ function MultiImageUploader(localized_text) {
     _this.fileStoreItems = [];
     _this.fileDictionary = {};
     _this.areAllProcessed = function () {
-      for(var i = 0; i < _this.fileStoreItems.length; i++) {
+      for (var i = 0; i < _this.fileStoreItems.length; i++) {
         if (!_this.fileStoreItems[i].processed)
           return false;
       }
@@ -186,7 +186,7 @@ function MultiImageUploader(localized_text) {
 
   }
 
-  FileStore.prototype.addFiles = function(files){
+  FileStore.prototype.addFiles = function (files) {
     var _this = this;
     for (var i = 0; i < files.length; i++) { //loop through the attached files, check to make sure we aren't adding duplicates
       if (_this.fileDictionary[files[i].size] != undefined) {  //stop adding the file, an exact size is already attached  TODO:What are the odds of this?
@@ -201,18 +201,18 @@ function MultiImageUploader(localized_text) {
     //check status of when all the selected files have processed.
     checkStatus();
     function checkStatus() {
-      setTimeout(function() {
+      setTimeout(function () {
         if (!_this.areAllProcessed()) {
           checkStatus();
         }
         else {
           dateUpdater.refreshBox();
         }
-      },30)
+      }, 30)
     }
   };
 
-  FileStore.prototype.addUrl = function(url) {
+  FileStore.prototype.addUrl = function (url) {
     var _this = this;
     if (_this.fileDictionary[url] == undefined) {
       var _fileStoreItem = new FileStoreItem(url, generateUUID());
@@ -250,14 +250,14 @@ function MultiImageUploader(localized_text) {
     });
   };
 
-  FileStore.prototype.uploadAll = function (){
-     var _this = this;
+  FileStore.prototype.uploadAll = function () {
+    var _this = this;
 
-     $submitButtons.prop('disabled', 'true'); //disable submit and remove image buttons during upload process.
-     $removeLinks.hide();
+    $submitButtons.prop('disabled', 'true'); //disable submit and remove image buttons during upload process.
+    $removeLinks.hide();
 
     //callback function to move through the the images to upload
-    function getNextImage () {
+    function getNextImage() {
       _this.fileStoreItems[0].destroy();
       return _this.fileStoreItems[0];
     }
@@ -271,13 +271,13 @@ function MultiImageUploader(localized_text) {
         $submitButtons.val(localized_text.creating_observation_text);
         $form.submit();
       }
-     }
+    }
 
     var firstUpload = _this.fileStoreItems[0];
     if (firstUpload) {
       firstUpload.upload(onUploadedCallback); //uploads first image. if we have one.
     }
-    else{
+    else {
       blockFormSubmission = false;
       $form.submit(); //no images to upload, submit form
     }
@@ -335,7 +335,7 @@ function MultiImageUploader(localized_text) {
       dateUpdater.refreshBox();
     });
 
-    _this.dom_element.find('select').change(function() {
+    _this.dom_element.find('select').change(function () {
       dateUpdater.refreshBox();
     });
 
@@ -376,11 +376,11 @@ function MultiImageUploader(localized_text) {
 
   FileStoreItem.prototype.getExifData = function () {  //extracts the exif data async;
     var _fsItem = this;
-    _fsItem.dom_element.find('.img-responsive').first().on('load', function() {
-    EXIF.getData(this, function () {
-      _fsItem.exif_data = this.exifdata;
-      _fsItem.applyExifData();  //apply the data to the DOM
-    });
+    _fsItem.dom_element.find('.img-responsive').first().on('load', function () {
+      EXIF.getData(this, function () {
+        _fsItem.exif_data = this.exifdata;
+        _fsItem.applyExifData();  //apply the data to the DOM
+      });
     });
   };
 
@@ -395,7 +395,7 @@ function MultiImageUploader(localized_text) {
     }
 
 
-     //Geocode Logic
+    //Geocode Logic
 
     if (_exif.GPSLatitude && _exif.GPSLongitude) { //check if there is geodata on the image
 
@@ -414,7 +414,7 @@ function MultiImageUploader(localized_text) {
           var latDif = Math.abs(latLngObject.latitude) - Math.abs(existingGeocode.latitude);
           var longDif = Math.abs(latLngObject.longitude) - Math.abs(existingGeocode.longitude);
 
-          if ( (Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
+          if ((Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
             shouldAddGeocode = false;
         });
 
@@ -431,17 +431,17 @@ function MultiImageUploader(localized_text) {
       //we found the date taken, let's parse it down.
       var _date_taken_array = _exif_date_taken.substring(' ', 10).split(':'), //returns an array of [YYYY,MM,DD]
         _exifSimpleDate = new SimpleDate(_date_taken_array[2], _date_taken_array[1], _date_taken_array[0]);
-        _this.imageDate(_exifSimpleDate);
+      _this.imageDate(_exifSimpleDate);
 
       var $camera_date = _this.dom_element.find(".camera_date_text");
-        $camera_date.text(_exifSimpleDate.asDateString());//shows the exif date by the photo
-        $camera_date.data('exif_date', _exifSimpleDate);
-        $camera_date.click(function(){
-          _this.imageDate(_exifSimpleDate);
-          dateUpdater.refreshBox();
-        })
+      $camera_date.text(_exifSimpleDate.asDateString());//shows the exif date by the photo
+      $camera_date.data('exif_date', _exifSimpleDate);
+      $camera_date.click(function () {
+        _this.imageDate(_exifSimpleDate);
+        dateUpdater.refreshBox();
+      })
 
-      }
+    }
     else {  //no date was found in EXIF data
       _this.imageDate(dateUpdater.observationDate()); //Use observation date
     }
@@ -450,9 +450,9 @@ function MultiImageUploader(localized_text) {
 
   FileStoreItem.prototype.imageDate = function (simpleDate) {
     var _this = this,
-    _$day = jQuery(_this.dom_element.find('select')[0]),
-    _$month = jQuery(_this.dom_element.find('select')[1]),
-    _$year = jQuery(_this.dom_element.find('input')[2]);
+      _$day = jQuery(_this.dom_element.find('select')[0]),
+      _$month = jQuery(_this.dom_element.find('select')[1]),
+      _$year = jQuery(_this.dom_element.find('input')[2]);
     if (simpleDate) {
       _$day.val(simpleDate.day);
       _$month.val(simpleDate.month);
@@ -535,23 +535,23 @@ function MultiImageUploader(localized_text) {
 
     xhrReq.onreadystatechange = function () { //after image has been created.
       if (xhrReq.readyState == 4) {
-      if (xhrReq.status == 200) {
-        var image = JSON.parse(xhrReq.response);
+        if (xhrReq.status == 200) {
+          var image = JSON.parse(xhrReq.response);
           goodImageVals = $goodImages.val();
-        $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
-        if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {
-          //set the thumbnail if it is selected
-          jQuery('#observation_thumb_image_id').val(image.id);
+          $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
+          if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {
+            //set the thumbnail if it is selected
+            jQuery('#observation_thumb_image_id').val(image.id);
+          }
+        } else if (xhrReq.response) {
+          alert(xhrReq.response);
+        } else {
+          alert(localized_text.something_went_wrong);
         }
-      } else if (xhrReq.response) {
-        alert(xhrReq.response);
-      } else {
-        alert(localized_text.something_went_wrong);
-      }
-      if (progress) window.clearTimeout(progress);
-      _this.incrementProgressBar(1);
-      _this.dom_element.hide('slow');
-      onUploadedCallback();
+        if (progress) window.clearTimeout(progress);
+        _this.incrementProgressBar(1);
+        _this.dom_element.hide('slow');
+        onUploadedCallback();
       }
     };
 
@@ -613,9 +613,9 @@ function MultiImageUploader(localized_text) {
 
   /**Geocode Helpers**/
 
-  function makeGeocodeRadioBtn(latLngObjct){
+  function makeGeocodeRadioBtn(latLngObjct) {
     var html = "<div class='radio'><label><input type='radio' data-geocode='{{geocode}}' name='fix_geocode'/>{{geoCodeStr}}</label> " +
-        "<a href='#geocode_map' data-role='show_on_map' class='ml-3' data-geocode='{{geocodeForMap}}'>" + localized_text.show_on_map + "</a></div>";
+      "<a href='#geocode_map' data-role='show_on_map' class='ml-3' data-geocode='{{geocodeForMap}}'>" + localized_text.show_on_map + "</a></div>";
     html = html.replace('{{geocode}}', JSON.stringify(latLngObjct));
     html = html.replace('{{geocodeForMap}}', JSON.stringify(latLngObjct));
     html = html.replace('{{geoCodeStr}}', latLngObjct.latitude.toFixed(5) + ", " + latLngObjct.longitude.toFixed(5));
@@ -628,8 +628,8 @@ function MultiImageUploader(localized_text) {
     var long = exifObject.GPSLongitude[0] + (exifObject.GPSLongitude[1] / 60.0) + (exifObject.GPSLongitude[2] / 3600.0);
     var alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.numerator / exifObject.GPSAltitude.denominator).toFixed(0) + " m" : ""
     //make sure you don't end up on the wrong side of the world
-    long = exifObject.GPSLongitudeRef == "W" ? long * -1  : long;
-    lat = exifObject.GPSLatitudeRef == "S" ? lat * -1  : lat;
+    long = exifObject.GPSLongitudeRef == "W" ? long * -1 : long;
+    lat = exifObject.GPSLatitudeRef == "S" ? lat * -1 : lat;
 
 
     return {
@@ -640,19 +640,19 @@ function MultiImageUploader(localized_text) {
   }
 
   function showGeocodeonMap(latLngObj) {
-      // Create a map object and specify the DOM element for display.
-      var obsLatLongFormat = {lat: latLngObj.latitude, lng: latLngObj.longitude}
-      // jQuery('#geocode_map').width('100%'); // css class w-100 on the div
-      jQuery('#geocode_map').height('250');
-      var map = new google.maps.Map(document.getElementById('geocode_map'), {
-        center: obsLatLongFormat,
-        zoom: 12
-      });
+    // Create a map object and specify the DOM element for display.
+    var obsLatLongFormat = { lat: latLngObj.latitude, lng: latLngObj.longitude }
+    // jQuery('#geocode_map').width('100%'); // css class w-100 on the div
+    jQuery('#geocode_map').height('250');
+    var map = new google.maps.Map(document.getElementById('geocode_map'), {
+      center: obsLatLongFormat,
+      zoom: 12
+    });
 
-       var marker = new google.maps.Marker({
-         map: map,
-        position: obsLatLongFormat
-      });
+    var marker = new google.maps.Marker({
+      map: map,
+      position: obsLatLongFormat
+    });
   }
   /*********************/
   /*   Bindings    */
@@ -676,7 +676,7 @@ function MultiImageUploader(localized_text) {
     });
 
 
-    jQuery('body').on('click', '[data-role="show_on_map"]',function () {
+    jQuery('body').on('click', '[data-role="show_on_map"]', function () {
       showGeocodeonMap((jQuery(this).data().geocode));
     });
 
@@ -692,21 +692,21 @@ function MultiImageUploader(localized_text) {
       $imgMessages.hide('slow');
     });
 
-    $obsYear.change(function (){dateUpdater.updateObservationDateRadio()});
-    $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
-    $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
+    $obsYear.change(function () { dateUpdater.updateObservationDateRadio() });
+    $obsMonth.change(function () { dateUpdater.updateObservationDateRadio() });
+    $obsDay.change(function () { dateUpdater.updateObservationDateRadio() });
 
 
 
     //Drag and Drop bindings on the window
 
-    $content.bind('dragover dragenter', function (e){
+    $content.bind('dragover dragenter', function (e) {
       if (e.preventDefault) { e.preventDefault(); }
       jQuery('#right_side').addClass('dashed-border');
       return false;
     });
 
-    $content.bind('dragend dragleave dragexit', function (e){
+    $content.bind('dragend dragleave dragexit', function (e) {
       jQuery('#right_side').removeClass('dashed-border');
     });
 
@@ -730,7 +730,7 @@ function MultiImageUploader(localized_text) {
 
     // IMPORTANT:  This allows the user to update the thumbnail on the edit
     // observation view.
-    jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
+    jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function () {
       jQuery('#observation_thumb_image_id').val($(this).val());
     });
 
@@ -778,16 +778,3 @@ function MultiImageUploader(localized_text) {
     init: init
   }
 }
-
-
-jQuery(document).ready(function () {
-  var uploader = new MultiImageUploader({
-    uploading_text: "<%= :form_observations_uploading_images.t %>",
-    image_too_big_text:  "<%= :form_observations_image_too_big.t(max: (MO.image_upload_max_size.to_f/1024/1024).round) %>",
-    creating_observation_text: "<%= :form_observations_creating_observation.t %>",
-    months: "<%= :all_months.t %>",
-    show_on_map: "<%= :show_on_map.t %>",
-    something_went_wrong: "<%= :form_observations_upload_error.t %>"
-  })
-  uploader.init();
-});

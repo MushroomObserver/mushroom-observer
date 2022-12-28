@@ -1,12 +1,12 @@
 $(document).ready(function () {
-  var zoom      = 1.0;
-  var expanded  = false;
+  var zoom = 1.0;
+  var expanded = false;
   var container = jQuery(".thumbnail-map-container");
-  var map       = jQuery(".thumbnail-map");
+  var map = jQuery(".thumbnail-map");
 
   // Maximum amount to allow zoom, otherwise it's easy to zoom so far in it
   // becomes a featureless blur.  No harm, just sort of annoying.
-  var MAX_ZOOM  = 50.0;
+  var MAX_ZOOM = 50.0;
 
   function reset_map() {
     container.css({ width: "", height: "", overflow: "" });
@@ -31,18 +31,18 @@ $(document).ready(function () {
     var ch = container.height();
     var mw = Math.round(cw * zoom);
     var mh = Math.round(ch * zoom);
-    var f  = 1.0 / Math.sqrt(zoom);
-    var x  = Math.round(THUMBNAIL_MAP_X/100 * (mw - cw*f) - cw/2 * (1-f));
-    var y  = Math.round(THUMBNAIL_MAP_Y/100 * (mh - ch*f) - ch/2 * (1-f));
+    var f = 1.0 / Math.sqrt(zoom);
+    var x = Math.round(THUMBNAIL_MAP_X / 100 * (mw - cw * f) - cw / 2 * (1 - f));
+    var y = Math.round(THUMBNAIL_MAP_Y / 100 * (mh - ch * f) - ch / 2 * (1 - f));
     container.css({
-      width:    cw + "px",
-      height:   ch + "px",
+      width: cw + "px",
+      height: ch + "px",
       overflow: "hidden"
     });
     map.css({
-      top:    -y + "px",
-      left:   -x + "px",
-      width:  mw + "px",
+      top: -y + "px",
+      left: -x + "px",
+      width: mw + "px",
       height: mh + "px"
     });
   }
@@ -50,7 +50,7 @@ $(document).ready(function () {
   function load_larger_map() {
     if (expanded) return
     var large = jQuery("<img/>");
-    var url = "<%= image_url("globe_large.jpg") %>";
+    var url = jQuery("#globe_image").data("globe-large-url");
     large.attr("src", url).on('load', function () {
       map.find(">img").attr("src", url);
     });
@@ -72,7 +72,7 @@ $(document).ready(function () {
     }
   });
 
-  container.click(function() { window.location = THUMBNAIL_MAP_LINK });
+  container.click(function () { window.location = THUMBNAIL_MAP_LINK });
 
   container.find(".plus-button").click(function (event) {
     zoom_map(1);

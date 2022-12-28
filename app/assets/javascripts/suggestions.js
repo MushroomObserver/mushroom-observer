@@ -3,8 +3,7 @@ var attach_suggestion_bindings;
 function SuggestionModule(ids, url, text) {
   attach_suggestion_bindings = function () {
     var button = $("[data-role='suggest_names']");
-    var whirly = ' <span><img alt="Indicator" ' +
-                 'src="<%= asset_path('indicator.gif') %>" /></span>';
+    var whirly = " <span class='spinner-right mx-2'></span>";
 
     button.click(function (event) {
       button.attr("disabled", "disabled");
@@ -19,10 +18,10 @@ function SuggestionModule(ids, url, text) {
       var any_worked = false;
       var predict = function (i) {
         progress.html(text.suggestions_processing_image + " " +
-                      (i+1) + " / " + ids.length + "..." + whirly);
+          (i + 1) + " / " + ids.length + "..." + whirly);
         $.ajax("https://images.mushroomobserver.org/model/predict", {
           method: "POST",
-          data: {id: ids[i]},
+          data: { id: ids[i] },
           dataType: "text",
           async: true,
           complete: function (request) {
@@ -34,7 +33,7 @@ function SuggestionModule(ids, url, text) {
               predict(i + 1);
             } else if (any_worked) {
               progress.html(text.suggestions_processing_results + "..." +
-                            whirly);
+                whirly);
               var out = JSON.stringify(results);
               url = url.replace("xxx", encodeURIComponent(out));
               if (event.ctrlKey)

@@ -71,7 +71,8 @@
 <div class="row mt-3" id="observation_geolocation">
   <div class="col-sm-6">
     <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
-    <div id="observationFormMap" class="form-observation-map hidden"></div>
+    <div id="observationFormMap" class="form-observation-map hidden"
+         data-indicator-url="<%= asset_path('indicator.gif') %>"></div>
     <div>
       <button type="button" class="map-open btn btn-default"><%= :form_observations_open_map.t %></span>
       <button type="button" class="map-clear btn btn-default hidden"><%= :form_observations_clear_map.t %></span>

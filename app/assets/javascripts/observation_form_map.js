@@ -4,32 +4,33 @@
 // This key is configured in Google Cloud Platform.
 // It is a public key that accepts requests only from mushroomobserver.org/*
 var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
-                       "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
+  "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
 
 // ./observations/new
-$(document).ready(function() {
+$(document).ready(function () {
   var opened = false;
+  var map_div = $('#observationFormMap');
 
-  var open_map = function(focus_immediately) {
+  var open_map = function (focus_immediately) {
     opened = true;
+    var indicator_url = map_div.data("indicator-url");
 
-    $('#observationFormMap').removeClass("hidden").css({
+    map_div.removeClass("hidden").css({
       "background-position": "center center",
-      "background-image": "url('<%= asset_path('indicator.gif') %>')",
+      "background-image": "url(" + indicator_url + ")",
       "background-repeat": "no-repeat"
     });
     $('.map-clear').removeClass("hidden");
     $('.map-open').hide();
 
-    $.getScript(GMAPS_API_SCRIPT, function() {
+    $.getScript(GMAPS_API_SCRIPT, function () {
       var searchInput = $('#observation_place_name'),
-          latInput    = $('#observation_lat'),
-          lngInput    = $('#observation_long'),
-          elvInput    = $('#observation_alt'),
-          marker;
+        latInput = $('#observation_lat'),
+        lngInput = $('#observation_long'),
+        elvInput = $('#observation_alt'),
+        marker;
 
       // init map
-      var map_div = document.getElementById('observationFormMap');
       var map = new google.maps.Map(map_div, {
         center: { lat: -7, lng: -47 },
         zoom: 1
@@ -41,9 +42,9 @@ $(document).ready(function() {
       addGmapsListener(map, 'click');
 
       // adjust marker on field input
-      $([latInput, lngInput]).each(function() {
+      $([latInput, lngInput]).each(function () {
         var location;
-        $(this).keyup(function() {
+        $(this).keyup(function () {
           location = {
             lat: parseFloat($(latInput).val()),
             lng: parseFloat($(lngInput).val())
@@ -68,12 +69,12 @@ $(document).ready(function() {
       }
 
       // set bounds on map
-      $('.map-locate').click(function() {
+      $('.map-locate').click(function () {
         focusMap();
       });
 
       // clear map button
-      $('.map-clear').click(function(){
+      $('.map-clear').click(function () {
         clearMap();
       });
 
@@ -82,13 +83,13 @@ $(document).ready(function() {
         var geocoder = new google.maps.Geocoder();
 
         // even a single letter will return a result
-        if ( $(searchInput).val().length <= 0 ) {
+        if ($(searchInput).val().length <= 0) {
           return false;
         }
 
         geocoder.geocode({
           'address': $(searchInput).val()
-        }, function(results, status) {
+        }, function (results, status) {
           if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
             if (results[0].geometry.viewport) {
               map.fitBounds(results[0].geometry.viewport);
@@ -123,15 +124,15 @@ $(document).ready(function() {
         $(lngInput).val(marker.position.lng());
 
         elevation.getElevationForLocations(requestElevation,
-                                           function(results, status) {
-          if (status === google.maps.ElevationStatus.OK) {
-            if (results[0]) {
-              $(elvInput).val(parseFloat(results[0].elevation));
-            } else {
-              $(elvInput).val('');
+          function (results, status) {
+            if (status === google.maps.ElevationStatus.OK) {
+              if (results[0]) {
+                $(elvInput).val(parseFloat(results[0].elevation));
+              } else {
+                $(elvInput).val('');
+              }
             }
-          }
-        });
+          });
       }
 
       function clearMap() {
@@ -142,7 +143,7 @@ $(document).ready(function() {
       }
 
       function addGmapsListener(el, eventType) {
-        google.maps.event.addListener(el, eventType, function(e) {
+        google.maps.event.addListener(el, eventType, function (e) {
           placeMarker(e.latLng);
           updateFields();
         });
@@ -154,11 +155,11 @@ $(document).ready(function() {
     });
   };
 
-  $('.map-open').click(function() {
+  $('.map-open').click(function () {
     if (!opened) open_map();
   });
 
-  $('.map-locate').click(function() {
+  $('.map-locate').click(function () {
     if (!opened) open_map("focus_immediately");
   });
 });

@@ -62,14 +62,14 @@
         </div>
       <% end %>
 
-      <%= image_tag("globe.jpg", width: "100%") %>
+      <%= image_tag("globe.jpg", width: "100%", id: "globe_image",
+                    data: { globe_large_url: "#{image_url("globe_large.jpg")}" })%>
     </div><!--.thumbnail-map-->
   </div><!--.thumbnail-map-container-->
 
 </div><!--#observation_thumbnail_map-->
 
 <%= if lat && long
-  javascript_include "thumbnail_map"
   javascript_tag %{
     var THUMBNAIL_MAP_ON   = true;
     var THUMBNAIL_MAP_X    = #{x};

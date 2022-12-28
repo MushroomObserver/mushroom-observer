@@ -36,7 +36,7 @@ function VoteByAjaxModule(translations) {
           .css("padding", "1em 2em")
           .append(
             $("<span>").text(translations.show_namings_saving + "... "),
-            $("<img>").attr("src", "<%= asset_path('indicator.gif') %>")
+            $("<span class='spinner-right mx-2'></span>")
           )
           .center()
           .show();
