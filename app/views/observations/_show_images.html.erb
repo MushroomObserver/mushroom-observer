@@ -7,15 +7,12 @@
       <div class="col-sm-8 float-sm-right">
         <small>
           <%= link_with_query(:show_observation_add_images.t,
-                              controller: "/observations/images", action: :new,
-                              id: observation.id) %>
+                              new_image_for_observation_path(observation.id)) %>
           | <%= link_with_query(:show_observation_reuse_image.t,
-                              controller: "/observations/images", action: :new,
-                              id: observation.id, mode: :reuse) %>
+                                reuse_images_for_observation_path(observation.id)) %>
           <% if observation.images.length > 0 %>
             | <%= link_with_query(:show_observation_remove_images.t,
-                                  controller: "/observations/images", action: :edit,
-                                  id: observation.id) %>
+                                  remove_images_from_observation_path(observation.id)) %>
             <% end %>
         </small>
       </div>
