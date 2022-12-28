@@ -17,6 +17,7 @@
 //= require suggestions
 //= require thumbnail_map
 //= require vote_by_ajax
+//= require pivotal
 //= require lightbox
 //= require popup_exif
 
