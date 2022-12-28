@@ -3,10 +3,11 @@
 require("test_helper")
 
 class ObservationFormTest < CapybaraIntegrationTestCase
-  def setup
-    super
-    # Capybara.current_driver = :firefox_headless
-  end
+  # Uncomment this to try running tests with firefox_headless browser
+  # def setup
+  #   super
+  #   Capybara.current_driver = :firefox_headless
+  # end
 
   def test_create_minimal_observation
     rolf = users("rolf")
@@ -16,12 +17,10 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     assert_selector("body.observations__new")
 
     within("#observation_form") do
-      assert_select("observation_when_1i", text: Date.today.year.to_s)
-      assert_select("observation_when_2i", text: Date.today.strftime("%B"))
-      assert_select("observation_when_3i", text: Date.today.strftime("%d").to_i)
-      # assert_field("collection_number_name", with: users(:rolf).legal_name)
-      # assert_field("herbarium_record_herbarium_name",
-      #              with: users(:rolf).preferred_herbarium_name)
+      assert_select("observation_when_1i", text: Time.zone.today.year.to_s)
+      assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
+      assert_select("observation_when_3i",
+                    text: Time.zone.today.strftime("%d").to_i)
       assert_selector("#where_help",
                       text: "Albion, Mendocino Co., California")
       fill_in("naming_name", with: "Elfin saddle")

@@ -110,9 +110,11 @@ module Observations::Namings
     # (Have Dick vote first... I forget what this was supposed to test for,
     # but it's clearly superfluous now).
     # Votes: rolf=2/-3, mary=1->x/3, dick=x/x->3
-    # Summing after Dick votes,   3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, 3 keeps it.
-    # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75,
-    # 3 still keeps it in this voting algorithm, arg.
+    # Summing after Dick votes,
+    #   3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, 3 keeps it.
+    # Summing after Mary deletes,
+    #   3 gets 2/2=1,   9 gets -3+3+3/4=.75,
+    #   3 still keeps it in this voting algorithm, arg.
     def test_cast_vote_mary
       obs  = observations(:coprinus_comatus_obs)
       nam1 = namings(:coprinus_comatus_naming)
