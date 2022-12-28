@@ -1146,7 +1146,7 @@ class NameController < ApplicationController
     name = name_tracker.name
     note = name_tracker.note_template
     subject = "New Name Tracker with Template"
-    content = "User: ##{user.id} / #{user.login}\n" \
+    content = "User: ##{user.id} / #{user.login} / #{user.email}\n" \
               "Name: ##{name.id} / #{name.search_name}\n" \
               "Note: [[#{note}]]\n\n" \
               "#{MO.http_domain}/name/approve_tracker/#{name_tracker.id}"
