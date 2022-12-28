@@ -17,6 +17,7 @@ module GlossaryTerms
       @object = GlossaryTerm.safe_find(params[:id])
     end
 
+    # reuse image form buttons POST here
     def attach
       @object = GlossaryTerm.safe_find(params[:id])
 

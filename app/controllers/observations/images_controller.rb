@@ -275,14 +275,13 @@ module Observations
     ############################################################################
 
     # REUSE: Attach an Image to an Observation from existing uploads
-    # was ImageController#reuse_image params[:mode] = observation
     def reuse
       return unless (@observation = find_observation!)
 
       return unless check_observation_permission!
     end
 
-    # reuse images "put buttons" commit here
+    # reuse image form buttons POST here
     def attach
       return unless (@observation = find_observation!)
 
