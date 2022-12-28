@@ -37,13 +37,10 @@
 #  bulk_filename_purge::   Purge all original image filenames from the database.
 #  process_image::         (helper for add_image)
 #
-class ImagesController < ApplicationController # :ClassLength
+class ImagesController < ApplicationController
   before_action :login_required
   before_action :pass_query_params, except: [:index]
-  before_action :disable_link_prefetching, except: [
-    :edit,
-    :show
-  ]
+  before_action :disable_link_prefetching, except: [:show]
 
   ##############################################################################
   #
@@ -297,7 +294,7 @@ class ImagesController < ApplicationController # :ClassLength
   ##############################################################################
 
   # Callback to destroy an image.
-  # Linked from: show_image/original
+  # Linked from: images/show
   # Inputs: params[:id] (image)
   # Redirects to list_images.
   def destroy

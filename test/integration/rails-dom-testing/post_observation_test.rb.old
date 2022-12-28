@@ -171,7 +171,7 @@
         assert_match(@new_image.notes, response.body)
         assert_select('a[href*=observations_at_where]', 0)
         assert_select('a[href*=show_location]', 1)
-        assert_select('a[href*=show_image]')
+        assert_select('a[href*=images]')
       end
 
       def sess.evaluate_change_location

@@ -33,6 +33,10 @@ module CapybaraSessionExtensions
     assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
   end
 
+  def logout
+    visit("/account/logout")
+  end
+
   def put_user_in_admin_mode(user = :zero_user)
     user.admin = true
     user.save!

@@ -305,16 +305,16 @@ class AjaxControllerTest < FunctionalTestCase
                       type: :image, id: images(:in_situ_image).id, value: 3)
 
     assert_select(
-      "a[href='/images/#{images(:in_situ_image).id}?vote=0']"
+      "a[href='/images/#{images(:in_situ_image).id}/vote?vote=0']"
     )
     assert_select(
-      "a[href='/images/#{images(:in_situ_image).id}?vote=1']"
+      "a[href='/images/#{images(:in_situ_image).id}/vote?vote=1']"
     )
     assert_select(
-      "a[href='/images/#{images(:in_situ_image).id}?vote=2']"
+      "a[href='/images/#{images(:in_situ_image).id}/vote?vote=2']"
     )
     assert_select(
-      "a[href='/images/#{images(:in_situ_image).id}?vote=4']"
+      "a[href='/images/#{images(:in_situ_image).id}/vote?vote=4']"
     )
   end
 

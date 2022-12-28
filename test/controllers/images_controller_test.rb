@@ -78,7 +78,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: img_id)
   end
 
-  def test_advanced_search
+  def test_advanced_search_1
     query = Query.lookup_and_save(:Image, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -104,10 +104,8 @@ class ImagesControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
-    ImagesController.any_instance.expects(:index).
-      raises(StandardError)
+    ImagesController.any_instance.expects(:index).raises(StandardError)
     login
-
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
     assert_redirected_to(search_advanced_path)
@@ -319,40 +317,6 @@ class ImagesControllerTest < FunctionalTestCase
       get(:show, params: { id: image.id, size: size })
       assert_template("show", partial: "_form_ccbyncsa25")
     end
-  end
-
-  def test_show_image_edit_links
-    img = images(:in_situ_image)
-    proj = projects(:bolete_project)
-    assert_equal(mary.id, img.user_id) # owned by mary
-    assert(img.projects.include?(proj)) # owned by bolete project
-    # dick is only member of project
-    assert_equal([dick.id], proj.user_group.users.map(&:id))
-
-    login("rolf")
-    get(:show, params: { id: img.id })
-    assert_select("a[href=?]", edit_image_path(img.id), count: 0)
-    assert_select("input[value*='#{:DESTROY.t}']", count: 0)
-    get(:edit, params: { id: img.id })
-    assert_response(:redirect)
-    delete(:destroy, params: { id: img.id })
-    assert_flash_error
-
-    login("mary")
-    get(:show, params: { id: img.id })
-    assert_select("a[href=?]", edit_image_path(img.id), minimum: 1)
-    assert_select("input[value*='#{:DESTROY.t}']", minimum: 1)
-    get(:edit, params: { id: img.id })
-    assert_response(:success)
-
-    login("dick")
-    get(:show, params: { id: img.id })
-    assert_select("a[href=?]", edit_image_path(img.id), minimum: 1)
-    assert_select("input[value*='#{:DESTROY.t}']", minimum: 1)
-    get(:edit, params: { id: img.id })
-    assert_response(:success)
-    delete(:destroy, params: { id: img.id })
-    assert_flash_success
   end
 
   def test_show_image_change_user_default_size
