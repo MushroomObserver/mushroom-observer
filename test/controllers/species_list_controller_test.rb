@@ -1095,7 +1095,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(0, spl.observations.length)
     path = Rails.root.join("test/species_lists/small_list.txt")
     file = File.new(path)
-    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
+    list_data = file.read.split(/\s*\n\s*/).compact_blank.join("\r\n")
     file = Rack::Test::UploadedFile.new(path, "text/plain")
     params = {
       "id" => spl.id,
@@ -1116,7 +1116,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(0, spl.observations.length)
     path = Rails.root.join("test/species_lists/foray_notes.txt")
     file = File.new(path)
-    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
+    list_data = file.read.split(/\s*\n\s*/).compact_blank.join("\r\n")
     file = Rack::Test::UploadedFile.new(path, "text/plain")
     params = {
       "id" => spl.id,

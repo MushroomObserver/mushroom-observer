@@ -173,9 +173,11 @@ gem("simplecov-lcov", require: false)
 # See http://brakemanscanner.org/
 gem("brakeman", require: false)
 
-# Use rubocop and associated gems for code quality control
-# When updating rubocop, insure that .codeclimate.yml uses highest available
+# Use rubocop and extension gems for code quality control
+# extension list: https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
+# NOTE: If updating RuboCop, insure that .codeclimate.yml uses highest available
 # rubocop channel. See https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
+# NOTE: If updating RuboCop, update any extension used here
 gem("rubocop", require: false)
 gem("rubocop-performance")
 gem("rubocop-rails")
