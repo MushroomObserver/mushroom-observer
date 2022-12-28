@@ -19,12 +19,13 @@ module CapybaraMacros
   # Do not commit this - it will freeze your CI server as it requires
   # keyboard input to exit from.
   # https://ricostacruz.com/til/pausing-capybara-selenium
-  def pause_selenium # not to be confused with Kernel#pause
+  # Also, not to be confused with Kernel#pause
+  def pause_selenium
     $stderr.write("Press enter to continue")
     $stdin.gets
   end
 
-  # HACK: to make element visible on page
+  # NOTE: sort of a hack to make element visible on page
   def maximize_browser_window
     Capybara.current_session.current_window.resize_to(1000, 1000)
   end
