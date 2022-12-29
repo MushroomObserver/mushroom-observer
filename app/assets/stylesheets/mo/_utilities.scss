@@ -385,6 +385,15 @@
   }
 }
 
+// Actually we can't use that for form.button_to inputs, though.
+.ab-fab {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
 //
 // larger devices
 // --------------------------------------------------

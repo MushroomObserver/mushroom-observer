@@ -34,22 +34,22 @@
   # html_options = html_options.merge({ class: "stretched-link" })
   image_link = case link_method
                 when :get
-                  link_with_query("", link, class: "stretched-link")
+                  link_with_query("", link, class: "ab-fab")
                 when :post
-                  post_button(name: "", path: link, class: "stretched-link")
+                  post_button(name: "", path: link, class: "ab-fab")
                 when :put
-                  put_button(name: "", path: link, class: "stretched-link")
+                  put_button(name: "", path: link, class: "ab-fab")
                 when :patch
-                  patch_button(name: "", path: link, class: "stretched-link")
+                  patch_button(name: "", path: link, class: "ab-fab")
                 when :delete
-                  destroy_button(name: "", target: link, class: "stretched-link")
+                  destroy_button(name: "", target: link, class: "ab-fab")
                 end
 %>
 
 <div class="position-relative">
   <div class="d-inline">
     <div data-toggle="expand-icon" class="text-center">
-      <div class="position-relative">
+      <div class="click-container position-relative">
         <%= image_tag(size_url, title: notes,
                       class: "img-fluid",
                       data: { toggle: "tooltip", placement: "bottom" }) %>
