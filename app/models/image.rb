@@ -1014,9 +1014,9 @@ class Image < AbstractModel
     display_names = {}
     current_names_and_ids = {}
 
-    License.each do |license|
+    License.all.each do |license|
       display_names[license.id] = license.display_name
-      current_names_and_ids[license_id] = License.current_names_and_ids(license)
+      current_names_and_ids[license.id] = License.current_names_and_ids(license)
     end
 
     Image.where(user: user).
