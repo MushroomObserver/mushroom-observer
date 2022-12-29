@@ -82,10 +82,12 @@ module Account
     def self.notify_root_of_verification_email(user)
       url = "#{MO.http_domain}/account/verify/#{user.id}?" \
             "auth_code=#{user.auth_code}"
-      subject = :email_subject_verify.l
       content = :email_verify_intro.tp(user: user.login, link: url)
-      content = "email: #{user.email}\n\n" + content.html_to_ascii
-      WebmasterMailer.build(user.email, content, subject).deliver_now
+      WebmasterMailer.build(
+        sender_email: user.email,
+        subject: :email_subject_verify.l,
+        content: "email: #{user.email}\n\n #{content.html_to_ascii}"
+      ).deliver_now
     end
 
     private
