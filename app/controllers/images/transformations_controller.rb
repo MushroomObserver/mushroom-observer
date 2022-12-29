@@ -20,14 +20,8 @@ module Images
 
     def transform_image_and_flash_notices(image)
       case params[:op]
-      when "rotate_left"
-        image.transform(:rotate_left)
-        flash_notice(:image_show_transform_note.t)
-      when "rotate_right"
-        image.transform(:rotate_right)
-        flash_notice(:image_show_transform_note.t)
-      when "mirror"
-        image.transform(:mirror)
+      when "rotate_left", "rotate_right", "mirror"
+        image.transform(params[:op].to_sym)
         flash_notice(:image_show_transform_note.t)
       else
         flash_error("Invalid operation #{params[:op].inspect}")
