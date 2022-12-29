@@ -435,10 +435,12 @@ class Name < AbstractModel
 
   # Notify webmaster that a new name was created.
   after_create do |name|
-    user    = User.current || User.admin
-    subject = "#{user.login} created #{name.real_text_name}"
-    content = "#{MO.http_domain}/name/show_name/#{name.id}"
-    WebmasterMailer.build(user.email, content, subject)
+    user = User.current || User.admin
+    WebmasterMailer.build(
+      sender_email: user.email,
+      subject: "#{user.login} created #{name.real_text_name}",
+      content: "#{MO.http_domain}/name/show_name/#{name.id}"
+    )
   end
 
   # Used by name/_form_name.rhtml
