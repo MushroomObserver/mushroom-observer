@@ -280,7 +280,10 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_webmaster_email
     run_mail_test("webmaster_question") do
-      WebmasterMailer.build(mary.email, "A question").deliver_now
+      WebmasterMailer.build(
+        sender_email: mary.email,
+        content: "A question"
+      ).deliver_now
     end
   end
 
