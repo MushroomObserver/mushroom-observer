@@ -1220,8 +1220,8 @@
   log_object_updated_at: "[:log_object_updated_by_user]"
 
   source_credit_mo_website: Created using the "Mushroom Observer website":https://mushroomobserver.org.
-  source_credit_mo_android_app: Created using the "Mushroom Observer iPhone app":https://blah.de.blah.
-  source_credit_mo_iphone_app: Created using the "Mushroom Observer android app":https://blah.de.blah.
+  source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
+  source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
   source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md.
 
   ##############################################################################
