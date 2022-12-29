@@ -174,6 +174,8 @@ require("mimemagic")
 #  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
 #  all_extensions::     All image extensions, with "raw" for "other".
 #  all_content_types::  All image content_types, with +nil+ for "other".
+#  licenses_for_user_by_type: Expensive query of image licenses the user has used.
+#  process_license_changes_for_user: Change licenses from one type to another.
 #
 #  == Instance Methods
 #
@@ -1008,16 +1010,23 @@ class Image < AbstractModel
   #   {"license_count"=>1, "copyright_holder"=>"Tim Wheeler", "license_id"=>2}]
   #   map(&:attributes) gives you a hash of your selects with their keys
 
-  def self.licenses_for_user_by_type(user)
-    Image.includes(:license).where(user_id: user.id).
+  def self.licenses_for_user_by_type(user) # rubocop:disable Metrics/AbcSize
+    display_names = {}
+    current_names_and_ids = {}
+
+    License.each do |license|
+      display_names[license.id] = license.display_name
+      current_names_and_ids[license_id] = License.current_names_and_ids(license)
+    end
+
+    Image.where(user: user).
       select(Arel.star.count.as("license_count"),
              :copyright_holder, :license_id).
       group(:copyright_holder, :license_id).
       map(&:attributes).map do |datum|
-      next unless (license = License.safe_find(datum["license_id"].to_i))
-
-      datum["license_name"] = license.display_name
-      datum["licenses"]     = License.current_names_and_ids(license)
+      license_id = datum["license_id"].to_i
+      datum["license_name"] = display_names[license_id]
+      datum["licenses"] = current_names_and_ids[license_id]
       datum.except!("id")
     end
   end
