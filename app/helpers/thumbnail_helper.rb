@@ -57,11 +57,9 @@ module ThumbnailHelper
       return content_tag(:span, image_vote_as_short_string(vote))
     end
 
-    # return a link if the user has NOT voted this way
-    # FIXME: JS is prolly checking a[data-role="image_vote"],
-    # but this is not an anchor tag now, it's an input.
-    # Also check show image vote panel
-    # Also be sure inputs can have titles
+    # return a form input button if the user has NOT voted this way
+    # NOTE: JS is checking any element with [data-role="image_vote"],
+    # Even though this is not an <a> tag, it's an <input>, it's ok.
     put_button(name: vote_text,
                path: image_vote_path(id: image.id, vote: vote),
                title: image_vote_as_help_string(vote),
@@ -73,8 +71,6 @@ module ThumbnailHelper
     state_text = visual_group_status_text(state)
     return content_tag(:span, link_text) if link_text == state_text
 
-    # FIXME: JS is prolly checking a[data-role="visual_group_status"],
-    # but this is not an anchor tag now, it's an input.
     put_button(name: link_text,
                path: image_vote_path(id: image_id, vote: 1),
                title: link_text,

@@ -167,7 +167,7 @@ module ApplicationHelper
   def post_button(name:, path:, **args)
     html_options = {
       method: :post,
-      class: "text-info"
+      class: ""
     }.merge(args)
 
     button_to(name, path, html_options)
@@ -180,7 +180,7 @@ module ApplicationHelper
   def put_button(name:, path:, **args)
     html_options = {
       method: :put,
-      class: "text-info"
+      class: ""
     }.merge(args)
 
     button_to(name, path, html_options)
@@ -193,7 +193,7 @@ module ApplicationHelper
   def patch_button(name:, path:, **args)
     html_options = {
       method: :patch,
-      class: "text-info"
+      class: ""
     }.merge(args)
 
     button_to(name, path, html_options)
