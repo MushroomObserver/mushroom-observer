@@ -1135,7 +1135,9 @@ class NameController < ApplicationController
     )
   end
 
-  def notify_admins_of_name_tracker(name_tracker)
+  # disable cop because method is clear and
+  # there's no easy way to reduce ABC count of <2, 20, 3> 20.32/20
+  def notify_admins_of_name_tracker(name_tracker) # rubocop:disable Metrics/AbcSize
     return if name_tracker.note_template.blank?
     # Only give notifications when users turn on the template function,
     # not when they edit the template after its already been approved.
