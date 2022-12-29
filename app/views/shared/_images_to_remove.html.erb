@@ -1,9 +1,4 @@
 <%
-# Somehow need to pass a param to thumbnail that generates a put_link to :update
-# and passes the form action path.
-
-# Change this from single form, to each box has form with method: :put
-# Removal has no form with text input at top, it's checkboxes per attached image
 # Note this uses a specialized matrix box here, not using the general partial.
 %>
 
@@ -19,8 +14,8 @@
 
       <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
         <div class="py-3 text-center">
-          <% # no special link-or-button param here, it's a checkbox %>
-          <%= thumbnail(image, votes: true, original: true) %>
+          <% # no special link-or-button param here, there's a checkbox below %>
+          <%= thumbnail(image, votes: false, original: true) %>
         </div>
         <div class="pb-3 text-center">
           <%= fields_for(:selected) do |f_s| %>

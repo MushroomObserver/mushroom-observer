@@ -1,11 +1,7 @@
 <%
-# Passes a param to thumbnail that generates a post_link to :attach
-# and passes the form action path.
+# This view consists of multiple <form>s: the form at the top with text input,
+# plus each thumbnail. The image is clickable: an overlaid form with method: :post
 
-# Multiple forms, the form at the top with text input
-# plus each thumbnail box is a little form with method: :post
-
-# Note this uses a specialized matrix box here, not using the general partial.
 @all_users = (params[:all_users] == "1") ? true : false
 # application_controller.rb
 query = query_images_to_reuse(@all_users, @user) 
@@ -37,6 +33,7 @@ query = query_images_to_reuse(@all_users, @user)
   </div><!--.container-text-->
 <% end %>
 
+<% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
 <%= paginate_block(@pages) do %>
   <ul class="row list-unstyled mt-3">
 
@@ -48,6 +45,7 @@ query = query_images_to_reuse(@all_users, @user)
             <%= thumbnail(image,
                           link: form_action.merge(img_id: image.id),
                           link_method: :post,
+                          votes: false,
                           original: true) %>
           </div>
         </div>
