@@ -45,7 +45,8 @@ module Observations
     end
 
     def init_project_vars_for_add_or_edit(obs_or_img)
-      @projects = User.current.projects_member(order: :title)
+      @projects = User.current.projects_member(order: :title,
+                                               include: :user_group)
       @project_checks = {}
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
@@ -256,17 +257,15 @@ module Observations
     def init_project_vars_for_reload(obs_or_img)
       # (Note: In practice, this is never called for add_image,
       # so obs_or_img is always an image.)
-      @projects = User.current.projects_member(order: :title)
+      @projects = User.current.projects_member(order: :title,
+                                               include: :user_group)
       @project_checks = {}
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
       end
       @projects.each do |proj|
-        @project_checks[proj.id] = begin
-                                     params[:project]["id_#{proj.id}"] == "1"
-                                   rescue StandardError
-                                     false
-                                   end
+        @project_checks[proj.id] = \
+          param_lookup([:project, "id_#{proj.id}"]) == "1"
       end
     end
 
