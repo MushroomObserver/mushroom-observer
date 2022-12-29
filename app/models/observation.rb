@@ -1240,6 +1240,11 @@ class Observation < AbstractModel
     :"source_credit_#{source}" if source.present?
   end
 
+  # Do we want to prominantly advertise the source of this observation?
+  def source_noteworthy?
+    source.present? && source != "mo_website"
+  end
+
   ##############################################################################
   #
   #  :section: Callbacks
