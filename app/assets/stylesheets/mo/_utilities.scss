@@ -394,6 +394,17 @@
   left: 0;
 }
 
+.click-container {
+  a.ab-fab {
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: transparent;
+    }
+  }
+}
+
 //
 // larger devices
 // --------------------------------------------------

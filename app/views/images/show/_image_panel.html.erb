@@ -4,17 +4,17 @@
     <div class="text-center small image-controls">
       <% if check_permission(@image) %>
         <%= put_button(name: :image_show_rotate_left.t,
-                        path: transform_image_path(id: @image.id, 
+                       path: transform_image_path(id: @image.id, 
                                                   op: :rotate_left,
                                                   q: get_query_param,
                                                   size: @size)) %> | 
         <%= put_button(name: :image_show_rotate_right.t,
-                        path: transform_image_path(id: @image.id, 
+                       path: transform_image_path(id: @image.id, 
                                                   op: :rotate_right,
                                                   q: get_query_param,
                                                   size: @size)) %> | 
         <%= put_button(name: :image_show_mirror.t,
-                        path: transform_image_path(id: @image.id, 
+                       path: transform_image_path(id: @image.id, 
                                                   op: :mirror, 
                                                   q: get_query_param,
                                                   size: @size)) %> | 
