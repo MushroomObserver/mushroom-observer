@@ -104,7 +104,8 @@ class ImagesControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
-    ImagesController.any_instance.expects(:index).raises(StandardError)
+    ImagesController.any_instance.expects(:show_selected_images).
+      raises(StandardError)
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
@@ -166,8 +167,8 @@ class ImagesControllerTest < FunctionalTestCase
     assert_nil(new_new_inner.next)
 
     params = {
-      id: det_unknown.images.last.id,
-      params: @controller.query_params(inner).merge({ flow: :next }) # inner for first obs
+      id: det_unknown.images.last.id, # inner for first obs
+      params: @controller.query_params(inner).merge({ flow: :next })
     }.flatten
     login
     get(:show, params: params)
@@ -382,8 +383,8 @@ class ImagesControllerTest < FunctionalTestCase
     q = query.id.alphabetize
     params = { id: image.id, q: q }
 
-    delete_requires_user(:destroy, { action: :show, id: image.id, q: q }, params,
-                         user.login)
+    delete_requires_user(:destroy, { action: :show, id: image.id, q: q },
+                         params, user.login)
 
     assert_redirected_to(action: :show, id: next_image.id, q: q)
     assert_equal(0, user.reload.contribution)
