@@ -148,6 +148,7 @@ module ObservationsController::NewAndCreate
     observation.updated_at = now
     observation.user       = @user
     observation.name       = Name.unknown
+    observation.source     = "mo_website"
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.long && observation.place_name.blank?)
       observation.location = Location.unknown
