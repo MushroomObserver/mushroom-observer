@@ -17,6 +17,7 @@ module Observations
       download_observations_switch
     rescue StandardError => e
       flash_error("Internal error: #{e}", *e.backtrace[0..10])
+      render(:new, location: new_observations_download_path(q: get_query_param))
     end
 
     def print_labels

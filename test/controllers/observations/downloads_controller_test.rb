@@ -139,6 +139,29 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "fundis",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "bogus",
+          encoding: "ASCII",
+          commit: "Download"
+        }
+      )
+      assert_flash_error
     end
 
     def test_print_labels
