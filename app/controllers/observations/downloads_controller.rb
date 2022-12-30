@@ -9,15 +9,12 @@ module Observations
 
     def create
       @query = find_or_create_query(:Observation, by: params[:by])
-      raise("no robots!") if browser.bot?
+      raise("no robots!") if browser.bot? # failsafe only!
 
       query_params_set(@query)
       @format = params[:format] || "raw"
       @encoding = params[:encoding] || "UTF-8"
       download_observations_switch
-    rescue StandardError => e
-      flash_error("Internal error: #{e}", *e.backtrace[0..10])
-      render(:new, location: new_observations_download_path(q: get_query_param))
     end
 
     def print_labels
