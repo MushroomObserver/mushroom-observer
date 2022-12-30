@@ -134,6 +134,7 @@ ACTIONS = {
     adjust_permissions: {},
     advanced_search: {},
     approve_name: {},
+    approve_tracker: {},
     authored_names: {},
     bulk_name_edit: {},
     change_synonyms: {},

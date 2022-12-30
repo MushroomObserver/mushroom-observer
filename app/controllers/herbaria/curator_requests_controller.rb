@@ -29,12 +29,13 @@ module Herbaria
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       return unless @herbarium
 
-      subject = "Herbarium Curator Request"
-      content =
-        "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
-        "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
-        "Notes: #{params[:notes]}"
-      WebmasterMailer.build(@user.email, content, subject).deliver_now
+      WebmasterMailer.build(
+        sender_email: @user.email,
+        subject: "Herbarium Curator Request",
+        content: "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
+                 "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
+                 "Notes: #{params[:notes]}"
+      ).deliver_now
       flash_notice(:show_herbarium_request_sent.t)
       redirect_to_referrer ||
         redirect_with_query(herbarium_path(@herbarium))

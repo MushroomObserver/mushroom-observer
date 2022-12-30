@@ -760,6 +760,7 @@ class ApplicationController < ActionController::Base
   def flash_notice(*strs)
     session[:notice] ||= "0"
     session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join
+    true
   end
   helper_method :flash_notice
 
@@ -785,6 +786,7 @@ class ApplicationController < ActionController::Base
     return unless obj&.errors && !obj.errors.empty?
 
     obj.formatted_errors.each { |error| flash_error(error) }
+    false
   end
 
   def save_with_log(obj)

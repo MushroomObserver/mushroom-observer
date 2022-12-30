@@ -2733,15 +2733,16 @@
   color_themes_title: Color Themes
 
   # name/email_tracking
-  email_tracking_enabled_only_for: Enabled only for [name] -- contained taxa not yet supported for [rank].
-  email_tracking_help: If you enable tracking then a note will be sent to the email address you have provided whenever this name is applied to an [:observation].  A link to this page will be given in each tracking email.  You can save your mailing address for collections in "your profile":/account/profile.
+  email_tracking_help_above_species: If enabled, this feature will notify you by email whenever someone posts an observation in this [rank].
+  email_tracking_help_below_species: If enabled, this feature will notify you by email whenever someone posts an observation of [name].
   email_tracking_no_longer_tracking: No longer tracking [name].
-  email_tracking_note: Template for notifying an observer
-  email_tracking_note_help: Provide a note template that will be sent as an email or shown to the observer when this name is applied to an [:observation].  If you leave it blank, then the observer will not be notified.
+  email_tracking_note: Send a research request to the observer?
+  email_tracking_note_help: "Check the box above if you would like us to send an email to the observer in addition to notifying you. Please fill in the template below to use in the research request email. Use the special keywords ':observer' and ':observation' as place holders for the observer's name and the observation id, respectively. Note: This feature requires administrative approval to prevent abuse by spammers."
   email_tracking_note_template: "Dear :observer,\n\nI am currently doing research related to [species_name].\n\nIf possible, please make a dried specimen of any of the mushrooms described in :observation and send them to:\n\n[mailing_address]\n\nThanks,\n\n[users_name]"
   email_tracking_now_tracking: Now tracking [name].
   email_tracking_title: Email Tracking for [name]
   email_tracking_updated_messages: Updated tracking messages.
+  email_tracking_awaiting_approval: Your request to send observers research requests has been sent to the admins for approval. Please check "[:app_your_interests]":/interests (the megaphone icon in the upper right corner of the page) in the next day or two to see if your request has been approved.
 
   # name/eol_expanded_review
   eol_expanded_review_title: EOL Name List
@@ -2788,6 +2789,7 @@
   list_interests_title: Your Notification Requests
   list_interests_turn_on: Change to Watch
   list_interests_turn_off: Change to Ignore
+  list_name_tracker_pending_approval: "(Observer notification pending approval.)"
 
   # location/list_merge_options
   list_merge_are_you_sure: Do merge?  This cannot be undone.
@@ -3254,6 +3256,7 @@
   email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
+  email_subject_name_tracker_approval: "Research Request Emails Approved for [name]"
   email_subject_new_password: New Password
   email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
   email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
@@ -3324,6 +3327,7 @@
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nshow this : [show_this_url]\nedit this : [edit_this_url]\nshow that : [show_that_url]\nedit that : [edit_that_url]\nnotes : [notes]"
   email_name_change_request: "User wants to change Name having dependents:\n\nuser : [user]\nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
+  email_name_tracker_body: "Dear [user],\n\nWe have approved your request to have MO send automated research request emails to observers whenever someone posts an observation of [name].\n\nYou can see your name-tracking notifications here: [link].\n\nPlease do not hesitate to let us know if there is any other ways MO can help support your research.\n\nBest wishes,\n-MO Admins"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
   email_new_password_intro: "h2. *New Password*\n\nYour new [:app_title] password is:"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_24_191500) do
+ActiveRecord::Schema.define(version: 2022_12_26_160800) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -364,10 +364,11 @@ ActiveRecord::Schema.define(version: 2022_12_24_191500) do
 
   create_table "name_trackers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
-    t.integer "obj_id"
+    t.integer "name_id"
     t.text "note_template"
     t.datetime "updated_at"
     t.boolean "require_specimen", default: false, null: false
+    t.boolean "approved", default: true, null: false
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -687,13 +688,13 @@ ActiveRecord::Schema.define(version: 2022_12_24_191500) do
     t.boolean "no_emails", default: false, null: false
   end
 
-  create_table "visual_group_images", charset: "utf8mb3", force: :cascade do |t|
+  create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "image_id"
     t.integer "visual_group_id"
     t.boolean "included", default: true, null: false
   end
 
-  create_table "visual_groups", charset: "utf8mb3", force: :cascade do |t|
+  create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "visual_model_id"
     t.string "name", null: false
     t.boolean "approved", default: false, null: false
@@ -702,7 +703,7 @@ ActiveRecord::Schema.define(version: 2022_12_24_191500) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "visual_models", charset: "utf8mb3", force: :cascade do |t|
+  create_table "visual_models", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
