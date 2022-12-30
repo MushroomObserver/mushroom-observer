@@ -4,14 +4,12 @@
 module ObservationsController::Download
   def download
     @query = find_or_create_query(:Observation, by: params[:by])
-    raise("no robots!") if browser.bot?
+    raise("no robots!") if browser.bot? # just a failsafe
 
     query_params_set(@query)
     @format = params[:format] || "raw"
     @encoding = params[:encoding] || "UTF-8"
     download_observations_switch
-  rescue StandardError => e
-    flash_error("Internal error: #{e}", *e.backtrace[0..10])
   end
 
   def print_labels
