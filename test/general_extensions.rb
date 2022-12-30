@@ -250,6 +250,7 @@ module GeneralExtensions
                      "Value of #{arg} is wrong")
       end
     end
+    email
   end
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.

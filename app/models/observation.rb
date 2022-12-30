@@ -1220,6 +1220,33 @@ class Observation < AbstractModel
 
   ##############################################################################
   #
+  #  :section: Sources
+  #
+  ##############################################################################
+
+  # Which agent created this observation?
+  enum source:
+        {
+          mo_website: 1,
+          mo_android_app: 2,
+          mo_iphone_app: 3,
+          mo_api: 4
+        }
+
+  # Message to use to credit the agent which created this observation.
+  # Intended to be used with .tpl to render as HTML:
+  #   <%= observation.source_credit.tpl %>
+  def source_credit
+    :"source_credit_#{source}" if source.present?
+  end
+
+  # Do we want to prominantly advertise the source of this observation?
+  def source_noteworthy?
+    source.present? && source != "mo_website"
+  end
+
+  ##############################################################################
+  #
   #  :section: Callbacks
   #
   ##############################################################################

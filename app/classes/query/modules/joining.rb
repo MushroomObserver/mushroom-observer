@@ -153,7 +153,7 @@ module Query
           names: :name_id
         },
         name_trackers: {
-          names: :obj,
+          names: :name,
           users: :user_id
         },
         naming_reasons: {

@@ -54,6 +54,9 @@ class MatrixBoxPresenter
       end
     return unless (temp = rss_log.detail)
 
+    temp = target.source_credit.tpl if target.respond_to?(:source_credit) &&
+                                       target.source_noteworthy?
+
     # To avoid calling rss_log.detail twice
     self.detail = temp
   end
