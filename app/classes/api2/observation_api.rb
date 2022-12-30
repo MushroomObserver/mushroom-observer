@@ -79,6 +79,8 @@ class API2
         gps_hidden: parse(:boolean, :gps_hidden, default: false,
                                                  help: 1),
         notes: @notes,
+        source: parse(:enum, :source, limit: Observation.sources.keys,
+                                      default: "mo_api"),
         thumb_image: @thumbnail,
         images: @images,
         projects: parse_array(:project, :projects, must_be_member: true) || [],
@@ -262,8 +264,7 @@ class API2
       declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
       return notes if set
 
-      notes.delete_if { |_key, val| val.blank? }
-      notes
+      notes.compact_blank!
     end
 
     def look_for_note_field_parameters(prefix)

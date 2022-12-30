@@ -2352,6 +2352,7 @@ class API2Test < UnitTestCase
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
+    assert_equal("mo_api", Observation.last.source)
     assert_api_fail(params.except(:location))
   end
 
@@ -2405,12 +2406,14 @@ class API2Test < UnitTestCase
       projects: @proj.id,
       species_lists: @spl.id,
       thumbnail: @img2.id,
-      images: "#{@img1.id},#{@img2.id}"
+      images: "#{@img1.id},#{@img2.id}",
+      source: "mo_iphone_app"
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
+    assert_equal("mo_iphone_app", Observation.last.source)
     assert_last_naming_correct
     assert_last_vote_correct
     assert_api_fail(params.except(:api_key))
