@@ -1166,6 +1166,7 @@ class ObservationsControllerTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert_equal(where, obs.place_name)
+    assert_equal("mo_website", obs.source)
   end
 
   def test_create_observation_with_collection_number

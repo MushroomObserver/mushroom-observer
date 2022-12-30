@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_15_233523) do
+ActiveRecord::Schema.define(version: 2022_12_24_191500) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -478,6 +478,7 @@ ActiveRecord::Schema.define(version: 2022_12_15_233523) do
     t.string "text_name", limit: 100
     t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
+    t.integer "source"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
