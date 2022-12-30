@@ -354,6 +354,7 @@ class ApplicationController < ActionController::Base
     make_logged_in_user_available_to_everyone
     track_last_time_user_made_a_request
     block_suspended_users
+    clear_admin_mode_for_nonadmins
   end
 
   private ##########
@@ -431,6 +432,10 @@ class ApplicationController < ActionController::Base
 
     render(plain: "Your account has been deleted.", layout: false)
     false # Tell Rails to stop processing.
+  end
+
+  def clear_admin_mode_for_nonadmins
+    session[:admin] = false if session[:admin] && !@user&.admin
   end
 
   public ##########
@@ -755,6 +760,7 @@ class ApplicationController < ActionController::Base
   def flash_notice(*strs)
     session[:notice] ||= "0"
     session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join
+    true
   end
   helper_method :flash_notice
 
@@ -780,6 +786,7 @@ class ApplicationController < ActionController::Base
     return unless obj&.errors && !obj.errors.empty?
 
     obj.formatted_errors.each { |error| flash_error(error) }
+    false
   end
 
   def save_with_log(obj)

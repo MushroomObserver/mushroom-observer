@@ -281,9 +281,12 @@ module NameController::CreateAndEditName
   end
 
   def email_admin_name_change
-    subject = "Nontrivial Name Change"
     content = email_name_change_content
-    WebmasterMailer.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(
+      sender_email: @user.email,
+      subject: "Nontrivial Name Change",
+      content: content
+    ).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 
@@ -372,7 +375,6 @@ module NameController::CreateAndEditName
   end
 
   def email_admin_icn_id_conflict(survivor)
-    subject = "Merger identifier conflict"
     content = :email_merger_icn_id_conflict.l(
       name: survivor.real_search_name,
       surviving_icn_id: survivor.icn_id,
@@ -381,7 +383,11 @@ module NameController::CreateAndEditName
       show_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
       edit_url: "#{MO.http_domain}/name/edit_name/#{@name.id}"
     )
-    WebmasterMailer.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(
+      sender_email: @user.email,
+      subject: "Merger identifier conflict",
+      content: content
+    ).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 

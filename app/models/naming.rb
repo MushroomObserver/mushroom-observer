@@ -167,8 +167,7 @@ class Naming < AbstractModel
     taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
     done_user = {}
     taxa.each do |taxon|
-      NameTracker.where(obj_id: taxon.id).includes(:user).
-        find_each do |n|
+      NameTracker.where(name: taxon).includes(:user).find_each do |n|
         next unless (n.user_id != user.id) && !done_user[n.user_id] &&
                     (!n.require_specimen || observation.specimen)
         next if n.user.no_emails

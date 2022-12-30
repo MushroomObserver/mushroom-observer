@@ -1,18 +1,12 @@
 <%
-  # case @name_tracker.flavor.to_s
-  # when "name"
-    obj  = @naming.observation
-    type = :observation
-  # else
-  #   obj  = @name_tracker.object
-  #   type = obj.type_tag
-  # end
+  obs  = @naming.observation
+  type = :observation
 
   intro = :email_naming_for_observer_intro.l(
     user:  @name_tracker.user.legal_name,
     email: @name_tracker.user.email,
     type:  type,
-    name:  obj.unique_format_name
+    name:  obs.unique_format_name
   )
 
   message = @name_tracker.calc_note(
@@ -27,13 +21,8 @@
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  # if obj.class.controller_normalized?
-    links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}/#{obj.id}"])
-  # else
-  #   links.push([:email_links_show_object.t(type: type),
-  #     "#{MO.http_domain}#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
-  # end
+  links.push([:email_links_show_object.t(type: type),
+    "#{MO.http_domain}/#{obs.id}"])
 
   links.push([:email_links_latest_changes.t,
     MO.http_domain])

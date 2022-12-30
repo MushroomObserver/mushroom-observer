@@ -5,6 +5,8 @@ class NamingObserverMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
   def build(observer, naming, name_tracker)
+    return unless name_tracker.approved
+
     sender = name_tracker.user
     setup_user(observer)
     @title = :email_subject_naming_for_observer.l

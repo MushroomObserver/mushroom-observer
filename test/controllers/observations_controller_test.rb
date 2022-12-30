@@ -1174,6 +1174,7 @@ class ObservationsControllerTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert_equal(where, obs.place_name)
+    assert_equal("mo_website", obs.source)
   end
 
   def test_create_observation_with_collection_number
@@ -1470,7 +1471,7 @@ class ObservationsControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    name_trackers = NameTracker.where(obj_id: name.id)
+    name_trackers = NameTracker.where(name: name)
     assert_equal(2, name_trackers.length,
                  "Should be 2 name name_trackers for name ##{name.id}")
     assert(name_trackers.map(&:user).include?(mary))

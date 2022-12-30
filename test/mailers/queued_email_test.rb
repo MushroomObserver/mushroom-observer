@@ -17,6 +17,21 @@ class QueuedEmailTest < UnitTestCase
     assert(RunLevel.is_normal?)
   end
 
+  def test_approval_email
+    user = katrina
+    subject = "this is the subject!"
+    content = "your request has been approved"
+    QueuedEmail::Approval.find_or_create_email(user, subject, content)
+    email = assert_email(
+      0,
+      from: User.admin,
+      to: user,
+      subject: subject,
+      note: content
+    )
+    assert(email.deliver_email)
+  end
+
   def test_comment_email
     QueuedEmail::CommentAdd.find_or_create_email(
       rolf, mary, comments(:minimal_unknown_obs_comment_1)
