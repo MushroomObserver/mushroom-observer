@@ -29,10 +29,8 @@ class AjaxControllerTest < FunctionalTestCase
     url = "/ajax/#{action}"
     url += "/#{params[:type]}" if params[:type]
     url += "/#{params[:id]}"   if params[:id]
-    args = params.each_with_object([]) do |var, val, memo|
-      memo << "#{var}=#{val}" if var != :type && var != :id
-    end
-    url += "?#{args.join("&")}" if args.any?
+    args = params.except(:type, :id)
+    url += "?#{URI.encode_www_form(args)}" if args.any?
     url
   end
 

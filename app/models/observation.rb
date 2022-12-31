@@ -1409,7 +1409,7 @@ class Observation < AbstractModel
 
   protected
 
-  include Validations
+  include Validations # currently only `validate_when`
 
   validate :check_requirements, :check_when
 
@@ -1431,7 +1431,7 @@ class Observation < AbstractModel
     end
   end
 
-  def check_where
+  def check_where # rubocop:disable Metrics/AbcSize
     # Clean off leading/trailing whitespace from +where+.
     self.where = where.strip_squeeze if where
     self.where = nil if where == ""

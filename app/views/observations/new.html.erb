@@ -9,16 +9,12 @@
   @container = :wide
 %>
 
-<%= form_tag({ action: :create,
-               approved_name: @what,
-               approved_where: @place_name },
-             { multipart: true, name: "observation_form" }) do %>
-  <%= render(partial: "form_observations", locals: {
-        action: :create,
-        logging_optional: false,
-        include_naming: true,
-        include_images: true,
-        button_name: :CREATE.l,
-        has_specimen: false
-  }) %>
-<% end %>
+<%= render(partial: "form", locals: {
+      action: :create,
+      method: :post,
+      logging_optional: false,
+      include_naming: true,
+      include_images: true,
+      button_name: :CREATE.l,
+      has_specimen: false
+}) %>

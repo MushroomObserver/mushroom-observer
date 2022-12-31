@@ -1,0 +1,19 @@
+<%
+# Vote Form:
+# a tiny form within a naming row for voting on this naming only
+
+menu = Vote.confidence_menu
+if !can_vote || !@vote || @vote.value == 0
+  menu = [Vote.no_opinion] + menu
+end
+%>
+
+<%= form_with(model: @vote, url: naming_vote_path(naming_id: naming.id),
+              method: :put, id: "cast_vote_#{naming.id}") \
+              do |f| %>
+  <%= f.select(:value, menu, {},
+               { class: "form-control w-100",
+                 data: { role: "change_vote", id: naming.id } }) %>
+  <%= f.submit(:show_namings_cast.l, class: "btn btn-default w-100",
+               data: { role: "save_vote" }) %>
+<% end %>

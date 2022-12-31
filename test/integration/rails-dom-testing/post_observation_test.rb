@@ -277,7 +277,7 @@ class PostObservationTest < IntegrationTestCase
       "observation_lat" => "",
       "observation_long" => "",
       "observation_alt" => "",
-      "name_name" => "",
+      "naming_name" => "",
       "is_collection_location" => true,
       "specimen" => false,
       other_notes_id => ""
@@ -309,8 +309,8 @@ class PostObservationTest < IntegrationTestCase
       "observation_lat" => " 12deg 34.56min N ",
       "observation_long" => " 123 45 6.78 W ",
       "observation_alt" => " 56 ft. ",
-      "name_name" => " Agaricus  campestris ",
-      "vote_value" => Vote.next_best_vote,
+      "naming_name" => " Agaricus  campestris ",
+      "naming_vote_value" => Vote.next_best_vote,
       "image_0_image" =>
         JpegUpload.new(Rails.root.join("test/images/Coprinus_comatus.jpg")),
       "image_0_when_1i" => "2010",
