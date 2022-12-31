@@ -181,5 +181,23 @@ module Observations
       query = Query.lookup_and_save(:Observation, :all)
       get(:print_labels, params: { q: query.id.alphabetize })
     end
+
+    def test_print_labels_query_nil
+      login
+      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      # So pretend we're passing a query param, but that query doesn't exist
+      # Observations::DownloadsController.any_instance.
+      #   stubs(:find_query).returns(nil)
+      @controller.stubs(:find_query).returns(nil)
+      get(
+        :print_labels,
+        params: {
+          q: query.id.alphabetize,
+          commit: "Print Labels"
+        }
+      )
+      # binding.break
+      assert_flash_error
+    end
   end
 end
