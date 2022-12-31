@@ -1228,7 +1228,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "**MO Merch!!!  Check it out the \"MO Shop on Etsy\":https://www.etsy.com/shop/MushroomObsMerch!**<br>\nThanks to Hannah and Anne for making this happen!"
+  app_banner_box: RIP Tom Volk. You will be missed.<br>Tom's original Gopher internet archive from the early 90's was one of the original inspirations for MO.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -2629,7 +2629,7 @@
   visual_group_show: Show Visual Group
 
   # visual_groups/show
-  definitional_images: "Definitional Images"
+  definitional_images: Definitional Images
   show_visual_group_title: "[name] [:VISUAL_GROUP]"
 
   # visual_groups/destroy
@@ -2665,7 +2665,7 @@
   account_api_keys_create_button: Create a New Key
   account_api_keys_help: "API Keys are used by third-party applications to access the Mushroom Observer database directly.  You may request as many API Keys as you like, and no restrictions are placed on these keys.\n\nEach key is attached to a single user.  When posting observations or images, for example, your application will send this API Key in lieu of logging in. Therefore you should take some care to prevent other people or malicious agents from using your API Keys.\n\nNote that no key is required if you are only interested in _reading_ data; keys are only required if you wish to post or modify data."
   account_api_keys_create_success: Sucessfully created a new API Key.
-  account_api_keys_create_failed: "Failed to create a new API Key: "
+  account_api_keys_create_failed: "Failed to create a new API Key:"
   account_api_keys_removed_some: Successfully removed [num] selected API Key(s).
   account_api_keys_removed_none: No API Keys were selected.
   account_api_keys_updated: Successfully updated API Key notes.
