@@ -12,7 +12,12 @@
 //= require theater
 //= require validate_file_input_fields
 //= require main
+//= require multi_image_upload
 //= require observation_form_map
+//= require suggestions
+//= require thumbnail_map
+//= require vote_by_ajax
+//= require pivotal
 //= require lightbox
 //= require popup_exif
 

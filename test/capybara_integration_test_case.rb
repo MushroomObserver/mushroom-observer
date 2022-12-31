@@ -3,6 +3,10 @@
 # Allow simuluation of user-browser interaction with capybara
 require("capybara/rails")
 require("capybara/minitest")
+require("webdrivers/geckodriver")
+
+require("database_cleaner/active_record")
+DatabaseCleaner.strategy = :transaction
 
 #  = Capybara Integration Test Case
 #
@@ -46,6 +50,24 @@ require("capybara/minitest")
 #    end
 #
 ################################################################################
+#
+#    NOTE for test writers!
+#
+# Even though Capybara can find an anchor by attribute href with a regex:
+# `find("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` << OK
+# `assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` <OK
+#
+# Capybara can't click that same selector.
+# `click_on("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")` << NO GO.
+#
+# Instead, give the link an HTML id (maybe even with an interpolated AR id) and
+# `click_on(id: "edit_herbarium_record_#{rec.id}_link")` << WORKS
+#
+# Or, try an explicit href attribute, but it won't match regex or path w/ params
+# `click_link(href: edit_herbarium_record_path(id: rec.id))` << ONLY WITH NO Q:
+# -- AN 10/2022
+#
+################################################################################
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests
@@ -56,6 +78,20 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   include GeneralExtensions
   include FlashExtensions
   include CapybaraSessionExtensions
+  include CapybaraMacros
+
+  # Javascript tests use this
+  Capybara.register_driver(:firefox_headless) do |app|
+    options = ::Selenium::WebDriver::Firefox::Options.new
+    options.args << "--headless"
+
+    Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+  end
+
+  # In case using screenshot
+  # Capybara::Screenshot.register_driver(:firefox_headless) do |driver, path|
+  #   driver.browser.save_screenshot(path)
+  # end
 
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
@@ -64,6 +100,16 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
 
     # NOTE: Shouldn't be necessary, but in case:
     # Capybara.reset_sessions!
+
+    # needed for selenium
+    Capybara.server = :webrick
+
+    # Webdrivers.logger.level = :debug
+    # TODO: Move this, it gets called tooo often
+    # Webdrivers::Geckodriver.update
+
+    # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
+    DatabaseCleaner.start
 
     # Treat Rails html requests as coming from non-robots.
     # If it's a bot, controllers often do not serve the expected content.
@@ -75,6 +121,8 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   def teardown
     Capybara.reset_sessions!
     Capybara.use_default_driver
+
+    DatabaseCleaner.clean
 
     ApplicationController.allow_forgery_protection = false
   end

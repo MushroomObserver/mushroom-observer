@@ -181,11 +181,6 @@ ACTIONS = {
     show_past_name_description: {},
     test_index: {}
   },
-  naming: {
-    create: {},
-    destroy: {},
-    edit: {}
-  },
   pivotal: {
     index: {}
   },
@@ -249,12 +244,6 @@ ACTIONS = {
     edit_translations: {},
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
-  },
-  vote: {
-    cast_vote: {},
-    cast_votes: {},
-    refresh_vote_cache: {},
-    show_votes: {}
   }
 }.freeze
 
@@ -549,6 +538,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/emails/commercial_inquiry(/:id)",
         to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
         as: "emails_commercial_inquiry")
+  # match("/emails/features(/:id)",
+  #       to: "emails#features", via: [:get, :post], id: /\d+/,
+  #       as: "emails_features")
   match("/emails/merge_request(/:id)",
         to: "emails#merge_request", via: [:get, :post], id: /\d+/,
         as: "emails_merge_request")
@@ -604,17 +596,27 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Observations: standard actions  ----------------------------
+  namespace :observations do
+    resources :downloads, only: [:new, :create]
+  end
+
   resources :observations do
+    resources :namings, only: [:new, :create, :edit, :update, :destroy],
+                        shallow: true, controller: "observations/namings" do
+      resources :votes, only: [:update, :show], as: "naming_vote",
+                        param: :naming_id,
+                        controller: "observations/namings/votes"
+    end
+
     member do
-      get("map")
-      get("suggestions")
+      get("map", to: "observations/maps#show")
+      get("suggestions", to: "observations/namings/suggestions#show",
+                         as: "naming_suggestions_for")
     end
     collection do
-      get("map")
-      get("download")
-      post("download")
-      get("print_labels")
-      post("print_labels")
+      get("map", to: "observations/maps#index")
+      get("print_labels", to: "observations/downloads#print_labels",
+                          as: "print_labels_for")
     end
   end
 
