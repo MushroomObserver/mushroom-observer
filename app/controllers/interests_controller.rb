@@ -24,22 +24,26 @@ class InterestsController < ApplicationController
 
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
-  # Inputs: params[:page]
-  # Outputs: @targets, @target_pages
+  # Inputs: params[:page], params[:type]
+  # Outputs: @interests, @types, @pages, @selected_type
   def index
     store_location
+    @container = :wide
     @title = :list_interests_title.t
     @interests = find_relevant_interests
-
-    @pages = paginate_numbers(:page, 50)
-    @pages.num_total = @interests.length
-    @interests = @interests[@pages.from..@pages.to]
+    @types = interest_types(@interests)
+    @selected_type = params[:type].to_s
+    @interests = filter_interests_by_type(@interests, @selected_type) \
+      if @selected_type.present?
+    @pages = paginate_interests!
   end
 
   private
 
   def find_relevant_interests
-    Interest.for_user(@user).sort do |a, b|
+    interests = Interest.for_user(@user).includes(:target)
+    eager_load_targets(interests)
+    interests.sort do |a, b|
       result = a.target_type <=> b.target_type
       if result.zero?
         result = (a.target ? a.target.text_name : "") <=>
@@ -47,6 +51,33 @@ class InterestsController < ApplicationController
       end
       result
     end
+  end
+
+  def eager_load_targets(interests)
+    # Props to this blog for teaching how to eager-load polymorphic relations!
+    # https://thepaulo.medium.com/eager-loading-polymorphic-associations-in-ruby-on-rails-155a356c39d7
+    preloader = ActiveRecord::Associations::Preloader.new
+    %w[NameTracker Observation].each do |type|
+      preloader.preload(
+        interests.select { |i| i.target_type == type },
+        target: [:name]
+      )
+    end
+  end
+
+  def interest_types(interests)
+    interests.map(&:target_type).uniq.sort
+  end
+
+  def filter_interests_by_type(interests, type)
+    interests.select { |i| i.target_type.to_s == type.to_s }
+  end
+
+  def paginate_interests!
+    pages = paginate_numbers(:page, 100)
+    pages.num_total = @interests.length
+    @interests = @interests[pages.from..pages.to]
+    pages
   end
 
   public

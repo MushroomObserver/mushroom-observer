@@ -43,7 +43,7 @@ class TranslationControllerTest < FunctionalTestCase
   end
 
   def hashify(*args)
-    args.each_with_object({}) { |arg, h| h[arg] = true }
+    args.index_with { |_arg| true }
   end
 
   def assert_major_header(str, item)

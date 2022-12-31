@@ -22,7 +22,7 @@ class API2ControllerTest < FunctionalTestCase
     lines += api.errors.map do |error|
       "#{error}\n#{error.trace.join("\n")}"
     end
-    lines.reject(&:blank?).join("\n")
+    lines.compact_blank.join("\n")
   end
 
   def post_and_send_file(action, file, content_type, params)

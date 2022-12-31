@@ -687,9 +687,12 @@ class LocationController < ApplicationController
   end
 
   def email_admin_location_change
-    subject = "Nontrivial Location Change"
     content = email_location_change_content
-    WebmasterMailer.build(@user.email, content, subject).deliver_now
+    WebmasterMailer.build(
+      sender_email: @user.email,
+      subject: "Nontrivial Location Change",
+      content: content
+    ).deliver_now
     LocationControllerTest.report_email(content) if Rails.env.test?
   end
 

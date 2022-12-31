@@ -58,10 +58,7 @@ module ThumbnailHelper
 
     # return a link if the user has NOT voted this way
     link_to(vote_text,
-            { controller: :image,
-              action: :show_image,
-              id: image.id,
-              vote: vote },
+            show_image_path(id: image.id, vote: vote),
             title: image_vote_as_help_string(vote),
             data: { role: "image_vote", id: image.id, val: vote })
   end
@@ -72,10 +69,7 @@ module ThumbnailHelper
     return content_tag(:span, link_text) if link_text == state_text
 
     link_to(link_text,
-            { controller: :image,
-              action: :show_image,
-              id: image_id,
-              vote: 1 },
+            show_image_path(id: image_id, vote: 1),
             title: link_text,
             data: { role: "visual_group_status",
                     imgid: image_id,

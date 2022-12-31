@@ -155,7 +155,7 @@ class Naming < AbstractModel
   end
 
   # Send email notifications after creating or changing the Name.
-  def create_emails
+  def create_emails # rubocop:disable Metrics/AbcSize
     return unless @name_changed
 
     @name_changed = false
@@ -167,8 +167,7 @@ class Naming < AbstractModel
     taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
     done_user = {}
     taxa.each do |taxon|
-      NameTracker.where(obj_id: taxon.id).includes(:user).
-        find_each do |n|
+      NameTracker.where(name: taxon).includes(:user).find_each do |n|
         next unless (n.user_id != user.id) && !done_user[n.user_id] &&
                     (!n.require_specimen || observation.specimen)
         next if n.user.no_emails
@@ -304,9 +303,9 @@ class Naming < AbstractModel
     observation.change_vote(self, value, user)
   end
 
-  def update_name(new_name, user, reason, was_js_on)
+  def update_name(new_name, user, reasons, was_js_on)
     clean_votes(new_name, user)
-    create_reasons(reason, was_js_on)
+    create_reasons(reasons, was_js_on)
     update_object(new_name, changed?)
   end
 
@@ -350,7 +349,7 @@ class Naming < AbstractModel
   #     votes  = record[:votes]  # List of actual votes.
   #   end
   #
-  def calc_vote_table
+  def calc_vote_table # rubocop:disable Metrics/AbcSize
     # Initialize table.
     table = {}
     Vote.opinion_menu.each do |str, val|
@@ -478,9 +477,9 @@ class Naming < AbstractModel
     end
 
     # Initialize Reason.
-    def initialize(reasons, num)
-      @reasons = reasons
-      @num     = num
+    def initialize(reason_structure, num)
+      @reason_structure = reason_structure
+      @num              = num
     end
 
     # Get localization string for this reason.  For example:
@@ -502,22 +501,22 @@ class Naming < AbstractModel
 
     # Is this Reason being used by the parent Naming?
     def used?
-      @reasons.key?(@num)
+      @reason_structure.key?(@num)
     end
 
     # Get notes, or +nil+ if Reason not used.
     def notes
-      @reasons[@num]
+      @reason_structure[@num]
     end
 
     # Set notes, and mark this Reason as "used".
     def notes=(val)
-      @reasons[@num] = val.to_s
+      @reason_structure[@num] = val.to_s
     end
 
     # Mark this Reason as "unused".
     def delete
-      @reasons.delete(@num)
+      @reason_structure.delete(@num)
     end
   end
 

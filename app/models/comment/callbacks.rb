@@ -35,9 +35,9 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.oil_users)
 
     ::WebmasterMailer.build(
-      MO.noreply_email_address,
-      oil_and_water_content(user_ids),
-      oil_and_water_subject
+      sender_email: MO.noreply_email_address,
+      subject: oil_and_water_subject,
+      content: oil_and_water_content(user_ids)
     ).deliver_now
   end
 

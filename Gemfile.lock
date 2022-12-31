@@ -83,6 +83,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    childprocess (4.1.0)
     coffee-rails (5.0.0)
       coffee-script (>= 2.2.0)
       railties (>= 5.2.0)
@@ -94,6 +95,10 @@ GEM
     crack (0.4.5)
       rexml
     crass (1.0.6)
+    database_cleaner-active_record (2.0.1)
+      activerecord (>= 5.a)
+      database_cleaner-core (~> 2.0.0)
+    database_cleaner-core (2.0.1)
     date (3.2.2)
     debug (1.5.0)
       irb (>= 1.3.6)
@@ -199,7 +204,7 @@ GEM
       io-console (~> 0.5)
     rexml (3.2.5)
     rtf (0.3.3)
-    rubocop (1.40.0)
+    rubocop (1.41.1)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.2.1)
@@ -213,10 +218,10 @@ GEM
       parser (>= 3.1.1.0)
     rubocop-graphql (0.14.3)
       rubocop (>= 0.87, < 2)
-    rubocop-performance (1.14.0)
+    rubocop-performance (1.15.2)
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
-    rubocop-rails (2.17.3)
+    rubocop-rails (2.17.4)
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.33.0, < 2.0)
@@ -230,6 +235,11 @@ GEM
       sprockets (> 3.0)
       sprockets-rails
       tilt
+    selenium-webdriver (4.6.1)
+      childprocess (>= 0.5, < 5.0)
+      rexml (~> 3.2, >= 3.2.5)
+      rubyzip (>= 1.2.2, < 3.0)
+      websocket (~> 1.0)
     set (1.0.2)
     simplecov (0.21.2)
       docile (~> 1.1)
@@ -265,11 +275,16 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
+    webdrivers (5.2.0)
+      nokogiri (~> 1.6)
+      rubyzip (>= 1.3.0)
+      selenium-webdriver (~> 4.0)
     webmock (3.14.0)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.7.0)
+    websocket (1.2.9)
     xmlrpc (0.3.2)
       webrick
     xpath (3.2.0)
@@ -300,6 +315,7 @@ DEPENDENCIES
   bundler
   capybara (~> 3.37, >= 3.37.1)
   coffee-rails
+  database_cleaner-active_record
   date (>= 3.2.1)
   debug (>= 1.0.0)
   graphiql-rails!
@@ -335,6 +351,7 @@ DEPENDENCIES
   rubocop-rails
   rubyzip (~> 2.3.0)
   sassc-rails
+  selenium-webdriver
   simplecov
   simplecov-lcov
   sorted_set
@@ -342,6 +359,7 @@ DEPENDENCIES
   uglifier
   unicorn
   web-console
+  webdrivers
   webmock
   xmlrpc
 

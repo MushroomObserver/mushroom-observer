@@ -7,6 +7,10 @@ module Admin
       @donation = Donation.new
     end
 
+    def create
+      @donation = create_donation(params)
+    end
+
     # Review donations
     def edit
       @donations = Donation.all.order(created_at: :desc)
@@ -14,10 +18,6 @@ module Admin
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed
       end
-    end
-
-    def create
-      @donation = create_donation(params)
     end
 
     def update

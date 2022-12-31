@@ -8,9 +8,11 @@
   <%= :BY.t %> <%= user_link(@article.user) %>,
   <%= content_tag(:small, @article.created_at.fancy_time) %>
 </div>
+
 <div class="mt-3 panel panel-default">
   <div class="panel-body">
     <%= @article.body.tpl %>
   </div>
 </div>
+
 <%= show_object_footer(@article) %>

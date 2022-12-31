@@ -109,7 +109,7 @@ class EmailsController < ApplicationController
     elsif non_user_potential_spam?
       flash_error(:runtime_ask_webmaster_antispam.t)
     else
-      WebmasterMailer.build(@email, @content).deliver_now
+      WebmasterMailer.build(sender_email: @email, content: @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to("/")
     end
@@ -140,9 +140,11 @@ class EmailsController < ApplicationController
 
   def send_merge_request
     temporarily_set_locale(MO.default_locale) do
-      subject = "#{@model.name} Merge Request"
-      WebmasterMailer.build(@user.email, merge_request_content, subject).
-        deliver_now
+      WebmasterMailer.build(
+        sender_email: @user.email,
+        subject: "#{@model.name} Merge Request",
+        content: merge_request_content
+      ).deliver_now
     end
     flash_notice(:email_merge_request_success.t)
     redirect_to(@old_obj.show_link_args)
@@ -164,10 +166,11 @@ class EmailsController < ApplicationController
 
   def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
     temporarily_set_locale(MO.default_locale) do
-      subject = "Request to change Name having dependents"
-      content = change_request_content(name_with_icn_id, new_name_with_icn_id)
-      WebmasterMailer.build(@user.email, content, subject).
-        deliver_now
+      WebmasterMailer.build(
+        sender_email: @user.email,
+        content: change_request_content(name_with_icn_id, new_name_with_icn_id),
+        subject: "Request to change Name having dependents"
+      ).deliver_now
     end
     flash_notice(:email_change_name_request_success.t)
     redirect_to(@name.show_link_args)

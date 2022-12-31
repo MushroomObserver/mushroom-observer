@@ -173,9 +173,11 @@ gem("simplecov-lcov", require: false)
 # See http://brakemanscanner.org/
 gem("brakeman", require: false)
 
-# Use rubocop and associated gems for code quality control
-# When updating rubocop, insure that .codeclimate.yml uses highest available
+# Use rubocop and extension gems for code quality control
+# extension list: https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
+# NOTE: If updating RuboCop, insure that .codeclimate.yml uses highest available
 # rubocop channel. See https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
+# NOTE: If updating RuboCop, update any extension used here
 gem("rubocop", require: false)
 gem("rubocop-performance")
 gem("rubocop-rails")
@@ -286,7 +288,14 @@ group :test do
   # Use capybara to simulate user-browser interaction
   gem("capybara", "~> 3.37", ">= 3.37.1")
 
-  # gem("selenium-webdriver")
+  # Use selenium to execute javascript in Capybara tests
+  gem("selenium-webdriver")
+  # keeps selenium drivers updated
+  gem("webdrivers")
+  # Selenium recommends Database Cleaner for cleaning db between tests.
+  # Maybe needed after JS db transactions, because they run in a separate thread
+  # from the test server. https://github.com/DatabaseCleaner/database_cleaner
+  gem("database_cleaner-active_record")
 
   # allows test results to be reported back to test runner IDE's
   gem("minitest")

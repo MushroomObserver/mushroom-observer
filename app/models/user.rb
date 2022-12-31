@@ -32,7 +32,7 @@
 #     is +nil+).
 #
 #  4. A verification email is sent to the email address given in the sign-up
-#     form.  Inside the email is a link to /account/verify/new.  This provides
+#     form.  Inside the email is a link to /account/verify.  This provides
 #     the User +id+ and +auth_code+.
 #
 #  5. When they click on that link, the User record is updated and the User is
@@ -572,7 +572,7 @@ class User < AbstractModel
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
                        order(created_at: :desc).limit(1).
-                       pluck(:herbarium_id).first
+                       pick(:herbarium_id)
         if herbarium_id.blank?
           personal_herbarium
         else
@@ -642,7 +642,7 @@ class User < AbstractModel
       begin
         i = Interest.where(
           user_id: id, target_type: object.class.name, target_id: object.id
-        ).pluck(:state).first
+        ).pick(:state)
         case i
         when true
           :watching
@@ -733,7 +733,7 @@ class User < AbstractModel
 
   def self.parse_notes_template(str)
     str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
-      split(",").map(&:squish).reject(&:blank?)
+      split(",").map(&:squish).compact_blank
   end
 
   ##############################################################################

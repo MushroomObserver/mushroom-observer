@@ -8,14 +8,14 @@
 #  id::               Locally unique numerical id, starting at 1
 #  updated_at::       Date/time it was last updated
 #  user::             User who created it
-#  obj_id::           Id of principal object
+#  name_id::          Id of name we're tracking.
 #  note_template::    Template for an email
 #  require_specimen:: Require observation to have a specimen?
 #
 #  == Instance methods
 #
 #  calc_note::         Create body of the email we're about to send.
-#  target::            Return principle object involved.
+#  name::              Return the name we're tracking.
 #  summary::           String summarizing what this Name Tracker is about
 #  link_params::       Hash of link_to options for edit action
 #  text_name::         Alias for +summary+ for debugging
@@ -26,9 +26,13 @@
 #
 class NameTracker < AbstractModel
   belongs_to :user
+  belongs_to :name
 
   scope :for_user,
         ->(user) { where(user: user) }
+
+  # Used as an "opt-in" check-box in the UI form.
+  attr_accessor :note_template_enabled
 
   # Create body of the email we're about to send.
   #
@@ -53,17 +57,9 @@ class NameTracker < AbstractModel
       gsub(":name", naming.format_name)
   end
 
-  # Return principal target involved.
-  #
-  # name::   Name that User is tracking.
-  #
-  def target
-    @target ||= Name.find(obj_id)
-  end
-
   # Return a string summarizing what this NameTracker is about.
   def summary
-    "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
+    "#{:TRACKING.l} #{:name.l}: #{name ? name.display_name : "?"}"
   end
   alias text_name summary
   alias unique_text_name summary
@@ -76,7 +72,7 @@ class NameTracker < AbstractModel
     result = {}
     result[:controller] = :name
     result[:action] = :email_tracking
-    result[:id] = obj_id
+    result[:id] = name_id
     result
   end
 

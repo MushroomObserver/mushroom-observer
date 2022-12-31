@@ -201,7 +201,6 @@ module ObservationsController::Index
   end
 
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/AbcSize
   def define_index_links(query)
     @links ||= []
@@ -221,10 +220,7 @@ module ObservationsController::Index
 
     @links << [
       :show_object.t(type: :map),
-      add_query_param(
-        { controller: :observations, action: :map },
-        query
-      )
+      map_observations_path(q: get_query_param(query))
     ]
 
     @links << coerced_query_link(query, Location)
@@ -241,14 +237,10 @@ module ObservationsController::Index
 
     @links << [
       :list_observations_download_as_csv.t,
-      add_query_param(
-        { controller: :observations, action: :download },
-        query
-      )
+      add_query_param(new_observations_download_path, query)
     ]
     @links
   end
-  # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/AbcSize
 
   def define_index_args(query, args)
