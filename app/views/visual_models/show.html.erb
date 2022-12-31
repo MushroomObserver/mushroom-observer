@@ -7,7 +7,7 @@
 <p>
   <%= :MEMBERS.t %>
   <ul>
-    <% @visual_model.visual_groups.each do |group|
+    <% @visual_model.visual_groups.order(:name).each do |group|
        link = link_to(group.name.t,
                       controller: :visual_groups,
                       action: :show, id: group.id) %>
