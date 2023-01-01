@@ -69,30 +69,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  # image: {
-  #   add_image: {},
-  #   advanced_search: {},
-  #   bulk_filename_purge: {},
-  #   bulk_vote_anonymity_updater: {},
-  #   cast_vote: {},
-  #   destroy_image: {},
-  #   edit_image: {},
-  #   image_search: {},
-  #   images_by_user: {},
-  #   images_for_project: {},
-  #   index_image: {},
-  #   license_updater: {},
-  #   list_images: {},
-  #   next_image: {},
-  #   prev_image: {},
-  #   remove_images: {},
-  #   remove_images_for_glossary_term: {},
-  #   reuse_image: {},
-  #   reuse_image_for_glossary_term: {},
-  #   # show_image: {},
-  #   show_original: {},
-  #   transform_image: {}
-  # },
   location: {
     add_to_location: {},
     adjust_permissions: {},
@@ -797,6 +773,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+
+  # ----- Images: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "image", new_controller: "images",
+    actions: [:index, :show]
+  )
 
   # ----- Interests: legacy action redirects
   redirect_legacy_actions(
