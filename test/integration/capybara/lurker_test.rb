@@ -29,7 +29,7 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Click on the first image.
     go_back_after do
-      first("#content .show_images img").sibling("a.stretched-link").click
+      first("#content .show_images img").sibling("a.image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation
