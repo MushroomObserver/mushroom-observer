@@ -69,7 +69,7 @@ class ProjectController < ApplicationController
   # Display list of Project's whose title or notes match a string pattern.
   def project_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
+    if pattern.match?(/^\d+$/) &&
        (project = Project.safe_find(pattern))
       redirect_to(action: "show_project", id: project.id)
     else

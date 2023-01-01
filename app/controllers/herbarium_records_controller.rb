@@ -123,7 +123,7 @@ class HerbariumRecordsController < ApplicationController
   # Display list of HerbariumRecords whose text matches a string pattern.
   def herbarium_record_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
+    if pattern.match?(/^\d+$/) &&
        (herbarium_record = HerbariumRecord.safe_find(pattern))
       redirect_to(herbarium_record_path(herbarium_record.id))
     else
