@@ -33,6 +33,7 @@ class ImagesTest < CapybaraIntegrationTestCase
     assert_selector("input[value*='#{:DESTROY.t}']", minimum: 1)
     visit(edit_image_path(img.id))
     assert_selector("body.images__edit")
+    visit(image_path(img.id))
     click_button(:destroy_object.t(type: :image))
     assert_flash_success
   end

@@ -2,8 +2,7 @@
   @title = :image_edit_title.t(name: @image.unique_format_name)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :image), @image.show_link_args),
-    destroy_button(name: :destroy_object.t(type: :image), target: @image)
+    link_with_query(:cancel_and_show.t(type: :image), @image.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
