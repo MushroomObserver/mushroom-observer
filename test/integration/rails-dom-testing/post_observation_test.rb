@@ -44,7 +44,7 @@ class PostObservationTest < IntegrationTestCase
 
   def submit_observation_form_with_errors
     submit_form_with_changes(create_observation_form_first_changes,
-                             "#observation_form")
+                             /create/i, "#observation_form")
     assert_template(NEW_OBSERVATION_TEMPLATE)
     assert_has_location_warning(/Unknown country/)
     assert_form_has_correct_values(
@@ -55,7 +55,7 @@ class PostObservationTest < IntegrationTestCase
   def submit_observation_form_without_errors
     File.stub(:rename, false) do
       submit_form_with_changes(create_observation_form_second_changes,
-                               "#observation_form")
+                               /create/i, "#observation_form")
     end
     assert_flash_for_create_observation
     assert_template(CREATE_LOCATION_TEMPLATE)
@@ -65,7 +65,7 @@ class PostObservationTest < IntegrationTestCase
 
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes,
-                             "#observation_form")
+                             /create/i, "#location_form")
     assert_template(CREATE_LOCATION_TEMPLATE)
     assert_has_location_warning(/County may not be required/)
     assert_form_has_correct_values(
@@ -75,7 +75,7 @@ class PostObservationTest < IntegrationTestCase
 
   def submit_location_form_without_errors
     submit_form_with_changes(create_location_form_second_changes,
-                             "#observation_form")
+                             /create/i, "#location_form")
     assert_flash_for_create_location
     assert_template(SHOW_OBSERVATION_TEMPLATE)
     assert_new_location_is_correct(expected_values_after_location)
@@ -92,7 +92,7 @@ class PostObservationTest < IntegrationTestCase
 
   def submit_observation_form_with_changes
     submit_form_with_changes(edit_observation_form_changes,
-                             "#observation_form")
+                             /edit/i, "#observation_form")
     assert_flash_for_edit_observation
     assert_template(SHOW_OBSERVATION_TEMPLATE)
     assert_edit_observation_is_correct(expected_values_after_edit)
