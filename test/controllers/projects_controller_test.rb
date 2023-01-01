@@ -54,13 +54,13 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: p_id })
     assert_template("show")
     assert_select(
-      "a[href*=?, #{new_project_admin_request_path(project_id: p_id)}]"
+      "a[href*=?]", new_project_admin_request_path(project_id: p_id)
     )
-    assert_select("a[href*=?, #{edit_project_path(p_id)}]", count: 0)
+    assert_select("a[href*=?]", edit_project_path(p_id), count: 0)
     assert_select(
-      "a[href*=?,#{new_project_member_path(project_id: p_id)}]", count: 0
+      "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
-    assert_select("form[action=?, #{project_path(p_id)}]", count: 0)
+    assert_select("form[action=?]", project_path(p_id), count: 0)
   end
 
   def test_show_project_logged_in
@@ -68,11 +68,11 @@ class ProjectsControllerTest < FunctionalTestCase
     requires_login(:new)
     get(:show, params: { id: p_id })
     assert_template("show")
-    assert_select("a[href*=?,
-                  #{new_project_admin_request_path(project_id: p_id)}]")
-    assert_select("a[href*=?, #{edit_project_path(p_id)}]")
-    assert_select("a[href*=?, #{new_project_member_path(project_id: p_id)}]")
-    assert_select("form[action=?, #{project_path(p_id)}]")
+    assert_select("a[href*=?]",
+                  new_project_admin_request_path(project_id: p_id))
+    assert_select("a[href*=?]", edit_project_path(p_id))
+    assert_select("a[href*=?]", new_project_member_path(project_id: p_id))
+    assert_select("form[action=?]", project_path(p_id))
   end
 
   def test_list_projects
