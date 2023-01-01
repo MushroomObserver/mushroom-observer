@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class SpeciesListControllerTest < FunctionalTestCase
+class SpeciesListsControllerTest < FunctionalTestCase
   # Score for one new name.
   def v_nam
     10

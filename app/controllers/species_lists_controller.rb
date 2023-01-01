@@ -37,7 +37,7 @@
 #  for the one exception).  In the end all these Name's cause rudimentary
 #  Observation's to spring into existence.
 #
-class SpeciesListController < ApplicationController
+class SpeciesListsController < ApplicationController
   # require "rtf"
 
   before_action :login_required
