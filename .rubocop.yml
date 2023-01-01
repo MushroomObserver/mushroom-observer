@@ -266,15 +266,6 @@ Style/SymbolArray:
   # MO uses plain brackets. Ex: [:foo, :bar, :baz]
   EnforcedStyle: brackets
 
-Rails/ActionOrder:
-  ExpectedOrder:
-    - index
-    - show
-    - new
-    - create
-    - edit
-    - update
-    - destroy
 Rails/SkipsModelValidations:
   # We skip validations all the time.  I'm tired of disabling this cop.
   Enabled: false
