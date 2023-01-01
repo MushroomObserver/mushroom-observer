@@ -15,6 +15,8 @@ class EmailsController < ApplicationController
     @email = @user.email if @user
   end
 
+  # TODO: Refactor UserMailer.build to take kwargs, eliminating
+  #       local variable assignments.
   def ask_user_question # rubocop:disable Metrics/AbcSize
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
                   can_email_user_question?(@target) &&
