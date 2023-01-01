@@ -14,6 +14,8 @@ module ImageTabsHelper
     { pager_for: image, right: draw_tab_set(tabs) }
   end
 
+  private
+
   def show_image_obs_links(image)
     return unless image.observations.length == 1
 
