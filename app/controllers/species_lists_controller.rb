@@ -38,24 +38,7 @@
 #  Observation's to spring into existence.
 #
 class SpeciesListsController < ApplicationController
-  # require "rtf"
-
   before_action :login_required
-  # except: [
-  #   :download,
-  #   :index_species_list,
-  #   :list_species_lists,
-  #   :make_report,
-  #   :name_lister,
-  #   :next_species_list,
-  #   :prev_species_list,
-  #   :print_labels,
-  #   :show_species_list,
-  #   :species_list_search,
-  #   :species_lists_by_title,
-  #   :species_lists_by_user,
-  #   :species_lists_for_project
-  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_species_list,
@@ -82,6 +65,24 @@ class SpeciesListsController < ApplicationController
   #
   ##############################################################################
 
+  def index # rubocop:disable Metrics/AbcSize
+    if params[:advanced_search].present?
+      advanced_search
+    elsif params[:pattern].present?
+      species_list_search
+    elsif params[:by_user].present?
+      species_lists_by_user
+    elsif params[:for_project].present?
+      species_lists_for_project
+    elsif params[:by] == "title"
+      species_lists_by_title
+    elsif params[:by].present?
+      index_species_list
+    else
+      list_species_lists
+    end
+  end
+
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
   def index_species_list
@@ -98,7 +99,7 @@ class SpeciesListsController < ApplicationController
 
   # Display list of user's species_lists, sorted by date.
   def species_lists_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = params[:id] ? find_or_goto_index(User, params[:by_user].to_s) : @user
     return unless user
 
     query = create_query(:SpeciesList, :by_user, user: user)
@@ -107,7 +108,7 @@ class SpeciesListsController < ApplicationController
 
   # Display list of SpeciesList's attached to a given project.
   def species_lists_for_project
-    project = find_or_goto_index(Project, params[:id].to_s)
+    project = find_or_goto_index(Project, params[:for_project].to_s)
     return unless project
 
     query = create_query(:SpeciesList, :for_project, project: project)
@@ -137,7 +138,7 @@ class SpeciesListsController < ApplicationController
   def show_selected_species_lists(query, args = {})
     @links ||= []
     args = {
-      action: :list_species_lists,
+      action: :index,
       num_per_page: 20,
       include: [:location, :user],
       letters: "species_lists.title"
@@ -172,15 +173,23 @@ class SpeciesListsController < ApplicationController
   #
   ##############################################################################
 
-  def show_species_list
+  # def show_species_list
+  def show
     store_location
     clear_query_in_session
     pass_query_params
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, SpeciesList, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, SpeciesList, params[:id]) and return
+    end
+
     @canonical_url =
-      "#{MO.http_domain}/species_list/show_species_list/#{@species_list.id}"
+      "#{MO.http_domain}/species_lists/#{@species_list.id}"
     @query = create_query(:Observation, :in_species_list,
                           by: :name, species_list: @species_list)
     store_query_in_session(@query) if params[:set_source].present?
@@ -188,14 +197,6 @@ class SpeciesListsController < ApplicationController
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])
-  end
-
-  def next_species_list
-    redirect_to_next_object(:next, SpeciesList, params[:id].to_s)
-  end
-
-  def prev_species_list
-    redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
   ##############################################################################

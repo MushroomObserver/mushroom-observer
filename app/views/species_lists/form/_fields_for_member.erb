@@ -1,0 +1,52 @@
+<%= fields_for(:member) do |f_m| %>
+
+  <div class="form-group form-inline mt-3">
+    <%= f_m.label(:value, :form_species_lists_confidence.t + ":") %>
+    <%= f_m.select(:value, Vote.confidence_menu, class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f_m.label(:notes, :form_species_lists_member_notes.t + ":") %>
+      (<%= :general_textile_link.t %>)
+    <% @species_list.form_notes_parts(@user).each do |part| %>
+      <div><%= "#{strip_tags(part.tl)}: "%></div>
+      <div>
+        <textarea class="form-control" rows="1"
+        id=<%= @species_list.notes_part_id(part) %>
+        name=<%= @species_list.notes_part_name(part) %>
+        ><%= @member_notes[part.to_sym] %></textarea>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="form-group form-inline mt-3">
+    <%= f_m.label(:lat, :LATITUDE.t + ":") %>&nbsp;<%=
+      f_m.text_field(:lat, size: 8, value: @member_lat,
+                     class: "form-control") %>
+    <%= f_m.label(:long, :LONGITUDE.t + ":") %>&nbsp;<%=
+      f_m.text_field(:long, size: 8, value: @member_long,
+                     class: "form-control") %>
+    <%= f_m.label(:alt, :ALTITUDE.t + ":") %>&nbsp;<%=
+      f_m.text_field(:alt, size: 6, value: @member_alt,
+                     class: "form-control") %>
+    <br/>
+    <span class="help-note"><%= :form_observations_lat_long_help.t %></span>
+  </div>
+
+  <div class="form-group form-inline mt-3">
+    <%= f_m.check_box(:is_collection_location,
+                      checked: @member_is_collection_location) %>
+    <%= f_m.label(:member_is_collection_location,
+                  :form_observations_is_collection_location.t) %>
+    <br/>
+    <span class="help-note"><%= :form_observations_is_collection_location_help.t %></span>
+  </div>
+
+  <div class="form-group form-inline mt-3">
+    <%= f_m.check_box(:specimen, checked: @member_specimen) %>
+    <%= f_m.label(:specimen, :form_observations_specimen_available.t) %>
+    <br/>
+    <span class="help-note"><%= :form_observations_specimen_available_help.t %></span>
+  </div>
+
+<% end %>

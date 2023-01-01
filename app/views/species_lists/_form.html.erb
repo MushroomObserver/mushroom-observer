@@ -1,0 +1,82 @@
+<%= form_with(model: @species_list, approved_where: @place_name) do |f| %>
+
+  <%= hidden_field_tag(:approved_where, @place_name) %>
+
+  <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>
+
+  <% partial = render(partial: "shared/form_list_feedback")
+  if !partial.blank? %>
+    <div class="container-text">
+      <%= partial %>
+    </div>
+  <% end %>
+
+  <% if @checklist&.any? %>
+    <%= render(partial: "species_lists/form/fields_for_checklist") %>
+  <% end %>
+
+  <div class="container-text">
+    <%= if !@new_names.blank?
+      hidden_field_tag(:approved_names, @new_names.join("\n"))
+    end %>
+
+    <%= if !@deprecated_names.blank?
+      hidden_field_tag(:approved_deprecated_names,
+                     @deprecated_names.map(&:id).join(" "))
+    end %>
+
+    <div class="form-group mt-3">
+      <%= fields_for(:list) do |f_l| %>
+        <%= f_l.label(:members, :form_species_lists_write_in_species.t) %>
+        <%= f_l.text_area(:members, value: @list_members, rows: 8,
+                          class: "form-control") %>
+        <% turn_into_name_auto_completer(:list_members, primer: Name.primer, token: "\n") %>
+      <% end %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label(:title, :form_species_lists_title.t + ":") %> (<%= :required.t %>)
+      <%= f.text_field(:title, class: "form-control") %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label(:notes,
+                  :form_species_lists_list_notes.t + ":") %>
+      <%= f.text_area(:notes, rows: 12, class: "form-control") %>
+      <%= render(partial: "shared/textilize_help") %>
+    </div>
+  </div>
+
+  <div class="container-text">
+    <div class="form-group form-inline">
+      <%= f.label(:when, :WHEN.t + ":") %>
+      <%= date_select(:species_list, :when, date_select_opts(@species_list),
+                      {class: "form-control"}) %>
+      <% turn_into_year_auto_completer(:species_list_when_1i) %>
+    </div>
+
+    <% if @dubious_where_reasons && @dubious_where_reasons.any? %>
+      <div class="alert alert-warning">
+        <%= @dubious_where_reasons.safe_join(safe_br) %><br/>
+        <span class="help-note">
+          <%= :form_observations_dubious_help.t(button: button) %>
+        </span>
+      </div>
+    <% end %>
+
+    <div class="form-group mt-3">
+      <%= f.label(:place_name, :WHERE.t + ":") %> (<%= :required.t %>)
+      <%= f.text_field(:place_name, class: "form-control") %>
+      <% turn_into_location_auto_completer(:species_list_place_name) %>
+    </div>
+
+    <%= render(partial: "species_lists/form/fields_for_member") %>
+
+    <% if @projects.any? %>
+      <%= render(partial: "species_lists/form/fields_for_project") %>
+    <% end %>
+  </div>
+
+  <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+
+<% end %>

@@ -8,14 +8,14 @@
   if @user
     tabs += [
       link_with_query(:species_list_show_set_source.t,
-                      { action: "show_species_list", id: @species_list.id,
+                      { action: :show, id: @species_list.id,
                         set_source: 1 },
                       { help: :species_list_show_set_source_help.l }),
       link_with_query(:species_list_show_clone_list.t,
-                      { action: :create_species_list,
+                      { action: :new,
                         clone: @species_list.id }),
       link_to(:species_list_show_add_remove_from_another_list.t,
-              add_query_param({ controller: "species_list",
+              add_query_param({ controller: "/species_lists/observations",
                                 action: "add_remove_observations" },
                               @query))
     ]
@@ -23,16 +23,15 @@
   if check_permission(@species_list)
     tabs += [
       link_with_query(:species_list_show_manage_projects.t,
-                      { action: :manage_projects, id: @species_list.id },
+                      { controller: "/species_lists/projects",
+                        action: :manage_projects, id: @species_list.id },
                       { help: :species_list_show_manage_projects_help.l }),
       link_with_query(:species_list_show_edit.t,
-                      { action: :edit_species_list, id: @species_list.id }),
+                      { action: :edit, id: @species_list.id }),
       link_with_query(:species_list_show_clear_list.t,
                       { action: :clear_species_list, id: @species_list.id },
                       { class: "text-danger", data: { confirm: :are_you_sure.l } }),
-      link_with_query(:species_list_show_destroy.t,
-                      { action: :destroy_species_list, id: @species_list.id },
-                      { class: "text-danger", data: { confirm: :are_you_sure.l } })
+      destroy_button(name: :species_list_show_destroy.t, target: @species_list)
     ]
   end
   tabs << draw_interest_icons(@species_list) if @user
