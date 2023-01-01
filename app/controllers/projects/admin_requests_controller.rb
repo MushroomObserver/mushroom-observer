@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
+# Manage requests to be a project admin
 module Projects
-  # request to be a project admin
   class AdminRequestsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params

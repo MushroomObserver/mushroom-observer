@@ -10,24 +10,20 @@
 #   P = prefetching allowed
 #
 #  ==== Index
+#  index::
+#  (private methods)
 #  list_projects::
 #  project_search::
 #  index_project::
 #  show_selected_projects::  (helper)
 #
 #  ==== Show, Create, Edit
-#  show_project::
-#  next_project::
-#  prev_project::
-#  add_project::
-#  edit_project::
-#  destroy_project::
-#
-#  ==== Manage
-#  admin_request::
-#  add_members::
-#  change_member_status::
-#  set_status::              (helper)
+#  show::
+#  new::
+#  edit::
+#  create::
+#  update
+#  destroy::
 #
 ################################################################################
 

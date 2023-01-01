@@ -1,3 +1,11 @@
+# frozen_string_literal: true
+
+#  ==== Manage Project Memberss
+#  new::
+#  create:: (add member)
+#  edit::
+#  update:: (change_member_status)
+
 module Projects
   # CRUD for project members
   class MembersController < ApplicationController
