@@ -116,7 +116,7 @@ class ImagesController < ApplicationController
   # Display matrix of images whose notes, names, etc. match a string pattern.
   def image_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
+    if pattern.match?(/^\d+$/) &&
        (image = Image.safe_find(pattern))
       redirect_to(action: "show", id: image.id)
     else
