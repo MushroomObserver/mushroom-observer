@@ -14,7 +14,7 @@ module Projects
         }
       }
       post_requires_login(:create, params)
-      assert_template("projects/show")
+      assert_redirected_to(project_path(eol_project.id))
       assert_flash_text(:admin_request_success.t(title: eol_project.title))
     end
 

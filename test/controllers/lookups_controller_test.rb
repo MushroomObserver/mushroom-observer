@@ -140,7 +140,7 @@ class LookupsControllerTest < FunctionalTestCase
     assert_flash_error
     get(:lookup_project, params: { id: "project" })
     # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{/project/index_project})
+    assert_redirected_to(%r{/projects})
     assert_flash_warning
   end
 

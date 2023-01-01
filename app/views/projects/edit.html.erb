@@ -10,8 +10,7 @@
   end
   @tabsets = { right: draw_tab_set(tabs) }
 
-  action = edit_project_path(@project.id, q: get_query_param)
   button = :SAVE_EDITS.l
 %>
 
-<%= render(partial: "form", locals: { action: action, button: button }) %>
+<%= render(partial: "form", locals: { button: button }) %>

@@ -447,7 +447,7 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Image, "/image/show_image")
     assert_show_url(Location, "/location/show_location")
     assert_show_url(Name, "/name/show_name")
-    assert_show_url(Naming, "/observations/namings")
+    # assert_show_url(Naming, "/observations/show_naming") # there is no show
     assert_show_url(Observation, "/observations")
     assert_show_url(Project, "/projects")
     assert_show_url(Sequence, "/sequences")

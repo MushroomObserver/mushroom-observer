@@ -1,6 +1,7 @@
 module Projects
   # CRUD for project members
   class MembersController < ApplicationController
+    before_action :login_required
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
@@ -94,14 +95,12 @@ module Projects
       end
       set_status(project, :admin, candidate, admin)
       set_status(project, :member, candidate, member)
-      render("projects/show",
-             location: project_path(project.id, q: get_query_param))
+      redirect_to(project_path(project.id, q: get_query_param))
     end
 
     def must_be_project_admin!(id)
       flash_error(:change_member_status_denied.t)
-      render("projects/show",
-             location: project_path(id, q: get_query_param))
+      redirect_to(project_path(id, q: get_query_param))
     end
 
     # Add/remove a given User to/from a given UserGroup.

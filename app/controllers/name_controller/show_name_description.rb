@@ -42,8 +42,7 @@ module NameController::ShowNameDescription
 
   def redirect_to_name_or_project
     if @description.project
-      redirect_to(controller: "project",
-                  action: "show_project",
+      redirect_to(controller: "/projects", action: :show,
                   id: @description.project_id)
     else
       redirect_to(action: "show_name", id: @description.name_id)

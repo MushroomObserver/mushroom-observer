@@ -19,7 +19,7 @@ module Projects
       }
 
       put_requires_login(:update, params, changer.login)
-      assert_template("projects/show")
+      assert_redirected_to(project_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(admin_after,
                    target_user.in_group?(eol_project.admin_group.name))
@@ -133,7 +133,7 @@ module Projects
     def test_add_members_non_admin
       project_id = projects(:eol_project).id
       requires_login(:new, { project_id: project_id }, katrina.login)
-      assert_template("projects/show")
+      assert_redirected_to(project_path(project_id))
     end
 
     # Make sure admin can add members.
@@ -164,7 +164,7 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, katrina.login)
-      assert_template("projects/show")
+      assert_redirected_to(project_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(false, target_user.in_group?(eol_project.user_group.name))

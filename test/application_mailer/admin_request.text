@@ -13,7 +13,7 @@ and this is why...
 
 Here are some handy links:
 
-Change user's status: https://mushroomobserver.org/project/change_member_status/<%= ActiveRecord::FixtureSet.identify(:eol_project) %>?candidate=<%= ActiveRecord::FixtureSet.identify(:katrina) %>
+Change user's status: https://mushroomobserver.org/projects/<%= ActiveRecord::FixtureSet.identify(:eol_project) %>/members/<%= ActiveRecord::FixtureSet.identify(:katrina) %>/edit
 Show user's profile: https://mushroomobserver.org/users/<%= ActiveRecord::FixtureSet.identify(:katrina) %>
 Latest changes at Mushroom Observer: https://mushroomobserver.org
 

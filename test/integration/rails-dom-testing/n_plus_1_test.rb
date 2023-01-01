@@ -23,7 +23,7 @@ class NPlusOneTest < IntegrationTestCase
     get("/image/list_images")
     get("/observations")
     get("/activity_logs")
-    get("/project/list_projects")
+    get("/projects")
     get("/publications")
     get("/sequences?flavor=all")
     get("/species_list/list_species_lists")

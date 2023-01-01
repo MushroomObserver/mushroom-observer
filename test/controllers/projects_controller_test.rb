@@ -23,7 +23,7 @@ class ProjectsControllerTest < FunctionalTestCase
         summary: project.summary
       }
     }
-    put_requires_user(:update, :show, params)
+    put_requires_user(:update, { action: :show }, params)
     assert_form_action(action: :update, id: project.id) # Failure
   end
 
@@ -32,8 +32,8 @@ class ProjectsControllerTest < FunctionalTestCase
     drafts = NameDescription.where(source_name: project.title)
     assert_not(drafts.empty?)
     params = { id: project.id.to_s }
-    requires_user(:destroy, :show, params, changer.login)
-    assert_template("projects/show")
+    requires_user(:destroy, { action: :show }, params, changer.login)
+    assert_redirected_to(project_path(project.id))
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
@@ -103,7 +103,7 @@ class ProjectsControllerTest < FunctionalTestCase
     }
     post_requires_login(:create, params)
     project = Project.find_by(title: title)
-    assert_template("projects/show")
+    assert_redirected_to(project_path(project.id))
     assert(project)
     assert_equal(title, project.title)
     assert_equal(summary, project.summary)
@@ -127,7 +127,7 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_edit_project
     project = projects(:eol_project)
     params = { id: project.id.to_s }
-    requires_user(:edit, :show, params)
+    requires_user(:edit, { action: :show }, params)
     assert_form_action(action: :update, id: project.id.to_s)
   end
 
@@ -144,9 +144,9 @@ class ProjectsControllerTest < FunctionalTestCase
         summary: summary
       }
     }
-    put_requires_user(:edit, :show, params)
+    put_requires_user(:update, { action: :show }, params)
     project = Project.find_by(title: title)
-    assert_template("projects/show")
+    assert_redirected_to(project_path(project.id))
     assert(project)
     assert_equal(summary, project.summary)
   end
@@ -171,8 +171,8 @@ class ProjectsControllerTest < FunctionalTestCase
     project_draft_count = drafts.length
     assert(project_draft_count.positive?)
     params = { id: project.id.to_s }
-    requires_user(:destroy, :show, params, "dick")
-    assert_template("projects/index")
+    requires_user(:destroy, { action: :show }, params, "dick")
+    assert_redirected_to(projects_path)
     assert_raises(ActiveRecord::RecordNotFound) do
       project = Project.find(project.id)
     end

@@ -1,6 +1,7 @@
 module Projects
   # request to be a project admin
   class AdminRequestsController < ApplicationController
+    before_action :login_required
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
@@ -27,8 +28,7 @@ module Projects
                           subject, content).deliver_now
       end
       flash_notice(:admin_request_success.t(title: @project.title))
-      render("projects/show",
-             location: project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id, q: get_query_param))
     end
 
     private

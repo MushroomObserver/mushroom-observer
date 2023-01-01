@@ -81,7 +81,7 @@ class ProjectsController < ApplicationController
   # Show selected list of projects.
   def show_selected_projects(query, args = {})
     args = {
-      action: :list_projects,
+      action: :index,
       letters: "projects.title",
       num_per_page: 50,
       include: :user
@@ -171,8 +171,9 @@ class ProjectsController < ApplicationController
     elsif admin_group
       flash_error(:add_project_group_exists.t(group: admin_name))
     else
-      create_project(title, admin_name)
+      return create_project(title, admin_name)
     end
+    render(:new, location: new_project_path(q: get_query_param))
   end
 
   # Form to edit a project
@@ -192,10 +193,16 @@ class ProjectsController < ApplicationController
 
     return if check_permission!(@project)
 
-    render(:show, location: project_path(@project.id, q: get_query_param))
+    redirect_to(project_path(@project.id, q: get_query_param))
   end
 
   def update # rubocop:disable Metrics/AbcSize
+    return unless find_project!
+
+    unless check_permission!(@project)
+      return redirect_to(project_path(@project.id, q: get_query_param))
+    end
+
     @title = params[:project][:title].to_s
     @summary = params[:project][:summary]
     if @title.blank?
@@ -208,8 +215,9 @@ class ProjectsController < ApplicationController
     else
       @project.log_update
       flash_notice(:runtime_edit_project_success.t(id: @project.id))
-      render(:show, location: project_path(@project.id, q: get_query_param))
+      return redirect_to(project_path(@project.id, q: get_query_param))
     end
+    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
   end
 
   ##############################################################################
@@ -224,14 +232,14 @@ class ProjectsController < ApplicationController
     return unless find_project!
 
     if !check_permission!(@project)
-      render(:show, location: project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id, q: get_query_param))
     elsif !@project.destroy
       flash_error(:destroy_project_failed.t)
-      render(:show, location: project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id, q: get_query_param))
     else
       @project.log_destroy
       flash_notice(:destroy_project_success.t)
-      render(:index, location: projects_path(q: get_query_param))
+      redirect_to(projects_path(q: get_query_param))
     end
   end
 
@@ -271,7 +279,7 @@ class ProjectsController < ApplicationController
     else
       @project.log_create
       flash_notice(:add_project_success.t)
-      redirect_with_query(action: :show, id: @project.id)
+      redirect_to(project_path(@project.id, q: get_query_param))
     end
   end
 end
