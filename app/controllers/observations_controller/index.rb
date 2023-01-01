@@ -230,7 +230,8 @@ module ObservationsController::Index
     @links << [
       :list_observations_add_to_list.t,
       add_query_param(
-        { controller: :species_list, action: :add_remove_observations },
+        { controller: "/species_lists/observations",
+          action: :add_remove_observations },
         query
       )
     ]

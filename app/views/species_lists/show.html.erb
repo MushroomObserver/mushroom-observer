@@ -3,7 +3,8 @@
 
   tabs = [
     link_with_query(:species_list_show_download.t,
-                    { action: "download", id: @species_list.id })
+                    { controller: "/species_lists/downloads",
+                      action: "new", id: @species_list.id })
   ]
   if @user
     tabs += [
