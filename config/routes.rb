@@ -623,6 +623,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  resources :projects do
+    resources :members, only: [:new, :create, :edit, :update],
+                        controller: "projects/members", param: :candidate
+    resources :admin_requests, only: [:new, :create],
+                               controller: "projects/admin_requests"
+  end
+
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
 

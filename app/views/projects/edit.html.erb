@@ -1,0 +1,17 @@
+<%
+  @title ||= :edit_project_title.t(title: @project.title)
+
+  tabs = [
+    link_to(:app_list_projects.t, projects_path),
+    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+  ]
+  if check_permission(@project)
+    tabs << destroy_button(name: :show_project_destroy.t, target: @project)
+  end
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  action = edit_project_path(@project.id, q: get_query_param)
+  button = :SAVE_EDITS.l
+%>
+
+<%= render(partial: "form", locals: { action: action, button: button }) %>

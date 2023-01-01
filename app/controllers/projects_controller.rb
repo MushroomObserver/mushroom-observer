@@ -1,0 +1,277 @@
+# frozen_string_literal: true
+
+#
+#  = Project Controller
+#
+#  == Actions
+#   L = login required
+#   A = admin required
+#   V = has view
+#   P = prefetching allowed
+#
+#  ==== Index
+#  list_projects::
+#  project_search::
+#  index_project::
+#  show_selected_projects::  (helper)
+#
+#  ==== Show, Create, Edit
+#  show_project::
+#  next_project::
+#  prev_project::
+#  add_project::
+#  edit_project::
+#  destroy_project::
+#
+#  ==== Manage
+#  admin_request::
+#  add_members::
+#  change_member_status::
+#  set_status::              (helper)
+#
+################################################################################
+
+class ProjectsController < ApplicationController
+  before_action :login_required
+  before_action :pass_query_params, except: [:index]
+  before_action :disable_link_prefetching, except: [:edit, :show]
+
+  ##############################################################################
+  #
+  #  :section: Index
+  #
+  ##############################################################################
+
+  def index
+    if params[:pattern].present?
+      project_search
+    elsif params[:by].present?
+      index_project
+    else
+      list_projects
+    end
+  end
+
+  private
+
+  # Show list of selected projects, based on current Query.
+  def index_project
+    query = find_or_create_query(:Project, by: params[:by])
+    show_selected_projects(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Show list of latest projects.  (Linked from left panel.)
+  def list_projects
+    query = create_query(:Project, :all, by: :title)
+    show_selected_projects(query)
+  end
+
+  # Display list of Project's whose title or notes match a string pattern.
+  def project_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) &&
+       (project = Project.safe_find(pattern))
+      redirect_to(action: "show_project", id: project.id)
+    else
+      query = create_query(:Project, :pattern_search, pattern: pattern)
+      show_selected_projects(query)
+    end
+  end
+
+  # Show selected list of projects.
+  def show_selected_projects(query, args = {})
+    args = {
+      action: :list_projects,
+      letters: "projects.title",
+      num_per_page: 50,
+      include: :user
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["name",        :sort_by_title.t],
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t]
+    ]
+
+    show_index_of_objects(query, args)
+  end
+
+  public
+
+  ##############################################################################
+  #
+  #  :section: Show, Create, Edit
+  #
+  ##############################################################################
+
+  # Display project by itself.
+  # Linked from: observations/show, list_projects
+  # Inputs: params[:id] (project)
+  # Outputs: @project
+  # def show_project
+  def show # rubocop:disable Metrics/AbcSize
+    store_location
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Project, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, Project, params[:id]) and return
+    end
+
+    @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
+    @is_member = @project.is_member?(@user)
+    @is_admin = @project.is_admin?(@user)
+    @drafts = NameDescription.joins(:admin_groups).
+              where("name_description_admins.user_group_id":
+                    @project.admin_group_id).
+              includes(:name, :user)
+  end
+
+  # Go to next project: redirects to show_project.
+  # def next_project
+
+  # Go to previous project: redirects to show_project.
+  # def prev_project
+
+  ##############################################################################
+
+  # Form to create a project.
+  # Linked from: list_projects
+  # Inputs:
+  #   params[:id] (project id)
+  #   params[:project][:title]
+  #   params[:project][:summary]
+  # Success:
+  #   Redirects to show_project.
+  # Failure:
+  #   Renders add_project again.
+  #   Outputs: @project
+  # def add_project
+  def new
+    @project = Project.new
+  end
+
+  def create
+    title = params[:project][:title].to_s
+    project = Project.find_by_title(title)
+    user_group = UserGroup.find_by_name(title)
+    admin_name = "#{title}.admin"
+    admin_group = UserGroup.find_by_name(admin_name)
+    if title.blank?
+      flash_error(:add_project_need_title.t)
+    elsif project
+      flash_error(:add_project_already_exists.t(title: project.title))
+    elsif user_group
+      flash_error(:add_project_group_exists.t(group: title))
+    elsif admin_group
+      flash_error(:add_project_group_exists.t(group: admin_name))
+    else
+      create_project(title, admin_name)
+    end
+  end
+
+  # Form to edit a project
+  # Linked from: show_project
+  # Inputs:
+  #   params[:id]
+  #   params[:project][:title]
+  #   params[:project][:summary]
+  # Success:
+  #   Redirects to show_project.
+  # Failure:
+  #   Renders edit_project again.
+  #   Outputs: @project
+  # def edit_project
+  def edit
+    return unless find_project!
+
+    return if check_permission!(@project)
+
+    render(:show, location: project_path(@project.id, q: get_query_param))
+  end
+
+  def update # rubocop:disable Metrics/AbcSize
+    @title = params[:project][:title].to_s
+    @summary = params[:project][:summary]
+    if @title.blank?
+      flash_error(:add_project_need_title.t)
+    elsif (project2 = Project.find_by_title(@title)) &&
+          (project2 != @project)
+      flash_error(:add_project_already_exists.t(title: @title))
+    elsif !@project.update(whitelisted_project_params)
+      flash_object_errors(@project)
+    else
+      @project.log_update
+      flash_notice(:runtime_edit_project_success.t(id: @project.id))
+      render(:show, location: project_path(@project.id, q: get_query_param))
+    end
+  end
+
+  ##############################################################################
+
+  # Callback to destroy a project.
+  # Linked from: show_project, observations/show
+  # Redirects to observations/show.
+  # Inputs: params[:id]
+  # Outputs: none
+  # def destroy_project
+  def destroy # rubocop:disable Metrics/AbcSize
+    return unless find_project!
+
+    if !check_permission!(@project)
+      render(:show, location: project_path(@project.id, q: get_query_param))
+    elsif !@project.destroy
+      flash_error(:destroy_project_failed.t)
+      render(:show, location: project_path(@project.id, q: get_query_param))
+    else
+      @project.log_destroy
+      flash_notice(:destroy_project_success.t)
+      render(:index, location: projects_path(q: get_query_param))
+    end
+  end
+
+  private
+
+  def whitelisted_project_params
+    params.require(:project).permit(:title, :summary)
+  end
+
+  def find_project!
+    @project = find_or_goto_index(Project, params[:id].to_s)
+  end
+
+  def create_project(title, admin_name) # rubocop:disable Metrics/AbcSize
+    # Create members group.
+    user_group = UserGroup.new
+    user_group.name = title
+    user_group.users << @user
+
+    # Create admin group.
+    admin_group = UserGroup.new
+    admin_group.name = admin_name
+    admin_group.users << @user
+
+    # Create project.
+    @project = Project.new(whitelisted_project_params)
+    @project.user = @user
+    @project.user_group = user_group
+    @project.admin_group = admin_group
+
+    if !user_group.save
+      flash_object_errors(user_group)
+    elsif !admin_group.save
+      flash_object_errors(admin_group)
+    elsif !@project.save
+      flash_object_errors(@project)
+    else
+      @project.log_create
+      flash_notice(:add_project_success.t)
+      redirect_with_query(action: :show_project, id: @project.id)
+    end
+  end
+end

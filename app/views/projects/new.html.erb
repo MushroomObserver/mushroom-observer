@@ -1,0 +1,13 @@
+<%
+  @title ||= :add_project_title.t
+
+  tabs = [
+    link_to(:app_list_projects.t, projects_path)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  action = projects_path(q: get_query_param)
+  button = :CREATE.l
+%>
+
+<%= render(partial: "form", locals: { action: action, button: button }) %>
