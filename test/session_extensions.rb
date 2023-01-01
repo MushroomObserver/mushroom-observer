@@ -225,7 +225,7 @@ module SessionExtensions
     end
   end
 
-  def submit_form_with_changes(changes, args = [])
+  def submit_form_with_changes(changes, button = nil, args = [])
     open_form(*args) do |form|
       changes.each do |key, value|
         if value == true
@@ -236,7 +236,7 @@ module SessionExtensions
           form.change(key, value)
         end
       end
-      form.submit
+      form.submit(button)
     end
   end
 
