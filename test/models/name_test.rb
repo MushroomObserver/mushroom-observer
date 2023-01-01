@@ -55,7 +55,7 @@ class NameTest < UnitTestCase
   end
 
   def assert_name_match_author_required(pattern, string, first_match = string)
-    assert_not(pattern.match(string),
+    assert_not(pattern.to_s.match?(string),
                "Expected #{string.inspect} not to match #{@pat}.")
     assert_name_match_various_authors(pattern, string, first_match)
   end
@@ -96,7 +96,7 @@ class NameTest < UnitTestCase
   end
 
   def assert_name_match(pattern, string, first, second = "")
-    match = pattern.match(string)
+    match = pattern.to_s.match?(string)
     assert(match, "Expected #{string.inspect} to match #{@pat}.")
     assert_equal(first, match[1].to_s,
                  "#{@pat} matched name part of #{string.inspect} wrong.")
