@@ -676,9 +676,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Name:
   get("/name/show_name/:id", to: "name#show_name",
                              as: "show_name")
-  # ----- Project:
-  get("/project/show_project/:id", to: "project#show_project",
-                                   as: "show_project")
   # ----- Species List:
   get("/species_list/show_species_list/:id",
       to: "species_list#show_species_list",

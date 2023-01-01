@@ -20,10 +20,8 @@
   elsif @project
     @title = :checklist_for_project_title.t(project: @project.title)
     tabs = [
-      link_to(:show_object.t(type: :project),
-              controller: :project, action: :show_project, id: @project.id),
-      link_to(:list_objects.t(type: :project),
-              controller: :project, action: :list_projects)
+      link_to(:show_object.t(type: :project), project_path(@project.id)),
+      link_to(:list_objects.t(type: :project), projects_path)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
     name_link[:project_id] = @project.id

@@ -71,7 +71,7 @@ class ProjectsController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (project = Project.safe_find(pattern))
-      redirect_to(action: "show_project", id: project.id)
+      redirect_to(action: :show, id: project.id)
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
@@ -271,7 +271,7 @@ class ProjectsController < ApplicationController
     else
       @project.log_create
       flash_notice(:add_project_success.t)
-      redirect_with_query(action: :show_project, id: @project.id)
+      redirect_with_query(action: :show, id: @project.id)
     end
   end
 end
