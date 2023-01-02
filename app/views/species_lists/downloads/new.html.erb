@@ -2,7 +2,7 @@
   @title = :species_list_download_title.t
 
   tabs = [
-    link_with_query(:species_list_download_back.t, action: :show)
+    link_with_query(:species_list_download_back.t, species_list_path(@list))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 

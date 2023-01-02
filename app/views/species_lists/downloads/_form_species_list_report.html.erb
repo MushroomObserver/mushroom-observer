@@ -1,25 +1,25 @@
 <%= form_with(url: { action: :create, id: @list.id, q: query_param },
               id: "species_list_download_report") do |f| %>
+
   <h3 class="margin-top:2em"><%= :species_list_report_header.t %>:</h3>
 
   <p><%= :download_observations_format.t %>:</p>
 
-  <%= # fields_for(:type) do |f_t| %>
-    <ul type="none">
-      <li>
-        <%= radio_button_tag(:type, :txt, @type == "txt") %>
-        <%= :species_list_show_save_as_txt.t %>
-      </li>
-      <li>
-        <%= radio_button_tag(:type, :rtf, @type == "rtf") %>
-        <%= :species_list_show_save_as_rtf.t %>
-      </li>
-      <li>
-        <%= radio_button_tag(:type, :csv, @type == "csv") %>
-        <%= :species_list_show_save_as_csv.t %>
-      </li>
-    </ul>
-  <% # end %>
+  <ul type="none">
+    <li>
+      <%= radio_button_tag(:type, :txt, @type == "txt") %>
+      <%= :species_list_show_save_as_txt.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:type, :rtf, @type == "rtf") %>
+      <%= :species_list_show_save_as_rtf.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:type, :csv, @type == "csv") %>
+      <%= :species_list_show_save_as_csv.t %>
+    </li>
+  </ul>
 
   <%= f.submit(:species_list_report_button.l, class: "btn btn-default") %>
+
 <% end %>

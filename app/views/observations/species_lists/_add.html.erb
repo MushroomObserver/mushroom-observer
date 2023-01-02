@@ -6,7 +6,7 @@ species_list_link = link_to(when_span + ": " + what_span,
                             species_list.show_link_args)
 
 add_link = put_button(name: :ADD.t,
-                      path: species_list_observation_path(
+                      path: observation_species_list_path(
                         observation_id: @observation.id, id: species_list.id,
                         commit: "add"
                       ))

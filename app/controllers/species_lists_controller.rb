@@ -198,7 +198,9 @@ class SpeciesListsController < ApplicationController
   # rubocop:enable Naming/MemoizedInstanceVariableName
 
   def create
+    @species_list = SpeciesList.new
     process_species_list(:create)
+    render(:new)
   end
 
   def edit
@@ -219,6 +221,7 @@ class SpeciesListsController < ApplicationController
 
     if check_permission!(@species_list)
       process_species_list(:update)
+      render(:edit)
     else
       redirect_to(action: :show, id: @species_list)
     end

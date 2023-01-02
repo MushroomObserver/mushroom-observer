@@ -13,8 +13,9 @@ module SpeciesLists
       params = {
         id: spl.id
       }
-      requires_user(:upload, :show, params)
-      assert_form_action(action: "process_upload", id: spl.id)
+      requires_user(:new,
+                    { controller: "/species_lists", action: :show }, params)
+      assert_form_action(action: :create, id: spl.id)
     end
 
     def test_read_species_list
@@ -33,7 +34,7 @@ module SpeciesLists
         }
       }
       login("rolf", "testpassword")
-      post(:process_upload, params: params)
+      post(:create, params: params)
       assert_edit_species_list
       assert_equal(10, rolf.reload.contribution)
       # Doesn't actually change list, just feeds it to edit_species_list
@@ -54,7 +55,7 @@ module SpeciesLists
         }
       }
       login("rolf", "testpassword")
-      post(:process_upload, params: params)
+      post(:create, params: params)
       assert_edit_species_list
       assert_equal(10, rolf.reload.contribution)
       new_data = @controller.instance_variable_get(:@list_members)

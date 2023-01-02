@@ -30,7 +30,7 @@ module SpeciesLists
         init_member_vars_for_edit(@species_list)
         init_project_vars_for_edit(@species_list)
         @checklist ||= calc_checklist
-        render(action: :edit)
+        render(action: :new)
       else
         redirect_to(action: :show, id: @species_list)
       end

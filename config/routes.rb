@@ -670,7 +670,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                           as: "new_species_list_download")
   post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
                                        as: "species_list_downloads")
-  get("/species_lists/:species_list/observations",
+  post("/species_lists/:id/downloads/print_labels",
+       to: "species_lists/downloads#print_labels",
+       as: "species_list_download_print_labels")
+  get("/species_lists/:species_list/observations/edit",
       to: "species_lists/observations#edit",
       as: "edit_species_list_observations")
   match("/species_lists/:species_list/observations/:commit",

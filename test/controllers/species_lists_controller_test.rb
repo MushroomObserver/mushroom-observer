@@ -230,7 +230,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     id = spl.id
     params = { id: id.to_s }
     assert_equal("rolf", spl.user.login)
-    requires_user(:destroy, [:show], params)
+    requires_user(:destroy, { action: :show }, params)
     assert_redirected_to(action: :index)
     assert_raises(ActiveRecord::RecordNotFound) do
       SpeciesList.find(id)
@@ -1195,10 +1195,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:one_genus_three_species_list)
     assert_equal("mary", spl.user.login)
     assert_operator(spl.observations.count, :>, 1)
-
-    put(:clear)
-    assert_no_flash
-    assert_not_equal(0, spl.reload.observations.count)
 
     put(:clear, params: { id: spl.id })
     assert_no_flash

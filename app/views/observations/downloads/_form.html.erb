@@ -3,7 +3,8 @@
 %>
 
 <%= form_with(url: observations_downloads_path(q: query_param)) do |f| %>
-  <h3 class="margin-top:2em"><%= :species_list_download_header.t %>:</h3>
+
+  <h3 class="mt-5"><%= :species_list_download_header.t %>:</h3>
 
   <p><%= :download_observations_format.t %>:</p>
   <ul type="none">
@@ -59,4 +60,5 @@
   <p class="mt-5"><%= :download_observations_print_labels_header.t %>:</p>
   <%= f.submit(:download_observations_print_labels.l,
                class: "btn btn-default") %>
+
 <% end %>

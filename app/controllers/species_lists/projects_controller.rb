@@ -77,7 +77,7 @@ module SpeciesLists
       else
         flash_error("Invalid submit button: #{params[:commit].inspect}")
       end
-      render(:new)
+      render(:edit)
     end
 
     def attach_objects_to_projects
