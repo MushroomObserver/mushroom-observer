@@ -6,8 +6,6 @@ module Images
     before_action :login_required
     # NO VIEW TEMPLATE
     # Linked from account/preferences/_privacy
-    # Move to new controller Images::FilenamesController#update
-    # Move test from images_controller_test
 
     # bulk_filename_purge
     def update
