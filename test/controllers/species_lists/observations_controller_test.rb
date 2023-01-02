@@ -9,16 +9,17 @@ module SpeciesLists
       assert(query.num_results > 1)
       params = @controller.query_params(query)
 
-      requires_login(:edit)
-      assert_response(:redirect)
-      assert_redirected_to(species_lists_path)
-      assert_flash_error
+      # This is not a valid path anymore. Requires params[:q]
+      # requires_login(:edit)
+      # assert_response(:redirect)
+      # assert_redirected_to(species_lists_path)
+      # assert_flash_error
 
-      get(:edit, params: params)
-      assert_response(:success)
-      assert_input_value(:species_list, "")
+      # This is not either. Requires params[:species_list]
+      # get(:edit, params: params)
+      # assert_response(:success)
+      # assert_input_value(:species_list, "")
 
-      # I wonder if this will work
       get(:edit, params: params.merge(species_list: "blah"))
       assert_response(:success)
       assert_input_value(:species_list, "blah")
@@ -40,7 +41,7 @@ module SpeciesLists
       # make sure some of the query results are already in there
       assert(query.results & spl.observations != [])
 
-      # These are not even valid routes anymore, without params[:species_list]
+      # These are not valid routes anymore, without params[:species_list]
       # put_requires_login(:update, params: params)
       # assert_response(:redirect)
       # assert_redirected_to(

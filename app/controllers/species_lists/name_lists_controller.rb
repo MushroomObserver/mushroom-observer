@@ -34,6 +34,7 @@ module SpeciesLists
         render_name_list_as_csv(@names)
       else
         flash_error(:name_lister_bad_submit.t(button: params[:commit]))
+        render("new")
       end
     end
 
@@ -62,7 +63,7 @@ module SpeciesLists
       init_project_vars_for_create
       @checklist ||= []
       @list_members = params[:results].tr("|", " ").delete("*")
-      render(action: :new)
+      render("species_lists/new")
     end
 
     ############################################################################

@@ -39,8 +39,9 @@
 #
 class SpeciesListsController < ApplicationController
   before_action :login_required
-  before_action :disable_link_prefetching, except: [:create, :edit, :show]
-  before_action :require_successful_user, only: [:create]
+  before_action :disable_link_prefetching,
+                except: [:new, :create, :edit, :update, :show]
+  before_action :require_successful_user, only: [:new, :create]
 
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
     # Bullet wants us to eager load synonyms for @deprecated_names in

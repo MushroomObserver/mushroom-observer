@@ -23,8 +23,7 @@ module SpeciesLists
     def update
       pass_query_params
       id = params[:species_list].to_s
-      spl = find_list_or_reload_form(id)
-      return unless spl
+      return unless (spl = find_list_or_reload_form!(id))
 
       query = find_obs_query_or_redirect(spl)
       return unless query
@@ -48,7 +47,7 @@ module SpeciesLists
       nil
     end
 
-    def find_list_or_reload_form(id)
+    def find_list_or_reload_form!(id)
       list = lookup_species_list_by_id_or_name(id)
       return list if list
 

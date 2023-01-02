@@ -3,8 +3,8 @@
     <b class="text-nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
   </p>
   <p>
-    <%= fields_for(:checklist) do |f_c| %>
-      <% @checklist.sort_by(&:first).each do |name, id| %>
+    <% @checklist.sort_by(&:first).each do |name, id| %>
+      <%= fields_for(:checklist) do |f_c| %>
         <%= f_c.check_box(:data, id, checked: @checklist_names[id]) %>
         <%= f_c.label("data_#{id}", name.t) %>
         <br/>

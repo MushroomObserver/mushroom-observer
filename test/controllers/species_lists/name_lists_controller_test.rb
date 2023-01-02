@@ -51,7 +51,7 @@ module SpeciesLists
 
       post(:create, params: { commit: "bogus" })
       assert_flash_error
-      assert_template(:new)
+      assert_template("new")
     end
 
     def assert_create_species_list

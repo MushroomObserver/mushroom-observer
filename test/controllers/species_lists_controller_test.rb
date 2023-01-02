@@ -104,7 +104,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_list_species_lists
     login
     get(:index)
-    assert_template(:list_species_lists)
+    assert_template(:index)
   end
 
   def test_show_species_list
@@ -269,7 +269,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_unsuccessful_create_location_description
+  def test_unsuccessful_create_species_list
     user = login("spamspamspam")
     assert_false(user.successful_contributor?)
     get(:new)
