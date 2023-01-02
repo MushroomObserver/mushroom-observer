@@ -17,11 +17,7 @@
 #  show_selected_images::  search results
 #
 #  ==== Show Images
-#  show::
-#  show_original::         show full_size image (for backwards compatibility)
-#  next_image::
-#  prev_image::
-#  cast_vote::             change user's vote & go to next image
+#  show::                  can use params[:flow] :next, :prev
 #
 #  ==== Work With Images
 #  add_image::             Upload images for observation.
