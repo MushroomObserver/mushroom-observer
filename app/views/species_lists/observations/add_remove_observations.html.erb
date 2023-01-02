@@ -8,9 +8,10 @@ tabs = [
                   action: :index)
 ]
 @tabsets = { right: draw_tab_set(tabs) }
+action = { controller: "/species_lists/observation_queries", action: "update" }
 %>
 
-<%= form_with(url: add_query_param(action: :post_add_remove_observations)) do %>
+<%= form_with(url: add_query_param(action: action)) do %>
   <p><%= :species_list_add_remove_body.tp(num: @query.num_results) %></p>
 
   <div class="form-group">

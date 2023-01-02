@@ -645,6 +645,21 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
+  # ----- Species Lists: standard actions -----------------------------------
+  resources :species_lists, id: /\d+/ do
+    resources :observations, only: [:edit, :update],
+                             controller: "species_lists/observations"
+    resources :observation_queries,
+              only: [:edit, :update],
+              controller: "species_lists/observation_queries"
+    resources :projects, only: [:edit, :update],
+                         controller: "species_lists/projects"
+    resources :uploads, only: [:new, :create],
+                        controller: "species_lists/uploads"
+    resources :downloads, only: [:new, :create],
+                          controller: "species_lists/downloads"
+  end
+
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"
@@ -672,10 +687,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Project:
   get("/project/show_project/:id", to: "project#show_project",
                                    as: "show_project")
-  # ----- Species List:
-  get("/species_list/show_species_list/:id",
-      to: "species_list#show_species_list",
-      as: "show_species_list")
 
   # ----- end temporary show routes for path_builder with id ---------------
 

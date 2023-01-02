@@ -16,9 +16,9 @@
                       { action: :new,
                         clone: @species_list.id }),
       link_to(:species_list_show_add_remove_from_another_list.t,
-              add_query_param({ controller: "/species_lists/observations",
-                                action: "add_remove_observations" },
-                              @query))
+              add_query_param(
+                { controller: "/species_lists/observation_queries",
+                  action: "edit" }, @query))
     ]
   end
   if check_permission(@species_list)
