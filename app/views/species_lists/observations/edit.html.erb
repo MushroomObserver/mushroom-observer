@@ -4,29 +4,11 @@
 @title = :species_list_add_remove_title.t
 
 tabs = [
-  link_with_query(:species_list_add_remove_cancel.t,
-                  controller: :observations,
-                  action: :index)
+  link_with_query(:species_list_add_remove_cancel.t, observations_path)
 ]
 @tabsets = { right: draw_tab_set(tabs) }
 
-action = { controller: "/species_lists/observations",
-           action: "update",
-           params: { q: get_query_param } }
+# action = species_list_observations_path(q: get_query_param)
 %>
 
-<%= form_with(url: action, method: :put,
-              id: "species_list_observations_form") do |f| %>
-  <p><%= :species_list_add_remove_body.tp(num: @query.num_results) %></p>
-
-  <div class="form-group">
-    <%= f.label(:species_list, :species_list_add_remove_label.t) %>:
-    <%= f.text_field(:species_list, @id, class: "form-control") %>
-    <% turn_into_species_list_auto_completer(:species_list) %>
-  </div>
-
-  <div class="form-group center-block">
-    <%= f.submit(:ADD.l, class: "btn btn-default") %>
-    <%= f.submit(:REMOVE.l, class: "btn btn-default") %>
-  </div>
-<% end %>
+<%= render(partial: "form") %>

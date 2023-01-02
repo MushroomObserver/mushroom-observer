@@ -7,18 +7,16 @@ module SpeciesLists
     def test_add_remove_observations
       query = Query.lookup(:Observation, :all, users: users(:mary))
       assert(query.num_results > 1)
-      params = @controller.query_params(query)
+      params = @controller.query_params(query) ## .merge(species_list: "")
 
-      # This is not a valid path anymore. Requires params[:q]
-      # requires_login(:edit)
-      # assert_response(:redirect)
-      # assert_redirected_to(species_lists_path)
-      # assert_flash_error
+      requires_login(:edit)
+      assert_response(:redirect)
+      assert_redirected_to(species_lists_path)
+      assert_flash_error
 
-      # This is not either. Requires params[:species_list]
-      # get(:edit, params: params)
-      # assert_response(:success)
-      # assert_input_value(:species_list, "")
+      get(:edit, params: params)
+      assert_response(:success)
+      assert_input_value(:species_list, "")
 
       get(:edit, params: params.merge(species_list: "blah"))
       assert_response(:success)

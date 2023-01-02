@@ -18,8 +18,8 @@ module SpeciesLists
     end
 
     # :post_add_remove_observations
-    # PUT endpoint to either add or remove
-    # a *query* of observations from a species list
+    # PUT endpoint — via params[:commit], either add or remove a
+    #                *query* of observations from a species_list
     def update
       pass_query_params
       id = params[:species_list].to_s
@@ -52,7 +52,7 @@ module SpeciesLists
       return list if list
 
       flash_error(:species_list_add_remove_bad_name.t(name: id.inspect))
-      redirect_to(add_query_param(action: :edit, species_list: id))
+      redirect_to(edit_species_list_observations_path(species_list: id))
       nil
     end
 
