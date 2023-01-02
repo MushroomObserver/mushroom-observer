@@ -151,6 +151,7 @@ module Observations
       attach_images_to_projects_and_flash_notices(img, projects, checks)
     end
 
+    # Returns true if any changes made, false if none
     def attach_images_to_projects_and_flash_notices(img, projects, checks)
       any_changes = false
       projects.each do |project|
