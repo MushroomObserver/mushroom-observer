@@ -188,8 +188,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(true, obs.is_collection_location)
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
-    assert_obj_arrays_equal([images(:in_situ_image), images(:turned_over_image)],
-                            obs.images)
+    assert_obj_arrays_equal([images(:in_situ_image),
+                             images(:turned_over_image)], obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
     assert_obj_arrays_equal([species_lists(:another_species_list)],

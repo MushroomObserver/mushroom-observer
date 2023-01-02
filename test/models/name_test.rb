@@ -2910,12 +2910,15 @@ class NameTest < UnitTestCase
                              Name.suggest_alternate_spellings("Lecanora\\"))
     assert_name_arrays_equal([genus1, genus2],
                              Name.suggest_alternate_spellings("Lecanoa"))
-    assert_name_arrays_equal([species3],
-                             Name.suggest_alternate_spellings("Lecanora granti"))
-    assert_name_arrays_equal([species3, species4],
-                             Name.suggest_alternate_spellings("Lecanora grandi"))
-    assert_name_arrays_equal([species4, species5],
-                             Name.suggest_alternate_spellings("Lecanoa grandis"))
+    assert_name_arrays_equal(
+      [species3], Name.suggest_alternate_spellings("Lecanora granti")
+    )
+    assert_name_arrays_equal(
+      [species3, species4], Name.suggest_alternate_spellings("Lecanora grandi")
+    )
+    assert_name_arrays_equal(
+      [species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis")
+    )
   end
 
   # --------------------------------------
