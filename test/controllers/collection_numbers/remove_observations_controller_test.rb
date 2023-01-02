@@ -8,19 +8,19 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
     obs2 = observations(:coprinus_comatus_obs)
     num1 = collection_numbers(:agaricus_campestris_coll_num)
     num2 = collection_numbers(:coprinus_comatus_coll_num)
-    assert_obj_list_equal([num1], obs1.collection_numbers)
-    assert_obj_list_equal([num2], obs2.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.collection_numbers)
+    assert_obj_arrays_equal([num2], obs2.collection_numbers)
 
     # Make sure user must be logged in.
     patch(:update, params: { collection_number_id: num1.id,
                              observation_id: obs1.id })
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure only owner obs can remove num from it.
     login("mary")
     patch(:update, params: { collection_number_id: num1.id,
                              observation_id: obs1.id })
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure badly-formed queries don't crash.
     login("rolf")
@@ -31,8 +31,8 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
                              observation_id: "bogus" })
     patch(:update, params: { collection_number_id: num1.id,
                              observation_id: obs2.id })
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
-    assert_obj_list_equal([num2], obs2.reload.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num2], obs2.reload.collection_numbers)
 
     # Removing num from last obs destroys it.
     patch(:update, params: { collection_number_id: num1.id,
@@ -42,11 +42,11 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
 
     # Removing num from one of two obs does not destroy it.
     num2.add_observation(obs1)
-    assert_obj_list_equal([num2], obs1.reload.collection_numbers)
-    assert_obj_list_equal([num2], obs2.reload.collection_numbers)
+    assert_obj_arrays_equal([num2], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num2], obs2.reload.collection_numbers)
     patch(:update, params: { collection_number_id: num2.id,
                              observation_id: obs2.id })
-    assert_obj_list_equal([num2], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num2], obs1.reload.collection_numbers)
     assert_empty(obs2.reload.collection_numbers)
     assert_not_nil(CollectionNumber.safe_find(num2.id))
 

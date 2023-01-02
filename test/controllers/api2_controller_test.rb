@@ -146,10 +146,10 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal(Observation.no_notes, obs.notes)
-    assert_obj_list_equal([], obs.images)
+    assert_obj_arrays_equal([], obs.images)
     assert_nil(obs.thumb_image)
-    assert_obj_list_equal([], obs.projects)
-    assert_obj_list_equal([], obs.species_lists)
+    assert_obj_arrays_equal([], obs.projects)
+    assert_obj_arrays_equal([], obs.species_lists)
   end
 
   def test_post_maximal_observation
@@ -188,12 +188,12 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(true, obs.is_collection_location)
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
-    assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)],
-                          obs.images)
+    assert_obj_arrays_equal([images(:in_situ_image), images(:turned_over_image)],
+                            obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
-    assert_obj_list_equal([projects(:eol_project)], obs.projects)
-    assert_obj_list_equal([species_lists(:another_species_list)],
-                          obs.species_lists)
+    assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
+    assert_obj_arrays_equal([species_lists(:another_species_list)],
+                            obs.species_lists)
   end
 
   def test_post_minimal_image
@@ -219,8 +219,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("image/jpeg", img.content_type)
     assert_equal(407, img.width)
     assert_equal(500, img.height)
-    assert_obj_list_equal([], img.projects)
-    assert_obj_list_equal([], img.observations)
+    assert_obj_arrays_equal([], img.projects)
+    assert_obj_arrays_equal([], img.observations)
     doc = REXML::Document.new(@response.body)
     checksum_returned = doc.root.elements["results/result/md5sum"].get_text.to_s
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
@@ -300,8 +300,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("image/jpeg", img.content_type)
     assert_equal(2288, img.width)
     assert_equal(2168, img.height)
-    assert_obj_list_equal([proj], img.projects)
-    assert_obj_list_equal([obs], img.observations)
+    assert_obj_arrays_equal([proj], img.projects)
+    assert_obj_arrays_equal([obs], img.observations)
   end
 
   def test_post_user

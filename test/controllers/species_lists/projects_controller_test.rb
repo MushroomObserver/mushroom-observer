@@ -63,7 +63,7 @@ module SpeciesLists
         }
       )
       assert_flash_error # bogus commit button
-      assert_obj_list_equal([proj2], list.projects.reload)
+      assert_obj_arrays_equal([proj2], list.projects.reload)
 
       put(
         :update,
@@ -76,7 +76,7 @@ module SpeciesLists
         }
       )
       assert_flash_warning # no changes
-      assert_obj_list_equal([proj2], list.projects.reload)
+      assert_obj_arrays_equal([proj2], list.projects.reload)
 
       put(
         :update,
@@ -89,7 +89,7 @@ module SpeciesLists
         }
       )
       assert_flash_error # no permission
-      assert_obj_list_equal([proj2], list.projects.reload)
+      assert_obj_arrays_equal([proj2], list.projects.reload)
 
       put(
         :update,
@@ -102,7 +102,7 @@ module SpeciesLists
         }
       )
       assert_flash_success
-      assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
+      assert_obj_arrays_equal([proj1, proj2], list.projects.reload, :sort)
 
       put(
         :update,
@@ -115,7 +115,7 @@ module SpeciesLists
         }
       )
       assert_flash_warning # already attached
-      assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
+      assert_obj_arrays_equal([proj1, proj2], list.projects.reload, :sort)
 
       put(
         :update,
@@ -128,7 +128,7 @@ module SpeciesLists
         }
       )
       assert_flash_warning # no changes
-      assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
+      assert_obj_arrays_equal([proj1, proj2], list.projects.reload, :sort)
 
       put(
         :update,
@@ -141,7 +141,7 @@ module SpeciesLists
         }
       )
       assert_flash_success
-      assert_obj_list_equal([proj1], list.projects.reload)
+      assert_obj_arrays_equal([proj1], list.projects.reload)
 
       put(
         :update,
@@ -154,7 +154,7 @@ module SpeciesLists
         }
       )
       assert_flash_warning # no changes
-      assert_obj_list_equal([proj1], list.projects.reload)
+      assert_obj_arrays_equal([proj1], list.projects.reload)
 
       put(
         :update,
@@ -167,7 +167,7 @@ module SpeciesLists
         }
       )
       assert_flash_success
-      assert_obj_list_equal([], list.projects.reload)
+      assert_obj_arrays_equal([], list.projects.reload)
     end
 
     def test_manage_projects_obs_and_img

@@ -71,10 +71,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     @spl2 = species_lists(:unknown_species_list)
     assert_users_equal(rolf, @spl1.user)
     assert_users_equal(mary, @spl2.user)
-    assert_obj_list_equal([], @spl1.projects)
-    assert_obj_list_equal([@proj2], @spl2.projects)
-    assert_obj_list_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_list_equal([dick], @proj2.user_group.users)
+    assert_obj_arrays_equal([], @spl1.projects)
+    assert_obj_arrays_equal([@proj2], @spl2.projects)
+    assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
+    assert_obj_arrays_equal([dick], @proj2.user_group.users)
   end
 
   def obs_params(obs, vote)
@@ -128,7 +128,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     proj1 = projects(:eol_project)
     proj2 = projects(:bolete_project)
     spl = species_lists(:first_species_list)
-    assert_obj_list_equal([], spl.projects)
+    assert_obj_arrays_equal([], spl.projects)
 
     get(:show, params: { id: spl.id })
     assert_no_match(proj1.title.t, @response.body)

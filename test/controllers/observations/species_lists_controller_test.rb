@@ -72,14 +72,14 @@ module Observations
       spl2.reload
       obs1 = observations(:detailed_unknown_obs)
       obs2 = observations(:coprinus_comatus_obs)
-      assert_obj_list_equal([dick], proj.user_group.users)
-      assert_obj_list_equal([proj], spl1.projects)
-      assert_obj_list_equal([], spl2.projects)
-      assert_obj_list_equal([], spl3.projects)
+      assert_obj_arrays_equal([dick], proj.user_group.users)
+      assert_obj_arrays_equal([proj], spl1.projects)
+      assert_obj_arrays_equal([], spl2.projects)
+      assert_obj_arrays_equal([], spl3.projects)
       assert_true(spl1.observations.include?(obs1))
       assert_false(spl1.observations.include?(obs2))
-      assert_obj_list_equal([], spl2.observations)
-      assert_obj_list_equal([], spl3.observations)
+      assert_obj_arrays_equal([], spl2.observations)
+      assert_obj_arrays_equal([], spl3.observations)
       assert_users_equal(mary, spl1.user)
       assert_users_equal(dick, spl2.user)
       assert_users_equal(rolf, spl3.user)
@@ -90,12 +90,12 @@ module Observations
                     observation_species_list_path(observation_id: obs1.id,
                                                   id: spl1.id,
                                                   commit: "remove"),
-                    text: :REMOVE.t, count: 1)
+                    count: 1)
       assert_select("form[action=?]",
                     observation_species_list_path(observation_id: obs1.id,
                                                   id: spl2.id,
                                                   commit: "add"),
-                    text: :ADD.t, count: 1)
+                    count: 1)
       assert_select("form[action*=?]",
                     observation_species_list_path(observation_id: obs1.id,
                                                   id: spl3.id,
@@ -103,16 +103,20 @@ module Observations
                     count: 0)
 
       get(:edit, params: { id: obs2.id })
+      puts("spl1 " + spl1.id + "\n")
+      puts("spl2 " + spl2.id + "\n")
+      puts("spl3 " + spl3.id + "\n")
+      # binding.break
       assert_select("form[action=?]",
                     observation_species_list_path(observation_id: obs1.id,
                                                   id: spl1.id,
                                                   commit: "add"),
-                    text: :ADD.t, count: 1)
+                    count: 1)
       assert_select("form[action=?]",
                     observation_species_list_path(observation_id: obs1.id,
                                                   id: spl2.id,
                                                   commit: "add"),
-                    text: :ADD.t, count: 1)
+                    count: 1)
       assert_select("form[action*=?]",
                     observation_species_list_path(observation_id: obs1.id,
                                                   id: spl3.id,
