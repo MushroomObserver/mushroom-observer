@@ -30,7 +30,7 @@ module SpeciesLists
         init_member_vars_for_edit(@species_list)
         init_project_vars_for_edit(@species_list)
         @checklist ||= calc_checklist
-        render(:new)
+        render("species_lists/edit")
       else
         redirect_to(species_list_path(@species_list))
       end

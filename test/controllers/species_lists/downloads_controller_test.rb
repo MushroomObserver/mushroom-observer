@@ -71,12 +71,10 @@ module SpeciesLists
                                     species_list: spl)
       query_params = @controller.query_params(query)
       get(:new, params: { id: spl.id })
-
       url = print_labels_for_observations_path(params: query_params)
       assert_select("form[action='#{url}']")
 
-      url = url_for({ controller: "/species_lists/downloads",
-                      action: :create, id: spl.id })
+      url = species_list_downloads_path(spl.id, params: query_params)
       assert_select("form[action='#{url}']")
 
       url = observations_downloads_path(params: query_params)

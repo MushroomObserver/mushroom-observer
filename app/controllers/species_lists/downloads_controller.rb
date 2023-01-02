@@ -15,10 +15,10 @@ module SpeciesLists
     # Template shows three forms: print_labels, make_report, and download obs
     def new
       @list = find_species_list!
-      # @type = params[:type] || "txt"
-      # @format = params[:format] || "raw"
-      # @encoding = params[:encoding] || "UTF-8"
-      # @query = lookup_species_list_query(@list)
+      @type = params[:type] || "txt"
+      @format = params[:format] || "raw"
+      @encoding = params[:encoding] || "UTF-8"
+      @query = lookup_species_list_query(@list)
     end
 
     def create

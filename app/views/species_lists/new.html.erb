@@ -10,4 +10,5 @@
   action = species_lists_path(approved_where: @place_name)
 %>
 
-<%= render(partial: "form", locals: { button: :CREATE, action: action }) %>
+<%= render(partial: "species_lists/form",
+           locals: { button: :CREATE, action: action }) %>
