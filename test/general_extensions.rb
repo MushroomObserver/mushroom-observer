@@ -21,10 +21,10 @@
 #  assert_objs_equal::          Compare two model instances.
 #  assert_users_equal::         Compare two user instances.
 #  assert_names_equal::         Compare two name instances.
-#  assert_list_equal:: Compare two lists by mapping and sorting elements.
-#  assert_obj_list_equal::      Compare two lists of objects, comparing ids.
-#  assert_user_list_equal::     Compare two lists of User's.
-#  assert_name_list_equal::     Compare two lists of Name's.
+#  assert_arrays_equal:: Compare two lists by mapping and sorting elements.
+#  assert_obj_arrays_equal::      Compare two lists of objects, comparing ids.
+#  assert_user_arrays_equal::     Compare two lists of User's.
+#  assert_name_arrays_equal::     Compare two lists of Name's.
 #  assert_gps_equal::           Compare two latitudes or longitudes.
 #  assert_email::               Check the properties of a QueuedEmail.
 #  assert_save::                Assert ActiveRecord save succeeds.
@@ -171,12 +171,12 @@ module GeneralExtensions
     )
   end
 
-  # Compare two lists by mapping their elements.  By default it
+  # Compare two arrays by mapping their elements.  By default it
   # just maps their elements to strings.
   #
-  #   assert_list_equal([rolf,mary], name.authors, &:login)
+  #   assert_arrays_equal([rolf,mary], name.authors, &:login)
   #
-  def assert_list_equal(expect, got, *args, &block)
+  def assert_arrays_equal(expect, got, *args, &block)
     block ||= :to_s.to_proc
     expect = expect.to_a.map(&block)
     got    = got.to_a.map(&block)
@@ -188,28 +188,28 @@ module GeneralExtensions
     assert_equal(expect, got, args.first)
   end
 
-  # Compare two lists of objects of the same type by comparing their ids.
+  # Compare two arrays of objects of the same type by comparing their ids.
   #
-  #   assert_obj_list_equal([img1,img2], obs.images)
+  #   assert_obj_arrays_equal([img1,img2], obs.images)
   #
-  def assert_obj_list_equal(expect, got, *args)
-    assert_list_equal(expect, got, *args) { |o| fixture_label(o) }
+  def assert_obj_arrays_equal(expect, got, *args)
+    assert_arrays_equal(expect, got, *args) { |o| fixture_label(o) }
   end
 
-  # Compare two lists of User's by comparing their logins.
+  # Compare two arrays of User's by comparing their logins.
   #
-  #   assert_user_list_equal([rolf,mary], name.authors)
+  #   assert_user_arrays_equal([rolf,mary], name.authors)
   #
-  def assert_user_list_equal(expect, got, *args)
-    assert_list_equal(expect, got, *args, &:login)
+  def assert_user_arrays_equal(expect, got, *args)
+    assert_arrays_equal(expect, got, *args, &:login)
   end
 
-  # Compare two lists of Name's by comparing their search_names.
+  # Compare two arrays of Name's by comparing their search_names.
   #
-  #   assert_name_list_equal([old_name,new_name], old_name.synonyms)
+  #   assert_name_arrays_equal([old_name,new_name], old_name.synonyms)
   #
-  def assert_name_list_equal(expect, got, *args)
-    assert_list_equal(expect, got, *args, &:search_name)
+  def assert_name_arrays_equal(expect, got, *args)
+    assert_arrays_equal(expect, got, *args, &:search_name)
   end
 
   GPS_CLOSE_ENOUGH = 0.001
