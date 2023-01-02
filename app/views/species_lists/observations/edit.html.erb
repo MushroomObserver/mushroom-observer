@@ -1,5 +1,6 @@
 <%
 # Linked from observations :index and species_lists :show
+# :add_remove_observations
 @title = :species_list_add_remove_title.t
 
 tabs = [
@@ -8,20 +9,21 @@ tabs = [
                   action: :index)
 ]
 @tabsets = { right: draw_tab_set(tabs) }
-action = { controller: "/species_lists/observation_queries", action: "update" }
+action = { controller: "/species_lists/observations", action: "update",
+           params: { q: get_query_param } }
 %>
 
-<%= form_with(url: add_query_param(action: action)) do %>
+<%= form_with(url: action, method: :put) do |f| %>
   <p><%= :species_list_add_remove_body.tp(num: @query.num_results) %></p>
 
   <div class="form-group">
-    <%= label_tag(:species_list, :species_list_add_remove_label.t) %>:
-    <%= text_field_tag(:species_list, @id, class: "form-control") %>
+    <%= f.label(:species_list, :species_list_add_remove_label.t) %>:
+    <%= f.text_field(:species_list, @id, class: "form-control") %>
     <% turn_into_species_list_auto_completer(:species_list) %>
   </div>
 
   <div class="form-group center-block">
-    <%= submit_tag(:ADD.l, class: "btn btn-default") %>
-    <%= submit_tag(:REMOVE.l, class: "btn btn-default") %>
+    <%= f.submit(:ADD.l, class: "btn btn-default") %>
+    <%= f.submit(:REMOVE.l, class: "btn btn-default") %>
   </div>
 <% end %>

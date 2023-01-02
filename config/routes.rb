@@ -619,6 +619,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                           as: "print_labels_for")
     end
   end
+  get("/observations/:id/species_lists/edit",
+      to: "observations/species_lists#edit",
+      as: "edit_observation_species_lists")
+  match("/observations/:observation_id/species_lists/:id(/:commit)",
+        to: "observations/species_lists#update",
+        via: [:put, :patch],
+        as: "observation_species_list")
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
@@ -647,11 +654,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Species Lists: standard actions -----------------------------------
   resources :species_lists, id: /\d+/ do
-    resources :observations, only: [:edit, :update],
-                             controller: "species_lists/observations"
-    resources :observation_queries,
-              only: [:edit, :update],
-              controller: "species_lists/observation_queries"
     resources :projects, only: [:edit, :update],
                          controller: "species_lists/projects"
     resources :uploads, only: [:new, :create],
@@ -659,6 +661,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :downloads, only: [:new, :create],
                           controller: "species_lists/downloads"
   end
+  get("/species_lists/:species_list/observations",
+      to: "species_lists/observations#edit",
+      as: "edit_species_list_observations")
+  match("/species_lists/:species_list/observations/:commit",
+        to: "species_lists/observations#update",
+        via: [:put, :patch],
+        as: "species_list_observations")
 
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do

@@ -231,7 +231,7 @@ module ObservationsController::Index
       :list_observations_add_to_list.t,
       add_query_param(
         { controller: "/species_lists/observations",
-          action: :add_remove_observations },
+          action: :edit },
         query
       )
     ]
