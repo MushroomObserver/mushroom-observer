@@ -75,6 +75,7 @@ module GlossaryTerms
       redirect_with_query(glossary_term_path(@object.id))
     end
 
+    # The remove form submits to this action
     def detach
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
