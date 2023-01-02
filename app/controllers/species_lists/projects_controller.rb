@@ -64,13 +64,13 @@ module SpeciesLists
       case params[:commit]
       when :ATTACH.l
         if attach_objects_to_projects
-          redirect_to(species_list_path(@list.id))
+          redirect_to(species_list_path(@list.id)) and return
         else
           flash_warning(:runtime_no_changes.t)
         end
       when :REMOVE.l
         if remove_objects_from_projects
-          redirect_to(species_list_path(@list.id))
+          redirect_to(species_list_path(@list.id)) and return
         else
           flash_warning(:runtime_no_changes.t)
         end

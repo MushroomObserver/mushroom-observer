@@ -2,7 +2,7 @@
   @title = :species_list_upload_title.t
 %>
 
-<%= form_with({ action: :create, id: @species_list.id },
+<%= form_with(url: species_list_uploads_path(@species_list.id),
               multipart: true) do |f| %>
 
   <div class="form-group mt-3">

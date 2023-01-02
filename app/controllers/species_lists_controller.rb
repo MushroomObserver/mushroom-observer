@@ -200,7 +200,6 @@ class SpeciesListsController < ApplicationController
   def create
     @species_list = SpeciesList.new
     process_species_list(:create)
-    render(:new)
   end
 
   def edit
@@ -212,7 +211,7 @@ class SpeciesListsController < ApplicationController
       init_project_vars_for_edit(@species_list)
       @checklist ||= calc_checklist
     else
-      redirect_to(action: :show, id: @species_list)
+      redirect_to(species_list_path(@species_list))
     end
   end
 
@@ -221,9 +220,8 @@ class SpeciesListsController < ApplicationController
 
     if check_permission!(@species_list)
       process_species_list(:update)
-      render(:edit)
     else
-      redirect_to(action: :show, id: @species_list)
+      redirect_to(species_list_path(@species_list))
     end
   end
 
@@ -234,9 +232,9 @@ class SpeciesListsController < ApplicationController
       @species_list.destroy
       id = params[:id].to_s
       flash_notice(:runtime_species_list_destroy_success.t(id: id))
-      redirect_to(action: :index)
+      redirect_to(species_lists_path)
     else
-      redirect_to(action: :show, id: @species_list)
+      redirect_to(species_list_path(@species_list))
     end
   end
 
@@ -247,7 +245,7 @@ class SpeciesListsController < ApplicationController
       @species_list.clear
       flash_notice(:runtime_species_list_clear_success.t)
     end
-    redirect_to(action: :show, id: @species_list)
+    redirect_to(species_list_path(@species_list))
   end
 
   private

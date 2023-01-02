@@ -14,8 +14,9 @@ module SpeciesLists
         id: spl.id
       }
       requires_user(:new,
-                    { controller: "/species_lists", action: :show }, params)
-      assert_form_action(action: :create, id: spl.id)
+                    { controller: "/species_lists", action: :show },
+                    params, "rolf")
+      assert_form_action({ action: :create, id: spl.id })
     end
 
     def test_read_species_list
@@ -61,6 +62,13 @@ module SpeciesLists
       new_data = @controller.instance_variable_get(:@list_members)
       new_data = new_data.split("\r\n").sort.join("\r\n")
       assert_equal(list_data, new_data)
+    end
+
+    def assert_edit_species_list
+      assert_template("species_lists/edit")
+      assert_template("shared/_form_list_feedback")
+      assert_template("shared/_textilize_help")
+      assert_template("species_lists/_form")
     end
   end
 end

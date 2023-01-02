@@ -699,19 +699,19 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_edit_species_list
     spl = species_lists(:first_species_list)
-    params = { id: spl.id.to_s }
+    params = { id: spl.id }
     assert_equal("rolf", spl.user.login)
-    requires_user(:edit, :show, params)
+    requires_user(:edit, { action: :show }, params)
     assert_edit_species_list
-    assert_form_action(action: :update, id: spl.id.to_s,
-                       approved_where: "Burbank, California, USA")
+    assert_form_action({ action: :update, id: spl.id,
+                         approved_where: "Burbank, California, USA" })
   end
 
   def test_update_species_list_nochange
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
-    put_requires_user(:update, :show, params,
+    put_requires_user(:update, { action: :show }, params,
                       spl.user.login)
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(10, spl.user.reload.contribution)

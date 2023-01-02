@@ -1,4 +1,4 @@
-<%= form_with(url: { action: :render_name_lister },
+<%= form_with(url: { action: :create },
               id: "name_lister_form") do |f| %>
 
   <div class="text-center">
@@ -13,7 +13,7 @@
                  class: "btn btn-default mx-3") %>
   </div><!-- .text-center -->
 
-  <%= f.hidden_field(:results, @name_strings.join("\n")) %>
+  <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
 
   <% if false %>
     <br/>

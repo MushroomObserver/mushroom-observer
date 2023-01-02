@@ -40,21 +40,22 @@ module SpeciesLists
       # make sure some of the query results are already in there
       assert(query.results & spl.observations != [])
 
-      put_requires_login(:update)
-      assert_response(:redirect)
-      assert_redirected_to(
-        edit_species_list_observations_path(species_list: spl.id)
-      )
-      assert_flash_error
-      assert_equal(old_count, spl.reload.observations.size)
+      # These are not even valid routes anymore, without params[:species_list]
+      # put_requires_login(:update, params: params)
+      # assert_response(:redirect)
+      # assert_redirected_to(
+      #   edit_species_list_observations_path(species_list: spl.id)
+      # )
+      # assert_flash_error
+      # assert_equal(old_count, spl.reload.observations.size)
 
-      put(:update, params: params)
-      assert_response(:redirect)
-      assert_redirected_to(
-        edit_species_list_observations_path(species_list: spl.id)
-      )
-      assert_flash_error
-      assert_equal(old_count, spl.reload.observations.size)
+      # put(:update, params: params)
+      # assert_response(:redirect)
+      # assert_redirected_to(
+      #   edit_species_list_observations_path(species_list: spl.id)
+      # )
+      # assert_flash_error
+      # assert_equal(old_count, spl.reload.observations.size)
 
       put(:update, params: params.merge(species_list: "blah"))
       assert_response(:redirect)

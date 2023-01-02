@@ -1,6 +1,4 @@
-<%= form_with(model: @species_list, approved_where: @place_name) do |f| %>
-
-  <%= hidden_field_tag(:approved_where, @place_name) %>
+<%= form_with(model: @species_list, url: action) do |f| %>
 
   <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>
 

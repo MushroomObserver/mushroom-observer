@@ -6,6 +6,8 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
+
+  action = species_lists_path(approved_where: @place_name)
 %>
 
-<%= render(partial: "form", locals: { button: :CREATE }) %>
+<%= render(partial: "form", locals: { button: :CREATE, action: action }) %>

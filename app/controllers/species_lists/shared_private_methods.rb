@@ -131,7 +131,7 @@ module SpeciesLists
             redirect_to(controller: "location", action: "create_location",
                         where: @place_name, set_species_list: @species_list.id)
           else
-            redirect_to(action: :show, id: @species_list)
+            redirect_to(species_list_path(@species_list))
           end
           redirected = true
         else
@@ -145,6 +145,13 @@ module SpeciesLists
       init_name_vars_from_sorter(@species_list, sorter)
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
+
+      case create_or_update
+      when :create
+        render(:new)
+      when :update
+        render(:edit)
+      end
     end
 
     # Creates observations for names written in and/or selected from checklist.

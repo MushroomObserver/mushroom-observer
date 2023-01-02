@@ -14,7 +14,7 @@ module SpeciesLists
                              by: :name, species_list: @species_list)
         @observation_list = query.results
       else
-        redirect_to(action: :show, id: @species_list)
+        redirect_to(species_list_path(@species_list))
       end
     end
 
@@ -30,9 +30,9 @@ module SpeciesLists
         init_member_vars_for_edit(@species_list)
         init_project_vars_for_edit(@species_list)
         @checklist ||= calc_checklist
-        render(action: :new)
+        render(:new)
       else
-        redirect_to(action: :show, id: @species_list)
+        redirect_to(species_list_path(@species_list))
       end
     end
 
