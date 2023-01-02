@@ -16,7 +16,8 @@ module Observations
     # Form (table of post_button links) to let user add/remove one observation
     # at a time from a species list. Maybe use param[:commit] like above?
     def edit
-      @observation = find_or_goto_index(Observation, params[:id].to_s)
+      return unless (@observation = find_observation!)
+
       @all_lists = @user.all_editable_species_lists
     end
 
@@ -31,23 +32,26 @@ module Observations
         return redirect_to(species_list_path(species_list.id))
       end
 
-      if params[:commit] == :ADD.l
+      case params[:commit]
+      when "add"
         add_observation_to_species_list(species_list, observation)
-      elsif params[:commit] == :REMOVE.l
+      when "remove"
         remove_observation_from_species_list(species_list, observation)
       else
+        # puts("Invalid mode: #{params[:commit].inspect}")
         flash_error("Invalid mode: #{params[:commit].inspect}")
+        render("edit")
       end
     end
 
     private
 
-    # Used by manage_species_lists.
-    def remove_observation_from_species_list(species_list, observation)
-      species_list.remove_observation(observation)
-      flash_notice(:runtime_species_list_remove_observation_success.
-        t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(action: :edit, id: observation.id)
+    def find_observation!
+      find_or_goto_index(Observation, params[:id])
+    end
+
+    def find_species_list!
+      find_or_goto_index(SpeciesList, params[:species_list_id])
     end
 
     # Used by manage_species_lists.
@@ -55,15 +59,17 @@ module Observations
       species_list.add_observation(observation)
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(action: :edit, id: observation.id)
+      render("edit",
+             location: edit_observation_species_lists_path(id: observation.id))
     end
 
-    def find_species_list!
-      find_or_goto_index(SpeciesList, params[:id])
-    end
-
-    def find_observation!
-      find_or_goto_index(Observation, params[:observation_id])
+    # Used by manage_species_lists.
+    def remove_observation_from_species_list(species_list, observation)
+      species_list.remove_observation(observation)
+      flash_notice(:runtime_species_list_remove_observation_success.
+        t(name: species_list.unique_format_name, id: observation.id))
+      render("edit",
+             location: edit_observation_species_lists_path(id: observation.id))
     end
   end
 end

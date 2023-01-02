@@ -7,7 +7,7 @@ species_list_link = link_to(when_span + ": " + what_span,
 
 rmv_link = put_button(name: :REMOVE.t,
                       path: observation_species_list_path(
-                        observation_id: @observation.id, id: species_list.id,
+                        id: @observation.id, species_list_id: species_list.id,
                         commit: "remove"
                       ),
                       data: { confirm: :are_you_sure.l })

@@ -25,7 +25,7 @@ module Observations
       sp = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
       assert_not(sp.observations.member?(obs))
-      params = { observation_id: obs.id, id: sp.id, commit: :ADD.l }
+      params = { id: obs.id, species_list_id: sp.id, commit: "add" }
       requires_login(:update, params)
       assert_redirected_to(action: :edit, id: obs.id)
       assert(sp.reload.observations.member?(obs))
@@ -35,7 +35,7 @@ module Observations
       sp = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
       assert_not(sp.observations.member?(obs))
-      params = { observation_id: obs.id, id: sp.id, commit: :ADD.l }
+      params = { id: obs.id, species_list_id: sp.id, commit: "add" }
       login("dick")
       put(:update, params: params)
       assert_redirected_to(species_list_path(sp.id))
@@ -46,7 +46,7 @@ module Observations
       spl = species_lists(:unknown_species_list)
       obs = observations(:minimal_unknown_obs)
       assert(spl.observations.member?(obs))
-      params = { observation_id: obs.id, id: spl.id, commit: :REMOVE.l }
+      params = { id: obs.id, species_list_id: spl.id, commit: "remove" }
       owner = spl.user.login
       assert_not_equal("rolf", owner)
 
@@ -87,50 +87,62 @@ module Observations
       login("dick")
       get(:edit, params: { id: obs1.id })
       assert_select("form[action=?]",
-                    observation_species_list_path(observation_id: obs1.id,
-                                                  id: spl1.id,
+                    observation_species_list_path(id: obs1.id,
+                                                  species_list_id: spl1.id,
                                                   commit: "remove"),
                     count: 1)
       assert_select("form[action=?]",
-                    observation_species_list_path(observation_id: obs1.id,
-                                                  id: spl2.id,
+                    observation_species_list_path(id: obs1.id,
+                                                  species_list_id: spl2.id,
                                                   commit: "add"),
                     count: 1)
       assert_select("form[action*=?]",
-                    observation_species_list_path(observation_id: obs1.id,
-                                                  id: spl3.id,
+                    observation_species_list_path(id: obs1.id,
+                                                  species_list_id: spl3.id,
                                                   commit: "add"),
                     count: 0)
 
       get(:edit, params: { id: obs2.id })
-      puts("spl1 " + spl1.id + "\n")
-      puts("spl2 " + spl2.id + "\n")
-      puts("spl3 " + spl3.id + "\n")
+      # puts("spl1 " + spl1.id + "\n")
+      # puts("spl2 " + spl2.id + "\n")
+      # puts("spl3 " + spl3.id + "\n")
       # binding.break
       assert_select("form[action=?]",
-                    observation_species_list_path(observation_id: obs1.id,
-                                                  id: spl1.id,
+                    observation_species_list_path(id: obs2.id,
+                                                  species_list_id: spl1.id,
                                                   commit: "add"),
                     count: 1)
       assert_select("form[action=?]",
-                    observation_species_list_path(observation_id: obs1.id,
-                                                  id: spl2.id,
+                    observation_species_list_path(id: obs2.id,
+                                                  species_list_id: spl2.id,
                                                   commit: "add"),
                     count: 1)
       assert_select("form[action*=?]",
-                    observation_species_list_path(observation_id: obs1.id,
-                                                  id: spl3.id,
+                    observation_species_list_path(id: obs2.id,
+                                                  species_list_id: spl3.id,
                                                   commit: "add"),
                     count: 0)
 
       put(:update,
-          params: { observation_id: obs2.id, id: spl1.id, commit: "add" })
-      assert_redirected_to(action: :edit, id: obs2.id)
+          params: { id: obs2.id, species_list_id: spl1.id, commit: "add" })
+      binding.break
+      assert_template("edit")
+      assert_select("form[action=?]",
+                    observation_species_list_path(id: obs2.id,
+                                                  species_list_id: spl1.id,
+                                                  commit: "remove"),
+                    count: 1)
+
       assert_true(spl1.reload.observations.include?(obs2))
 
       put(:update,
-          params: { observation_id: obs2.id, id: spl1.id, commit: "remove" })
-      assert_redirected_to(action: :edit, id: obs2.id)
+          params: { id: obs2.id, species_list_id: spl1.id, commit: "remove" })
+      assert_template("edit")
+      assert_select("form[action=?]",
+                    observation_species_list_path(id: obs2.id,
+                                                  species_list_id: spl1.id,
+                                                  commit: "add"),
+                    count: 1)
       assert_false(spl1.reload.observations.include?(obs2))
     end
   end

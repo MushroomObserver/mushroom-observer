@@ -619,10 +619,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                           as: "print_labels_for")
     end
   end
+  # NOTE: the intentional "backwards" param specificity here:
   get("/observations/:id/species_lists/edit",
       to: "observations/species_lists#edit",
       as: "edit_observation_species_lists")
-  match("/observations/:observation_id/species_lists/:id(/:commit)",
+  match("/observations/:id/species_lists/:species_list_id(/:commit)",
         to: "observations/species_lists#update",
         via: [:put, :patch],
         as: "observation_species_list")
