@@ -297,14 +297,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl2.reload
     obs1 = observations(:detailed_unknown_obs)
     obs2 = observations(:coprinus_comatus_obs)
-    assert_obj_list_equal([dick], proj.user_group.users)
-    assert_obj_list_equal([proj], spl1.projects)
-    assert_obj_list_equal([], spl2.projects)
-    assert_obj_list_equal([], spl3.projects)
+    assert_obj_arrays_equal([dick], proj.user_group.users)
+    assert_obj_arrays_equal([proj], spl1.projects)
+    assert_obj_arrays_equal([], spl2.projects)
+    assert_obj_arrays_equal([], spl3.projects)
     assert_true(spl1.observations.include?(obs1))
     assert_false(spl1.observations.include?(obs2))
-    assert_obj_list_equal([], spl2.observations)
-    assert_obj_list_equal([], spl3.observations)
+    assert_obj_arrays_equal([], spl2.observations)
+    assert_obj_arrays_equal([], spl3.observations)
     assert_users_equal(mary, spl1.user)
     assert_users_equal(dick, spl2.user)
     assert_users_equal(rolf, spl3.user)
@@ -1473,7 +1473,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_error # bogus commit button
-    assert_obj_list_equal([proj2], list.projects.reload)
+    assert_obj_arrays_equal([proj2], list.projects.reload)
 
     post(
       :manage_projects,
@@ -1486,7 +1486,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj2], list.projects.reload)
+    assert_obj_arrays_equal([proj2], list.projects.reload)
 
     post(
       :manage_projects,
@@ -1499,7 +1499,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_error # no permission
-    assert_obj_list_equal([proj2], list.projects.reload)
+    assert_obj_arrays_equal([proj2], list.projects.reload)
 
     post(
       :manage_projects,
@@ -1512,7 +1512,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_success
-    assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
+    assert_obj_arrays_equal([proj1, proj2], list.projects.reload, :sort)
 
     post(
       :manage_projects,
@@ -1525,7 +1525,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_warning # already attached
-    assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
+    assert_obj_arrays_equal([proj1, proj2], list.projects.reload, :sort)
 
     post(
       :manage_projects,
@@ -1538,7 +1538,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
+    assert_obj_arrays_equal([proj1, proj2], list.projects.reload, :sort)
 
     post(
       :manage_projects,
@@ -1551,7 +1551,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_success
-    assert_obj_list_equal([proj1], list.projects.reload)
+    assert_obj_arrays_equal([proj1], list.projects.reload)
 
     post(
       :manage_projects,
@@ -1564,7 +1564,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj1], list.projects.reload)
+    assert_obj_arrays_equal([proj1], list.projects.reload)
 
     post(
       :manage_projects,
@@ -1577,7 +1577,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     )
     assert_flash_success
-    assert_obj_list_equal([], list.projects.reload)
+    assert_obj_arrays_equal([], list.projects.reload)
   end
 
   def test_manage_projects_obs_and_img
