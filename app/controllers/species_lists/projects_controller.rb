@@ -3,36 +3,33 @@
 module SpeciesLists
   class ProjectsController < ApplicationController
     before_action :login_required
+    before_action :disable_link_prefetching
 
     # ----------------------------
     #  :section: Manage Projects
     # ----------------------------
 
-    def manage_projects
-      return unless (@list = find_or_goto_index(SpeciesList,
-                                                params[:id].to_s))
+    # def manage_projects
+    def edit
+      return unless (@list = find_species_list!)
 
       if check_permission!(@list)
         @projects = projects_to_manage
         @object_states = manage_object_states
         @project_states = manage_project_states
-        if request.method == "POST"
-          if params[:commit] == :ATTACH.l
-            if attach_objects_to_projects
-              redirect_to(species_list_path(@list.id))
-            else
-              flash_warning(:runtime_no_changes.t)
-            end
-          elsif params[:commit] == :REMOVE.l
-            if remove_objects_from_projects
-              redirect_to(species_list_path(@list.id))
-            else
-              flash_warning(:runtime_no_changes.t)
-            end
-          else
-            flash_error("Invalid submit button: #{params[:commit].inspect}")
-          end
-        end
+      else
+        redirect_to(species_list_path(@list.id))
+      end
+    end
+
+    def update
+      return unless (@list = find_species_list!)
+
+      if check_permission!(@list)
+        @projects = projects_to_manage
+        @object_states = manage_object_states
+        @project_states = manage_project_states
+        commit_and_redirect
       else
         redirect_to(species_list_path(@list.id))
       end
@@ -61,6 +58,26 @@ module SpeciesLists
         states[proj.id] = params["projects_#{proj.id}"].present?
       end
       states
+    end
+
+    def commit_and_redirect # rubocop:disable Metrics/AbcSize
+      case params[:commit]
+      when :ATTACH.l
+        if attach_objects_to_projects
+          redirect_to(species_list_path(@list.id))
+        else
+          flash_warning(:runtime_no_changes.t)
+        end
+      when :REMOVE.l
+        if remove_objects_from_projects
+          redirect_to(species_list_path(@list.id))
+        else
+          flash_warning(:runtime_no_changes.t)
+        end
+      else
+        flash_error("Invalid submit button: #{params[:commit].inspect}")
+      end
+      render(:new)
     end
 
     def attach_objects_to_projects
@@ -165,5 +182,9 @@ module SpeciesLists
                         project: proj.title))
       @any_changes = true
     end
+
+    ############################################################################
+
+    include SpeciesLists::SharedPrivateMethods # shared private methods
   end
 end

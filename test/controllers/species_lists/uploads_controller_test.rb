@@ -5,7 +5,7 @@ require("test_helper")
 module SpeciesLists
   class UploadsControllerTest < FunctionalTestCase
     # ----------------------------
-    #  Upload files.
+    #  Upload files that get parsed as species_lists.
     # ----------------------------
 
     def test_upload_species_list
@@ -13,8 +13,8 @@ module SpeciesLists
       params = {
         id: spl.id
       }
-      requires_user(:upload_species_list, :show, params)
-      assert_form_action(action: "upload_species_list", id: spl.id)
+      requires_user(:upload, :show, params)
+      assert_form_action(action: "process_upload", id: spl.id)
     end
 
     def test_read_species_list
@@ -33,7 +33,7 @@ module SpeciesLists
         }
       }
       login("rolf", "testpassword")
-      post(:upload_species_list, params: params)
+      post(:process_upload, params: params)
       assert_edit_species_list
       assert_equal(10, rolf.reload.contribution)
       # Doesn't actually change list, just feeds it to edit_species_list
@@ -54,7 +54,7 @@ module SpeciesLists
         }
       }
       login("rolf", "testpassword")
-      post(:upload_species_list, params: params)
+      post(:process_upload, params: params)
       assert_edit_species_list
       assert_equal(10, rolf.reload.contribution)
       new_data = @controller.instance_variable_get(:@list_members)

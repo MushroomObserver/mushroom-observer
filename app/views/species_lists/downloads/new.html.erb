@@ -1,0 +1,19 @@
+<%
+  @title = :species_list_download_title.t
+
+  tabs = [
+    link_with_query(:species_list_download_back.t, action: :show)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  query_param = get_query_param(@query)
+%>
+
+<%= render(partial: "form_print_labels",
+           locals: { query_param: query_param }) %>
+
+<%= render(partial: "form_species_list_report",
+           locals: { query_param: query_param }) %>
+
+<%= render(partial: "observations/downloads/form",
+           locals: { query_param: query_param }) %>

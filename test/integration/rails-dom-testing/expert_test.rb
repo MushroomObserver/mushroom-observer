@@ -143,7 +143,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_error
     assert_response(:success)
-    assert_template("species_list/create_species_list")
+    assert_template("species_lists/new")
 
     assert_select("#missing_names", /Caloplaca arnoldii ssp. obliterate/)
     assert_select("#deprecated_names", /Lactarius alpigenes/)
@@ -168,7 +168,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("species_list/show_species_list")
+    assert_template("species_lists/show")
 
     spl = SpeciesList.last
     obs = spl.observations
@@ -189,7 +189,7 @@ class ExpertTest < IntegrationTestCase
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
-    click_mo_link(href: /edit_species_list/)
+    click_mo_link(href: /#{edit_species_list_path(spl.id)}/)
     new_member_notes = "New member notes."
     open_form do |form|
       form.assert_value("list_members", "")
@@ -212,7 +212,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_error
     assert_response(:success)
-    assert_template("species_list/edit_species_list")
+    assert_template("species_lists/edit")
 
     assert_select("#missing_names", /Agaricus nova/)
     assert_select("#ambiguous_names", /Amanita baccata.*sensu Arora/)
@@ -261,9 +261,9 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("species_list/show_species_list")
+    assert_template("species_lists/show")
     assert_select("#title", text: /#{spl.title}/)
-    assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
+    assert_select("a[href*=?]", edit_species_list_path(spl.id), text: /edit/i)
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
@@ -280,14 +280,14 @@ class ExpertTest < IntegrationTestCase
     click_mo_link(href: /#{new_comment_path}/)
     assert_template("comments/new")
     assert_select("#title", text: /#{spl.title}/)
-    assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
+    assert_select("a[href*='species_lists/#{spl.id}']", text: /cancel/i)
     open_form do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")
       form.submit
     end
     assert_flash_success
-    assert_template("species_list/show_species_list")
+    assert_template("species_lists/show")
     assert_select("#title", text: /#{spl.title}/)
     assert_select("div.comment", text: /Slartibartfast/)
     assert_select("div.comment", text: /Steatopygia/)

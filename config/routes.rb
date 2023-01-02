@@ -198,33 +198,33 @@ ACTIONS = {
     project_search: {}
     # show_project: {}
   },
-  species_list: {
-    add_observation_to_species_list: {},
-    add_remove_observations: {},
-    bulk_editor: {},
-    clear_species_list: {},
-    create_species_list: {},
-    destroy_species_list: {},
-    download: {},
-    edit_species_list: {},
-    index_species_list: {},
-    list_species_lists: {},
-    make_report: {},
-    manage_projects: {},
-    manage_species_lists: {},
-    name_lister: {},
-    next_species_list: {},
-    post_add_remove_observations: {},
-    prev_species_list: {},
-    print_labels: {},
-    remove_observation_from_species_list: {},
-    # show_species_list: {},
-    species_list_search: {},
-    species_lists_by_title: {},
-    species_lists_by_user: {},
-    species_lists_for_project: {},
-    upload_species_list: {}
-  },
+  # species_list: {
+  #   add_observation_to_species_list: {},
+  #   add_remove_observations: {},
+  #   bulk_editor: {},
+  #   clear_species_list: {},
+  #   create_species_list: {},
+  #   destroy_species_list: {},
+  #   download: {},
+  #   edit_species_list: {},
+  #   index_species_list: {},
+  #   list_species_lists: {},
+  #   make_report: {},
+  #   manage_projects: {},
+  #   manage_species_lists: {},
+  #   name_lister: {},
+  #   next_species_list: {},
+  #   post_add_remove_observations: {},
+  #   prev_species_list: {},
+  #   print_labels: {},
+  #   remove_observation_from_species_list: {},
+  #   # show_species_list: {},
+  #   species_list_search: {},
+  #   species_lists_by_title: {},
+  #   species_lists_by_user: {},
+  #   species_lists_for_project: {},
+  #   upload_species_list: {}
+  # },
   support: {
     confirm: {},
     donate: {},
@@ -653,14 +653,23 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :sequences, id: /\d+/
 
   # ----- Species Lists: standard actions -----------------------------------
-  resources :species_lists, id: /\d+/ do
-    resources :projects, only: [:edit, :update],
-                         controller: "species_lists/projects"
-    resources :uploads, only: [:new, :create],
-                        controller: "species_lists/uploads"
-    resources :downloads, only: [:new, :create],
-                          controller: "species_lists/downloads"
-  end
+  resources :species_lists, id: /\d+/
+
+  put("/species_lists/:id/clear", to: "species_lists#clear",
+                                  as: "clear_species_list")
+
+  get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
+                                        as: "new_species_list_name_lister")
+  post("/species_lists/name_lister", to: "species_lists/name_lists#create",
+                                     as: "species_list_name_lister")
+  get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
+                                        as: "new_species_list_upload")
+  post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
+                                     as: "species_list_uploads")
+  get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
+                                          as: "new_species_list_download")
+  post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
+                                       as: "species_list_downloads")
   get("/species_lists/:species_list/observations",
       to: "species_lists/observations#edit",
       as: "edit_species_list_observations")
@@ -668,6 +677,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "species_lists/observations#update",
         via: [:put, :patch],
         as: "species_list_observations")
+  get("/species_lists/:id/projects",
+      to: "species_lists/projects#edit",
+      as: "edit_species_list_projects")
+  match("/species_lists/:id/projects",
+        to: "species_lists/projects#update",
+        via: [:put, :patch],
+        as: "species_list_projects")
 
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do

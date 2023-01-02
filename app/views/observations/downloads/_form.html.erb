@@ -1,40 +1,6 @@
 <%
-  @title = :species_list_download_title.t
-
-  tabs = [
-    link_with_query(:species_list_download_back.t, action: :show_species_list)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-
-  query_param = get_query_param(@query)
+# This form partial is also called by species_lists/downloads
 %>
-
-<%= form_with(url: print_labels_for_observations_path(q: query_param)) do |f| %>
-  <h3 class="margin-top:2em"><%= :species_list_labels_header.t %>:</h3>
-  <%= submit_tag(:species_list_labels_button.l, class: "btn btn-default") %>
-<% end %>
-
-<%= form_tag(add_query_param({ action: :make_report, id: @list.id })) %>
-  <h3 class="margin-top:2em"><%= :species_list_report_header.t %>:</h3>
-
-  <p><%= :download_observations_format.t %>:</p>
-  <ul type="none">
-    <li>
-      <%= radio_button_tag(:type, :txt, @type == "txt") %>
-      <%= :species_list_show_save_as_txt.t %>
-    </li>
-    <li>
-      <%= radio_button_tag(:type, :rtf, @type == "rtf") %>
-      <%= :species_list_show_save_as_rtf.t %>
-    </li>
-    <li>
-      <%= radio_button_tag(:type, :csv, @type == "csv") %>
-      <%= :species_list_show_save_as_csv.t %>
-    </li>
-  </ul>
-
-  <%= submit_tag(:species_list_report_button.l, class: "btn btn-default") %>
-</form>
 
 <%= form_with(url: observations_downloads_path(q: query_param)) do |f| %>
   <h3 class="margin-top:2em"><%= :species_list_download_header.t %>:</h3>
@@ -52,7 +18,8 @@
     <li>
       <%= radio_button_tag(:format, :darwin, @format == "darwin") %>
       <%= :download_observations_darwin.t %>
-      (<%= link_to(:download_observations_what_is_this.t, "http://rs.tdwg.org/dwc/index.htm",
+      (<%= link_to(:download_observations_what_is_this.t,
+                   "http://rs.tdwg.org/dwc/index.htm",
                    target: "_new") %>)
     </li>
     <li>
@@ -72,7 +39,8 @@
       <%= :download_observations_ascii.t %>
     </li>
     <li>
-      <%= radio_button_tag(:encoding, "WINDOWS-1252", @encoding == "WINDOWS-1252") %>
+      <%= radio_button_tag(:encoding, "WINDOWS-1252",
+                           @encoding == "WINDOWS-1252") %>
       <%= :download_observations_windows.t %>
     </li>
     <li>
@@ -85,5 +53,10 @@
     </li>
   </ul>
 
-  <%= submit_tag(:DOWNLOAD.l, class: "btn btn-default") %>
+  <%= f.submit(:DOWNLOAD.l, class: "btn btn-default") %>
+  <%= f.submit(:CANCEL.l, class: "btn btn-default") %>
+
+  <p class="mt-5"><%= :download_observations_print_labels_header.t %>:</p>
+  <%= f.submit(:download_observations_print_labels.l,
+               class: "btn btn-default") %>
 <% end %>

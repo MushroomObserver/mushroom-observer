@@ -43,14 +43,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_template("new")
     assert_template("shared/_form_list_feedback")
     assert_template("shared/_textilize_help")
-    assert_template("species_list/_form")
+    assert_template("species_lists/_form")
   end
 
   def assert_edit_species_list
     assert_template("edit")
     assert_template("shared/_form_list_feedback")
     assert_template("shared/_textilize_help")
-    assert_template("species_list/_form")
+    assert_template("species_lists/_form")
   end
 
   def assert_project_checks(project_states)
@@ -236,8 +236,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
       SpeciesList.find(id)
     end
   end
-
-
 
   # ----------------------------
   #  Create lists.
@@ -984,127 +982,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
   #  Name lister and reports.
   # ----------------------------
 
-  def test_make_report
-    login
-    now = Time.zone.now
-
-    User.current = rolf
-    tapinella = Name.create(
-      author: "(Batsch) Šutara",
-      text_name: "Tapinella atrotomentosa",
-      search_name: "Tapinella atrotomentosa (Batsch) Šutara",
-      sort_name: "Tapinella atrotomentosa (Batsch) Šutara",
-      display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
-      deprecated: false,
-      rank: "Species"
-    )
-
-    list = species_lists(:first_species_list)
-    args = {
-      place_name: "limbo",
-      when: now,
-      created_at: now,
-      updated_at: now,
-      user: rolf,
-      specimen: false
-    }
-    list.construct_observation(tapinella, args)
-    list.construct_observation(names(:fungi), args)
-    list.construct_observation(names(:coprinus_comatus), args)
-    list.construct_observation(names(:lactarius_alpigenes), args)
-    list.save # just in case
-
-    path = Rails.root.join("test/reports")
-
-    get(:make_report, params: { id: list.id, type: "csv" })
-    assert_response_equal_file(["#{path}/test.csv", "ISO-8859-1"])
-
-    get(:make_report, params: { id: list.id, type: "txt" })
-    assert_response_equal_file("#{path}/test.txt")
-
-    get(:make_report, params: { id: list.id, type: "rtf" })
-    assert_response_equal_file("#{path}/test.rtf") do |x|
-      x.sub(/\{\\createim\\yr.*\}/, "")
-    end
-
-    get(:make_report, params: { id: list.id, type: "bogus" })
-    assert_response(:redirect)
-    assert_flash_error
-  end
-
-  def test_print_labels
-    login
-    spl = species_lists(:one_genus_three_species_list)
-    query = Query.lookup_and_save(:Observation, :in_species_list,
-                                  species_list: spl)
-    query_params = @controller.query_params(query)
-    get(:print_labels, params: { id: spl.id })
-    assert_redirected_to(
-      print_labels_for_observations_path(params: query_params)
-    )
-  end
-
-  def test_download
-    login
-    spl = species_lists(:one_genus_three_species_list)
-    query = Query.lookup_and_save(:Observation, :in_species_list,
-                                  species_list: spl)
-    query_params = @controller.query_params(query)
-    get(:download, params: { id: spl.id })
-
-    url = print_labels_for_observations_path(params: query_params)
-    assert_select("form[action='#{url}']")
-
-    url = url_for({ controller: :species_list, action: :make_report,
-                    id: spl.id })
-    assert_select("form[action='#{url}']")
-
-    url = observations_downloads_path(params: query_params)
-    assert_select("form[action='#{url}']")
-  end
-
-  def test_name_lister
-    # This will have to be very rudimentary, since the vast majority of the
-    # complexity is in Javascript.  Sigh.
-    user = login("rolf")
-    assert(user.successful_contributor?)
-    get(:name_lister)
-
-    params = {
-      results: [
-        "Amanita baccata|sensu Borealis*",
-        "Coprinus comatus*",
-        "Fungi*",
-        "Lactarius alpigenes"
-      ].join("\n")
-    }
-
-    post(:name_lister, params: params.merge(commit: :name_lister_submit_spl.l))
-    ids = @controller.instance_variable_get(:@names).map(&:id)
-    assert_equal([names(:amanita_baccata_borealis).id,
-                  names(:coprinus_comatus).id, names(:fungi).id,
-                  names(:lactarius_alpigenes).id],
-                 ids)
-    assert_create_species_list
-
-    path = Rails.root.join("test/reports")
-
-    post(:name_lister, params: params.merge(commit: :name_lister_submit_csv.l))
-    assert_response_equal_file(["#{path}/test2.csv", "ISO-8859-1"])
-
-    post(:name_lister, params: params.merge(commit: :name_lister_submit_txt.l))
-    assert_response_equal_file("#{path}/test2.txt")
-
-    post(:name_lister, params: params.merge(commit: :name_lister_submit_rtf.l))
-    assert_response_equal_file("#{path}/test2.rtf") do |x|
-      x.sub(/\{\\createim\\yr.*\}/, "")
-    end
-
-    post(:name_lister, params: { commit: "bogus" })
-    assert_flash_error
-    assert_template(:name_lister)
-  end
-
   def test_name_resolution
     params = {
       species_list: {
@@ -1319,22 +1196,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal("mary", spl.user.login)
     assert_operator(spl.observations.count, :>, 1)
 
-    get(:clear_species_list)
+    put(:clear)
     assert_no_flash
     assert_not_equal(0, spl.reload.observations.count)
 
-    get(:clear_species_list, params: { id: spl.id })
+    put(:clear, params: { id: spl.id })
     assert_no_flash
     assert_not_equal(0, spl.reload.observations.count)
 
     login("rolf")
-    get(:clear_species_list, params: { id: spl.id })
+    put(:clear, params: { id: spl.id })
     assert_flash_error
     assert_not_equal(0, spl.reload.observations.count)
 
     login("mary")
     expected_score = mary.contribution - spl.observations.count
-    get(:clear_species_list, params: { id: spl.id })
+    put(:clear, params: { id: spl.id })
     assert_flash_success
     assert_equal(0, spl.reload.observations.count)
     assert_equal(expected_score, mary.reload.contribution)
@@ -1355,7 +1232,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # make sure the "Set Source" link is on the page somewhere
     get(:show, params: { id: spl1.id })
-    link_args = { controller: :species_list, action: :show,
+    link_args = { controller: :species_lists, action: :show,
                   id: spl1.id, set_source: 1 }
     assert_link_in_html(:species_list_show_set_source.t, link_args)
 

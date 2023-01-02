@@ -79,14 +79,14 @@ module SpeciesLists
       put(:update,
           params: params.merge(commit: "bogus", species_list: spl.title))
       assert_response(:redirect)
-      assert_redirected_to(%r{/species_list/show_species_list})
+      assert_redirected_to(%r{/species_lists})
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
       put(:update,
           params: params.merge(commit: :ADD.l, species_list: spl.title))
       assert_response(:redirect)
-      assert_redirected_to(%r{/species_list/show_species_list})
+      assert_redirected_to(%r{/species_lists})
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
@@ -94,14 +94,14 @@ module SpeciesLists
       put(:update,
           params: params.merge(commit: :ADD.l, species_list: spl.title))
       assert_response(:redirect)
-      assert_redirected_to(%r{/species_list/show_species_list})
+      assert_redirected_to(%r{/species_lists})
       assert_flash_success
       assert_equal(new_count, spl.reload.observations.size)
 
       put(:update,
           params: params.merge(commit: :REMOVE.l, species_list: spl.id.to_s))
       assert_response(:redirect)
-      assert_redirected_to(%r{/species_list/show_species_list})
+      assert_redirected_to(%r{/species_lists})
       assert_flash_success
       assert_equal(0, spl.reload.observations.size)
     end

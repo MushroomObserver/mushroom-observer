@@ -1,0 +1,5 @@
+<%= form_with(url: print_labels_for_observations_path(q: query_param),
+              id: "species_list_download_print_labels") do |f| %>
+  <h3 class="margin-top:2em"><%= :species_list_labels_header.t %>:</h3>
+  <%= f.submit(:species_list_labels_button.l, class: "btn btn-default") %>
+<% end %>

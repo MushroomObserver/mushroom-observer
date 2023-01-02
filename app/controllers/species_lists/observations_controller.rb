@@ -99,5 +99,9 @@ module SpeciesLists
       species_list.observation_ids -= ids
       flash_notice(:species_list_add_remove_remove_success.t(num: ids.length))
     end
+
+    ############################################################################
+
+    include SpeciesLists::SharedPrivateMethods # shared private methods
   end
 end

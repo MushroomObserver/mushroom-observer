@@ -31,7 +31,7 @@ class ObjectLinkHelperTest < ActionView::TestCase
                  link_to_object(projects(:bolete_project), "BP"))
     # link to species list
     spl = species_lists(:first_species_list)
-    path = show_species_list_path(spl.id)
+    path = species_list_path(spl.id)
     html_id = "show_species_list_link_#{spl.id}"
     link_text = "A Species List"
     assert_equal(expected_link(path, html_id, link_text),

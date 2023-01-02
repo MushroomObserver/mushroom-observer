@@ -17,7 +17,7 @@
                         clone: @species_list.id }),
       link_to(:species_list_show_add_remove_from_another_list.t,
               add_query_param(
-                { controller: "/species_lists/observation_queries",
+                { controller: "/species_lists/observations",
                   action: "edit" }, @query))
     ]
   end
@@ -25,13 +25,13 @@
     tabs += [
       link_with_query(:species_list_show_manage_projects.t,
                       { controller: "/species_lists/projects",
-                        action: :manage_projects, id: @species_list.id },
+                        action: :edit, id: @species_list.id },
                       { help: :species_list_show_manage_projects_help.l }),
       link_with_query(:species_list_show_edit.t,
                       { action: :edit, id: @species_list.id }),
-      link_with_query(:species_list_show_clear_list.t,
-                      { action: :clear_species_list, id: @species_list.id },
-                      { class: "text-danger", data: { confirm: :are_you_sure.l } }),
+      put_button(name: :species_list_show_clear_list.t,
+                 path: { action: :clear, id: @species_list.id },
+                 { class: "text-danger", data: { confirm: :are_you_sure.l } }),
       destroy_button(name: :species_list_show_destroy.t, target: @species_list)
     ]
   end

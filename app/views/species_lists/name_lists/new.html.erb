@@ -2,7 +2,7 @@
   @title = :name_lister_title.t
 
   tabs = [
-    link_to(:name_lister_classic.t, action: :create_species_list)
+    link_to(:name_lister_classic.t, new_species_list_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
@@ -48,21 +48,7 @@
     <tr>
       <td colspan="3">
         <div id="word">&nbsp;</div>
-        <%= form_tag({action: :name_lister}, {}) %>
-          <div class="text-center">
-            <%= submit_tag(:name_lister_submit_spl.l, class: "btn btn-default", disabled: !@user) %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_txt.l, class: "btn btn-default") %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_rtf.l, class: "btn btn-default") %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_csv.l, class: "btn btn-default") %>
-          </div><!-- .text-center -->
-          <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
-          <% if false %>
-            <br/>
-            <%= label_tag(:charset, :name_lister_charset.t + ":") %>
-            <%= select_tag(:charset, options_for_select(["ISO-8859-1", "WINDOWS-1252", "UTF-8"], @charset)) %>
-            <span class="help-note"><%= :name_lister_charset_help.t %></span>
-          <% end %>
-        </form>
+        <%= render(partial: "species_lists/name_lister/form") %>
       </td>
     </tr>
   </tbody>

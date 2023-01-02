@@ -12,22 +12,22 @@ module SpeciesLists
       list = species_lists(:unknown_species_list)
 
       # Requires login.
-      get(:manage_projects, params: { id: list.id })
+      get(:edit, params: { id: list.id })
       assert_response(:redirect)
 
       # Must have permission to edit list.
       login("rolf")
-      get(:manage_projects, params: { id: list.id })
+      get(:edit, params: { id: list.id })
       assert_response(:redirect)
 
       # Members of group that has list are good enough.
       login("dick")
-      get(:manage_projects, params: { id: list.id })
+      get(:edit, params: { id: list.id })
       assert_response(:success)
 
       # Owner of list always can.
       login("mary")
-      get(:manage_projects, params: { id: list.id })
+      get(:edit, params: { id: list.id })
       assert_response(:success)
     end
 
@@ -37,7 +37,7 @@ module SpeciesLists
       list = species_lists(:unknown_species_list)
 
       login("dick")
-      get(:manage_projects, params: { id: list.id })
+      get(:edit, params: { id: list.id })
       assert_checkbox_state("objects_list", :unchecked)
       assert_checkbox_state("objects_obs", :unchecked)
       assert_checkbox_state("objects_img", :unchecked)
@@ -45,15 +45,15 @@ module SpeciesLists
       assert_checkbox_state("projects_#{proj2.id}", :unchecked)
 
       login("mary")
-      get(:manage_projects, params: { id: list.id })
+      get(:edit, params: { id: list.id })
       assert_checkbox_state("objects_list", :unchecked)
       assert_checkbox_state("objects_obs", :unchecked)
       assert_checkbox_state("objects_img", :unchecked)
       assert_checkbox_state("projects_#{proj1.id}", :unchecked)
       assert_checkbox_state("projects_#{proj2.id}", :unchecked)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -65,8 +65,8 @@ module SpeciesLists
       assert_flash_error # bogus commit button
       assert_obj_list_equal([proj2], list.projects.reload)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -78,8 +78,8 @@ module SpeciesLists
       assert_flash_warning # no changes
       assert_obj_list_equal([proj2], list.projects.reload)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -91,8 +91,8 @@ module SpeciesLists
       assert_flash_error # no permission
       assert_obj_list_equal([proj2], list.projects.reload)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -104,8 +104,8 @@ module SpeciesLists
       assert_flash_success
       assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -117,8 +117,8 @@ module SpeciesLists
       assert_flash_warning # already attached
       assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -130,8 +130,8 @@ module SpeciesLists
       assert_flash_warning # no changes
       assert_obj_list_equal([proj1, proj2], list.projects.reload, :sort)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -143,8 +143,8 @@ module SpeciesLists
       assert_flash_success
       assert_obj_list_equal([proj1], list.projects.reload)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -156,8 +156,8 @@ module SpeciesLists
       assert_flash_warning # no changes
       assert_obj_list_equal([proj1], list.projects.reload)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_list: "1",
@@ -180,8 +180,8 @@ module SpeciesLists
       assert_equal(2, proj2.images.length)
 
       login("mary")
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
@@ -193,8 +193,8 @@ module SpeciesLists
       )
       assert_flash_warning # no changes
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
@@ -206,8 +206,8 @@ module SpeciesLists
       )
       assert_flash_warning # no changes
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
@@ -220,8 +220,8 @@ module SpeciesLists
       assert_flash_error # no permission
 
       login("dick")
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
@@ -234,8 +234,8 @@ module SpeciesLists
       assert_flash_warning # already done
 
       login("mary")
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
@@ -250,8 +250,8 @@ module SpeciesLists
       assert_equal(2, proj1.observations.length)
       assert_equal(2, proj1.images.length)
 
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
@@ -267,8 +267,8 @@ module SpeciesLists
       assert_equal(0, proj2.images.length)
 
       login("dick")
-      post(
-        :manage_projects,
+      put(
+        :update,
         params: {
           id: list.id,
           objects_obs: "1",
