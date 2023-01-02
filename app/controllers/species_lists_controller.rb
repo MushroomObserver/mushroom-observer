@@ -168,7 +168,7 @@ class SpeciesListsController < ApplicationController
     store_location
     clear_query_in_session
     pass_query_params
-    return unless find_species_list!
+    return unless (@species_list = find_species_list!)
 
     case params[:flow]
     when "next"
@@ -202,7 +202,7 @@ class SpeciesListsController < ApplicationController
   end
 
   def edit
-    return unless @species_list = find_species_list!
+    return unless (@species_list = find_species_list!)
 
     if check_permission!(@species_list)
       init_name_vars_for_edit(@species_list)
@@ -215,7 +215,7 @@ class SpeciesListsController < ApplicationController
   end
 
   def update
-    return unless @species_list = find_species_list!
+    return unless (@species_list = find_species_list!)
 
     if check_permission!(@species_list)
       process_species_list(:update)
@@ -225,7 +225,7 @@ class SpeciesListsController < ApplicationController
   end
 
   def destroy
-    return unless @species_list = find_species_list!
+    return unless (@species_list = find_species_list!)
 
     if check_permission!(@species_list)
       @species_list.destroy
@@ -238,7 +238,7 @@ class SpeciesListsController < ApplicationController
   end
 
   def clear
-    return unless @species_list = find_species_list!
+    return unless (@species_list = find_species_list!)
 
     if check_permission!(@species_list)
       @species_list.clear

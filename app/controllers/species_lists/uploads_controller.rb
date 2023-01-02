@@ -5,9 +5,9 @@ module SpeciesLists
     before_action :login_required
     before_action :disable_link_prefetching
 
-    # Form to let user create/edit species_list from file.
+    # Form to let user add to a species_list from file.
     def new
-      return unless @species_list = find_species_list!
+      return unless (@species_list = find_species_list!)
 
       if check_permission!(@species_list)
         query = create_query(:Observation, :in_species_list,
@@ -20,7 +20,7 @@ module SpeciesLists
 
     # Upload form posts here
     def create
-      return unless @species_list = find_species_list!
+      return unless (@species_list = find_species_list!)
 
       if check_permission!(@species_list)
         sorter = NameSorter.new
