@@ -248,6 +248,9 @@ gem("graphql-batch")
 
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
+  # https://github.com/ruby/debug
+  gem("debug", ">= 1.0.0")
+
   # Use built-in Ruby coverage to generate html coverage file
   gem("simplecov", require: false)
   # generate lcov file to send to Coveralls by Github Actions
