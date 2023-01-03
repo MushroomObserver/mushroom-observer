@@ -39,27 +39,27 @@ module SpeciesLists
       # make sure some of the query results are already in there
       assert(query.results & spl.observations != [])
 
-      # These are not valid routes anymore, without params[:species_list]
-      # put_requires_login(:update, params: params)
-      # assert_response(:redirect)
-      # assert_redirected_to(
-      #   edit_species_list_observations_path(species_list: spl.id)
-      # )
-      # assert_flash_error
-      # assert_equal(old_count, spl.reload.observations.size)
+      # The form does not require any starting species_list or obs
+      put_requires_login(:update)
+      assert_response(:redirect)
+      assert_redirected_to(
+        edit_species_list_observations_path(species_list: "")
+      )
+      assert_flash_error
+      assert_equal(old_count, spl.reload.observations.size)
 
-      # put(:update, params: params)
-      # assert_response(:redirect)
-      # assert_redirected_to(
-      #   edit_species_list_observations_path(species_list: spl.id)
-      # )
-      # assert_flash_error
-      # assert_equal(old_count, spl.reload.observations.size)
+      put(:update, params: params)
+      assert_response(:redirect)
+      assert_redirected_to(
+        edit_species_list_observations_path(species_list: "")
+      )
+      assert_flash_error
+      assert_equal(old_count, spl.reload.observations.size)
 
       put(:update, params: params.merge(species_list: "blah"))
       assert_response(:redirect)
       assert_redirected_to(
-        edit_species_list_observations_path(species_list: spl.id)
+        edit_species_list_observations_path(species_list: "blah")
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -76,6 +76,7 @@ module SpeciesLists
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
+      # Test a bogus commit param, in case of hacks
       put(:update,
           params: params.merge(commit: "bogus", species_list: spl.title))
       assert_response(:redirect)

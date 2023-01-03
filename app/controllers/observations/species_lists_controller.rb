@@ -24,19 +24,21 @@ module Observations
     # new endpoint for :add_observation_to_species_list and
     # :remove_observation_from_species_list. use params[:commit]
     def update
-      return unless (species_list = find_species_list!)
+      return unless (@species_list = find_species_list!)
 
-      return unless (observation = find_observation!)
+      return unless (@observation = find_observation!)
 
-      unless check_permission!(species_list)
-        return redirect_to(species_list_path(species_list.id))
+      unless check_permission!(@species_list)
+        return redirect_to(species_list_path(@species_list.id))
       end
+
+      @all_lists = @user.all_editable_species_lists
 
       case params[:commit]
       when "add"
-        add_observation_to_species_list(species_list, observation)
+        add_observation_to_species_list(@species_list, @observation)
       when "remove"
-        remove_observation_from_species_list(species_list, observation)
+        remove_observation_from_species_list(@species_list, @observation)
       else
         # puts("Invalid mode: #{params[:commit].inspect}")
         flash_error("Invalid mode: #{params[:commit].inspect}")

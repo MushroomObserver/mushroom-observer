@@ -27,7 +27,7 @@ module Observations
       assert_not(sp.observations.member?(obs))
       params = { id: obs.id, species_list_id: sp.id, commit: "add" }
       requires_login(:update, params)
-      assert_redirected_to(action: :edit, id: obs.id)
+      assert_template("edit")
       assert(sp.reload.observations.member?(obs))
     end
 
@@ -58,7 +58,7 @@ module Observations
 
       login(owner)
       put(:update, params: params)
-      assert_redirected_to(action: :edit, id: obs.id)
+      assert_template("edit")
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -103,10 +103,6 @@ module Observations
                     count: 0)
 
       get(:edit, params: { id: obs2.id })
-      # puts("spl1 " + spl1.id + "\n")
-      # puts("spl2 " + spl2.id + "\n")
-      # puts("spl3 " + spl3.id + "\n")
-      # binding.break
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
                                                   species_list_id: spl1.id,
@@ -125,7 +121,6 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "add" })
-      binding.break
       assert_template("edit")
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,

@@ -4,11 +4,11 @@
   </p>
   <p>
     <% @checklist.sort_by(&:first).each do |name, id| %>
-      <%= fields_for(:checklist) do |f_c| %>
-        <%= f_c.check_box(:data, id, checked: @checklist_names[id]) %>
-        <%= f_c.label("data_#{id}", name.t) %>
-        <br/>
+      <%= fields_for(:checklist_data) do |fcd| %>
+      <%= fcd.check_box(id, checked: @checklist_names[id]) %>
+      <%= fcd.label(id, name.t) %>
       <% end %>
+      <br/>
     <% end %>
   </p>
 </div>
