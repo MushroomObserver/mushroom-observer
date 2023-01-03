@@ -43,11 +43,6 @@ class ProjectsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_add_project_existing
-    add_project_helper(projects(:eol_project).title,
-                       "The Entoloma On Line Project")
-  end
-
   def test_show_project
     login("zero") # NOt the owner of eol_project
     p_id = projects(:eol_project).id
@@ -134,12 +129,21 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal([rolf], admin_group.users)
   end
 
+  def test_add_project_existing
+    add_project_helper(projects(:eol_project).title,
+                       "The Entoloma On Line Project")
+  end
+
   def test_add_project_empty_name
     add_project_helper("", "The Empty Project")
   end
 
   def test_add_project_existing_user_group
     add_project_helper("reviewers", "Journal Reviewers")
+  end
+
+  def test_add_project_existing_admin_group
+    add_project_helper("The Test Coverage Project", "")
   end
 
   def test_edit_project
