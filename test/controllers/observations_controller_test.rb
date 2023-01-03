@@ -71,7 +71,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + 2 * g_num + 10 * n_num,
+    assert_equal(score + o_num + g_num * 2 + n_num * 10,
                  user.reload.contribution,
                  "Wrong User score")
     return unless o_num == 1
@@ -1574,7 +1574,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + 2 * g_num + 10 * n_num,
+    assert_equal(score + o_num + g_num * 2 + n_num * 10,
                  user.reload.contribution,
                  "Wrong User score")
     assert_not_equal(

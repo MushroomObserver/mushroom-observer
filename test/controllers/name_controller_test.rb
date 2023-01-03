@@ -891,7 +891,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert(name = Name.find_by(text_name: text_name))
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts + 10, rolf.reload.contribution)
     assert_equal(icn_id, name.icn_id)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)

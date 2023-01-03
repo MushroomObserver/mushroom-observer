@@ -391,7 +391,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     post_requires_login(:create_species_list, params)
     spl = SpeciesList.last
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_spl + v_obs + 10, rolf.reload.contribution)
     assert_not_nil(spl)
     assert_equal(list_title, spl.title)
     assert(spl.name_included(names(:coprinus_comatus)))
@@ -447,7 +447,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_spl + v_obs + 10, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(agaricus))
   end
@@ -478,7 +478,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
     # Creates Lecideaceae, spl, and obs/naming/splentry.
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_nam + v_spl + v_obs + 10, rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
@@ -562,7 +562,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
     # Creating L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_nam + v_spl + v_obs + 10, rolf.reload.contribution)
     assert_not_nil(spl)
     obs = spl.observations.first
     assert_not_nil(obs)
@@ -596,7 +596,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
     # Creates Lecideaceae, spl, obs/naming/splentry.
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_nam + v_spl + v_obs + 10, rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
@@ -666,7 +666,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
     # Creates "New" and "New name", spl, and five obs/naming/splentries.
-    assert_equal(10 + v_nam * 2 + v_spl + v_obs * 5, rolf.reload.contribution)
+    assert_equal(v_nam * 2 + v_spl + v_obs * 5 + 10, rolf.reload.contribution)
     assert(spl.name_included(deprecated_name))
     assert(spl.name_included(multiple_name))
     assert(spl.name_included(Name.find_by(text_name: new_name_str)))
@@ -725,7 +725,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.last
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_spl + v_obs + 10, rolf.reload.contribution)
     assert(spl.name_included(bugs_names.second))
   end
 
@@ -756,7 +756,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(v_spl + v_obs + 10, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(names(:coprinus_comatus)))
     obs = spl.observations.first
@@ -832,7 +832,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(owner)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
+    assert_equal(v_obs * 2 + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
   end
 
@@ -884,7 +884,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:edit_species_list, params: params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
     assert_equal("New Title", spl.title)
@@ -922,7 +922,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     # Creates "New", 'New name', observations/splentry/naming.
-    assert_equal(10 + v_nam * 2 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_nam * 2 + v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
   end
 
@@ -952,7 +952,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -983,7 +983,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -998,7 +998,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -1029,7 +1029,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -1048,7 +1048,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_not(spl.name_included(name))
     assert(spl.name_included(approved_name))
@@ -1069,7 +1069,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
     post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(v_obs + 10, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_not(spl.name_included(name))
     assert(spl.name_included(approved_name))

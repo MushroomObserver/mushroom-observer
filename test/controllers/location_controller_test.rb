@@ -159,10 +159,10 @@ class LocationControllerTest < FunctionalTestCase
     login
     get(:list_locations, params: { north: 0, south: 0, east: 0, west: 0 })
     query = Query.find(QueryRecord.last.id)
-    assert_equal(0 + delta, query.params[:north])
-    assert_equal(0 - delta, query.params[:south])
-    assert_equal(0 + delta, query.params[:east])
-    assert_equal(0 - delta, query.params[:west])
+    assert_equal(params[:north] + delta, query.params[:north])
+    assert_equal(params[:south] - delta, query.params[:south])
+    assert_equal(params[:east] + delta, query.params[:east])
+    assert_equal(params[:west] - delta, query.params[:west])
 
     get(:list_locations,
         params: { north: 90, south: -90, east: 180, west: -180 })
@@ -414,7 +414,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :location, action: :show_location,
                          id: loc.id)
     assert_equal(count + 1, Location.count)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
 
