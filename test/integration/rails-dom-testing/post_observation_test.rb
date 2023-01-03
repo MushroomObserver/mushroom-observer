@@ -177,7 +177,7 @@ class PostObservationTest < IntegrationTestCase
   def assert_observation_has_correct_image(expected_values)
     new_obs = Observation.last
     new_img = Image.last
-    assert_obj_list_equal([new_img], new_obs.images)
+    assert_obj_arrays_equal([new_img], new_obs.images)
     assert_dates_equal(expected_values[:when], new_img.when)
     assert_equal(expected_values[:user].legal_name, new_img.copyright_holder)
     assert_equal(expected_values[:image_notes], new_img.notes.strip)

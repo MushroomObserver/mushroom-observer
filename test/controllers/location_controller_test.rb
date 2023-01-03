@@ -204,10 +204,10 @@ class LocationControllerTest < FunctionalTestCase
                                notes: "Santa Fe",
                                user: @mary)
     get(:list_by_country, params: { country: "USA" })
-    assert_obj_list_equal(usa_loc_array << loc_usa, assigns(:objects), :sort)
+    assert_obj_arrays_equal(usa_loc_array << loc_usa, assigns(:objects), :sort)
 
     get(:list_by_country, params: { country: "Mexico" })
-    assert_obj_list_equal([], assigns(:objects))
+    assert_obj_arrays_equal([], assigns(:objects))
 
     loc_mex1 = Location.create!(
       name: "Somewhere, Chihuahua, Mexico",
@@ -228,7 +228,7 @@ class LocationControllerTest < FunctionalTestCase
       user: @mary
     )
     get(:list_by_country, params: { country: "Mexico" })
-    assert_obj_list_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
+    assert_obj_arrays_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
   def test_locations_by_user
@@ -580,8 +580,8 @@ class LocationControllerTest < FunctionalTestCase
 
     # Rolf was already author, Mary doesn't become editor because
     # there was no change.
-    assert_user_list_equal([rolf], loc.description.authors)
-    assert_user_list_equal([], loc.description.editors)
+    assert_user_arrays_equal([rolf], loc.description.authors)
+    assert_user_arrays_equal([], loc.description.editors)
   end
 
   # Test update for north > 90.
@@ -785,15 +785,15 @@ class LocationControllerTest < FunctionalTestCase
 
     # Full match with albion.
     requires_login(:list_merge_options, where: albion.display_name)
-    assert_obj_list_equal([albion], assigns(:matches))
+    assert_obj_arrays_equal([albion], assigns(:matches))
 
     # Should match against albion.
     requires_login(:list_merge_options, where: "Albion, CA")
-    assert_obj_list_equal([albion], assigns(:matches))
+    assert_obj_arrays_equal([albion], assigns(:matches))
 
     # Should match against albion.
     requires_login(:list_merge_options, where: "Albion Field Station, CA")
-    assert_obj_list_equal([albion], assigns(:matches))
+    assert_obj_arrays_equal([albion], assigns(:matches))
 
     # Shouldn't match anything.
     requires_login(:list_merge_options, where: "Somewhere out there")

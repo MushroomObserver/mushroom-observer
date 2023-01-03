@@ -7,7 +7,7 @@ class LanguageTest < UnitTestCase
     english = languages(:english)
     all_but_english = Language.all - [english]
     assert_objs_equal(english, Language.official)
-    assert_obj_list_equal(all_but_english, Language.unofficial)
+    assert_obj_arrays_equal(all_but_english, Language.unofficial)
   end
 
   def test_top_contributors

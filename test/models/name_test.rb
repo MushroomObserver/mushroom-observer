@@ -1707,37 +1707,37 @@ class NameTest < UnitTestCase
   # ------------------------------
 
   def test_ancestors_1
-    assert_name_list_equal([names(:agaricus),
-                            names(:agaricaceae),
-                            names(:agaricales),
-                            names(:basidiomycetes),
-                            names(:basidiomycota),
-                            names(:fungi)],
-                           names(:agaricus_campestris).all_parents)
-    assert_name_list_equal(
+    assert_name_arrays_equal([names(:agaricus),
+                              names(:agaricaceae),
+                              names(:agaricales),
+                              names(:basidiomycetes),
+                              names(:basidiomycota),
+                              names(:fungi)],
+                             names(:agaricus_campestris).all_parents)
+    assert_name_arrays_equal(
       [names(:agaricus)], names(:agaricus_campestris).parents
     )
-    assert_name_list_equal(
+    assert_name_arrays_equal(
       [names(:agaricaceae)], names(:agaricus).parents
     )
-    assert_name_list_equal(
+    assert_name_arrays_equal(
       [], names(:agaricus_campestris).children
     )
-    assert_name_list_equal([names(:sect_agaricus)],
-                           names(:agaricus).children(all: false), :sort)
-    assert_name_list_equal([names(:sect_agaricus),
-                            names(:agaricus_campestras),
-                            names(:agaricus_campestris),
-                            names(:agaricus_campestros),
-                            names(:agaricus_campestrus)],
-                           names(:agaricus).children(all: true), :sort)
+    assert_name_arrays_equal([names(:sect_agaricus)],
+                             names(:agaricus).children(all: false), :sort)
+    assert_name_arrays_equal([names(:sect_agaricus),
+                              names(:agaricus_campestras),
+                              names(:agaricus_campestris),
+                              names(:agaricus_campestros),
+                              names(:agaricus_campestrus)],
+                             names(:agaricus).children(all: true), :sort)
   end
 
   def test_ancestors_2
     # use Petigera instead of Peltigera because it has no classification string
     p = names(:petigera)
-    assert_name_list_equal([], p.all_parents)
-    assert_name_list_equal([], p.children)
+    assert_name_arrays_equal([], p.all_parents)
+    assert_name_arrays_equal([], p.children)
 
     pc   = create_test_name("Petigera canina (L.) Willd.")
     pcr  = create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
@@ -1755,80 +1755,80 @@ class NameTest < UnitTestCase
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
 
-    assert_name_list_equal([pa, pc, pp, pp2], p.children, :sort)
-    assert_name_list_equal([pcr, pcs], pc.children, :sort)
-    assert_name_list_equal([pcri], pcr.children, :sort)
-    assert_name_list_equal([pav], pa.children, :sort)
-    assert_name_list_equal([pph, ppn], pp.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pcr, pcs], pc.children, :sort)
+    assert_name_arrays_equal([pcri], pcr.children, :sort)
+    assert_name_arrays_equal([pav], pa.children, :sort)
+    assert_name_arrays_equal([pph, ppn], pp.children, :sort)
 
     # Oops! Petigera is misspelled, so these aren't right...
-    assert_name_list_equal([], pc.all_parents)
-    assert_name_list_equal([pc], pcr.all_parents)
-    assert_name_list_equal([pcr, pc], pcri.all_parents)
-    assert_name_list_equal([pc], pcs.all_parents)
-    assert_name_list_equal([], pa.all_parents)
-    assert_name_list_equal([pa], pac.all_parents)
-    assert_name_list_equal([pa], pav.all_parents)
-    assert_name_list_equal([], pp.all_parents)
-    assert_name_list_equal([], pp2.all_parents)
-    assert_name_list_equal([pp], pph.all_parents)
-    assert_name_list_equal([pp], ppn.all_parents)
+    assert_name_arrays_equal([], pc.all_parents)
+    assert_name_arrays_equal([pc], pcr.all_parents)
+    assert_name_arrays_equal([pcr, pc], pcri.all_parents)
+    assert_name_arrays_equal([pc], pcs.all_parents)
+    assert_name_arrays_equal([], pa.all_parents)
+    assert_name_arrays_equal([pa], pac.all_parents)
+    assert_name_arrays_equal([pa], pav.all_parents)
+    assert_name_arrays_equal([], pp.all_parents)
+    assert_name_arrays_equal([], pp2.all_parents)
+    assert_name_arrays_equal([pp], pph.all_parents)
+    assert_name_arrays_equal([pp], ppn.all_parents)
 
-    assert_name_list_equal([], pc.parents)
-    assert_name_list_equal([pc], pcr.parents)
-    assert_name_list_equal([pcr], pcri.parents)
-    assert_name_list_equal([pc], pcs.parents)
-    assert_name_list_equal([], pa.parents)
-    assert_name_list_equal([pa], pac.parents)
-    assert_name_list_equal([pa], pav.parents)
-    assert_name_list_equal([], pp.parents)
-    assert_name_list_equal([pp], pph.parents)
-    assert_name_list_equal([pp], ppn.parents)
+    assert_name_arrays_equal([], pc.parents)
+    assert_name_arrays_equal([pc], pcr.parents)
+    assert_name_arrays_equal([pcr], pcri.parents)
+    assert_name_arrays_equal([pc], pcs.parents)
+    assert_name_arrays_equal([], pa.parents)
+    assert_name_arrays_equal([pa], pac.parents)
+    assert_name_arrays_equal([pa], pav.parents)
+    assert_name_arrays_equal([], pp.parents)
+    assert_name_arrays_equal([pp], pph.parents)
+    assert_name_arrays_equal([pp], ppn.parents)
 
     # Try it again if we clear the misspelling flag.  (Still deprecated though.)
     p.correct_spelling = nil
     p.save
 
-    assert_name_list_equal([p], pc.all_parents, :sort)
-    assert_name_list_equal([pc], pcr.all_parents, :sort)
-    assert_name_list_equal([pcr, pc], pcri.all_parents, :sort)
-    assert_name_list_equal([pc], pcs.all_parents, :sort)
-    assert_name_list_equal([p], pa.all_parents, :sort)
-    assert_name_list_equal([pa], pac.all_parents, :sort)
-    assert_name_list_equal([pa], pav.all_parents, :sort)
-    assert_name_list_equal([p], pp.all_parents, :sort)
-    assert_name_list_equal([p], pp2.all_parents, :sort)
-    assert_name_list_equal([pp], pph.all_parents, :sort)
-    assert_name_list_equal([pp], ppn.all_parents, :sort)
+    assert_name_arrays_equal([p], pc.all_parents, :sort)
+    assert_name_arrays_equal([pc], pcr.all_parents, :sort)
+    assert_name_arrays_equal([pcr, pc], pcri.all_parents, :sort)
+    assert_name_arrays_equal([pc], pcs.all_parents, :sort)
+    assert_name_arrays_equal([p], pa.all_parents, :sort)
+    assert_name_arrays_equal([pa], pac.all_parents, :sort)
+    assert_name_arrays_equal([pa], pav.all_parents, :sort)
+    assert_name_arrays_equal([p], pp.all_parents, :sort)
+    assert_name_arrays_equal([p], pp2.all_parents, :sort)
+    assert_name_arrays_equal([pp], pph.all_parents, :sort)
+    assert_name_arrays_equal([pp], ppn.all_parents, :sort)
 
-    assert_name_list_equal([p], pc.parents)
-    assert_name_list_equal([pc], pcr.parents)
-    assert_name_list_equal([pcr], pcri.parents)
-    assert_name_list_equal([pc], pcs.parents)
-    assert_name_list_equal([p], pa.parents)
-    assert_name_list_equal([pa], pac.parents)
-    assert_name_list_equal([pa], pav.parents)
-    assert_name_list_equal([p], pp.parents)
-    assert_name_list_equal([pp], pph.parents, :sort)
-    assert_name_list_equal([pp], ppn.parents, :sort)
+    assert_name_arrays_equal([p], pc.parents)
+    assert_name_arrays_equal([pc], pcr.parents)
+    assert_name_arrays_equal([pcr], pcri.parents)
+    assert_name_arrays_equal([pc], pcs.parents)
+    assert_name_arrays_equal([p], pa.parents)
+    assert_name_arrays_equal([pa], pac.parents)
+    assert_name_arrays_equal([pa], pav.parents)
+    assert_name_arrays_equal([p], pp.parents)
+    assert_name_arrays_equal([pp], pph.parents, :sort)
+    assert_name_arrays_equal([pp], ppn.parents, :sort)
 
     pp2.change_deprecated(true)
     pp2.save
 
-    assert_name_list_equal([pa, pc, pp, pp2], p.children, :sort)
-    assert_name_list_equal([pp], pph.all_parents, :sort)
-    assert_name_list_equal([pp], ppn.all_parents, :sort)
-    assert_name_list_equal([pp], pph.parents, :sort)
-    assert_name_list_equal([pp], ppn.parents, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pp], pph.all_parents, :sort)
+    assert_name_arrays_equal([pp], ppn.all_parents, :sort)
+    assert_name_arrays_equal([pp], pph.parents, :sort)
+    assert_name_arrays_equal([pp], ppn.parents, :sort)
 
     pp.change_deprecated(true)
     pp.save
 
-    assert_name_list_equal([pa, pc, pp, pp2], p.children, :sort)
-    assert_name_list_equal([pp, p], pph.all_parents, :sort)
-    assert_name_list_equal([pp, p], ppn.all_parents, :sort)
-    assert_name_list_equal([pp], pph.parents, :sort)
-    assert_name_list_equal([pp], ppn.parents, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pp, p], pph.all_parents, :sort)
+    assert_name_arrays_equal([pp, p], ppn.all_parents, :sort)
+    assert_name_arrays_equal([pp], pph.parents, :sort)
+    assert_name_arrays_equal([pp], ppn.parents, :sort)
   end
 
   def test_ancestors_3
@@ -1852,55 +1852,56 @@ class NameTest < UnitTestCase
       "f. innovans (Körber) J. W. Thomson"
     )
 
-    assert_name_list_equal([], kng.all_parents)
-    assert_name_list_equal([kng], phy.all_parents)
-    assert_name_list_equal([phy, kng], cls.all_parents)
-    assert_name_list_equal([cls, phy, kng], ord.all_parents)
-    assert_name_list_equal([ord, cls, phy, kng], fam.all_parents)
-    assert_name_list_equal([fam, ord, cls, phy, kng], gen.all_parents)
-    assert_name_list_equal([gen, fam, ord, cls, phy, kng], spc.all_parents)
-    assert_name_list_equal([spc, gen, fam, ord, cls, phy, kng], ssp.all_parents)
-    assert_name_list_equal([ssp, spc, gen, fam, ord, cls, phy, kng],
-                           var.all_parents)
-    assert_name_list_equal([var, ssp, spc, gen, fam, ord, cls, phy, kng],
-                           frm.all_parents)
+    assert_name_arrays_equal([], kng.all_parents)
+    assert_name_arrays_equal([kng], phy.all_parents)
+    assert_name_arrays_equal([phy, kng], cls.all_parents)
+    assert_name_arrays_equal([cls, phy, kng], ord.all_parents)
+    assert_name_arrays_equal([ord, cls, phy, kng], fam.all_parents)
+    assert_name_arrays_equal([fam, ord, cls, phy, kng], gen.all_parents)
+    assert_name_arrays_equal([gen, fam, ord, cls, phy, kng], spc.all_parents)
+    assert_name_arrays_equal([spc, gen, fam, ord, cls, phy, kng],
+                             ssp.all_parents)
+    assert_name_arrays_equal([ssp, spc, gen, fam, ord, cls, phy, kng],
+                             var.all_parents)
+    assert_name_arrays_equal([var, ssp, spc, gen, fam, ord, cls, phy, kng],
+                             frm.all_parents)
 
-    assert_name_list_equal([],    kng.parents)
-    assert_name_list_equal([kng], phy.parents)
-    assert_name_list_equal([phy], cls.parents)
-    assert_name_list_equal([cls], ord.parents)
-    assert_name_list_equal([ord], fam.parents)
-    assert_name_list_equal([fam], gen.parents)
-    assert_name_list_equal([gen], spc.parents)
-    assert_name_list_equal([spc], ssp.parents)
-    assert_name_list_equal([ssp], var.parents)
-    assert_name_list_equal([var], frm.parents)
+    assert_name_arrays_equal([],    kng.parents)
+    assert_name_arrays_equal([kng], phy.parents)
+    assert_name_arrays_equal([phy], cls.parents)
+    assert_name_arrays_equal([cls], ord.parents)
+    assert_name_arrays_equal([ord], fam.parents)
+    assert_name_arrays_equal([fam], gen.parents)
+    assert_name_arrays_equal([gen], spc.parents)
+    assert_name_arrays_equal([spc], ssp.parents)
+    assert_name_arrays_equal([ssp], var.parents)
+    assert_name_arrays_equal([var], frm.parents)
 
     assert(kng.children.include?(phy))
-    assert_name_list_equal([cls], phy.children)
-    assert_name_list_equal([ord], cls.children)
-    assert_name_list_equal([fam], ord.children)
-    assert_name_list_equal([gen], fam.children)
-    assert_name_list_equal([spc], gen.children)
-    assert_name_list_equal([ssp], spc.children)
-    assert_name_list_equal([var], ssp.children)
-    assert_name_list_equal([frm], var.children)
-    assert_name_list_equal([],    frm.children)
+    assert_name_arrays_equal([cls], phy.children)
+    assert_name_arrays_equal([ord], cls.children)
+    assert_name_arrays_equal([fam], ord.children)
+    assert_name_arrays_equal([gen], fam.children)
+    assert_name_arrays_equal([spc], gen.children)
+    assert_name_arrays_equal([ssp], spc.children)
+    assert_name_arrays_equal([var], ssp.children)
+    assert_name_arrays_equal([frm], var.children)
+    assert_name_arrays_equal([],    frm.children)
 
     assert_empty([phy, cls, ord, fam, gen, spc, ssp, var, frm] -
                  kng.all_children)
-    assert_name_list_equal([cls, ord, fam, gen, spc, ssp, var, frm],
-                           phy.all_children, :sort)
-    assert_name_list_equal([ord, fam, gen, spc, ssp, var, frm],
-                           cls.all_children, :sort)
-    assert_name_list_equal([fam, gen, spc, ssp, var, frm],
-                           ord.all_children, :sort)
-    assert_name_list_equal([gen, spc, ssp, var, frm], fam.all_children, :sort)
-    assert_name_list_equal([spc, ssp, var, frm], gen.all_children, :sort)
-    assert_name_list_equal([ssp, var, frm], spc.all_children, :sort)
-    assert_name_list_equal([var, frm], ssp.all_children, :sort)
-    assert_name_list_equal([frm], var.all_children, :sort)
-    assert_name_list_equal([], frm.all_children, :sort)
+    assert_name_arrays_equal([cls, ord, fam, gen, spc, ssp, var, frm],
+                             phy.all_children, :sort)
+    assert_name_arrays_equal([ord, fam, gen, spc, ssp, var, frm],
+                             cls.all_children, :sort)
+    assert_name_arrays_equal([fam, gen, spc, ssp, var, frm],
+                             ord.all_children, :sort)
+    assert_name_arrays_equal([gen, spc, ssp, var, frm], fam.all_children, :sort)
+    assert_name_arrays_equal([spc, ssp, var, frm], gen.all_children, :sort)
+    assert_name_arrays_equal([ssp, var, frm], spc.all_children, :sort)
+    assert_name_arrays_equal([var, frm], ssp.all_children, :sort)
+    assert_name_arrays_equal([frm], var.all_children, :sort)
+    assert_name_arrays_equal([], frm.all_children, :sort)
   end
 
   # --------------------------------------
@@ -2843,19 +2844,19 @@ class NameTest < UnitTestCase
     d.merge_synonyms(b)
     d.merge_synonyms(c)
 
-    assert_obj_list_equal([a1],
-                          Name.names_from_synonymous_genera("Lepiota testa"))
-    assert_obj_list_equal([a1],
-                          Name.names_from_synonymous_genera("Lepiota testus"))
-    assert_obj_list_equal([a1],
-                          Name.names_from_synonymous_genera("Lepiota testum"))
-    assert_obj_list_equal([a3],
-                          Name.names_from_synonymous_genera("Lepiota testii"))
+    assert_obj_arrays_equal([a1],
+                            Name.names_from_synonymous_genera("Lepiota testa"))
+    assert_obj_arrays_equal([a1],
+                            Name.names_from_synonymous_genera("Lepiota testus"))
+    assert_obj_arrays_equal([a1],
+                            Name.names_from_synonymous_genera("Lepiota testum"))
+    assert_obj_arrays_equal([a3],
+                            Name.names_from_synonymous_genera("Lepiota testii"))
 
     a1.change_deprecated(true)
     a1.save
-    assert_obj_list_equal([a1, b1, c1],
-                          Name.names_from_synonymous_genera("Lepiota testa"))
+    assert_obj_arrays_equal([a1, b1, c1],
+                            Name.names_from_synonymous_genera("Lepiota testa"))
   end
 
   def test_suggest_alternate_spelling
@@ -2867,54 +2868,57 @@ class NameTest < UnitTestCase
     species4 = create_test_name("Lecanora grandis")
     species5 = create_test_name("Lecania grandis")
 
-    assert_name_list_equal([genus1],
-                           Name.guess_with_errors("Lecanora", 1))
-    assert_name_list_equal([genus1, genus2],
-                           Name.guess_with_errors("Lecanoa", 1))
-    assert_name_list_equal([],
-                           Name.guess_with_errors("Lecanroa", 1))
-    assert_name_list_equal([genus1, genus2],
-                           Name.guess_with_errors("Lecanroa", 2))
-    assert_name_list_equal([genus1],
-                           Name.guess_with_errors("Lecanosa", 1))
-    assert_name_list_equal([genus1, genus2],
-                           Name.guess_with_errors("Lecanosa", 2))
-    assert_name_list_equal([genus1, genus2],
-                           Name.guess_with_errors("Lecanroa", 3))
-    assert_name_list_equal([genus1],
-                           Name.guess_with_errors("Lacanora", 1))
-    assert_name_list_equal([genus1],
-                           Name.guess_with_errors("Lacanora", 2))
-    assert_name_list_equal([genus1],
-                           Name.guess_with_errors("Lacanora", 3))
-    assert_name_list_equal([genus1],
-                           Name.guess_word("", "Lacanora"))
-    assert_name_list_equal([genus1, genus2],
-                           Name.guess_word("", "Lecanroa"))
+    assert_name_arrays_equal([genus1],
+                             Name.guess_with_errors("Lecanora", 1))
+    assert_name_arrays_equal([genus1, genus2],
+                             Name.guess_with_errors("Lecanoa", 1))
+    assert_name_arrays_equal([],
+                             Name.guess_with_errors("Lecanroa", 1))
+    assert_name_arrays_equal([genus1, genus2],
+                             Name.guess_with_errors("Lecanroa", 2))
+    assert_name_arrays_equal([genus1],
+                             Name.guess_with_errors("Lecanosa", 1))
+    assert_name_arrays_equal([genus1, genus2],
+                             Name.guess_with_errors("Lecanosa", 2))
+    assert_name_arrays_equal([genus1, genus2],
+                             Name.guess_with_errors("Lecanroa", 3))
+    assert_name_arrays_equal([genus1],
+                             Name.guess_with_errors("Lacanora", 1))
+    assert_name_arrays_equal([genus1],
+                             Name.guess_with_errors("Lacanora", 2))
+    assert_name_arrays_equal([genus1],
+                             Name.guess_with_errors("Lacanora", 3))
+    assert_name_arrays_equal([genus1],
+                             Name.guess_word("", "Lacanora"))
+    assert_name_arrays_equal([genus1, genus2],
+                             Name.guess_word("", "Lecanroa"))
 
-    assert_name_list_equal([species1, species2],
-                           Name.guess_with_errors("Lecanora galactina", 1))
-    assert_name_list_equal([species3],
-                           Name.guess_with_errors("Lecanora granti", 1))
-    assert_name_list_equal([species3, species4],
-                           Name.guess_with_errors("Lecanora granti", 2))
-    assert_name_list_equal([],
-                           Name.guess_with_errors("Lecanora gran", 3))
-    assert_name_list_equal([species3],
-                           Name.guess_word("Lecanora", "granti"))
+    assert_name_arrays_equal([species1, species2],
+                             Name.guess_with_errors("Lecanora galactina", 1))
+    assert_name_arrays_equal([species3],
+                             Name.guess_with_errors("Lecanora granti", 1))
+    assert_name_arrays_equal([species3, species4],
+                             Name.guess_with_errors("Lecanora granti", 2))
+    assert_name_arrays_equal([],
+                             Name.guess_with_errors("Lecanora gran", 3))
+    assert_name_arrays_equal([species3],
+                             Name.guess_word("Lecanora", "granti"))
 
-    assert_name_list_equal([names(:lecanorales), genus1],
-                           Name.suggest_alternate_spellings("Lecanora"))
-    assert_name_list_equal([names(:lecanorales), genus1],
-                           Name.suggest_alternate_spellings("Lecanora\\"))
-    assert_name_list_equal([genus1, genus2],
-                           Name.suggest_alternate_spellings("Lecanoa"))
-    assert_name_list_equal([species3],
-                           Name.suggest_alternate_spellings("Lecanora granti"))
-    assert_name_list_equal([species3, species4],
-                           Name.suggest_alternate_spellings("Lecanora grandi"))
-    assert_name_list_equal([species4, species5],
-                           Name.suggest_alternate_spellings("Lecanoa grandis"))
+    assert_name_arrays_equal([names(:lecanorales), genus1],
+                             Name.suggest_alternate_spellings("Lecanora"))
+    assert_name_arrays_equal([names(:lecanorales), genus1],
+                             Name.suggest_alternate_spellings("Lecanora\\"))
+    assert_name_arrays_equal([genus1, genus2],
+                             Name.suggest_alternate_spellings("Lecanoa"))
+    assert_name_arrays_equal(
+      [species3], Name.suggest_alternate_spellings("Lecanora granti")
+    )
+    assert_name_arrays_equal(
+      [species3, species4], Name.suggest_alternate_spellings("Lecanora grandi")
+    )
+    assert_name_arrays_equal(
+      [species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis")
+    )
   end
 
   # --------------------------------------

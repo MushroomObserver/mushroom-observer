@@ -490,7 +490,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.email)
     assert_equal("", herbarium.mailing_address)
     assert_equal("", herbarium.description)
-    assert_user_list_equal([mary], herbarium.curators)
+    assert_user_arrays_equal([mary], herbarium.curators)
   end
 
   def test_create_second_personal_herbarium
@@ -686,7 +686,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
     assert_users_equal(mary, herbarium.reload.personal_user)
-    assert_user_list_equal([mary], herbarium.reload.curators)
+    assert_user_arrays_equal([mary], herbarium.reload.curators)
   end
 
   def test_update_cannot_make_personal
@@ -756,7 +756,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
     assert_users_equal(mary, herbarium.reload.personal_user)
-    assert_user_list_equal([mary], herbarium.curators)
+    assert_user_arrays_equal([mary], herbarium.curators)
   end
 
   def test_update_change_personal_user_no_login
@@ -803,7 +803,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
     assert_users_equal(mary, herbarium.reload.personal_user)
-    assert_user_list_equal([mary], herbarium.curators)
+    assert_user_arrays_equal([mary], herbarium.curators)
   end
 
   def test_update_clear_personal_user_no_login

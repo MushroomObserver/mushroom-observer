@@ -14,7 +14,7 @@ class CommentTest < UnitTestCase
 
   def do_highlight_test(expected, string)
     comment = Comment.first
-    assert_user_list_equal(expected, comment.send(:highlighted_users, string))
+    assert_user_arrays_equal(expected, comment.send(:highlighted_users, string))
   end
 
   def test_user_highlighting_emails

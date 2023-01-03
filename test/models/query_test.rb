@@ -13,7 +13,7 @@ class QueryTest < UnitTestCase
     if test_ids
       assert_equal(expect.sort, actual.sort, msg)
     else
-      assert_obj_list_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
+      assert_obj_arrays_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
     end
     type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
     assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
@@ -480,7 +480,7 @@ class QueryTest < UnitTestCase
     assert_equal({ "id" => Name.first.id }, query.select_one)
 
     assert_equal([Name.first], query.find_by_sql(limit: 1))
-    assert_name_list_equal(
+    assert_name_arrays_equal(
       @agaricus.children(all: true).sort_by(&:id),
       query.find_by_sql(where: 'text_name LIKE "Agaricus %"')
     )
@@ -558,7 +558,7 @@ class QueryTest < UnitTestCase
       @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
     )
     assert_equal(@names.size, @pages.num_total)
-    assert_name_list_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_name_arrays_equal(@names[from_nth..to_nth], @query.paginate(@pages))
   end
 
   def test_paginate_start
@@ -592,7 +592,7 @@ class QueryTest < UnitTestCase
     assert(@ells.length >= 9)
     assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
     assert_equal(@letters, @pages.used_letters.sort)
-    assert_name_list_equal(@ells[3..5], @query.paginate(@pages))
+    assert_name_arrays_equal(@ells[3..5], @query.paginate(@pages))
   end
 
   def test_eager_instantiator
@@ -3349,6 +3349,6 @@ class QueryTest < UnitTestCase
     actual = query.lookup_names_by_name(args)
     expect = expect.sort_by(&:text_name)
     actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
-    assert_name_list_equal(expect, actual)
+    assert_name_arrays_equal(expect, actual)
   end
 end
