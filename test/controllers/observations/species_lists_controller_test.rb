@@ -3,9 +3,9 @@
 require("test_helper")
 
 # :manage_species_lists
-# NOTE: params change from
-# :species_list to :species_list_id
-# :observation to :id
+# NOTE: params changed from
+#   :species_list > :species_list_id
+#   :observation  > :id
 module Observations
   class SpeciesListsControllerTest < FunctionalTestCase
     def assigns_exist
@@ -15,7 +15,6 @@ module Observations
 
     def test_manage_species_lists
       obs = observations(:coprinus_comatus_obs)
-      params = { id: obs.id }
       requires_login(:edit, id: obs.id)
 
       assert(assigns_exist, "Missing species lists!")
