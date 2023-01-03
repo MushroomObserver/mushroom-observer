@@ -47,7 +47,7 @@ module SpeciesLists
 
     # Used by download.
     def make_report
-      return unless @species_list = find_species_list!
+      return unless (@species_list = find_species_list!)
 
       names = @species_list.names
       case params[:type]
@@ -66,5 +66,6 @@ module SpeciesLists
     ############################################################################
 
     include SpeciesLists::SharedPrivateMethods # shared private methods
+    include SpeciesLists::SharedRenderMethods # shared private methods
   end
 end

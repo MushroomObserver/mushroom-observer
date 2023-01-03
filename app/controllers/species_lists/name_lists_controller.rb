@@ -69,5 +69,6 @@ module SpeciesLists
     ############################################################################
 
     include SpeciesLists::SharedPrivateMethods # shared private methods
+    include SpeciesLists::SharedRenderMethods # shared private methods
   end
 end

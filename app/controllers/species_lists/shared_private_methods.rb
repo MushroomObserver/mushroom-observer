@@ -31,6 +31,44 @@ module SpeciesLists
       redirected = false
 
       # Update the timestamps/user/when/where/title/notes fields.
+      init_basic_species_list_fields(create_or_update)
+
+      # Validate place name.
+      validate_place_name
+
+      # Make sure all the names (that have been approved) exist.
+      list = check_names_on_list
+      construct_approved_names(list, params[:approved_names])
+
+      # Initialize NameSorter and give it all the information.
+      sorter = init_name_sorter(list)
+
+      # Now let us count all the ways in which NameSorter can fail...
+      failed = check_if_name_sorter_failed(sorter)
+
+      # Okay, at this point we've apparently validated the new list of names.
+      # Save the OTHER changes to the species list, then let this other method
+      # (construct_observations) create the observations.  This always succeeds,
+      # so we can redirect to show_species_list (or chain to create_location).
+      if !failed && @dubious_where_reasons == []
+        if @species_list.save
+          redirected = update_redirect_and_flash_notices(create_or_update,
+                                                         sorter)
+        else
+          flash_object_errors(@species_list)
+        end
+      end
+
+      return if redirected
+
+      # Failed to create due to synonyms, unrecognized names, etc.
+      init_name_vars_from_sorter(@species_list, sorter)
+      init_member_vars_for_reload
+      init_project_vars_for_reload(@species_list)
+      re_render_appropriate_form(create_or_update)
+    end
+
+    def init_basic_species_list_fields(create_or_update)
       now = Time.zone.now
       @species_list.created_at = now if create_or_update == :create
       @species_list.updated_at = now
@@ -40,29 +78,35 @@ module SpeciesLists
         @species_list.attributes = args.permit(whitelisted_species_list_args)
       end
       @species_list.title = @species_list.title.to_s.strip_squeeze
+    end
+
+    def validate_place_name
       if Location.is_unknown?(@species_list.place_name) ||
          @species_list.place_name.blank?
         @species_list.location = Location.unknown
         @species_list.where = nil
       end
 
-      # Validate place name.
       @place_name = @species_list.place_name
       @dubious_where_reasons = []
-      if @place_name != params[:approved_where] && @species_list.location.nil?
-        db_name = Location.user_name(@user, @place_name)
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
+      unless (@place_name != params[:approved_where]) &&
+             @species_list.location.nil?
+        return
       end
 
-      # Make sure all the names (that have been approved) exist.
-      list = if params[:list]
-               params[:list][:members].to_s.tr("_", " ").strip_squeeze
-             else
-               ""
-             end
-      construct_approved_names(list, params[:approved_names])
+      db_name = Location.user_name(@user, @place_name)
+      @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    end
 
-      # Initialize NameSorter and give it all the information.
+    def check_names_on_list
+      if params[:list]
+        params[:list][:members].to_s.tr("_", " ").strip_squeeze
+      else
+        ""
+      end
+    end
+
+    def init_name_sorter(list)
       sorter = NameSorter.new
       sorter.add_chosen_names(params[:chosen_multiple_names])
       sorter.add_chosen_names(params[:chosen_approved_names])
@@ -70,8 +114,10 @@ module SpeciesLists
       sorter.check_for_deprecated_checklist(params[:checklist_data])
       sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
       sorter.sort_names(list)
+      sorter
+    end
 
-      # Now let us count all the ways in which NameSorter can fail...
+    def check_if_name_sorter_failed(sorter) # rubocop:disable Metrics/AbcSize
       failed = false
 
       # Does list have "Name one = Name two" type lines?
@@ -108,61 +154,72 @@ module SpeciesLists
         failed = true
       end
 
-      # Okay, at this point we've apparently validated the new list of names.
-      # Save the OTHER changes to the species list, then let this other method
-      # (construct_observations) create the observations.  This always succeeds,
-      # so we can redirect to show_species_list (or chain to create_location).
-      if !failed && @dubious_where_reasons == []
-        if @species_list.save
-          if create_or_update == :create
-            @species_list.log(:log_species_list_created)
-            id = @species_list.id
-            flash_notice(:runtime_species_list_create_success.t(id: id))
-          else
-            @species_list.log(:log_species_list_updated)
-            id = @species_list.id
-            flash_notice(:runtime_species_list_edit_success.t(id: id))
-          end
+      failed
+    end
 
-          update_projects(@species_list, params[:project])
-          construct_observations(@species_list, sorter)
-
-          if @species_list.location.nil?
-            redirect_to(controller: "location", action: "create_location",
-                        where: @place_name, set_species_list: @species_list.id)
-          else
-            redirect_to(species_list_path(@species_list))
-          end
-          redirected = true
-        else
-          flash_object_errors(@species_list)
-        end
+    def update_redirect_and_flash_notices(create_or_update, sorter)
+      if create_or_update == :create
+        @species_list.log(:log_species_list_created)
+        id = @species_list.id
+        flash_notice(:runtime_species_list_create_success.t(id: id))
+      else
+        @species_list.log(:log_species_list_updated)
+        id = @species_list.id
+        flash_notice(:runtime_species_list_edit_success.t(id: id))
       end
 
-      return if redirected
+      update_projects(@species_list, params[:project])
+      construct_observations(@species_list, sorter)
 
-      # Failed to create due to synonyms, unrecognized names, etc.
-      init_name_vars_from_sorter(@species_list, sorter)
-      init_member_vars_for_reload
-      init_project_vars_for_reload(@species_list)
-
-      case create_or_update
-      when :create
-        render(:new)
-      when :update
-        render(:edit)
+      if @species_list.location.nil?
+        redirect_to(controller: "location", action: "create_location",
+                    where: @place_name, set_species_list: @species_list.id)
+      else
+        redirect_to(species_list_path(@species_list))
       end
+      true
     end
 
     # Creates observations for names written in and/or selected from checklist.
     # Uses the member instance vars, as well as:
     #   params[:chosen_approved_names]    Names from radio boxes.
     #   params[:checklist_data]           Names from LHS check boxes.
-    def construct_observations(spl, sorter)
+    def construct_observations(spl, sorter) # rubocop:disable Metrics/AbcSize
       # Put together a list of arguments to use when creating new observations.
+      spl_args = init_spl_args(spl)
+
+      # This updates certain observation namings already in the list.  It looks
+      # for namings that are deprecated, then replaces them with approved
+      # synonyms which the user has chosen via radio boxes in
+      # params[:chosen_approved_names].
+      update_namings(spl)
+
+      # Add all names from text box into species_list. Creates a new observation
+      # for each name.  ("single names" are names that matched a single name
+      # uniquely.)
+      sorter.single_names.each do |name, timestamp|
+        spl_args[:when] = timestamp || spl.when
+        spl.construct_observation(name, spl_args)
+      end
+
+      # Add checked names from LHS check boxes.  It doesn't check if they are
+      # already in there; it creates new observations for each and stuffs it in.
+      spl_args[:when] = spl.when
+      return unless params[:checklist_data]
+
+      params[:checklist_data].each do |key, value|
+        next unless value == "1"
+
+        name = find_chosen_name(key.to_i, params[:chosen_approved_names])
+        spl.construct_observation(name, spl_args)
+      end
+    end
+
+    def init_spl_args(spl)
       member_args = params[:member] || {}
       member_notes = clean_notes(member_args[:notes])
-      sp_args = {
+
+      {
         created_at: spl.updated_at,
         updated_at: spl.updated_at,
         user: @user,
@@ -177,42 +234,20 @@ module SpeciesLists
         is_collection_location: (member_args[:is_collection_location] == "1"),
         specimen: (member_args[:specimen] == "1")
       }
+    end
 
-      # This updates certain observation namings already in the list.  It looks
-      # for namings that are deprecated, then replaces them with approved
-      # synonyms which the user has chosen via radio boxes in
-      # params[:chosen_approved_names].
-      if (chosen_names = params[:chosen_approved_names])
-        spl.observations.each do |observation|
-          observation.namings.each do |naming|
-            # (compensate for gsub in _form_species_lists)
-            next unless (alt_name_id = chosen_names[naming.name_id.to_s])
+    def update_namings(spl)
+      return unless (chosen_names = params[:chosen_approved_names])
 
-            alt_name = Name.find(alt_name_id)
-            naming.name = alt_name
-            naming.save
-          end
+      spl.observations.each do |observation|
+        observation.namings.each do |naming|
+          # (compensate for gsub in _form_species_lists)
+          next unless (alt_name_id = chosen_names[naming.name_id.to_s])
+
+          alt_name = Name.find(alt_name_id)
+          naming.name = alt_name
+          naming.save
         end
-      end
-
-      # Add all names from text box into species_list. Creates a new observation
-      # for each name.  ("single names" are names that matched a single name
-      # uniquely.)
-      sorter.single_names.each do |name, timestamp|
-        sp_args[:when] = timestamp || spl.when
-        spl.construct_observation(name, sp_args)
-      end
-
-      # Add checked names from LHS check boxes.  It doesn't check if they are
-      # already in there; it creates new observations for each and stuffs it in.
-      sp_args[:when] = spl.when
-      return unless params[:checklist_data]
-
-      params[:checklist_data].each do |key, value|
-        next unless value == "1"
-
-        name = find_chosen_name(key.to_i, params[:chosen_approved_names])
-        spl.construct_observation(name, sp_args)
       end
     end
 
@@ -232,6 +267,15 @@ module SpeciesLists
         Name.find(alt_id)
       else
         Name.find(id)
+      end
+    end
+
+    def re_render_appropriate_form(create_or_update)
+      case create_or_update
+      when :create
+        render(:new)
+      when :update
+        render(:edit)
       end
     end
 
@@ -485,54 +529,6 @@ module SpeciesLists
       else
         val
       end
-    end
-
-    ############################################################################
-
-    def render_name_list_as_txt(names)
-      charset = "UTF-8"
-      str = "\xEF\xBB\xBF#{names.map(&:real_search_name).join("\r\n")}"
-      send_data(str, type: "text/plain",
-                     charset: charset,
-                     disposition: "attachment",
-                     filename: "report.txt")
-    end
-
-    def render_name_list_as_csv(names)
-      charset = "ISO-8859-1"
-      str = CSV.generate do |csv|
-        csv << %w[scientific_name authority citation accepted]
-        names.each do |name|
-          csv << [name.real_text_name, name.author, name.citation,
-                  name.deprecated ? "" : "1"].map(&:presence)
-        end
-      end
-      str = str.iconv(charset)
-      send_data(str, type: "text/csv",
-                     charset: charset,
-                     header: "present",
-                     disposition: "attachment",
-                     filename: "report.csv")
-    end
-
-    def render_name_list_as_rtf(names)
-      charset = "UTF-8"
-      doc = RTF::Document.new(RTF::Font::SWISS)
-      reportable_ranks = %w[Genus Species Subspecies Variety Form]
-      names.each do |name|
-        rank      = name.rank
-        text_name = name.real_text_name
-        author    = name.author
-        node      = name.deprecated ? doc : doc.bold
-        node      = node.italic if reportable_ranks.include?(rank)
-        node << text_name
-        doc << " #{author}" if author.present?
-        doc.line_break
-      end
-      send_data(doc.to_rtf, type: "text/rtf",
-                            charset: charset,
-                            disposition: "attachment",
-                            filename: "report.rtf")
     end
   end
 end

@@ -65,15 +65,16 @@ module SpeciesLists
       when :ATTACH.l
         if attach_objects_to_projects
           redirect_to(species_list_path(@list.id)) and return
-        else
-          flash_warning(:runtime_no_changes.t)
         end
+
+        flash_warning(:runtime_no_changes.t)
       when :REMOVE.l
         if remove_objects_from_projects
           redirect_to(species_list_path(@list.id)) and return
-        else
-          flash_warning(:runtime_no_changes.t)
         end
+
+        flash_warning(:runtime_no_changes.t)
+
       else
         flash_error("Invalid submit button: #{params[:commit].inspect}")
       end
