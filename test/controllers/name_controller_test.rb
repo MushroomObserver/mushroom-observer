@@ -930,7 +930,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(count, Name.count,
                  "Shouldn't have created #{Name.last.search_name.inspect}.")
     names = Name.where(text_name: text_name)
-    assert_obj_list_equal([names(:conocybe_filaris)], names)
+    assert_obj_arrays_equal([names(:conocybe_filaris)], names)
     assert_equal(10, rolf.reload.contribution)
   end
 
@@ -4772,14 +4772,14 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name_description, id: desc.id)
     name.reload
     assert_objs_equal(desc, name.description)
-    assert_obj_list_equal([desc], name.descriptions)
+    assert_obj_arrays_equal([desc], name.descriptions)
     assert_equal("public", desc.source_type)
     assert_equal("", desc.source_name.to_s)
     assert_equal(true, desc.public)
     assert_equal(true, desc.public_write)
-    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+    assert_obj_arrays_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_arrays_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_arrays_equal([UserGroup.all_users], desc.reader_groups)
 
     # Already have default, try to make public desc private -> warn and make
     # public but not default.
@@ -4799,9 +4799,9 @@ class NameControllerTest < FunctionalTestCase
     assert_true(name.descriptions.include?(desc))
     assert_equal("public", desc.source_type)
     assert_equal("Alternate Description", desc.source_name.to_s)
-    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+    assert_obj_arrays_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_arrays_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_arrays_equal([UserGroup.all_users], desc.reader_groups)
     assert_equal(true, desc.public)
     assert_equal(true, desc.public_write)
   end
@@ -4870,9 +4870,9 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("Mushrooms Demystified", desc.source_name)
     assert_false(desc.public)
     assert_false(desc.public_write)
-    assert_obj_list_equal([UserGroup.one_user(dick)], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.one_user(dick)], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.one_user(dick)], desc.reader_groups)
+    assert_obj_arrays_equal([UserGroup.one_user(dick)], desc.admin_groups)
+    assert_obj_arrays_equal([UserGroup.one_user(dick)], desc.writer_groups)
+    assert_obj_arrays_equal([UserGroup.one_user(dick)], desc.reader_groups)
   end
 
   # -----------------------------------
@@ -5060,7 +5060,7 @@ class NameControllerTest < FunctionalTestCase
     post(:inherit_classification,
          params: { id: name.id, parent: "Agaricaceae" })
     assert_no_flash
-    assert_name_list_equal([], assigns(:options))
+    assert_name_arrays_equal([], assigns(:options))
     assert_blank(assigns(:message))
     assert_redirected_to(name.show_link_args)
     new_str = "#{parent1.classification}\r\nFamily: _Agaricaceae_\r\n"

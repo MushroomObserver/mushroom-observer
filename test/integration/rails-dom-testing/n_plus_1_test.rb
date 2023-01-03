@@ -20,7 +20,7 @@ class NPlusOneTest < IntegrationTestCase
     get("/herbaria?flavor=all")
     get("/location/list_locations")
     get("/name/list_names")
-    get("/image/list_images")
+    get("/images")
     get("/observations")
     get("/activity_logs")
     get("/projects")

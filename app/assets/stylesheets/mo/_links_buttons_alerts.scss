@@ -17,7 +17,8 @@ a:hover {
   background-color: $LINK_HOVER_BG_COLOR;
 }
 
-.btn:hover, .btn-default:hover {
+.btn:hover,
+.btn-default:hover {
   color: $BUTTON_HOVER_FG_COLOR;
   background-color: $BUTTON_HOVER_BG_COLOR;
   border-color: $BUTTON_HOVER_BORDER_COLOR;
@@ -36,12 +37,12 @@ a:hover {
 }
 
 .form-control {
-//   color: $BUTTON_FG_COLOR;
-//   border-width: $INPUT_BORDER_WIDTH;
-//   border-style: $INPUT_BORDER_STYLE;
-//   border-radius: $INPUT_BORDER_RADIUS;
+  //   color: $BUTTON_FG_COLOR;
+  //   border-width: $INPUT_BORDER_WIDTH;
+  //   border-style: $INPUT_BORDER_STYLE;
+  //   border-radius: $INPUT_BORDER_RADIUS;
   border-color: $BUTTON_FG_COLOR;
-//   padding: $padding-small-vertical $padding-small-horizontal;
+  //   padding: $padding-small-vertical $padding-small-horizontal;
 }
 
 input.has_error,

@@ -9,7 +9,7 @@ module Authors
       desc = location_descriptions(:albion_desc)
       params = { id: desc.id, type: "LocationDescription" }
       desc.authors.clear
-      assert_user_list_equal([], desc.reload.authors)
+      assert_user_arrays_equal([], desc.reload.authors)
 
       # Make sure it lets Rolf and only Rolf see this page.
       assert_not(mary.in_group?("reviewers"))
@@ -35,7 +35,7 @@ module Authors
       desc.add_author(rolf)
       desc.save
       desc.reload
-      assert_user_list_equal([rolf], desc.authors)
+      assert_user_arrays_equal([rolf], desc.authors)
 
       # Rolf should be able to do it now.
       get(:show, params: params)
@@ -45,13 +45,13 @@ module Authors
       post(:create, params: params.merge(add: mary.id))
       assert_redirected_to(authors_review_path)
       desc.reload
-      assert_user_list_equal([mary, rolf], desc.authors, :sort)
+      assert_user_arrays_equal([mary, rolf], desc.authors, :sort)
 
       # ...and taketh with the other.
       delete(:destroy, params: params.merge(remove: mary.id))
       assert_redirected_to(authors_review_path)
       desc.reload
-      assert_user_list_equal([rolf], desc.authors)
+      assert_user_arrays_equal([rolf], desc.authors)
     end
 
     def test_review_name
@@ -74,7 +74,7 @@ module Authors
 
       # Make Rolf an author.
       desc.add_author(rolf)
-      assert_user_list_equal([rolf], desc.reload.authors)
+      assert_user_arrays_equal([rolf], desc.reload.authors)
 
       # Rolf should be able to do it again now.
       get(:show, params: params)
@@ -83,12 +83,12 @@ module Authors
       # Rolf giveth with one hand...
       post(:create, params: params.merge(add: mary.id))
       assert_redirected_to(authors_review_path)
-      assert_user_list_equal([mary, rolf], desc.reload.authors, :sort)
+      assert_user_arrays_equal([mary, rolf], desc.reload.authors, :sort)
 
       # ...and taketh with the other.
       delete(:destroy, params: params.merge(remove: mary.id))
       assert_redirected_to(authors_review_path)
-      assert_user_list_equal([rolf], desc.reload.authors)
+      assert_user_arrays_equal([rolf], desc.reload.authors)
     end
   end
 end

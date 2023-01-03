@@ -1,0 +1,21 @@
+<%
+@title = :image_vote_anonymity_title.t
+form_action = {
+  controller: "/images/votes/anonymity",
+  action: :update
+}
+%>
+
+<%= form_with(action: form_action, method: :patch) do |f| %>
+  <div class="mt-3">
+    <%= :image_vote_anonymity_num_anonymous.t %>: <%= @num_anonymous %><br/>
+    <%= :image_vote_anonymity_num_public.t %>: <%= @num_public %><br/>
+  </div>
+
+  <div class="mt-3">
+    <%= f.submit(:image_vote_anonymity_make_anonymous.l,
+                 class: "btn btn-default") %><br/>
+    <%= f.submit(:image_vote_anonymity_make_public.l,
+                 class: "btn btn-default") %><br/>
+  </div>
+<% end %>

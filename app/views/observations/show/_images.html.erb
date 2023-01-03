@@ -7,15 +7,12 @@
       <div class="col-sm-8 float-sm-right">
         <small>
           <%= link_with_query(:show_observation_add_images.t,
-                              controller: "/image", action: :add_image,
-                              id: observation.id) %>
+                              new_image_for_observation_path(observation.id)) %>
           | <%= link_with_query(:show_observation_reuse_image.t,
-                              controller: "/image", action: :reuse_image,
-                              obs_id: observation.id, mode: :observation) %>
+                                reuse_images_for_observation_path(observation.id)) %>
           <% if observation.images.length > 0 %>
             | <%= link_with_query(:show_observation_remove_images.t,
-                                  controller: "/image", action: :remove_images,
-                                  id: observation.id) %>
+                                  remove_images_from_observation_path(observation.id)) %>
             <% end %>
         </small>
       </div>
@@ -33,7 +30,10 @@
                 each do |image| %>
       <div class="list-group-item">
         <%= thumbnail(image,
-                      link: show_image_path(id: image.id, obs: observation.id),
+                      link: { controller: image.show_controller,
+                              action: image.show_action,
+                              id: image.id,
+                              obs: observation.id },
                       votes: true,
                       original: true,
                       is_set: true,

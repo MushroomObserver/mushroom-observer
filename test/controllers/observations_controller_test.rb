@@ -577,7 +577,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login(user.name)
     get(:index)
     results = @controller.instance_variable_get(:@objects).sort_by(&:id)
-    assert_obj_list_equal(observations_in_region, results)
+    assert_obj_arrays_equal(observations_in_region, results)
   end
 
   ##############################################################################
@@ -738,11 +738,13 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: obs.id })
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
-    assert_select("a:match('href',?)", observation_path(obs.id),
-                  count: 0, text: :DESTROY.t)
-    assert_select("a[href*=add_image]", count: 0)
-    assert_select("a[href*=remove_image]", count: 0)
-    assert_select("a[href*=reuse_image]", count: 0)
+    assert_select("form[action=?]", observation_path(obs.id), count: 0)
+    assert_select("a:match('href',?)",
+                  new_image_for_observation_path(obs.id), count: 0)
+    assert_select("a:match('href',?)",
+                  remove_images_from_observation_path(obs.id), count: 0)
+    assert_select("a:match('href',?)",
+                  reuse_images_for_observation_path(obs.id), count: 0)
     get(:edit, params: { id: obs.id })
     assert_response(:redirect)
     get(:destroy, params: { id: obs.id })
@@ -754,9 +756,12 @@ class ObservationsControllerTest < FunctionalTestCase
     # Destroy button is in a form, not a link_to
     assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
     assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
-    assert_select("a[href*=add_image]", minimum: 1)
-    assert_select("a[href*=remove_image]", minimum: 1)
-    assert_select("a[href*=reuse_image]", minimum: 1)
+    assert_select("a[href=?]",
+                  new_image_for_observation_path(obs.id), minimum: 1)
+    assert_select("a[href=?]",
+                  remove_images_from_observation_path(obs.id), minimum: 1)
+    assert_select("a[href=?]",
+                  reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_response(:success)
 
@@ -766,9 +771,12 @@ class ObservationsControllerTest < FunctionalTestCase
     # Destroy button is in a form, not a link_to
     assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
     assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
-    assert_select("a[href*=add_image]", minimum: 1)
-    assert_select("a[href*=remove_image]", minimum: 1)
-    assert_select("a[href*=reuse_image]", minimum: 1)
+    assert_select("a[href=?]",
+                  new_image_for_observation_path(obs.id), minimum: 1)
+    assert_select("a[href=?]",
+                  remove_images_from_observation_path(obs.id), minimum: 1)
+    assert_select("a[href=?]",
+                  reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_response(:success)
     get(:destroy, params: { id: obs.id })
@@ -1607,7 +1615,7 @@ class ObservationsControllerTest < FunctionalTestCase
                                     naming: { name: "Cladina pictum" }
                                   }, 0, 0, 0, roy)
     assert_names_equal(cladina, assigns(:parent_deprecated))
-    assert_obj_list_equal([cladonia_picta], assigns(:valid_names))
+    assert_obj_arrays_equal([cladonia_picta], assigns(:valid_names))
 
     generic_construct_observation({
                                     observation: { place_name: "Earth" },
@@ -2623,8 +2631,8 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     )
     assert_response(:redirect)
-    assert_obj_list_equal([@proj1], @obs2.reload.projects)
-    assert_obj_list_equal([@proj1], @img2.reload.projects)
+    assert_obj_arrays_equal([@proj1], @obs2.reload.projects)
+    assert_obj_arrays_equal([@proj1], @img2.reload.projects)
 
     login("mary")
     get(:edit, params: { id: @obs2.id })
@@ -2654,8 +2662,8 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     )
     assert_response(:redirect)
-    assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects, :sort)
-    assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects, :sort)
+    assert_obj_arrays_equal([@proj1, @proj2], @obs1.reload.projects, :sort)
+    assert_obj_arrays_equal([@proj1, @proj2], @img1.reload.projects, :sort)
 
     login("dick")
     get(:edit, params: { id: @obs2.id })
@@ -2745,7 +2753,7 @@ class ObservationsControllerTest < FunctionalTestCase
     )
     assert_equal(spl_start_length + 1, @spl1.reload.observations.length)
     assert_response(:redirect)
-    assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
+    assert_obj_arrays_equal([@spl1], @obs1.reload.species_lists)
     get(:edit, params: { id: @obs2.id })
     assert_response(:redirect)
 
@@ -2772,8 +2780,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_users_equal(mary, @spl2.user)
     assert_users_equal(rolf, @obs1.user)
     assert_users_equal(mary, @obs2.user)
-    assert_obj_list_equal([], @obs1.species_lists)
-    assert_obj_list_equal([@spl2], @obs2.species_lists)
+    assert_obj_arrays_equal([], @obs1.species_lists)
+    assert_obj_arrays_equal([@spl2], @obs2.species_lists)
   end
 
   def assert_list_checks(list_states)

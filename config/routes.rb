@@ -69,30 +69,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  image: {
-    add_image: {},
-    advanced_search: {},
-    bulk_filename_purge: {},
-    bulk_vote_anonymity_updater: {},
-    cast_vote: {},
-    destroy_image: {},
-    edit_image: {},
-    image_search: {},
-    images_by_user: {},
-    images_for_project: {},
-    index_image: {},
-    license_updater: {},
-    list_images: {},
-    next_image: {},
-    prev_image: {},
-    remove_images: {},
-    remove_images_for_glossary_term: {},
-    reuse_image: {},
-    reuse_image_for_glossary_term: {},
-    # show_image: {},
-    show_original: {},
-    transform_image: {}
-  },
   location: {
     add_to_location: {},
     adjust_permissions: {},
@@ -344,6 +320,9 @@ end
 
 # ----------------------------
 #  Helpers.
+#
+#  To access paths in the console:
+#    include Rails.application.routes.url_helpers
 # ----------------------------
 
 # Get an array of API endpoints for all versions of API.
@@ -467,7 +446,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    patch("profile/remove_image", controller: "profile") # alternate path
+    get("profile/images", to: "profile/images#reuse",
+                          as: "profile_select_image")
+    post("profile/images(/:id)", to: "profile/images#attach",
+                                 as: "profile_update_image")
+    put("profile/images(/:id)", to: "profile/images#detach",
+                                as: "profile_remove_image")
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -559,6 +543,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
+
+    member do
+      get("images/reuse", to: "glossary_terms/images#reuse",
+                          as: "reuse_images_for")
+      post("images/attach", to: "glossary_terms/images#attach",
+                            as: "attach_image_to")
+      get("images/remove", to: "glossary_terms/images#remove",
+                           as: "remove_images_from")
+      put("images/detach", to: "glossary_terms/images#detach",
+                           as: "detach_image_from")
+    end
   end
 
   # ----- Herbaria: standard actions -------------------------------------------
@@ -574,6 +569,26 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :herbarium_records do
     resource :remove_observation, only: [:update], module: :herbarium_records
   end
+
+  # ----- Images: Namespace differences are for memorable path names
+  namespace :images do
+    put("/purge_filenames", to: "/images/filenames#update",
+                            as: "bulk_filename_purge")
+    get("/licenses/edit", to: "/images/licenses#edit",
+                          as: "edit_licenses")
+    put("/licenses", to: "/images/licenses#update",
+                     as: "license_updater")
+    get("/votes/anonymity", to: "/images/votes/anonymity#edit",
+                            as: "edit_vote_anonymity")
+    put("/votes/anonymity", to: "/images/votes/anonymity#update",
+                            as: "bulk_vote_anonymity_updater")
+  end
+  resources :images, only: [:index, :show, :destroy] do
+    member do
+      put("transform", to: "images/transformations#update", as: "transform")
+    end
+  end
+  put("/images/:id/vote", to: "images/votes#update", as: "image_vote")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -612,6 +627,18 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
+      get("images/new", to: "observations/images#new",
+                        as: "new_image_for")
+      post("images", to: "observations/images#create",
+                     as: "upload_image_for")
+      get("images/reuse", to: "observations/images#reuse",
+                          as: "reuse_images_for")
+      post("images/attach", to: "observations/images#attach",
+                            as: "attach_image_to")
+      get("images/remove", to: "observations/images#remove",
+                           as: "remove_images_from")
+      put("images/detach", to: "observations/images#detach",
+                           as: "detach_images_from")
     end
     collection do
       get("map", to: "observations/maps#index")
@@ -619,6 +646,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                           as: "print_labels_for")
     end
   end
+  # These are in observations because they share private methods with
+  # :new and :create, which are currently observation-specific
+  get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
+  match("/images/:id", to: "observations/images#update", via: [:put, :patch])
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
@@ -667,9 +698,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
-  # ----- Image:
-  get("/image/show_image/:id", to: "image#show_image",
-                               as: "show_image")
   # ----- Location:
   get("/location/show_location/:id", to: "location#show_location",
                                      as: "show_location")
@@ -749,6 +777,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+
+  # ----- Images: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "image", new_controller: "images",
+    actions: [:index, :show]
+  )
 
   # ----- Interests: legacy action redirects
   redirect_legacy_actions(
