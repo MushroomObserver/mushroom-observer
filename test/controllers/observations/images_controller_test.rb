@@ -68,8 +68,8 @@ module Observations
       )
       assert_flash_text(/#{message}/)
       img = Image.last
-      assert_obj_list_equal([obs], img.observations)
-      assert_obj_list_equal([proj], img.projects)
+      assert_obj_arrays_equal([obs], img.observations)
+      assert_obj_arrays_equal([proj], img.projects)
       assert_false(obs.gps_hidden)
       assert_false(img.gps_stripped)
     end
@@ -253,12 +253,12 @@ module Observations
       assert_users_equal(mary, obs2.user)
       assert_users_equal(mary, img1.user)
       assert_users_equal(rolf, img2.user)
-      assert_obj_list_equal([],      obs1.projects)
-      assert_obj_list_equal([proj2], obs2.projects)
-      assert_obj_list_equal([proj2], img1.projects)
-      assert_obj_list_equal([],      img2.projects)
-      assert_obj_list_equal([rolf, mary, katrina], proj1.user_group.users)
-      assert_obj_list_equal([dick], proj2.user_group.users)
+      assert_obj_arrays_equal([],      obs1.projects)
+      assert_obj_arrays_equal([proj2], obs2.projects)
+      assert_obj_arrays_equal([proj2], img1.projects)
+      assert_obj_arrays_equal([],      img2.projects)
+      assert_obj_arrays_equal([rolf, mary, katrina], proj1.user_group.users)
+      assert_obj_arrays_equal([dick], proj2.user_group.users)
 
       # NOTE: It is impossible, apparently, to get edit_image to fail,
       # so there is no way to test init_project_vars_for_reload().
