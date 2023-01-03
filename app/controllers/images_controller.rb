@@ -17,24 +17,14 @@
 #  show_selected_images::  search results
 #
 #  ==== Show Images
-#  show::
-#  show_original::         show full_size image (for backwards compatibility)
-#  next_image::
-#  prev_image::
-#  cast_vote::             change user's vote & go to next image
+#  show::                  can use params[:flow] :next, :prev
 #
 #  ==== Work With Images
-#  add_image::             Upload images for observation.
-#  edit_image::            Edit notes, etc. for image.
-#  transform_image         Rotate or flip image
-#  destroy_image::         Callback: destroy image.
-#  remove_image::          Callback: remove image from observation.
-#  reuse_image::           Choose images to add to observation.
-#  remove_images::         Choose images to remove from observation.
-#  remove_images_for_glossary_term Choose images to remove from GlossaryTerm.
-#  license_updater::       Change copyright of many images.
-#  bulk_vote_anonymity_updater:: Change anonymity of image votes in bulk.
-#  bulk_filename_purge::   Purge all original image filenames from the database.
+#  new::                   Upload images for observation.
+#  edit::                  Edit notes, etc. for image.
+#  create::                New form commits here
+#  update::                Edit form commits here
+#  destroy::               Callback: destroy image.
 #  process_image::         (helper for add_image)
 #
 class ImagesController < ApplicationController

@@ -3,11 +3,6 @@
 # Images::LicensesController
 module Images
   class LicensesController < ApplicationController
-    # def access_denied
-    #   flash_error(:permission_denied.t)
-    #   redirect_to(edit_account_preferences_path)
-    # end
-
     before_action :login_required
 
     # Linked from show_obs, account prefs tabs and section, acct profile

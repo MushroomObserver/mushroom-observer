@@ -7,8 +7,6 @@
 module GlossaryTerms
   class ImagesController < ApplicationController
     before_action :login_required
-
-    before_action :login_required
     before_action :pass_query_params
     before_action :disable_link_prefetching
 
@@ -75,6 +73,7 @@ module GlossaryTerms
       redirect_with_query(glossary_term_path(@object.id))
     end
 
+    # The remove form submits to this action
     def detach
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object

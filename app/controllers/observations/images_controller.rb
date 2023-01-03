@@ -73,6 +73,8 @@ module Observations
       if params[:upload].blank?
         flash_warning(:runtime_no_changes.t)
       else
+        # There are five upload spots on the form. 
+        # For as many as have an image, process the image. 
         args = params[:image]
         i = 1
         while i < 5 || params[:upload]["image#{i}"].present?
@@ -149,6 +151,7 @@ module Observations
       attach_images_to_projects_and_flash_notices(img, projects, checks)
     end
 
+    # Returns true if any changes made, false if none
     def attach_images_to_projects_and_flash_notices(img, projects, checks)
       any_changes = false
       projects.each do |project|
