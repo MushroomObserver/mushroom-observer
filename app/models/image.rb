@@ -174,7 +174,8 @@ require("mimemagic")
 #  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
 #  all_extensions::     All image extensions, with "raw" for "other".
 #  all_content_types::  All image content_types, with +nil+ for "other".
-#  licenses_for_user_by_type: Expensive query of image licenses the user has used.
+#  licenses_for_user_by_type:
+#                       Expensive query of image licenses the user has used.
 #  process_license_changes_for_user: Change licenses from one type to another.
 #
 #  == Instance Methods
@@ -1014,7 +1015,7 @@ class Image < AbstractModel
     display_names = {}
     current_names_and_ids = {}
 
-    License.all.each do |license|
+    License.all.find_each do |license|
       display_names[license.id] = license.display_name
       current_names_and_ids[license.id] = License.current_names_and_ids(license)
     end
