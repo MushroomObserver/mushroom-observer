@@ -47,7 +47,7 @@ class ProjectsController < ApplicationController
   # Inputs: params[:id] (project)
   # Outputs: @project
   # def show_project
-  def show # rubocop:disable Metrics/AbcSize
+  def show
     store_location
     return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
@@ -58,13 +58,7 @@ class ProjectsController < ApplicationController
       redirect_to_next_object(:prev, Project, params[:id]) and return
     end
 
-    @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
-    @is_member = @project.is_member?(@user)
-    @is_admin = @project.is_admin?(@user)
-    @drafts = NameDescription.joins(:admin_groups).
-              where("name_description_admins.user_group_id":
-                    @project.admin_group_id).
-              includes(:name, :user)
+    set_ivars_for_show
   end
 
   ##############################################################################
@@ -174,6 +168,16 @@ class ProjectsController < ApplicationController
 
   private
 
+  def set_ivars_for_show
+    @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
+    @is_member = @project.is_member?(@user)
+    @is_admin = @project.is_admin?(@user)
+    @drafts = NameDescription.joins(:admin_groups).
+              where("name_description_admins.user_group_id":
+                    @project.admin_group_id).
+              includes(:name, :user)
+  end
+
   ##############################################################################
   #
   #  :section: Index private methods
@@ -196,8 +200,10 @@ class ProjectsController < ApplicationController
   def project_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
-       (project = Project.safe_find(pattern))
-      redirect_to(action: :show, id: project.id)
+       (@project = Project.safe_find(pattern))
+      # redirect_to(action: :show, id: project.id)
+      set_ivars_for_show
+      render("show", location: project_path(@project.id))
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)

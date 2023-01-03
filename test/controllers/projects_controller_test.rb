@@ -81,6 +81,24 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_project_search
+    login
+    p_id = projects(:bolete_project).id
+    # try searching by project title. Note that search saves a query record
+    get(:index, params: { pattern: "Bolete Project" })
+    q = QueryRecord.last.id.alphabetize
+    assert_redirected_to(project_path(p_id, q: q))
+    # try searching by project_id
+    get(:index, params: { pattern: p_id.to_s })
+    assert_template("show")
+  end
+
+  def test_index_by_updated_at
+    login
+    get(:index, params: { by: "updated_at" })
+    assert_template("index")
+  end
+
   def test_add_project
     requires_login(:new)
     assert_form_action(action: :create)
