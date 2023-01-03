@@ -112,7 +112,7 @@ module Projects
     end
 
     # Add/remove a given User to/from a given UserGroup.
-    # TODO: Changes should get logged
+    # Changes should get logged
     def set_status(project, type, user, mode)
       group = project.send(type == :member ? :user_group : :admin_group)
       set_status_add(project, type, user, group) if mode == :add
