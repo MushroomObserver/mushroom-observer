@@ -444,7 +444,7 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(ExternalSite, "/external_site/show_external_site")
     assert_show_url(Herbarium, "/herbaria")
     assert_show_url(HerbariumRecord, "/herbarium_records")
-    assert_show_url(Image, "/image/show_image")
+    assert_show_url(Image, "/images")
     assert_show_url(Location, "/location/show_location")
     assert_show_url(Name, "/name/show_name")
     assert_show_url(Naming, "/observations/show_naming")

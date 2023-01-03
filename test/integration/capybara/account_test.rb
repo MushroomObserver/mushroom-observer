@@ -363,6 +363,19 @@ class AccountTest < CapybaraIntegrationTestCase
     assert_flash_text(/Successfully updated profile/i)
     assert_equal("Merula Marshwell", mary.name)
     assert_equal(locations(:mitrula_marsh), mary.location)
+
+    # Reuse one of mary's images for profile
+    assert_nil(mary.image_id)
+    visit(edit_account_profile_path)
+    click_on(:profile_image_reuse.t)
+    first(:button, class: "image-link").click
+    assert_not_nil(mary.reload.image_id)
+
+    # Click the button on user profile edit page to remove image
+    visit(edit_account_profile_path)
+    click_button(:profile_image_remove.t)
+    assert_flash_text(:runtime_profile_removed_image.t)
+    assert_nil(mary.reload.image_id)
   end
 
   def test_api_keys

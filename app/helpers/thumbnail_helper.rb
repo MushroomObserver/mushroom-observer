@@ -16,16 +16,18 @@ module ThumbnailHelper
     image_id = image.is_a?(Integer) ? image : image.id
     locals = {
       image: image,
-      link: show_image_path(image_id),
+      link: image_path(image_id),
+      link_method: :get,
       size: :small,
       votes: true,
       original: false,
       responsive: true,
       theater_on_click: false,
-      html_options: {},
+      html_options: {}, # we don't want to always pass class: "img-fluid"
+      extra_classes: "",
       notes: ""
     }.merge(args)
-    render(partial: "image/image_thumbnail", locals: locals)
+    render(partial: "shared/image_thumbnail", locals: locals)
   end
 
   def show_best_image(obs)
@@ -56,11 +58,13 @@ module ThumbnailHelper
       return content_tag(:span, image_vote_as_short_string(vote))
     end
 
-    # return a link if the user has NOT voted this way
-    link_to(vote_text,
-            show_image_path(id: image.id, vote: vote),
-            title: image_vote_as_help_string(vote),
-            data: { role: "image_vote", id: image.id, val: vote })
+    # return a form input button if the user has NOT voted this way
+    # NOTE: JS is checking any element with [data-role="image_vote"],
+    # Even though this is not an <a> tag, it's an <input>, it's ok.
+    put_button(name: vote_text,
+               path: image_vote_path(id: image.id, vote: vote),
+               title: image_vote_as_help_string(vote),
+               data: { role: "image_vote", id: image.id, val: vote })
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)
@@ -68,12 +72,12 @@ module ThumbnailHelper
     state_text = visual_group_status_text(state)
     return content_tag(:span, link_text) if link_text == state_text
 
-    link_to(link_text,
-            show_image_path(id: image_id, vote: 1),
-            title: link_text,
-            data: { role: "visual_group_status",
-                    imgid: image_id,
-                    vgid: visual_group.id,
-                    status: link })
+    put_button(name: link_text,
+               path: image_vote_path(id: image_id, vote: 1),
+               title: link_text,
+               data: { role: "visual_group_status",
+                       imgid: image_id,
+                       vgid: visual_group.id,
+                       status: link })
   end
 end

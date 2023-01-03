@@ -15,7 +15,9 @@ class EmailsController < ApplicationController
     @email = @user.email if @user
   end
 
-  def ask_user_question
+  # TODO: Refactor UserMailer.build to take kwargs, eliminating
+  #       local variable assignments.
+  def ask_user_question # rubocop:disable Metrics/AbcSize
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
                   can_email_user_question?(@target) &&
                   request.method == "POST"
@@ -36,7 +38,7 @@ class EmailsController < ApplicationController
     question = params[:question][:content]
     ObservationMailer.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(controller: :observations, action: :show,
+    redirect_with_query(controller: "/observations", action: :show,
                         id: @observation.id)
   end
 
@@ -49,7 +51,7 @@ class EmailsController < ApplicationController
     commercial_inquiry = params[:commercial_inquiry][:content]
     CommercialMailer.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
-    redirect_with_query(controller: "image", action: "show_image",
+    redirect_with_query(controller: "/images", action: "show",
                         id: @image.id)
   end
 

@@ -7,7 +7,7 @@ class SearchController < ApplicationController
   #   /comments/index (params[:pattern])
   #   /herbaria/index (params[:pattern])
   #   /herbarium_records/index (params[:pattern])
-  #   /image/image_search
+  #   /images/index (params[:pattern])
   #   /location/location_search
   #   /name/name_search
   #   /observations/index (params[:pattern])
@@ -29,7 +29,7 @@ class SearchController < ApplicationController
     when :google
       site_google_search(pattern)
       return
-    when :comment, :herbarium, :herbarium_record, :observation, :user,
+    when :comment, :herbarium, :herbarium_record, :observation, :user, :image,
       :species_list
       redirect_to_search_or_index(
         pattern: pattern,
@@ -37,7 +37,7 @@ class SearchController < ApplicationController
         index_path: send("#{type.to_s.pluralize}_path", special_params)
       )
       return
-    when :image, :location, :name, :project
+    when :location, :name, :project
       ctrlr = type
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))

@@ -106,7 +106,7 @@ class CollectionNumbersController < ApplicationController
   # Display list of CollectionNumbers whose text matches a string pattern.
   def collection_number_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
+    if pattern.match?(/^\d+$/) &&
        (collection_number = CollectionNumber.safe_find(pattern))
       redirect_to(action: :show, id: collection_number.id)
     else

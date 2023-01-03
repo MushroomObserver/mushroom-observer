@@ -24,9 +24,9 @@ class LookupsControllerTest < FunctionalTestCase
     login
     i_id = images(:in_situ_image).id
     get(:lookup_image, params: { id: i_id })
-    assert_redirected_to(controller: :image, action: :show_image, id: i_id)
+    assert_redirected_to(controller: :images, action: :show, id: i_id)
     get(:lookup_image, params: { id: 10_000 })
-    assert_redirected_to(controller: :image, action: :index_image)
+    assert_redirected_to(controller: :images, action: :index)
     assert_flash_error
   end
 

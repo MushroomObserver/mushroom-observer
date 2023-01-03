@@ -78,7 +78,7 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "34", type: :image } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :image, action: :image_search,
+    assert_redirected_to(controller: :images, action: :index,
                          pattern: "34")
 
     params = { search: { pattern: "56", type: :name } }

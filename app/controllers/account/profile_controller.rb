@@ -26,14 +26,6 @@ module Account
       deal_with_possible_profile_changes
     end
 
-    def remove_image
-      if @user&.image
-        @user.update(image: nil)
-        flash_notice(:runtime_profile_removed_image.t)
-      end
-      redirect_to(user_path(@user.id))
-    end
-
     private
 
     def check_and_maybe_update_user_place_name

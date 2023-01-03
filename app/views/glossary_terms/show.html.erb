@@ -32,12 +32,12 @@
 
 <div class="mb-3">
   <%= link_with_query(:show_glossary_term_reuse_image.t,
-                      controller: :image,
-                      action: :reuse_image_for_glossary_term,
+                      controller: "/glossary_terms/images",
+                      action: :reuse,
                       id: @glossary_term.id) %><br/>
   <%= link_with_query(:show_glossary_term_remove_image.t,
-                      controller: :image,
-                      action: :remove_images_for_glossary_term,
+                      controller: "/glossary_terms/images",
+                      action: :remove,
                       id: @glossary_term.id) %><br/>
 </div>
 
