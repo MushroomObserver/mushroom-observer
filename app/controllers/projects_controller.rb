@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = Project Controller
+#  = Projects Controller
 #
 #  == Actions
 #   L = login required
@@ -22,7 +22,7 @@
 #  new::
 #  edit::
 #  create::
-#  update
+#  update::
 #  destroy::
 #
 ################################################################################
@@ -31,12 +31,6 @@ class ProjectsController < ApplicationController
   before_action :login_required
   before_action :pass_query_params, except: [:index]
   before_action :disable_link_prefetching, except: [:edit, :show]
-
-  ##############################################################################
-  #
-  #  :section: Index
-  #
-  ##############################################################################
 
   def index
     if params[:pattern].present?
@@ -47,61 +41,6 @@ class ProjectsController < ApplicationController
       list_projects
     end
   end
-
-  private
-
-  # Show list of selected projects, based on current Query.
-  def index_project
-    query = find_or_create_query(:Project, by: params[:by])
-    show_selected_projects(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Show list of latest projects.  (Linked from left panel.)
-  def list_projects
-    query = create_query(:Project, :all, by: :title)
-    show_selected_projects(query)
-  end
-
-  # Display list of Project's whose title or notes match a string pattern.
-  def project_search
-    pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (project = Project.safe_find(pattern))
-      redirect_to(action: :show, id: project.id)
-    else
-      query = create_query(:Project, :pattern_search, pattern: pattern)
-      show_selected_projects(query)
-    end
-  end
-
-  # Show selected list of projects.
-  def show_selected_projects(query, args = {})
-    args = {
-      action: :index,
-      letters: "projects.title",
-      num_per_page: 50,
-      include: :user
-    }.merge(args)
-
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",        :sort_by_title.t],
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t]
-    ]
-
-    show_index_of_objects(query, args)
-  end
-
-  public
-
-  ##############################################################################
-  #
-  #  :section: Show, Create, Edit
-  #
-  ##############################################################################
 
   # Display project by itself.
   # Linked from: observations/show, list_projects
@@ -128,12 +67,6 @@ class ProjectsController < ApplicationController
               includes(:name, :user)
   end
 
-  # Go to next project: redirects to show_project.
-  # def next_project
-
-  # Go to previous project: redirects to show_project.
-  # def prev_project
-
   ##############################################################################
 
   # Form to create a project.
@@ -150,26 +83,6 @@ class ProjectsController < ApplicationController
   # def add_project
   def new
     @project = Project.new
-  end
-
-  def create # rubocop:disable Metrics/AbcSize
-    title = params[:project][:title].to_s
-    project = Project.find_by_title(title)
-    user_group = UserGroup.find_by_name(title)
-    admin_name = "#{title}.admin"
-    admin_group = UserGroup.find_by_name(admin_name)
-    if title.blank?
-      flash_error(:add_project_need_title.t)
-    elsif project
-      flash_error(:add_project_already_exists.t(title: project.title))
-    elsif user_group
-      flash_error(:add_project_group_exists.t(group: title))
-    elsif admin_group
-      flash_error(:add_project_group_exists.t(group: admin_name))
-    else
-      return create_project(title, admin_name)
-    end
-    render(:new, location: new_project_path(q: get_query_param))
   end
 
   # Form to edit a project
@@ -190,6 +103,26 @@ class ProjectsController < ApplicationController
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))
+  end
+
+  def create # rubocop:disable Metrics/AbcSize
+    title = params[:project][:title].to_s
+    project = Project.find_by_title(title)
+    user_group = UserGroup.find_by_name(title)
+    admin_name = "#{title}.admin"
+    admin_group = UserGroup.find_by_name(admin_name)
+    if title.blank?
+      flash_error(:add_project_need_title.t)
+    elsif project
+      flash_error(:add_project_already_exists.t(title: project.title))
+    elsif user_group
+      flash_error(:add_project_group_exists.t(group: title))
+    elsif admin_group
+      flash_error(:add_project_group_exists.t(group: admin_name))
+    else
+      return create_project(title, admin_name)
+    end
+    render(:new, location: new_project_path(q: get_query_param))
   end
 
   def update # rubocop:disable Metrics/AbcSize
@@ -240,6 +173,63 @@ class ProjectsController < ApplicationController
   end
 
   private
+
+  ##############################################################################
+  #
+  #  :section: Index private methods
+  #
+  ##############################################################################
+
+  # Show list of selected projects, based on current Query.
+  def index_project
+    query = find_or_create_query(:Project, by: params[:by])
+    show_selected_projects(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Show list of latest projects.  (Linked from left panel.)
+  def list_projects
+    query = create_query(:Project, :all, by: :title)
+    show_selected_projects(query)
+  end
+
+  # Display list of Project's whose title or notes match a string pattern.
+  def project_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) &&
+       (project = Project.safe_find(pattern))
+      redirect_to(action: :show, id: project.id)
+    else
+      query = create_query(:Project, :pattern_search, pattern: pattern)
+      show_selected_projects(query)
+    end
+  end
+
+  # Show selected list of projects.
+  def show_selected_projects(query, args = {})
+    args = {
+      action: :index,
+      letters: "projects.title",
+      num_per_page: 50,
+      include: :user
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["name",        :sort_by_title.t],
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t]
+    ]
+
+    show_index_of_objects(query, args)
+  end
+
+  ##############################################################################
+  #
+  #  :section: update, edit private methods
+  #
+  ##############################################################################
 
   def whitelisted_project_params
     params.require(:project).permit(:title, :summary)

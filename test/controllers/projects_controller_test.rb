@@ -37,8 +37,8 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
-    assert_obj_list_equal(drafts,
-                          NameDescription.where(source_name: project.title))
+    assert_obj_arrays_equal(drafts,
+                            NameDescription.where(source_name: project.title))
   end
 
   ##############################################################################
