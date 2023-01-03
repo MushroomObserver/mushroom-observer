@@ -129,10 +129,6 @@ module ObservationsHelper
 
   def name_html(naming)
     Textile.register_name(naming.name)
-    name_link = link_with_query(
-      naming.display_name_brief_authors.t.break_name.small_author,
-      show_name_path(id: naming.name)
-    )
 
     if check_permission(naming)
       edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
@@ -144,7 +140,14 @@ module ObservationsHelper
       proposer_links = ""
     end
 
-    [name_link, proposer_links].safe_join
+    [name_link(naming), proposer_links].safe_join
+  end
+
+  def name_link(naming)
+    link_with_query(
+      naming.display_name_brief_authors.t.break_name.small_author,
+      show_name_path(id: naming.name)
+    )
   end
 
   def proposer_html(naming)
