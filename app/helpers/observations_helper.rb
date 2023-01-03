@@ -122,7 +122,7 @@ module ObservationsHelper
                          { data: { role: "suggest_names" },
                            class: "btn btn-default" })
     end
-    buttons.safe_join(tag.br())
+    buttons.safe_join(tag.br)
   end
 
   private
@@ -138,7 +138,7 @@ module ObservationsHelper
       edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
                                   class: "edit_naming_link_#{naming.id}")
       delete_link = destroy_button(target: naming)
-      proposer_links = [tag.br(),
+      proposer_links = [tag.br,
                         "[", edit_link, " | ", delete_link, "]"].safe_join
     else
       proposer_links = ""
