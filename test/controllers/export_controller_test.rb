@@ -86,7 +86,7 @@ class ExportControllerTest < FunctionalTestCase
     image = ml_image
     image.update(diagnostic: true)
     get(:set_ml_status, params: ml_params.merge(value: "0"))
-    assert_redirected_to(controller: :image, action: :show_image, id: image.id)
+    assert_redirected_to(controller: :images, action: :show, id: image.id)
     assert_equal(false, image.reload.diagnostic)
   end
 
@@ -95,7 +95,7 @@ class ExportControllerTest < FunctionalTestCase
     image = ml_image
     image.update(diagnostic: false)
     get(:set_ml_status, params: ml_params.merge(value: "1"))
-    assert_redirected_to(controller: :image, action: :show_image, id: image.id)
+    assert_redirected_to(controller: :images, action: :show, id: image.id)
     assert_equal(true, image.reload.diagnostic)
   end
 

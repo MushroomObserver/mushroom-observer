@@ -65,8 +65,8 @@
         <b><%= :IMAGES.t %>:</b>
         <% if @project.images.any? %>
           <%= @project.images.length %>
-          (<%= link_to(:SHOW.t, controller: :image,
-                       action: :images_for_project, id: @project.id) %>)
+          (<%= link_to(:SHOW.t, controller: :images,
+                       action: :index, for_project: @project.id) %>)
         <% else %>
           <%= :NONE.t %>
         <% end %>

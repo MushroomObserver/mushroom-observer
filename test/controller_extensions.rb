@@ -96,6 +96,9 @@ module ControllerExtensions
     user
   end
 
+  # FIXME: Give these actions named kwargs, down to `either_requires_either`.
+  # Debugging positional args is WAY TOO CONFUSING. (What arg are you passing?)
+  #
   # Send GET request to a page that should require login.
   #
   #   # Make sure only logged-in users get to see this page.
@@ -153,12 +156,17 @@ module ControllerExtensions
     either_requires_either(:patch, *args)
   end
 
+  def delete_requires_user(*args)
+    either_requires_either(:delete, *args)
+  end
+
   # Helper used by the blah_requires_blah methods.
   # method::        [Request method: "GET" or "POST".
   #                 - Supplied automatically by all four "public" methods.]
   # page::          Name of action.
   # altpage::       [Name of page redirected to if user wrong.
-  #                 - Only include in +requires_user+ and +post_requires_user+.]
+  #                 - Only include in +requires_user+ and +{_}_requires_user+,]
+  #                 If not a simple action MUST be a ctrlr/action/param hash!
   # params::        Hash of parameters for action.
   # stay_on_page::  Does it render template of same name as action if succeeds?
   # username::      Which user should be logged in (default is "rolf").
@@ -196,6 +204,7 @@ module ControllerExtensions
   #
   def either_requires_either(method, page, altpage, params = {},
                              username = "rolf", password = "testpassword")
+    # binding.break
     assert_request(
       method: method,
       action: page,

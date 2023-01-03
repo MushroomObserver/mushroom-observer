@@ -78,7 +78,7 @@ xml.response(
           xml.license(@data.license_url(image.license_id))
           xml.dcterms(:rightsHolder, user)
           xml.audience("General public")
-          xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
+          xml.dc(:source, "#{MO.http_domain}/images/#{image.id}")
           xml.dc(:description,
                  "Mushroom Observer Image #{image.id}: " \
                  "#{@data.image_to_names(image.id)}",

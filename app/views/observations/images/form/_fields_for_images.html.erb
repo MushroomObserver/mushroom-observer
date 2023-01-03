@@ -1,0 +1,32 @@
+<div class="form-group">
+  <%= f.label(:copyright_holder, :form_images_copyright_holder.t + ":") %>
+  <%= f.text_field(:copyright_holder, class: "form-control") %>
+</div>
+
+<% unless leave_out_original_file_name %>
+  <div class="form-group">
+    <%= f.label(:original_name, :form_images_original_name.t + ":") %>
+    <%= f.text_field(:original_name, class: "form-control") %>
+  </div>
+<% end %>
+
+<div class="form-group form-inline">
+  <%= f.label(:when_1i, :WHEN.t + ":") %>
+  <%= f.date_select(:when, date_select_opts(@image),
+                    { class: "form-control" }) %>
+  <% turn_into_year_auto_completer(:image_when_1i) %>
+  <%= content_tag(:p, class: "help-block") { :form_images_when_help.t } %>
+</div>
+
+<div class="form-group">
+  <%= f.label(:license_id, :LICENSE.t + ":") %>
+  <%= f.select(:license_id, @licenses, {}, { class: "form-control" }) %>
+  <%= content_tag(:p, class: "help-block") { :form_images_license_help.t } %>
+</div>
+
+<div class="form-group">
+  <%= f.label(:notes, :NOTES.t + ":") %>
+  <%= f.text_area(:notes, data: { autofocus: true }, class: "form-control") %>
+  <%= content_tag(:p, class: "help-block") { :form_images_notes_help.t } %>
+  <%= render(partial: "shared/textilize_help") %>
+</div>

@@ -1,0 +1,16 @@
+<div class="form-group form-inline mt-3">
+  <%= fields_for(:upload) do |f_u| %>
+    <%= f_u.label(:image1, :image_add_image.t + " 1:") %>
+      <%= custom_file_field(:upload, :image1) %>
+      (<%= :image_add_default.t %>)<br/>
+    <%= f_u.label(:image2, :image_add_image.t + " 2:") %>
+      <%= custom_file_field(:upload, :image2) %>
+      (<%= :image_add_optional.t %>)<br/>
+    <%= f_u.label(:image3, :image_add_image.t + " 3:") %>
+      <%= custom_file_field(:upload, :image3) %>
+      (<%= :image_add_optional.t %>)<br/>
+    <%= f_u.label(:image4, :image_add_image.t + " 4:") %>
+      <%= custom_file_field(:upload, :image4) %>
+      (<%= :image_add_optional.t %>)<br/>
+  <% end %>
+</div>
