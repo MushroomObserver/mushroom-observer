@@ -152,7 +152,7 @@ class ProjectsController < ApplicationController
     @project = Project.new
   end
 
-  def create
+  def create # rubocop:disable Metrics/AbcSize
     title = params[:project][:title].to_s
     project = Project.find_by_title(title)
     user_group = UserGroup.find_by_name(title)
