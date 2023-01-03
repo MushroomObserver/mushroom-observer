@@ -113,7 +113,7 @@ class CommentsController < ApplicationController
   # Display list of Comment's whose text matches a string pattern.
   def comment_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
+    if pattern.match?(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
       redirect_to(action: :show, id: comment.id)
     else
