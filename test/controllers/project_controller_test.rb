@@ -37,8 +37,8 @@ class ProjectControllerTest < FunctionalTestCase
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
-    assert_obj_list_equal(drafts,
-                          NameDescription.where(source_name: project.title))
+    assert_obj_arrays_equal(drafts,
+                            NameDescription.where(source_name: project.title))
   end
 
   def change_member_status_helper(changer, target_user, commit, admin_before,

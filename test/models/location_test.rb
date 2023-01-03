@@ -274,7 +274,7 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
-    assert_user_list_equal([rolf, dick], desc.editors)
+    assert_user_arrays_equal([rolf, dick], desc.editors)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::LocationChange",
@@ -307,7 +307,7 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
-    assert_user_list_equal([rolf, dick], desc.editors)
+    assert_user_arrays_equal([rolf, dick], desc.editors)
     assert_email(3,
                  flavor: "QueuedEmail::LocationChange",
                  from: dick,
