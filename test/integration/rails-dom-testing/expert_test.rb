@@ -127,7 +127,7 @@ class ExpertTest < IntegrationTestCase
 
     # First attempt at creating a list.
     login!(dick)
-    get("/species_list/create_species_list")
+    get("/species_lists/new")
     member_notes = "Member notes."
     open_form do |form|
       form.assert_value("list_members", "")

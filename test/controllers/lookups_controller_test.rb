@@ -157,7 +157,7 @@ class LookupsControllerTest < FunctionalTestCase
     )
     get(:lookup_species_list, params: { id: "species list" })
     # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{/species_list/index_species_list})
+    assert_redirected_to(%r{/species_lists})
     assert_flash_warning
     get(:lookup_species_list, params: { id: "Flibbertygibbets" })
     assert_redirected_to(controller: :species_lists, action: :index)

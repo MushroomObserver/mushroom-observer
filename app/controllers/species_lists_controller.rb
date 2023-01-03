@@ -5,30 +5,22 @@
 #
 #  == Actions
 #
+#  index::                   Endpoint for all lists
+#    (private methods)
 #  index_species_list::      List of lists in current query.
 #  list_species_lists::      List of lists by date.
 #  species_lists_by_title::  List of lists by title.
 #  species_lists_by_user::   List of lists created by user.
 #  species_list_search::     List of lists matching search.
 #
-#  show_species_list::       Display notes/etc. and list of species.
-#  prev_species_list::       Display previous species list in index.
-#  next_species_list::       Display next species list in index.
+#  show::                    Display notes/etc. and list of species.
 #
-#  download::                Download observation data.
-#  make_report::             Save observation data as report.
-#  print_labels::            Print observation data as labels.
-#
-#  name_lister::             Efficient javascripty way to build a list of names.
-#  create_species_list::     Create new list.
-#  edit_species_list::       Edit existing list.
-#  upload_species_list::     Same as edit_species_list but gets list from file.
-#  destroy_species_list::    Destroy list.
-#  clear_species_list::      Remove all observations from list.
-#  add_remove_observations:: Add/remove query results to/from a list.
-#  manage_species_lists::    Add/remove one observation from a user's lists.
-#  add_observation_to_species_list::      (post method)
-#  remove_observation_from_species_list:: (post method)
+#  new::                     Form to create new list.
+#  edit::                    Form to edit existing list.
+#  create::                  Create new list.
+#  update::                  Update existing list.
+#  clear::                   Remove all observations from list.
+#  destroy::                 Destroy list.
 #
 #  *NOTE*: There is some ambiguity between observations and names that makes
 #  this slightly confusing.  The end result of a species list is actually a
@@ -40,7 +32,7 @@
 class SpeciesListsController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching,
-                except: [:new, :create, :edit, :update, :show]
+                except: [:show, :new, :edit, :create, :update]
   before_action :require_successful_user, only: [:new, :create]
 
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
@@ -49,12 +41,6 @@ class SpeciesListsController < ApplicationController
     # get it to work.  Seems to minor to waste any more time on.
     :edit_species_list
   ]
-
-  ##############################################################################
-  #
-  #  :section: Index
-  #
-  ##############################################################################
 
   def index # rubocop:disable Metrics/AbcSize
     if params[:advanced_search].present?
@@ -73,6 +59,94 @@ class SpeciesListsController < ApplicationController
       list_species_lists
     end
   end
+
+  # def show_species_list
+  def show
+    store_location
+    clear_query_in_session
+    pass_query_params
+    return unless (@species_list = find_species_list!)
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, SpeciesList, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, SpeciesList, params[:id]) and return
+    end
+
+    init_ivars_for_show
+  end
+
+  # rubocop:disable Naming/MemoizedInstanceVariableName
+  def new
+    @species_list = SpeciesList.new
+    init_name_vars_for_create
+    init_member_vars_for_create
+    init_project_vars_for_create
+    init_name_vars_for_clone(params[:clone]) if params[:clone].present?
+    @checklist ||= calc_checklist
+  end
+  # rubocop:enable Naming/MemoizedInstanceVariableName
+
+  def edit
+    return unless (@species_list = find_species_list!)
+
+    if check_permission!(@species_list)
+      init_name_vars_for_edit(@species_list)
+      init_member_vars_for_edit(@species_list)
+      init_project_vars_for_edit(@species_list)
+      @checklist ||= calc_checklist
+    else
+      redirect_to(species_list_path(@species_list))
+    end
+  end
+
+  def create
+    @species_list = SpeciesList.new
+    process_species_list(:create)
+  end
+
+  def update
+    return unless (@species_list = find_species_list!)
+
+    if check_permission!(@species_list)
+      process_species_list(:update)
+    else
+      redirect_to(species_list_path(@species_list))
+    end
+  end
+
+  # Custom endpoint to clear obs from spl
+  def clear
+    return unless (@species_list = find_species_list!)
+
+    if check_permission!(@species_list)
+      @species_list.clear
+      flash_notice(:runtime_species_list_clear_success.t)
+    end
+    redirect_to(species_list_path(@species_list))
+  end
+
+  def destroy
+    return unless (@species_list = find_species_list!)
+
+    if check_permission!(@species_list)
+      @species_list.destroy
+      id = params[:id].to_s
+      flash_notice(:runtime_species_list_destroy_success.t(id: id))
+      redirect_to(species_lists_path)
+    else
+      redirect_to(species_list_path(@species_list))
+    end
+  end
+
+  private
+
+  ##############################################################################
+  #
+  #  :section: Index
+  #
+  ##############################################################################
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
@@ -164,93 +238,6 @@ class SpeciesListsController < ApplicationController
   #
   ##############################################################################
 
-  # def show_species_list
-  def show
-    store_location
-    clear_query_in_session
-    pass_query_params
-    return unless (@species_list = find_species_list!)
-
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, SpeciesList, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, SpeciesList, params[:id]) and return
-    end
-
-    init_ivars_for_show
-  end
-
-  ##############################################################################
-  #
-  #  :section: Create and Modify
-  #
-  ##############################################################################
-
-  # rubocop:disable Naming/MemoizedInstanceVariableName
-  def new
-    @species_list = SpeciesList.new
-    init_name_vars_for_create
-    init_member_vars_for_create
-    init_project_vars_for_create
-    init_name_vars_for_clone(params[:clone]) if params[:clone].present?
-    @checklist ||= calc_checklist
-  end
-  # rubocop:enable Naming/MemoizedInstanceVariableName
-
-  def create
-    @species_list = SpeciesList.new
-    process_species_list(:create)
-  end
-
-  def edit
-    return unless (@species_list = find_species_list!)
-
-    if check_permission!(@species_list)
-      init_name_vars_for_edit(@species_list)
-      init_member_vars_for_edit(@species_list)
-      init_project_vars_for_edit(@species_list)
-      @checklist ||= calc_checklist
-    else
-      redirect_to(species_list_path(@species_list))
-    end
-  end
-
-  def update
-    return unless (@species_list = find_species_list!)
-
-    if check_permission!(@species_list)
-      process_species_list(:update)
-    else
-      redirect_to(species_list_path(@species_list))
-    end
-  end
-
-  def destroy
-    return unless (@species_list = find_species_list!)
-
-    if check_permission!(@species_list)
-      @species_list.destroy
-      id = params[:id].to_s
-      flash_notice(:runtime_species_list_destroy_success.t(id: id))
-      redirect_to(species_lists_path)
-    else
-      redirect_to(species_list_path(@species_list))
-    end
-  end
-
-  def clear
-    return unless (@species_list = find_species_list!)
-
-    if check_permission!(@species_list)
-      @species_list.clear
-      flash_notice(:runtime_species_list_clear_success.t)
-    end
-    redirect_to(species_list_path(@species_list))
-  end
-
-  private
-
   def init_ivars_for_show
     @canonical_url =
       "#{MO.http_domain}/species_lists/#{@species_list.id}"
@@ -263,7 +250,11 @@ class SpeciesListsController < ApplicationController
                   [:user, :name, :location, { thumb_image: :image_votes }])
   end
 
-  ############################################################################
+  ##############################################################################
+  #
+  #  :section: Create and Modify
+  #
+  ##############################################################################
 
   include SpeciesLists::SharedPrivateMethods # shared private methods
 end
