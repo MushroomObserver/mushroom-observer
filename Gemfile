@@ -162,33 +162,6 @@ gem("rubyzip", "~> 2.3.0")
 # to handle frontend requests from different port, e.g. dev GraphQL client
 gem("rack-cors")
 
-########## Development, Testing, and Analysis ##################################
-
-# Use built-in Ruby coverage to generate html coverage file
-gem("simplecov", require: false)
-# generate lcov file to send to Coveralls by Github Actions
-gem("simplecov-lcov", require: false)
-
-# Brakeman static analysis security scanner
-# See http://brakemanscanner.org/
-gem("brakeman", require: false)
-
-# Use rubocop and extension gems for code quality control
-# extension list: https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
-# NOTE: If updating RuboCop, insure that .codeclimate.yml uses highest available
-# rubocop channel. See https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
-# NOTE: If updating RuboCop, update any extension used here
-gem("rubocop", require: false)
-gem("rubocop-performance")
-gem("rubocop-rails")
-# Rubocop extension for enforcing graphql-ruby best practices.
-# You need to tell RuboCop to load the GraphQL extension. rubocop.yml
-# require:
-#  - rubocop-other-extension
-#  - rubocop-graphql
-# http://github.com/DmitryTsepelev/rubocop-graphql
-gem("rubocop-graphql", require: false)
-
 ########## GraphQL API ########################################
 
 # GraphQL-Ruby
@@ -273,10 +246,33 @@ gem("graphql-batch")
 # gem("cacheql")
 #
 
+########## Development, Testing, and Analysis ##################################
 group :test, :development do
-  # https://github.com/ruby/debug
-  # NOTE: Remove this upon upgrade to Ruby 3.1. (It's included with Ruby 3.1)
-  gem "debug", ">= 1.0.0"
+  # Use built-in Ruby coverage to generate html coverage file
+  gem("simplecov", require: false)
+  # generate lcov file to send to Coveralls by Github Actions
+  gem("simplecov-lcov", require: false)
+
+  # Brakeman static analysis security scanner
+  # See http://brakemanscanner.org/
+  gem("brakeman", require: false)
+
+  # Use rubocop and extensions for code quality control
+  # https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
+  # NOTE: If updating RuboCop:
+  #  - Update any extension used here
+  #  - Use highest available .codeclimate.yml rubocop channel
+  #    https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
+  gem("rubocop", require: false)
+  gem("rubocop-performance")
+  gem("rubocop-rails")
+  # Rubocop extension for enforcing graphql-ruby best practices.
+  # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
+  # require:
+  #  - rubocop-other-extension
+  #  - rubocop-graphql
+  # http://github.com/DmitryTsepelev/rubocop-graphql
+  gem("rubocop-graphql", require: false)
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
