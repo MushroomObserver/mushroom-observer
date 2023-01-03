@@ -129,7 +129,8 @@ module Observations
       params = { "id" => image.id.to_s }
       assert(image.user.login == "rolf")
       requires_user(:edit,
-                    { controller: "/images", action: :show, id: image.id }, params)
+                    { controller: "/images", action: :show, id: image.id },
+                    params)
       assert_form_action(action: :update, id: image.id.to_s)
     end
 
@@ -474,7 +475,8 @@ module Observations
              "Use Observation fixture with multiple images for best coverage")
       user = obs.user
       selected = images.ids.each_with_object({}) do |item, hash|
-        hash[item.to_s] = "yes" # "img_id" => "yes" (yes means detach that image˝)
+        # "img_id" => "yes" (yes means detach that image˝)
+        hash[item.to_s] = "yes"
       end
       params = { id: obs.id, selected: selected }
 

@@ -45,9 +45,11 @@ module Images
       assert_template("images/licenses/edit")
       assert_equal(10, rolf.reload.contribution)
 
-      target_count_after = Image.where(user_id: user_id,
-                                       license_id: target_license.id,
-                                       copyright_holder: copyright_holder).length
+      target_count_after = Image.
+                           where(user_id: user_id,
+                                 license_id: target_license.id,
+                                 copyright_holder: copyright_holder).
+                           length
       new_count_after = Image.where(user_id: user_id,
                                     license_id: new_license.id,
                                     copyright_holder: copyright_holder).length
