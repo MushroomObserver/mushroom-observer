@@ -32,7 +32,7 @@ module Observations
       assert(img_count.positive?)
       assert(obs.thumb_image)
       file = Rack::Test::UploadedFile.new(
-        "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+        Rails.root.join("test/images/Coprinus_comatus.jpg"), "image/jpeg"
       )
       params = {
         id: obs.id,
