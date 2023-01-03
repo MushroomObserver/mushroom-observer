@@ -5,6 +5,7 @@
 # with CRUD refactor, change thumbnail helper to fire a POST somehow?
 
 module Observations
+  # Upload, attach, detach, edit Observation Images
   class ImagesController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
@@ -73,8 +74,8 @@ module Observations
       if params[:upload].blank?
         flash_warning(:runtime_no_changes.t)
       else
-        # There are five upload spots on the form. 
-        # For as many as have an image, process the image. 
+        # There are five upload spots on the form.
+        # For as many as have an image, process the image.
         args = params[:image]
         i = 1
         while i < 5 || params[:upload]["image#{i}"].present?
