@@ -155,14 +155,17 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_location_bounding_box
+    north = south = east = west = 0
     delta = 0.001
     login
-    get(:list_locations, params: { north: 0, south: 0, east: 0, west: 0 })
+    get(:list_locations,
+        params: { north: north, south: south, east: east, west: west })
     query = Query.find(QueryRecord.last.id)
-    assert_equal(params[:north] + delta, query.params[:north])
-    assert_equal(params[:south] - delta, query.params[:south])
-    assert_equal(params[:east] + delta, query.params[:east])
-    assert_equal(params[:west] - delta, query.params[:west])
+
+    assert_equal(north + delta, query.params[:north])
+    assert_equal(south - delta, query.params[:south])
+    assert_equal(east + delta, query.params[:east])
+    assert_equal(west - delta, query.params[:west])
 
     get(:list_locations,
         params: { north: 90, south: -90, east: 180, west: -180 })
