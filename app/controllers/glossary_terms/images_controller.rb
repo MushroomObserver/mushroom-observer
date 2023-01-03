@@ -81,6 +81,7 @@ module GlossaryTerms
       unless check_permission!(@object)
         return redirect_with_query(glossary_term_path(@object.id))
       end
+
       return unless (images_data = params[:selected])
 
       detach_images_from_glossary_term(images_data)
@@ -91,6 +92,14 @@ module GlossaryTerms
     private
 
     def detach_images_from_glossary_term(images_data)
+      if images_data == ""
+        flash_error(:runtime_no_save.t(:glossary_term))
+        return render(:remove,
+                      location: remove_images_from_glossary_term_path(
+                        params[:id]
+                      ))
+      end
+
       images_data.each do |image_id, do_it|
         next unless do_it == "yes"
 

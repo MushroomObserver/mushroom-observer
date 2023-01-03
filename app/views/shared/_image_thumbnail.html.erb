@@ -30,8 +30,7 @@
 
   # CHANGES -
   # remove responsive param, all responsive
-  # make link a stretched-link
-  # html_options = html_options.merge({ class: "stretched-link" })
+  # FIXME: Pass a srcset attribute, or symbol, from context for true responsive
   image_link = case link_method
                 when :get
                   link_with_query("", link, class: "image-link ab-fab")
@@ -52,11 +51,11 @@
     <div data-toggle="expand-icon" class="text-center">
       <div class="click-container position-relative">
         <%= image_tag(size_url, title: notes,
-                      class: "img-fluid",
+                      class: "img-fluid #{extra_classes}",
                       data: { toggle: "tooltip", placement: "bottom" }) %>
         <%= image_link %>
       </div>
-      <%= link_to("", huge_url, # FIX. Pass a srcset attribute from context?
+      <%= link_to("", huge_url,
                   class: "glyphicon glyphicon-fullscreen theater-btn",
                   data: { lightbox: lightbox_id, title: caption }) %>
       <div class="mt-3">
