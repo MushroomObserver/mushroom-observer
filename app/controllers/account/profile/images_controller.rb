@@ -30,13 +30,13 @@ module Account::Profile
       redirect_to(user_path(@user.id))
     end
 
-    # PUT action
+    # PUT action. Does not require a param, just removes user.image_id
     def detach
       if @user&.image
         @user.update(image: nil)
         flash_notice(:runtime_profile_removed_image.t)
       end
-      redirect_to(user_path(@user.id))
+      redirect_to(edit_account_profile_path)
     end
 
     private
