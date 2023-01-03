@@ -31,7 +31,7 @@ module ImageTabsHelper
   end
 
   def eol_link(image)
-    return unless eol_url = image.eol_url
+    return unless (eol_url = image.eol_url)
 
     link_to("EOL", eol_url)
   end
