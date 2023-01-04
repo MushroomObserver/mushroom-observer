@@ -6,18 +6,8 @@
     link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  action = { controller: "/names", action: :update, id: @name.id }
 %>
 
-<%= form_with(
-      model: @name, url: add_query_param(action: :update, id: @name.id)
-    ) do |form| %>
-  <div class="text-center my-3">
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
-  </div><!-- .text-center -->
-
-  <%= render(partial: "form_name", locals: { form: form }) %>
-
-  <div class="text-center my-3">
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn btn-default") %>
-  </div><!-- .text-center -->
-<% end %>
+<%= render(partial: "names/form",
+           locals: { action: action, button: :SAVE_EDITS.l }) %>

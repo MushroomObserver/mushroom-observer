@@ -105,8 +105,8 @@ module Names
       end
     end
 
-    # Form accessible from show_name that lets the user deprecate a name in favor
-    # of another name.
+    # Form accessible from show_name that lets the user deprecate a name
+    # in favor of another name.
     def deprecate_name
       pass_query_params
 
