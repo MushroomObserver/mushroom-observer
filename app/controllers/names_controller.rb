@@ -31,31 +31,24 @@
 class NamesController < ApplicationController
   include CreateAndEditName
 
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another
   #    before_action :login_required, except: :show_name_description
   # in name_controller/show_name_description.rb, it ignores it.
   before_action :login_required
-
   before_action :disable_link_prefetching, except: [
-    :approve_name,
-    :bulk_name_edit,
-    :change_synonyms,
-    :deprecate_name,
     :show_name,
-    :show_past_name,
     :create_name,
     :edit_name
   ]
-
-  before_action :disable_link_prefetching, except: []
-  # rubocop:enable Rails/LexicallyScopedActionFilter
-
   ##############################################################################
   #
   #  :section: Indexes and Searches
   #
   ##############################################################################
+
+  def index; end
+  
+  private
 
   # Display list of names in last index/search query.
   def index_name
@@ -206,6 +199,8 @@ class NamesController < ApplicationController
     end
   end
 
+  public
+
   ##############################################################################
   #
   #  :section: Show Name
@@ -268,23 +263,6 @@ class NamesController < ApplicationController
     @first_child      = @children_query.results(limit: 1).first
     @first_consensus  = @consensus_query.results(limit: 1).first
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
-  end
-
-  # Show past version of Name.  Accessible only from show_name page.
-  def show_past_name
-    pass_query_params
-    store_location
-    @name = find_or_goto_index(Name, params[:id].to_s)
-    return unless @name
-
-    @name.revert_to(params[:version].to_i)
-    @correct_spelling = ""
-    return unless @name.is_misspelling?
-
-    # Old correct spellings could have gotten merged with something else
-    # and no longer exist.
-    @correct_spelling = Name.where(id: @name.correct_spelling_id).
-                        pluck(:display_name)
   end
 
   # Go to next name: redirects to show_name.

@@ -8,6 +8,9 @@
 
 module Names
   class EolDataController < ApplicationController
+    before_action :login_required
+    before_action :disable_link_prefetching
+
     ##########################################################################
     #
     #  :section: EOL Feed

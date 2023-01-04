@@ -2,49 +2,29 @@
 
 require("geocoder")
 
-# Location controller.
-class LocationController < ApplicationController
-  include DescriptionControllerHelpers
+#   :advanced_search,
+#   :help,
+#   :index_location,
+#   :list_by_country,
+#   :list_countries,
+#   :list_locations,
+#   :location_search,
+#   :locations_by_editor,
+#   :locations_by_user,
+#   :next_location,
+#   :prev_location,
+#   :show_location,
+#   :create_location,
+#   :edit_location,
+#   :destroy_location
 
+# Locations controller.
+class LocationsController < ApplicationController
   before_action :login_required
-  # except: [
-  #   :advanced_search,
-  #   :help,
-  #   :index_location,
-  #   :index_location_description,
-  #   :list_by_country,
-  #   :list_countries,
-  #   :list_location_descriptions,
-  #   :list_locations,
-  #   :location_descriptions_by_author,
-  #   :location_descriptions_by_editor,
-  #   :location_search,
-  #   :locations_by_editor,
-  #   :locations_by_user,
-  #   :map_locations,
-  #   :next_location,
-  #   :prev_location,
-  #   :next_location_description,
-  #   :prev_location_description,
-  #   :show_location,
-  #   :show_location_description,
-  #   :show_past_location,
-  #   :show_past_location_description
-  # ]
-
   before_action :disable_link_prefetching, except: [
     :create_location,
-    :create_location_description,
     :edit_location,
-    :edit_location_description,
-    :show_location,
-    :show_location_description,
-    :show_past_location,
-    :show_past_location_description
-  ]
-
-  before_action :require_successful_user, only: [
-    :create_location_description
+    :show_location
   ]
 
   ##############################################################################
@@ -53,15 +33,14 @@ class LocationController < ApplicationController
   #
   ##############################################################################
 
+  def index; end
+
+  private
+
   # Displays a list of selected locations, based on current Query.
   def index_location
     query = find_or_create_query(:Location, by: params[:by])
     show_selected_locations(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Displays a list of all countries with counts.
-  def list_countries
-    @cc = CountryCounter.new
   end
 
   # Displays a list of all locations whose country matches the id param.
@@ -187,28 +166,6 @@ class LocationController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  # Map results of a search or index.
-  def map_locations
-    @query = find_or_create_query(:Location)
-
-    apply_content_filters(@query)
-
-    @title = if @query.flavor == :all
-               :map_locations_global_map.t
-             else
-               :map_locations_title.t(locations: @query.title)
-             end
-    @query = restrict_query_to_box(@query)
-    @timer_start = Time.current
-    columns = %w[name north south east west].map { |x| "locations.#{x}" }
-    args = { select: "DISTINCT(locations.id), #{columns.join(", ")}" }
-    @locations = @query.select_rows(args).map do |id, *the_rest|
-      MinimalMapLocation.new(id, *the_rest)
-    end
-    @num_results = @locations.count
-    @timer_end = Time.current
-  end
-
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
   def coerce_query_for_undefined_locations(query)
@@ -280,66 +237,7 @@ class LocationController < ApplicationController
     result
   end
 
-  ##############################################################################
-  #
-  #  :section: Description Searches and Indexes
-  #
-  ##############################################################################
-
-  # Displays a list of selected locations, based on current Query.
-  def index_location_description
-    query = find_or_create_query(:LocationDescription, by: params[:by])
-    show_selected_location_descriptions(query, id: params[:id].to_s,
-                                               always_index: true)
-  end
-
-  # Displays a list of all location_descriptions.
-  def list_location_descriptions
-    query = create_query(:LocationDescription, :all, by: :name)
-    show_selected_location_descriptions(query)
-  end
-
-  # Display list of location_descriptions that a given user is author on.
-  def location_descriptions_by_author
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-    return unless user
-
-    query = create_query(:LocationDescription, :by_author, user: user)
-    show_selected_location_descriptions(query)
-  end
-
-  # Display list of location_descriptions that a given user is editor on.
-  def location_descriptions_by_editor
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-    return unless user
-
-    query = create_query(:LocationDescription, :by_editor, user: user)
-    show_selected_location_descriptions(query)
-  end
-
-  # Show selected search results as a list with 'list_locations' template.
-  def show_selected_location_descriptions(query, args = {})
-    store_query_in_session(query)
-    @links ||= []
-    args = {
-      action: :list_location_descriptions,
-      num_per_page: 50
-    }.merge(args)
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",        :sort_by_name.t],
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["num_views",   :sort_by_num_views.t]
-    ]
-
-    # Add "show locations" link if this query can be coerced into an
-    # observation query.
-    @links << coerced_query_link(query, Location)
-
-    show_index_of_objects(query, args)
-  end
+  public
 
   ##############################################################################
   #
@@ -383,67 +281,6 @@ class LocationController < ApplicationController
     end
   end
 
-  # Show just a LocationDescription.
-  def show_location_description
-    store_location
-    pass_query_params
-    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-    return unless @description
-
-    @canonical_url = "#{MO.http_domain}/location/show_location_description/" \
-                     "#{@description.id}"
-    # Public or user has permission.
-    if in_admin_mode? || @description.is_reader?(@user)
-      @location = @description.location
-      update_view_stats(@description)
-
-      # Get a list of projects the user can create drafts for.
-      @projects = @user&.projects_member&.select do |project|
-        @location.descriptions.none? { |d| d.belongs_to_project?(project) }
-      end
-
-    # User doesn't have permission to see this description.
-    elsif @description.source_type == "project"
-      flash_error(:runtime_show_draft_denied.t)
-      if (project = @description.project)
-        redirect_to(controller: :project, action: :show_project,
-                    id: project.id)
-      else
-        redirect_to(action: :show_location, id: @description.location_id)
-      end
-    else
-      flash_error(:runtime_show_description_denied.t)
-      redirect_to(action: :show_location, id: @description.location_id)
-    end
-  end
-
-  # Show past version of Location.  Accessible only from show_location page.
-  def show_past_location
-    store_location
-    pass_query_params
-    @location = find_or_goto_index(Location, params[:id].to_s)
-    return unless @location
-
-    if params[:version]
-      @location.revert_to(params[:version].to_i)
-    else
-      flash_error(:show_past_location_no_version.t)
-      redirect_to(action: :show_location, id: @location.id)
-    end
-  end
-
-  # Show past version of LocationDescription.  Accessible only from
-  # show_location_description page.
-  def show_past_location_description
-    store_location
-    pass_query_params
-    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-    return unless @description
-
-    @location = @description.location
-    @description.revert_to(params[:version].to_i)
-  end
-
   # Go to next location: redirects to show_location.
   def next_location
     redirect_to_next_object(:next, Location, params[:id].to_s)
@@ -454,21 +291,12 @@ class LocationController < ApplicationController
     redirect_to_next_object(:prev, Location, params[:id].to_s)
   end
 
-  # Go to next location: redirects to show_location.
-  def next_location_description
-    redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
-  end
-
-  # Go to previous location: redirects to show_location.
-  def prev_location_description
-    redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
-  end
-
   ##############################################################################
   #
   #  :section: Create/Edit/Destroy Location
   #
   ##############################################################################
+
   def create_location
     store_location
     pass_query_params
@@ -702,174 +530,12 @@ class LocationController < ApplicationController
       old: @location.display_name,
       new: @display_name,
       observations: @location.observations.length,
-      show_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
-      edit_url: "#{MO.http_domain}/location/edit_location/#{@location.id}"
+      show_url: "#{MO.http_domain}/locations/#{@location.id}",
+      edit_url: "#{MO.http_domain}/locations/#{@location.id}/edit"
     )
   end
 
-  def create_location_description
-    store_location
-    pass_query_params
-    @location = Location.find(params[:id].to_s)
-    @licenses = License.current_names_and_ids
-    @description = LocationDescription.new
-    @description.location = @location
-
-    # Render a blank form.
-    if request.method == "GET"
-      initialize_description_source(@description)
-
-    # Create new description.
-    else
-      @description.attributes = whitelisted_location_description_params
-
-      if @description.valid?
-        initialize_description_permissions(@description)
-        @description.save
-
-        # Log action in parent location.
-        @description.location.log(:log_description_created,
-                                  user: @user.login, touch: true,
-                                  name: @description.unique_partial_format_name)
-
-        flash_notice(
-          :runtime_location_description_success.t(id: @description.id)
-        )
-        redirect_to(action: :show_location_description,
-                    id: @description.id)
-
-      else
-        flash_object_errors(@description)
-      end
-    end
-  end
-
-  def edit_location_description
-    store_location
-    pass_query_params
-    @description = LocationDescription.find(params[:id].to_s)
-    @licenses = License.current_names_and_ids
-
-    # check_description_edit_permission is partly broken.
-    # It, LocationController, and NameController need repairs.
-    # See https://www.pivotaltracker.com/story/show/174737948
-    if !check_description_edit_permission(@description, params[:description])
-      # already redirected
-
-    elsif request.method == "POST"
-      @description.attributes = whitelisted_location_description_params
-
-      # Modify permissions based on changes to the two "public" checkboxes.
-      modify_description_permissions(@description)
-
-      # No changes made.
-      if !@description.changed?
-        flash_warning(:runtime_edit_location_description_no_change.t)
-        redirect_to(action: :show_location_description,
-                    id: @description.id)
-
-      # There were error(s).
-      elsif !@description.save
-        flash_object_errors(@description)
-
-      # Updated successfully.
-      else
-        flash_notice(
-          :runtime_edit_location_description_success.t(id: @description.id)
-        )
-
-        # Log action in parent location.
-        @description.location.log(:log_description_updated,
-                                  user: @user.login, touch: true,
-                                  name: @description.unique_partial_format_name)
-
-        # Delete old description after resolving conflicts of merge.
-        if (params[:delete_after] == "true") &&
-           (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
-          if !in_admin_mode? && !old_desc.is_admin?(@user)
-            flash_warning(:runtime_description_merge_delete_denied.t)
-          else
-            flash_notice(:runtime_description_merge_deleted.
-                           t(old: old_desc.partial_format_name))
-            @description.location.log(
-              :log_object_merged_by_user,
-              user: @user.login, touch: true,
-              from: old_desc.unique_partial_format_name,
-              to: @description.unique_partial_format_name
-            )
-            old_desc.destroy
-          end
-        end
-
-        redirect_to(action: :show_location_description,
-                    id: @description.id)
-      end
-    end
-  end
-
-  def destroy_location_description
-    pass_query_params
-    @description = LocationDescription.find(params[:id].to_s)
-    if in_admin_mode? || @description.is_admin?(@user)
-      flash_notice(:runtime_destroy_description_success.t)
-      @description.location.log(:log_description_destroyed,
-                                user: @user.login, touch: true,
-                                name: @description.unique_partial_format_name)
-      @description.destroy
-      redirect_with_query(action: :show_location,
-                          id: @description.location_id)
-    else
-      flash_error(:runtime_destroy_description_not_admin.t)
-      if in_admin_mode? || @description.is_reader?(@user)
-        redirect_with_query(action: :show_location_description,
-                            id: @description.id)
-      else
-        redirect_with_query(action: :show_location,
-                            id: @description.location_id)
-      end
-    end
-  end
-
-  ##############################################################################
-  #
-  #  :section: Merging Locations
-  #
-  ##############################################################################
-
-  # Show a list of defined locations that match a given +where+ string, in
-  # order of closeness of match.
-  def list_merge_options
-    store_location
-    @where = Location.user_name(@user, params[:where].to_s)
-
-    # Split list of all locations into "matches" and "non-matches".  Try
-    # matches in the following order:
-    #   1) all that start with full "where" string
-    #   2) all that start with everything in "where" up to the comma
-    #   3) all that start with the first word in "where"
-    #   4) there just aren't any matches, give up
-    all = Location.all.order("name")
-    @matches, @others = (
-      split_out_matches(all, @where) ||
-      split_out_matches(all, @where.split(",").first) ||
-      split_out_matches(all, @where.split.first) ||
-      [nil, all]
-    )
-  end
-
-  # Split up +list+ into those that start with +substring+ and those that
-  # don't.  If none match, then return nil.
-  def split_out_matches(list, substring)
-    matches = list.select do |loc|
-      (loc.name.to_s[0, substring.length] == substring)
-    end
-    if matches.empty?
-      nil
-    else
-      [matches, list - matches]
-    end
-  end
-
+  # Callback for :show
   def reverse_name_order
     if (location = Location.safe_find(params[:id].to_s))
       location.name = Location.reverse_name(location.name)
@@ -899,9 +565,6 @@ class LocationController < ApplicationController
     redirect_to(action: :list_locations)
   end
 
-  # Help for locations
-  def help; end
-
   # Move all the Observation's with a given +where+ into a given Location.
   def update_observations_by_where(location, given_where)
     success = true
@@ -924,16 +587,8 @@ class LocationController < ApplicationController
 
   ##############################################################################
 
-  private
-
   def whitelisted_location_params
     params.require(:location).
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
-  end
-
-  def whitelisted_location_description_params
-    params.require(:description).
-      permit(:source_type, :source_name, :project_id, :public_write, :public,
-             :license_id, :gen_desc, :ecology, :species, :notes, :refs)
   end
 end

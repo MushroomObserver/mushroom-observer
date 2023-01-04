@@ -6,6 +6,9 @@
 
 module Names
   class TrackersController < ApplicationController
+    before_action :login_required
+    before_action :disable_link_prefetching
+
     # Form accessible from show_name that lets a user setup a tracker
     # with notifications for a name.
     def email_tracking
@@ -22,7 +25,15 @@ module Names
       end
     end
 
-          private
+    # Endpoint for admins to approve a tracker.
+    def approve_tracker
+      return unless (tracker = find_or_goto_index(NameTracker, params[:id]))
+
+      approve_tracker_if_everything_okay(tracker)
+      redirect_to("/")
+    end
+
+    private
 
     def initialize_tracking_form
       if @name_tracker
@@ -89,7 +100,8 @@ module Names
 
     # disable cop because method is clear and
     # there's no easy way to reduce ABC count of <2, 20, 3> 20.32/20
-    def notify_admins_of_name_tracker(name_tracker) # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/AbcSize
+    def notify_admins_of_name_tracker(name_tracker)
       return if name_tracker.note_template.blank?
       # Only give notifications when users turn on the template function,
       # not when they edit the template after its already been approved.
@@ -110,17 +122,7 @@ module Names
       # Let the user know that the note_template feature requires approval.
       flash_notice(:email_tracking_awaiting_approval.t)
     end
-
-          public
-
-    def approve_tracker
-      return unless (tracker = find_or_goto_index(NameTracker, params[:id]))
-
-      approve_tracker_if_everything_okay(tracker)
-      redirect_to("/")
-    end
-
-          private
+    # rubocop:enable Metrics/AbcSize
 
     def approve_tracker_if_everything_okay(tracker)
       return flash_warning(:permission_denied.t) unless @user.admin

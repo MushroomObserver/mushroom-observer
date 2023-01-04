@@ -2,41 +2,37 @@
 
 #  == DESCRIPTIONS
 #   index_name_description::     List of results of index/search.
-#  list_name_descriptions::      Alphabetical list of all name_descriptions,
+#   list_name_descriptions::     Alphabetical list of all name_descriptions,
 #                                used or otherwise.
 #   name_descriptions_by_author::Alphabetical list of name_descriptions authored
 #                                by given user.
 #   name_descriptions_by_editor::Alphabetical list of name_descriptions edited
 #                                by given user.
 #  show_name_description::       Show info about name_description.
-#   show_past_name_description:: Show past versions of name_description info.
 #   prev_name_description::      Show previous name_description in index.
 #   next_name_description::      Show next name_description in index.
 #  create_name_description::     Create new name_description.
-#   publish_description::        Publish a draft description.
 #  edit_name_description::       Edit name_description.
 #  destroy_name_description::    Destroy name_description.
-#    == DESCRIPTIONS CONCERN
-#  make_description_default::    Make a description the default one.
-#  adjust_permissions::          Adjust permissions on a description.
-#    == DESCRIPTION MERGES CONCERN
-#  merge_descriptions::          Merge a description with another.
 
 module Names
   class DescriptionsController < ApplicationController
-    include DescriptionControllerHelpers
+    include Descriptions
 
     before_action :login_required
-
     before_action :disable_link_prefetching, except: [
       :show, :new, :create, :edit, :update
     ]
 
-    ##############################################################################
+    ############################################################################
     #
     #  :section: Description Indexes and Searches
     #
-    ##############################################################################
+    ############################################################################
+
+    def index; end
+
+    private
 
     # Display list of names in last index/search query.
     def index_name_description
@@ -93,7 +89,9 @@ module Names
       show_index_of_objects(query, args)
     end
 
-    # ----------------------------------------------------------------------------
+    public
+
+    # --------------------------------------------------------------------------
 
     def show_name_description
       store_location
@@ -165,32 +163,11 @@ module Names
 
     public
 
-    # Show past version of NameDescription.  Accessible only from
-    # show_name_description page.
-    def show_past_name_description
-      pass_query_params
-      store_location
-      @description = find_or_goto_index(NameDescription, params[:id].to_s)
-      return unless @description
-
-      @name = @description.name
-      @description.revert_to(params[:version].to_i)
-    end
-
-    # Callback to let reviewers change the review status of a Name from the
-    # show_name page.
-    def set_review_status
-      pass_query_params
-      id = params[:id].to_s
-      desc = NameDescription.find(id)
-      desc.update_review_status(params[:value]) if reviewer?
-      redirect_with_query(action: :show_name, id: desc.name_id)
-    end
-    ##############################################################################
+    ############################################################################
     #
     #  :section: Create and Edit Name Descriptions
     #
-    ##############################################################################
+    ############################################################################
 
     def create_name_description
       store_location
@@ -343,7 +320,7 @@ module Names
 
     private
 
-    # TODO: should public, public_write and source_type be removed from this list?
+    # TODO: should public, public_write and source_type be removed from list?
     # They should be individually checked and set, since we
     # don't want them to have arbitrary values
     def whitelisted_name_description_params
