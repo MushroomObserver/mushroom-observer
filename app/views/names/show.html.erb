@@ -5,22 +5,24 @@
   Textile.register_name(@name)
 
   tabs = [
-    link_with_query(:show_name_edit_name.t, action: :edit_name, id: @name.id),
-    link_with_query(:show_name_bulk_name_edit.t, action: :bulk_name_edit),
-    link_with_query(:show_name_add_name.t, action: :create_name)
+    link_with_query(:show_name_edit_name.t, edit_name_path(@name.id)),
+    link_with_query(:show_name_add_name.t, new_name_path)
   ]
   if in_admin_mode? || !@name.locked
     tabs << link_with_query(:show_name_change_synonyms.t,
-                      action: :change_synonyms, id: @name.id)
+                            controller: "/names/synonyms",
+                            action: :change_synonyms, id: @name.id)
     if @name.deprecated
-      tabs << link_with_query(:APPROVE.t, action: :approve_name, id: @name.id)
+      tabs << link_with_query(:APPROVE.t, controller: "/names/synonyms",
+                              action: :approve_name, id: @name.id)
     else
-      tabs << link_with_query(:DEPRECATE.t, action: :deprecate_name, id: @name.id)
+      tabs << link_with_query(:DEPRECATE.t, controller: "/names/synonyms",
+                              action: :deprecate_name, id: @name.id)
     end
   end
   tabs += [
-    link_with_query(:show_name_email_tracking.t, action: :email_tracking,
-                    id: @name.id),
+    link_with_query(:show_name_email_tracking.t, controller: "/names/trackers",
+                    action: :email_tracking, id: @name.id),
     draw_interest_icons(@name)
   ]
   @tabsets = {
@@ -106,7 +108,9 @@
                     target: :_blank
                   )) %>
               <%= tag.p(link_with_query(
-                    :show_name_distribution_map.t, action: :map, id: @name.id
+                    :show_name_distribution_map.t,
+                    controller: "/names/maps",
+                    action: :map, id: @name.id
                   )) %>
             </div>
           </div>
@@ -114,7 +118,7 @@
       </div>
     </div>
 
-    <%= render(partial: "nomenclature",
+    <%= render(partial: "show/nomenclature",
               locals: { name: @name, synonyms: true }) %>
 
     <div class="row">
@@ -122,13 +126,14 @@
         <div id="name_classification">
           <strong><%= :show_name_classification.t %>:</strong>
             <% if @user %>
-              [<%= link_with_query(:EDIT.t, controller: :name,
-                                  action: :edit_classification,
-                                  id: @name.id) %>]
+              [<%= link_with_query(:EDIT.t,
+                                   controller: "/names/classifications",
+                                   action: :edit_classification,
+                                   id: @name.id) %>]
             <% end %>
           <div class="panel panel-default">
             <div class="panel-body name-section" id="classification_section">
-              <%= render(partial: "classification") %>
+              <%= render(partial: "show/classification") %>
             </div>
           </div>
         </div><!--#name_classification-->
@@ -138,12 +143,12 @@
         <div id="name_lifeform">
           <strong><%= :show_name_lifeform.t %>:</strong>
             <% if @user %>
-              [<%= link_with_query(:EDIT.t, controller: :name,
-                                  action: :edit_lifeform, id: @name.id) %>]
+              [<%= link_with_query(:EDIT.t, controller: "/names/lifeforms",
+                                   action: :edit_lifeform, id: @name.id) %>]
             <% end %>
           <div class="panel panel-default">
             <div class="panel-body name-section" id="lifeform_section">
-              <%= render(partial: "lifeform") %>
+              <%= render(partial: "show/lifeform") %>
             </div>
           </div>
         </div>
@@ -162,7 +167,7 @@
     <% if @name.has_notes? %>
       <div id="name_notes">
         <strong><%= :show_name_notes.t %>:</strong>
-          [<%= link_with_query(:EDIT.t, controller: :name, action: :edit_name, id: @name.id) %>]
+          [<%= link_with_query(:EDIT.t, edit_name_path(@name.id)) %>]
         <div class="panel panel-default">
           <div class="panel-body">
               <%= @name.notes.tpl %>
@@ -174,11 +179,13 @@
     <% if !@best_description.blank? %>
       <div id="name_best_description">
         <strong><%= :show_name_brief_description.t %>:</strong>
-          [<%= link_with_query(:show_name_see_more.t, controller: :name,
-                                action: :show_name_description,
+          [<%= link_with_query(:show_name_see_more.t,
+                                controller: "/names/descriptions",
+                                action: :show,
                                 id: @name.description.id) %> |
-            <%= link_with_query(:EDIT.t, controller: :name,
-                                action: :edit_name_description,
+            <%= link_with_query(:EDIT.t,
+                                controller: "/names/descriptions",
+                                action: :edit,
                                 id: @name.description.id) %>]
         <div class="panel panel-default">
           <div class="panel-body">
@@ -190,8 +197,9 @@
 
     <div id="name_descriptions">
       <strong><%= :show_name_descriptions.t %>:</strong>
-        [<%= link_with_query(:show_name_create_description.t, controller: :name,
-                            action: :create_name_description, id: @name.id) %>]
+        [<%= link_with_query(:show_name_create_description.t,
+                             controller: "/names/descriptions",
+                             action: :new, id: @name.id) %>]
       <div class="panel panel-default">
         <div class="panel-body">
           <% description_links.each do |desc| %>
@@ -211,7 +219,8 @@
           <div class="panel-body">
             <% @projects.each do |project| %>
               <%= link_with_query(project.title,
-                                  action: :create_name_description,
+                                  controller: "/names/descriptions",
+                                  action: :new,
                                   id: @name.id,
                                   project: project.id,
                                   source: :project) %><br>

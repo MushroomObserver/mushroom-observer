@@ -1,5 +1,8 @@
-<% approved_name = @name.approved_name %>
-<% parents = approved_name.all_parents %>
+<%
+approved_name = @name.approved_name
+parents = approved_name.all_parents
+%>
+
 <% if approved_name.classification.present? && parents.any? %>
   <div class="mb-2">
     <% ([approved_name] + parents).reverse.each do |n| %>

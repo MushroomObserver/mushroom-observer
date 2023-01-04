@@ -1,7 +1,302 @@
 # frozen_string_literal: true
 
-# see app/controllers/name_controller.rb
-module NameController::CreateAndEditName
+#
+#  = Names Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
+#  index_name::                  List of results of index/search.
+#  list_names::                  Alphabetical list of all names, used or not.
+#  observation_index::           Alphabetical list of names people have seen.
+#  names_by_user::               Alphabetical list of names created by
+#                                given user.
+#  names_by_editor::             Alphabetical list of names edited by given user
+#  name_search::                 Seach for string in name, notes, etc.
+#
+#  show_name::                   Show info about name.
+#  show_past_name::              Show past versions of name info.
+#  prev_name::                   Show previous name in index.
+#  next_name::                   Show next name in index.
+#
+#  create_name::                 Create new name.
+#  edit_name::                   Edit name.
+#
+#    DELETE THIS
+#  bulk_name_edit::              Create/synonymize/deprecate a list of names.
+#
+class NamesController < ApplicationController
+  include CreateAndEditName
+
+  # rubocop:disable Rails/LexicallyScopedActionFilter
+  # No idea how to fix this offense.  If I add another
+  #    before_action :login_required, except: :show_name_description
+  # in name_controller/show_name_description.rb, it ignores it.
+  before_action :login_required
+
+  before_action :disable_link_prefetching, except: [
+    :approve_name,
+    :bulk_name_edit,
+    :change_synonyms,
+    :deprecate_name,
+    :show_name,
+    :show_past_name,
+    :create_name,
+    :edit_name
+  ]
+
+  before_action :disable_link_prefetching, except: []
+  # rubocop:enable Rails/LexicallyScopedActionFilter
+
+  ##############################################################################
+  #
+  #  :section: Indexes and Searches
+  #
+  ##############################################################################
+
+  # Display list of names in last index/search query.
+  def index_name
+    query = find_or_create_query(:Name, by: params[:by])
+    show_selected_names(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Display list of all (correctly-spelled) names in the database.
+  def list_names
+    query = create_query(:Name, :all, by: :name)
+    show_selected_names(query)
+  end
+
+  # Display list of names that have observations.
+  def observation_index
+    query = create_query(:Name, :with_observations)
+    show_selected_names(query)
+  end
+
+  # Display list of names that have authors.
+  def authored_names
+    query = create_query(:Name, :with_descriptions)
+    show_selected_names(query)
+  end
+
+  # Display list of names that a given user is author on.
+  def names_by_user
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Name, :by_user, user: user)
+    show_selected_names(query)
+  end
+
+  # This no longer makes sense, but is being requested by robots.
+  alias names_by_author names_by_user
+
+  # Display list of names that a given user is editor on.
+  def names_by_editor
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Name, :by_editor, user: user)
+    show_selected_names(query)
+  end
+
+  # Display list of the most popular 100 names that don't have descriptions.
+  # NOTE: all this extra info and help will be lost if user re-sorts.
+  def needed_descriptions
+    @help = :needed_descriptions_help
+    query = Name.descriptions_needed
+    show_selected_names(query, num_per_page: 100)
+  end
+
+  # Display list of names that match a string.
+  def name_search
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) &&
+       (name = Name.safe_find(pattern))
+      redirect_to(action: "show_name", id: name.id)
+    else
+      search = PatternSearch::Name.new(pattern)
+      if search.errors.any?
+        search.errors.each do |error|
+          flash_error(error.to_s)
+        end
+        render(action: :list_names)
+      else
+        @suggest_alternate_spellings = search.query.params[:pattern]
+        show_selected_names(search.query)
+      end
+    end
+  end
+
+  # Displays list of advanced search results.
+  def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
+    query = find_query(:Name)
+    show_selected_names(query)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to(controller: :search, action: :advanced)
+  end
+
+  # Used to test pagination.
+  def test_index
+    query = find_query(:Name)
+    raise("Missing query: #{params[:q]}") unless query
+
+    if params[:test_anchor]
+      @test_pagination_args = { anchor: params[:test_anchor] }
+    end
+    show_selected_names(query, num_per_page: params[:num_per_page].to_i)
+  end
+
+  # Show selected search results as a list with 'list_names' template.
+  def show_selected_names(query, args = {})
+    store_query_in_session(query)
+    @links ||= []
+    args = {
+      action: "list_names",
+      letters: "names.sort_name",
+      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
+    }.merge(args)
+
+    # Tired of not having an easy link to list_names.
+    if query.flavor == :with_observations
+      @links << [:all_objects.t(type: :name), { action: "list_names" }]
+    end
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["name", :sort_by_name.t],
+      ["created_at", :sort_by_created_at.t],
+      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+       :sort_by_updated_at.t],
+      ["num_views", :sort_by_num_views.t]
+    ]
+
+    # Add "show observations" link if this query can be coerced into an
+    # observation query.
+    @links << coerced_query_link(query, Observation)
+
+    # Add "show descriptions" link if this query can be coerced into a
+    # description query.
+    if query.coercable?(:NameDescription)
+      @links << [:show_objects.t(type: :description),
+                 add_query_param({ action: "index_name_description" },
+                                 query)]
+    end
+
+    # Add some extra fields to the index for authored_names.
+    if query.flavor == :with_descriptions
+      show_index_of_objects(query, args) do |name|
+        if (desc = name.description)
+          [desc.authors.map(&:login).join(", "),
+           desc.note_status.map(&:to_s).join("/"),
+           :"review_#{desc.review_status}".t]
+        else
+          []
+        end
+      end
+    else
+      # NOTE: if show_selected_name is called with a block
+      # it will *not* get passed to show_index_of_objects.
+      show_index_of_objects(query, args)
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Show Name
+  #
+  ##############################################################################
+
+  # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
+  # relevant Observations.
+  def show_name
+    pass_query_params
+    store_location
+    clear_query_in_session
+
+    # Load Name and NameDescription along with a bunch of associated objects.
+    name_id = params[:id].to_s
+    @name = find_or_goto_index(Name, name_id)
+    return unless @name
+
+    update_view_stats(@name)
+
+    # Tell robots the proper URL to use to index this content.
+    @canonical_url = "#{MO.http_domain}/names/#{@name.id}"
+
+    # Get a list of projects the user can create drafts for.
+    @projects = @user&.projects_member&.select do |project|
+      @name.descriptions.none? { |d| d.belongs_to_project?(project) }
+    end
+
+    # Create query for immediate children.
+    @children_query = create_query(:Name, :all,
+                                   names: @name.id,
+                                   include_immediate_subtaxa: true,
+                                   exclude_original_names: true)
+    if @name.at_or_below_genus?
+      @subtaxa_query = create_query(:Observation, :all,
+                                    names: @name.id,
+                                    include_subtaxa: true,
+                                    exclude_original_names: true,
+                                    by: :confidence)
+    end
+
+    # Create search queries for observation lists.
+    @consensus_query = create_query(:Observation, :all,
+                                    names: @name.id, by: :confidence)
+
+    @obs_with_images_query = create_query(:Observation, :all,
+                                          names: @name.id,
+                                          has_images: true,
+                                          by: :confidence)
+
+    # Determine which queries actually have results and instantiate the ones
+    # we'll use.
+    @best_description = @name.best_brief_description
+    @first_four       = @obs_with_images_query.results(
+      limit: 4,
+      include: {
+        thumb_image: [:image_votes, :license, :user]
+      }
+    )
+    @first_child      = @children_query.results(limit: 1).first
+    @first_consensus  = @consensus_query.results(limit: 1).first
+    @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
+  end
+
+  # Show past version of Name.  Accessible only from show_name page.
+  def show_past_name
+    pass_query_params
+    store_location
+    @name = find_or_goto_index(Name, params[:id].to_s)
+    return unless @name
+
+    @name.revert_to(params[:version].to_i)
+    @correct_spelling = ""
+    return unless @name.is_misspelling?
+
+    # Old correct spellings could have gotten merged with something else
+    # and no longer exist.
+    @correct_spelling = Name.where(id: @name.correct_spelling_id).
+                        pluck(:display_name)
+  end
+
+  # Go to next name: redirects to show_name.
+  def next_name
+    redirect_to_next_object(:next, Name, params[:id].to_s)
+  end
+
+  # Go to previous name: redirects to show_name.
+  def prev_name
+    redirect_to_next_object(:prev, Name, params[:id].to_s)
+  end
+
   def create_name
     store_location
     pass_query_params
