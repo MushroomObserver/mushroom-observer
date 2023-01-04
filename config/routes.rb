@@ -763,7 +763,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
        as: "name_description_drafts")
   # Merge Name Descriptions: form and callback:
   get("names/descriptions/:id/merges/new",
-      to: "locations/descriptions/merges#new",
+      to: "names/descriptions/merges#new",
       as: "new_name_description_merge")
   post("names/descriptions/:id/merges",
        to: "names/descriptions/merges#create",
