@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 # inherit_classification
-module Names::Classifications
+module Names::Classification
   class InheritController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
 
+    # form
     def inherit_classification
       store_location
       pass_query_params
@@ -24,6 +25,8 @@ module Names::Classifications
       redirect_with_query(@name.show_link_args)
     end
 
-    include Names::Classifications::SharedPrivateMethods
+    # POST callback
+
+    include Names::Classification::SharedPrivateMethods
   end
 end

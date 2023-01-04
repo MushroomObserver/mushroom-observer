@@ -6,8 +6,8 @@ module Descriptions::Defaults
   extend ActiveSupport::Concern
 
   included do
-    # Make a description the default one.  Description must be publically
-    # readable and writable.
+    # Make a description the default one.
+    # Description must be publically readable and writable.
     def make_description_default
       pass_query_params
       desc = find_description(params[:id].to_s)

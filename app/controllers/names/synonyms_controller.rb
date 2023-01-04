@@ -13,6 +13,8 @@
 
 module Names
   class SynonymsController < ApplicationController
+    include Names::Synonyms::SharedPrivateMethods
+
     before_action :login_required
 
     ############################################################################
@@ -107,6 +109,8 @@ module Names
       end
     end
 
+    private
+
     # Helper used by change_synonyms.  Deprecates a single name.  Returns true
     # if it worked.  Flashes an error and returns false if it fails for whatever
     # reason.
@@ -175,7 +179,5 @@ module Names
                       summary: summary,
                       comment: message)
     end
-
-    include Names::Synonyms::SharedPrivateMethods
   end
 end

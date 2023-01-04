@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Names::Classifications
+module Names::Classification
   module SharedPrivateMethods
     private
 
@@ -110,5 +110,6 @@ module Names::Classifications
       @options = matches
       @message = :inherit_classification_multiple_matches
       nil
-    end  end
+    end
+  end
 end

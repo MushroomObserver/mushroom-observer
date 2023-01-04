@@ -111,6 +111,16 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
+  scope :for_eol_export,
+        lambda {
+          where(review_status: review_statuses.values_at(
+            "unvetted", "vetted"
+          )).
+            where(NameDescription[:gen_desc].not_blank).
+            where(ok_for_export: true).
+            where(public: true)
+        }
+
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
   ].freeze
