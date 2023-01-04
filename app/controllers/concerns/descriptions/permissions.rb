@@ -111,8 +111,7 @@ module Descriptions::Permissions
       end
 
       if done
-        redirect_with_query(action: @description.show_action,
-                            id: @description.id)
+        redirect_to(object_path_with_query(@description))
 
       # Gather list of all the groups, authors, editors and owner.
       # If the user wants more they can write them in.

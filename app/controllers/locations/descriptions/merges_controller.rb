@@ -7,5 +7,6 @@ module Locations::Descriptions
     before_action :disable_link_prefetching
 
     include ::Descriptions::Merges
+    include ::Locations::Descriptions::SharedPrivateMethods
   end
 end

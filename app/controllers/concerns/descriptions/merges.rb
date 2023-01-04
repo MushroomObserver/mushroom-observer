@@ -23,7 +23,7 @@ module Descriptions::Merges
       # Doesn't have permission to see source.
       if !in_admin_mode? && !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
-        redirect_with_query(action: src.parent.show_action, id: src.parent_id)
+        redirect_to(object_path_with_query(src.parent))
 
       # POST method
       elsif request.method == "POST"
@@ -65,7 +65,7 @@ module Descriptions::Merges
         @merge = true
         @old_desc_id = src.id
         @delete_after = delete_after
-        render(action: "edit_#{src.parent.type_tag}_description")
+        render("#{src.parent.type_tag}_descriptions/edit")
 
       # Merged successfully.
       else
@@ -75,7 +75,7 @@ module Descriptions::Merges
                         to: dest.unique_partial_format_name)
         flash_notice(:runtime_description_merge_success.
                      t(old: src_title, new: dest.format_name))
-        redirect_with_query(action: dest.show_action, id: dest.id)
+        redirect_to(object_path_with_query(dest))
       end
     end
 
@@ -112,7 +112,7 @@ module Descriptions::Merges
         end
         flash_notice(:runtime_description_move_success.
                      t(old: src_title, new: dest.format_name))
-        redirect_with_query(action: src.show_action, id: src.id)
+        redirect_to(object_path_with_query(src))
 
       # Create a clone in the destination name/location.
       else
@@ -128,7 +128,7 @@ module Descriptions::Merges
         )
 
         # I think a reviewer should be required to pass off on this before it
-        # gets shared with reputable sources.  Synonymy is never a clean science.
+        # gets shared with reputable sources. Synonymy is never a clean science.
         # if dest.is_a?(Name)
         #   desc.review_status = src.review_status
         #   desc.last_review   = src.last_review
@@ -137,7 +137,7 @@ module Descriptions::Merges
         # end
 
         # This can really gum up the works and it's really hard to figure out
-        # what the problem is when it occurs, since the error message is cryptic.
+        # what the problem is when it occurs, since error message is cryptic.
         if dest.is_a?(Name) && desc.classification.present?
           begin
             Name.validate_classification(dest.rank, desc.classification)
@@ -156,7 +156,7 @@ module Descriptions::Merges
                    touch: true)
           flash_notice(:runtime_description_copy_success.
                        t(old: src_title, new: desc.format_name))
-          redirect_with_query(action: desc.show_action, id: desc.id)
+          redirect_to(object_path_with_query(desc))
         else
           flash_object_errors(desc)
         end

@@ -144,11 +144,6 @@ class NameDescription < Description
   after_update :notify_users
   after_save :update_classification_cache
 
-  # Override the default show_controller
-  def self.show_controller
-    "/name"
-  end
-
   # Don't add any authors until someone has written something "useful".
   def author_worthy?
     gen_desc.present? || diag_desc.present?

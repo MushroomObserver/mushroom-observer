@@ -35,16 +35,6 @@ module Descriptions
     #
     ############################################################################
 
-    # Look up a name or location description by id, using the controller name
-    # to decide which kind.
-    def find_description(id)
-      if instance_of?(NameController)
-        find_or_goto_index(NameDescription, id)
-      else
-        find_or_goto_index(LocationDescription, id)
-      end
-    end
-
     # Initialize source info before serving creation form.
     def initialize_description_source(desc)
       desc.license = @user.license
@@ -61,11 +51,10 @@ module Descriptions
         else
           flash_error(:runtime_create_draft_create_denied.
                         t(title: project.title))
-          redirect_to(controller: "project", action: "show_project",
-                      id: project.id)
+          redirect_to(project_path(project.id))
         end
 
-      # Cloning an existing description.
+      # Cloning an existing description. Only occurs on names?
       elsif params[:clone].present?
         clone = find_description(params[:clone])
         if in_admin_mode? || clone.is_reader?(@user)
@@ -77,7 +66,7 @@ module Descriptions
           desc.public_write = false
         else
           flash_error(:runtime_description_private.t)
-          redirect_to(action: "show_name", id: desc.parent_id)
+          redirect_to(name_path(desc.parent_id))
         end
 
       # Otherwise default to "public" description.
@@ -152,9 +141,9 @@ module Descriptions
       unless in_admin_mode? || desc.writer?(@user)
         flash_error(:runtime_edit_description_denied.t)
         if in_admin_mode? || desc.is_reader?(@user)
-          redirect_to(action: desc.show_action, id: desc.id)
+          redirect_to(object_path(desc))
         else
-          redirect_to(action: desc.parent.show_action, id: desc.parent_id)
+          redirect_to(object_path(desc.parent))
         end
         okay = false
       end
@@ -164,7 +153,8 @@ module Descriptions
       # check_description_edit_permission is partly broken.
       # It, LocationController, and NameController need repairs.
       # See https://www.pivotaltracker.com/story/show/174737948
-      if params.is_a?(Hash)
+      # Attempted fix by Nimmo 04102022 (changed is_a?(Hash), cause it ain't)
+      if params.is_a?(ActionController::Parameters)
         root = in_admin_mode?
         admin = desc.is_admin?(@user)
         author = desc.author?(@user)
@@ -237,6 +227,18 @@ module Descriptions
           new_writers << project.admin_group
         end
       end
+    end
+
+    def object_path(object)
+      { controller: object.show_controller,
+        action: object.show_action,
+        id: object.id }
+    end
+
+    def object_path_with_query(object)
+      { controller: object.show_controller,
+        action: object.show_action,
+        id: object.id, q: get_query_param }
     end
   end
 end

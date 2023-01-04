@@ -21,12 +21,16 @@ module Descriptions::Drafts
       # to delete the draft after publishing it.)
       if !in_admin_mode? && !draft.is_admin?(@user)
         flash_error(:runtime_edit_description_denied.t)
-        redirect_with_query(action: parent.show_action, id: parent.id)
+        redirect_to(controller: parent.show_controller,
+                    action: parent.show_action,
+                    id: parent.id, q: get_query_param)
 
       # Can't merge it into itself!
       elsif old == draft
         flash_error(:runtime_description_already_default.t)
-        redirect_with_query(action: draft.show_action, id: draft.id)
+        redirect_to(controller: draft.show_controller,
+                    action: draft.show_action,
+                    id: draft.id, q: get_query_param)
 
       # I've temporarily decided to always just turn it into a public desc.
       # User can then merge by hand if public desc already exists.
@@ -47,7 +51,7 @@ module Descriptions::Drafts
                    touch: true)
         parent.description = draft
         parent.save
-        redirect_with_query(action: parent.show_action, id: parent.id)
+        redirect_to(object_path_with_query(parent))
       end
     end
 

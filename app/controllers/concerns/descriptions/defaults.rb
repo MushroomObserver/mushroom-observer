@@ -13,7 +13,7 @@ module Descriptions::Defaults
       desc = find_description(params[:id].to_s)
       return unless desc
 
-      redirect_with_query(action: desc.show_action, id: desc.id)
+      redirect_to(object_path_with_query(desc))
       unless desc.fully_public
         flash_error(:runtime_description_make_default_only_public.t)
         return

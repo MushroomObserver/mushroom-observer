@@ -7,5 +7,6 @@ module Names::Descriptions
     before_action :disable_link_prefetching
 
     include ::Descriptions::Defaults
+    include ::Names::Descriptions::SharedPrivateMethods
   end
 end

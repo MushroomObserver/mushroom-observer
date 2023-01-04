@@ -119,11 +119,6 @@ class LocationDescription < Description
   #
   ##############################################################################
 
-  # Override the default show_controller
-  def self.show_controller
-    "/location"
-  end
-
   # Returns an Array of all the descriptive text fields (Symbol's).
   def self.all_note_fields
     ALL_NOTE_FIELDS
