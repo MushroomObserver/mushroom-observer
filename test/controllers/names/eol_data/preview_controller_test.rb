@@ -7,10 +7,9 @@ module Names::EolData
   class PreviewControllerTest < FunctionalTestCase
     include ObjectLinkHelper
 
-  def test_eol_preview
-    login
-    get("eol_preview")
-  end
-
+    def test_eol_preview
+      login
+      get("show")
+    end
   end
 end

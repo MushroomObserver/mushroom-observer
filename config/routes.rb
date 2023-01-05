@@ -706,12 +706,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "names/lifeforms#update", via: [:put, :patch],
         as: "name_lifeforms")
   # Propagate Lifeforms: form and callback:
-  get("names/:id/lifeforms/propagate/new",
-      to: "names/lifeforms/propagate#new",
+  get("names/:id/lifeforms/propagate/edit",
+      to: "names/lifeforms/propagate#edit",
       as: "propagate_name_lifeform_form")
-  post("names/:id/lifeforms/propagate",
-       to: "names/lifeforms/propagate#create",
-       as: "propagate_name_lifeform")
+  put("names/:id/lifeforms/propagate",
+      to: "names/lifeforms/propagate#update",
+      as: "propagate_name_lifeform")
   # Names Map: show:
   get("names/map", to: "names/maps#show")
   # Edit Name Synonyms: form and callback:

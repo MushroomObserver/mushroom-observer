@@ -1,18 +1,13 @@
 # frozen_string_literal: true
 
-#  == EOL
 #  eol_preview::
-#  eol_data::
-#  eol_expanded_review::
-#  eol::
-
 module Names::EolData
   class PreviewController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
 
     # Show the data getting sent to EOL
-    def eol_preview
+    def show
       @timer_start = Time.current
       eol_data
       @timer_end = Time.current

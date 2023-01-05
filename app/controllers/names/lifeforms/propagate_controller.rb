@@ -6,10 +6,14 @@ module Names::Lifeforms
     before_action :login_required
     before_action :disable_link_prefetching
 
-    def propagate_lifeform
+    def edit
       pass_query_params
       @name = find_or_goto_index(Name, params[:id])
-      return unless request.method == "POST"
+    end
+
+    def update
+      pass_query_params
+      @name = find_or_goto_index(Name, params[:id])
 
       Name.all_lifeforms.each do |word|
         if params["add_#{word}"] == "1"

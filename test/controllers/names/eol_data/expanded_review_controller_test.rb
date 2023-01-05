@@ -8,7 +8,7 @@ module Names::EolData
     include ObjectLinkHelper
 
     def test_eol_expanded_review
-      requires_login(:eol_expanded_review)
+      requires_login(:show)
     end
   end
 end
