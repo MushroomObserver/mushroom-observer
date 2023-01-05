@@ -6,5 +6,11 @@ require("set")
 module Names::EolData
   class PreviewControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+
+  def test_eol_preview
+    login
+    get("eol_preview")
+  end
+
   end
 end

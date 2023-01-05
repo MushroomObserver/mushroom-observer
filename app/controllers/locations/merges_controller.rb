@@ -6,11 +6,11 @@ module Locations
     before_action :login_required
     before_action :disable_link_prefetching
 
-    ##############################################################################
+    ############################################################################
     #
     #  :section: Merging Locations
     #
-    ##############################################################################
+    ############################################################################
 
     # Show a list of defined locations that match a given +where+ string, in
     # order of closeness of match.

@@ -6,5 +6,9 @@ require("set")
 module Names::EolData
   class ExpandedReviewControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+
+    def test_eol_expanded_review
+      requires_login(:eol_expanded_review)
+    end
   end
 end

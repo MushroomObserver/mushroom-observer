@@ -3,8 +3,8 @@
 require("test_helper")
 require("set")
 
-module Names::Descriptions
-  class DraftsControllerTest < FunctionalTestCase
+module Locations::Descriptions
+  class PublishControllerTest < FunctionalTestCase
     include ObjectLinkHelper
   end
 end

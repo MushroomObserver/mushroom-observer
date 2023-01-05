@@ -163,17 +163,6 @@ class NamesController < ApplicationController
     redirect_to(search_advanced_path)
   end
 
-  # Used to test pagination.
-  def test_index
-    query = find_query(:Name)
-    raise("Missing query: #{params[:q]}") unless query
-
-    if params[:test_anchor]
-      @test_pagination_args = { anchor: params[:test_anchor] }
-    end
-    show_selected_names(query, num_per_page: params[:num_per_page].to_i)
-  end
-
   # Show selected search results as a list with 'index' template.
   def show_selected_names(query, args = {})
     store_query_in_session(query)

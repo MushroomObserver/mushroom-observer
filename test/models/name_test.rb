@@ -2921,6 +2921,28 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_guessing
+    # Not all the genera actually have records in our test database.
+    User.current = rolf
+    @controller.instance_variable_set(:@user, rolf)
+    Name.create_needed_names("Agaricus")
+    Name.create_needed_names("Pluteus")
+    Name.create_needed_names("Coprinus comatus subsp. bogus var. varietus")
+
+    assert_name_suggestions("Agricus")
+    assert_name_suggestions("Ptligera")
+    assert_name_suggestions(" plutues _petastus  ")
+    assert_name_suggestions("Coprinis comatis")
+    assert_name_suggestions("Coprinis comatis blah. boggle")
+    assert_name_suggestions("Coprinis comatis blah. boggle var. varitus")
+  end
+
+  def assert_name_suggestions(str)
+    results = Name.suggest_alternate_spellings(str)
+    assert(results.any?,
+           "Couldn't suggest alternate spellings for #{str.inspect}.")
+  end
+
   # --------------------------------------
 
   def test_approved_synonym_of_proposed_name_has_dependents

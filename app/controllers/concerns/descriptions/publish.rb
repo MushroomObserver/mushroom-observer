@@ -2,7 +2,7 @@
 
 #  publish_description::
 
-module Descriptions::Drafts
+module Descriptions::Publish
   extend ActiveSupport::Concern
 
   included do

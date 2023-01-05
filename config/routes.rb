@@ -621,7 +621,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/map", to: "locations/maps#show")
   # Merge Locations: form and callback
   get("locations/merges/new", to: "locations/merges#new",
-                              as: "new_location_merge")
+                              as: "location_merge_form")
   post("locations/merges", to: "locations/merges#create",
                            as: "location_merges")
   # Location Versions: show
@@ -648,16 +648,16 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   delete("locations/descriptions/:id", to: "locations/descriptions#destroy")
 
   # Publish Draft Location Description: form and callback:
-  get("locations/descriptions/:id/drafts/new",
-      to: "locations/descriptions/drafts#new",
-      as: "new_location_description_draft")
-  post("locations/descriptions/:id/drafts",
-       to: "locations/descriptions/drafts#create",
-       as: "location_description_drafts")
+  get("locations/descriptions/:id/publish/new",
+      to: "locations/descriptions/publish#new",
+      as: "location_description_publish_form")
+  post("locations/descriptions/:id/publish",
+       to: "locations/descriptions/publish#create",
+       as: "location_description_publish")
   # Merge Location Descriptions: form and callback:
   get("locations/descriptions/:id/merges/new",
       to: "locations/descriptions/merges#new",
-      as: "new_location_description_merge")
+      as: "location_description_merge_form")
   post("locations/descriptions/:id/merges",
        to: "locations/descriptions/merges#create",
        as: "location_description_merges")
@@ -680,14 +680,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: "names/classification#edit",
       as: "edit_name_classification")
   match("names/:id/classification",
-        to: "names/classification/refresh#update", via: [:put, :patch],
+        to: "names/classification#update", via: [:put, :patch],
         as: "name_classification")
   # Inherit Name Classification: form and callback:
   get("names/:id/classification/inherit/new",
-      to: "names/classification/inherit#edit",
-      as: "new_inherit_name_classification")
+      to: "names/classification/inherit#new",
+      as: "inherit_name_classification_form")
   post("names/:id/classification/inherit",
-       to: "names/classification/inherit#update",
+       to: "names/classification/inherit#create",
        as: "inherit_name_classification")
   # Propagate Name Classification: callback only:
   post("names/:id/classification/propagate",
@@ -706,8 +706,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         as: "name_lifeforms")
   # Propagate Lifeforms: form and callback:
   get("names/:id/lifeforms/propagate/new",
-      to: "names/lifeforms/propagate#edit",
-      as: "new_propagate_name_lifeform")
+      to: "names/lifeforms/propagate#new",
+      as: "propagate_name_lifeform_form")
   post("names/:id/lifeforms/propagate",
        to: "names/lifeforms/propagate#create",
        as: "propagate_name_lifeform")
@@ -731,6 +731,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
   get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
+  # Test Index
+  get("names/test_index", to: "names/test_index#index", as: "names_test_index")
   # Name Versions: show
   get("names/:id/versions", to: "names/versions#show",
                             as: "name_versions")
@@ -755,16 +757,16 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   delete("names/descriptions/:id", to: "names/descriptions#destroy")
 
   # Publish Name Description Drafts: form and callback:
-  get("names/descriptions/:id/drafts/new",
-      to: "names/descriptions/drafts#new",
-      as: "new_name_description_draft")
-  post("names/descriptions/:id/drafts",
-       to: "names/descriptions/drafts#create",
-       as: "name_description_drafts")
+  get("names/descriptions/:id/publish/new",
+      to: "names/descriptions/publish#new",
+      as: "name_description_publish_form")
+  post("names/descriptions/:id/publish",
+       to: "names/descriptions/publish#create",
+       as: "name_description_publish")
   # Merge Name Descriptions: form and callback:
   get("names/descriptions/:id/merges/new",
       to: "names/descriptions/merges#new",
-      as: "new_name_description_merge")
+      as: "name_description_merge_form")
   post("names/descriptions/:id/merges",
        to: "names/descriptions/merges#create",
        as: "name_description_merges")
