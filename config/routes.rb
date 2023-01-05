@@ -542,8 +542,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
-    get "show_past", on: :member
-
     member do
       get("images/reuse", to: "glossary_terms/images#reuse",
                           as: "reuse_images_for")
@@ -553,6 +551,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "remove_images_from")
       put("images/detach", to: "glossary_terms/images#detach",
                            as: "detach_image_from")
+      get("versions", to: "glossary_terms/versions#show",
+                      as: "show_past")
     end
   end
 

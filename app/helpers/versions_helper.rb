@@ -4,7 +4,7 @@
 # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
 # actions are normalized.
 # See https://www.pivotaltracker.com/story/show/174440291
-module VersionHelper
+module VersionsHelper
   # Just shows the current version number and a link to see the previous.
   #
   #   <%= show_previous_version(name) %>
@@ -21,8 +21,10 @@ module VersionHelper
 
     if (previous_version = latest_version.previous)
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
-      html += link_with_query(str, action: obj.show_past_action, id: obj.id,
-                                   version: previous_version.version)
+      html += link_with_query(str,
+                              controller: "#{obj.show_controller}/versions",
+                              action: :show, id: obj.id,
+                              version: previous_version.version)
       html += safe_br
     end
     html
@@ -67,10 +69,10 @@ module VersionHelper
                                        action: obj.show_action,
                                        id: obj.id)
                else
-                 link_with_query(link, controller: obj.show_controller,
-                                       action: obj.show_past_action,
-                                       id: obj.id,
-                                       version: ver.version)
+                 link_with_query(link,
+                                 controller: "#{obj.show_controller}/versions",
+                                 action: :show, id: obj.id,
+                                 version: ver.version)
                end
       end
       link = content_tag(:b, link) if args[:bold]&.call(ver)
