@@ -8,7 +8,7 @@ module Names::Descriptions
 
     # PUT Callback to let reviewers change review_status of a NameDescription
     # from the show_name page.
-    def set_review_status
+    def update
       pass_query_params
       id = params[:id].to_s
       desc = NameDescription.find(id)

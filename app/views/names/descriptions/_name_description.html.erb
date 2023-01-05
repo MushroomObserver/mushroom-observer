@@ -19,12 +19,18 @@
   <% end %>
 
   <% if reviewer? %>
-    <%= indent + link_with_query(:review_unvetted.t, action: :set_review_status,
-          value: "unvetted", id: desc.id) %><br/>
-    <%= indent + link_with_query(:review_vetted.t, action: :set_review_status,
-          value: "vetted", id: desc.id) %><br/>
-    <%= indent + link_with_query(:review_inaccurate.t, action: :set_review_status,
-          value: "inaccurate", id: desc.id) %><br/>
+    <%= indent + put_button(name: :review_unvetted.t,
+        path: name_description_review_status_path(desc.id,
+          value: "unvetted", q: get_query_param)
+        ) %><br/>
+    <%= indent + put_button(:review_vetted.t,
+        path: name_description_review_status_path(desc.id,
+          value: "vetted", q: get_query_param)
+        ) %><br/>
+    <%= indent + put_button(:review_inaccurate.t,
+        path: name_description_review_status_path(desc.id,
+          value: "inaccurate", q: get_query_param)
+        ) %><br/>
   <% end %><br/>
 <% end %>
 
