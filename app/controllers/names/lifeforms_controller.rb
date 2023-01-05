@@ -1,24 +1,31 @@
 # frozen_string_literal: true
 
-#  == LIFEFORMS
 #  edit_lifeform::               Edit lifeform tags.
-#  propagate_lifeform::          Add/remove lifeform tags to/from subtaxa.
-
 module Names
   class LifeformsController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
 
-    def edit_lifeform
+    def edit
       pass_query_params
-      @name = find_or_goto_index(Name, params[:id])
-      return unless request.method == "POST"
+      find_name!
+    end
+
+    def update
+      pass_query_params
+      return unless find_name!
 
       words = Name.all_lifeforms.select do |word|
         params["lifeform_#{word}"] == "1"
       end
       @name.update(lifeform: " #{words.join(" ")} ")
       redirect_with_query(@name.show_link_args)
+    end
+
+    private
+
+    def find_name!
+      @name = find_or_goto_index(Name, params[:id])
     end
   end
 end

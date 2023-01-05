@@ -618,7 +618,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Location Help: show
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
-  get("locations/map", to: "locations/maps#show")
+  get("locations/map", to: "locations/maps#show", as: "map_locations")
   # Merge Locations: form and callback
   get("locations/merges/new", to: "locations/merges#new",
                               as: "location_merge_form")
@@ -713,7 +713,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: "names/lifeforms/propagate#update",
       as: "propagate_name_lifeform")
   # Names Map: show:
-  get("names/map", to: "names/maps#show")
+  get("names/map", to: "names/maps#show", as: "map_names")
   # Edit Name Synonyms: form and callback:
   get("names/:id/synonyms/edit", to: "names/synonyms#edit",
                                  as: "edit_name_synonyms")

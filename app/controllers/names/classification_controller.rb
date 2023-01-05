@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-#  == CLASSIFICATIONS
 #  edit_classification::
-#
 module Names
   class ClassificationController < ApplicationController
     before_action :login_required

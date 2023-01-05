@@ -12,8 +12,8 @@ module Names
       # off with the correct current state.
       name = names(:peltigera)
       assert_equal(" lichen ", name.lifeform)
-      requires_login(:edit_lifeform, id: name.id)
-      assert_template(:edit_lifeform)
+      requires_login(:edit, id: name.id)
+      assert_template("names/lifeforms/edit")
       Name.all_lifeforms.each do |word|
         assert_input_value("lifeform_#{word}", word == "lichen" ? "1" : "")
       end
@@ -23,7 +23,7 @@ module Names
       Name.all_lifeforms.each do |word|
         params["lifeform_#{word}"] = (word == "lichenicolous" ? "1" : "")
       end
-      post(:edit_lifeform, params: params)
+      put(:update, params: params)
       assert_equal(" lichenicolous ", name.reload.lifeform)
     end
   end

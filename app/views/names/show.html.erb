@@ -107,9 +107,7 @@
                     target: :_blank
                   )) %>
               <%= tag.p(link_with_query(
-                    :show_name_distribution_map.t,
-                    controller: "/names/maps",
-                    action: :map, id: @name.id
+                    :show_name_distribution_map.t, map_names_path(@name.id)
                   )) %>
             </div>
           </div>

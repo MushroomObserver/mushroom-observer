@@ -3,18 +3,26 @@
 # approve_name
 module Names::Synonyms
   class ApproveController < ApplicationController
+    include Names::Synonyms::SharedPrivateMethods
+
     before_action :login_required
 
     # Form accessible from show_name that lets a user make call this an accepted
     # name, possibly deprecating its synonyms at the same time.
-    def approve_name
+    def new
       pass_query_params
-      @name = find_or_goto_index(Name, params[:id].to_s)
-      return unless @name
+      return unless find_name!
       return if abort_if_name_locked!(@name)
 
       @approved_names = @name.approved_synonyms
-      return unless request.method == "POST"
+    end
+
+    def create
+      pass_query_params
+      return unless find_name!
+      return if abort_if_name_locked!(@name)
+
+      @approved_names = @name.approved_synonyms
 
       deprecate_others
       approve_this_one
@@ -54,7 +62,5 @@ module Names::Synonyms
 
       post_comment(:approve, @name, comment)
     end
-
-    include Names::Synonyms::SharedPrivateMethods
   end
 end

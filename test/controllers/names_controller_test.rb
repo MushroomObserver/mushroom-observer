@@ -252,41 +252,42 @@ class NamesControllerTest < FunctionalTestCase
     name = Name.where(locked: true).first
     login
     get(:show, params: { id: name.id })
-    assert_select("a[href*=approve_name]", count: 0)
-    assert_select("a[href*=deprecate_name]", count: 0)
-    assert_select("a[href*=change_synonyms]", count: 0)
+    assert_select("a[href*=synonyms/approve/new]", count: 0)
+    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
+    assert_select("a[href*=synonyms/edit]", count: 0)
     login("rolf")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=approve_name]", count: 0)
-    assert_select("a[href*=deprecate_name]", count: 0)
-    assert_select("a[href*=change_synonyms]", count: 0)
+    assert_select("a[href*=synonyms/approve/new]", count: 0)
+    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
+    assert_select("a[href*=synonyms/edit]", count: 0)
     make_admin("mary")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=approve_name]", count: 0)
-    assert_select("a[href*=deprecate_name]", count: 1)
-    assert_select("a[href*=change_synonyms]", count: 1)
+    assert_select("a[href*=synonyms/approve/new]", count: 0)
+    assert_select("a[href*=synonyms/deprecate/new]", count: 1)
+    assert_select("a[href*=synonyms/edit]", count: 1)
 
     Name.update(name.id, deprecated: true)
     logout
     get(:show, params: { id: name.id })
-    assert_select("a[href*=approve_name]", count: 0)
-    assert_select("a[href*=deprecate_name]", count: 0)
-    assert_select("a[href*=change_synonyms]", count: 0)
+    assert_select("a[href*=synonyms/approve/new]", count: 0)
+    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
+    assert_select("a[href*=synonyms/edit]", count: 0)
     login("rolf")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=approve_name]", count: 0)
-    assert_select("a[href*=deprecate_name]", count: 0)
-    assert_select("a[href*=change_synonyms]", count: 0)
+    assert_select("a[href*=synonyms/approve/new]", count: 0)
+    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
+    assert_select("a[href*=synonyms/edit]", count: 0)
     make_admin("mary")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=approve_name]", count: 1)
-    assert_select("a[href*=deprecate_name]", count: 0)
-    assert_select("a[href*=change_synonyms]", count: 1)
+    assert_select("a[href*=synonyms/approve/new]", count: 1)
+    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
+    assert_select("a[href*=synonyms/edit]", count: 1)
   end
   # ----------------------------
   #  Interest.
   # ----------------------------
 
+  # NOTE: The interest links are GET paths because email.
   def test_interest_in_show_name
     peltigera = names(:peltigera)
     login("rolf")

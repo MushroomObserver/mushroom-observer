@@ -1,8 +1,8 @@
 <%
   tabs = [
-    link_with_query(:show_location_create.t, action: :create_location),
-    link_with_query(:list_place_names_map.t, action: :map_locations),
-    link_to(:list_countries.t, action: :list_countries)
+    link_with_query(:show_location_create.t, new_location_path),
+    link_with_query(:list_place_names_map.t, map_locations_path),
+    link_to(:list_countries.t, location_countries_path)
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }

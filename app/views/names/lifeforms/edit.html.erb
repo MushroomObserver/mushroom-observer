@@ -6,18 +6,22 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
+
+  action = name_lifeforms_path(@name.id, q: get_query_param)
 %>
 
-<%= form_tag(add_query_param(action: :edit_lifeform, id: @name.id)) do %>
+<%= form_with(url: action) do |f| %>
+
   <p><%= :edit_lifeform_help.t %></p>
+
   <table class="table-lifeform">
     <% Name.all_lifeforms.each do |word| %>
       <tr>
         <td>
-          <%= check_box_tag("lifeform_#{word}", "1",
+          <%= f.check_box("lifeform_#{word}", "1",
                             @name.lifeform.include?(" #{word} "),
                             class: "form-control-xxx mt-2") %>
-          <%= label_tag("lifeform_#{word}", :"lifeform_#{word}".t) %>
+          <%= f.label("lifeform_#{word}", :"lifeform_#{word}".t) %>
         </td>
         <td class="container-text">
           <%= :"lifeform_help_#{word}".t %>
@@ -26,5 +30,7 @@
     <% end %>
   </table>
 
-  <%= submit_tag(:edit_lifeform_save.t, class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(:edit_lifeform_save.t,
+               class: "btn btn-default center-block mt-3") %>
+
 <% end %>

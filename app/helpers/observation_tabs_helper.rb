@@ -31,8 +31,7 @@ module ObservationTabsHelper
   end
 
   def google_distribution_map_for(obs_name)
-    link_with_query(:show_name_distribution_map.t,
-                    controller: :name, action: :map, id: obs_name.id)
+    link_with_query(:show_name_distribution_map.t, map_names_path(obs_name.id))
   end
 
   def general_questions_link(obs, user)
@@ -55,7 +54,7 @@ module ObservationTabsHelper
   def map_link(mappable)
     return unless mappable
 
-    link_with_query(:MAP.t, controller: :location, action: :map_locations)
+    link_with_query(:MAP.t, map_locations_path)
   end
 
   def obs_change_links(obs)

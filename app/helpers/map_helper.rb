@@ -151,18 +151,20 @@ module MapHelper
     params = args[:query_params] || {}
     params = params.merge(mapset_box_params(set))
     model = type.to_s.classify.constantize
-    if type.to_s == "observation"
+    case type.to_s
+    when "observation"
       [link_to(:show_all.t, observations_path(params: params)),
        link_to(:map_all.t, map_observations_path(params: params))]
-    else
-      params = params.merge(controller: model.show_controller)
-      if model.controller_normalized?
-        [link_to(:show_all.t, params.merge(action: :index)),
-         link_to(:map_all.t, params.merge(action: :map))]
-      else
-        [link_to(:show_all.t, params.merge(action: "index_#{type}")),
-         link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
-      end
+    when "location"
+      [link_to(:show_all.t,
+               locations_path(params: params)),
+       link_to(:map_all.t,
+               map_locations_path(params: params))]
+    when "name"
+      [link_to(:show_all.t,
+               names_path(params: params)),
+       link_to(:map_all.t,
+               map_names_path(params: params))]
     end
   end
 

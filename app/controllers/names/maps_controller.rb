@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
-#  == MAPS
 #  map::                         Show distribution map.
-
 module Names
   class MapsController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
 
     # Draw a map of all the locations where this name has been observed.
-    def map
+    def show
       pass_query_params
       @name = find_or_goto_index(Name, params[:id].to_s)
       return unless @name
