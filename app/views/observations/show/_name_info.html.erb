@@ -8,8 +8,7 @@
 
     <%= content_tag(:p,
                     link_to(:show_name.t(name: name.display_name_brief_authors),
-                            controller: :name,
-                            action: :show_name, id: name.id)) %>
+                            name_path(name.id)) %>
     <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
                                 target: :_blank)) %>
     <%= content_tag(:p, link_to("Mycobank", mycobank_name_search_url(name),

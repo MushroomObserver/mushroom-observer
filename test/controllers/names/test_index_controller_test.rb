@@ -31,9 +31,9 @@ module Names
       assert_equal(10, name_links.length)
       expected = Name.all.order("sort_name, author").limit(10).to_a
       assert_equal(expected.map(&:id), ids_from_links(name_links))
-      # assert_equal(@controller.url_with_query(action: "show_name",
+      # assert_equal(@controller.url_with_query(action: "show",
       #  id: expected.first.id, only_path: true), name_links.first.url)
-      url = @controller.url_with_query(action: "show_name",
+      url = @controller.url_with_query(action: "show",
                                        id: expected.first.id, only_path: true)
       assert_not_nil(name_links.first.to_s.index(url))
       assert_select("a", text: "1", count: 0)
@@ -55,7 +55,7 @@ module Names
       assert_equal(10, name_links.length)
       expected = Name.all.order("sort_name").limit(10).offset(10).to_a
       assert_equal(expected.map(&:id), ids_from_links(name_links))
-      url = @controller.url_with_query(action: "show_name",
+      url = @controller.url_with_query(action: "show",
                                        id: expected.first.id, only_path: true)
       assert_not_nil(name_links.first.to_s.index(url))
 
@@ -81,7 +81,7 @@ module Names
       assert_equal(Set.new(l_names.map(&:id)),
                    Set.new(ids_from_links(name_links)))
 
-      url = @controller.url_with_query(action: "show_name",
+      url = @controller.url_with_query(action: "show",
                                        id: l_names.first.id, only_path: true)
       assert_not_nil(name_links.first.to_s.index(url))
       assert_select("a", text: "1", count: 0)

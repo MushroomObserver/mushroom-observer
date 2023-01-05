@@ -70,7 +70,7 @@ class AuthorsControllerTest < FunctionalTestCase
 
   #   # Make sure it fails to let unauthorized users see page.
   #   get(:review, params: params)
-  #   assert_redirected_to(controller: :name, action: :show_name, id: name.id)
+  #   assert_redirected_to(controller: "/names", action: :show, id: name.id)
 
   #   # Make Rolf an author.
   #   desc.add_author(rolf)

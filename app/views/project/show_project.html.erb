@@ -87,9 +87,7 @@
         <div class="ml-3">
           <% @drafts.each do |draft| %>
             <%= link_with_query(draft.name&.display_name&.t,
-                                { controller: :name,
-                                  action: :show_name_description,
-                                  id: draft.id }) %>
+                                name_description_path(draft.id)) %>
             (<%= user_link(draft.user) %>)<br/>
           <% end %>
         </div>
@@ -99,6 +97,6 @@
 </div><!--.row-->
 
 <%= render(partial: "comments/comments_for_object",
-            locals: {object: @project, controls: true, limit: nil}) %>
+          locals: { object: @project, controls: true, limit: nil }) %>
 
 <%= show_object_footer(@project) %>

@@ -39,7 +39,8 @@ class StudentTest < IntegrationTestCase
   module AdminDsl
     def check_admin(url, gen_desc, project)
       get(url)
-      assert_select("a[href*=show_name_description]", 1) do |links|
+      # FIXME: get a real description here and use that ID
+      assert_select("a[href*=names/descriptions]", 1) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
       assert_no_match(/#{gen_desc}/, response.body)

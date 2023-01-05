@@ -28,8 +28,8 @@ module Authors
       }
       post_requires_login(:create, params)
       assert_redirected_to(
-        controller: "/name",
-        action: :show_name_description,
+        controller: "/names/descriptions",
+        action: :show,
         id: name_descriptions(:coprinus_comatus_desc).id
       )
       assert_flash_text(:request_success.t)
@@ -43,8 +43,8 @@ module Authors
         }
       }
       post_requires_login(:create, params)
-      assert_redirected_to(controller: "/location",
-                           action: :show_location_description,
+      assert_redirected_to(controller: "/locations/descriptions",
+                           action: :show,
                            id: location_descriptions(:albion_desc).id)
       assert_flash_text(:request_success.t)
     end

@@ -70,7 +70,7 @@ module Authors
 
       # Make sure it fails to let unauthorized users see page.
       get(:show, params: params)
-      assert_redirected_to(show_name_path(id: name.id))
+      assert_redirected_to(name_path(id: name.id))
 
       # Make Rolf an author.
       desc.add_author(rolf)

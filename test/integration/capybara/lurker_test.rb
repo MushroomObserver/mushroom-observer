@@ -142,14 +142,14 @@ class LurkerTest < CapybaraIntegrationTestCase
     # Check out Name
     go_back_after do
       # (Should be at least two links to show the Name.)
-      assert(assert_selector("#content a[href^='/name/show_name/#{name.id}']",
+      assert(assert_selector("#content a[href^='/names/#{name.id}']",
                              minimum: 2))
 
       click_link("About #{name.text_name}")
       # (Make sure the page contains create_name_description.)
       assert(
         assert_selector(
-          "#content a[href^='/name/create_name_description/#{name.id}']"
+          "#content a[href^='/names/#{name.id}/descriptions/new']"
         )
       )
     end

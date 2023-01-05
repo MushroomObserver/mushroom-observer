@@ -10,7 +10,7 @@
           <% if n != @name %>
             <%= check_box(:existing_synonyms, n.id, {checked: "1"}, "1") %>
             <%= content_tag(:label, for: "existing_synonyms_#{n.id}") do
-              link_to(n.display_name.t, action: :show_name, id: n.id)
+              link_to(n.display_name.t, name_path(n.id))
             end %><br/>
           <% end %>
         <% end %>
@@ -29,7 +29,7 @@
             <% unless names.member?(name) %>
               <%= check_box(:proposed_synonyms, name.id, {checked: "1"}, "1") %>
               <%= content_tag(:label, for: "proposed_synonyms_#{name.id}") do
-                link_to(name.display_name.t, action: :show_name, id: name.id)
+                link_to(name.display_name.t, name_path(name.id))
               end %><br/>
             <% end %>
           <% end %>

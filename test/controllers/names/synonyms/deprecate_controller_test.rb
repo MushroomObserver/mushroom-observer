@@ -40,7 +40,7 @@ module Names::Synonyms
         comment: { comment: "Don't like this name" }
       }
       post_requires_login(:deprecate_name, params)
-      assert_redirected_to(action: :show_name, id: old_name.id)
+      assert_redirected_to(name_path(old_name.id))
 
       assert(old_name.reload.deprecated)
       assert_equal(old_past_name_count + 1, old_name.versions.length)
@@ -119,7 +119,7 @@ module Names::Synonyms
       }
       login("rolf")
       post(:deprecate_name, params: params)
-      assert_redirected_to(action: :show_name, id: old_name.id)
+      assert_redirected_to(name_path(old_name.id))
 
       assert(old_name.reload.deprecated)
       assert_equal(old_past_name_count + 1, old_name.versions.length)
@@ -176,7 +176,7 @@ module Names::Synonyms
       }
       login("rolf")
       post(:deprecate_name, params: params)
-      assert_redirected_to(action: :show_name, id: old_name.id)
+      assert_redirected_to(name_path(old_name.id))
 
       assert(old_name.reload.deprecated)
       # past name should have been created# past name should have been created

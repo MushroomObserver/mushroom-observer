@@ -55,10 +55,10 @@ OBJECT_TYPES = [
    "observations/show/ID"],
   ["names",
    "Name",
-   "name/show_name/ID"],
+   "names/show/ID"],
   ["locations",
    "Location",
-   "location/show_location/ID"],
+   "location/show/ID"],
   ["species_lists",
    "SpeciesList",
    "species_list/show_species_list/ID"],
@@ -146,7 +146,7 @@ ROBOTS_HEADER = <<~"TXT".freeze
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
-  Disallow: /name/show_name
+  Disallow: /names
 
 TXT
 # The rest of #write_robots_file must follow immediately

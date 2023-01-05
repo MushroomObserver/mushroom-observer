@@ -285,7 +285,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
         form.submit
       end
       assert_flash_success
-      # assert_template("name/show_name_description")
+      # assert_template("names/descriptions/show")
     end
 
     def check_name_description_form_defaults(form)

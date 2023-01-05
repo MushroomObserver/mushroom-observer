@@ -33,7 +33,7 @@
       <tr>
         <td>
           <%= link_with_query(sugg.name.display_name_brief_authors.t,
-                              show_name_path(id: sugg.name.id)) %><br/>
+                              name_path(id: sugg.name.id)) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
             (<%= :suggestions_already_proposed.t %>)

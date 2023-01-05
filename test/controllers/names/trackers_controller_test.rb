@@ -66,7 +66,7 @@ module Names
       }
       login("rolf")
       post(:email_tracking, params: params)
-      assert_redirected_to(action: :show_name, id: name.id)
+      assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count
       int_ct_after = Interest.count
@@ -99,7 +99,7 @@ module Names
       }
       login("rolf")
       post(:email_tracking, params: params)
-      assert_redirected_to(action: :show_name, id: name.id)
+      assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count
       int_ct_after = Interest.count
@@ -131,7 +131,7 @@ module Names
       }
       login("rolf")
       post(:email_tracking, params: params)
-      assert_redirected_to(action: :show_name, id: name.id)
+      assert_redirected_to(name_path(name.id))
       name_tracker = NameTracker.find_by(name: name, user: rolf)
       assert_nil(name_tracker)
       interest = Interest.find_by(target: name_tracker)

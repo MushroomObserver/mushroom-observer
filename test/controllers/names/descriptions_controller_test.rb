@@ -26,22 +26,30 @@ module Names
 
     def test_name_description_index
       login
-      get(:list_name_descriptions)
-      assert_template(:list_name_descriptions)
+      get(:index)
+      assert_template(:index)
     end
 
-    def test_index_description_index
+    def test_name_descriptions_by_author
       login
-      get(:index_name_description)
-      assert_template(:list_name_descriptions)
+      get(:index, params: { by_author: rolf.id })
+      assert_template(:index)
+    end
+
+    def test_name_descriptions_by_editor
+      login
+      get(:index, params: { by_editor: rolf.id })
+      assert_redirected_to(action: :show,
+                           id: name_descriptions(:coprinus_comatus_desc).id,
+                           params: @controller.query_params)
     end
 
     def test_show_name_description
       desc = name_descriptions(:peltigera_desc)
       params = { "id" => desc.id.to_s }
       login
-      get(:show_name_description, params: params)
-      assert_template(:show_name_description)
+      get(:show, params: params)
+      assert_template(:show)
       assert_template("name/_name_description")
     end
 
@@ -51,11 +59,9 @@ module Names
       object = NameDescription.find(id)
       params = @controller.find_query_and_next_object(object, :next, id)
       login
-      get(:next_name_description, params: { id: description.id })
+      get(:show, params: { flow: "next", id: description.id })
       q = @controller.query_params(QueryRecord.last)
-      assert_redirected_to(action: :show_name_description,
-                           id: params[:id],
-                           params: q)
+      assert_redirected_to(name_description_path(params[:id], q: q))
     end
 
     def test_prev_description
@@ -64,19 +70,17 @@ module Names
       object = NameDescription.find(id)
       params = @controller.find_query_and_next_object(object, :prev, id)
       login
-      get(:prev_name_description, params: { id: description.id })
+      get(:show, params: { flow: "prev", id: description.id })
       q = @controller.query_params(QueryRecord.last)
-      assert_redirected_to(action: :show_name_description,
-                           id: params[:id],
-                           params: q)
+      assert_redirected_to(name_description_path(params[:id], q: q))
     end
 
     def test_why_danny_cant_edit_lentinus_description
       desc = name_descriptions(:boletus_edulis_desc)
       login
-      get(:show_name_description, params: { id: desc.id })
+      get(:show, params: { id: desc.id })
       assert_no_flash
-      assert_template(:show_name_description)
+      assert_template(:show)
     end
 
     # This is a bit confusing: create and edit draft are handled here,
@@ -115,9 +119,9 @@ module Names
         assert_template(:edit_name_description)
         assert_template("name/_form_name_description")
       elsif reader
-        assert_redirected_to(action: :show_name_description, id: draft.id)
+        assert_redirected_to(name_description_path(draft.id))
       else
-        assert_redirected_to(action: :show_name, id: draft.name_id)
+        assert_redirected_to(name_path(draft.name_id))
       end
     end
 
@@ -143,9 +147,9 @@ module Names
         assert_template(:edit_name_description)
         assert_template("name/_form_name_description")
       elsif draft.is_reader?(user)
-        assert_redirected_to(action: :show_name_description, id: draft.id)
+        assert_redirected_to(name_description_path(draft.id))
       else
-        assert_redirected_to(action: :show_name, id: draft.name_id)
+        assert_redirected_to(name_path(draft.name_id))
       end
 
       draft.reload
@@ -182,8 +186,8 @@ module Names
     def test_show_draft
       draft = name_descriptions(:draft_coprinus_comatus)
       login(draft.user.login)
-      get(:show_name_description, params: { id: draft.id })
-      assert_template(:show_name_description)
+      get(:show, params: { id: draft.id })
+      assert_template("show")
       assert_template("name/_name_description")
     end
 
@@ -192,8 +196,8 @@ module Names
       draft = name_descriptions(:draft_coprinus_comatus)
       assert_not_equal(draft.user, mary)
       login(mary.login)
-      get(:show_name_description, params: { id: draft.id })
-      assert_template(:show_name_description)
+      get(:show, params: { id: draft.id })
+      assert_template("show")
       assert_template("name/_name_description")
     end
 
@@ -202,8 +206,8 @@ module Names
       draft = name_descriptions(:draft_agaricus_campestris)
       assert_not_equal(draft.user, katrina)
       login(katrina.login)
-      get(:show_name_description, params: { id: draft.id })
-      assert_template(:show_name_description)
+      get(:show, params: { id: draft.id })
+      assert_template("show")
       assert_template("name/_name_description")
     end
 
@@ -214,7 +218,7 @@ module Names
       assert(draft.belongs_to_project?(project))
       assert_not(project.is_member?(dick))
       login(dick.login)
-      get(:show_name_description, params: { id: draft.id })
+      get(:show, params: { id: draft.id })
       assert_redirected_to(project.show_link_args)
     end
 
@@ -364,7 +368,7 @@ module Names
       other = name_descriptions(:peltigera_user_desc)
       login("katrina") # random user
       get(:create_name_description, params: params.merge(clone: other.id))
-      assert_redirected_to(action: :show_name, id: name.id)
+      assert_redirected_to(name_path(name.id))
       assert_flash_error
 
       # Test clone of private description if can read.
@@ -400,7 +404,7 @@ module Names
       post(:create_name_description, params: params)
       assert_flash_success
       desc = NameDescription.last
-      assert_redirected_to(action: :show_name_description, id: desc.id)
+      assert_redirected_to(name_description_path(desc.id))
       name.reload
       assert_objs_equal(desc, name.description)
       assert_obj_arrays_equal([desc], name.descriptions)
@@ -424,7 +428,7 @@ module Names
       post(:create_name_description, params: params)
       assert_flash_warning # tried to make it private
       desc = NameDescription.last
-      assert_redirected_to(action: :show_name_description, id: desc.id)
+      assert_redirected_to(name_description_path(desc.id))
       name.reload
       assert_objs_equal(default, name.description)
       assert_true(name.descriptions.include?(desc))
@@ -465,7 +469,7 @@ module Names
       post(:create_name_description, params: params)
       assert_flash_success
       desc = NameDescription.last
-      assert_redirected_to(action: :show_name_description, id: desc.id)
+      assert_redirected_to(name_description_path(desc.id))
 
       name.reload
       assert_equal(final_class, name.classification)
@@ -492,7 +496,7 @@ module Names
       post(:create_name_description, params: params)
       assert_flash_success
       desc = NameDescription.last
-      assert_redirected_to(action: :show_name_description, id: desc.id)
+      assert_redirected_to(name_description_path(desc.id))
 
       name.reload
       assert_nil(name.description)
@@ -515,7 +519,7 @@ module Names
       }
       requires_login(:destroy_name_description, params, user.login)
       if success
-        assert_redirected_to(action: :show_name, id: draft.name_id)
+        assert_redirected_to(name_path(draft.name_id))
         assert_raises(ActiveRecord::RecordNotFound) do
           draft = NameDescription.find(draft.id)
         end
@@ -524,9 +528,9 @@ module Names
         assert(NameDescription.find(draft.id))
         assert_equal(count, NameDescription.count)
         if draft.is_reader?(user)
-          assert_redirected_to(action: :show_name_description, id: draft.id)
+          assert_redirected_to(name_description_path(desc.id))
         else
-          assert_redirected_to(action: :show_name, id: draft.name_id)
+          assert_redirected_to(name_path(draft.name_id))
         end
       end
     end

@@ -16,7 +16,7 @@ module Names::Descriptions
         value: "vetted"
       }
       post_requires_login(:set_review_status, params)
-      assert_redirected_to(action: :show_name, id: desc.name_id)
+      assert_redirected_to(name_path(desc.name_id))
       assert_equal("vetted", desc.reload.review_status)
     end
 
@@ -29,7 +29,7 @@ module Names::Descriptions
         value: "vetted"
       }
       post_requires_login(:set_review_status, params, "mary")
-      assert_redirected_to(action: :show_name, id: desc.name_id)
+      assert_redirected_to(name_path(desc.name_id))
       assert_equal("unreviewed", desc.reload.review_status)
     end
   end

@@ -94,7 +94,7 @@ module Names::Descriptions
         assert(assigns(:description).gen_desc.index(draft_gen_desc))
         assert(assigns(:description).gen_desc.index(name_gen_desc))
       else
-        assert_redirected_to(action: :show_name, id: name_id)
+        assert_redirected_to(name_path(name_id))
       end
     end
   end
