@@ -40,7 +40,7 @@ module Names
         synonym: { members: add_name.text_name },
         deprecate: { all: "1" }
       }
-      post_requires_login(:create, params)
+      put_requires_login(:update, params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
