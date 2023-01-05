@@ -9,13 +9,23 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  index_name::                  List of results of index/search.
-#  list_names::                  Alphabetical list of all names, used or not.
-#  observation_index::           Alphabetical list of names people have seen.
-#  names_by_user::               Alphabetical list of names created by
-#                                given user.
-#  names_by_editor::             Alphabetical list of names edited by given user
-#  name_search::                 Seach for string in name, notes, etc.
+#  index::                       (replace list_names::)
+#                                Alphabetical list of all names, used or not.
+#  params
+#  :by                           (replace ::index_name)
+#    index_name::                List of results of index/search.
+#  :with_observations            (replace ::observation_index)
+#    names_with_observations::   Alphabetical list of names people have seen.
+#  :with_descriptions            (replace ::authored_names)
+#    names_with_descriptions::   Alpha names with descriptions (with authors)
+#  :by_user                      (replace names_by_user:: ::names_by_author)
+#    names_by_user::             Alphabetical list of names created by user.
+#  :by_editor                    (replace names_by_editor::)
+#    names_by_editor::           Alphabetical list of names edited by user
+#  :pattern                      (replace name_search::)
+#    name_search::               Seach for string in name, notes, etc.
+#  :need_descriptions            (replace ::needed_descriptions)
+#    names_needing_descriptions::
 #
 #  show_name::                   Show info about name.
 #  show_past_name::              Show past versions of name info.
@@ -29,11 +39,6 @@
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #
 class NamesController < ApplicationController
-  include CreateAndEditName
-
-  # No idea how to fix this offense.  If I add another
-  #    before_action :login_required, except: :show_name_description
-  # in name_controller/show_name_description.rb, it ignores it.
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :show_name,
@@ -46,8 +51,28 @@ class NamesController < ApplicationController
   #
   ##############################################################################
 
-  def index; end
-  
+  def index
+    if params[:advanced_search].present?
+      advanced_search
+    elsif params[:pattern].present?
+      name_search
+    elsif params[:with_observations].present?
+      observation_index
+    elsif params[:with_descriptions].present?
+      names_with_descriptions
+    elsif params[:need_descriptions].present?
+      names_needing_descriptions
+    elsif params[:by_user].present?
+      names_by_user
+    elsif params[:by_editor].present?
+      names_by_editor
+    elsif params[:by].present?
+      index_name
+    else
+      list_names
+    end
+  end
+
   private
 
   # Display list of names in last index/search query.
@@ -63,20 +88,20 @@ class NamesController < ApplicationController
   end
 
   # Display list of names that have observations.
-  def observation_index
+  def names_with_observations
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
   end
 
-  # Display list of names that have authors.
-  def authored_names
+  # Display list of names with descriptions that have authors.
+  def names_with_descriptions
     query = create_query(:Name, :with_descriptions)
     show_selected_names(query)
   end
 
   # Display list of names that a given user is author on.
   def names_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = params[:id] ? find_or_goto_index(User, params[:by_user].to_s) : @user
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
@@ -88,7 +113,11 @@ class NamesController < ApplicationController
 
   # Display list of names that a given user is editor on.
   def names_by_editor
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = if params[:id]
+             find_or_goto_index(User, params[:by_editor].to_s)
+           else
+             @user
+           end
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
@@ -97,7 +126,7 @@ class NamesController < ApplicationController
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
-  def needed_descriptions
+  def names_needing_descriptions
     @help = :needed_descriptions_help
     query = Name.descriptions_needed
     show_selected_names(query, num_per_page: 100)
@@ -108,14 +137,14 @@ class NamesController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (name = Name.safe_find(pattern))
-      redirect_to(action: "show_name", id: name.id)
+      redirect_to(name_path(name.id))
     else
       search = PatternSearch::Name.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(action: :list_names)
+        render("names/index")
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_names(search.query)
@@ -131,7 +160,7 @@ class NamesController < ApplicationController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :search, action: :advanced)
+    redirect_to(search_advanced_path)
   end
 
   # Used to test pagination.
@@ -145,19 +174,20 @@ class NamesController < ApplicationController
     show_selected_names(query, num_per_page: params[:num_per_page].to_i)
   end
 
-  # Show selected search results as a list with 'list_names' template.
+  # Show selected search results as a list with 'index' template.
   def show_selected_names(query, args = {})
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: "list_names",
+      controller: "/names",
+      action: "index",
       letters: "names.sort_name",
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
     }.merge(args)
 
-    # Tired of not having an easy link to list_names.
+    # Tired of not having an easy link to index.
     if query.flavor == :with_observations
-      @links << [:all_objects.t(type: :name), { action: "list_names" }]
+      @links << [:all_objects.t(type: :name), names_path]
     end
 
     # Add some alternate sorting criteria.
@@ -177,8 +207,7 @@ class NamesController < ApplicationController
     # description query.
     if query.coercable?(:NameDescription)
       @links << [:show_objects.t(type: :description),
-                 add_query_param({ action: "index_name_description" },
-                                 query)]
+                 name_descriptions_path(q: get_query_param(query))]
     end
 
     # Add some extra fields to the index for authored_names.

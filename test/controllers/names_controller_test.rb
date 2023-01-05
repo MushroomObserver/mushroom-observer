@@ -3,7 +3,7 @@
 require("test_helper")
 require("set")
 
-class NameControllerTest < FunctionalTestCase
+class NamesControllerTest < FunctionalTestCase
   include ObjectLinkHelper
 
   def self.report_email(email)
@@ -209,14 +209,14 @@ class NameControllerTest < FunctionalTestCase
 
   def test_index_name
     login
-    get(:index_name)
-    assert_template(:list_names)
+    get(:index)
+    assert_template("index")
   end
 
   def test_name_index
     login
-    get(:list_names)
-    assert_template(:list_names)
+    get(:index)
+    assert_template("index")
   end
 
   def test_name_description_index
@@ -233,27 +233,27 @@ class NameControllerTest < FunctionalTestCase
 
   def test_observation_index
     login
-    get(:observation_index)
-    assert_template(:list_names)
+    get(:index, params: { with_observations: true })
+    assert_template("index")
   end
 
   def test_observation_index_by_letter
     login
-    get(:observation_index, params: { letter: "A" })
-    assert_template(:list_names)
+    get(:index, params: { with_observations: true, letter: "A" })
+    assert_template("index")
   end
 
   def test_authored_names
     login
-    get(:authored_names)
-    assert_template(:list_names)
+    get(:index, params: { with_descriptions: true })
+    assert_template("index")
   end
 
   def test_show_name
     assert_equal(0, QueryRecord.count)
     login
-    get(:show_name, params: { id: names(:coprinus_comatus).id })
-    assert_template(:show_name)
+    get(:show, params: { id: names(:coprinus_comatus).id })
+    assert_template("show")
     # Creates three for children and all four observations sections,
     # but one never used.
     assert_equal(3, QueryRecord.count)
@@ -503,31 +503,31 @@ class NameControllerTest < FunctionalTestCase
 
   def test_names_by_user
     login
-    get(:names_by_user, params: { id: rolf.id })
-    assert_template(:list_names)
+    get(:index, params: { by_user: rolf.id })
+    assert_template("index")
   end
 
   def test_names_by_editor
     login
-    get(:names_by_editor, params: { id: rolf.id })
-    assert_template(:list_names)
+    get(:index, params: { by_editor: rolf.id })
+    assert_template("index")
   end
 
-  def test_needed_descriptions
+  def test_names_needing_descriptions
     login
-    get(:needed_descriptions)
-    assert_template(:list_names)
+    get(:index, params: { need_descriptions: rolf.id })
+    assert_template("index")
   end
 
   def test_name_descriptions_by_author
     login
-    get(:name_descriptions_by_author, params: { id: rolf.id })
+    get(:index, params: { by_author: rolf.id })
     assert_template(:list_name_descriptions)
   end
 
   def test_name_descriptions_by_editor
     login
-    get(:name_descriptions_by_editor, params: { id: rolf.id })
+    get(:index, params: { by_editor: rolf.id })
     assert_redirected_to(action: :show_name_description,
                          id: name_descriptions(:coprinus_comatus_desc).id,
                          params: @controller.query_params)
@@ -536,20 +536,20 @@ class NameControllerTest < FunctionalTestCase
   def test_name_search
     id = names(:agaricus).id
     login
-    get(:name_search, params: { pattern: id })
+    get(:index, params: { pattern: id })
     assert_redirected_to(action: :show_name, id: id)
   end
 
   def test_name_search_help
     login
-    get(:name_search, params: { pattern: "help:me" })
+    get(:index, params: { pattern: "help:me" })
     assert_match(/unexpected term/i, @response.body)
   end
 
   def test_name_search_with_spelling_correction
     login
-    get(:name_search, params: { pattern: "agaricis campestrus" })
-    assert_template(:list_names)
+    get(:index, params: { pattern: "agaricis campestrus" })
+    assert_template("index")
     assert_select("div.alert-warning", 1)
     assert_select("a[href*='show_name/#{names(:agaricus_campestrus).id}']",
                   text: names(:agaricus_campestrus).search_name)
@@ -558,8 +558,8 @@ class NameControllerTest < FunctionalTestCase
     assert_select("a[href*='show_name/#{names(:agaricus_campestros).id}']",
                   text: names(:agaricus_campestros).search_name)
 
-    get(:name_search, params: { pattern: "Agaricus" })
-    assert_template(:list_names)
+    get(:index, params: { pattern: "Agaricus" })
+    assert_template("index")
     assert_select("div.alert-warning", 0)
   end
 
@@ -570,8 +570,9 @@ class NameControllerTest < FunctionalTestCase
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
     login
-    get(:advanced_search, params: @controller.query_params(query))
-    assert_template(:list_names)
+    get(:index, params: { advanced_search: true,
+                          q: @controller.query_params(query) })
+    assert_template("index")
   end
 
   def test_advanced_search_with_deleted_query
@@ -699,7 +700,7 @@ class NameControllerTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: 10 }.merge(query_params))
     # print @response.body
-    assert_template(:list_names)
+    assert_template("names/index")
     name_links = css_select(".table a")
     assert_equal(10, name_links.length)
     expected = Name.all.order("sort_name, author").limit(10).to_a
@@ -722,7 +723,7 @@ class NameControllerTest < FunctionalTestCase
     query_params = pagination_query_params
     login
     get(:test_index, params: { num_per_page: 10, page: 2 }.merge(query_params))
-    assert_template(:list_names)
+    assert_template("names/index")
     name_links = css_select(".table a")
     assert_equal(10, name_links.length)
     expected = Name.all.order("sort_name").limit(10).offset(10).to_a
@@ -746,7 +747,7 @@ class NameControllerTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
-    assert_template(:list_names)
+    assert_template("names/index")
     assert_select("#content")
     name_links = css_select(".table a")
     assert_equal(l_names.size, name_links.length)
@@ -771,7 +772,7 @@ class NameControllerTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
-    assert_template(:list_names)
+    assert_template("names/index")
     name_links = css_select(".table a")
 
     assert_equal(l_names.size, name_links.length)
@@ -795,7 +796,7 @@ class NameControllerTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size, letter: "L",
                                page: 2 }.merge(query_params))
-    assert_template(:list_names)
+    assert_template("names/index")
     name_links = css_select(".table a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))

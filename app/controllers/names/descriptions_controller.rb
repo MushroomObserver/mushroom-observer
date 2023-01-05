@@ -65,12 +65,14 @@ module Names
       show_selected_name_descriptions(query)
     end
 
-    # Show selected search results as a list with 'list_names' template.
+    # Show selected search results as a list with ???
+    #              'names/descriptions/index' template ???
     def show_selected_name_descriptions(query, args = {})
       store_query_in_session(query)
       @links ||= []
       args = {
-        action: "list_name_descriptions",
+        controller: "names/descriptions",
+        action: "index",
         num_per_page: 50
       }.merge(args)
 
@@ -114,7 +116,7 @@ module Names
       return true if @name
 
       flash_error(:runtime_name_for_description_not_found.t)
-      redirect_to(action: "list_names")
+      redirect_to(names_path)
       false
     end
 
