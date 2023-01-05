@@ -16,11 +16,11 @@ module Names::Classification
 
       # Make sure bogus requests don't crash.
       login("rolf")
-      get(:propagate_classification)
-      get(:propagate_classification, params: { id: 666 })
-      get(:propagate_classification, params: { id: "bogus" })
-      get(:propagate_classification, params: { id: child.id })
-      get(:propagate_classification, params: { id: names(:ascomycota).id })
+      # put(:update)
+      put(:update, params: { id: 666 })
+      put(:update, params: { id: "bogus" })
+      put(:update, params: { id: child.id })
+      put(:update, params: { id: names(:ascomycota).id })
       assert_equal(val, genus.reload.classification)
       assert_equal(val, genus.description.reload.classification)
       assert_equal(val, child.reload.classification)
@@ -30,12 +30,12 @@ module Names::Classification
       new_val = names(:peltigera).classification
       genus.update_columns(classification: new_val)
       logout
-      get(:propagate_classification, params: { id: genus.id })
+      put(:update, params: { id: genus.id })
       assert_equal(val, child.reload.classification)
 
       # Now finally do it right and make sure it makes correct changes.
       login("rolf")
-      get(:propagate_classification, params: { id: genus.id })
+      put(:update, params: { id: genus.id })
       assert_equal(new_val, child.reload.classification)
       assert_equal(new_val, child.description.reload.classification)
     end

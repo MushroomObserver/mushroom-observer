@@ -11,64 +11,65 @@ module Names::Classification
       name = names(:boletus)
 
       # Make sure user has to be logged in.
-      get(:inherit_classification, params: { id: name.id })
+      get(:new, params: { id: name.id })
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
       # Make sure it doesn't crash if id is missing.
-      get(:inherit_classification)
+      get(:new)
       assert_flash_error
       assert_response(:redirect)
 
       # Make sure it doesn't crash if id is bogus.
-      get(:inherit_classification, params: { id: "bogus" })
+      get(:new, params: { id: "bogus" })
       assert_flash_error
       assert_response(:redirect)
 
       # Make sure it doesn't crash if id is bogus.
-      get(:inherit_classification, params: { id: name.id })
+      get(:new, params: { id: name.id })
       assert_no_flash
       assert_response(:success)
-      assert_template("inherit_classification")
+      assert_template("names/classification/inherit/new")
     end
 
     def test_post_inherit_classification
       name = names(:boletus)
 
       # Make sure user has to be logged in.
-      post(:inherit_classification, params: { id: name, parent: "Agaricales" })
+      post(:create, params: { id: name, parent: "Agaricales" })
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
       # Make sure it doesn't crash if id is missing.
-      post(:inherit_classification, params: { parent: "Agaricales" })
+      post(:create, params: { parent: "Agaricales" })
       assert_flash_error
       assert_response(:redirect)
 
       # Make sure it doesn't crash if id is bogus.
-      post(:inherit_classification, params: { id: "bogus", parent: "Agaricales" })
+      post(:create, params: { id: "bogus", parent: "Agaricales" })
       assert_flash_error
       assert_response(:redirect)
 
       # Test reload if parent field missing.
-      post(:inherit_classification, params: { id: name.id, parent: "" })
+      post(:create, params: { id: name.id, parent: "" })
       assert_flash_error
       assert_response(:success)
-      assert_template(:inherit_classification)
+      assert_template("names/classification/inherit/new")
 
       # Test reload if parent field has no match and no alternate spellings.
-      post(:inherit_classification,
+      post(:create,
            params: { id: name.id, parent: "cakjdncaksdbcsdkn" })
       assert_flash_error
       assert_response(:success)
-      assert_template(:inherit_classification)
+      assert_template("names/classification/inherit/new")
       assert_input_value("parent", "cakjdncaksdbcsdkn")
 
       # Test reload if parent field misspelled.
-      post(:inherit_classification, params: { id: name.id, parent: "Agariclaes" })
+      post(:create,
+           params: { id: name.id, parent: "Agariclaes" })
       assert_no_flash
       assert_response(:success)
-      assert_template(:inherit_classification)
+      assert_template("names/classification/inherit/new")
       assert_not_blank(assigns(:message))
       assert_not_empty(assigns(:options))
       assert_select("span", text: "Agaricales")
@@ -84,11 +85,11 @@ module Names::Classification
       parent3 = create_name("Agaricaceae Clauzade")
       parent3.classification = "Domain: _Eukarya_"
       parent3.save
-      post(:inherit_classification,
+      post(:create,
            params: { id: name.id, parent: "Agaricaceae" })
       assert_no_flash
       assert_response(:success)
-      assert_template(:inherit_classification)
+      assert_template("names/classification/inherit/new")
       assert_not_blank(assigns(:message))
       assert_not_empty(assigns(:options))
       assert_select("input[type=radio][value='#{parent1.id}']", count: 1)
@@ -97,19 +98,19 @@ module Names::Classification
       assert_input_value("parent", "Agaricaceae")
 
       # Have it select a bogus name (rank wrong in this case).
-      post(:inherit_classification,
+      post(:create,
            params: { id: name.id,
                      parent: "Agaricaceae",
                      options: names(:coprinus_comatus).id })
       assert_flash_error
       assert_response(:success)
-      assert_template(:inherit_classification)
+      assert_template("names/classification/inherit/new")
 
       # Make it less ambiguous, so it will select the original Agaricaceae.
       Name.update(parent2.id, classification: "")
       Name.update(parent3.id, deprecated: true)
       assert_blank(name.reload.classification)
-      post(:inherit_classification,
+      post(:create,
            params: { id: name.id, parent: "Agaricaceae" })
       assert_no_flash
       assert_name_arrays_equal([], assigns(:options))

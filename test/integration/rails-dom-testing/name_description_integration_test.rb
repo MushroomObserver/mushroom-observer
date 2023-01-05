@@ -277,7 +277,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def create_name_description
       get(show_name_uri)
-      click_mo_link(href: /create_name_description/)
+      click_mo_link(href: %r{descriptions/new})
       # assert_template("name/create_name_description")
       open_form do |form|
         check_name_description_form_defaults(form)

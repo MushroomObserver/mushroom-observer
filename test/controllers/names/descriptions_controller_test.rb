@@ -93,9 +93,9 @@ module Names
         source: "project",
         project: project.id
       }
-      requires_login(:create_name_description, params, user.login)
+      requires_login(:new, params, user.login)
       if success
-        assert_template(:create_name_description)
+        assert_template("new")
         assert_template("name/_form_name_description")
       else
         assert_redirected_to(controller: "project", action: "show_project",
@@ -114,9 +114,9 @@ module Names
       params = {
         id: draft.id
       }
-      requires_login(:edit_name_description, params, user.login)
+      requires_login(:edit, params, user.login)
       if success
-        assert_template(:edit_name_description)
+        assert_template("edit")
         assert_template("name/_form_name_description")
       elsif reader
         assert_redirected_to(name_description_path(draft.id))
@@ -142,9 +142,9 @@ module Names
           classification: classification
         }.merge(params)
       }
-      post_requires_login(:edit_name_description, params, user.login)
+      post_requires_login(:edit, params, user.login)
       if permission && !success
-        assert_template(:edit_name_description)
+        assert_template("edit")
         assert_template("name/_form_name_description")
       elsif draft.is_reader?(user)
         assert_redirected_to(name_description_path(draft.id))
@@ -167,15 +167,15 @@ module Names
     def test_create_name_description
       name = names(:peltigera)
       params = { "id" => name.id.to_s }
-      requires_login(:create_name_description, params)
-      assert_form_action(action: "create_name_description", id: name.id)
+      requires_login(:new, params)
+      assert_form_action(name_descriptions_path(name.id))
     end
 
     def test_edit_name_description
       desc = name_descriptions(:peltigera_desc)
       params = { "id" => desc.id.to_s }
-      requires_login(:edit_name_description, params)
-      assert_form_action(action: "edit_name_description", id: desc.id)
+      requires_login(:edit, params)
+      assert_form_action(name_descriptions_path(desc.id))
     end
 
     # ----------------------------
@@ -304,7 +304,7 @@ module Names
       params = { id: name.id }
 
       # Make sure it requires login.
-      requires_login(:create_name_description, params)
+      requires_login(:new, params)
       desc = assigns(:description)
       assert_equal("public", desc.source_type)
       assert_equal("", desc.source_name.to_s)
@@ -314,8 +314,8 @@ module Names
       # Test draft creation by project member.
       login("rolf") # member
       project = projects(:eol_project)
-      get(:create_name_description, params: params.merge(project: project.id))
-      assert_template(:create_name_description)
+      get(:new, params: params.merge(project: project.id))
+      assert_template("new")
       assert_template("name/_form_name_description")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
@@ -325,7 +325,7 @@ module Names
 
       # Test draft creation by project non-member.
       login("dick")
-      get(:create_name_description, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project: project.id))
       assert_redirected_to(controller: "project", action: "show_project",
                            id: project.id)
       assert_flash_error
@@ -337,7 +337,7 @@ module Names
       params = { id: name.id }
 
       # Make sure it requires login.
-      requires_login(:create_name_description, params)
+      requires_login(:new, params)
       desc = assigns(:description)
       assert_equal("public", desc.source_type)
       assert_equal("", desc.source_name.to_s)
@@ -347,8 +347,8 @@ module Names
       # Test draft creation by project member.
       login("katrina") # member
       project = projects(:eol_project)
-      get(:create_name_description, params: params.merge(project: project.id))
-      assert_template(:create_name_description)
+      get(:new, params: params.merge(project: project.id))
+      assert_template("new")
       assert_template("name/_form_name_description")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
@@ -358,7 +358,7 @@ module Names
 
       # Test draft creation by project non-member.
       login("dick")
-      get(:create_name_description, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project: project.id))
       assert_redirected_to(controller: "project",
                            action: "show_project",
                            id: project.id)
@@ -367,14 +367,14 @@ module Names
       # Test clone of private description if not reader.
       other = name_descriptions(:peltigera_user_desc)
       login("katrina") # random user
-      get(:create_name_description, params: params.merge(clone: other.id))
+      get(:new, params: params.merge(clone: other.id))
       assert_redirected_to(name_path(name.id))
       assert_flash_error
 
       # Test clone of private description if can read.
       login("dick") # reader
-      get(:create_name_description, params: params.merge(clone: other.id))
-      assert_template(:create_name_description)
+      get(:new, params: params.merge(clone: other.id))
+      assert_template("new")
       assert_template("name/_form_name_description")
       desc = assigns(:description)
       assert_equal("user", desc.source_type)
@@ -397,11 +397,11 @@ module Names
       # No desc yet -> make new desc default.
       name = names(:conocybe_filaris)
       assert_equal(0, name.descriptions.length)
-      post(:create_name_description, params: params)
+      post(:create, params: params)
       assert_response(:redirect)
       login("dick")
       params[:id] = name.id
-      post(:create_name_description, params: params)
+      post(:create, params: params)
       assert_flash_success
       desc = NameDescription.last
       assert_redirected_to(name_description_path(desc.id))
@@ -425,7 +425,7 @@ module Names
       params[:description][:public]       = "0"
       params[:description][:public_write] = "0"
       params[:description][:source_name]  = "Alternate Description"
-      post(:create_name_description, params: params)
+      post(:create, params: params)
       assert_flash_warning # tried to make it private
       desc = NameDescription.last
       assert_redirected_to(name_description_path(desc.id))
@@ -460,13 +460,13 @@ module Names
       }
 
       params[:description][:classification] = bad_class
-      post(:create_name_description, params: params)
+      post(:create, params: params)
       assert_flash_error
-      assert_template(:create_name_description)
+      assert_template("new")
       assert_template("name/_form_name_description")
 
       params[:description][:classification] = good_class
-      post(:create_name_description, params: params)
+      post(:create, params: params)
       assert_flash_success
       desc = NameDescription.last
       assert_redirected_to(name_description_path(desc.id))
@@ -493,7 +493,7 @@ module Names
         )
       }
 
-      post(:create_name_description, params: params)
+      post(:create, params: params)
       assert_flash_success
       desc = NameDescription.last
       assert_redirected_to(name_description_path(desc.id))
@@ -517,7 +517,7 @@ module Names
       params = {
         id: draft.id
       }
-      requires_login(:destroy_name_description, params, user.login)
+      requires_login(:destroy, params, user.login)
       if success
         assert_redirected_to(name_path(draft.name_id))
         assert_raises(ActiveRecord::RecordNotFound) do

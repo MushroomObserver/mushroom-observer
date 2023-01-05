@@ -75,7 +75,7 @@ OBJECT_TYPES = [
    "herbaria/show/ID"],
   ["name_descriptions",
    "NameDescription",
-   "name/show_name_description/ID"],
+   "names/descriptions/show/ID"],
   ["location_descriptions",
    "LocationDescription",
    "location/show_location_description/ID"]

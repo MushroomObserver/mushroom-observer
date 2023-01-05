@@ -89,7 +89,7 @@ module Names::Descriptions
         assert(NameDescription.safe_find(draft.id))
       end
       if conflict
-        assert_template(:edit_name_description)
+        assert_template("names/descriptions/edit")
         assert_template("name/_form_name_description")
         assert(assigns(:description).gen_desc.index(draft_gen_desc))
         assert(assigns(:description).gen_desc.index(name_gen_desc))

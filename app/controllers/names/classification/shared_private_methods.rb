@@ -4,6 +4,10 @@ module Names::Classification
   module SharedPrivateMethods
     private
 
+    def find_name!
+      @name = find_or_goto_index(Name, params[:id])
+    end
+
     def make_sure_parent_higher_rank!(parent)
       parent_index = Name.rank_index(parent.rank)
       our_index = Name.rank_index(@name.rank)

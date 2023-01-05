@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 #  == CLASSIFICATIONS
-#  propagate_classification::    Copy classification to all subtaxa.
-#  refresh_classification::      Refresh classification from genus.
-#  inherit_classification::
 #  edit_classification::
 #
 module Names
@@ -11,12 +8,18 @@ module Names
     before_action :login_required
     before_action :disable_link_prefetching
 
-    def edit_classification
+    # Form
+    def edit
       store_location
       pass_query_params
-      @name = find_or_goto_index(Name, params[:id])
-      return unless @name
-      return unless request.method == "POST"
+      return unless find_name!
+    end
+
+    # PUT callback
+    def update
+      store_location
+      pass_query_params
+      return unless find_name!
 
       @name.classification = params[:classification].to_s.strip_html.
                              strip_squeeze

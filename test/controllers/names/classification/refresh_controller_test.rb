@@ -19,11 +19,11 @@ module Names::Classification
 
       # Make sure bogus requests don't crash.
       login("rolf")
-      get(:refresh_classification)
-      get(:refresh_classification, params: { id: 666 })
-      get(:refresh_classification, params: { id: "bogus" })
-      get(:refresh_classification, params: { id: genus.id })
-      get(:refresh_classification, params: { id: child.id }) # no change!
+      # put(:update)
+      put(:update, params: { id: 666 })
+      put(:update, params: { id: "bogus" })
+      put(:update, params: { id: genus.id })
+      put(:update, params: { id: child.id }) # no change!
       assert_equal(val, genus.reload.classification)
       assert_equal(val, genus.description.reload.classification)
       assert_equal(val, child.reload.classification)
@@ -39,13 +39,13 @@ module Names::Classification
       child.update_columns(classification: new_val)
       child.description.update_columns(classification: new_val)
       logout
-      get(:refresh_classification, params: { id: child.id })
+      put(:update, params: { id: child.id })
       assert_equal(new_val, child.reload.classification)
       assert_equal(time, child.updated_at)
 
       # Now finally do it right and make sure it makes correct changes.
       login("rolf")
-      get(:refresh_classification, params: { id: child.id })
+      put(:update, params: { id: child.id })
       assert_equal(val, child.reload.classification)
       assert_not_equal(time, child.updated_at)
     end

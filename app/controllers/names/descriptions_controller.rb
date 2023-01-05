@@ -214,7 +214,7 @@ module Names
           @name.save if @name.changed?
 
           flash_notice(:runtime_name_description_success.t(id: @description.id))
-          redirect_to(action: "show_name_description", id: @description.id)
+          redirect_to(name_description_path(@description.id))
         else
           flash_object_errors(@description)
         end
@@ -251,7 +251,7 @@ module Names
         # No changes made.
         if !@description.changed?
           flash_warning(:runtime_edit_name_description_no_change.t)
-          redirect_to(action: "show_name_description", id: @description.id)
+          redirect_to(name_description_path(@description.id))
 
         # There were error(s).
         elsif !@description.save
@@ -293,12 +293,12 @@ module Names
             end
           end
 
-          redirect_to(action: "show_name_description", id: @description.id)
+          redirect_to(name_description_path(@description.id))
         end
       end
     end
 
-    def destroy_name_description
+    def destroy
       pass_query_params
       @description = NameDescription.find(params[:id].to_s)
       if in_admin_mode? || @description.is_admin?(@user)
@@ -312,8 +312,9 @@ module Names
       else
         flash_error(:runtime_destroy_description_not_admin.t)
         if in_admin_mode? || @description.is_reader?(@user)
-          redirect_with_query(action: "show_name_description",
-                              id: @description.id)
+          redirect_to(
+            name_description_path(@description.id, q: get_query_param)
+          )
         else
           redirect_to(name_path(@description.name_id, q: get_query_param))
         end
