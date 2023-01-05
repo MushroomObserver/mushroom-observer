@@ -416,7 +416,7 @@ class AbstractModel < ApplicationRecord
   # that displays search index for this object.
   #
   #   Article.index_action => :index # normalized controller
-  #   Name.index_action => :index_name # unormalized
+  #   Name.index_action => :index # unormalized
   #
   # WARNING.
   # 1. There is no standard Rails action name for displaying a **search** index.
@@ -443,9 +443,9 @@ class AbstractModel < ApplicationRecord
   # Return the link_to args of the "index_<object>" action
   # (the index, indexed to a particular id)
   #
-  #   Name.index_link_args(12) => {controller: "/name", action: :index_name,
+  #   Name.index_link_args(12) => {controller: "/names", action: :index,
   #                                id: 12}
-  #   name.index_link_args     => {controller: "/name", action: :index_name,
+  #   name.index_link_args     => {controller: "/names", action: :index,
   #                                id: 12}
   #
   def self.index_link_args(id)

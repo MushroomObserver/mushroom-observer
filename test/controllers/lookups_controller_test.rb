@@ -84,7 +84,7 @@ class LookupsControllerTest < FunctionalTestCase
 
     get(:lookup_name, params: { id: "Amanita baccata" })
     # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{/name/index_name})
+    assert_redirected_to(%r{/names})
     assert_flash_warning
 
     get(:lookup_name, params: { id: "Agaricus campestris L." })
@@ -109,7 +109,7 @@ class LookupsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_suggest_multiple_alternates.t(type: :name,
                                                              match: "Verpab"))
     # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{/name/index_name})
+    assert_redirected_to(%r{/names})
 
     # Prove that lookup_name adds flash message when it hits an error,
     # stubbing a method called by lookup_name in order to provoke an error.
