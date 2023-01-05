@@ -43,8 +43,6 @@
 #  show_url::           "Official" URL for this database object.
 #  show_link_args::     "Official" link_to args for this database object.
 #  index_action::       Name of action to display index of these objects
-#  next_action          Name of action to display next one of these objects
-#  prev_action          Name of action to display previous one of these objects
 #
 #  ==== Callbacks
 #  before_create::      Do several things before creating a new record.
@@ -496,44 +494,6 @@ class AbstractModel < ApplicationRecord
 
   def show_url
     self.class.show_url(id)
-  end
-
-  # Return the name of the "show_past_<object>" action
-  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
-  # actions are normalized.
-  # See https://www.pivotaltracker.com/story/show/174440291
-  def self.show_past_action
-    return :show_past if controller_normalized? # Rails standard
-
-    "show_past_#{name.underscore}".to_sym # Old MO style
-  end
-
-  def show_past_action
-    self.class.show_past_action
-  end
-
-  # Return the name of the "next" action
-  # See comments above at show_action
-  def self.next_action
-    return :show if controller_normalized? # Rails standard
-
-    "next_#{name.underscore}".to_sym # Old MO style
-  end
-
-  def next_action
-    self.class.next_action
-  end
-
-  # Return the name of the "prev" action
-  # See comments above at show_action
-  def self.prev_action
-    return :show if controller_normalized? # Rails standard
-
-    "prev_#{name.underscore}".to_sym # Old MO style
-  end
-
-  def prev_action
-    self.class.prev_action
   end
 
   # Return the link_to args of the "show_<object>" action

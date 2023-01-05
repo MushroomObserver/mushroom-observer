@@ -16,7 +16,7 @@ module Names
     CREATE_NAME_DESCRIPTION_PARTIALS = %w[
       _form_description
       _textilize_help
-      _form_name_description
+      _form
     ].freeze
 
     SHOW_NAME_DESCRIPTION_PARTIALS = %w[
@@ -50,7 +50,7 @@ module Names
       login
       get(:show, params: params)
       assert_template(:show)
-      assert_template("name/_name_description")
+      assert_template("names/descriptions/_name_description")
     end
 
     def test_next_description
@@ -96,7 +96,7 @@ module Names
       requires_login(:new, params, user.login)
       if success
         assert_template("new")
-        assert_template("name/_form_name_description")
+        assert_template("names/descriptions/_form")
       else
         assert_redirected_to(controller: "project", action: "show_project",
                              id: project.id)
@@ -117,7 +117,7 @@ module Names
       requires_login(:edit, params, user.login)
       if success
         assert_template("edit")
-        assert_template("name/_form_name_description")
+        assert_template("names/descriptions/_form")
       elsif reader
         assert_redirected_to(name_description_path(draft.id))
       else
@@ -145,7 +145,7 @@ module Names
       post_requires_login(:edit, params, user.login)
       if permission && !success
         assert_template("edit")
-        assert_template("name/_form_name_description")
+        assert_template("names/descriptions/_form")
       elsif draft.is_reader?(user)
         assert_redirected_to(name_description_path(draft.id))
       else
@@ -188,7 +188,7 @@ module Names
       login(draft.user.login)
       get(:show, params: { id: draft.id })
       assert_template("show")
-      assert_template("name/_name_description")
+      assert_template("names/descriptions/_name_description")
     end
 
     # Ensure that an admin can see a draft they don't own
@@ -198,7 +198,7 @@ module Names
       login(mary.login)
       get(:show, params: { id: draft.id })
       assert_template("show")
-      assert_template("name/_name_description")
+      assert_template("names/descriptions/_name_description")
     end
 
     # Ensure that an member can see a draft they don't own
@@ -208,7 +208,7 @@ module Names
       login(katrina.login)
       get(:show, params: { id: draft.id })
       assert_template("show")
-      assert_template("name/_name_description")
+      assert_template("names/descriptions/_name_description")
     end
 
     # Ensure that a non-member cannot see a draft
@@ -316,7 +316,7 @@ module Names
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
       assert_template("new")
-      assert_template("name/_form_name_description")
+      assert_template("names/descriptions/_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -349,7 +349,7 @@ module Names
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
       assert_template("new")
-      assert_template("name/_form_name_description")
+      assert_template("names/descriptions/_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -375,7 +375,7 @@ module Names
       login("dick") # reader
       get(:new, params: params.merge(clone: other.id))
       assert_template("new")
-      assert_template("name/_form_name_description")
+      assert_template("names/descriptions/_form")
       desc = assigns(:description)
       assert_equal("user", desc.source_type)
       assert_equal("", desc.source_name.to_s)
@@ -463,7 +463,7 @@ module Names
       post(:create, params: params)
       assert_flash_error
       assert_template("new")
-      assert_template("name/_form_name_description")
+      assert_template("names/descriptions/_form")
 
       params[:description][:classification] = good_class
       post(:create, params: params)

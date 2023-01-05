@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DescriptionHelper
+module DescriptionsHelper
   def writer?(desc)
     desc.writer?(@user) || in_admin_mode?
   end
