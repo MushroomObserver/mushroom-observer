@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class LocationControllerTest < FunctionalTestCase
+class LocationsControllerTest < FunctionalTestCase
   def setup
     @new_pts  = 10
     @chg_pts  = 5

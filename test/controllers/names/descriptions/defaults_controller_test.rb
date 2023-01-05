@@ -12,7 +12,7 @@ module Names::Descriptions
       params = {
         id: desc.id
       }
-      requires_login(:make_description_default, params, user.login)
+      put_requires_login(:update, params, user.login)
     end
 
     def test_make_description_default
