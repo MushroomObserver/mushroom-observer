@@ -6,7 +6,7 @@ module Names
     before_action :login_required
 
     # Show past version of Name.  Accessible only from show_name page.
-    def show_past_name
+    def show
       pass_query_params
       store_location
       @name = find_or_goto_index(Name, params[:id].to_s)

@@ -41,9 +41,11 @@
 class NamesController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching, except: [
-    :show_name,
-    :create_name,
-    :edit_name
+    :show,
+    :new,
+    :create,
+    :edit,
+    :update
   ]
   ##############################################################################
   #
@@ -228,25 +230,38 @@ class NamesController < ApplicationController
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
   def show
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
+    end
+
     pass_query_params
     store_location
     clear_query_in_session
 
     # Load Name and NameDescription along with a bunch of associated objects.
-    name_id = params[:id].to_s
-    @name = find_or_goto_index(Name, name_id)
-    return unless @name
+    return unless find_name!
 
     update_view_stats(@name)
 
     # Tell robots the proper URL to use to index this content.
     @canonical_url = "#{MO.http_domain}/names/#{@name.id}"
 
-    # Get a list of projects the user can create drafts for.
-    @projects = @user&.projects_member&.select do |project|
-      @name.descriptions.none? { |d| d.belongs_to_project?(project) }
-    end
+    init_projects_ivar
+    init_related_query_ivars
+  end
 
+  # ----------------------------------------------------------------------------
+
+  private
+
+  def find_name!
+    @name = find_or_goto_index(Name, params[:id].to_s)
+  end
+
+  def init_related_query_ivars
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
                                    names: @name.id,
@@ -283,42 +298,50 @@ class NamesController < ApplicationController
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
   end
 
-  # Go to next name: redirects to show_name.
-  def next_name
-    redirect_to_next_object(:next, Name, params[:id].to_s)
+  def init_projects_ivar
+    # Get a list of projects the user can create drafts for.
+    @projects = @user&.projects_member&.select do |project|
+      @name.descriptions.none? { |d| d.belongs_to_project?(project) }
+    end
   end
 
-  # Go to previous name: redirects to show_name.
-  def prev_name
-    redirect_to_next_object(:prev, Name, params[:id].to_s)
-  end
+  public
 
-  def create_name
+  def new
     store_location
     pass_query_params
     init_create_name_form
-    if request.method == "POST"
-      @parse = parse_name
-      make_sure_name_doesnt_exist!
-      create_new_name
-    end
-  rescue RuntimeError => e
-    reload_name_form_on_error(e)
   end
 
-  def edit_name
+  def create
     store_location
     pass_query_params
-    @name = find_or_goto_index(Name, params[:id].to_s)
-    return unless @name
-
-    init_edit_name_form
-    update if request.method == "POST"
+    init_create_name_form
+    @parse = parse_name
+    make_sure_name_doesnt_exist!
+    create_new_name
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
 
-  # ----------------------------------------------------------------------------
+  def edit
+    store_location
+    pass_query_params
+    return unless find_name!
+
+    init_edit_name_form
+  end
+
+  def update
+    store_location
+    pass_query_params
+    return unless find_name!
+
+    init_edit_name_form
+    update_name
+  rescue RuntimeError => e
+    reload_name_form_on_error(e)
+  end
 
   private
 
@@ -332,7 +355,7 @@ class NamesController < ApplicationController
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
 
-    @name.attributes = name_params[:name]
+    @name.attributes = allowed_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
   end
@@ -397,7 +420,7 @@ class NamesController < ApplicationController
   # update
   # ------
 
-  def update
+  def update_name
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
       redirect_with_query(
@@ -685,7 +708,7 @@ class NamesController < ApplicationController
   # ----------------------------------------------------------------------------
 
   # allow some mass assignment for purposes of reloading form
-  def name_params
+  def allowed_name_params
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end

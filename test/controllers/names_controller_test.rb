@@ -331,14 +331,14 @@ class NamesControllerTest < FunctionalTestCase
     name13 = names[13]
     name14 = names[14]
     login
-    get(:next_name, params: { id: name12.id })
+    get(:show, params: { flow: "next", id: name12.id })
     q = @controller.query_params(QueryRecord.last)
     assert_redirected_to(action: :show, id: name13.id, params: q)
-    get(:next_name, params: { id: name13.id })
+    get(:show, params: { flow: "next", id: name13.id })
     assert_redirected_to(action: :show, id: name14.id, params: q)
-    get(:prev_name, params: { id: name14.id })
+    get(:show, params: { flow: "prev", id: name14.id })
     assert_redirected_to(action: :show, id: name13.id, params: q)
-    get(:prev_name, params: { id: name13.id })
+    get(:show, params: { flow: "prev", id: name13.id })
     assert_redirected_to(action: :show, id: name12.id, params: q)
   end
 

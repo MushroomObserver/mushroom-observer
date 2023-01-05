@@ -2178,10 +2178,10 @@
   # location/show_past_location_description
   show_past_location_description_title: "[:VERSION] [num]: [name]"
 
-  # name/show_past_name
+  # names/versions/show
   show_past_name_title: "[:VERSION] [num]: [name]"
 
-  # name/show_past_name_description
+  # names/descriptions/versions/show
   show_past_name_description_title: "[:VERSION] [num]: [name]"
 
   # object/show_past_versions

@@ -8,7 +8,7 @@ module Names::Descriptions
 
     # Show past versions of NameDescription.  Accessible only from
     # show_name_description page.
-    def show_past_name_description
+    def show
       pass_query_params
       store_location
       @description = find_or_goto_index(NameDescription, params[:id].to_s)

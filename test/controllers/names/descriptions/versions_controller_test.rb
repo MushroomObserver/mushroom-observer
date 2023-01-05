@@ -15,10 +15,9 @@ module Names::Descriptions
       desc.reload
       new_versions = desc.versions.length
       assert(new_versions > old_versions)
-      get(:show_past_name_description, params: { id: desc.id })
-      assert_template(:show_past_name_description)
+      get(:show, params: { id: desc.id })
+      assert_template("show")
       assert_template("name/_name_description")
     end
-
   end
 end
