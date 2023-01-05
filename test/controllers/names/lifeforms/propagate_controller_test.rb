@@ -13,8 +13,8 @@ module Names::Lifeforms
 
       # Prove that getting to the form requires a login, and that it starts off
       # with all boxes unchecked.
-      requires_login(:propagate_lifeform, id: name.id)
-      assert_template(:propagate_lifeform)
+      requires_login(:edit, id: name.id)
+      assert_template("names/lifeforms/propagate/edit")
       Name.all_lifeforms.each do |word|
         if word == "lichen"
           assert_input_value("add_#{word}", "")
@@ -24,7 +24,7 @@ module Names::Lifeforms
       end
 
       # Make sure we can add "lichen" to all children.
-      post(:propagate_lifeform, params: { id: name.id, add_lichen: "1" })
+      put(:update, params: { id: name.id, add_lichen: "1" })
       assert_redirected_to(name.show_link_args)
       children.each do |child|
         assert(child.reload.lifeform.include?(" lichen "),
@@ -32,7 +32,7 @@ module Names::Lifeforms
       end
 
       # Make sure we can remove "lichen" from all children, too.
-      post(:propagate_lifeform, params: { id: name.id, remove_lichen: "1" })
+      put(:update, params: { id: name.id, remove_lichen: "1" })
       assert_redirected_to(name.show_link_args)
       children.each do |child|
         assert_not(child.reload.lifeform.include?(" lichen "),

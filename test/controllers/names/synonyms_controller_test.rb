@@ -10,8 +10,9 @@ module Names
     def test_change_synonyms
       name = names(:chlorophyllum_rachodes)
       params = { id: name.id }
-      requires_login(:change_synonyms, params)
-      assert_form_action(action: "change_synonyms",
+      requires_login(:edit, params)
+      assert_form_action(controller: "/names/synonyms",
+                         action: :update,
                          approved_synonyms: [], id: name.id)
     end
 
@@ -39,7 +40,7 @@ module Names
         synonym: { members: add_name.text_name },
         deprecate: { all: "1" }
       }
-      post_requires_login(:change_synonyms, params)
+      post_requires_login(:create, params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -78,7 +79,7 @@ module Names
         deprecate: { all: "0" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert_not(add_name.reload.deprecated)
@@ -104,9 +105,9 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_template(:change_synonyms)
-      assert_template("name/_form_synonyms")
+      assert_template("names/synonyms/_form")
       assert_nil(selected_name.reload.synonym_id)
       assert_not(selected_name.deprecated)
     end
@@ -125,7 +126,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert_equal(selected_version, selected_name.reload.version)
@@ -157,7 +158,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(page_name.id))
 
       assert_not(page_name.reload.deprecated)
@@ -190,7 +191,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -242,7 +243,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -297,7 +298,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -339,9 +340,9 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
-      assert_template(:change_synonyms)
-      assert_template("name/_form_synonyms")
+      put(:update, params: params)
+      assert_template("names/synonyms/edit")
+      assert_template("names/synonyms/_form")
 
       assert_not(add_name.reload.deprecated)
       assert_equal(add_version, add_name.version)
@@ -381,7 +382,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -422,7 +423,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -462,9 +463,9 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
-      assert_template(:change_synonyms)
-      assert_template("name/_form_synonyms")
+      put(:update, params: params)
+      assert_template("names/synonyms/edit")
+      assert_template("names/synonyms/_form")
 
       assert_not(add_name.reload.deprecated)
       assert_not_nil(add_synonym = add_name.synonym)
@@ -501,7 +502,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -542,7 +543,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
@@ -592,7 +593,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert_equal(selected_version, selected_name.reload.version)
@@ -642,7 +643,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert_not(selected_name.reload.deprecated)
@@ -687,7 +688,7 @@ module Names
         deprecate: { all: "1" }
       }
       login("rolf")
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(selected_name.id))
 
       assert_equal(selected_version, selected_name.reload.version)
@@ -718,16 +719,16 @@ module Names
       }
 
       login("rolf")
-      get(:change_synonyms, params: { id: name.id })
+      get(:edit, params: { id: name.id })
       assert_response(:redirect)
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_flash_error
       assert_not_nil(name.reload.synonym_id)
 
       make_admin("mary")
-      get(:change_synonyms, params: { id: name.id })
+      get(:edit, params: { id: name.id })
       assert_response(:success)
-      post(:change_synonyms, params: params)
+      put(:update, params: params)
       assert_nil(name.reload.synonym_id)
     end
   end

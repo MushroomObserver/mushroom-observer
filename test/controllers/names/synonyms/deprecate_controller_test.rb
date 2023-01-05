@@ -10,8 +10,9 @@ module Names::Synonyms
     def test_deprecate_name
       name = names(:chlorophyllum_rachodes)
       params = { id: name.id }
-      requires_login(:deprecate_name, params)
-      assert_form_action(action: "deprecate_name", approved_name: "",
+      requires_login(:new, params)
+      assert_form_action(controller: "/names/synonyms/deprecate",
+                         action: :create, approved_name: "",
                          id: name.id)
     end
 
@@ -39,7 +40,7 @@ module Names::Synonyms
         proposed: { name: new_name.text_name },
         comment: { comment: "Don't like this name" }
       }
-      post_requires_login(:deprecate_name, params)
+      post_requires_login(:create, params)
       assert_redirected_to(name_path(old_name.id))
 
       assert(old_name.reload.deprecated)
@@ -82,8 +83,8 @@ module Names::Synonyms
         comment: { comment: "" }
       }
       login("rolf")
-      post(:deprecate_name, params: params)
-      assert_template(:deprecate_name)
+      post(:create, params: params)
+      assert_template("names/synonyms/deprecate/new")
       assert_template("shared/_form_name_feedback")
       # Fail since name can't be disambiguated
 
@@ -118,7 +119,7 @@ module Names::Synonyms
         comment: { comment: "Don't like this name" }
       }
       login("rolf")
-      post(:deprecate_name, params: params)
+      post(:create, params: params)
       assert_redirected_to(name_path(old_name.id))
 
       assert(old_name.reload.deprecated)
@@ -148,8 +149,8 @@ module Names::Synonyms
         comment: { comment: "Don't like this name" }
       }
       login("rolf")
-      post(:deprecate_name, params: params)
-      assert_template(:deprecate_name)
+      post(:create, params: params)
+      assert_template("names/synonyms/deprecate/new")
       assert_template("shared/_form_name_feedback")
       # Fail since new name is not approved
 
@@ -175,7 +176,7 @@ module Names::Synonyms
         comment: { comment: "Don't like this name" }
       }
       login("rolf")
-      post(:deprecate_name, params: params)
+      post(:create, params: params)
       assert_redirected_to(name_path(old_name.id))
 
       assert(old_name.reload.deprecated)
@@ -204,16 +205,16 @@ module Names::Synonyms
       }
 
       login("rolf")
-      get(:deprecate_name, params: { id: name.id })
+      get(:new, params: { id: name.id })
       assert_response(:redirect)
-      post(:deprecate_name, params: params)
+      post(:create, params: params)
       assert_flash_error
       assert_false(name.reload.deprecated)
 
       make_admin("mary")
-      get(:deprecate_name, params: { id: name.id })
+      get(:new, params: { id: name.id })
       assert_response(:success)
-      post(:deprecate_name, params: params)
+      post(:create, params: params)
       assert_true(name.reload.deprecated)
     end
   end

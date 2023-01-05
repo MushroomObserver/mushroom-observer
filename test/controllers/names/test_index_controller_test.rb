@@ -33,14 +33,16 @@ module Names
       assert_equal(expected.map(&:id), ids_from_links(name_links))
       # assert_equal(@controller.url_with_query(action: "show",
       #  id: expected.first.id, only_path: true), name_links.first.url)
-      url = @controller.url_with_query(action: "show",
+      url = @controller.url_with_query(controller: "/names", action: :show,
                                        id: expected.first.id, only_path: true)
       assert_not_nil(name_links.first.to_s.index(url))
       assert_select("a", text: "1", count: 0)
-      assert_link_in_html("2", action: :test_index, num_per_page: 10,
+      assert_link_in_html("2", controller: "/names/test_index",
+                               action: :index, num_per_page: 10,
                                params: query_params, page: 2)
       assert_select("a", text: "Z", count: 0)
-      assert_link_in_html("A", action: :test_index, num_per_page: 10,
+      assert_link_in_html("A", controller: "/names/test_index",
+                               action: :index, num_per_page: 10,
                                params: query_params, letter: "A")
     end
 
@@ -48,22 +50,24 @@ module Names
       # Now go to the second page.
       query_params = pagination_query_params
       login
-      get(:test_index,
+      get(:index,
           params: { num_per_page: 10, page: 2 }.merge(query_params))
       assert_template("names/index")
       name_links = css_select(".table a")
       assert_equal(10, name_links.length)
       expected = Name.all.order("sort_name").limit(10).offset(10).to_a
       assert_equal(expected.map(&:id), ids_from_links(name_links))
-      url = @controller.url_with_query(action: "show",
+      url = @controller.url_with_query(controller: "/names", action: :show,
                                        id: expected.first.id, only_path: true)
       assert_not_nil(name_links.first.to_s.index(url))
 
       assert_select("a", text: "2", count: 0)
-      assert_link_in_html("1", action: :test_index, num_per_page: 10,
+      assert_link_in_html("1", controller: "/names/test_index",
+                               action: :index, num_per_page: 10,
                                params: query_params, page: 1)
       assert_select("a", text: "Z", count: 0)
-      assert_link_in_html("A", action: :test_index, num_per_page: 10,
+      assert_link_in_html("A", controller: "/names/test_index",
+                               action: :index, num_per_page: 10,
                                params: query_params, letter: "A")
     end
 
@@ -72,8 +76,8 @@ module Names
       query_params = pagination_query_params
       l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
       login
-      get(:test_index, params: { num_per_page: l_names.size,
-                                 letter: "L" }.merge(query_params))
+      get(:index, params: { num_per_page: l_names.size,
+                            letter: "L" }.merge(query_params))
       assert_template("names/index")
       assert_select("#content")
       name_links = css_select(".table a")
@@ -81,13 +85,14 @@ module Names
       assert_equal(Set.new(l_names.map(&:id)),
                    Set.new(ids_from_links(name_links)))
 
-      url = @controller.url_with_query(action: "show",
+      url = @controller.url_with_query(controller: "/names", action: :show,
                                        id: l_names.first.id, only_path: true)
       assert_not_nil(name_links.first.to_s.index(url))
       assert_select("a", text: "1", count: 0)
       assert_select("a", text: "Z", count: 0)
 
-      assert_link_in_html("A", action: :test_index, params: query_params,
+      assert_link_in_html("A", controller: "/names/test_index",
+                               action: :index, params: query_params,
                                num_per_page: l_names.size, letter: "A")
     end
 
@@ -108,7 +113,8 @@ module Names
 
       assert_select("a", text: "1", count: 0)
 
-      assert_link_in_html("2", action: :test_index, params: query_params,
+      assert_link_in_html("2", controller: "/names/test_index",
+                               action: :index, params: query_params,
                                num_per_page: l_names.size,
                                letter: "L", page: 2)
 
@@ -128,7 +134,8 @@ module Names
       assert_equal(1, name_links.length)
       assert_equal([last_name.id], ids_from_links(name_links))
       assert_select("a", text: "2", count: 0)
-      assert_link_in_html("1", action: :test_index, params: query_params,
+      assert_link_in_html("1", controller: "/names/test_index",
+                               action: :index, params: query_params,
                                num_per_page: l_names.size,
                                letter: "L", page: 1)
       assert_select("a", text: "3", count: 0)
@@ -142,10 +149,12 @@ module Names
         num_per_page: 10,
         test_anchor: "blah"
       }.merge(query_params))
-      assert_link_in_html("2", action: :test_index, num_per_page: 10,
+      assert_link_in_html("2", controller: "/names/test_index",
+                               action: :index, num_per_page: 10,
                                params: query_params, page: 2,
                                test_anchor: "blah", anchor: "blah")
-      assert_link_in_html("A", action: :test_index, num_per_page: 10,
+      assert_link_in_html("A", controller: "/names/test_index",
+                               action: :index, num_per_page: 10,
                                params: query_params, letter: "A",
                                test_anchor: "blah", anchor: "blah")
     end

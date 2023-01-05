@@ -27,13 +27,13 @@ module Names
     def test_name_description_index
       login
       get(:index)
-      assert_template(:index)
+      assert_template("names/descriptions/index")
     end
 
     def test_name_descriptions_by_author
       login
       get(:index, params: { by_author: rolf.id })
-      assert_template(:index)
+      assert_template("names/descriptions/index")
     end
 
     def test_name_descriptions_by_editor
@@ -49,7 +49,7 @@ module Names
       params = { "id" => desc.id.to_s }
       login
       get(:show, params: params)
-      assert_template(:show)
+      assert_template("names/descriptions/show")
       assert_template("names/descriptions/_name_description")
     end
 
@@ -80,7 +80,7 @@ module Names
       login
       get(:show, params: { id: desc.id })
       assert_no_flash
-      assert_template(:show)
+      assert_template("names/descriptions/show")
     end
 
     # This is a bit confusing: create and edit draft are handled here,
@@ -95,7 +95,7 @@ module Names
       }
       requires_login(:new, params, user.login)
       if success
-        assert_template("new")
+        assert_template("names/descriptions/new")
         assert_template("names/descriptions/_form")
       else
         assert_redirected_to(controller: "project", action: "show_project",
@@ -116,7 +116,7 @@ module Names
       }
       requires_login(:edit, params, user.login)
       if success
-        assert_template("edit")
+        assert_template("names/descriptions/edit")
         assert_template("names/descriptions/_form")
       elsif reader
         assert_redirected_to(name_description_path(draft.id))
@@ -144,7 +144,7 @@ module Names
       }
       post_requires_login(:edit, params, user.login)
       if permission && !success
-        assert_template("edit")
+        assert_template("names/descriptions/edit")
         assert_template("names/descriptions/_form")
       elsif draft.is_reader?(user)
         assert_redirected_to(name_description_path(draft.id))
@@ -187,7 +187,7 @@ module Names
       draft = name_descriptions(:draft_coprinus_comatus)
       login(draft.user.login)
       get(:show, params: { id: draft.id })
-      assert_template("show")
+      assert_template("names/descriptions/show")
       assert_template("names/descriptions/_name_description")
     end
 
@@ -197,7 +197,7 @@ module Names
       assert_not_equal(draft.user, mary)
       login(mary.login)
       get(:show, params: { id: draft.id })
-      assert_template("show")
+      assert_template("names/descriptions/show")
       assert_template("names/descriptions/_name_description")
     end
 
@@ -207,7 +207,7 @@ module Names
       assert_not_equal(draft.user, katrina)
       login(katrina.login)
       get(:show, params: { id: draft.id })
-      assert_template("show")
+      assert_template("names/descriptions/show")
       assert_template("names/descriptions/_name_description")
     end
 
@@ -315,7 +315,7 @@ module Names
       login("rolf") # member
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
-      assert_template("new")
+      assert_template("names/descriptions/new")
       assert_template("names/descriptions/_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
@@ -348,7 +348,7 @@ module Names
       login("katrina") # member
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
-      assert_template("new")
+      assert_template("names/descriptions/new")
       assert_template("names/descriptions/_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
@@ -374,7 +374,7 @@ module Names
       # Test clone of private description if can read.
       login("dick") # reader
       get(:new, params: params.merge(clone: other.id))
-      assert_template("new")
+      assert_template("names/descriptions/new")
       assert_template("names/descriptions/_form")
       desc = assigns(:description)
       assert_equal("user", desc.source_type)
@@ -462,7 +462,7 @@ module Names
       params[:description][:classification] = bad_class
       post(:create, params: params)
       assert_flash_error
-      assert_template("new")
+      assert_template("names/descriptions/new")
       assert_template("names/descriptions/_form")
 
       params[:description][:classification] = good_class

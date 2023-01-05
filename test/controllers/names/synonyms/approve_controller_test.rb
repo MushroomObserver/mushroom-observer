@@ -13,8 +13,9 @@ module Names::Synonyms
     def test_approve_name
       name = names(:lactarius_alpigenes)
       params = { id: name.id }
-      requires_login(:approve_name, params)
-      assert_form_action(action: "approve_name", id: name.id)
+      requires_login(:new, params)
+      assert_form_action(controller: "/names/synonyms/approve",
+                         action: :create, id: name.id)
     end
 
     # approve a deprecated name
@@ -31,7 +32,7 @@ module Names::Synonyms
         deprecate: { others: "1" },
         comment: { comment: "Prefer this name" }
       }
-      post_requires_login(:approve_name, params)
+      post_requires_login(:create, params)
       assert_redirected_to(name_path(old_name.id))
 
       assert_not(old_name.reload.deprecated)
@@ -64,7 +65,7 @@ module Names::Synonyms
         comment: { comment: "" }
       }
       login("rolf")
-      post(:approve_name, params: params)
+      post(:create, params: params)
       assert_redirected_to(name_path(old_name.id))
 
       assert_not(old_name.reload.deprecated)
@@ -86,16 +87,16 @@ module Names::Synonyms
       }
 
       login("rolf")
-      get(:approve_name, params: { id: name.id })
+      get(:new, params: { id: name.id })
       assert_response(:redirect)
-      post(:approve_name, params: params)
+      post(:create, params: params)
       assert_flash_error
       assert_true(name.reload.deprecated)
 
       make_admin("mary")
-      get(:approve_name, params: { id: name.id })
+      get(:new, params: { id: name.id })
       assert_response(:success)
-      post(:approve_name, params: params)
+      post(:create, params: params)
       assert_false(name.reload.deprecated)
     end
   end

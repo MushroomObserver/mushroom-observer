@@ -16,8 +16,8 @@ module Names::Descriptions
       new_versions = desc.versions.length
       assert(new_versions > old_versions)
       get(:show, params: { id: desc.id })
-      assert_template("show")
-      assert_template("name/_name_description")
+      assert_template("names/descriptions/show")
+      assert_template("names/descriptions/_name_description")
     end
   end
 end
