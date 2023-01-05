@@ -16,39 +16,43 @@ module DescriptionHelper
     tabs = []
     if true
       tabs << link_with_query(:show_object.t(type: type),
-                              action: "show_#{type}", id: desc.parent_id)
+                              controller: "/#{type}s",
+                              action: :show, id: desc.parent_id)
     end
     if writer?(desc)
       tabs << link_with_query(:show_description_edit.t,
-                              action: "edit_#{type}_description", id: desc.id)
+                              controller: "/#{type}s/descriptions",
+                              action: :edit, id: desc.id)
     end
     if admin
-      tabs << link_with_query(:show_description_destroy.t,
-                              { action: "destroy_#{type}_description",
-                                id: desc.id },
-                              data: { confirm: :are_you_sure.l })
+      # FIXME: needs query_param somehow
+      tabs << destroy_button(name: :show_description_destroy.t, target: desc)
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
-                              controller: type,
-                              action: "create_#{type}_description",
+                              controller: "/#{type}s/descriptions",
+                              action: :new,
                               id: desc.parent_id, clone: desc.id,
                               help: :show_description_clone_help.l)
     end
     if admin
       tabs << link_with_query(:show_description_merge.t,
-                              action: :merge_descriptions, id: desc.id,
+                              controller: "/#{type}s/descriptions/merges",
+                              action: :new, id: desc.id,
                               help: :show_description_merge_help.l)
     end
     if admin
       tabs << link_with_query(:show_description_adjust_permissions.t,
-                              action: :adjust_permissions, id: @description.id,
+                              controller: "/#{type}s/descriptions/permissions",
+                              action: :edit, id: desc.id,
                               help: :show_description_adjust_permissions_help.l)
     end
     if desc.public && @user && (desc.parent.description_id != desc.id)
-      tabs << link_with_query(:show_description_make_default.t,
-                              action: :make_description_default, id: desc.id,
-                              help: :show_description_make_default_help.l)
+      tabs << put_button(:show_description_make_default.t,
+                         { controller: "/#{type}s/descriptions/default",
+                           action: :update, id: desc.id,
+                           q: get_query_param },
+                         help: :show_description_make_default_help.l)
     end
     if (desc.source_type == :project) &&
        (project = desc.source_object)
@@ -56,9 +60,11 @@ module DescriptionHelper
                               project.show_link_args)
     end
     if admin && (desc.source_type != :public)
-      tabs << link_with_query(:show_description_publish.t,
-                              action: :publish_description, id: desc.id,
-                              help: :show_description_publish_help.l)
+      tabs << put_button(:show_description_publish.t,
+                         { controller: "/#{type}s/descriptions/publish",
+                           action: :update, id: desc.id,
+                           q: get_query_param },
+                         help: :show_description_publish_help.l)
     end
     tabs
   end
@@ -75,12 +81,13 @@ module DescriptionHelper
     title = description_title(desc)
     links = []
     if writer?(desc)
-      links << link_with_query(:EDIT.t, action: "edit_#{type}", id: desc.id)
+      links << link_with_query(:EDIT.t,
+                               { controller: "/#{type}s/descriptions",
+                                 action: :edit, id: desc.id })
     end
     if is_admin?(desc)
-      links << link_with_query(:DESTROY.t,
-                               { action: "destroy_#{type}", id: desc.id },
-                               data: { confirm: :are_you_sure.l })
+      # FIXME: needs query_param somehow
+      links << destroy_button(name: :show_description_destroy.t, target: desc)
     end
     content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
   end
@@ -119,15 +126,13 @@ module DescriptionHelper
         if writer
           links << link_with_query(:EDIT.t,
                                    controller: obj.show_controller,
-                                   action: "edit_#{type}_description",
+                                   action: :edit,
                                    id: desc.id)
         end
         if admin
-          links << link_with_query(:DESTROY.t,
-                                   { controller: obj.show_controller,
-                                     action: "destroy_#{type}_description",
-                                     id: desc.id },
-                                   data: { confirm: :are_you_sure.t })
+          # FIXME: needs query_param somehow
+          links << destroy_button(name: :show_description_destroy.t,
+                                  target: desc)
         end
         item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
       end
@@ -138,7 +143,7 @@ module DescriptionHelper
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
       link = link_with_query(:CREATE.t, controller: obj.show_controller,
-                                        action: "create_#{type}_description",
+                                        action: :new,
                                         id: obj.id)
       str += indent + "[" + link + "]"
       list.unshift(str)
@@ -172,7 +177,7 @@ module DescriptionHelper
     head = content_tag(:b, :show_name_descriptions.t) + ": "
     head += link_with_query(:show_name_create_description.t,
                             controller: obj.show_controller,
-                            action: "create_#{type}_description", id: obj.id)
+                            action: "new", id: obj.id)
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(obj).map { |link| indent + link }
@@ -187,7 +192,8 @@ module DescriptionHelper
       head2 = :show_name_create_draft.t + ": "
       list = [head2] + projects.map do |project|
         item = link_with_query(project.title,
-                               action: "create_#{type}_description",
+                               controller: obj.show_controller,
+                               action: :new,
                                id: obj.id, project: project.id,
                                source: "project")
         indent + item
@@ -208,14 +214,8 @@ module DescriptionHelper
   #
   def colored_notes_box(even, msg = nil, &block)
     msg = capture(&block) if block
-    klass = "ListLine#{even ? 0 : 1}"
-    style = [
-      "margin-left:10px",
-      "margin-right:10px",
-      "padding:10px",
-      "border:1px dotted"
-    ].join(";")
-    result = content_tag(:div, msg, class: klass, style: style)
+    classes = "ListLine#{even ? 0 : 1} mx-10px p-3 dotted-border"
+    result = content_tag(:div, msg, class: classes)
     if block
       concat(result)
     else
@@ -246,8 +246,7 @@ module DescriptionHelper
   def name_section_link(title, data, query)
     return unless data && data != 0
 
-    action = { controller: :observations, action: :index }
-    url = add_query_param(action, query)
+    url = add_query_param(observations_path, query)
     content_tag(:p, link_to(title, url))
   end
 end

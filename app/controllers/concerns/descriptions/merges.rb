@@ -9,14 +9,28 @@ module Descriptions::Merges
   extend ActiveSupport::Concern
 
   included do
-    # Merge a description with another.  User must be both an admin for the
-    # old description (which will be destroyed) and a writer for the new one
-    # (so they can modify it).  If there is a conflict, it dumps the user into
+    # Form to merge a description with another. User must be both an admin for
+    # the old description (which will be destroyed) and a writer for the new one
+    # (so they can modify it).
+    def new
+      pass_query_params
+      return unless (src = find_description!(params[:id].to_s))
+
+      @description = src
+
+      # Doesn't have permission to see source.
+      return unless !in_admin_mode? && !src.is_reader?(@user)
+
+      flash_error(:runtime_description_private.t)
+      redirect_to(object_path_with_query(src.parent))
+    end
+
+    # POST method. If there is a merge conflict, it dumps the user into
     # the edit_description form and forces them to do the merge and delete the
     # old description afterword.
-    def merge_descriptions
+    def create
       pass_query_params
-      return unless (src = find_description(params[:id].to_s))
+      return unless (src = find_description!(params[:id].to_s))
 
       @description = src
 
@@ -24,9 +38,7 @@ module Descriptions::Merges
       if !in_admin_mode? && !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
         redirect_to(object_path_with_query(src.parent))
-
-      # POST method
-      elsif request.method == "POST"
+      else
         delete_after = (params[:delete] == "1")
         target = params[:target].to_s
         if target =~ /^parent_(\d+)$/
@@ -36,7 +48,7 @@ module Descriptions::Merges
           end
         elsif target =~ /^desc_(\d+)$/
           target_id = Regexp.last_match(1)
-          if (dest = find_description(target_id))
+          if (dest = find_description!(target_id))
             do_merge_description(src, dest, delete_after)
           end
         else

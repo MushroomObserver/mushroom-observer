@@ -647,13 +647,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "locations/descriptions#update", via: [:put, :patch])
   delete("locations/descriptions/:id", to: "locations/descriptions#destroy")
 
-  # Publish Draft Location Description: form and callback:
-  get("locations/descriptions/:id/publish/new",
-      to: "locations/descriptions/publish#new",
-      as: "location_description_publish_form")
-  post("locations/descriptions/:id/publish",
-       to: "locations/descriptions/publish#create",
-       as: "location_description_publish")
+  # Make Descripton Default: callback only:
+  put("locations/descriptions/:id/default",
+      to: "locations/descriptions/default#update",
+      as: "make_default_location_description")
+  # Publish Draft Location Description: callback:
+  put("locations/descriptions/:id/publish",
+      to: "locations/descriptions/publish#update",
+      as: "location_description_publish")
   # Merge Location Descriptions: form and callback:
   get("locations/descriptions/:id/merges/new",
       to: "locations/descriptions/merges#new",
@@ -764,13 +765,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "names/descriptions#update", via: [:put, :patch])
   delete("names/descriptions/:id", to: "names/descriptions#destroy")
 
-  # Publish Name Description Drafts: form and callback:
-  get("names/descriptions/:id/publish/new",
-      to: "names/descriptions/publish#new",
-      as: "name_description_publish_form")
-  post("names/descriptions/:id/publish",
-       to: "names/descriptions/publish#create",
-       as: "name_description_publish")
+  # Make Descripton Default: callback only:
+  put("names/descriptions/:id/default",
+      to: "names/descriptions/default#update",
+      as: "make_default_name_description")
+  # Publish Name Description Drafts: callback:
+  put("names/descriptions/:id/publish",
+      to: "names/descriptions/publish#update",
+      as: "name_description_publish")
   # Merge Name Descriptions: form and callback:
   get("names/descriptions/:id/merges/new",
       to: "names/descriptions/merges#new",

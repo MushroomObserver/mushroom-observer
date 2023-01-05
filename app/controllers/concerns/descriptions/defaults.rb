@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
 #  make_description_default::
-
 module Descriptions::Defaults
   extend ActiveSupport::Concern
 
   included do
-    # Make a description the default one.
+    # PUT callback to make a description the default one.
     # Description must be publically readable and writable.
-    def make_description_default
+    def update
       pass_query_params
-      desc = find_description(params[:id].to_s)
+      desc = find_description!(params[:id].to_s)
       return unless desc
 
       redirect_to(object_path_with_query(desc))

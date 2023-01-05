@@ -14,8 +14,8 @@
 #
 #
 #  == Helpers
-#  find_description::                   Look up a description based on id and
-#                                       controller name.
+#  find_description!::                  Look up a description based on id and
+#                                       controller name. (Has to be local def)
 #  initialize_description_source::      Initialize source info before serving
 #                                       creation form.
 #  initialize_description_permissions:: Initialize permissions of new
@@ -56,7 +56,7 @@ module Descriptions
 
       # Cloning an existing description. Only occurs on names?
       elsif params[:clone].present?
-        clone = find_description(params[:clone])
+        clone = find_description!(params[:clone])
         if in_admin_mode? || clone.is_reader?(@user)
           desc.all_notes = clone.all_notes
           desc.source_type  = "user"

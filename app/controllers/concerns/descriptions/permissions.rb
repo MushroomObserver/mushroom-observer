@@ -15,10 +15,38 @@ module Descriptions::Permissions
   extend ActiveSupport::Concern
 
   included do
-    # Adjust permissions on a description.
-    def adjust_permissions
+    # Form to adjust permissions on a description.
+    def edit
       pass_query_params
-      return unless (@description = find_description(params[:id].to_s))
+      return unless (@description = find_description!(params[:id].to_s))
+
+      done = false
+      # Doesn't have permission.
+      if !in_admin_mode? && !@description.is_admin?(@user)
+        flash_error(:runtime_description_adjust_permissions_denied.t)
+        done = true
+
+      # These types have fixed permissions.
+      elsif %w[public foreign].include?(@description.source_type) &&
+            !in_admin_mode?
+        flash_error(:runtime_description_permissions_fixed.t)
+        done = true
+      end
+      @data = nil
+
+      if done
+        redirect_to(object_path_with_query(@description))
+
+      # Gather list of all the groups, authors, editors and owner.
+      # If the user wants more they can write them in.
+      else
+        gather_list_of_groups
+      end
+    end
+
+    def update
+      pass_query_params
+      return unless (@description = find_description!(params[:id].to_s))
 
       done = false
       # Doesn't have permission.
@@ -32,11 +60,7 @@ module Descriptions::Permissions
         flash_error(:runtime_description_permissions_fixed.t)
         done = true
 
-      # GET method.
-      elsif request.method != "POST"
-        @data = nil
-
-      # POST method.
+      # We're on.
       else
         old_readers = @description.reader_groups.sort_by(&:id)
         old_writers = @description.writer_groups.sort_by(&:id)
@@ -48,39 +72,7 @@ module Descriptions::Permissions
         update_groups(@description, :admins,  params[:group_admin])
 
         # Look up write-ins and adjust their permissions.
-        @data = [nil]
-        done = true
-        params[:writein_name].keys.sort.each do |n|
-          name   = begin
-                     params[:writein_name][n].to_s
-                   rescue StandardError
-                     ""
-                   end
-          reader = begin
-                     params[:writein_reader][n] == "1"
-                   rescue StandardError
-                     false
-                   end
-          writer = begin
-                     params[:writein_writer][n] == "1"
-                   rescue StandardError
-                     false
-                   end
-          admin  = begin
-                     params[:writein_admin][n] == "1"
-                   rescue StandardError
-                     false
-                   end
-
-          next unless name.present? &&
-                      !update_writein(@description, name, reader, writer,
-                                      admin)
-
-          @data << { name: name, reader: reader, writer: writer,
-                     admin: admin }
-          flash_error(:runtime_description_user_not_found.t(name: name))
-          done = false
-        end
+        done = assemble_data
 
         # Were any changes made?
         new_readers = @description.reader_groups.sort_by(&:id)
@@ -116,22 +108,63 @@ module Descriptions::Permissions
       # Gather list of all the groups, authors, editors and owner.
       # If the user wants more they can write them in.
       else
-        @groups = (
-          [UserGroup.all_users] +
-          @description.admin_groups.sort_by(&:name) +
-          @description.writer_groups.sort_by(&:name) +
-          @description.reader_groups.sort_by(&:name) +
-          [UserGroup.reviewers]
-        ) + (
-          [@description.user] +
-          @description.authors.sort_by(&:login) +
-          @description.editors.sort_by(&:login) +
-          [@user]
-        ).map { |user| UserGroup.one_user(user) }
-        @groups.uniq!
-        @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
-                  @groups.select { |g| g.name.match(/^user \d+$/) }
+        gather_list_of_groups
       end
+    end
+
+    def gather_list_of_groups
+      @groups = (
+        [UserGroup.all_users] +
+        @description.admin_groups.sort_by(&:name) +
+        @description.writer_groups.sort_by(&:name) +
+        @description.reader_groups.sort_by(&:name) +
+        [UserGroup.reviewers]
+      ) + (
+        [@description.user] +
+        @description.authors.sort_by(&:login) +
+        @description.editors.sort_by(&:login) +
+        [@user]
+      ).map { |user| UserGroup.one_user(user) }
+      @groups.uniq!
+      @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
+                @groups.select { |g| g.name.match(/^user \d+$/) }
+    end
+
+    def assemble_data
+      @data = [nil]
+      done = true
+      params[:writein_name].keys.sort.each do |n|
+        name   = begin
+                   params[:writein_name][n].to_s
+                 rescue StandardError
+                   ""
+                 end
+        reader = begin
+                   params[:writein_reader][n] == "1"
+                 rescue StandardError
+                   false
+                 end
+        writer = begin
+                   params[:writein_writer][n] == "1"
+                 rescue StandardError
+                   false
+                 end
+        admin  = begin
+                   params[:writein_admin][n] == "1"
+                 rescue StandardError
+                   false
+                 end
+
+        next unless name.present? &&
+                    !update_writein(@description, name, reader, writer,
+                                    admin)
+
+        @data << { name: name, reader: reader, writer: writer,
+                   admin: admin }
+        flash_error(:runtime_description_user_not_found.t(name: name))
+        done = false
+      end
+      done
     end
 
     # Throw up some flash notices to reassure user that we did in fact make the
