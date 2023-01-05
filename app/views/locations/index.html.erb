@@ -56,7 +56,7 @@
             <div class="list-group-item">
               <%= location_link(location, nil, count) %>
               <%= link_to(:list_place_names_merge.t,
-                          action: :list_merge_options, where: location) %>
+                          location_merge_options_path(where: location)) %>
             </div>
           <% end %>
         </div>

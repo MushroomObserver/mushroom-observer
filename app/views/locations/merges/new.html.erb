@@ -14,7 +14,7 @@
           <tr>
             <td>
               <%= link_to(location.display_name.t,
-                          {action: :add_to_location, where: @where, location: location},
+                          {action: :create, where: @where, location: location},
                           data: {confirm: :list_merge_are_you_sure.l}) %>
             </td>
           </tr>
@@ -33,7 +33,7 @@
           <tr>
             <td>
               <%= link_to(location.display_name.t,
-                          {action: :add_to_location, where: @where, location: location},
+                          {action: :create, where: @where, location: location},
                           data: {confirm: :list_merge_are_you_sure.l}) %>
             </td>
           </tr>

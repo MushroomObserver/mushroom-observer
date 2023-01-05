@@ -1,0 +1,31 @@
+<%= form_with(scope: :description, url: action) do |f| %>
+
+  <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>
+
+  <%= render(partial: "shared/form_description", locals: { form: f }) %>
+
+  <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+
+  <hr/>
+
+  <% LocationDescription.all_note_fields.each do |field| %>
+    <div class="form-group">
+      <%= f.label(field, "form_locations_#{f}".to_sym.t + ":",
+                    class: "mb-0") %>
+      <div class="help-block mt-0">
+        <%= "form_locations_#{field}_help".to_sym.l %>
+      </div>
+      <%= f.text_area(field, rows: 10, class: "form-control") %>
+    </div>
+  <% end %>
+
+  <%= render(partial: "shared/textilize_help") %>
+
+  <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+
+  <% if (button == :UPDATE) && @merge %>
+    <%= f.hidden_field(:old_desc_id, @old_desc_id) %>
+    <%= f.hidden_field(:delete_after, @delete_after) %>
+  <% end %>
+
+<% end %>

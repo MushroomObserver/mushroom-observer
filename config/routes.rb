@@ -613,7 +613,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/
   # Location Countries: show
-  get("locations/:id/countries", to: "locations/countries#show",
+  get("locations/:id/countries", to: "locations/countries#index",
                                  as: "location_countries")
   # Location Help: show
   get("locations/help", to: "locations/help#show")
@@ -621,7 +621,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/map", to: "locations/maps#show", as: "map_locations")
   # Merge Locations: form and callback
   get("locations/merges/new", to: "locations/merges#new",
-                              as: "location_merge_form")
+                              as: "location_merge_options")
   post("locations/merges", to: "locations/merges#create",
                            as: "location_merges")
   # Location Versions: show

@@ -8,7 +8,7 @@ module Locations
   end
 
   # Displays a list of all countries with counts.
-  def list_countries
+  def index
     @cc = CountryCounter.new
   end
 end

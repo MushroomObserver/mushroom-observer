@@ -3,19 +3,14 @@
 
   tabs = [
     link_with_query(show_obs_link_title_with_count(@location),
-                    controller: :observations,
-                    action: :index,
-                    location: @location.id),
-    link_to(:all_objects.t(type: :location), action: :list_locations),
-    link_with_query(:show_location_create.t, action: :create_location),
-    link_with_query(:show_location_edit.t, action: :edit_location,
-                    id: @location.id)
+                    observations_path(location: @location.id)),
+    link_to(:all_objects.t(type: :location), locations_path),
+    link_with_query(:show_location_create.t, new_location_path),
+    link_with_query(:show_location_edit.t, edit_location_path(@location.id))
   ]
   if in_admin_mode?
     tabs += [
-      link_with_query(:show_location_destroy.t,
-                      {action: :destroy_location, id: @location.id},
-                      data: {confirm: :are_you_sure.l}),
+      destroy_button(name: :show_location_destroy.t, target: @location),
       link_with_query(:show_location_reverse.t, action: :reverse_name_order,
                       id: @location.id)
     ]
@@ -39,18 +34,19 @@
   </div>
 </div><!--.row-->
 
-<%= render(partial: "location", object: @location) %>
+<%= render(partial: "locations/show/location", object: @location) %>
 
 <%= render(partial: "comments/comments_for_object",
-            locals: {object: @location, controls: true, limit: 2}) %>
+           locals: { object: @location, controls: true, limit: 2 }) %>
 
 <div class="container-text">
   <% if @description&.notes? %>
     <hr/>
     <%= show_embedded_description_title(@description, @location) %>
-    <%= render(partial: "location_description", object: @description) %>
+    <%= render(partial: "locations/descriptions/show/location_description",
+               object: @description) %>
     <%= render(partial: "comments/comments_for_object",
-                locals: {object: @description, controls: true, limit: 2}) %>
+               locals: { object: @description, controls: true, limit: 2 }) %>
     <hr/>
   <% end %>
 

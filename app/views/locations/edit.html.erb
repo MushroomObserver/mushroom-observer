@@ -12,13 +12,9 @@
     right: draw_tab_set(tabs),
   }
   @container = :full
+  action = locations_path(id: @location.id,
+      approved_where: @display_name, q: get_query_param)
 %>
 
-<%= form_with(model: @location, url: add_query_param(
-      action: :edit_location,
-      id: @location.id,
-      approved_where: @display_name
-    ), id: "location_form") do |form| %>
-  <%= render(partial: "form_location",
-            locals: { form: form, button: :UPDATE }) %>
-<% end %>
+<%= render(partial: "locations/form",
+           locals: { action: action, button: :UPDATE }) %>

@@ -13,17 +13,7 @@
                             action: :edit, id: @description.id)
   end
   @tabsets = { right: draw_tab_set(tabs) }
+  action = location_description_path(@description.id, q: get_query_param)
 %>
 
-<%= form_for(:description, url: add_query_param(
-        action: :edit_location_description,
-        id: @description.id,
-    )) do |form| %>
-  <%= render(partial: "form_location_description",
-              locals: { form: form, button: :UPDATE }) %>
-
-  <% if @merge %>
-    <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
-    <%= hidden_field_tag(:delete_after, @delete_after) %>
-  <% end %>
-<% end %>
+<%= render(partial: "form", locals: { action: action, button: :UPDATE }) %>
