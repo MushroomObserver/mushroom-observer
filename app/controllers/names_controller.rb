@@ -227,7 +227,7 @@ class NamesController < ApplicationController
 
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
-  def show_name
+  def show
     pass_query_params
     store_location
     clear_query_in_session
@@ -455,9 +455,9 @@ class NamesController < ApplicationController
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(action: :deprecate_name, id: @name.id)
+      redirect_with_query(deprecate_name_synonym_form_path(@name.id))
     else
-      redirect_with_query(action: :approve_name, id: @name.id)
+      redirect_with_query(approve_name_synonym_form_path(@name.id))
     end
   end
 
@@ -590,8 +590,8 @@ class NamesController < ApplicationController
       new: @parse.real_search_name,
       observations: @name.observations.length,
       namings: @name.namings.length,
-      show_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
-      edit_url: "#{MO.http_domain}/name/edit_name/#{@name.id}"
+      show_url: "#{MO.http_domain}/names/#{@name.id}",
+      edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
   end
 
@@ -671,8 +671,8 @@ class NamesController < ApplicationController
       surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
       user: @user.login,
-      show_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
-      edit_url: "#{MO.http_domain}/name/edit_name/#{@name.id}"
+      show_url: "#{MO.http_domain}/names/#{@name.id}",
+      edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
     WebmasterMailer.build(
       sender_email: @user.email,

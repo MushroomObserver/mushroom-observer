@@ -9,7 +9,7 @@
 <%= link_to(:LOCATIONS.t, location_list_locations_path,
             { class: classes[:indent],
               id: "nav_locations_link" }) %>
-<%= link_to(:NAMES.t, name_observation_index_path,
+<%= link_to(:NAMES.t, names_path(with_observations: true),
             { class: classes[:indent],
               id: "nav_name_observations_link" }) %>
 <%= link_to(:NEWS.t, articles_path,

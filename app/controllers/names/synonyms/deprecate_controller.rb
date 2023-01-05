@@ -76,7 +76,7 @@ module Names::Synonyms
                             other: target_name.real_search_name)
         post_comment(:deprecate, @name, @comment) if @comment.present?
 
-        redirect_with_query(action: "show_name", id: @name.id)
+        redirect_to(name_path(@name.id, q: get_query_param))
       end
     end
 

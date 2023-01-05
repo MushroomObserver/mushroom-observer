@@ -6,7 +6,7 @@ module Names::Classification
     before_action :login_required
     before_action :disable_link_prefetching
 
-    # POST callback
+    # PUT callback
     def propagate_classification
       pass_query_params
       name = find_or_goto_index(Name, params[:id])

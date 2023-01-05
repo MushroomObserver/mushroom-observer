@@ -14,8 +14,8 @@ xml.response(
 ) do
   @data.names.each do |taxon|
     xml.taxon do
-      xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
-      xml.dc(:source, "#{MO.http_domain}/name/show_name/#{taxon.id}")
+      xml.dc(:identifier, "#{MO.http_domain}/names/#{taxon.id}")
+      xml.dc(:source, "#{MO.http_domain}/names/#{taxon.id}")
       Name.parse_classification(taxon.classification).each do |(rank, name)|
         xml.dwc(rank, name) if MO.eol_ranks.member?(rank)
       end

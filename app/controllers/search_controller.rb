@@ -8,8 +8,8 @@ class SearchController < ApplicationController
   #   /herbaria/index (params[:pattern])
   #   /herbarium_records/index (params[:pattern])
   #   /images/index (params[:pattern])
-  #   /location/location_search
-  #   /name/name_search
+  #   /locations/index (params[:pattern])
+  #   /names/index (params[:pattern])
   #   /observations/index (params[:pattern])
   #   /users/index (params[:pattern])
   #   /project/project_search

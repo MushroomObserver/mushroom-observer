@@ -690,9 +690,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
        to: "names/classification/inherit#create",
        as: "inherit_name_classification")
   # Propagate Name Classification: callback only:
-  post("names/:id/classification/propagate",
-       to: "names/classification/propagate#create",
-       as: "propagate_name_classification")
+  put("names/:id/classification/propagate",
+      to: "names/classification/propagate#update",
+      as: "propagate_name_classification")
   # Refresh Name Classification: callback only:
   put("names/:id/classification/refresh",
       to: "names/classification/refresh#update",
@@ -714,12 +714,20 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Names Map: show:
   get("names/map", to: "names/maps#show")
   # Edit Name Synonyms: form and callback:
-  get("names/:id/synonyms/edit",
-      to: "names/synonyms#edit",
-      as: "edit_name_synonyms")
-  match("names/:id/synonyms",
-        to: "names/synonyms#update", via: [:put, :patch],
-        as: "name_synonyms")
+  get("names/:id/synonyms/edit", to: "names/synonyms#edit",
+                                 as: "edit_name_synonyms")
+  match("names/:id/synonyms", to: "names/synonyms#update", via: [:put, :patch],
+                              as: "name_synonyms")
+  # Approve Name Synonyms: form and callback:
+  get("names/:id/synonyms/approve/new", to: "names/synonyms/approve#new",
+                                        as: "approve_name_synonym_form")
+  post("names/:id/synonyms", to: "names/synonyms/approve#create",
+                             as: "approve_name_synonym")
+  # Deprecate Name Synonyms: form and callback:
+  get("names/:id/synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
+                                          as: "deprecate_name_synonym_form")
+  post("names/:id/synonyms", to: "names/synonyms/deprecate#create",
+                             as: "deprecate_name_synonym")
   # Name Trackers: form and callback:
   get("names/:id/trackers/new", to: "names/trackers#new",
                                 as: "new_name_tracker")

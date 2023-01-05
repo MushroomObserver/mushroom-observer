@@ -137,12 +137,12 @@ module Names
                     action: "show_project",
                     id: @description.project_id)
       else
-        redirect_to(action: "show_name", id: @description.name_id)
+        redirect_to(name_path(@description.name_id, q: get_query_param))
       end
     end
 
     def description_canonical_url
-      "#{MO.http_domain}/name/show_name_description/#{@description.id}"
+      "#{MO.http_domain}/names/descriptions/#{@description.id}"
     end
 
     def users_projects_which_dont_have_desc_of_this_name
@@ -308,14 +308,14 @@ module Names
                               touch: true,
                               name: @description.unique_partial_format_name)
         @description.destroy
-        redirect_with_query(action: "show_name", id: @description.name_id)
+        redirect_to(name_path(@description.name_id, q: get_query_param))
       else
         flash_error(:runtime_destroy_description_not_admin.t)
         if in_admin_mode? || @description.is_reader?(@user)
           redirect_with_query(action: "show_name_description",
                               id: @description.id)
         else
-          redirect_with_query(action: "show_name", id: @description.name_id)
+          redirect_to(name_path(@description.name_id, q: get_query_param))
         end
       end
     end

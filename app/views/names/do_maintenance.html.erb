@@ -9,8 +9,7 @@
   <br/>
 
   <% @data.each do |datum| %>
-    <%= link_to(datum[:name].t, controller: :name, action: :show_name,
-                id: datum[:id]) %>
+    <%= link_to(datum[:name].t, name_path(datum[:id])) %>
     <%= datum[:login] %><br/>
   <% end %>
 <% end %>

@@ -56,7 +56,7 @@ module Names
       when :DISABLE.l
         destroy_name_tracker_interest_and_flash
       end
-      redirect_with_query(action: "show_name", id: name_id)
+      redirect_to(name_path(@name.id, q: get_query_param))
     end
 
     def create_or_update_name_tracker_and_interest(name_id)

@@ -13,7 +13,7 @@
       <% (@objects || []).each do |desc| %>
         <tr>
           <td><%= link_with_query(desc.format_name.t,
-                    action: :show_name_description, id: desc.id) %><td>
+                                  name_description_path(desc.id)) %><td>
         </tr>
       <% end %>
     </table>

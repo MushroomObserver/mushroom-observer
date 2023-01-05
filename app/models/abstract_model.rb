@@ -480,8 +480,8 @@ class AbstractModel < ApplicationRecord
   #   Article.show_url(12) => "https://mushroomobserver.org/articles/12"
   #
   #   # unnormalized controller
-  #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
-  #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
+  #   Name.show_url(12) => "https://mushroomobserver.org/names/12"
+  #   name.show_url     => "https://mushroomobserver.org/names/12"
   #
   # NOTE: show_controller now has leading forward slash,
   # to account for namespacing
@@ -538,9 +538,9 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "show_<object>" action
   #
-  #   Name.show_link_args(12) => {controller: "/name", action: :show_name,
+  #   Name.show_link_args(12) => {controller: "/names", action: :show,
   #                               id: 12}
-  #   name.show_link_args     => {controller: "/name", action: :show_name,
+  #   name.show_link_args     => {controller: "/names", action: :show,
   #                               id: 12}
   #
   def self.show_link_args(id)

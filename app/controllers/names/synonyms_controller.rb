@@ -94,7 +94,7 @@ module Names
         end
 
         if success
-          redirect_with_query(action: "show_name", id: @name.id)
+          redirect_to(name_path(@name.id, q: get_query_param))
         else
           flash_object_errors(@name)
           flash_object_errors(@name.synonym)

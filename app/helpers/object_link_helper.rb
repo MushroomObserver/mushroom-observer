@@ -45,10 +45,10 @@ module ObjectLinkHelper
   def name_link(name, str = nil)
     if name.is_a?(Integer)
       str ||= "#{:NAME.t} ##{name}"
-      link_to(str, show_name_path(name), { id: "show_name_link_#{name}" })
+      link_to(str, name_path(name), { id: "show_name_link_#{name}" })
     else
       str ||= name.display_name_brief_authors.t
-      link_to(str, show_name_path(name.id),
+      link_to(str, name_path(name.id),
               { id: "show_name_link_#{name.id}" })
     end
   end

@@ -79,7 +79,7 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :name),
-    "#{MO.http_domain}/name/show_name/#{new_name.id}"])
+    "#{MO.http_domain}/names/#{new_name.id}"])
   links.push([:email_links_not_interested.t(type: :name),
     "#{MO.http_domain}/interests/set_interest?id=#{new_name.id}&type=Name&user=#{@user.id}&state=-1"])
   if email_type && email_type != "interest"
