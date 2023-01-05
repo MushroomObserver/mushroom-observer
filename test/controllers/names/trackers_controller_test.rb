@@ -14,9 +14,9 @@ module Names
     def test_email_tracking
       name = names(:coprinus_comatus)
       params = { id: name.id.to_s }
-      requires_login(:email_tracking, params)
-      assert_template(:email_tracking)
-      assert_form_action(action: "email_tracking", id: name.id.to_s)
+      requires_login(:new, params)
+      assert_template("names/trackers/new")
+      assert_form_action(name_trackers_path(name.id.to_s))
     end
 
     def test_email_tracking_enable_no_note
@@ -33,7 +33,7 @@ module Names
           note_template: ""
         }
       }
-      post_requires_login(:email_tracking, params)
+      post_requires_login(:create, params)
       # This is needed before the next find for some reason
       count_after = NameTracker.count
       int_ct_after = Interest.count
@@ -65,7 +65,7 @@ module Names
         }
       }
       login("rolf")
-      post(:email_tracking, params: params)
+      post(:create, params: params)
       assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count
@@ -98,7 +98,7 @@ module Names
         }
       }
       login("rolf")
-      post(:email_tracking, params: params)
+      post(:create, params: params)
       assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count
@@ -130,44 +130,12 @@ module Names
         }
       }
       login("rolf")
-      post(:email_tracking, params: params)
+      post(:create, params: params)
       assert_redirected_to(name_path(name.id))
       name_tracker = NameTracker.find_by(name: name, user: rolf)
       assert_nil(name_tracker)
       interest = Interest.find_by(target: name_tracker)
       assert_nil(interest)
-    end
-
-    def test_approve_tracker_with_template
-      QueuedEmail.queue_emails(true)
-      assert_equal(0, QueuedEmail.count)
-
-      tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
-      NameTracker.update(tracker.id, approved: false)
-      assert_not(tracker.reload.approved)
-
-      params = { id: tracker.id }
-      get(:approve_tracker, params: params)
-      assert_no_flash
-      assert_not(tracker.reload.approved)
-      assert_equal(0, QueuedEmail.count)
-
-      login("rolf")
-      get(:approve_tracker, params: params)
-      assert_flash_warning
-      assert_not(tracker.reload.approved)
-      assert_equal(0, QueuedEmail.count)
-
-      login("admin")
-      get(:approve_tracker, params: params)
-      assert_flash_success
-      assert(tracker.reload.approved)
-      assert_equal(1, QueuedEmail.count)
-
-      get(:approve_tracker, params: params)
-      assert_flash_warning
-      assert(tracker.reload.approved)
-      assert_equal(1, QueuedEmail.count)
     end
   end
 end

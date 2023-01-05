@@ -8,7 +8,7 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
-  action = { controller: "/names/trackers", action: :update, id: @name.id }
+  action = name_trackers_path(@name.id)
 %>
 
 <div class="mt-5 mb-5">

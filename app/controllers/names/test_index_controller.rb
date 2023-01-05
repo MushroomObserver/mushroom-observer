@@ -9,7 +9,7 @@ module Names
     before_action :disable_link_prefetching
 
     # Used to test pagination.
-    def test_index
+    def index
       query = find_query(:Name)
       raise("Missing query: #{params[:q]}") unless query
 

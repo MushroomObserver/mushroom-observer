@@ -3,7 +3,6 @@
 #  == NAME TRACKERS
 #  email_tracking::
 #  approve_tracker::
-
 module Names
   class TrackersController < ApplicationController
     before_action :login_required
@@ -11,29 +10,31 @@ module Names
 
     # Form accessible from show_name that lets a user setup a tracker
     # with notifications for a name.
-    def email_tracking
+    def new
       pass_query_params
-      name_id = params[:id].to_s
-      @name = find_or_goto_index(Name, name_id)
-      return unless @name
+      return unless find_name!
 
-      @name_tracker = NameTracker.find_by(name_id: name_id, user_id: @user.id)
-      if request.method == "POST"
-        submit_tracking_form(name_id)
-      else
-        initialize_tracking_form
-      end
+      try_to_find_name_tracker
+      initialize_tracking_form
     end
 
-    # Endpoint for admins to approve a tracker.
-    def approve_tracker
-      return unless (tracker = find_or_goto_index(NameTracker, params[:id]))
+    def create
+      pass_query_params
+      return unless find_name!
 
-      approve_tracker_if_everything_okay(tracker)
-      redirect_to("/")
+      try_to_find_name_tracker
+      submit_tracking_form(name_id)
     end
 
     private
+
+    def find_name!
+      @name = find_or_goto_index(Name, params[:id].to_s)
+    end
+
+    def try_to_find_name_tracker
+      @name_tracker = NameTracker.find_by(name_id: name_id, user_id: @user.id)
+    end
 
     def initialize_tracking_form
       if @name_tracker
@@ -116,7 +117,7 @@ module Names
         content: "User: ##{user.id} / #{user.login} / #{user.email}\n" \
                  "Name: ##{name.id} / #{name.search_name}\n" \
                  "Note: [[#{name_tracker.note_template}]]\n\n" \
-                 "#{MO.http_domain}/name/approve_tracker/#{name_tracker.id}"
+                 "#{MO.http_domain}/names/trackers/#{name_tracker.id}/approve"
       ).deliver_now
 
       # Let the user know that the note_template feature requires approval.

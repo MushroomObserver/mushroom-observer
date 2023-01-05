@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 
-#  == SYNONYMS
 #  change_synonyms::             Change list of synonyms for a name.
-#  deprecate_name::              Deprecate name in favor of another.
-#  approve_name::                Flag given name as "accepted"
-#                                (others could be, too).
-#  ==== Helpers
-#  deprecate_synonym::           (used by change_synonyms)
-#  check_for_new_synonym::       (used by change_synonyms)
-#
-#  dump_sorter::                 Error diagnostics for change_synonyms.
-
 module Names
   class SynonymsController < ApplicationController
     include Names::Synonyms::SharedPrivateMethods
@@ -25,22 +15,39 @@ module Names
 
     # Form accessible from show_name that lets a user review all the synonyms
     # of a name, removing others, writing in new, etc.
-    def change_synonyms
+    def edit
       pass_query_params
-      @name = find_or_goto_index(Name, params[:id].to_s)
-      return unless @name
+      return unless find_name!
       return if abort_if_name_locked!(@name)
 
+      init_ivars_for_edit
+    end
+
+    def update
+      pass_query_params
+
+      return unless find_name!
+      return if abort_if_name_locked!(@name)
+
+      init_ivars_for_edit
+      change_synonyms
+    end
+
+    private
+
+    def find_name!
+      @name = find_or_goto_index(Name, params[:id].to_s)
+    end
+
+    def init_ivars_for_edit
       @list_members     = nil
       @new_names        = nil
       @synonym_name_ids = []
       @synonym_names    = []
       @deprecate_all    = true
-
-      post_change_synonyms if request.method == "POST"
     end
 
-    def post_change_synonyms
+    def change_synonyms
       list = params[:synonym][:members].strip_squeeze
       @deprecate_all = (params[:deprecate][:all] == "1")
 
@@ -107,9 +114,8 @@ module Names
       @synonym_names    = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
+      render(:edit, location: edit_name_synonyms_path)
     end
-
-    private
 
     # Helper used by change_synonyms.  Deprecates a single name.  Returns true
     # if it worked.  Flashes an error and returns false if it fails for whatever
