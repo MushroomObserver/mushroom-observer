@@ -31,7 +31,54 @@ module Descriptions
   included do
     ############################################################################
     #
-    #  :section Helpers
+    #  :section Helpers for show
+    #
+    ############################################################################
+
+    def description_canonical_url(description)
+      "#{MO.http_domain}/#{description.parent.type_tag.to_s.pluralize}/" \
+        "descriptions/#{description.id}"
+    end
+
+    def description_parent_exists?(parent)
+      return true if parent
+
+      flash_error(:runtime_name_for_description_not_found.t)
+      # parent index:
+      redirect_to(send("#{parent.type_tag.to_s.pluralize}_path"))
+      false
+    end
+
+    def user_has_permission_to_see_description?
+      return true if in_admin_mode? || @description.is_reader?(@user)
+
+      if @description.source_type == :project
+        flash_error(:runtime_show_draft_denied.t)
+      else
+        flash_error(:runtime_show_description_denied.t)
+      end
+      redirect_to_parent_or_project
+    end
+
+    def redirect_to_parent_or_project
+      if @description.project
+        redirect_to(project_path(@description.project_id))
+      else
+        redirect_to(add_query_param(@description.parent.show_link_args))
+      end
+    end
+
+    def users_projects_which_dont_have_desc_of_this(parent)
+      return [] unless @user
+
+      @user&.projects_member&.select do |project|
+        parent.descriptions.none? { |d| d.belongs_to_project?(project) }
+      end
+    end
+
+    ############################################################################
+    #
+    #  :section Helpers for Create/Edit
     #
     ############################################################################
 

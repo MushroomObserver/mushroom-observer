@@ -107,44 +107,22 @@ module Locations
     def show
       store_location
       pass_query_params
-      @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-      return unless @description
+      return unless find_description!
 
-      @canonical_url = "#{MO.http_domain}/locations/descriptions/" \
-                       "#{@description.id}"
-      # Public or user has permission.
-      if in_admin_mode? || @description.is_reader?(@user)
-        @location = @description.location
-        update_view_stats(@description)
-
-        # Get a list of projects the user can create drafts for.
-        @projects = @user&.projects_member&.select do |project|
-          @location.descriptions.none? { |d| d.belongs_to_project?(project) }
-        end
-
-      # User doesn't have permission to see this description.
-      elsif @description.source_type == "project"
-        flash_error(:runtime_show_draft_denied.t)
-        if (project = @description.project)
-          redirect_to(controller: :project, action: :show_project,
-                      id: project.id)
-        else
-          redirect_to(action: :show_location, id: @description.location_id)
-        end
-      else
-        flash_error(:runtime_show_description_denied.t)
-        redirect_to(action: :show_location, id: @description.location_id)
+      case params[:flow]
+      when "next"
+        redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
+      when "prev"
+        redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
       end
-    end
 
-    # Go to next location: redirects to show_location.
-    def next_location_description
-      redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
-    end
+      @location = @description.location
+      return unless description_parent_exists?(@location)
+      return unless user_has_permission_to_see_description?
 
-    # Go to previous location: redirects to show_location.
-    def prev_location_description
-      redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
+      update_view_stats(@description)
+      @canonical_url = description_canonical_url(@description)
+      @projects = users_projects_which_dont_have_desc_of_this(parent)
     end
 
     def create_location_description

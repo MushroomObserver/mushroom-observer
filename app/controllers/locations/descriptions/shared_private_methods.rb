@@ -4,8 +4,8 @@ module Locations::Descriptions
   module SharedPrivateMethods
     private
 
-    def find_description!(id)
-      find_or_goto_index(LocationDescription, id)
+    def find_description!
+      @description = find_or_goto_index(LocationDescription, params[:id].to_s)
     end
   end
 end

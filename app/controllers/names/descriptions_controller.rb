@@ -18,6 +18,7 @@
 module Names
   class DescriptionsController < ApplicationController
     include Descriptions
+    include ::Names::Descriptions::SharedPrivateMethods
 
     before_action :login_required
     before_action :disable_link_prefetching, except: [
@@ -116,72 +117,23 @@ module Names
     def show
       store_location
       pass_query_params
-      @description = find_or_goto_index(NameDescription, params[:id].to_s)
-      return unless @description
+      return unless find_description!
+
+      case params[:flow]
+      when "next"
+        redirect_to_next_object(:next, NameDescription, params[:id].to_s)
+      when "prev"
+        redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
+      end
 
       @name = @description.name
-      return unless description_name_exists?
+      return unless description_name_exists?(@location)
       return unless user_has_permission_to_see_description?
 
       update_view_stats(@description)
-      @canonical_url = description_canonical_url
+      @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this_name
     end
-
-    private
-
-    def description_name_exists?
-      return true if @name
-
-      flash_error(:runtime_name_for_description_not_found.t)
-      redirect_to(names_path)
-      false
-    end
-
-    def user_has_permission_to_see_description?
-      return true if in_admin_mode? || @description.is_reader?(@user)
-
-      if @description.source_type == :project
-        flash_error(:runtime_show_draft_denied.t)
-      else
-        flash_error(:runtime_show_description_denied.t)
-      end
-      redirect_to_name_or_project
-    end
-
-    def redirect_to_name_or_project
-      if @description.project
-        redirect_to(controller: "project",
-                    action: "show_project",
-                    id: @description.project_id)
-      else
-        redirect_to(name_path(@description.name_id, q: get_query_param))
-      end
-    end
-
-    def description_canonical_url
-      "#{MO.http_domain}/names/descriptions/#{@description.id}"
-    end
-
-    def users_projects_which_dont_have_desc_of_this_name
-      return [] unless @user
-
-      @user.projects_member.select do |project|
-        @name.descriptions.none? { |d| d.belongs_to_project?(project) }
-      end
-    end
-
-    # Go to next name: redirects to show_name.
-    def next_name_description
-      redirect_to_next_object(:next, NameDescription, params[:id].to_s)
-    end
-
-    # Go to previous name_description: redirects to show_name_description.
-    def prev_name_description
-      redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
-    end
-
-    public
 
     ############################################################################
     #
