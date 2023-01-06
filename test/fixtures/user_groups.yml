@@ -18,6 +18,9 @@ bolete_users:
 bolete_admins:
   name: Bolete Project.admin
 
+only_admins:
+  name: The Test Coverage Project.admin
+
 all_users:
   name: all users
 

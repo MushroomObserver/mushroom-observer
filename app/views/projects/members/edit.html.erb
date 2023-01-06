@@ -5,19 +5,20 @@
   )
 
   tabs = [
-    link_to(:app_list_projects.t, action: :list_projects),
+    link_to(:app_list_projects.t, projects_path),
     link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
   ]
   if check_permission(@project)
-    tabs << link_with_query(:change_member_status_edit.t, action: :edit_project,
-                            id: @project.id)
+    tabs << link_with_query(:change_member_status_edit.t,
+                            edit_project_path(@project.id))
   end
   @tabsets = { right: draw_tab_set(tabs) }
+
+  action = project_member_path(project_id: @project.id,
+                               candidate: @candidate.id, q: get_query_param)
 %>
 
-<%= form_tag(add_query_param(action: :change_member_status, id: @project.id,
-                              candidate: @candidate.id)) do %>
-
+<%= form_with(url: action, id: "project_member_form") do |f| %>
   <div class="form-group mt-3">
     <%= submit_tag(:change_member_status_make_member.l, class: "btn btn-default center-block mb-3") %>
     <%= :change_member_status_make_member_help.t %>
@@ -34,4 +35,4 @@
   </div>
 <% end %>
 
-<%= render(partial: "show_groups", locals: {project: @project}) %>
+<%= render(partial: "projects/groups", locals: { project: @project }) %>
