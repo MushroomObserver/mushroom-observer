@@ -24,9 +24,9 @@ class LookupsControllerTest < FunctionalTestCase
     login
     i_id = images(:in_situ_image).id
     get(:lookup_image, params: { id: i_id })
-    assert_redirected_to(controller: :images, action: :show, id: i_id)
+    assert_redirected_to(image_path(i_id))
     get(:lookup_image, params: { id: 10_000 })
-    assert_redirected_to(controller: :images, action: :index)
+    assert_redirected_to(images_path)
     assert_flash_error
   end
 
@@ -123,8 +123,9 @@ class LookupsControllerTest < FunctionalTestCase
     login
     get(:lookup_observation,
         params: { id: observations(:minimal_unknown_obs).id })
-    assert_redirected_to(controller: :observations, action: :show,
-                         id: observations(:minimal_unknown_obs).id)
+    assert_redirected_to(
+      observation_path(observations(:minimal_unknown_obs).id)
+    )
   end
 
   def test_lookup_project
@@ -148,19 +149,17 @@ class LookupsControllerTest < FunctionalTestCase
     login
     sl_id = species_lists(:first_species_list).id
     get(:lookup_species_list, params: { id: sl_id })
-    assert_redirected_to(controller: :species_lists,
-                         action: :show, id: sl_id)
+    assert_redirected_to(species_list_path(sl_id))
     get(:lookup_species_list, params: { id: "Mysteries" })
     assert_redirected_to(
-      controller: :species_lists,
-      action: :show, id: species_lists(:unknown_species_list).id
+      species_list_path(species_lists(:unknown_species_list).id)
     )
     get(:lookup_species_list, params: { id: "species list" })
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/species_lists})
     assert_flash_warning
     get(:lookup_species_list, params: { id: "Flibbertygibbets" })
-    assert_redirected_to(controller: :species_lists, action: :index)
+    assert_redirected_to(species_lists_path)
     assert_flash_error
   end
 

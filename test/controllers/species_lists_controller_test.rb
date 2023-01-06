@@ -1228,9 +1228,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # make sure the "Set Source" link is on the page somewhere
     get(:show, params: { id: spl1.id })
-    link_args = { controller: :species_lists, action: :show,
-                  id: spl1.id, set_source: 1 }
-    assert_link_in_html(:species_list_show_set_source.t, link_args)
+    assert_link_in_html(:species_list_show_set_source.t,
+                        species_list_path(spl1.id, set_source: 1))
 
     # make sure clicking on "Set Source" changes the session
     @request.session[:checklist_source] = nil

@@ -73,13 +73,11 @@ class SearchControllerTest < FunctionalTestCase
     login
     params = { search: { pattern: "12", type: :observation } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :observations, action: :index,
-                         pattern: "12")
+    assert_redirected_to(observations_path(pattern: "12"))
 
     params = { search: { pattern: "34", type: :image } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :images, action: :index,
-                         pattern: "34")
+    assert_redirected_to(images_path(pattern: "34"))
 
     params = { search: { pattern: "56", type: :name } }
     get(:pattern, params: params)
@@ -93,13 +91,11 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "90", type: :comment } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :comments, action: :index,
-                         pattern: "90")
+    assert_redirected_to(comments_path(pattern: "90"))
 
     params = { search: { pattern: "12", type: :species_list } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :species_lists, action: :index,
-                         pattern: "12")
+    assert_redirected_to(species_lists_path(pattern: "12"))
 
     params = { search: { pattern: "34", type: :user } }
     get(:pattern, params: params)
@@ -123,7 +119,7 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :observation } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :observations, action: :index)
+    assert_redirected_to(observations_path)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.
