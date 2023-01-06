@@ -230,16 +230,16 @@ class NamesController < ApplicationController
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
   def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
-    when "prev"
-      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
-    end
-
     pass_query_params
     store_location
     clear_query_in_session
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Name, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, Name, params[:id].to_s)
+    end
 
     # Load Name and NameDescription along with a bunch of associated objects.
     return unless find_name!

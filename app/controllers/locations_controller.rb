@@ -22,9 +22,9 @@ require("geocoder")
 class LocationsController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching, except: [
-    :create_location,
-    :edit_location,
-    :show_location
+    :new, :create,
+    :edit, :update,
+    :show
   ]
 
   ##############################################################################
@@ -246,23 +246,40 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
-  def show_location
+  def show # rubocop:disable Metrics/AbcSize
     store_location
     pass_query_params
     clear_query_in_session
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Location, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, Location, params[:id].to_s)
+    end
 
     # Load Location and LocationDescription along with a bunch of associated
     # objects.
-    loc_id = params[:id].to_s
     desc_id = params[:desc]
-    @location = find_or_goto_index(Location, loc_id)
-    return unless @location
+    return unless find_location!
 
-    @canonical_url = "#{MO.http_domain}/location/show_location/" \
-                     "#{@location.id}"
+    @canonical_url = "#{MO.http_domain}/locations/#{@location.id}"
 
     # Load default description if user didn't request one explicitly.
     desc_id = @location.description_id if desc_id.blank?
+    init_description_ivar(desc_id)
+    update_view_stats(@location)
+    update_view_stats(@description) if @description
+
+    init_projects_ivar
+  end
+
+  private
+
+  def find_location!
+    @name = find_or_goto_index(Location, params[:id].to_s)
+  end
+
+  def init_description_ivar(desc_id)
     if desc_id.blank?
       @description = nil
     elsif (@description = LocationDescription.safe_find(desc_id))
@@ -271,25 +288,16 @@ class LocationsController < ApplicationController
       flash_error(:runtime_object_not_found.t(type: :description,
                                               id: desc_id))
     end
+  end
 
-    update_view_stats(@location)
-    update_view_stats(@description) if @description
-
+  def init_projects_ivar
     # Get a list of projects the user can create drafts for.
     @projects = @user&.projects_member&.select do |project|
       @location.descriptions.none? { |d| d.belongs_to_project?(project) }
     end
   end
 
-  # Go to next location: redirects to show_location.
-  def next_location
-    redirect_to_next_object(:next, Location, params[:id].to_s)
-  end
-
-  # Go to previous location: redirects to show_location.
-  def prev_location
-    redirect_to_next_object(:prev, Location, params[:id].to_s)
-  end
+  public
 
   ##############################################################################
   #
@@ -297,10 +305,97 @@ class LocationsController < ApplicationController
   #
   ##############################################################################
 
-  def create_location
+  def new
     store_location
     pass_query_params
+    init_ivars_for_new
 
+    # Render a blank form.
+    user_name = Location.user_name(@user, @display_name)
+    if @display_name
+      @dubious_where_reasons = Location.
+                               dubious_name?(user_name, true)
+    end
+    @location = Location.new
+    try_to_geocode_location(user_name)
+  end
+
+  def create
+    store_location
+    pass_query_params
+    init_caller_ivars_for_new
+    # Set to true below if created successfully, or if a matching location
+    # already exists.  In either case, we're done with this form.
+    done = false
+
+    # Look to see if the display name is already in use.
+    # If it is then just use that location and ignore the other values.
+    # Probably should be smarter with warnings and merges and such...
+    db_name = Location.user_name(@user, @display_name)
+    @location = Location.find_by_name_or_reverse_name(db_name)
+
+    # Location already exists.
+    if @location
+      flash_warning(:runtime_location_already_exists.t(name: @display_name))
+      done = true
+
+    # Need to create location.
+    else
+      done = create_location_ivar(done)
+    end
+
+    # If done, update any observations at @display_name,
+    # and set user's primary location if called from profile.
+    return unless done
+
+    if @original_name.present?
+      db_name = Location.user_name(@user, @original_name)
+      Observation.define_a_location(@location, db_name)
+      SpeciesList.define_a_location(@location, db_name)
+    end
+    return_to_caller
+  end
+
+  def edit
+    store_location
+    pass_query_params
+    return unless find_location!
+
+    params[:location] ||= {}
+    @display_name = @location.display_name
+    update if request.method == "POST"
+  end
+
+  def update
+    store_location
+    pass_query_params
+    return unless find_location!
+
+    params[:location] ||= {}
+    @display_name = params[:location][:display_name].strip_squeeze
+    db_name = Location.user_name(@user, @display_name)
+    merge = Location.find_by_name_or_reverse_name(db_name)
+    if merge && merge != @location
+      update_location_merge(merge)
+    else
+      email_admin_location_change if nontrivial_location_change?
+      update_location_change(db_name)
+    end
+  end
+
+  def destroy
+    return unless in_admin_mode?
+    return unless find_location!
+
+    if @location.destroy
+      flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
+    end
+    redirect_to(locations_path)
+  end
+
+  private
+
+  def init_caller_ivars_for_new
     # Original name passed in when arrive here with express purpose of
     # defining a given location. (e.g., clicking on "define this location",
     # or after create_observation with unknown location)
@@ -323,140 +418,72 @@ class LocationsController < ApplicationController
     @set_species_list = params[:set_species_list]
     @set_user         = params[:set_user]
     @set_herbarium    = params[:set_herbarium]
+  end
 
-    # Render a blank form.
-    if request.method == "POST"
-      # Set to true below if created successfully, or if a matching location
-      # already exists.  In either case, we're done with this form.
-      done = false
+  def try_to_geocode_location(user_name)
+    geocoder = Geocoder.new(user_name)
+    if geocoder.valid
+      @location.display_name = @display_name
+      @location.north = geocoder.north
+      @location.south = geocoder.south
+      @location.east = geocoder.east
+      @location.west = geocoder.west
+    else
+      @location.display_name = ""
+      @location.north = 80
+      @location.south = -80
+      @location.east = 89
+      @location.west = -89
+    end
+  end
 
-      # Look to see if the display name is already in use.
-      # If it is then just use that location and ignore the other values.
-      # Probably should be smarter with warnings and merges and such...
-      db_name = Location.user_name(@user, @display_name)
-      @location = Location.find_by_name_or_reverse_name(db_name)
+  def create_location_ivar(done)
+    @location = Location.new(whitelisted_location_params)
+    @location.display_name = @display_name # (strip_squozen)
 
-      # Location already exists.
-      if @location
-        flash_warning(:runtime_location_already_exists.t(name: @display_name))
+    # Validate name.
+    @dubious_where_reasons = []
+    if @display_name != @approved_name
+      @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    end
+
+    if @dubious_where_reasons.empty?
+      if @location.save
+        flash_notice(:runtime_location_success.t(id: @location.id))
         done = true
-
-      # Need to create location.
       else
-        @location = Location.new(whitelisted_location_params)
-        @location.display_name = @display_name # (strip_squozen)
-
-        # Validate name.
-        @dubious_where_reasons = []
-        if @display_name != @approved_name
-          @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        end
-
-        if @dubious_where_reasons.empty?
-          if @location.save
-            flash_notice(:runtime_location_success.t(id: @location.id))
-            done = true
-          else
-            # Failed to create location
-            flash_object_errors(@location)
-          end
-        end
+        # Failed to create location
+        flash_object_errors(@location)
       end
+    end
+    done
+  end
 
-      # If done, update any observations at @display_name,
-      # and set user's primary location if called from profile.
-      if done
-        if @original_name.present?
-          db_name = Location.user_name(@user, @original_name)
-          Observation.define_a_location(@location, db_name)
-          SpeciesList.define_a_location(@location, db_name)
-        end
-        if @set_observation
-          redirect_to(controller: :observations,
-                      action: :show,
-                      id: @set_observation)
-        elsif @set_species_list
-          redirect_to(controller: :species_list, action: :show_species_list,
-                      id: @set_species_list)
-        elsif @set_herbarium
-          if (herbarium = Herbarium.safe_find(@set_herbarium))
-            herbarium.location = @location
-            herbarium.save
-            redirect_to(herbarium_path(@set_herbarium))
-          end
-        elsif @set_user
-          if (user = User.safe_find(@set_user))
-            user.location = @location
-            user.save
-            redirect_to(user_path(@set_user.id))
-          end
-        else
-          redirect_to(controller: :location,
-                      action: :show_location,
-                      id: @location.id)
-        end
+  def return_to_caller
+    if @set_observation
+      redirect_to(observations_path(@set_observation))
+    elsif @set_species_list
+      redirect_to(controller: :species_list, action: :show_species_list,
+                  id: @set_species_list)
+    elsif @set_herbarium
+      if (herbarium = Herbarium.safe_find(@set_herbarium))
+        herbarium.location = @location
+        herbarium.save
+        redirect_to(herbarium_path(@set_herbarium))
+      end
+    elsif @set_user
+      if (user = User.safe_find(@set_user))
+        user.location = @location
+        user.save
+        redirect_to(user_path(@set_user.id))
       end
     else
-      user_name = Location.user_name(@user, @display_name)
-      if @display_name
-        @dubious_where_reasons = Location.
-                                 dubious_name?(user_name, true)
-      end
-      @location = Location.new
-      geocoder = Geocoder.new(user_name)
-      if geocoder.valid
-        @location.display_name = @display_name
-        @location.north = geocoder.north
-        @location.south = geocoder.south
-        @location.east = geocoder.east
-        @location.west = geocoder.west
-      else
-        @location.display_name = ""
-        @location.north = 80
-        @location.south = -80
-        @location.east = 89
-        @location.west = -89
-      end
-
-      # Submit form.
+      redirect_to(location_path(@location.id))
     end
-  end
-
-  def edit_location
-    store_location
-    pass_query_params
-    @location = find_or_goto_index(Location, params[:id].to_s)
-    return unless @location
-
-    params[:location] ||= {}
-    @display_name = @location.display_name
-    post_edit_location if request.method == "POST"
-  end
-
-  def post_edit_location
-    @display_name = params[:location][:display_name].strip_squeeze
-    db_name = Location.user_name(@user, @display_name)
-    merge = Location.find_by_name_or_reverse_name(db_name)
-    if merge && merge != @location
-      post_edit_location_merge(merge)
-    else
-      email_admin_location_change if nontrivial_location_change?
-      post_edit_location_change(db_name)
-    end
-  end
-
-  def destroy_location
-    return unless in_admin_mode?
-    return unless (@location = find_or_goto_index(Location, params[:id].to_s))
-
-    if @location.destroy
-      flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
-    end
-    redirect_to(locations_path)
   end
 
   # Merge this location with another.
-  def post_edit_location_merge(merge)
+  def update_location_merge(merge)
     if !@location.mergable? && merge.mergable?
       @location, merge = merge, @location
     end
@@ -479,32 +506,39 @@ class LocationsController < ApplicationController
   end
 
   # Just change this location in place.
-  def post_edit_location_change(db_name)
+  def update_location_change(db_name)
     @dubious_where_reasons = []
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
-    if !@location.locked || in_admin_mode?
-      @location.north = params[:location][:north] if params[:location][:north]
-      @location.south = params[:location][:south] if params[:location][:south]
-      @location.east  = params[:location][:east]  if params[:location][:east]
-      @location.west  = params[:location][:west]  if params[:location][:west]
-      @location.high  = params[:location][:high]  if params[:location][:high]
-      @location.low   = params[:location][:low]   if params[:location][:low]
-      @location.display_name = @display_name
-      if @display_name != params[:approved_where]
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      end
-    end
-    return unless @dubious_where_reasons.empty?
+    determine_and_check_location(db_name) if !@location.locked || in_admin_mode?
+    return render("edit") unless @dubious_where_reasons.empty?
 
+    save_flash_and_redirect_or_render!
+  end
+
+  def determine_and_check_location(db_name) # rubocop:disable Metrics/AbcSize
+    @location.north = params[:location][:north] if params[:location][:north]
+    @location.south = params[:location][:south] if params[:location][:south]
+    @location.east  = params[:location][:east]  if params[:location][:east]
+    @location.west  = params[:location][:west]  if params[:location][:west]
+    @location.high  = params[:location][:high]  if params[:location][:high]
+    @location.low   = params[:location][:low]   if params[:location][:low]
+    @location.display_name = @display_name
+    return unless @display_name != params[:approved_where]
+
+    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+  end
+
+  def save_flash_and_redirect_or_render!
     if !@location.changed?
       flash_warning(:runtime_edit_location_no_change.t)
-      redirect_to(action: :show_location, id: @location.id)
+      redirect_to(location_path(@location.id))
     elsif !@location.save
       flash_object_errors(@location)
+      render("edit")
     else
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
-      redirect_to(@location.show_link_args)
+      redirect_to(location_path(@location.id))
     end
   end
 
@@ -533,56 +567,6 @@ class LocationsController < ApplicationController
       show_url: "#{MO.http_domain}/locations/#{@location.id}",
       edit_url: "#{MO.http_domain}/locations/#{@location.id}/edit"
     )
-  end
-
-  # Callback for :show
-  def reverse_name_order
-    if (location = Location.safe_find(params[:id].to_s))
-      location.name = Location.reverse_name(location.name)
-      location.save
-    end
-    redirect_to(action: :show_location, id: params[:id].to_s)
-  end
-
-  # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
-  # into the given Location.  Linked from +list_merge_options+, I think.
-  def add_to_location
-    location = find_or_goto_index(Location, params[:location])
-    return unless location
-
-    where = begin
-              params[:where].strip_squeeze
-            rescue StandardError
-              ""
-            end
-    if where.present? &&
-       update_observations_by_where(location, where)
-      flash_notice(
-        :runtime_location_merge_success.t(this: where,
-                                          that: location.display_name)
-      )
-    end
-    redirect_to(action: :list_locations)
-  end
-
-  # Move all the Observation's with a given +where+ into a given Location.
-  def update_observations_by_where(location, given_where)
-    success = true
-    # observations = Observation.find_all_by_where(given_where)
-    observations = Observation.where(where: given_where)
-    count = 3
-    observations.each do |o|
-      count += 1
-      next if o.location_id
-
-      o.location_id = location.id
-      o.where = nil
-      next if o.save
-
-      flash_error(:runtime_location_merge_failed.t(name: o.unique_format_name))
-      success = false
-    end
-    success
   end
 
   ##############################################################################

@@ -165,8 +165,13 @@ class NameDescription < Description
   #
   ##############################################################################
   def self.show_controller
-    # Not the default defined in AbstractModel
+    # Not the generated default in AbstractModel, because controller namespaced.
     "/names/descriptions"
+  end
+
+  # Eliminate when controller_normalized? goes.
+  def self.show_action
+    :show
   end
 
   # Returns an Array of all the descriptive text fields that don't require any

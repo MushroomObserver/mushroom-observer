@@ -18,12 +18,12 @@ module Locations
 
     before_action :login_required
     before_action :disable_link_prefetching, except: [
-      :create_location_description,
-      :edit_location_description,
-      :show_location_description
+      :new, :create,
+      :edit, :update,
+      :show
     ]
     before_action :require_successful_user, only: [
-      :create_location_description
+      :new, :create
     ]
 
     ############################################################################
@@ -32,7 +32,17 @@ module Locations
     #
     ############################################################################
 
-    def index; end
+    def index
+      if params[:by_author].present?
+        locations_by_author
+      elsif params[:by_editor].present?
+        locations_by_editor
+      elsif params[:by].present?
+        index_location
+      else
+        list_locations
+      end
+    end
 
     private
 
@@ -96,7 +106,7 @@ module Locations
     # --------------------------------------------------------------------------
 
     # Show just a LocationDescription.
-    def show_location_description
+    def show
       store_location
       pass_query_params
       @description = find_or_goto_index(LocationDescription, params[:id].to_s)

@@ -11,8 +11,8 @@
   if in_admin_mode?
     tabs += [
       destroy_button(name: :show_location_destroy.t, target: @location),
-      link_with_query(:show_location_reverse.t, action: :reverse_name_order,
-                      id: @location.id)
+      link_with_query(:show_location_reverse.t,
+                      location_reverse_name_order_path(@location.id))
     ]
   end
   tabs << draw_interest_icons(@location)

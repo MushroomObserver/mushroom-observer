@@ -30,7 +30,17 @@ module Names
     #
     ############################################################################
 
-    def index; end
+    def index
+      if params[:by_author].present?
+        names_by_user
+      elsif params[:by_editor].present?
+        names_by_editor
+      elsif params[:by].present?
+        index_name
+      else
+        list_names
+      end
+    end
 
     private
 
@@ -49,7 +59,11 @@ module Names
 
     # Display list of name_descriptions that a given user is author on.
     def name_descriptions_by_author
-      user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+      user = if params[:by_author]
+               find_or_goto_index(User, params[:by_author].to_s)
+             else
+               @user
+             end
       return unless user
 
       query = create_query(:NameDescription, :by_author, user: user)
@@ -58,7 +72,11 @@ module Names
 
     # Display list of name_descriptions that a given user is editor on.
     def name_descriptions_by_editor
-      user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+      user = if params[:by_editor]
+               find_or_goto_index(User, params[:by_editor].to_s)
+             else
+               @user
+             end
       return unless user
 
       query = create_query(:NameDescription, :by_editor, user: user)
@@ -95,7 +113,7 @@ module Names
 
     # --------------------------------------------------------------------------
 
-    def show_name_description
+    def show
       store_location
       pass_query_params
       @description = find_or_goto_index(NameDescription, params[:id].to_s)

@@ -18,11 +18,5 @@
   action = edit_name_description_path(@description.id, q: get_query_param)
 %>
 
-<%= form_for(:description, url: action) do |form| %>
-  <%= render(partial: "form_name_description",
-              locals: {form: form, button: :SAVE_EDITS.l}) %>
-  <% if @merge %>
-    <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
-    <%= hidden_field_tag(:delete_after, @delete_after) %>
-  <% end %>
-<% end %>
+<%= render(partial: "form",
+           locals: { action: action, button: :SAVE_EDITS }) %>

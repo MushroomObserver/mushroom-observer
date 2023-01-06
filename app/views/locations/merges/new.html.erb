@@ -13,9 +13,11 @@
         <% @matches.each do |location| %>
           <tr>
             <td>
-              <%= link_to(location.display_name.t,
-                          {action: :create, where: @where, location: location},
-                          data: {confirm: :list_merge_are_you_sure.l}) %>
+              <%= patch_button(name: location.display_name.t,
+                              path: add_observation_to_location_path(
+                                where: @where, location: location
+                              ),
+                              data: { confirm: :list_merge_are_you_sure.l }) %>
             </td>
           </tr>
         <% end %>
@@ -32,9 +34,11 @@
         <% @others.each do |location| %>
           <tr>
             <td>
-              <%= link_to(location.display_name.t,
-                          {action: :create, where: @where, location: location},
-                          data: {confirm: :list_merge_are_you_sure.l}) %>
+              <%= patch_button(name: location.display_name.t,
+                              path: add_observation_to_location_path(
+                                where: @where, location: location
+                              ),
+                              data: { confirm: :list_merge_are_you_sure.l }) %>
             </td>
           </tr>
         <% end %>

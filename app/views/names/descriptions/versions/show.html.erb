@@ -17,7 +17,7 @@
 
 <%= show_past_versions(@description) %>
 
-<%= render(partial: "name_description", object: @description,
-           locals: { review: false }) %>
+<%= render(partial: "names/descriptions/show/name_description",
+           object: @description, locals: { review: false }) %>
 
 <%= show_object_footer(@description) %>

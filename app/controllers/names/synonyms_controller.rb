@@ -100,12 +100,11 @@ module Names
           end
         end
 
-        if success
-          redirect_to(name_path(@name.id, q: get_query_param))
-        else
-          flash_object_errors(@name)
-          flash_object_errors(@name.synonym)
-        end
+        return redirect_to(name_path(@name.id, q: get_query_param)) if success
+
+        flash_object_errors(@name)
+        flash_object_errors(@name.synonym)
+
       end
 
       @list_members     = sorter.all_line_strs.join("\r\n")

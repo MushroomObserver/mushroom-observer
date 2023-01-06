@@ -6,5 +6,25 @@ require("set")
 module Locations
   class MergesControllerTest < FunctionalTestCase
     include ObjectLinkHelper
+
+    def test_list_merge_options
+      albion = locations(:albion)
+
+      # Full match with albion.
+      requires_login(:list_merge_options, where: albion.display_name)
+      assert_obj_arrays_equal([albion], assigns(:matches))
+
+      # Should match against albion.
+      requires_login(:list_merge_options, where: "Albion, CA")
+      assert_obj_arrays_equal([albion], assigns(:matches))
+
+      # Should match against albion.
+      requires_login(:list_merge_options, where: "Albion Field Station, CA")
+      assert_obj_arrays_equal([albion], assigns(:matches))
+
+      # Shouldn't match anything.
+      requires_login(:list_merge_options, where: "Somewhere out there")
+      assert_nil(assigns(:matches))
+    end
   end
 end
