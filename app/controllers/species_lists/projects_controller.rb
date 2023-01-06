@@ -40,12 +40,11 @@ module SpeciesLists
     private
 
     def projects_to_manage
-      projects = @user.projects_member
       if @list.user == @user
-        projects += @list.projects
-        projects.uniq!
+        @user.projects_member.union(@list.projects)
+      else
+        @user.projects_member
       end
-      projects
     end
 
     def manage_object_states
