@@ -452,7 +452,7 @@ class LocationsController < ApplicationController
     if @location.destroy
       flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
     end
-    redirect_to(location_list_locations_path)
+    redirect_to(locations_path)
   end
 
   # Merge this location with another.

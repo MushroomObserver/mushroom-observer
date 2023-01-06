@@ -33,7 +33,8 @@ module Names
     end
 
     def try_to_find_name_tracker
-      @name_tracker = NameTracker.find_by(name_id: name_id, user_id: @user.id)
+      @name_tracker = NameTracker.find_by(name_id: params[:id].to_s,
+                                          user_id: @user.id)
     end
 
     def initialize_tracking_form

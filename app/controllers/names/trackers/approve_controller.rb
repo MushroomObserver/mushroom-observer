@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # approve_name
-module Names::Synonyms
+module Names::Trackers
   class ApproveController < ApplicationController
     before_action :login_required
 

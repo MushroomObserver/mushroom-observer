@@ -18,7 +18,7 @@
     <% Name.all_lifeforms.each do |word| %>
       <tr>
         <td>
-          <%= f.check_box("lifeform_#{word}", "1",
+          <%= check_box_tag("lifeform_#{word}", "1",
                             @name.lifeform.include?(" #{word} "),
                             class: "form-control-xxx mt-2") %>
           <%= f.label("lifeform_#{word}", :"lifeform_#{word}".t) %>
