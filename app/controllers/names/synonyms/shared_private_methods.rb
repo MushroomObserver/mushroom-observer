@@ -14,5 +14,13 @@ module Names::Synonyms
       flash_error(:permission_denied.t)
       redirect_back_or_default("/")
     end
+
+    # Post a comment after approval or deprecation if the user entered one.
+    def post_comment(action, name, message)
+      summary = :"name_#{action}_comment_summary".l
+      Comment.create!(target: name,
+                      summary: summary,
+                      comment: message)
+    end
   end
 end

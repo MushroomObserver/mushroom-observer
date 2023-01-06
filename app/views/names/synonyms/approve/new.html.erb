@@ -5,10 +5,13 @@
     link_to(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+
+  action = approve_name_synonym_path(@name.id)
 %>
 
-<%= form_tag(action: :approve_name, id: @name.id) do %>
-  <br/><div class="text-center"><%= submit_tag(:APPROVE.l, class: "btn btn-default") %></div><!-- .text-center -->
+<%= form_with(url: action) do |f| %>
+
+  <%= f.submit(:APPROVE.l, class: "btn btn-default center-block mt-3") %>
 
   <% if @approved_names %>
     <p><%= check_box(:deprecate, :others, checked: "checked") %>
@@ -25,5 +28,6 @@
     <%= :name_approve_comments_help.tp(name: @name.display_name) %>
   </div>
 
-  <br/><div class="text-center"><%= submit_tag(:APPROVE.l, class: "btn btn-default") %></div><!-- .text-center -->
+  <%= f.submit(:APPROVE.l, class: "btn btn-default center-block mt-3") %>
+
 <% end %>

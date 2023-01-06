@@ -3,8 +3,6 @@
 # approve_name
 module Names::Synonyms
   class ApproveController < ApplicationController
-    include Names::Synonyms::SharedPrivateMethods
-
     before_action :login_required
 
     # Form accessible from show_name that lets a user make call this an accepted
@@ -62,5 +60,7 @@ module Names::Synonyms
 
       post_comment(:approve, @name, comment)
     end
+
+    include Names::Synonyms::SharedPrivateMethods
   end
 end
