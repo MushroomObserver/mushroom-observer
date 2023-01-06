@@ -1,0 +1,24 @@
+<%
+  @title = :admin_request_title.t(title: @project.title)
+  action = project_admin_requests_path(project_id: @project.id)
+%>
+
+<%= form_with(scope: :email, url: action,
+              id: "project_admin_request_form") do |f| %>
+
+  <%= :admin_request_note.tp %>
+
+  <div class="form-group mt-3">
+    <%= f.label(:subject, :request_subject.t + ":") %>
+    <%= f.text_field(:subject, class: "form-control",
+                     data: { autofocus: true }) %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= f.label(:content, :request_message.t + ":") %>
+    <%= f.text_area(:content, rows: 5, class: "form-control") %>
+  </div>
+
+  <%= f.submit(:SEND.l, class: "btn btn-default center-block mt-3") %>
+
+<% end %>

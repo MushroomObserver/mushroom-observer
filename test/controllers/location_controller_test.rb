@@ -284,7 +284,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:bolete_project_private_location_desc)
     get(:show_location_description, params: { id: desc.id })
     assert_flash_error
-    assert_redirected_to(controller: :project, action: :show_project,
+    assert_redirected_to(controller: "/projects", action: :show,
                          id: desc.project.id)
 
     # description is private, for a project, project doesn't exist

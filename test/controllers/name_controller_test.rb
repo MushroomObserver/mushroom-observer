@@ -49,7 +49,7 @@ class NameControllerTest < FunctionalTestCase
       assert_template(:create_name_description)
       assert_template("name/_form_name_description")
     else
-      assert_redirected_to(controller: "project", action: "show_project",
+      assert_redirected_to(controller: "/projects", action: :show,
                            id: project.id)
     end
     assert_equal(count, NameDescription.count)
@@ -4693,7 +4693,7 @@ class NameControllerTest < FunctionalTestCase
     # Test draft creation by project non-member.
     login("dick")
     get(:create_name_description, params: params.merge(project: project.id))
-    assert_redirected_to(controller: "project", action: "show_project",
+    assert_redirected_to(controller: "/projects", action: :show,
                          id: project.id)
     assert_flash_error
   end
@@ -4726,9 +4726,7 @@ class NameControllerTest < FunctionalTestCase
     # Test draft creation by project non-member.
     login("dick")
     get(:create_name_description, params: params.merge(project: project.id))
-    assert_redirected_to(controller: "project",
-                         action: "show_project",
-                         id: project.id)
+    assert_redirected_to(controller: "/projects", action: :show, id: project.id)
     assert_flash_error
 
     # Test clone of private description if not reader.

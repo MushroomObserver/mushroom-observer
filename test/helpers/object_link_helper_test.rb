@@ -18,9 +18,9 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   def test_link_if_object
     # link to project, name not supplied
-    # pre  = '<a href="/project/show_project/'
+    # pre  = '<a href="/projects/'
     proj = projects(:bolete_project)
-    path = show_project_path(proj.id)
+    path = project_path(proj.id)
     html_id = "show_project_link_#{proj.id}"
     link_text = "Bolete Project"
     assert_equal(expected_link(path, html_id, link_text),

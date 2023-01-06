@@ -406,7 +406,7 @@ class LocationController < ApplicationController
     elsif @description.source_type == "project"
       flash_error(:runtime_show_draft_denied.t)
       if (project = @description.project)
-        redirect_to(controller: :project, action: :show_project,
+        redirect_to(controller: "/projects", action: :show,
                     id: project.id)
       else
         redirect_to(action: :show_location, id: @description.location_id)

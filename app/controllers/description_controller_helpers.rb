@@ -434,7 +434,7 @@ module DescriptionControllerHelpers
       else
         flash_error(:runtime_create_draft_create_denied.
                       t(title: project.title))
-        redirect_to(controller: "project", action: "show_project",
+        redirect_to(controller: "/projects", action: :show,
                     id: project.id)
       end
 

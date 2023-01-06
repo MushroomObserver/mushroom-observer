@@ -662,6 +662,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  resources :projects do
+    resources :members, only: [:new, :create, :edit, :update],
+                        controller: "projects/members", param: :candidate
+    resources :admin_requests, only: [:new, :create],
+                               controller: "projects/admin_requests"
+  end
+
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
@@ -741,9 +748,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Name:
   get("/name/show_name/:id", to: "name#show_name",
                              as: "show_name")
-  # ----- Project:
-  get("/project/show_project/:id", to: "project#show_project",
-                                   as: "show_project")
 
   # ----- end temporary show routes for path_builder with id ---------------
 

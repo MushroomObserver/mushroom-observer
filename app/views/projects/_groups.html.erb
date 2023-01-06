@@ -6,8 +6,8 @@
     <%= user_link(u) %>
     <% if @project.is_admin?(@user) %>
       | <%= link_with_query(:change_member_status_change_status.t,
-                            action: :change_member_status, id: project.id,
-                            candidate: u.id) %>
+                            edit_project_member_path(project_id: project.id,
+                                                     candidate: u.id)) %>
     <% end %>
     <br/>
   <% end %>
@@ -21,8 +21,8 @@
     <%= user_link(u) %>
     <% if @project.is_member?(@user) %>
       | <%= link_with_query(:change_member_status_change_status.t,
-                            action: :change_member_status, id: project.id,
-                            candidate: u.id) %>
+                            edit_project_member_path(project_id: project.id,
+                                                     candidate: u.id)) %>
     <% end %>
     <br/>
   <% end %>
