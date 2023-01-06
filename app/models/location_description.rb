@@ -118,6 +118,10 @@ class LocationDescription < Description
   #  :section: Descriptions
   #
   ##############################################################################
+  def self.show_controller
+    # Not the default defined in AbstractModel
+    "/locations/descriptions"
+  end
 
   # Returns an Array of all the descriptive text fields (Symbol's).
   def self.all_note_fields

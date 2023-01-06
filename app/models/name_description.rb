@@ -164,6 +164,10 @@ class NameDescription < Description
   #  :section: Descriptions
   #
   ##############################################################################
+  def self.show_controller
+    # Not the default defined in AbstractModel
+    "/names/descriptions"
+  end
 
   # Returns an Array of all the descriptive text fields that don't require any
   # special processing when they go to EOL.  Fields are all Symbol's.
