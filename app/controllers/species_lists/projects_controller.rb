@@ -35,6 +35,10 @@ module SpeciesLists
       end
     end
 
+    ############################################################################
+
+    private
+
     def projects_to_manage
       projects = @user.projects_member
       if @list.user == @user
