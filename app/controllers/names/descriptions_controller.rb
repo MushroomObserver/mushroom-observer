@@ -32,13 +32,13 @@ module Names
 
     def index
       if params[:by_author].present?
-        names_by_user
+        name_descriptions_by_user
       elsif params[:by_editor].present?
-        names_by_editor
+        name_descriptions_by_editor
       elsif params[:by].present?
-        index_name
+        index_name_description
       else
-        list_names
+        list_name_descriptions
       end
     end
 

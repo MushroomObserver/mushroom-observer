@@ -22,8 +22,10 @@ require("geocoder")
 class LocationsController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching, except: [
-    :new, :create,
-    :edit, :update,
+    :new,
+    :create,
+    :edit,
+    :update,
     :show
   ]
 
@@ -33,7 +35,23 @@ class LocationsController < ApplicationController
   #
   ##############################################################################
 
-  def index; end
+  def index
+    if params[:advanced_search].present?
+      advanced_search
+    elsif params[:pattern].present?
+      name_search
+    elsif params[:country].present?
+      list_by_country
+    elsif params[:by_user].present?
+      locations_by_user
+    elsif params[:by_editor].present?
+      locations_by_editor
+    elsif params[:by].present?
+      index_location
+    else
+      list_locations
+    end
+  end
 
   private
 
@@ -59,7 +77,11 @@ class LocationsController < ApplicationController
 
   # Display list of locations that a given user is author on.
   def locations_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = if params[:id]
+             find_or_goto_index(User, params[:by_user].to_s)
+           else
+             @user
+           end
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
@@ -68,7 +90,11 @@ class LocationsController < ApplicationController
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    user = if params[:id]
+             find_or_goto_index(User, params[:by_editor].to_s)
+           else
+             @user
+           end
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
@@ -80,7 +106,7 @@ class LocationsController < ApplicationController
     pattern = params[:pattern].to_s
     loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
     if loc
-      redirect_to(action: "show_location", id: loc.id)
+      redirect_to(location_path(loc.id))
     else
       query = create_query(
         :Location, :pattern_search,
@@ -98,7 +124,7 @@ class LocationsController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :search, action: :advanced)
+    redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -237,8 +263,6 @@ class LocationsController < ApplicationController
     result
   end
 
-  public
-
   ##############################################################################
   #
   #  :section: Show Location
@@ -272,32 +296,6 @@ class LocationsController < ApplicationController
 
     init_projects_ivar
   end
-
-  private
-
-  def find_location!
-    @name = find_or_goto_index(Location, params[:id].to_s)
-  end
-
-  def init_description_ivar(desc_id)
-    if desc_id.blank?
-      @description = nil
-    elsif (@description = LocationDescription.safe_find(desc_id))
-      @description = nil unless in_admin_mode? || @description.is_reader?(@user)
-    else
-      flash_error(:runtime_object_not_found.t(type: :description,
-                                              id: desc_id))
-    end
-  end
-
-  def init_projects_ivar
-    # Get a list of projects the user can create drafts for.
-    @projects = @user&.projects_member&.select do |project|
-      @location.descriptions.none? { |d| d.belongs_to_project?(project) }
-    end
-  end
-
-  public
 
   ##############################################################################
   #
@@ -393,7 +391,29 @@ class LocationsController < ApplicationController
     redirect_to(locations_path)
   end
 
-  private
+  ##############################################################################
+
+  def find_location!
+    @name = find_or_goto_index(Location, params[:id].to_s)
+  end
+
+  def init_description_ivar(desc_id)
+    if desc_id.blank?
+      @description = nil
+    elsif (@description = LocationDescription.safe_find(desc_id))
+      @description = nil unless in_admin_mode? || @description.is_reader?(@user)
+    else
+      flash_error(:runtime_object_not_found.t(type: :description,
+                                              id: desc_id))
+    end
+  end
+
+  def init_projects_ivar
+    # Get a list of projects the user can create drafts for.
+    @projects = @user&.projects_member&.select do |project|
+      @location.descriptions.none? { |d| d.belongs_to_project?(project) }
+    end
+  end
 
   def init_caller_ivars_for_new
     # Original name passed in when arrive here with express purpose of
@@ -438,7 +458,7 @@ class LocationsController < ApplicationController
   end
 
   def create_location_ivar(done)
-    @location = Location.new(whitelisted_location_params)
+    @location = Location.new(allowed_location_params)
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
@@ -571,7 +591,7 @@ class LocationsController < ApplicationController
 
   ##############################################################################
 
-  def whitelisted_location_params
+  def allowed_location_params
     params.require(:location).
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end

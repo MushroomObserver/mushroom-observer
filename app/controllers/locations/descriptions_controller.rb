@@ -18,9 +18,7 @@ module Locations
 
     before_action :login_required
     before_action :disable_link_prefetching, except: [
-      :new, :create,
-      :edit, :update,
-      :show
+      :new, :create, :edit, :update, :show
     ]
     before_action :require_successful_user, only: [
       :new, :create
@@ -34,13 +32,13 @@ module Locations
 
     def index
       if params[:by_author].present?
-        locations_by_author
+        location_descriptions_by_author
       elsif params[:by_editor].present?
-        locations_by_editor
+        location_descriptions_by_editor
       elsif params[:by].present?
-        index_location
+        index_location_description
       else
-        list_locations
+        list_location_descriptions
       end
     end
 
