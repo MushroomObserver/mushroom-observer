@@ -13,8 +13,7 @@ class SearchController < ApplicationController
   #   /observations/index (params[:pattern])
   #   /users/index (params[:pattern])
   #   /project/project_search
-  #   /species_list/species_list_search
-  # rubocop:disable Metrics/AbcSize
+  #   /species_lists/index
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
@@ -25,37 +24,7 @@ class SearchController < ApplicationController
 
     special_params = type == :herbarium ? { flavor: :all } : {}
 
-    case type
-    when :google
-      site_google_search(pattern)
-      return
-    when :comment, :herbarium, :herbarium_record, :location, :name,
-         :observation, :user, :image
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
-        index_path: send("#{type.to_s.pluralize}_path", special_params)
-      )
-      return
-    when :project, :species_list
-      ctrlr = type
-    else
-      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default("/")
-      return
-    end
-
-    redirect_to_search_or_list(ctrlr, type, pattern)
-  end
-  # rubocop:enable Metrics/AbcSize
-
-  def site_google_search(pattern)
-    if pattern.blank?
-      redirect_to("/")
-    else
-      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
-      redirect_to("https://google.com/search?#{search}")
-    end
+    forward_pattern_search(type, pattern, special_params)
   end
 
   ADVANCED_SEARCHABLE_MODELS = [Image, Location, Name, Observation].freeze
@@ -79,6 +48,36 @@ class SearchController < ApplicationController
     redirect_to_model_controller(model, query)
   end
 
+  ##############################################################################
+
+  private
+
+  def site_google_search(pattern)
+    if pattern.blank?
+      redirect_to("/")
+    else
+      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
+      redirect_to("https://google.com/search?#{search}")
+    end
+  end
+
+  def forward_pattern_search(type, pattern, special_params)
+    case type
+    when :google
+      site_google_search(pattern)
+    when :comment, :herbarium, :herbarium_record, :image, :location, :name,
+         :observation, :project, :species_list, :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
+        index_path: send("#{type.to_s.pluralize}_path", special_params)
+      )
+    else
+      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
+      redirect_back_or_default("/")
+    end
+  end
+
   def add_filled_in_text_fields(query_params)
     [:content, :location, :name, :user].each do |field|
       val = params[:search][field].to_s
@@ -97,19 +96,6 @@ class SearchController < ApplicationController
     end
   end
 
-  ##############################################################################
-
-  private
-
-  def redirect_to_search_or_list(ctrlr, type, pattern)
-    # If pattern is blank, this would devolve into a very expensive index.
-    if pattern.blank?
-      redirect_to(controller: ctrlr, action: "list_#{type.to_s.pluralize}")
-    else
-      redirect_to(controller: ctrlr, action: "#{type}_search", pattern: pattern)
-    end
-  end
-
   def redirect_to_search_or_index(search_path:, index_path:, pattern: nil)
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
@@ -120,15 +106,10 @@ class SearchController < ApplicationController
   end
 
   def redirect_to_model_controller(model, query)
-    if model.controller_normalized?
-      redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :index,
-                                    advanced_search: 1 },
-                                  query))
-    else
-      redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :advanced_search },
-                                  query))
-    end
+    advanced_search_path = add_query_param({ controller: model.show_controller,
+                                             action: :index,
+                                             advanced_search: 1 },
+                                           query)
+    redirect_to(advanced_search_path)
   end
 end

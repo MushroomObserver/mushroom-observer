@@ -24,7 +24,7 @@
     [ :names, :names, :index, { by_user: @show_user.id } ],
     [ :names_versions, :index, { by_editor: @show_user.id } ],
     [ :observations, :observations, :index, { user: @show_user.id } ],
-    [ :species_lists, :species_list, :species_lists_by_user, {} ],
+    [ :species_lists, :species_lists, :index, { by_user: @show_user.id } ],
     [ :life_list, :checklists, :show, {} ]
   ].each do |key, controller, action, params|
     links[key] = url_for(controller: controller, action: action,
