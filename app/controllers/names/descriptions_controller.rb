@@ -189,8 +189,7 @@ module Names
 
       find_licenses
 
-      check_description_edit_permission(@description,
-                                        params[:description])
+      check_description_edit_permission(@description, params[:description])
       @description.attributes = allowed_name_description_params
       @description.source_type = @description.source_type.to_sym
 
@@ -228,9 +227,8 @@ module Names
         set_default_description_if_public
         update_classification_cache(@name)
         log_description_created
-
         flash_notice(:runtime_name_description_success.t(id: @description.id))
-        redirect_to(name_description_path(@description.id))
+        redirect_to(@description.show_link_args)
       else
         flash_object_errors(@description)
       end
@@ -244,108 +242,39 @@ module Names
       @name.description = @description
     end
 
-    # Log action in parent name.
-    def log_description_created
-      @description.name.log(:log_description_created,
-                            user: @user.login,
-                            touch: true,
-                            name: @description.unique_partial_format_name)
-    end
-
     def save_if_changes_made_or_flash
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        redirect_to(name_description_path(@description.id))
+        redirect_to(@description.show_link_args)
 
-      # There were error(s).
+      # Try to save and flash if there were error(s).
       elsif !@description.save
         flash_object_errors(@description)
 
       # Updated successfully.
       else
-        save_flash_success_and_redirect
+        flash_success_update_parent_and_redirect
       end
     end
 
-    def save_flash_success_and_redirect
+    def flash_success_update_parent_and_redirect
       flash_notice(
         :runtime_edit_name_description_success.t(id: @description.id)
       )
       name = @description.name
-      update_classification_cache(name)
-      log_description_updated(name)
-      resolve_merge_conflicts_and_delete_old_description(name)
-      redirect_to(name_description_path(@description.id))
+      update_classification_cache_and_save_name(name)
+      log_description_updated
+      resolve_merge_conflicts_and_delete_old_description
+      redirect_to(@description.show_link_args)
     end
 
     # Update name's classification cache.
-    def update_classification_cache(name)
+    def update_classification_cache_and_save_name(name)
       if (name.description == @description) &&
          (name.classification != @description.classification)
         name.classification = @description.classification
         name.save if name.changed?
-      end
-    end
-
-    # Log action to parent name.
-    def log_description_updated(name)
-      name.log(:log_description_updated,
-               touch: true,
-               user: @user.login,
-               name: @description.unique_partial_format_name)
-    end
-
-    # Delete old description after resolving conflicts of merge.
-    def resolve_merge_conflicts_and_delete_old_description(name)
-      if (params[:delete_after] == "true") &&
-         (old_desc = NameDescription.safe_find(params[:old_desc_id]))
-        if !in_admin_mode? && !old_desc.is_admin?(@user)
-          flash_warning(:runtime_description_merge_delete_denied.t)
-        else
-          flash_notice(:runtime_description_merge_deleted.
-                          t(old: old_desc.partial_format_name))
-          log_description_merged(name)
-          old_desc.destroy
-        end
-      end
-    end
-
-    # Log merge to parent name.
-    def log_description_merged(name)
-      name.log(:log_object_merged_by_user,
-               touch: true,
-               user: @user.login,
-               from: old_desc.unique_partial_format_name,
-               to: @description.unique_partial_format_name)
-    end
-
-    def check_delete_permission_flash_and_redirect
-      if in_admin_mode? || @description.is_admin?(@user)
-        flash_notice(:runtime_destroy_description_success.t)
-        log_description_destroyed
-        @description.destroy
-        redirect_to(name_path(@description.name_id, q: get_query_param))
-      else
-        flash_error(:runtime_destroy_description_not_admin.t)
-        redirect_if_description_not_destroyed
-      end
-    end
-
-    def log_description_destroyed
-      @description.name.log(:log_description_destroyed,
-                            user: @user.login,
-                            touch: true,
-                            name: @description.unique_partial_format_name)
-    end
-
-    def redirect_if_description_not_destroyed
-      if in_admin_mode? || @description.is_reader?(@user)
-        redirect_to(
-          name_description_path(@description.id, q: get_query_param)
-        )
-      else
-        redirect_to(name_path(@description.name_id, q: get_query_param))
       end
     end
 

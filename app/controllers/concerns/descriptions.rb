@@ -291,5 +291,63 @@ module Descriptions
     def find_licenses
       @licenses = License.current_names_and_ids
     end
+
+    # Log action in parent
+    def log_description_created
+      @description.parent.log(:log_description_created,
+                              user: @user.login, touch: true,
+                              name: @description.unique_partial_format_name)
+    end
+
+    # Log merge to parent.
+    def log_description_merged
+      @description.parent.log(:log_object_merged_by_user,
+                              touch: true,
+                              user: @user.login,
+                              from: old_desc.unique_partial_format_name,
+                              to: @description.unique_partial_format_name)
+    end
+
+    # Delete old description after resolving conflicts of merge.
+    def resolve_merge_conflicts_and_delete_old_description
+      if (params[:delete_after] == "true") &&
+         (old_desc = @description.class.safe_find(params[:old_desc_id]))
+        if !in_admin_mode? && !old_desc.is_admin?(@user)
+          flash_warning(:runtime_description_merge_delete_denied.t)
+        else
+          flash_notice(:runtime_description_merge_deleted.
+                          t(old: old_desc.partial_format_name))
+          log_description_merged(@description)
+          old_desc.destroy
+        end
+      end
+    end
+
+    def check_delete_permission_flash_and_redirect
+      if in_admin_mode? || @description.is_admin?(@user)
+        flash_notice(:runtime_destroy_description_success.t)
+        log_description_destroyed(@description)
+        @description.destroy
+        redirect_to(add_query_param(@description.parent.show_link_args))
+      else
+        flash_error(:runtime_destroy_description_not_admin.t)
+        redirect_if_description_not_destroyed
+      end
+    end
+
+    def redirect_if_description_not_destroyed
+      if in_admin_mode? || @description.is_reader?(@user)
+        redirect_to(add_query_param(@description.show_link_args))
+      else
+        redirect_to(add_query_param(@description.parent.show_link_args))
+      end
+    end
+
+    def log_description_destroyed
+      @description.parent.log(:log_description_destroyed,
+                              user: @user.login,
+                              touch: true,
+                              name: @description.unique_partial_format_name)
+    end
   end
 end
