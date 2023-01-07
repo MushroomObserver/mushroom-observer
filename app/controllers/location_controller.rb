@@ -548,7 +548,7 @@ class LocationController < ApplicationController
                       action: :show,
                       id: @set_observation)
         elsif @set_species_list
-          redirect_to(controller: :species_list, action: :show_species_list,
+          redirect_to(controller: :species_lists, action: :show,
                       id: @set_species_list)
         elsif @set_herbarium
           if (herbarium = Herbarium.safe_find(@set_herbarium))

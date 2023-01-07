@@ -174,33 +174,33 @@ ACTIONS = {
     project_search: {}
     # show_project: {}
   },
-  species_list: {
-    add_observation_to_species_list: {},
-    add_remove_observations: {},
-    bulk_editor: {},
-    clear_species_list: {},
-    create_species_list: {},
-    destroy_species_list: {},
-    download: {},
-    edit_species_list: {},
-    index_species_list: {},
-    list_species_lists: {},
-    make_report: {},
-    manage_projects: {},
-    manage_species_lists: {},
-    name_lister: {},
-    next_species_list: {},
-    post_add_remove_observations: {},
-    prev_species_list: {},
-    print_labels: {},
-    remove_observation_from_species_list: {},
-    # show_species_list: {},
-    species_list_search: {},
-    species_lists_by_title: {},
-    species_lists_by_user: {},
-    species_lists_for_project: {},
-    upload_species_list: {}
-  },
+  # species_list: {
+  #   add_observation_to_species_list: {},
+  #   add_remove_observations: {},
+  #   bulk_editor: {},
+  #   clear_species_list: {},
+  #   create_species_list: {},
+  #   destroy_species_list: {},
+  #   download: {},
+  #   edit_species_list: {},
+  #   index_species_list: {},
+  #   list_species_lists: {},
+  #   make_report: {},
+  #   manage_projects: {},
+  #   manage_species_lists: {},
+  #   name_lister: {},
+  #   next_species_list: {},
+  #   post_add_remove_observations: {},
+  #   prev_species_list: {},
+  #   print_labels: {},
+  #   remove_observation_from_species_list: {},
+  #   # show_species_list: {},
+  #   species_list_search: {},
+  #   species_lists_by_title: {},
+  #   species_lists_by_user: {},
+  #   species_lists_for_project: {},
+  #   upload_species_list: {}
+  # },
   support: {
     confirm: {},
     donate: {},
@@ -646,6 +646,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                           as: "print_labels_for")
     end
   end
+  # NOTE: the intentional "backwards" param specificity here:
+  get("/observations/:id/species_lists/edit",
+      to: "observations/species_lists#edit",
+      as: "edit_observation_species_lists")
+  match("/observations/:id/species_lists/:species_list_id(/:commit)",
+        to: "observations/species_lists#update",
+        via: [:put, :patch],
+        as: "observation_species_list")
   # These are in observations because they share private methods with
   # :new and :create, which are currently observation-specific
   get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
@@ -683,6 +691,42 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
+  # ----- Species Lists: standard actions -----------------------------------
+  resources :species_lists, id: /\d+/
+
+  put("/species_lists/:id/clear", to: "species_lists#clear",
+                                  as: "clear_species_list")
+
+  get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
+                                        as: "new_species_list_name_lister")
+  post("/species_lists/name_lister", to: "species_lists/name_lists#create",
+                                     as: "species_list_name_lister")
+  get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
+                                        as: "new_species_list_upload")
+  post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
+                                     as: "species_list_uploads")
+  get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
+                                          as: "new_species_list_download")
+  post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
+                                       as: "species_list_downloads")
+  post("/species_lists/:id/downloads/print_labels",
+       to: "species_lists/downloads#print_labels",
+       as: "species_list_download_print_labels")
+  get("/species_lists/observations/edit",
+      to: "species_lists/observations#edit",
+      as: "edit_species_list_observations")
+  match("/species_lists/observations(/:commit)",
+        to: "species_lists/observations#update",
+        via: [:put, :patch],
+        as: "species_list_observations")
+  get("/species_lists/:id/projects",
+      to: "species_lists/projects#edit",
+      as: "edit_species_list_projects")
+  match("/species_lists/:id/projects",
+        to: "species_lists/projects#update",
+        via: [:put, :patch],
+        as: "species_list_projects")
+
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"
@@ -704,10 +748,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Name:
   get("/name/show_name/:id", to: "name#show_name",
                              as: "show_name")
-  # ----- Species List:
-  get("/species_list/show_species_list/:id",
-      to: "species_list#show_species_list",
-      as: "show_species_list")
 
   # ----- end temporary show routes for path_builder with id ---------------
 

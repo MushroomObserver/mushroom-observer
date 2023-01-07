@@ -276,15 +276,19 @@ module ControllerExtensions
 
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
-  def assert_link_in_html(label, url_opts, _msg = nil)
-    revised_opts = raise_params(url_opts)
-    url = url_for(revised_opts)
+  def assert_link_in_html(label, url, _msg = nil)
+    unless url.is_a?(String)
+      revised_opts = raise_params(url)
+      url = url_for(revised_opts)
+    end
     assert_select("a[href='#{url}']", text: label)
   end
 
-  def assert_image_link_in_html(img_src, url_opts, _msg = nil)
-    revised_opts = raise_params(url_opts)
-    url = url_for(revised_opts)
+  def assert_image_link_in_html(img_src, url, _msg = nil)
+    unless url.is_a?(String)
+      revised_opts = raise_params(url)
+      url = url_for(revised_opts)
+    end
     assert_select("a[href = '#{url}']>img") do
       assert_select(":match('src', ?)", img_src)
     end

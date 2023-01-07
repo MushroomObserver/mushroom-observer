@@ -30,14 +30,12 @@
     @title = :checklist_for_species_list_title.t(list: @species_list.title)
     tabs = [
       link_to(:show_object.t(type: :project),
-              controller: :species_list, action: :show_species_list,
-              id: @species_list.id)
+              species_list_path(@species_list.id))
     ]
     if check_permission(@species_list)
       tabs += [
         link_to(:edit_object.t(type: :species_list),
-                controller: :species_list, action: :edit_species_list,
-                id: @species_list.id)
+                edit_species_list_path(@species_list.id))
       ]
     end
     @tabsets = { right: draw_tab_set(tabs) }
@@ -54,7 +52,8 @@
 %>
 
 <div class="text-center">
-  <%= :checklist_summary.t(species: @data.num_species, genera: @data.num_genera) %>
+  <%= :checklist_summary.t(species: @data.num_species,
+                           genera: @data.num_genera) %>
   <br/>
   <br/>
 

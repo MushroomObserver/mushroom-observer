@@ -71,8 +71,8 @@
         <b><%= :SPECIES_LISTS.t %>:</b>
         <% if @project.species_lists.any? %>
           <%= @project.species_lists.length %>
-          (<%= link_to(:SHOW.t, controller: :species_list,
-                       action: :species_lists_for_project, id: @project.id) %>)
+          (<%= link_to(:SHOW.t, controller: :species_lists,
+                       action: :index, for_project: @project.id) %>)
         <% else %>
           <%= :NONE.t %>
         <% end %>

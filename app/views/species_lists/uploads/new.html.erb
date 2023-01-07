@@ -2,8 +2,9 @@
   @title = :species_list_upload_title.t
 %>
 
-<%= form_tag({ action: :upload_species_list, id: @species_list.id },
-              multipart: true) do %>
+<%= form_with(url: species_list_uploads_path(@species_list.id),
+              multipart: true) do |f| %>
+
   <div class="form-group mt-3">
     <%= :species_list_upload_label.t %>:
     <%= custom_file_field(:species_list, :file) %>
@@ -11,5 +12,7 @@
       <%= :species_list_upload_help.tp %>
     </div>
   </div>
-  <%= submit_tag(:UPLOAD.l, class: "btn btn-default center-block mt-3") %>
+
+  <%= f.submit(:UPLOAD.l, class: "btn btn-default center-block mt-3") %>
+
 <% end %>

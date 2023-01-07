@@ -61,7 +61,7 @@ OBJECT_TYPES = [
    "location/show_location/ID"],
   ["species_lists",
    "SpeciesList",
-   "species_list/show_species_list/ID"],
+   "species_lists/ID"],
   ["projects",
    "Project",
    "projects/ID"],
