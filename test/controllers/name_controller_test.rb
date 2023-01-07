@@ -4383,6 +4383,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_warning
     assert(tracker.reload.approved)
     assert_equal(1, QueuedEmail.count)
+    QueuedEmail.queue_emails(false)
   end
 
   # ----------------------------
