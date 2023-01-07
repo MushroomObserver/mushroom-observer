@@ -3,12 +3,13 @@
 require("test_helper")
 
 class SpeciesListsControllerTest < FunctionalTestCase
-  # NOTE: Use Rolf's base contribution as a proxy for all users
-  # because I don't know how to grab the DEFAULT from the fixture set.
+  # NOTE: I don't know how to grab the DEFAULT from the fixture set and
+  #   User.find(ActiveRecord::FixtureSet.identify(:rolf)).contribution
+  # blows up in CI with
+  # Couldn't find User with 'id'=241228755 (ActiveRecord::RecordNotFound)
+  # See https://github.com/MushroomObserver/mushroom-observer/actions/runs/3863461654/jobs/6585724583
   # JDC 2023-01-07
-  BASE_CONTRIBUTION = User.find(
-    ActiveRecord::FixtureSet.identify(:rolf)
-  ).contribution.freeze
+  BASE_CONTRIBUTION = 10
 
   # Score for one new name.
   def v_nam
