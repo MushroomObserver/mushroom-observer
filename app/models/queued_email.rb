@@ -210,7 +210,6 @@ class QueuedEmail < AbstractModel
          queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
          queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.join(" "))
     current_locale = I18n.locale
-    # unless MO.queue_email || @@queue
     unless MO.queue_email || QueuedEmail.queue
       deliver_email if RunLevel.is_normal?
       destroy
