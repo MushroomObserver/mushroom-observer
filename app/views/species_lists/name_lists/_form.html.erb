@@ -1,0 +1,26 @@
+<%= form_with(url: { action: :create },
+              id: "name_lister_form") do |f| %>
+
+  <div class="text-center">
+    <%= f.submit(:name_lister_submit_spl.l,
+                 class: "btn btn-default mx-3",
+                 disabled: !@user) %>
+    <%= f.submit(:name_lister_submit_txt.l,
+                 class: "btn btn-default mx-3") %>
+    <%= f.submit(:name_lister_submit_rtf.l,
+                 class: "btn btn-default mx-3") %>
+    <%= f.submit(:name_lister_submit_csv.l,
+                 class: "btn btn-default mx-3") %>
+  </div><!-- .text-center -->
+
+  <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
+
+  <% if false %>
+    <br/>
+    <%= f.label(:charset, :name_lister_charset.t + ":") %>
+    <%= f.select(:charset, options_for_select(["ISO-8859-1",
+                  "WINDOWS-1252", "UTF-8"], @charset)) %>
+    <span class="help-note"><%= :name_lister_charset_help.t %></span>
+  <% end %>
+
+<% end %>
