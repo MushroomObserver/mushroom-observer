@@ -15,6 +15,7 @@
 module Locations
   class DescriptionsController < ApplicationController
     include Descriptions
+    include ::Locations::Descriptions::SharedPrivateMethods
 
     before_action :login_required
     before_action :disable_link_prefetching, except: [
@@ -128,8 +129,8 @@ module Locations
     def create_location_description
       store_location
       pass_query_params
-      @location = Location.find(params[:id].to_s)
-      @licenses = License.current_names_and_ids
+      find_location
+      find_licenses
       @description = LocationDescription.new
       @description.location = @location
 
@@ -139,7 +140,7 @@ module Locations
 
       # Create new description.
       else
-        @description.attributes = whitelisted_location_description_params
+        @description.attributes = allowed_location_description_params
 
         if @description.valid?
           initialize_description_permissions(@description)
@@ -162,67 +163,78 @@ module Locations
       end
     end
 
-    def edit_location_description
+    def find_location
+      @location = Location.find(params[:id].to_s)
+    end
+
+    def edit
       store_location
       pass_query_params
       @description = LocationDescription.find(params[:id].to_s)
-      @licenses = License.current_names_and_ids
+      find_licenses
 
       # check_description_edit_permission is partly broken.
       # It, LocationController, and NameController need repairs.
       # See https://www.pivotaltracker.com/story/show/174737948
-      if !check_description_edit_permission(@description,
-                                            params[:description])
-        # already redirected
+      check_description_edit_permission(@description,
+                                        params[:description])
+    end
 
-      elsif request.method == "POST"
-        @description.attributes = whitelisted_location_description_params
+    def update
+      store_location
+      pass_query_params
+      @description = LocationDescription.find(params[:id].to_s)
+      find_licenses
 
-        # Modify permissions based on changes to the two "public" checkboxes.
-        modify_description_permissions(@description)
+      check_description_edit_permission(@description,
+                                        params[:description])
 
-        # No changes made.
-        if !@description.changed?
-          flash_warning(:runtime_edit_location_description_no_change.t)
-          redirect_to(action: :show_location_description,
-                      id: @description.id)
+      @description.attributes = allowed_location_description_params
 
-        # There were error(s).
-        elsif !@description.save
-          flash_object_errors(@description)
+      # Modify permissions based on changes to the two "public" checkboxes.
+      modify_description_permissions(@description)
 
-        # Updated successfully.
-        else
-          flash_notice(
-            :runtime_edit_location_description_success.t(id: @description.id)
-          )
+      # No changes made.
+      if !@description.changed?
+        flash_warning(:runtime_edit_location_description_no_change.t)
+        redirect_to(action: :show_location_description,
+                    id: @description.id)
 
-          # Log action in parent location.
-          @description.location.log(:log_description_updated,
-                                    user: @user.login, touch: true,
-                                    name: @description.unique_partial_format_name)
+      # There were error(s).
+      elsif !@description.save
+        flash_object_errors(@description)
 
-          # Delete old description after resolving conflicts of merge.
-          if (params[:delete_after] == "true") &&
-             (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
-            if !in_admin_mode? && !old_desc.is_admin?(@user)
-              flash_warning(:runtime_description_merge_delete_denied.t)
-            else
-              flash_notice(:runtime_description_merge_deleted.
-                             t(old: old_desc.partial_format_name))
-              @description.location.log(
-                :log_object_merged_by_user,
-                user: @user.login, touch: true,
-                from: old_desc.unique_partial_format_name,
-                to: @description.unique_partial_format_name
-              )
-              old_desc.destroy
-            end
+      # Updated successfully.
+      else
+        flash_notice(
+          :runtime_edit_location_description_success.t(id: @description.id)
+        )
+
+        # Log action in parent location.
+        @description.location.log(:log_description_updated,
+                                  user: @user.login, touch: true,
+                                  name: @description.unique_partial_format_name)
+
+        # Delete old description after resolving conflicts of merge.
+        if (params[:delete_after] == "true") &&
+           (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
+          if !in_admin_mode? && !old_desc.is_admin?(@user)
+            flash_warning(:runtime_description_merge_delete_denied.t)
+          else
+            flash_notice(:runtime_description_merge_deleted.
+                            t(old: old_desc.partial_format_name))
+            @description.location.log(
+              :log_object_merged_by_user,
+              user: @user.login, touch: true,
+              from: old_desc.unique_partial_format_name,
+              to: @description.unique_partial_format_name
+            )
+            old_desc.destroy
           end
-
-          redirect_to(action: :show_location_description,
-                      id: @description.id)
         end
+
+        redirect_to(action: :show_location_description,
+                    id: @description.id)
       end
     end
 
@@ -249,7 +261,7 @@ module Locations
       end
     end
 
-    def whitelisted_location_description_params
+    def allowed_location_description_params
       params.require(:description).
         permit(:source_type, :source_name, :project_id, :public_write, :public,
                :license_id, :gen_desc, :ecology, :species, :notes, :refs)

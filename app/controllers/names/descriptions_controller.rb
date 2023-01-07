@@ -220,10 +220,6 @@ module Names
       @name = Name.find(params[:id].to_s)
     end
 
-    def find_licenses
-      @licenses = License.current_names_and_ids
-    end
-
     def check_create_validity_and_save_or_flash_and_redirect
       if @description.valid?
         initialize_description_permissions(@description)

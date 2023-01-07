@@ -287,5 +287,9 @@ module Descriptions
         action: object.show_action,
         id: object.id, q: get_query_param }
     end
+
+    def find_licenses
+      @licenses = License.current_names_and_ids
+    end
   end
 end
