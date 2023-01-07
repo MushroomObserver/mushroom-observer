@@ -4354,7 +4354,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_approve_tracker_with_template
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     assert_equal(0, QueuedEmail.count)
 
     tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
@@ -4383,7 +4383,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_warning
     assert(tracker.reload.approved)
     assert_equal(1, QueuedEmail.count)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   # ----------------------------
