@@ -141,7 +141,7 @@ module Names
     #
     ############################################################################
 
-    def create_name_description
+    def new
       store_location
       pass_query_params
       @name = Name.find(params[:id].to_s)
@@ -150,44 +150,50 @@ module Names
       @description.name = @name
 
       # Render a blank form.
-      if request.method == "GET"
-        initialize_description_source(@description)
+      initialize_description_source(@description)
+    end
+
+    def create
+      store_location
+      pass_query_params
+      @name = Name.find(params[:id].to_s)
+      @licenses = License.current_names_and_ids
+      @description = NameDescription.new
+      @description.name = @name
 
       # Create new description.
-      else
-        @description.attributes = whitelisted_name_description_params
-        @description.source_type = @description.source_type.to_sym
+      @description.attributes = whitelisted_name_description_params
+      @description.source_type = @description.source_type.to_sym
 
-        if @description.valid?
-          initialize_description_permissions(@description)
-          @description.save
+      if @description.valid?
+        initialize_description_permissions(@description)
+        @description.save
 
-          # Make this the "default" description if there isn't one and this is
-          # publicly readable and writable.
-          if !@name.description && @description.fully_public
-            @name.description = @description
-          end
-
-          # Keep the parent's classification cache up to date.
-          if (@name.description == @description) &&
-             (@name.classification != @description.classification)
-            @name.classification = @description.classification
-          end
-
-          # Log action in parent name.
-          @description.name.log(:log_description_created,
-                                user: @user.login,
-                                touch: true,
-                                name: @description.unique_partial_format_name)
-
-          # Save any changes to parent name.
-          @name.save if @name.changed?
-
-          flash_notice(:runtime_name_description_success.t(id: @description.id))
-          redirect_to(name_description_path(@description.id))
-        else
-          flash_object_errors(@description)
+        # Make this the "default" description if there isn't one and this is
+        # publicly readable and writable.
+        if !@name.description && @description.fully_public
+          @name.description = @description
         end
+
+        # Keep the parent's classification cache up to date.
+        if (@name.description == @description) &&
+           (@name.classification != @description.classification)
+          @name.classification = @description.classification
+        end
+
+        # Log action in parent name.
+        @description.name.log(:log_description_created,
+                              user: @user.login,
+                              touch: true,
+                              name: @description.unique_partial_format_name)
+
+        # Save any changes to parent name.
+        @name.save if @name.changed?
+
+        flash_notice(:runtime_name_description_success.t(id: @description.id))
+        redirect_to(name_description_path(@description.id))
+      else
+        flash_object_errors(@description)
       end
     end
 
