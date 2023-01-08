@@ -5,6 +5,7 @@ module Locations
   class ObservationsController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
+
     # merges_controller_test
     # Adds the Observation's associated with obs.where == params[:where]
     # into the given Location.  Linked from +list_merge_options+, I think.
@@ -27,7 +28,7 @@ module Locations
       redirect_to(locations_path)
     end
 
-          private
+    private
 
     # Move all the Observation's with a given +where+ into a given Location.
     def update_observations_by_where(location, given_where)
@@ -47,5 +48,6 @@ module Locations
         success = false
       end
       success
-    end end
+    end
+  end
 end

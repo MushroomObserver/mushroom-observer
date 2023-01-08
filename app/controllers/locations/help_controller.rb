@@ -6,6 +6,6 @@ module Locations
     before_action :login_required
     before_action :disable_link_prefetching
     # Help for locations
-    def help; end
+    def show; end
   end
 end

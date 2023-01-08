@@ -7,7 +7,7 @@ module Locations
     before_action :disable_link_prefetching
 
     # Map results of a search or index.
-    def map_locations
+    def show
       @query = find_or_create_query(:Location)
 
       apply_content_filters(@query)

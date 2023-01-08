@@ -5,6 +5,7 @@ module Locations
   class ReverseNameOrderController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
+
     # Callback for :show
     def update
       if (location = Location.safe_find(params[:id].to_s))

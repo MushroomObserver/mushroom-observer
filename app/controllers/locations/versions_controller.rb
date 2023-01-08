@@ -7,7 +7,7 @@ module Locations
     before_action :disable_link_prefetching
 
     # Show past version of Location.  Accessible only from show_location page.
-    def show_past_location
+    def show
       store_location
       pass_query_params
       @location = find_or_goto_index(Location, params[:id].to_s)

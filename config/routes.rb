@@ -615,10 +615,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Location Countries: show
   get("locations/:id/countries", to: "locations/countries#index",
                                  as: "location_countries")
-  # Location Reverse name order: update
-  put("locations/:id/reverse_name_order",
-      to: "locations/reverse_name_order#update",
-      as: "location_reverse_name_order")
   # Location Help: show
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
@@ -628,12 +624,16 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                               as: "location_merge_options")
   post("locations/merges", to: "locations/merges#create",
                            as: "location_merges")
-  # Location Versions: show
-  get("locations/:id/versions", to: "locations/versions#show",
-                                as: "location_versions")
   # Add Observation (matching :where) to Location: update
   patch("locations/add_to_location", to: "locations/observations#update",
                                      as: "add_observation_to_location")
+  # Location Reverse name order: update
+  put("locations/:id/reverse_name_order",
+      to: "locations/reverse_name_order#update",
+      as: "location_reverse_name_order")
+  # Location Versions: show
+  get("locations/:id/versions", to: "locations/versions#show",
+                                as: "location_versions")
 
   # like resources, but using just an :id param:
   get("locations/:id/descriptions",

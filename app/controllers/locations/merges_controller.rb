@@ -14,7 +14,7 @@ module Locations
 
     # Show a list of defined locations that match a given +where+ string, in
     # order of closeness of match.
-    def list_merge_options
+    def new
       store_location
       @where = Location.user_name(@user, params[:where].to_s)
 
