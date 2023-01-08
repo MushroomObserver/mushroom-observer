@@ -410,7 +410,7 @@ class Image < AbstractModel
     w = width
     h = height
     if width && height
-      d = w > h ? w : h
+      d = [w, h].max
       max = case size.to_s
             when "thumbnail" then 160
             when "small" then 320

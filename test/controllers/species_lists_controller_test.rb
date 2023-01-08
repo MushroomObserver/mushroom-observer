@@ -3,6 +3,14 @@
 require("test_helper")
 
 class SpeciesListsControllerTest < FunctionalTestCase
+  # NOTE: I don't know how to grab the DEFAULT from the fixture set and
+  #   User.find(ActiveRecord::FixtureSet.identify(:rolf)).contribution
+  # blows up in CI with
+  # Couldn't find User with 'id'=241228755 (ActiveRecord::RecordNotFound)
+  # See https://github.com/MushroomObserver/mushroom-observer/actions/runs/3863461654/jobs/6585724583
+  # JDC 2023-01-07
+  BASE_CONTRIBUTION = 10
+
   # Score for one new name.
   def v_nam
     10
@@ -294,7 +302,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post_requires_login(:create, params)
     spl = SpeciesList.last
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert_equal(list_title, spl.title)
     assert(spl.name_included(names(:coprinus_comatus)))
@@ -350,7 +358,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(agaricus))
   end
@@ -381,7 +389,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_redirected_to(species_list_path(spl.id))
     # Creates Lecideaceae, spl, and obs/naming/splentry.
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_nam + v_spl + v_obs,
+                 rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
@@ -465,7 +474,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_redirected_to(species_list_path(spl.id))
     # Creating L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_nam + v_spl + v_obs,
+                 rolf.reload.contribution)
     assert_not_nil(spl)
     obs = spl.observations.first
     assert_not_nil(obs)
@@ -499,7 +509,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_redirected_to(species_list_path(spl.id))
     # Creates Lecideaceae, spl, obs/naming/splentry.
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_nam + v_spl + v_obs,
+                 rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
@@ -569,7 +580,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_redirected_to(species_list_path(spl.id))
     # Creates "New" and "New name", spl, and five obs/naming/splentries.
-    assert_equal(10 + v_nam * 2 + v_spl + v_obs * 5, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_nam * 2 + v_spl + v_obs * 5,
+                 rolf.reload.contribution)
     assert(spl.name_included(deprecated_name))
     assert(spl.name_included(multiple_name))
     assert(spl.name_included(Name.find_by(text_name: new_name_str)))
@@ -628,7 +640,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = SpeciesList.last
 
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert(spl.name_included(bugs_names.second))
   end
 
@@ -659,7 +671,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(names(:coprinus_comatus)))
     obs = spl.observations.first
@@ -735,7 +747,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(owner)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs * 2, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
   end
 
@@ -787,7 +799,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     put(:update, params: params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
     assert_equal("New Title", spl.title)
@@ -825,7 +837,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
     # Creates "New", 'New name', observations/splentry/naming.
-    assert_equal(10 + v_nam * 2 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_nam * 2 + v_obs,
+                 spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
   end
 
@@ -855,7 +868,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -886,7 +899,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -901,7 +914,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -932,7 +945,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
@@ -951,7 +964,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_not(spl.name_included(name))
     assert(spl.name_included(approved_name))
@@ -972,7 +985,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_not(spl.name_included(name))
     assert(spl.name_included(approved_name))
