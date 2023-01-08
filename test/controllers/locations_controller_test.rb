@@ -108,22 +108,22 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Location", id: albion.id, state: 1)
+                              set_interest_path(type: "Location",
+                                                id: albion.id, state: 1))
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Location", id: albion.id, state: -1)
+                              set_interest_path(type: "Location",
+                                                id: albion.id, state: -1))
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Location", id: albion.id, state: 0)
+                              set_interest_path(type: "Location",
+                                                id: albion.id, state: 0))
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Location", id: albion.id, state: -1)
+                              set_interest_path(type: "Location",
+                                                id: albion.id, state: -1))
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
@@ -131,11 +131,11 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Location", id: albion.id, state: 0)
+                              set_interest_path(type: "Location",
+                                                id: albion.id, state: 0))
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Location", id: albion.id, state: 1)
+                              set_interest_path(type: "Location",
+                                                id: albion.id, state: 1))
   end
 
   ##############################################################################

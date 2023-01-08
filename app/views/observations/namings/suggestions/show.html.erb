@@ -39,10 +39,11 @@
             (<%= :suggestions_already_proposed.t %>)
           <% else %>
             <%= link_with_query(:suggestions_propose_name.t,
-                                { controller: :naming, action: :create,
-                                  id: @observation.id,
+                                new_observation_naming_path(
+                                  @observation.id,
                                   name: sugg.name.search_name,
-                                  ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence" },
+                                  ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"
+                                ),
                                 { class: "btn btn-default mt-3" }) %>
             <% end %>
             <br/><br/>

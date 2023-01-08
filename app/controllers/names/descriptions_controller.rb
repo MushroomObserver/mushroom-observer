@@ -90,7 +90,7 @@ module Names
       store_query_in_session(query)
       @links ||= []
       args = {
-        controller: "names/descriptions",
+        controller: "/names/descriptions",
         action: "index",
         num_per_page: 50
       }.merge(args)

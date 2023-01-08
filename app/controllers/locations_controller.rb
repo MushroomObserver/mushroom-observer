@@ -483,8 +483,7 @@ class LocationsController < ApplicationController
     if @set_observation
       redirect_to(observations_path(@set_observation))
     elsif @set_species_list
-      redirect_to(controller: :species_list, action: :show_species_list,
-                  id: @set_species_list)
+      redirect_to(species_list_path(@set_species_list))
     elsif @set_herbarium
       if (herbarium = Herbarium.safe_find(@set_herbarium))
         herbarium.location = @location
@@ -517,11 +516,10 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(controller: :emails,
-                          action: :merge_request,
-                          type: :Location,
-                          old_id: @location.id,
-                          new_id: merge.id)
+      redirect_with_query(emails_merge_request_path(
+                            type: :Location, old_id: @location.id,
+                            new_id: merge.id
+                          ))
     end
   end
 

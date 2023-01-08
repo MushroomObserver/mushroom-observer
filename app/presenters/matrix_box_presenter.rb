@@ -37,10 +37,7 @@ class MatrixBoxPresenter
                              action: target.show_action,
                              id: target.id)
       else
-        view.link_with_query(name,
-                             controller: :rss_logs,
-                             action: :show,
-                             id: rss_log.id)
+        view.link_with_query(name, rss_log_path(rss_log.id))
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
@@ -86,7 +83,7 @@ class MatrixBoxPresenter
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
-    self.what  = view.link_with_query(name, controller: :observations,
+    self.what  = view.link_with_query(name, controller: "/observations",
                                             action: :show,
                                             id: observation.id)
     self.where = view.location_link(observation.place_name,
@@ -99,7 +96,7 @@ class MatrixBoxPresenter
 
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: :observations,
+                     link: { controller: "/observations",
                              action: :show,
                              id: observation.id })
   end

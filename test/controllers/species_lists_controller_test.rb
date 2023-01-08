@@ -785,7 +785,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login(owner)
     put(:update, params: params)
-    # assert_redirected_to(controller: "location", action: "create_location")
+    # assert_redirected_to(controller: "/locations", action: :new)
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)

@@ -433,11 +433,11 @@ module ControllerExtensions
   #   assert_response("template")
   #
   #   # Expect a redirect to particular observation
-  #   assert_response({ controller: :observations, action: :show, id: 1 })
+  #   assert_response({ controller: "/observations", action: :show, id: 1 })
   #   assert_response({ action: :show, id: 1 })
   #
   #   # Expect a redirection to site index.
-  #   assert_response(controller: :rss_logs, action: :index)
+  #   assert_response(controller: "/rss_logs", action: :index)
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])

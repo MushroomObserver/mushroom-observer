@@ -296,22 +296,22 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Name", id: peltigera.id, state: 1)
+                              set_interest_path(type: "Name",
+                                                id: peltigera.id, state: 1))
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Name", id: peltigera.id, state: -1)
+                              set_interest_path(type: "Name",
+                                                id: peltigera.id, state: -1))
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: peltigera, user: rolf, state: true)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Name", id: peltigera.id, state: 0)
+                              set_interest_path(type: "Name",
+                                                id: peltigera.id, state: 0))
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Name", id: peltigera.id, state: -1)
+                              set_interest_path(type: "Name",
+                                                id: peltigera.id, state: -1))
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
@@ -319,11 +319,11 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Name", id: peltigera.id, state: 0)
+                              set_interest_path(type: "Name",
+                                                id: peltigera.id, state: 0))
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "/interests", action: "set_interest",
-                              type: "Name", id: peltigera.id, state: 1)
+                              set_interest_path(type: "Name",
+                                                id: peltigera.id, state: 1))
   end
 
   def test_next_and_prev
@@ -1406,8 +1406,8 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_redirected_to(
-      { controller: :emails, action: :name_change_request,
-        name_id: name.id, new_name_with_icn_id: "Superboletus [#]" },
+      emails_name_change_request_path(name_id: name.id,
+                                      new_name_with_icn_id: "Superboletus [#]"),
       "User should be unable to change text_name of Name with dependents"
     )
   end
@@ -1557,11 +1557,10 @@ class NamesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
     assert_redirected_to(
-      { controller: :emails, action: :name_change_request,
-        params: {
-          name_id: name.id,
-          new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
-        } },
+      emails_name_change_request_path(
+        name_id: name.id,
+        new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
+      ),
       "Editing id# of Name w/dependents should show Name Change Request form"
     )
   end
@@ -1657,8 +1656,9 @@ class NamesControllerTest < FunctionalTestCase
 
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
-    assert_redirected_to(controller: :emails, action: :merge_request,
-                         type: :Name, old_id: old_name.id, new_id: new_name.id)
+    assert_redirected_to(emails_merge_request_path(
+                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                         ))
     assert(Name.find(old_name.id))
     assert(new_name.reload)
     assert_equal(1, new_name.version)
@@ -1777,8 +1777,9 @@ class NamesControllerTest < FunctionalTestCase
 
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(controller: :emails, action: :merge_request,
-                         type: :Name, old_id: old_name.id, new_id: new_name.id)
+    assert_redirected_to(emails_merge_request_path(
+                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                         ))
 
     # Try again as an admin.
     make_admin
@@ -2159,8 +2160,9 @@ class NamesControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     put(:update, params: params)
-    assert_redirected_to(controller: :emails, action: :merge_request,
-                         type: :Name, old_id: old_name.id, new_id: new_name.id)
+    assert_redirected_to(emails_merge_request_path(
+                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                         ))
     assert(old_name.reload)
     assert(new_name.reload)
     assert_equal(1, new_name.version)

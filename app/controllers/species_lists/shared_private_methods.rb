@@ -172,8 +172,8 @@ module SpeciesLists
       construct_observations(@species_list, sorter)
 
       if @species_list.location.nil?
-        redirect_to(controller: "location", action: "create_location",
-                    where: @place_name, set_species_list: @species_list.id)
+        redirect_to(new_location_path(where: @place_name,
+                                      set_species_list: @species_list.id))
       else
         redirect_to(species_list_path(@species_list))
       end

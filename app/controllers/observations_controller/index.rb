@@ -130,8 +130,7 @@ module ObservationsController::Index
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(controller: :observations, action: :show,
-                  id: observation.id)
+      redirect_to(observation_path(observation.id))
     else
       render_observation_search_results(pattern)
     end
@@ -143,7 +142,7 @@ module ObservationsController::Index
       search.errors.each do |error|
         flash_error(error.to_s)
       end
-      render(controller: :observations, action: :index)
+      render(observations_path)
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
       show_selected_observations(
@@ -209,13 +208,10 @@ module ObservationsController::Index
     # undefined location.
     if query.flavor == :at_where
       @links << [:list_observations_location_define.l,
-                 { controller: :location, action: :create_location,
-                   where: query.params[:user_where] }]
+                 new_location_path(where: query.params[:user_where])]
       @links << [:list_observations_location_merge.l,
-                 { controller: :location, action: :list_merge_options,
-                   where: query.params[:user_where] }]
-      @links << [:list_observations_location_all.l,
-                 { controller: :location, action: :list_locations }]
+                 location_merge_options_path(where: query.params[:user_where])]
+      @links << [:list_observations_location_all.l, locations_path]
     end
 
     @links << [
@@ -241,7 +237,7 @@ module ObservationsController::Index
   # rubocop:enable Metrics/AbcSize
 
   def define_index_args(query, args)
-    args = { controller: :observations,
+    args = { controller: "/observations",
              action: :index,
              matrix: true,
              include: [:name, :location, :user, :rss_log,

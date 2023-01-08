@@ -38,8 +38,7 @@ class EmailsController < ApplicationController
     question = params[:question][:content]
     ObservationMailer.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(controller: "/observations", action: :show,
-                        id: @observation.id)
+    redirect_with_query(observation_path(@observation.id))
   end
 
   def commercial_inquiry
@@ -51,8 +50,7 @@ class EmailsController < ApplicationController
     commercial_inquiry = params[:commercial_inquiry][:content]
     CommercialMailer.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
-    redirect_with_query(controller: "/images", action: "show",
-                        id: @image.id)
+    redirect_with_query(image_path(@image.id))
   end
 
   def can_email_user_question?(target, method: :email_general_question)

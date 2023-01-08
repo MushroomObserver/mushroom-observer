@@ -8,6 +8,5 @@
 
 <% if @first_child %>
   <p><%= link_with_query(:show_name_propagate_lifeform.t,
-                         controller: :name, action: :propagate_lifeform,
-                         id: @name.id) %></p>
+                         propagate_name_lifeform_form_path(@name.id)) %></p>
 <% end %>

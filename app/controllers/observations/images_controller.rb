@@ -219,8 +219,7 @@ module Observations
     def check_image_permission!
       return if check_permission!(@image)
 
-      redirect_with_query(controller: "/images", action: :show,
-                          id: @image)
+      redirect_with_query(image_path(@image))
     end
 
     def whitelisted_image_params

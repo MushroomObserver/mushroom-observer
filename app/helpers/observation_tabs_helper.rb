@@ -39,17 +39,14 @@ module ObservationTabsHelper
     return unless obs.user.email_general_question && obs.user != user
 
     link_with_query(:show_observation_send_question.t,
-                    controller: :emails, action: :ask_observation_question,
-                    id: obs.id)
+                    emails_ask_observation_question_path(obs.id))
   end
 
   def manage_lists_link(obs, user)
     return unless user
 
     link_with_query(:show_observation_manage_species_lists.t,
-                    controller: "/observations/species_lists",
-                    action: :edit,
-                    id: obs.id)
+                    edit_observation_species_lists_path(obs.id))
   end
 
   def map_link(mappable)

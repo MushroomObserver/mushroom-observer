@@ -1,18 +1,16 @@
 <%
   # NOTE: action was `observations_of_name`. Whether before or after refactor,
   # this action needed a `name` param but there's none here. Reverting to index
-  name_link = { controller: :observations, action: :index }
+  name_link = observations_path(name: @name) if @name
 
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
     tabs = [
       link_to(:show_object.t(type: :profile), user_path(@show_user.id)),
       link_to(:show_objects.t(type: :observation),
-              controller: :observations, action: :index,
-              user: @show_user.id),
+              observations_path(user: @show_user.id)),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
-              controller: :emails, action: :ask_user_question,
-              id: @show_user.id)
+              emails_ask_user_question_path(@show_user.id))
     ]
     @tabsets = { right: draw_tab_set(tabs) }
     name_link[:user_id] = @show_user.id

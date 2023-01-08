@@ -34,21 +34,18 @@ class LookupsControllerTest < FunctionalTestCase
     login
     l_id = locations(:albion).id
     get(:lookup_location, params: { id: l_id })
-    assert_redirected_to(controller: :location,
-                         action: :show_location, id: l_id)
+    assert_redirected_to(location_path(id: l_id))
     get(:lookup_location, params: { id: "Burbank, California" })
-    assert_redirected_to(controller: :location, action: :show_location,
-                         id: locations(:burbank).id)
+    assert_redirected_to(location_path(locations(:burbank).id))
     get(:lookup_location, params: { id: "California, Burbank" })
-    assert_redirected_to(controller: :location, action: :show_location,
-                         id: locations(:burbank).id)
+    assert_redirected_to(location_path(locations(:burbank).id))
     get(:lookup_location, params: { id: "Zyzyx, Califonria" })
-    assert_redirected_to(controller: :location, action: :index_location)
+    assert_redirected_to(locations_path)
     assert_flash_error
     get(:lookup_location, params: { id: "California" })
-    # assert_redirected_to(controller: :location, action: :index_location)
+    # assert_redirected_to(locations_path)
     # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{/location/index_location})
+    assert_redirected_to(%r{/locations})
     assert_flash_warning
   end
 
@@ -56,31 +53,28 @@ class LookupsControllerTest < FunctionalTestCase
     login
     get(:lookup_accepted_name,
         params: { id: names(:lactarius_subalpinus).text_name })
-    assert_redirected_to(controller: "/names", action: :show,
-                         id: names(:lactarius_alpinus))
+    assert_redirected_to(name_path(names(:lactarius_alpinus)))
   end
 
   def test_lookup_name
     login
     n_id = names(:fungi).id
     get(:lookup_name, params: { id: n_id })
-    assert_redirected_to(controller: "/names", action: :show, id: n_id)
+    assert_redirected_to(name_path(n_id))
 
     get(:lookup_name, params: { id: names(:coprinus_comatus).id })
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/names/#{names(:coprinus_comatus).id}})
 
     get(:lookup_name, params: { id: "Agaricus campestris" })
-    assert_redirected_to(controller: "/names", action: :show,
-                         id: names(:agaricus_campestris).id)
+    assert_redirected_to(name_path(names(:agaricus_campestris).id))
 
     get(:lookup_name, params: { id: "Agaricus newname" })
-    assert_redirected_to(controller: "/names", action: :index)
+    assert_redirected_to(names_path)
     assert_flash_error
 
     get(:lookup_name, params: { id: "Amanita baccata sensu Borealis" })
-    assert_redirected_to(controller: "/names", action: :show,
-                         id: names(:amanita_baccata_borealis).id)
+    assert_redirected_to(name_path(names(:amanita_baccata_borealis).id))
 
     get(:lookup_name, params: { id: "Amanita baccata" })
     # Must test against regex because passed query param borks path match
@@ -88,20 +82,17 @@ class LookupsControllerTest < FunctionalTestCase
     assert_flash_warning
 
     get(:lookup_name, params: { id: "Agaricus campestris L." })
-    assert_redirected_to(controller: "/names", action: :show,
-                         id: names(:agaricus_campestris).id)
+    assert_redirected_to(name_path(names(:agaricus_campestris).id))
 
     get(:lookup_name, params: { id: "Agaricus campestris Linn." })
-    assert_redirected_to(controller: "/names", action: :show,
-                         id: names(:agaricus_campestris).id)
+    assert_redirected_to(name_path(names(:agaricus_campestris).id))
 
     # Prove that when there are no hits and exactly one spelling suggestion,
     # it gives a flash warning and shows the page for the suggestion.
     get(:lookup_name, params: { id: "Fungia" })
     assert_flash_text(:runtime_suggest_one_alternate.t(type: :name,
                                                        match: "Fungia"))
-    assert_redirected_to(controller: "/names", action: :show,
-                         id: names(:fungi).id)
+    assert_redirected_to(name_path(names(:fungi).id))
 
     # Prove that when there are no hits and >1 spelling suggestion,
     # it flashes a warning and shows the name index
@@ -132,12 +123,11 @@ class LookupsControllerTest < FunctionalTestCase
     login
     p_id = projects(:eol_project).id
     get(:lookup_project, params: { id: p_id })
-    assert_redirected_to(controller: "/projects", action: :show, id: p_id)
+    assert_redirected_to(/project_path(p_id)/)
     get(:lookup_project, params: { id: "Bolete" })
-    assert_redirected_to(controller: "/projects", action: :show,
-                         id: projects(:bolete_project).id)
+    assert_redirected_to(/project_path(projects(:bolete_project).id)/)
     get(:lookup_project, params: { id: "Bogus" })
-    assert_redirected_to(controller: "/projects", action: :index)
+    assert_redirected_to(/projects_path/)
     assert_flash_error
     get(:lookup_project, params: { id: "project" })
     # Must test against regex because passed query param borks path match

@@ -8,9 +8,7 @@
   <%= :MEMBERS.t %>
   <ul>
     <% @visual_model.visual_groups.each do |group|
-       link = link_to(group.name.t,
-                      controller: :visual_groups,
-                      action: :show, id: group.id) %>
+       link = link_to(group.name.t, visual_group_path(group.id)) %>
       <li>
 	<%= content_tag(:p, link) %>
       </li>

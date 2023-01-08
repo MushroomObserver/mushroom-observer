@@ -363,8 +363,8 @@ class HerbariaController < ApplicationController
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    redirect_to(controller: :location, action: :create_location, back: @back,
-                where: @herbarium.place_name, set_herbarium: @herbarium.id)
+    redirect_to(new_location_path(back: @back,
+                where: @herbarium.place_name, set_herbarium: @herbarium.id))
     true
   end
 

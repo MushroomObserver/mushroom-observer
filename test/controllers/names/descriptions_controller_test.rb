@@ -98,8 +98,7 @@ module Names
         assert_template("names/descriptions/new")
         assert_template("names/descriptions/_form")
       else
-        assert_redirected_to(controller: "project", action: "show_project",
-                             id: project.id)
+        assert_redirected_to(project_path(project.id))
       end
       assert_equal(count, NameDescription.count)
     end
@@ -326,8 +325,7 @@ module Names
       # Test draft creation by project non-member.
       login("dick")
       get(:new, params: params.merge(project: project.id))
-      assert_redirected_to(controller: "project", action: "show_project",
-                           id: project.id)
+      assert_redirected_to(project_path(project.id))
       assert_flash_error
     end
 
@@ -359,9 +357,7 @@ module Names
       # Test draft creation by project non-member.
       login("dick")
       get(:new, params: params.merge(project: project.id))
-      assert_redirected_to(controller: "project",
-                           action: "show_project",
-                           id: project.id)
+      assert_redirected_to(project_path(project.id))
       assert_flash_error
 
       # Test clone of private description if not reader.

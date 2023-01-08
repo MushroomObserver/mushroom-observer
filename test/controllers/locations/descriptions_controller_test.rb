@@ -26,8 +26,7 @@ module Locations
       desc = location_descriptions(:bolete_project_private_location_desc)
       get(:show_location_description, params: { id: desc.id })
       assert_flash_error
-      assert_redirected_to(controller: :project, action: :show_project,
-                           id: desc.project.id)
+      assert_redirected_to(project_path(desc.project.id))
 
       # description is private, for a project, project doesn't exist
       # but project doesn't existb
@@ -102,9 +101,7 @@ module Locations
 
       post_requires_login(:create_location_description, params)
 
-      assert_redirected_to(controller: :location,
-                           action: :show_location_description,
-                           id: loc.descriptions.last.id)
+      assert_redirected_to(location_description_path(loc.descriptions.last.id))
       assert_not_empty(loc.descriptions)
       assert_equal(params[:description][:notes], loc.descriptions.last.notes)
     end
@@ -142,9 +139,7 @@ module Locations
 
       post_requires_login(:edit_location_description, params)
 
-      assert_redirected_to(controller: :location,
-                           action: :show_location_description,
-                           id: loc.descriptions.last.id)
+      assert_redirected_to(location_description_path(loc.descriptions.last.id))
       assert_not_empty(loc.descriptions)
       assert_equal(params[:description][:notes], loc.descriptions.last.notes)
     end
