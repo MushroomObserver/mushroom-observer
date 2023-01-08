@@ -29,7 +29,7 @@ module Authors
 
       # Make sure it fails to let unauthorized users see page.
       get(:show, params: params)
-      assert_redirected_to(show_location_path(id: locations(:albion).id))
+      assert_redirected_to(location_path(id: locations(:albion).id))
 
       # Make Rolf an author.
       desc.add_author(rolf)

@@ -176,7 +176,7 @@ module MapHelper
 
   def mapset_location_link(loc, args)
     params = args[:query_params] || {}
-    link_to(loc.display_name.t, show_location_path(id: loc.id, params: params))
+    link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 
   def mapset_box_params(set)

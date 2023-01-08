@@ -28,7 +28,7 @@ module ObjectLinkHelper
       location = Location.find(location) unless location.is_a?(AbstractModel)
       link_string = where_string(location.display_name, count)
       link_string += " [#{:click_for_map.t}]" if click
-      link_to(link_string, show_location_path(id: location.id),
+      link_to(link_string, location_path(id: location.id),
               { id: "show_location_link_#{location.id}" })
     else
       link_string = where_string(where, count)
