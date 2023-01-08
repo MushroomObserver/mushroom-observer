@@ -1953,7 +1953,7 @@ class NameTest < UnitTestCase
     desc.reload
     name_version = name.version
     description_version = desc.version
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     QueuedEmail.all.map(&:destroy)
 
     assert_equal(0, desc.authors.length)
@@ -2170,7 +2170,7 @@ class NameTest < UnitTestCase
                  old_description_version: 0,
                  new_description_version: 0,
                  review_status: "no_change")
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_misspelling
