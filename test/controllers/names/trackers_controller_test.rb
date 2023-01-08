@@ -16,7 +16,7 @@ module Names
       params = { id: name.id.to_s }
       requires_login(:new, params)
       assert_template("names/trackers/new")
-      assert_form_action(name_trackers_path(name.id.to_s))
+      assert_form_action(action: :create, id: name.id)
     end
 
     def test_email_tracking_enable_no_note

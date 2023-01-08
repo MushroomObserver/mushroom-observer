@@ -7,7 +7,7 @@ module Locations::Descriptions
 
     # Show past version of LocationDescription.  Accessible only from
     # show_location_description page.
-    def show_past_location_description
+    def show
       store_location
       pass_query_params
       @description = find_or_goto_index(LocationDescription, params[:id].to_s)

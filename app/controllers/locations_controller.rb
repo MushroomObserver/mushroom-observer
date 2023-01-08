@@ -573,7 +573,7 @@ class LocationsController < ApplicationController
       subject: "Nontrivial Location Change",
       content: content
     ).deliver_now
-    LocationControllerTest.report_email(content) if Rails.env.test?
+    LocationsControllerTest.report_email(content) if Rails.env.test?
   end
 
   def email_location_change_content

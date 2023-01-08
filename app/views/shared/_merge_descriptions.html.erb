@@ -4,12 +4,12 @@ moves = description.parent.synonyms - [description.parent]
 moves.reject!(&:is_misspelling?)
 %>
 
-<div class="container-text"><%=
-  form_tag(action: :merge_descriptions, id: description.id) do %>
-    <br/><br/>
+<div class="container-text">
 
-    <p><span class="text-larger"><%= :merge_descriptions_merge_header.t %>:</span><!-- .text-larger --><br/>
-      <span class="help-note"><%= :merge_descriptions_merge_help.t %></span></p>
+  <%= form_with(url: action, id: "merge_descriptions_form") do |f| %>
+
+    <h4><%= :merge_descriptions_merge_header.t %>:</h4><!-- .text-larger -->
+    <p><span class="help-note"><%= :merge_descriptions_merge_help.t %></span></p>
 
     <ul type="none">
       <% merges.each do |desc| %>
@@ -51,9 +51,9 @@ moves.reject!(&:is_misspelling?)
       button = :merge_descriptions_merge_or_move.l
     end
     if button %>
-      <br/><br/>
-      <div class="text-center"><%= submit_tag(button, class: "btn btn-default") %></div><!-- .text-center -->
-      <br/>
+      <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
     <% end %>
+
   <% end %>
+
 </div><!--.container-text-->

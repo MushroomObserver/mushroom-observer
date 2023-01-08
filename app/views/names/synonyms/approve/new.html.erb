@@ -9,7 +9,7 @@
   action = approve_name_synonym_path(@name.id)
 %>
 
-<%= form_with(url: action) do |f| %>
+<%= form_with(url: action, id: "name_approve_synonym_form") do |f| %>
 
   <%= f.submit(:APPROVE.l, class: "btn btn-default center-block mt-3") %>
 

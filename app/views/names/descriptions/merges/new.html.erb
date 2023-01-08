@@ -8,7 +8,8 @@
                     name_description_path(@description.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  action: name_description_merges_path(@description.id)
 %>
 
 <%= render(partial: "shared/merge_descriptions",
-           locals: { description: @description }) %>
+           locals: { action: action, description: @description }) %>

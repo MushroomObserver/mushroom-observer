@@ -10,7 +10,7 @@
                                    approved_synonyms: @synonym_name_ids)
 %>
 
-<%= form_with(url: action, method: :put) do |f| %>
+<%= form_with(url: action, method: :put, id: "name_edit_synonym_form") do |f| %>
 
   <%= render(partial: "form") %>
   <%= f.submit(:name_change_synonyms_submit.l,

@@ -9,7 +9,7 @@
   action = deprecate_name_synonym_path(@name.id, approved_name: @what)
 %>
 
-<%= form_with(url: action) do |f| %>
+<%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
 
   <%= f.submit(:name_deprecate_submit.l,
                class: "btn btn-default center-block mt-3") %>

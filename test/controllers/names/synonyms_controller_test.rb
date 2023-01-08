@@ -11,7 +11,7 @@ module Names
       name = names(:chlorophyllum_rachodes)
       params = { id: name.id }
       requires_login(:edit, params)
-      assert_form_action(name_synonyms_path(approved_synonyms: [], id: name.id))
+      assert_form_action(action: :update, approved_synonyms: [], id: name.id)
     end
 
     # ----------------------------

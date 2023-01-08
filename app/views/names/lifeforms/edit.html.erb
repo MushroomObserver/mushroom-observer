@@ -10,7 +10,7 @@
   action = name_lifeforms_path(@name.id, q: get_query_param)
 %>
 
-<%= form_with(url: action) do |f| %>
+<%= form_with(url: action, id: "name_lifeform_form") do |f| %>
 
   <p><%= :edit_lifeform_help.t %></p>
 

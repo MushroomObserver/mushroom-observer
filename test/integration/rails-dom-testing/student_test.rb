@@ -29,7 +29,7 @@ class StudentTest < IntegrationTestCase
     assert_not_equal(mary_session.session[:session_id],
                      dick_session.session[:session_id])
     url = mary_session.create_draft(name, gen_desc, project)
-    rolf_session.check_admin(url, gen_desc, project)
+    rolf_session.check_admin(name, url, gen_desc, project)
     katrina_session.check_another_student(url)
     dick_session.check_another_user(url)
     lurker_session.login
@@ -37,19 +37,20 @@ class StudentTest < IntegrationTestCase
   end
 
   module AdminDsl
-    def check_admin(url, gen_desc, project)
+    def check_admin(name, url, gen_desc, project)
       get(url)
-      # FIXME: get a real description here and use that ID
+      # The latest ND should be Mary's draft
+      marys_draft = NameDescription.last
       assert_select("a[href*=names/descriptions]", 1) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
       assert_no_match(/#{gen_desc}/, response.body)
-      assert_select("a[href*=create_name_description]", 1)
-      click_mo_link(href: /show_name_description/)
-      assert_select("a[href*=edit_name_description]")
-      assert_select("a[href*=destroy_name_description]")
-      click_mo_link(href: /edit_name_description/)
-      open_form do |form|
+      assert_select("a[href*=?]", new_name_description_path(name.id), 1)
+      click_mo_link(href: name_description_path(marys_draft.id))
+      assert_select("a[href*=?", edit_name_description_path(marys_draft.id))
+      assert_select("form[action=?]", name_description_path(marys_draft.id))
+      click_mo_link(href: edit_name_description_path(marys_draft.id))
+      open_form("#name_description_form") do |form|
         form.assert_value("source_type", "project")
         form.assert_value("source_name", project.title)
         form.assert_value("public_write", false)

@@ -91,7 +91,7 @@ module Names
       @links ||= []
       args = {
         controller: "/names/descriptions",
-        action: "index",
+        action: :index,
         num_per_page: 50
       }.merge(args)
 

@@ -598,7 +598,7 @@ class NamesController < ApplicationController
       subject: "Nontrivial Name Change",
       content: content
     ).deliver_now
-    NameControllerTest.report_email(content) if Rails.env.test?
+    NamesControllerTest.report_email(content) if Rails.env.test?
   end
 
   def email_name_change_content
@@ -700,7 +700,7 @@ class NamesController < ApplicationController
       subject: "Merger identifier conflict",
       content: content
     ).deliver_now
-    NameControllerTest.report_email(content) if Rails.env.test?
+    NamesControllerTest.report_email(content) if Rails.env.test?
   end
 
   # ----------------------------------------------------------------------------

@@ -8,8 +8,10 @@
                     location_description_path(@description.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  action = edit_location_description_permissions_path(@description.id,
+                                                      q: get_query_param)
 %>
 
 <%= render(partial: "shared/adjust_permissions",
-           locals: { description: @description,
+           locals: { action: action, description: @description,
                      groups: @groups, data: @data }) %>

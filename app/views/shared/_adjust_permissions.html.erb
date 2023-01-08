@@ -1,10 +1,8 @@
 <div class="container-text">
-  <%= form_for(:description, url: add_query_param(
-        action: :adjust_permissions, id:
-        description.id
-      )) do |form| %>
+  <%= form_with(scope: :description, url: action,
+                id: "adjust_permissions_form") do |f| %>
 
-    <%= submit_tag(:SUBMIT.l, class: "btn btn-default center-block my-3") %>
+    <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block my-3") %>
 
     <div class="text-center">
       <table class="table-striped table-description-permissions">
@@ -120,6 +118,8 @@
       </table>
     </div><!-- .text-center -->
 
-    <%= submit_tag(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+    <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+
   <% end %>
+
 </div><!--.container-text-->

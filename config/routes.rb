@@ -636,7 +636,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                 as: "location_versions")
 
   # like resources, but using just an :id param:
-  get("locations/:id/descriptions",
+  get("locations(/:id)/descriptions",
       to: "locations/descriptions#index",
       as: "location_descriptions")
   get("locations/descriptions/:id",
@@ -757,7 +757,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                             as: "name_versions")
 
   # like resources, but using just an :id param:
-  get("names/:id/descriptions",
+  get("names(/:id)/descriptions",
       to: "names/descriptions#index",
       as: "name_descriptions")
   get("names/descriptions/:id",

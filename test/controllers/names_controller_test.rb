@@ -376,7 +376,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_create_name_get
     requires_login(:new)
-    assert_form_action(names_path)
+    assert_form_action(action: :create)
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
   end
@@ -574,7 +574,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("name/_form_name")
     # Should fail and no name should get created
     assert_nil(Name.find_by(text_name: text_name))
-    assert_form_action(names_path)
+    assert_form_action(action: :create)
   end
 
   def test_create_name_author_trailing_comma
@@ -760,9 +760,9 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_edit_name_get
     name = names(:coprinus_comatus)
-    params = { "id" => name.id.to_s }
+    params = { id: name.id.to_s }
     requires_login(:edit, params)
-    assert_form_action(name_path(id: name.id.to_s))
+    assert_form_action(action: :update, id: name.id.to_s)
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
   end

@@ -1,5 +1,6 @@
 <!--[form:name_description]-->
-<%= form_with(scope: :description, url: action) do |f| %>
+<%= form_with(scope: :description, url: action,
+              id: "name_description_form") do |f| %>
 
   <div class="container-text">
     <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>

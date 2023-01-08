@@ -254,7 +254,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_create_location
     requires_login(:new)
-    assert_form_action(locations_path)
+    assert_form_action(action: :create)
   end
 
   # This was causing a crash in live server.
@@ -368,8 +368,8 @@ class LocationsControllerTest < FunctionalTestCase
     loc = locations(:albion)
     params = { id: loc.id.to_s }
     requires_login(:edit, params)
-    assert_form_action(location_path(loc.id.to_s,
-                                     approved_where: loc.display_name))
+    assert_form_action(action: :update, id: loc.id.to_s,
+                       approved_where: loc.display_name)
     assert_input_value(:location_display_name, loc.display_name)
   end
 

@@ -81,7 +81,8 @@ module Locations
       store_query_in_session(query)
       @links ||= []
       args = {
-        action: :list_location_descriptions,
+        controller: "/locations/descriptions",
+        action: :index,
         num_per_page: 50
       }.merge(args)
 

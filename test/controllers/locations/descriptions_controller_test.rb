@@ -24,22 +24,22 @@ module Locations
 
       # description is private and belongs to a project
       desc = location_descriptions(:bolete_project_private_location_desc)
-      get(:show_location_description, params: { id: desc.id })
+      get(:show, params: { id: desc.id })
       assert_flash_error
       assert_redirected_to(project_path(desc.project.id))
 
       # description is private, for a project, project doesn't exist
       # but project doesn't existb
       desc = location_descriptions(:non_ex_project_private_location_desc)
-      get(:show_location_description, params: { id: desc.id })
+      get(:show, params: { id: desc.id })
       assert_flash_error
-      assert_redirected_to(action: :show_location, id: desc.location_id)
+      assert_redirected_to(location_path(desc.location_id))
 
       # description is private, not for a project
       desc = location_descriptions(:user_private_location_desc)
-      get(:show_location_description, params: { id: desc.id })
+      get(:show, params: { id: desc.id })
       assert_flash_error
-      assert_redirected_to(action: :show_location, id: desc.location_id)
+      assert_redirected_to(location_path(desc.location_id))
     end
 
     ############################################################################
@@ -78,8 +78,8 @@ module Locations
 
     def test_create_location_description
       loc = locations(:albion)
-      requires_login(:create_location_description, id: loc.id)
-      assert_form_action(action: :create_location_description, id: loc.id)
+      requires_login(:new, id: loc.id)
+      assert_form_action(action: :create, id: loc.id)
     end
 
     def test_create_and_save_location_description
@@ -99,7 +99,7 @@ module Locations
                                 refs: "" },
                  id: loc.id }
 
-      post_requires_login(:create_location_description, params)
+      post_requires_login(:create, params)
 
       assert_redirected_to(location_description_path(loc.descriptions.last.id))
       assert_not_empty(loc.descriptions)
@@ -110,14 +110,18 @@ module Locations
       loc = locations(:albion)
       user = login(users(:spammer).name)
       assert_false(user.successful_contributor?)
-      get(:create_location_description, params: { id: loc.id })
+      get(:new, params: { id: loc.id })
       assert_response(:redirect)
     end
 
+    ############################################################################
+    #
+    #    EDIT
+
     def test_edit_location_description
       desc = location_descriptions(:albion_desc)
-      requires_login(:edit_location_description, { id: desc.id })
-      assert_form_action(action: :edit_location_description, id: desc.id)
+      requires_login(:edit, { id: desc.id })
+      assert_form_action(action: :update, id: desc.id)
     end
 
     def test_edit_and_save_location_description
@@ -137,15 +141,12 @@ module Locations
                                 refs: "" },
                  id: location_descriptions(:albion_desc).id }
 
-      post_requires_login(:edit_location_description, params)
+      post_requires_login(:edit, params)
 
       assert_redirected_to(location_description_path(loc.descriptions.last.id))
       assert_not_empty(loc.descriptions)
       assert_equal(params[:description][:notes], loc.descriptions.last.notes)
     end
 
-    ############################################################################
-    #
-    #    EDIT
   end
 end
