@@ -84,25 +84,33 @@
         <% @objects.each do |observation| %>
           <div class="list-group-item">
             <div class="row">
-              <div class="col-sm-4 col-md-3 col-lg-2">
+              <div class="col-sm-4 col-md-3">
                 <%= if observation.thumb_image_id
                   thumbnail(observation.thumb_image,
                             link: observation_path(id: observation.id),
                             votes: true)
                 end %>
               </div>
-              <div class="col-sm-8 col-md-9 col-lg-10">
-                <div class="font-weight-bold">
+              <div class="col-sm-8 col-md-9">
+                <p class="font-weight-bold mb-0">
                   <%= link_to(observation.unique_format_name.t,
                               observation_path(id: observation.id,
                                                q: get_query_param(@query))) %>
-                </div>
-                <div>
+                </p>
+                <p>
                   <b><%= location_link(observation.place_name,
                                        observation.location) %></b><br/>
                   <span><%= user_link(observation.user) %></span>:
                   <span><%= observation.when.web_date %></span>
-                </div>
+                </p>
+                <%= put_button(name: :REMOVE.t,
+                              path: observation_species_list_path(
+                                id: observation.id,
+                                species_list_id: @species_list.id,
+                                commit: "remove"
+                              ),
+                              class: "btn btn-default",
+                              data: { confirm: :are_you_sure.l }) %>
               </div>
             </div>
           </div>
@@ -119,6 +127,6 @@
 <% end %>
 
 <%= render(partial: "comments/comments_for_object",
-           locals: {object: @species_list, controls: true, limit: nil}) %>
+           locals: { object: @species_list, controls: true, limit: nil }) %>
 
 <%= show_object_footer(@species_list) %>

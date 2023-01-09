@@ -1,6 +1,5 @@
 <%= form_with(url: species_list_observations_path(q: get_query_param),
-              # method: :put,
-              id: "species_list_observations_form") do |f| %>
+              method: :put, id: "species_list_observations_form") do |f| %>
 
   <p><%= :species_list_add_remove_body.tp(num: @query.num_results) %></p>
 

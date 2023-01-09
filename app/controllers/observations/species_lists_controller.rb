@@ -42,7 +42,10 @@ module Observations
       else
         # puts("Invalid mode: #{params[:commit].inspect}")
         flash_error("Invalid mode: #{params[:commit].inspect}")
-        render("edit")
+        render("edit",
+               location: edit_observation_species_lists_path(
+                 id: @observation.id
+               ))
       end
     end
 
@@ -61,8 +64,7 @@ module Observations
       species_list.add_observation(observation)
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      render("edit",
-             location: edit_observation_species_lists_path(id: observation.id))
+      redirect_to(species_list_path(id: species_list.id))
     end
 
     # Used by manage_species_lists.
@@ -70,8 +72,7 @@ module Observations
       species_list.remove_observation(observation)
       flash_notice(:runtime_species_list_remove_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      render("edit",
-             location: edit_observation_species_lists_path(id: observation.id))
+      redirect_to(species_list_path(id: species_list.id))
     end
   end
 end

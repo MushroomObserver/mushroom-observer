@@ -10,11 +10,11 @@
             <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
             <%= if check_permission(spl)
               put_button(name: :REMOVE.t,
-                      path: observation_species_list_path(
-                        id: @observation.id, species_list_id: spl.id,
-                        commit: "remove"
-                      ),
-                      data: { confirm: :are_you_sure.l })
+                        path: observation_species_list_path(
+                          id: @observation.id, species_list_id: spl.id,
+                          commit: "remove"
+                        ),
+                        data: { confirm: :are_you_sure.l })
             end %>
           </td>
         </tr>
