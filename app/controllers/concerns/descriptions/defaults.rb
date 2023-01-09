@@ -12,7 +12,7 @@ module Descriptions::Defaults
       return unless (desc = find_description!)
 
       redirect_to(object_path_with_query(desc))
-      unless desc.fully_public
+      unless desc.fully_public?
         flash_error(:runtime_description_make_default_only_public.t)
         return
       end

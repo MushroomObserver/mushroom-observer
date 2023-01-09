@@ -23,11 +23,11 @@
         path: name_description_review_status_path(desc.id,
           value: "unvetted", q: get_query_param)
         ) %><br/>
-    <%= indent + put_button(:review_vetted.t,
+    <%= indent + put_button(name: :review_vetted.t,
         path: name_description_review_status_path(desc.id,
           value: "vetted", q: get_query_param)
         ) %><br/>
-    <%= indent + put_button(:review_inaccurate.t,
+    <%= indent + put_button(name: :review_inaccurate.t,
         path: name_description_review_status_path(desc.id,
           value: "inaccurate", q: get_query_param)
         ) %><br/>

@@ -219,6 +219,7 @@ module Names
 
         set_default_description_if_public
         update_parent_classification_cache
+        @name.save if @name.changed?
         log_description_created
         flash_notice(:runtime_name_description_success.t(id: @description.id))
 
@@ -231,7 +232,7 @@ module Names
     # Make this the "default" description if there isn't one and this is
     # publicly readable and writable.
     def set_default_description_if_public
-      return unless !@name.description && @description.fully_public
+      return unless !@name.description && @description.fully_public?
 
       @name.description = @description
     end

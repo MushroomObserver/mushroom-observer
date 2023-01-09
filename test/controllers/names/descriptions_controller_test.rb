@@ -141,7 +141,7 @@ module Names
           classification: classification
         }.merge(params)
       }
-      post_requires_login(:edit, params, user.login)
+      put_requires_login(:edit, params, user.login)
       if permission && !success
         assert_template("names/descriptions/edit")
         assert_template("names/descriptions/_form")
@@ -380,8 +380,12 @@ module Names
     end
 
     def test_create_name_description_public
+      name = names(:conocybe_filaris)
+      assert_equal(0, name.descriptions.length)
+
       # Minimum args.
       params = {
+        id: name.id,
         description: empty_notes.merge(
           source_type: "public",
           source_name: "",
@@ -390,16 +394,16 @@ module Names
         )
       }
 
-      # No desc yet -> make new desc default.
-      name = names(:conocybe_filaris)
-      assert_equal(0, name.descriptions.length)
       post(:create, params: params)
       assert_response(:redirect)
+      assert_equal(0, name.descriptions.length)
+
+      # No desc yet -> make new desc default.
       login("dick")
-      params[:id] = name.id
       post(:create, params: params)
       assert_flash_success
       desc = NameDescription.last
+      assert_equal(desc.name_id, name.id)
       assert_redirected_to(name_description_path(desc.id))
       name.reload
       assert_objs_equal(desc, name.description)

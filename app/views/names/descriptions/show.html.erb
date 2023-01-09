@@ -18,8 +18,8 @@
   </tr>
 </table>
 
-<%= render(partial: "show/name_description", object: @description,
-           locals: { review: true }) %>
+<%= render(partial: "names/descriptions/show/name_description",
+           object: @description, locals: { review: true }) %>
 <%= render(partial: "comments/comments_for_object",
            locals: { object: @description, controls: true, limit: 10 }
           ) if false%>

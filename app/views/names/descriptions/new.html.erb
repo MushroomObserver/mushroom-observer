@@ -10,5 +10,5 @@
   action = name_descriptions_path(@description.name_id, q: get_query_param)
 %>
 
-<%= render(partial: "form",
+<%= render(partial: "names/descriptions/form",
            locals: { action: action, button: :CREATE }) %>

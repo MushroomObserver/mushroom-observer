@@ -114,7 +114,7 @@ module Descriptions::Merges
                        from: src_name,
                        to: dest.unique_format_name,
                        touch: true)
-        if make_dest_default && src.fully_public
+        if make_dest_default && src.fully_public?
           dest.description_id = src
           dest.save
           dest.log(:log_changed_default_description,
@@ -227,7 +227,7 @@ module Descriptions::Merges
             src.destroy
 
             # Make destination the default if source used to be the default.
-            if src_was_default && dest.fully_public
+            if src_was_default && dest.fully_public?
               dest.parent.description = dest
               dest.parent.save
             end

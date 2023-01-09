@@ -102,7 +102,7 @@ module ControllerExtensions
   # Send GET request to a page that should require login.
   #
   #   # Make sure only logged-in users get to see this page.
-  #   requires_login(:edit_name, id: 1)
+  #   requires_login(:edit, id: 1)
   #
   def requires_login(page, *args)
     either_requires_either(:get, page, nil, *args)
@@ -111,7 +111,7 @@ module ControllerExtensions
   # Send POST request to a page that should require login.
   #
   #   # Make sure only logged-in users get to post this page.
-  #   post_requires_login(:edit_name, id: 1)
+  #   put_requires_login(:update, id: 1)
   #
   def post_requires_login(page, *args)
     either_requires_either(:post, page, nil, *args)
@@ -175,26 +175,26 @@ module ControllerExtensions
   #
   #   # Make sure only logged-in users get to see this page, and that it
   #   # renders the template of the same name when it succeeds.
-  #   requires_login(:edit_name, id: 1)
+  #   requires_login(:edit, id: 1)
   #
   #   # Make sure only logged-in users get to post this page, but that it
   #   # renders the template of a different name (or redirects) on success.
-  #   post_requires_login(:edit_name, id: 1, false)
+  #   put_requires_login(:update, id: 1, false)
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
-  #   # redirected to "show_location"), and that it renders
+  #   # redirected to "show"), and that it renders
   #   # the template of the same name when it succeeds.
-  #   requires_user(:review_authors, {id: 1}, :show_location)
+  #   requires_user(:new, { id: 1 }, :show)
   #
   #   # Make sure only owner can edit observation (non-owners get
   #   # redirected to "observations/show"), and that it redirects to
   #   # "observations/show" when it succeeds (last argument).
-  #   post_requires_user(:update, {notes: 'new notes'},
+  #   put_requires_user(:update, { notes: 'new notes' },
   #     :show, [:show])
   #
   #   # Even more general case where second case renders a template:
   #   post_requires_user(:action, params,
-  #     {controller: controller1, action: :access_denied, ...},
+  #     { controller: controller1, action: :access_denied, ... },
   #     :success_template)
   #
   #   # Even more general case where both cases redirect:
@@ -378,19 +378,19 @@ module ControllerExtensions
   # require_user::  Check result if wrong user logged in.
   # result::        Expected result if everything is correct.
   #
-  #   # POST the edit_name form: requires standard login; redirect to
+  #   # PUT the edit form: requires standard login; redirect to
   #   # show_name if it succeeds.
   #   assert_request(
-  #     method: "POST",
-  #     action: "edit_name",
+  #     method: "PUT",
+  #     action: :update,
   #     params: params,
   #     require_login: :login,
-  #     result: ["show_name"]
+  #     result: ["show"]
   #   )
   #
   #   # Make sure only logged-in users get to post this page, and that it
   #   # render the template of the same name when it succeeds.
-  #   post_requires_login(:edit_name, id: 1)
+  #   put_requires_login(:update, id: 1)
   #
   def assert_request(args)
     method       = args[:method] || :get

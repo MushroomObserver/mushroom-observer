@@ -16,13 +16,13 @@ module DescriptionsHelper
     tabs = []
     if true
       tabs << link_with_query(:show_object.t(type: type),
-                              controller: "/#{type}s",
-                              action: :show, id: desc.parent_id)
+                              { controller: "/#{type}s",
+                                action: :show, id: desc.parent_id })
     end
     if writer?(desc)
       tabs << link_with_query(:show_description_edit.t,
-                              controller: "/#{type}s/descriptions",
-                              action: :edit, id: desc.id)
+                              { controller: "/#{type}s/descriptions",
+                                action: :edit, id: desc.id })
     end
     if admin
       # FIXME: needs query_param somehow
@@ -30,28 +30,30 @@ module DescriptionsHelper
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
-                              controller: "/#{type}s/descriptions",
-                              action: :new,
-                              id: desc.parent_id, clone: desc.id,
+                              { controller: "/#{type}s/descriptions",
+                                action: :new,
+                                id: desc.parent_id, clone: desc.id },
                               help: :show_description_clone_help.l)
     end
     if admin
       tabs << link_with_query(:show_description_merge.t,
-                              controller: "/#{type}s/descriptions/merges",
-                              action: :new, id: desc.id,
+                              { controller: "/#{type}s/descriptions/merges",
+                                action: :new, id: desc.id },
                               help: :show_description_merge_help.l)
     end
     if admin
-      tabs << link_with_query(:show_description_adjust_permissions.t,
-                              controller: "/#{type}s/descriptions/permissions",
-                              action: :edit, id: desc.id,
-                              help: :show_description_adjust_permissions_help.l)
+      tabs << link_with_query(
+        :show_description_adjust_permissions.t,
+        { controller: "/#{type}s/descriptions/permissions",
+          action: :edit, id: desc.id },
+        help: :show_description_adjust_permissions_help.l
+      )
     end
     if desc.public && @user && (desc.parent.description_id != desc.id)
-      tabs << put_button(:show_description_make_default.t,
-                         { controller: "/#{type}s/descriptions/default",
-                           action: :update, id: desc.id,
-                           q: get_query_param },
+      tabs << put_button(name: :show_description_make_default.t,
+                         path: { controller: "/#{type}s/descriptions/default",
+                                 action: :update, id: desc.id,
+                                 q: get_query_param },
                          help: :show_description_make_default_help.l)
     end
     if (desc.source_type == :project) &&
@@ -60,10 +62,10 @@ module DescriptionsHelper
                               project.show_link_args)
     end
     if admin && (desc.source_type != :public)
-      tabs << put_button(:show_description_publish.t,
-                         { controller: "/#{type}s/descriptions/publish",
-                           action: :update, id: desc.id,
-                           q: get_query_param },
+      tabs << put_button(name: :show_description_publish.t,
+                         path: { controller: "/#{type}s/descriptions/publish",
+                                 action: :update, id: desc.id,
+                                 q: get_query_param },
                          help: :show_description_publish_help.l)
     end
     tabs
@@ -125,9 +127,9 @@ module DescriptionsHelper
         links = []
         if writer
           links << link_with_query(:EDIT.t,
-                                   controller: obj.show_controller,
-                                   action: :edit,
-                                   id: desc.id)
+                                   { controller: obj.show_controller,
+                                     action: :edit,
+                                     id: desc.id })
         end
         if admin
           # FIXME: needs query_param somehow
@@ -142,9 +144,9 @@ module DescriptionsHelper
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, controller: obj.show_controller,
-                                        action: :new,
-                                        id: obj.id)
+      link = link_with_query(:CREATE.t, { controller: obj.show_controller,
+                                          action: :new,
+                                          id: obj.id })
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
@@ -176,8 +178,8 @@ module DescriptionsHelper
     # Show existing drafts, with link to create new one.
     head = content_tag(:b, :show_name_descriptions.t) + ": "
     head += link_with_query(:show_name_create_description.t,
-                            controller: obj.show_controller,
-                            action: "new", id: obj.id)
+                            { controller: obj.show_controller,
+                              action: "new", id: obj.id })
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(obj).map { |link| indent + link }
@@ -192,10 +194,9 @@ module DescriptionsHelper
       head2 = :show_name_create_draft.t + ": "
       list = [head2] + projects.map do |project|
         item = link_with_query(project.title,
-                               controller: obj.show_controller,
-                               action: :new,
-                               id: obj.id, project: project.id,
-                               source: "project")
+                               { controller: obj.show_controller,
+                                 action: :new, id: obj.id,
+                                 project: project.id, source: "project" })
         indent + item
       end
       html2 = list.safe_join(safe_br)

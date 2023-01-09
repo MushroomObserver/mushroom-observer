@@ -141,7 +141,7 @@ module Locations
                                 refs: "" },
                  id: location_descriptions(:albion_desc).id }
 
-      post_requires_login(:edit, params)
+      put_requires_login(:update, params)
 
       assert_redirected_to(location_description_path(loc.descriptions.last.id))
       assert_not_empty(loc.descriptions)
