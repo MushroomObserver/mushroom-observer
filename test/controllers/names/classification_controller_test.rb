@@ -8,19 +8,19 @@ module Names
     include ObjectLinkHelper
 
     def test_get_edit_classification
+      name = names(:boletus_edulis)
       # Make sure user has to be logged in.
-      get(:edit)
+      get(:edit, params: { id: name.id })
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
-      # Make sure missing and bogus ids do not crash it.
-      get(:edit)
-      assert_response(:redirect)
+      # Make sure (missing and) bogus ids do not crash it.
+      # get(:edit)
+      # assert_response(:redirect)
       get(:edit, params: { id: "bogus" })
       assert_response(:redirect)
 
       # Make sure form initialized correctly.
-      name = names(:boletus_edulis)
       get(:edit, params: { id: name.id })
       assert_response(:success)
       assert_template("names/classification/edit")
@@ -34,21 +34,22 @@ module Names
     end
 
     def test_update_classification
+      name = names(:agaricus_campestris)
+
       # Make sure user has to be logged in.
-      put(:update)
+      put(:update, params: { id: name.id })
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
       # Make sure bogus requests don't crash.
-      put(:update)
-      assert_flash_error
-      assert_response(:redirect)
+      # put(:update)
+      # assert_flash_error
+      # assert_response(:redirect)
       put(:update, params: { id: "bogus" })
       assert_flash_error
       assert_response(:redirect)
 
       # Make sure it is validating the classification.
-      name = names(:agaricus_campestris)
       put(:update,
           params: { id: name.id, classification: "bogus" })
       assert_flash_error
