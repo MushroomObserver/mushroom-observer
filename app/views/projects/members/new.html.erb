@@ -11,14 +11,20 @@
 %>
 
 <div class="container-text mt-3 pb-2">
+
   <%= form_with(url: action, id: "project_member_form") do |f| %>
-    <span class="text-larger"><%= :LOGIN_NAME.t %>:</span><!-- .text-larger --><br/>
+
+    <h4><%= :LOGIN_NAME.t %>:</h4>
+
     <%= text_field_tag(:candidate, @candidate, size: 40,
                                                data: { autofocus: true },
                                                class: "form-control") %><br/>
     <% turn_into_user_auto_completer(:candidate) %>
+
     <%= f.submit(:ADD.t, class: "btn btn-default ml-3") %>
+
   <% end %>
+
 </div><!--.container-text-->
 
 <table class="table-striped table-project-members mt-3">

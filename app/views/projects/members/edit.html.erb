@@ -18,19 +18,22 @@
                                candidate: @candidate.id, q: get_query_param)
 %>
 
-<%= form_with(url: action, id: "project_member_form") do |f| %>
+<%= form_with(url: action, method: :patch, id: "project_member_form") do |f| %>
   <div class="form-group mt-3">
-    <%= submit_tag(:change_member_status_make_member.l, class: "btn btn-default center-block mb-3") %>
+    <%= f.submit(:change_member_status_make_member.l,
+                 class: "btn btn-default center-block mb-3") %>
     <%= :change_member_status_make_member_help.t %>
   </div>
 
   <div class="form-group mt-3">
-    <%= submit_tag(:change_member_status_remove_member.l, class: "btn btn-default center-block mb-3") %>
+    <%= f.submit(:change_member_status_remove_member.l,
+                 class: "btn btn-default center-block mb-3") %>
     <%= :change_member_status_remove_member_help.t %>
   </div>
 
   <div class="form-group mt-3">
-    <%= submit_tag(:change_member_status_make_admin.l, class: "btn btn-default center-block mb-3") %>
+    <%= f.submit(:change_member_status_make_admin.l,
+                 class: "btn btn-default center-block mb-3") %>
     <%= :change_member_status_make_admin_help.t %>
   </div>
 <% end %>
