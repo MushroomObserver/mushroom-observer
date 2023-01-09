@@ -230,8 +230,7 @@ class NamesController < ApplicationController
       @test_pagination_args = { anchor: params[:test_anchor] }
     end
 
-    n_c = NamesController.new
-    n_c.show_selected_names(query, num_per_page: params[:num_per_page].to_i)
+    show_selected_names(query, num_per_page: params[:num_per_page].to_i)
   end
 
   ##############################################################################
