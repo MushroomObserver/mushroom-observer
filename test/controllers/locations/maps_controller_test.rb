@@ -10,16 +10,16 @@ module Locations
     def test_map_locations
       login
       # test_map_locations - map everything
-      get(:map_locations)
-      assert_template("map_locations")
+      get(:show)
+      assert_template("locations/maps/show")
 
       # test_map_locations_empty - map nothing
-      get(:map_locations, params: { pattern: "Never Never Land" })
-      assert_template("map_locations")
+      get(:show, params: { pattern: "Never Never Land" })
+      assert_template("locations/maps/show")
 
       # test_map_locations_some - map something
-      get(:map_locations, params: { pattern: "California" })
-      assert_template("map_locations")
+      get(:show, params: { pattern: "California" })
+      assert_template("locations/maps/show")
     end
   end
 end

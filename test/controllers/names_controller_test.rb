@@ -449,36 +449,33 @@ class NamesControllerTest < FunctionalTestCase
     name = Name.where(locked: true).first
     login
     get(:show, params: { id: name.id })
-    assert_select("a[href*=synonyms/approve/new]", count: 0)
-    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
-    assert_select("a[href*=synonyms/edit]", count: 0)
+    assert_synonym_links(name, 0, 0, 0)
     login("rolf")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=synonyms/approve/new]", count: 0)
-    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
-    assert_select("a[href*=synonyms/edit]", count: 0)
+    assert_synonym_links(name, 0, 0, 0)
     make_admin("mary")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=synonyms/approve/new]", count: 0)
-    assert_select("a[href*=synonyms/deprecate/new]", count: 1)
-    assert_select("a[href*=synonyms/edit]", count: 1)
+    assert_synonym_links(name, 0, 1, 1)
 
     Name.update(name.id, deprecated: true)
     logout
     get(:show, params: { id: name.id })
-    assert_select("a[href*=synonyms/approve/new]", count: 0)
-    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
-    assert_select("a[href*=synonyms/edit]", count: 0)
+    assert_synonym_links(name, 0, 0, 0)
     login("rolf")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=synonyms/approve/new]", count: 0)
-    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
-    assert_select("a[href*=synonyms/edit]", count: 0)
+    assert_synonym_links(name, 0, 0, 0)
     make_admin("mary")
     get(:show, params: { id: name.id })
-    assert_select("a[href*=synonyms/approve/new]", count: 1)
-    assert_select("a[href*=synonyms/deprecate/new]", count: 0)
-    assert_select("a[href*=synonyms/edit]", count: 1)
+    assert_synonym_links(name, 1, 0, 1)
+  end
+
+  def assert_synonym_links(name, approve, deprecate, edit)
+    assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
+                  count: approve)
+    assert_select("a[href*=?]", deprecate_name_synonym_form_path(name.id),
+                  count: deprecate)
+    assert_select("a[href*=?]", edit_name_synonyms_path(name.id),
+                  count: edit)
   end
 
   # ----------------------------
@@ -768,8 +765,8 @@ class NamesControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:create, params: params)
-    assert_template(:create_name)
-    assert_template("name/_form_name")
+    assert_template("names/new")
+    assert_template("names/_form")
     # Should fail and no name should get created
     assert_nil(Name.find_by(text_name: text_name))
     assert_form_action(action: :create)
@@ -1216,7 +1213,7 @@ class NamesControllerTest < FunctionalTestCase
         correct_spelling: "Peltigera"
       }
     }
-    post(:edit, params: params)
+    put(:update, params: params)
     assert_flash_success
     assert_true(name.reload.is_misspelling?)
     assert_equal("__Petigera__", name.display_name)

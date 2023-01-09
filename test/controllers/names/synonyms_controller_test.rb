@@ -104,7 +104,7 @@ module Names
       }
       login("rolf")
       put(:update, params: params)
-      assert_template(:change_synonyms)
+      assert_template("names/synonyms/edit")
       assert_template("names/synonyms/_form")
       assert_nil(selected_name.reload.synonym_id)
       assert_not(selected_name.deprecated)

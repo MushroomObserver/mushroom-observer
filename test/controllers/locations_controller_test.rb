@@ -589,7 +589,7 @@ class LocationsControllerTest < FunctionalTestCase
     make_admin("rolf")
     put(:update, params: params)
 
-    # assert_template(action: "show_location")
+    # assert_template("locations/show")
     assert_redirected_to(location_path(to_stay.id))
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)

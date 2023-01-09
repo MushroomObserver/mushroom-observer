@@ -9,7 +9,7 @@ module Names
 
     def test_eol
       login
-      get("eol")
+      get("show")
     end
   end
 end
