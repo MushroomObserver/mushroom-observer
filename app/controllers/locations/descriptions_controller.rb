@@ -106,7 +106,7 @@ module Locations
     # --------------------------------------------------------------------------
 
     # Show just a LocationDescription.
-    def show # rubocop:disable Metrics/AbcSize
+    def show
       store_location
       pass_query_params
       return unless find_description!
@@ -124,7 +124,7 @@ module Locations
 
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
-      @projects = users_projects_which_dont_have_desc_of_this(parent)
+      @projects = users_projects_which_dont_have_desc_of_this(@location)
     end
 
     def new
