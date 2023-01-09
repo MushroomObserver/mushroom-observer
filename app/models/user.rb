@@ -21,7 +21,7 @@
 #
 #  1. Anonymous User pokes around until they try to post a Comment, say.  This
 #     page requires a login (via +login_required+ filter in controller, see
-#     below).  This causes the User to be redirected to <tt>/account/login</tt>.
+#     below).  This causes the User to be redirected to /account/login/new.
 #
 #  2. If the User already has an account, they login here, and wind up
 #     redirected back to the form that triggered the login.
@@ -52,7 +52,7 @@
 #
 #  3. +set_timezone+: Set timezone from cookie set by client's browser.
 #
-#  4. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
+#  4. +login_required+: (optional) Redirects to /account/login/new if not
 #     logged in.
 #
 #  == Contribution Score

@@ -11,6 +11,8 @@ class SearchController < ApplicationController
   #   /locations/index (params[:pattern])
   #   /names/index (params[:pattern])
   #   /observations/index (params[:pattern])
+  #   /projects/index (params[:pattern])
+  #   /species_lists/index (params[:pattern])
   #   /users/index (params[:pattern])
   #   /project/project_search
   #   /species_lists/index

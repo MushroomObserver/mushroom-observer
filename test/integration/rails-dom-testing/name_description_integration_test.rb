@@ -357,7 +357,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_edit_description_link_behavior
       click_mo_link(href: edit_name_description_uri)
       if edit_description_requires_login?
-        assert_match(%r{account/login}, response.body)
+        assert_match(%r{account/login/new}, response.body)
       else
         check_name_description_fields
       end

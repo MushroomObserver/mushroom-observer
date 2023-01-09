@@ -445,7 +445,7 @@ module ControllerExtensions
   #
   #   # Short-hand for common redirects:
   #   assert_response(:index)   => /rss_logs
-  #   assert_response(:login)   => /account/login
+  #   assert_response(:login)   => /account/login/new
   #   assert_response(:welcome) => /account/welcome
   #
   #   # Lastly, expect redirect to full explicit URL.
@@ -510,7 +510,7 @@ module ControllerExtensions
         msg += "Expected redirect to <root>#{got}"
         assert_redirected_to("/", msg)
       elsif arg == :login
-        msg += "Expected redirect to <account/login>#{got}"
+        msg += "Expected redirect to <account/login/new>#{got}"
         assert_redirected_to(new_account_login_path, msg)
       elsif arg == :welcome
         msg += "Expected redirect to <account/welcome>#{got}"

@@ -1707,7 +1707,7 @@
   location_dubious_unknown_country: Unknown country '[country]'
   location_dubious_unknown_state: Unrecognized state or province '[state]' for '[country]'.
 
-  # account/login
+  # account/login/new
   login_please_login: Please login
   login_login: Login
   login_user: User name or Email address

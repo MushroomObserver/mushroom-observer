@@ -196,14 +196,17 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_location_bounding_box
+    north = south = east = west = 0
     delta = 0.001
     login
-    get(:index, params: { north: 0, south: 0, east: 0, west: 0 })
+    get(:index,
+        params: { north: north, south: south, east: east, west: west })
     query = Query.find(QueryRecord.last.id)
-    assert_equal(0 + delta, query.params[:north])
-    assert_equal(0 - delta, query.params[:south])
-    assert_equal(0 + delta, query.params[:east])
-    assert_equal(0 - delta, query.params[:west])
+
+    assert_equal(north + delta, query.params[:north])
+    assert_equal(south - delta, query.params[:south])
+    assert_equal(east + delta, query.params[:east])
+    assert_equal(west - delta, query.params[:west])
 
     get(:index,
         params: { north: 90, south: -90, east: 180, west: -180 })
@@ -309,7 +312,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     assert_redirected_to(location_path(loc.id))
     assert_equal(count + 1, Location.count)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
 
