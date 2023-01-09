@@ -8,7 +8,7 @@ module Names::EolData
 
     def show
       @timer_start = Time.current
-      @data = EolData.new
+      @data = ::EolData.new
     end
     # TODO: Add ability to preview synonyms?
     # TODO: List stuff that's almost ready.

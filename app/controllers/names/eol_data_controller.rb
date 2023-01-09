@@ -16,7 +16,7 @@ module Names
     def show
       @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
       @timer_start = Time.current
-      @data = EolData.new
+      @data = ::EolData.new
       render_xml(layout: false)
     end
   end

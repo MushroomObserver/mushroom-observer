@@ -61,7 +61,8 @@ module Names
       login
       get(:show, params: { flow: :next, id: description.id })
       q = @controller.query_params(QueryRecord.last)
-      assert_redirected_to(name_description_path(description.id, q: q))
+      # from params above
+      assert_redirected_to(name_description_path(params[:id], params: q))
     end
 
     def test_prev_description
@@ -72,7 +73,8 @@ module Names
       login
       get(:show, params: { flow: :prev, id: description.id })
       q = @controller.query_params(QueryRecord.last)
-      assert_redirected_to(name_description_path(description.id, q: q))
+      # from params above
+      assert_redirected_to(name_description_path(params[:id], params: q))
     end
 
     def test_why_danny_cant_edit_lentinus_description
