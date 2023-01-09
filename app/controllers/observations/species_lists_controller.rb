@@ -4,8 +4,6 @@
 # Linked from observation_tabs_helper, maybe should also link from spl :show?
 # Table of links for dealing with a list of obs line by line, can add or remove
 #
-# MAYBE MOVE TO Observations::SpeciesListsController
-#
 module Observations
   class SpeciesListsController < ApplicationController
     before_action :login_required
@@ -40,7 +38,6 @@ module Observations
       when "remove"
         remove_observation_from_species_list(@species_list, @observation)
       else
-        # puts("Invalid mode: #{params[:commit].inspect}")
         flash_error("Invalid mode: #{params[:commit].inspect}")
         render("edit",
                location: edit_observation_species_lists_path(
