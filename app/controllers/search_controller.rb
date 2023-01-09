@@ -11,9 +11,9 @@ class SearchController < ApplicationController
   #   /location/location_search
   #   /name/name_search
   #   /observations/index (params[:pattern])
+  #   /projects/index (params[:pattern])
+  #   /species_lists/index (params[:pattern])
   #   /users/index (params[:pattern])
-  #   /projects/index
-  #   /species_lists/index
   # rubocop:disable Metrics/AbcSize
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
