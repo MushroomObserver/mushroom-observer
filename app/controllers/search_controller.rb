@@ -12,7 +12,7 @@ class SearchController < ApplicationController
   #   /name/name_search
   #   /observations/index (params[:pattern])
   #   /users/index (params[:pattern])
-  #   /project/project_search
+  #   /projects/index
   #   /species_lists/index
   # rubocop:disable Metrics/AbcSize
   def pattern
@@ -29,15 +29,15 @@ class SearchController < ApplicationController
     when :google
       site_google_search(pattern)
       return
-    when :comment, :herbarium, :herbarium_record, :observation, :user, :image,
-      :species_list
+    when :comment, :herbarium, :herbarium_record, :image, :observation,
+      :project, :species_list, :user
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
         index_path: send("#{type.to_s.pluralize}_path", special_params)
       )
       return
-    when :location, :name, :project
+    when :location, :name
       ctrlr = type
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
