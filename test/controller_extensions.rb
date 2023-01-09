@@ -45,10 +45,6 @@
 ################################################################################
 
 module ControllerExtensions
-  def self.included(base)
-    base.extend(ClassMethods)
-  end
-
   ##############################################################################
   #
   #  :section: Request helpers
@@ -652,15 +648,6 @@ module ControllerExtensions
   # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # also ClassMethods below
 
-  def setup
-    @new_pts  = 10
-    @chg_pts  = 10
-    @auth_pts = 100
-    @edit_pts = 10
-    @@emails = []
-    super
-  end
-
   def assert_email_generated
     assert_not_empty(@@emails, "Was expecting an email notification.")
   ensure
@@ -675,11 +662,7 @@ module ControllerExtensions
     @@emails = []
   end
 
-  module ClassMethods
-    # EMAIL TESTS, currently in Names, Locations and their Descriptions
-    def report_email(email)
-      @@emails ||= []
-      @@emails << email
-    end
-  end
+  # module ClassMethods
+  # EMAIL TESTS, currently in Names, Locations and their Descriptions
+  # end
 end

@@ -3,6 +3,20 @@
 require("test_helper")
 
 class LocationsControllerTest < FunctionalTestCase
+  # Has to be defined on class itself, include doesn't seem to work
+  def self.report_email(email)
+    @@emails << email
+  end
+
+  def setup
+    @new_pts  = 10
+    @chg_pts  = 10
+    @auth_pts = 100
+    @edit_pts = 10
+    @@emails = []
+    super
+  end
+
   # Init params based on existing location.
   def update_params_from_loc(loc)
     { id: loc.id,

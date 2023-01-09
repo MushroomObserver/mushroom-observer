@@ -317,7 +317,7 @@ module Descriptions
         else
           flash_notice(:runtime_description_merge_deleted.
                           t(old: old_desc.partial_format_name))
-          log_description_merged(@description)
+          log_description_merged
           old_desc.destroy
         end
       end
@@ -326,7 +326,7 @@ module Descriptions
     def check_delete_permission_flash_and_redirect
       if in_admin_mode? || @description.is_admin?(@user)
         flash_notice(:runtime_destroy_description_success.t)
-        log_description_destroyed(@description)
+        log_description_destroyed
         @description.destroy
         redirect_to(add_query_param(@description.parent.show_link_args))
       else

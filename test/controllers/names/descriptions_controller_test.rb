@@ -524,7 +524,7 @@ module Names
         assert(NameDescription.find(draft.id))
         assert_equal(count, NameDescription.count)
         if draft.is_reader?(user)
-          assert_redirected_to(name_description_path(desc.id))
+          assert_redirected_to(name_description_path(draft.id))
         else
           assert_redirected_to(name_path(draft.name_id))
         end

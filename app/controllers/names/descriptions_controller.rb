@@ -33,7 +33,7 @@ module Names
 
     def index
       if params[:by_author].present?
-        name_descriptions_by_user
+        name_descriptions_by_author
       elsif params[:by_editor].present?
         name_descriptions_by_editor
       elsif params[:by].present?
@@ -127,7 +127,7 @@ module Names
       end
 
       @name = @description.name
-      return unless description_name_exists?(@location)
+      return unless description_parent_exists?(@name)
       return unless user_has_permission_to_see_description?
 
       update_view_stats(@description)

@@ -656,7 +656,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Make Descripton Default: callback only:
   put("locations/descriptions/:id/default",
-      to: "locations/descriptions/default#update",
+      to: "locations/descriptions/defaults#update",
       as: "make_default_location_description")
   # Publish Draft Location Description: callback:
   put("locations/descriptions/:id/publish",
@@ -683,6 +683,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Names: a lot of actions  ----------------------------
   resources :names, id: /\d+/
+  # Test Index
+  get("names/test_index", to: "names#test_index", as: "names_test_index")
+
   # Edit Name Classification: form and callback:
   get("names/:id/classification/edit",
       to: "names/classification#edit",
@@ -745,13 +748,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("names/trackers/:id/approve", to: "names/trackers/approve#new",
                                     as: "approve_name_tracker")
   # Name EOL Data: show:
-  get("names/eol_preview", to: "names/eol/preview#show",
+  get("names/eol_preview", to: "names/eol_data/preview#show",
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
   get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
-  # Test Index
-  get("names/test_index", to: "names/test_index#index", as: "names_test_index")
   # Name Versions: show
   get("names/:id/versions", to: "names/versions#show",
                             as: "name_versions")
@@ -777,7 +778,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Make Descripton Default: callback only:
   put("names/descriptions/:id/default",
-      to: "names/descriptions/default#update",
+      to: "names/descriptions/defaults#update",
       as: "make_default_name_description")
   # Publish Name Description Drafts: callback:
   put("names/descriptions/:id/publish",

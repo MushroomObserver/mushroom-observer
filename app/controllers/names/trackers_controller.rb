@@ -23,7 +23,7 @@ module Names
       return unless find_name!
 
       try_to_find_name_tracker
-      submit_tracking_form(name_id)
+      submit_tracking_form
     end
 
     private
@@ -51,7 +51,8 @@ module Names
       end
     end
 
-    def submit_tracking_form(name_id)
+    def submit_tracking_form
+      name_id = params[:id].to_s
       case params[:commit]
       when :ENABLE.l, :UPDATE.l
         create_or_update_name_tracker_and_interest(name_id)
