@@ -75,7 +75,7 @@ module Names::Descriptions
       params = {
         id: draft.id
       }
-      requires_login(:publish_description, params, user.login)
+      put_requires_login(:update, params, user.login)
       name = Name.find(name_id)
       new_gen_desc = begin
                        name.description.gen_desc

@@ -9,8 +9,7 @@ module Descriptions::Defaults
     # Description must be publically readable and writable.
     def update
       pass_query_params
-      desc = find_description!(params[:id].to_s)
-      return unless desc
+      return unless (desc = find_description!)
 
       redirect_to(object_path_with_query(desc))
       unless desc.fully_public

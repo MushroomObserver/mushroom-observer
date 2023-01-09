@@ -6,6 +6,7 @@ require("set")
 class NamesControllerTest < FunctionalTestCase
   include ObjectLinkHelper
 
+  # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # Has to be defined on class itself, include doesn't seem to work
   def self.report_email(email)
     @@emails ||= []
@@ -19,6 +20,20 @@ class NamesControllerTest < FunctionalTestCase
     @edit_pts = 10
     @@emails = []
     super
+  end
+
+  def assert_email_generated
+    assert_not_empty(@@emails, "Was expecting an email notification.")
+  ensure
+    @@emails = []
+  end
+
+  def assert_no_emails
+    msg = @@emails.join("\n")
+    assert(@@emails.empty?,
+           "Wasn't expecting any email notifications; got:\n#{msg}")
+  ensure
+    @@emails = []
   end
 
   def create_name(name)

@@ -3,8 +3,10 @@
 require("test_helper")
 
 class LocationsControllerTest < FunctionalTestCase
+  # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # Has to be defined on class itself, include doesn't seem to work
   def self.report_email(email)
+    @@emails ||= []
     @@emails << email
   end
 
@@ -15,6 +17,20 @@ class LocationsControllerTest < FunctionalTestCase
     @edit_pts = 10
     @@emails = []
     super
+  end
+
+  def assert_email_generated
+    assert_not_empty(@@emails, "Was expecting an email notification.")
+  ensure
+    @@emails = []
+  end
+
+  def assert_no_emails
+    msg = @@emails.join("\n")
+    assert(@@emails.empty?,
+           "Wasn't expecting any email notifications; got:\n#{msg}")
+  ensure
+    @@emails = []
   end
 
   # Init params based on existing location.

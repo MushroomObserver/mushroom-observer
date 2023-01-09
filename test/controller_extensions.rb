@@ -644,25 +644,4 @@ module ControllerExtensions
       assert_textarea_value(id, val)
     end
   end
-
-  # EMAIL TESTS, currently in Names, Locations and their Descriptions
-  # also ClassMethods below
-
-  def assert_email_generated
-    assert_not_empty(@@emails, "Was expecting an email notification.")
-  ensure
-    @@emails = []
-  end
-
-  def assert_no_emails
-    msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
-  ensure
-    @@emails = []
-  end
-
-  # module ClassMethods
-  # EMAIL TESTS, currently in Names, Locations and their Descriptions
-  # end
 end

@@ -13,21 +13,21 @@ module Names
     # name with Observations that have Locations
     def test_map
       login
-      get(:map, params: { id: names(:agaricus_campestris).id })
+      get(:show, params: { id: names(:agaricus_campestris).id })
       assert_template("names/maps/show")
     end
 
     # name with Observations that don't have Locations
     def test_map_no_loc
       login
-      get(:map, params: { id: names(:coprinus_comatus).id })
+      get(:show, params: { id: names(:coprinus_comatus).id })
       assert_template("names/maps/show")
     end
 
     # name with no Observations
     def test_map_no_obs
       login
-      get(:map, params: { id: names(:conocybe_filaris).id })
+      get(:show, params: { id: names(:conocybe_filaris).id })
       assert_template("names/maps/show")
     end
   end

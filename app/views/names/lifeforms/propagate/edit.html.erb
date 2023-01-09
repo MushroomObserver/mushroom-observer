@@ -6,9 +6,11 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
+  action = propagate_name_lifeform_path(@name.id, q: get_query_param)
 %>
 
-<%= form_tag(add_query_param(action: :propagate_lifeform, id: @name.id)) do %>
+<%= form_with(url: action, id: "propagate_name_lifeform_form") do |f| %>
+
   <p><b><%= :ADD.t %>:</b> <%= :propagate_lifeform_add.t %></p>
   <table class="table-lifeform">
     <% Name.all_lifeforms.
@@ -46,5 +48,7 @@
     <% end %>
   </table>
 
-  <%= submit_tag(:propagate_lifeform_apply.t, class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(:propagate_lifeform_apply.t,
+               class: "btn btn-default center-block mt-3") %>
+
 <% end %>
