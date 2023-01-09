@@ -4,12 +4,11 @@
 module Names::Synonyms
   class DeprecateController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # Form accessible from show_name that lets the user deprecate a name
     # in favor of another name.
     def new
-      pass_query_params
-
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -18,8 +17,6 @@ module Names::Synonyms
     end
 
     def create
-      pass_query_params
-
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -32,14 +29,15 @@ module Names::Synonyms
       end
 
       # Find the chosen preferred name (and alternates).
-      try_to_set_names_preferred_ivar
+      try_to_set_names_from_chosen_name
+      try_to_set_names_from_approved_name
 
-      target_name = try_to_set_target_name
-
+      target_name = @names.first
       # No matches: try to guess.
       if @names.empty?
         @valid_names = Name.suggest_alternate_spellings(@what)
         @suggest_corrections = true
+        render(:new)
 
       # If written-in name matches uniquely an existing name:
       elsif target_name && @names.length == 1
@@ -70,7 +68,7 @@ module Names::Synonyms
       @misspelling      = (params[:is][:misspelling] == "1")
     end
 
-    def try_to_set_names_preferred_ivar
+    def try_to_set_names_from_chosen_name
       @names = if params[:chosen_name][:name_id] &&
                   (name = Name.safe_find(params[:chosen_name][:name_id]))
                  [name]
@@ -79,13 +77,12 @@ module Names::Synonyms
                end
     end
 
-    def try_to_set_target_name
+    def try_to_set_names_from_approved_name
       approved_name = params[:approved_name].to_s.strip_squeeze
       if @names.empty? &&
          (new_name = Name.create_needed_names(approved_name, @what))
         @names = [new_name]
       end
-      @names.first
     end
 
     def deprecate_and_post_comment

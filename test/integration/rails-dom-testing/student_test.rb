@@ -48,6 +48,7 @@ class StudentTest < IntegrationTestCase
       assert_select("a[href*=?]", new_name_description_path(name.id), 1)
       click_mo_link(href: name_description_path(marys_draft.id))
       assert_select("a[href*=?", edit_name_description_path(marys_draft.id))
+      assert_select("form input[value='Destroy']")
       assert_select("form[action=?]", name_description_path(marys_draft.id))
       click_mo_link(href: edit_name_description_path(marys_draft.id))
       open_form("#name_description_form") do |form|
@@ -78,7 +79,7 @@ class StudentTest < IntegrationTestCase
                    response.body)
 
       # Check that initial form is correct.
-      open_form do |form|
+      open_form("#name_description_form") do |form|
         form.assert_value("source_type", :project)
         form.assert_value("source_name", project.title)
         form.assert_value("project_id", project.id)
@@ -92,16 +93,18 @@ class StudentTest < IntegrationTestCase
       end
       assert_flash_success
       # assert_template("name/show_name_description")
+      marys_draft = NameDescription.last
 
       # Make sure it shows up on main show_name page and can edit it.
       get(url)
-      assert_select("a[href*=edit_name_description]", 1)
-      assert_select("a[href*=destroy_name_description]", 1)
+      assert_select("a[href*=?", edit_name_description_path(marys_draft.id))
+      assert_select("form input[value='Destroy']")
+      assert_select("form[action=?]", name_description_path(marys_draft.id))
 
       # Now give it some text to make sure it *can* (but doesn't) actually get
       # displayed (content, that is) on main show_name page.
-      click_mo_link(href: /edit_name_description/)
-      open_form do |form|
+      click_mo_link(href: edit_name_description_path(marys_draft.id))
+      open_form("#name_description_form") do |form|
         form.assert_value("source_type", :project)
         form.assert_value("source_name", project.title)
         form.assert_value("public_write", false)
