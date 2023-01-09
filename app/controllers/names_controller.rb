@@ -370,6 +370,7 @@ class NamesController < ApplicationController
     @name.attributes = allowed_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
+    render("new", location: new_name_path)
   end
 
   def init_edit_name_form
