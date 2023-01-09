@@ -164,7 +164,6 @@ module Names
       # Create new description.
       @description.attributes = allowed_name_description_params
       @description.source_type = @description.source_type.to_sym
-
       validitate_description_and_save_or_flash_and_redirect
     end
 
@@ -174,10 +173,6 @@ module Names
       return unless find_description!
 
       find_licenses
-
-      # check_description_edit_permission is partly broken.
-      # It, LocationController, and NameController need repairs.
-      # See https://www.pivotaltracker.com/story/show/174737948
       check_description_edit_permission(@description,
                                         params[:description])
     end
@@ -188,14 +183,12 @@ module Names
       return unless find_description!
 
       find_licenses
-
       check_description_edit_permission(@description, params[:description])
       @description.attributes = allowed_name_description_params
       @description.source_type = @description.source_type.to_sym
 
       modify_description_permissions(@description)
       update_review_status_if_changes_substantial
-
       save_if_changes_made_or_flash
     end
 
@@ -226,6 +219,7 @@ module Names
         redirect_to(@description.show_link_args)
       else
         flash_object_errors(@description)
+        render("new", location: new_name_description_path(@name.id))
       end
     end
 

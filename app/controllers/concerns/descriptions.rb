@@ -181,6 +181,9 @@ module Descriptions
     end
 
     # Make sure user is allowed to make the changes they are trying to make.
+    # check_description_edit_permission is partly broken.
+    # It, LocationController, and NameController need repairs.
+    # See https://www.pivotaltracker.com/story/show/174737948
     def check_description_edit_permission(desc, params)
       okay = true
 

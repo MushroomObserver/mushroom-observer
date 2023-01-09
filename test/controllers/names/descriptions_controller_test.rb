@@ -141,7 +141,7 @@ module Names
           classification: classification
         }.merge(params)
       }
-      put_requires_login(:edit, params, user.login)
+      put_requires_login(:update, params, user.login)
       if permission && !success
         assert_template("names/descriptions/edit")
         assert_template("names/descriptions/_form")
