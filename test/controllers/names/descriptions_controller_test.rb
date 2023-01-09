@@ -59,9 +59,9 @@ module Names
       object = NameDescription.find(id)
       params = @controller.find_query_and_next_object(object, :next, id)
       login
-      get(:show, params: { flow: "next", id: description.id })
+      get(:show, params: { flow: :next, id: description.id })
       q = @controller.query_params(QueryRecord.last)
-      assert_redirected_to(name_description_path(params[:id], q: q))
+      assert_redirected_to(name_description_path(description.id, q: q))
     end
 
     def test_prev_description
@@ -70,9 +70,9 @@ module Names
       object = NameDescription.find(id)
       params = @controller.find_query_and_next_object(object, :prev, id)
       login
-      get(:show, params: { flow: "prev", id: description.id })
+      get(:show, params: { flow: :prev, id: description.id })
       q = @controller.query_params(QueryRecord.last)
-      assert_redirected_to(name_description_path(params[:id], q: q))
+      assert_redirected_to(name_description_path(description.id, q: q))
     end
 
     def test_why_danny_cant_edit_lentinus_description
