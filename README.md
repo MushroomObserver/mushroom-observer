@@ -50,8 +50,7 @@ to implement Continuous Integration (CI).
 Pushing a commit to GitHub triggers a workflow run that includes:
 
 - testing with [minitest][minitest],
-- submitting the test results to [Coveralls][Coveralls]
-to obtain a test coverage report,
+- submitting the results to [Coveralls][Coveralls] to get a coverage report,
 - running [Codeclimate][CodeClimate] to get a quality control report.
 
 ### [minitest][minitest]
@@ -116,7 +115,8 @@ this file describes the steps used by one developer.
 You are encouraged to update this document with your own experience.
 Also see [MACOSX_NOTES](MACOSX_NOTES) for notes about setting up a
 local Apple M1 working under the Monterey (12.4) version of MacOS.
->Rather than running our code locally on your hardware, we recommend using the process outlined in
+>Rather than running our code locally on your hardware,
+we recommend using the process outlined in
 <https://github.com/MushroomObserver/developer-startup>
 to create a development environment on a virtual machine.
 
