@@ -5,6 +5,7 @@
 # Table of links for dealing with a list of obs line by line, can add or remove
 #
 module Observations
+  # Add or remove one Observation from the Species List
   class SpeciesListsController < ApplicationController
     before_action :login_required
 

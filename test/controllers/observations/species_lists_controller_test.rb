@@ -11,6 +11,7 @@ module Observations
     def assigns_exist
       !assigns(:all_lists).empty?
     rescue StandardError
+      # do nothing (This comment prevents Lint/SuppressedException offense.)
     end
 
     def test_manage_species_lists
