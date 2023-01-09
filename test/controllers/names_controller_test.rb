@@ -126,8 +126,8 @@ class NamesControllerTest < FunctionalTestCase
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
     login
-    get(:index, params: { advanced_search: true,
-                          q: @controller.query_params(query) })
+    get(:index,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
     assert_template("index")
   end
 

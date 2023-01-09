@@ -85,7 +85,7 @@ module Names::Synonyms
       end
     end
 
-    def deprecate_and_post_comment
+    def deprecate_and_post_comment(target_name)
       # Merge this name's synonyms with the preferred name's synonyms.
       @name.merge_synonyms(target_name)
 

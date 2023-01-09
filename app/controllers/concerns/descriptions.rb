@@ -302,11 +302,17 @@ module Descriptions
                               name: @description.unique_partial_format_name)
     end
 
+    def log_description_updated
+      # Log action to parent name.
+      @description.parent.log(:log_description_updated,
+                              user: @user.login, touch: true,
+                              name: @description.unique_partial_format_name)
+    end
+
     # Log merge to parent.
     def log_description_merged
       @description.parent.log(:log_object_merged_by_user,
-                              touch: true,
-                              user: @user.login,
+                              user: @user.login, touch: true,
                               from: old_desc.unique_partial_format_name,
                               to: @description.unique_partial_format_name)
     end
@@ -348,8 +354,7 @@ module Descriptions
 
     def log_description_destroyed
       @description.parent.log(:log_description_destroyed,
-                              user: @user.login,
-                              touch: true,
+                              user: @user.login, touch: true,
                               name: @description.unique_partial_format_name)
     end
   end

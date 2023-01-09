@@ -19,17 +19,26 @@ module Names::Classification
       store_location
       pass_query_params
 
-      return unless find_name!
-      return unless make_sure_name_is_at_or_above_genus!(@name)
+      unless find_name! &&
+             make_sure_name_is_at_or_above_genus!(@name)
+        return render_new
+      end
 
       @parent_text_name = params[:parent].to_s.strip_html.strip_squeeze
       parent = resolve_name!(@parent_text_name, params[:options])
-      return unless parent
-      return unless make_sure_parent_has_classification!(parent)
-      return unless make_sure_parent_higher_rank!(parent)
+      unless parent && make_sure_parent_has_classification!(parent) &&
+             make_sure_parent_higher_rank!(parent)
+        return render_new
+      end
 
       @name.inherit_classification(parent)
       redirect_with_query(@name.show_link_args)
+    end
+
+    private
+
+    def render_new
+      render("new", location: inherit_name_classification_form_path)
     end
 
     include Names::Classification::SharedPrivateMethods
