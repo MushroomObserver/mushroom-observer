@@ -49,11 +49,9 @@
       <% end %>
     </div><!--#name_confident_observations-->
 
-    <div id="name_previous_export">
+    <div id="name_previous_export" class="mb-4">
       <%= show_previous_version(@name) %>
       <%= set_export_status_controls(@name) %>
-      <br/>
-      <br/>
     </div>
 
     <div id="name_authors_editors">
@@ -128,7 +126,7 @@
             <% end %>
           <div class="panel panel-default">
             <div class="panel-body name-section" id="classification_section">
-              <%= render(partial: "show/classification") %>
+              <%= render(partial: "names/show/classification") %>
             </div>
           </div>
         </div><!--#name_classification-->
@@ -143,7 +141,7 @@
             <% end %>
           <div class="panel panel-default">
             <div class="panel-body name-section" id="lifeform_section">
-              <%= render(partial: "show/lifeform") %>
+              <%= render(partial: "names/show/lifeform") %>
             </div>
           </div>
         </div>

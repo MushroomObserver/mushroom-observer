@@ -107,10 +107,10 @@ class NamesControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
-    params = @controller.query_params(query)
+    params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
     login
-    get(:advanced_search, params: params)
+    get(:index, params: params)
     assert_redirected_to(search_advanced_path)
   end
 
@@ -1381,7 +1381,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Bar", name.author)
     assert_equal("Genus", name.rank)
     assert_false(name.locked)
-    assert_redirected_to(deprecate_name_synonym_path(name.id))
+    assert_redirected_to(deprecate_name_synonym_form_path(name.id))
   end
 
   def test_edit_misspelled_name

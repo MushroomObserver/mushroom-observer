@@ -17,7 +17,7 @@
 
 module Names
   class DescriptionsController < ApplicationController
-    include Descriptions
+    include ::Descriptions
     include ::Names::Descriptions::SharedPrivateMethods
 
     before_action :login_required
@@ -165,7 +165,7 @@ module Names
       @description.attributes = allowed_name_description_params
       @description.source_type = @description.source_type.to_sym
 
-      check_create_validity_and_save_or_flash_and_redirect
+      validitate_description_and_save_or_flash_and_redirect
     end
 
     def edit
@@ -193,15 +193,8 @@ module Names
       @description.attributes = allowed_name_description_params
       @description.source_type = @description.source_type.to_sym
 
-      # Modify permissions based on changes to the two "public" checkboxes.
       modify_description_permissions(@description)
-
-      # If substantive changes are made by a reviewer, call this act a
-      # "review", even though they haven't actually changed the review
-      # status.  If it's a non-reviewer, this will revert it to "unreviewed".
-      if @description.save_version?
-        @description.update_review_status(@description.review_status)
-      end
+      update_review_status_if_changes_substantial
 
       save_if_changes_made_or_flash
     end
@@ -219,15 +212,16 @@ module Names
       @name = Name.find(params[:id].to_s)
     end
 
-    def check_create_validity_and_save_or_flash_and_redirect
+    def validitate_description_and_save_or_flash_and_redirect
       if @description.valid?
         initialize_description_permissions(@description)
         @description.save
 
         set_default_description_if_public
-        update_classification_cache(@name)
+        update_parent_classification_cache
         log_description_created
         flash_notice(:runtime_name_description_success.t(id: @description.id))
+
         redirect_to(@description.show_link_args)
       else
         flash_object_errors(@description)
@@ -240,6 +234,23 @@ module Names
       return unless !@name.description && @description.fully_public
 
       @name.description = @description
+    end
+
+    # Keep the parent's classification cache up to date.
+    def update_parent_classification_cache
+      if (@name.description == @description) &&
+         (@name.classification != @description.classification)
+        @name.classification = @description.classification
+      end
+    end
+
+    # If substantive changes are made by a reviewer, call this act a
+    # "review", even though they haven't actually changed the review
+    # status.  If it's a non-reviewer, this will revert it to "unreviewed".
+    def update_review_status_if_changes_substantial
+      return unless @description.save_version?
+
+      @description.update_review_status(@description.review_status)
     end
 
     def save_if_changes_made_or_flash

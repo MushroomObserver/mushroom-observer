@@ -90,7 +90,7 @@ class NamesController < ApplicationController
   end
 
   # Display list of names that have observations.
-  def names_with_observations
+  def observation_index
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
   end
