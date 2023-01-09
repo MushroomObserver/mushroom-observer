@@ -1,4 +1,5 @@
 # Mushroom Observer
+
 <!-- Most links are defined here for DRYness and consistency -->
 [Brakeman]: https://brakemanscanner.org/
 [Codeclimate]: https://codeclimate.com
@@ -24,35 +25,43 @@
 Last Revised: 2023-01-08
 
 This README is an overview of
+
 - the tools used by Mushroom Observer (MO) and
 - the other READMEs in this repository.
-
 
 See
 <https://mushroomobserver.org/info/intro>
 for an introduction to the website itself.
 
 -----
+
 ## TOOLS
+
 ### [git][git]
+
 MO uses [git][git] for version control and management of MO code.
 The source code is hosted on github. The URL for the MO source repository is
-https://github.com/MushroomObserver/mushroom-observer.
+<https://github.com/MushroomObserver/mushroom-observer>.
+
 ### [Github Actions][Github Actions]
+
 We use [Github Actions][Github Actions]
 to implement Continuous Integration (CI).
 Pushing a commit to GitHub triggers a workflow run that includes:
+
 - testing with [minitest][minitest],
 - submitting the test results to [Coveralls][Coveralls]
 to obtain a test coverage report,
 - running [Codeclimate][CodeClimate] to get a quality control report.
 
 ### [minitest][minitest]
+
 Our test suite uses [minitest][minitest] and extensions.
 See our [Gemfile][Gemfile] for more details.
 The test suite is run as part of our CI, and also can be run locally.
 
 ### [Coveralls][Coveralls]
+
 We use [Coveralls][Coveralls] to obtain a
 [report about test coverage][coveralls_build].
 Coveralls is run as part of our CI, and also can be run locally.
@@ -61,12 +70,14 @@ The reports highlight newly uncovered lines
 so that we can maintain a high degree of coverage.
 
 ### [Codeclimate][CodeClimate]
+
 We use [Codeclimate][CodeClimate]
 and plugins, like [RuboCop][RuboCop] and [Brakeman][Brakeman],
 to help maintain and improve code quality, including a consistent style.
 See our [Codeclimate configuration file](/.codeclimate.yml) for more details.
 
 ### [RuboCop][RuboCop]
+
 We use [RuboCop][RuboCop] and extensions to help with
 code quality and consistentcy of style.
 See our [RuboCop configuration file](/.rubocop.yml) for more details.
@@ -76,17 +87,19 @@ We have hundreds of offenses to fix.
 See our [Ruboco Todo file](.rubocop_todo.yml).)
 
 ### [Brakeman][Brakeman]
+
 We use [Brakeman][Brakeman] to highight some security issues.
 
-----
+-----
 
 ## DEVELOPMENT
+
 To get started developing we recommend that you head over to
 <https://github.com/MushroomObserver/developer-startup> which provides
 instructions for getting a virtual machine development environment set up on
 Mac, Linux and Windows machines.
 
-----
+-----
 
 ## Other READMEs
 
