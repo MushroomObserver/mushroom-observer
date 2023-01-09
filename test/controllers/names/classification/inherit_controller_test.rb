@@ -7,6 +7,11 @@ module Names::Classification
   class InheritControllerTest < FunctionalTestCase
     include ObjectLinkHelper
 
+    def create_name(name)
+      parse = Name.parse_name(name)
+      Name.new_name(parse.params)
+    end
+
     def test_get_inherit_classification
       name = names(:boletus)
 

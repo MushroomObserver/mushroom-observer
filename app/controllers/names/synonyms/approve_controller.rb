@@ -30,8 +30,14 @@ module Names::Synonyms
 
     private
 
+    def render_new
+      render(:new, location: approve_name_synonym_form_path)
+    end
+
     def deprecate_others
-      return unless params[:deprecate] && params[:deprecate][:others] == "1"
+      unless params[:deprecate] && params[:deprecate][:others] == "1"
+        return render_new
+      end
 
       @others = []
       @name.approved_synonyms.each do |n|

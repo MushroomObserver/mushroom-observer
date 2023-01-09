@@ -25,7 +25,7 @@ module Names::Synonyms
 
       if @what.blank?
         flash_error(:runtime_name_deprecate_must_choose.t)
-        return
+        return render_new
       end
 
       # Find the chosen preferred name (and alternates).
@@ -37,7 +37,7 @@ module Names::Synonyms
       if @names.empty?
         @valid_names = Name.suggest_alternate_spellings(@what)
         @suggest_corrections = true
-        render(:new)
+        render_new
 
       # If written-in name matches uniquely an existing name:
       elsif target_name && @names.length == 1
@@ -47,6 +47,10 @@ module Names::Synonyms
     end
 
     private
+
+    def render_new
+      render(:new, location: deprecate_name_synonym_form_path)
+    end
 
     def init_params_for_new
       # These parameters aren't always provided.

@@ -22,9 +22,9 @@
       </div>
     <% end %>
 
-    <%= f.label(:parent, :inherit_classification_parent_name.t + ":") %>
-    <%= f.text_field(:parent, @parent_text_name,
-                     class: "form-control", data: {autofocus: true}) %>
+    <%= label_tag(:parent, :inherit_classification_parent_name.t + ":") %>
+    <%= text_field_tag(:parent, @parent_text_name,
+                       class: "form-control", data: { autofocus: true }) %>
 
     <%= f.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
 

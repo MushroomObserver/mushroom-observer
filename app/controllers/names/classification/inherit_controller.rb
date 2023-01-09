@@ -19,16 +19,14 @@ module Names::Classification
       store_location
       pass_query_params
 
-      unless find_name! &&
-             make_sure_name_is_at_or_above_genus!(@name)
-        return render_new
-      end
+      return unless find_name!
+      return unless make_sure_name_is_at_or_above_genus!(@name)
 
       @parent_text_name = params[:parent].to_s.strip_html.strip_squeeze
       parent = resolve_name!(@parent_text_name, params[:options])
       unless parent && make_sure_parent_has_classification!(parent) &&
              make_sure_parent_higher_rank!(parent)
-        return render_new
+        render_new and return
       end
 
       @name.inherit_classification(parent)
