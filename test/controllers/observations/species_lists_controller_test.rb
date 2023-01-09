@@ -21,24 +21,24 @@ module Observations
     end
 
     def test_add_observation_to_species_list
-      sp = species_lists(:first_species_list)
+      spl = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
-      assert_not(sp.observations.member?(obs))
-      params = { id: obs.id, species_list_id: sp.id, commit: "add" }
+      assert_not(spl.observations.member?(obs))
+      params = { id: obs.id, species_list_id: spl.id, commit: "add" }
       requires_login(:update, params)
-      assert_template("edit")
-      assert(sp.reload.observations.member?(obs))
+      assert_redirected_to(species_list_path(spl.id))
+      assert(spl.reload.observations.member?(obs))
     end
 
     def test_add_observation_to_species_list_no_permission
-      sp = species_lists(:first_species_list)
+      spl = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
-      assert_not(sp.observations.member?(obs))
-      params = { id: obs.id, species_list_id: sp.id, commit: "add" }
+      assert_not(spl.observations.member?(obs))
+      params = { id: obs.id, species_list_id: spl.id, commit: "add" }
       login("dick")
       put(:update, params: params)
-      assert_redirected_to(species_list_path(sp.id))
-      assert_not(sp.reload.observations.member?(obs))
+      assert_redirected_to(species_list_path(spl.id))
+      assert_not(spl.reload.observations.member?(obs))
     end
 
     def test_remove_observation_from_species_list
@@ -57,7 +57,7 @@ module Observations
 
       login(owner)
       put(:update, params: params)
-      assert_template("edit")
+      assert_redirected_to(species_list_path(spl.id))
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -120,7 +120,8 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "add" })
-      assert_template("edit")
+      assert_redirected_to(species_list_path(spl1.id))
+      get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
                                                   species_list_id: spl1.id,
@@ -131,7 +132,8 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "remove" })
-      assert_template("edit")
+      assert_redirected_to(species_list_path(spl1.id))
+      get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
                                                   species_list_id: spl1.id,
