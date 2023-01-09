@@ -41,6 +41,18 @@ module Observations
       assert_not(spl.reload.observations.member?(obs))
     end
 
+    def test_add_observation_to_species_list_invalid_mode
+      spl = species_lists(:first_species_list)
+      obs = observations(:coprinus_comatus_obs)
+      assert_not(spl.observations.member?(obs))
+      params = { id: obs.id, species_list_id: spl.id, commit: "invalid_param" }
+
+      requires_login(:update, params)
+      assert_flash_error
+      assert_redirected_to(species_list_path(spl.id))
+      assert_not(spl.reload.observations.member?(obs))
+    end
+
     def test_remove_observation_from_species_list
       spl = species_lists(:unknown_species_list)
       obs = observations(:minimal_unknown_obs)
@@ -59,6 +71,24 @@ module Observations
       put(:update, params: params)
       assert_redirected_to(species_list_path(spl.id))
       assert_not(spl.reload.observations.member?(obs))
+    end
+
+    def test_remove_observation_from_species_list_invalid_mode
+      spl = species_lists(:unknown_species_list)
+      obs = observations(:minimal_unknown_obs)
+      assert(spl.observations.member?(obs))
+      params = { id: obs.id, species_list_id: spl.id, commit: "invalid_mode" }
+      owner = spl.user.login
+
+      login(owner)
+      put(:update, params: params)
+
+      assert_flash_error(
+        "Flash error should display if trying to remove an Observation " \
+        "from a Species list with an invalid `commit` mode"
+      )
+      assert(spl.reload.observations.member?(obs),
+             "Observation should remain in Species List")
     end
 
     def test_manage_species_list_with_projects
