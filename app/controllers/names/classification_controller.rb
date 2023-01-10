@@ -21,10 +21,16 @@ module Names
 
       @name.classification = params[:classification].to_s.strip_html.
                              strip_squeeze
-      return unless validate_classification!
+      return render_edit unless validate_classification!
 
       @name.change_classification(@name.classification)
       redirect_with_query(@name.show_link_args)
+    end
+
+    private
+
+    def render_edit
+      render(:edit, location: edit_name_classification_path(@name))
     end
 
     include Names::Classification::SharedPrivateMethods
