@@ -39,6 +39,8 @@
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #
 class NamesController < ApplicationController
+  before_action :store_location, except: [:index]
+  before_action :pass_query_params, except: [:index]
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :show,
@@ -242,8 +244,6 @@ class NamesController < ApplicationController
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
   def show
-    pass_query_params
-    store_location
     clear_query_in_session
 
     case params[:flow]
@@ -320,14 +320,10 @@ class NamesController < ApplicationController
   public
 
   def new
-    store_location
-    pass_query_params
     init_create_name_form
   end
 
   def create
-    store_location
-    pass_query_params
     init_create_name_form
     @parse = parse_name
     make_sure_name_doesnt_exist!
@@ -337,16 +333,12 @@ class NamesController < ApplicationController
   end
 
   def edit
-    store_location
-    pass_query_params
     return unless find_name!
 
     init_edit_name_form
   end
 
   def update
-    store_location
-    pass_query_params
     return unless find_name!
 
     init_edit_name_form

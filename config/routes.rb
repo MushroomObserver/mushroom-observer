@@ -613,8 +613,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/
   # Location Countries: show
-  get("locations/:id/countries", to: "locations/countries#index",
-                                 as: "location_countries")
+  get("locations(/:id)/countries", to: "locations/countries#index",
+                                   as: "location_countries")
   # Location Help: show
   get("locations/help", to: "locations/help#show")
   # Map Locations: show

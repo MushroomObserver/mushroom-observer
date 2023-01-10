@@ -10,4 +10,4 @@
   action = location_descriptions_path(@description.location_id)
 %>
 
-<%= render(partial: "form", locals: { form: form, button: :CREATE }) %>
+<%= render(partial: "form", locals: { action: action, button: :CREATE }) %>

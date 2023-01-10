@@ -20,6 +20,8 @@ require("geocoder")
 
 # Locations controller.
 class LocationsController < ApplicationController
+  before_action :store_location, except: [:index, :destroy]
+  before_action :pass_query_params, except: [:index]
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :new,
@@ -39,7 +41,7 @@ class LocationsController < ApplicationController
     if params[:advanced_search].present?
       advanced_search
     elsif params[:pattern].present?
-      name_search
+      location_search
     elsif params[:country].present?
       list_by_country
     elsif params[:by_user].present?
@@ -263,6 +265,8 @@ class LocationsController < ApplicationController
     result
   end
 
+  public
+
   ##############################################################################
   #
   #  :section: Show Location
@@ -271,8 +275,6 @@ class LocationsController < ApplicationController
 
   # Show a Location and one of its LocationDescription's, including a map.
   def show # rubocop:disable Metrics/AbcSize
-    store_location
-    pass_query_params
     clear_query_in_session
     case params[:flow]
     when "next"
@@ -304,8 +306,6 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   def new
-    store_location
-    pass_query_params
     init_ivars_for_new
 
     # Render a blank form.
@@ -319,8 +319,6 @@ class LocationsController < ApplicationController
   end
 
   def create
-    store_location
-    pass_query_params
     init_caller_ivars_for_new
     # Set to true below if created successfully, or if a matching location
     # already exists.  In either case, we're done with this form.
@@ -339,7 +337,7 @@ class LocationsController < ApplicationController
 
     # Need to create location.
     else
-      done = create_location_ivar(done)
+      done = create_location_ivar(done, db_name)
     end
 
     # If done, update any observations at @display_name,
@@ -355,8 +353,6 @@ class LocationsController < ApplicationController
   end
 
   def edit
-    store_location
-    pass_query_params
     return unless find_location!
 
     params[:location] ||= {}
@@ -365,8 +361,6 @@ class LocationsController < ApplicationController
   end
 
   def update
-    store_location
-    pass_query_params
     return unless find_location!
 
     params[:location] ||= {}
@@ -394,7 +388,7 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   def find_location!
-    @name = find_or_goto_index(Location, params[:id].to_s)
+    @location = find_or_goto_index(Location, params[:id].to_s)
   end
 
   def init_description_ivar(desc_id)
@@ -457,7 +451,7 @@ class LocationsController < ApplicationController
     end
   end
 
-  def create_location_ivar(done)
+  def create_location_ivar(done, db_name)
     @location = Location.new(allowed_location_params)
     @location.display_name = @display_name # (strip_squozen)
 

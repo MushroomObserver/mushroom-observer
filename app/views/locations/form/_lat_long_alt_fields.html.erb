@@ -5,7 +5,7 @@
         <div class="text-center">
           <div class="form-group">
             <%= f.label(:north, :NORTH.t + ":") %>
-            <%= form.text_field(:north, class: "form-control") %>
+            <%= f.text_field(:north, class: "form-control") %>
             <% inject_javascript_at_end("jQuery('#location_north').keypress(startKeyPressTimer);") %>
           </div>
         </div><!-- .text-center -->
