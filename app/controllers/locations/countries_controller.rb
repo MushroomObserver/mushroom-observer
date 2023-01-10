@@ -9,6 +9,6 @@ module Locations
 
   # Displays a list of all countries with counts.
   def index
-    @cc = CountryCounter.new
+    @cc = ::CountryCounter.new
   end
 end
