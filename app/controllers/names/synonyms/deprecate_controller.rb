@@ -16,17 +16,15 @@ module Names::Synonyms
       init_ivars_for_new
     end
 
-    def create
+    def create # rubocop:disable Metrics/AbcSize
       return unless find_name!
+
       return if abort_if_name_locked!(@name)
 
       init_params_for_new
       init_ivars_for_new
 
-      if @what.blank?
-        flash_error(:runtime_name_deprecate_must_choose.t)
-        return render_new
-      end
+      return unless we_have_a_what!
 
       # Find the chosen preferred name (and alternates).
       try_to_set_names_from_chosen_name
@@ -35,21 +33,38 @@ module Names::Synonyms
       target_name = @names.first
       # No matches: try to guess.
       if @names.empty?
-        @valid_names = Name.suggest_alternate_spellings(@what)
-        @suggest_corrections = true
-        render_new
+        suggest_alternate_spellings
 
       # If written-in name matches uniquely an existing name:
       elsif target_name && @names.length == 1
         deprecate_and_post_comment(target_name)
         redirect_to(name_path(@name.id, q: get_query_param))
+      else
+        # TODO: Flash a custom message about ambiguous name?
+        # :api_ambiguous_name.l is kind of similar
+        flash_warning(:api_ambiguous_name.t)
+        render_new
       end
     end
 
     private
 
+    def we_have_a_what!
+      return true if @what.present?
+
+      flash_error(:runtime_name_deprecate_must_choose.t)
+      render_new
+      false
+    end
+
     def render_new
       render(:new, location: deprecate_name_synonym_form_path)
+    end
+
+    def suggest_alternate_spellings
+      @valid_names = Name.suggest_alternate_spellings(@what)
+      @suggest_corrections = true
+      render_new
     end
 
     def init_params_for_new

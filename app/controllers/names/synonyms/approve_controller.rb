@@ -22,7 +22,8 @@ module Names::Synonyms
 
       @approved_names = @name.approved_synonyms
 
-      deprecate_others
+      return redirect_to(name_path(@name)) unless deprecate_others
+
       approve_this_one
       post_approval_comment
       redirect_with_query(@name.show_link_args)
@@ -35,9 +36,8 @@ module Names::Synonyms
     end
 
     def deprecate_others
-      unless params[:deprecate] && params[:deprecate][:others] == "1"
-        return render_new
-      end
+      return false unless params[:deprecate] &&
+                          params[:deprecate][:others] == "1"
 
       @others = []
       @name.approved_synonyms.each do |n|
@@ -45,6 +45,7 @@ module Names::Synonyms
         n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
         @others << n.real_search_name
       end
+      true
     end
 
     def approve_this_one
