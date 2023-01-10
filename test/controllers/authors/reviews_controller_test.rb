@@ -17,7 +17,7 @@ module Authors
       login("rolf")
       requires_user(:show,
                     [{ controller: "/location",
-                       action: :show_location,
+                       action: :show,
                        id: desc.location_id }],
                     params)
       assert_template(:show)

@@ -75,10 +75,11 @@ class LocationsControllerTest < FunctionalTestCase
     case page
     when :create
       post_requires_login(page, params)
+      assert_template("new")
     when :update
       put_requires_login(page, params)
+      assert_template("edit")
     end
-    assert_template(page.to_s)
     assert_template("locations/_form")
     assert_template("shared/_textilize_help")
     assert_equal(loc_count, Location.count)
@@ -135,7 +136,7 @@ class LocationsControllerTest < FunctionalTestCase
     # No interest in this location yet.
     albion = locations(:albion)
     login("rolf")
-    get(:show_location, params: { id: albion.id })
+    get(:show, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/watch\d*.png/,
                               set_interest_path(type: "Location",
@@ -146,7 +147,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
-    get(:show_location, params: { id: albion.id })
+    get(:show, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
                               set_interest_path(type: "Location",
@@ -158,7 +159,7 @@ class LocationsControllerTest < FunctionalTestCase
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.new(target: albion, user: rolf, state: false).save
-    get(:show_location, params: { id: albion.id })
+    get(:show, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
                               set_interest_path(type: "Location",
@@ -401,8 +402,8 @@ class LocationsControllerTest < FunctionalTestCase
     loc = locations(:albion)
     params = { id: loc.id.to_s }
     requires_login(:edit, params)
-    assert_form_action(action: :update, id: loc.id.to_s,
-                       approved_where: loc.display_name)
+    assert_form_action({ action: :update, id: loc.id.to_s,
+                         approved_where: loc.display_name })
     assert_input_value(:location_display_name, loc.display_name)
   end
 

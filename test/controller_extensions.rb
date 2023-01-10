@@ -128,9 +128,9 @@ module ControllerExtensions
   # Send GET request to a page that should require a specific user.
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
-  #   # redirected to "show_location").
-  #   requires_user(:review_authors, :show_location, id: 1)
-  #   requires_user(:review_authors, [:location, :show_location], id: 1)
+  #   # redirected to "show").
+  #   requires_user(:review_authors, :show, id: 1)
+  #   requires_user(:review_authors, [:location, :show], id: 1)
   #
   def requires_user(*args)
     either_requires_either(:get, *args)

@@ -170,7 +170,7 @@
         assert_match(@new_observation.notes, response.body)
         assert_match(@new_image.notes, response.body)
         assert_select('a[href*=observations_at_where]', 0)
-        assert_select('a[href*=show_location]', 1)
+        assert_select('a[href*=locations]', 1)
         assert_select('a[href*=images]')
       end
 
@@ -182,7 +182,7 @@
         assert_objs_equal(@expectations[:location], @new_observation.location)
         assert_equal(@expectations[:location].display_name, @new_observation.place_name)
         assert_select('a[href*=observations_at_where]', 0)
-        assert_select('a[href*=show_location]', 1)
+        assert_select('a[href*=locations]', 1)
       end
     end
   end

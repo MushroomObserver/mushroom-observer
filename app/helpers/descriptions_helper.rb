@@ -78,13 +78,14 @@ module DescriptionsHelper
   #   # Renders something like this:
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
-  def show_embedded_description_title(desc, _parent)
+  def show_embedded_description_title(desc)
     type = desc.type_tag
+    parent_type = desc.parent.type_tag
     title = description_title(desc)
     links = []
     if writer?(desc)
       links << link_with_query(:EDIT.t,
-                               { controller: "/#{type}s/descriptions",
+                               { controller: "/#{parent_type}s/descriptions",
                                  action: :edit, id: desc.id })
     end
     if is_admin?(desc)

@@ -2,21 +2,20 @@
 
 require("geocoder")
 
+#  :index
 #   :advanced_search,
-#   :help,
 #   :index_location,
 #   :list_by_country,
-#   :list_countries,
 #   :list_locations,
 #   :location_search,
 #   :locations_by_editor,
 #   :locations_by_user,
-#   :next_location,
-#   :prev_location,
-#   :show_location,
-#   :create_location,
-#   :edit_location,
-#   :destroy_location
+#  :show,
+#  :new,
+#  :create,
+#  :edit,
+#  :update,
+#  :destroy
 
 # Locations controller.
 class LocationsController < ApplicationController
@@ -37,7 +36,7 @@ class LocationsController < ApplicationController
   #
   ##############################################################################
 
-  def index
+  def index # rubocop:disable Metrics/AbcSize
     if params[:advanced_search].present?
       advanced_search
     elsif params[:pattern].present?
@@ -130,6 +129,7 @@ class LocationsController < ApplicationController
   end
 
   # Show selected search results as a list with 'list_locations' template.
+  # rubocop:disable Metrics/AbcSize
   def show_selected_locations(query, args = {})
     @links ||= []
 
@@ -193,6 +193,8 @@ class LocationsController < ApplicationController
     args[:action] = args[:action] || :index
     show_index_of_objects(query, args)
   end
+
+  public # for test!
 
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
@@ -264,8 +266,7 @@ class LocationsController < ApplicationController
 
     result
   end
-
-  public
+  # rubocop:enable Metrics/AbcSize
 
   ##############################################################################
   #
@@ -342,7 +343,7 @@ class LocationsController < ApplicationController
 
     # If done, update any observations at @display_name,
     # and set user's primary location if called from profile.
-    return unless done
+    return render_new unless done
 
     if @original_name.present?
       db_name = Location.user_name(@user, @original_name)
@@ -387,8 +388,18 @@ class LocationsController < ApplicationController
 
   ##############################################################################
 
+  private
+
   def find_location!
     @location = find_or_goto_index(Location, params[:id].to_s)
+  end
+
+  def render_new
+    render("new", location: new_location_path)
+  end
+
+  def render_edit
+    render("edit", location: edit_location_path(@location))
   end
 
   def init_description_ivar(desc_id)
@@ -523,7 +534,7 @@ class LocationsController < ApplicationController
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
     determine_and_check_location(db_name) if !@location.locked || in_admin_mode?
-    return render("edit") unless @dubious_where_reasons.empty?
+    return render_edit unless @dubious_where_reasons.empty?
 
     save_flash_and_redirect_or_render!
   end
@@ -547,7 +558,7 @@ class LocationsController < ApplicationController
       redirect_to(location_path(@location.id))
     elsif !@location.save
       flash_object_errors(@location)
-      render("edit")
+      render_edit
     else
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
       redirect_to(location_path(@location.id))
