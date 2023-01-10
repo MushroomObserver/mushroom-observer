@@ -7,7 +7,7 @@ module Names::Trackers
   class ApproveControllerTest < FunctionalTestCase
     # NOTE: this is a GET callback for email links
     def test_approve_tracker_with_template
-      QueuedEmail.queue_emails(true)
+      QueuedEmail.queue = true
       assert_equal(0, QueuedEmail.count)
 
       tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
@@ -36,7 +36,7 @@ module Names::Trackers
       assert_flash_warning
       assert(tracker.reload.approved)
       assert_equal(1, QueuedEmail.count)
-      QueuedEmail.queue_emails(false)
+      QueuedEmail.queue = false
     end
   end
 end

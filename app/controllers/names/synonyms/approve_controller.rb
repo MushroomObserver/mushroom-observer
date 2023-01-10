@@ -22,8 +22,7 @@ module Names::Synonyms
 
       @approved_names = @name.approved_synonyms
 
-      return redirect_to(name_path(@name)) unless deprecate_others
-
+      deprecate_others
       approve_this_one
       post_approval_comment
       redirect_with_query(@name.show_link_args)
