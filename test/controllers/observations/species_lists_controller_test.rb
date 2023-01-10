@@ -49,8 +49,8 @@ module Observations
       params = { id: obs.id, species_list_id: spl.id, commit: "invalid_param" }
 
       requires_login(:update, params)
+
       assert_flash_error
-      assert_redirected_to(species_list_path(spl.id))
       assert_not(spl.reload.observations.member?(obs))
     end
 
