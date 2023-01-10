@@ -749,7 +749,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                     as: "approve_name_tracker")
   # Name EOL Data: show:
   get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
-  get("name/eol", to: "names/eol_data#show", as: "names_eol_data")
   get("names/eol_preview", to: "names/eol_data/preview#show",
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
@@ -1027,6 +1026,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/textile", to: redirect("/info/textile_sandbox"))
   get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
+
+  # ----- Names: legacy action redirects -----------------------------------
+  get("name/eol", to: redirect("names/eol_data#show"))
 
   # ----- Observations: legacy action redirects ----------------------------
   get("/observer/create_observation", to: redirect("/observations/new"))

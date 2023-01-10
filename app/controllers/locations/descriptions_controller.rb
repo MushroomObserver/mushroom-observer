@@ -17,6 +17,8 @@ module Locations
     include Descriptions
     include ::Locations::Descriptions::SharedPrivateMethods
 
+    before_action :store_location, except: [:index, :destroy]
+    before_action :pass_query_params, except: [:index]
     before_action :login_required
     before_action :disable_link_prefetching, except: [
       :new, :create, :edit, :update, :show
@@ -107,8 +109,6 @@ module Locations
 
     # Show just a LocationDescription.
     def show
-      store_location
-      pass_query_params
       return unless find_description!
 
       case params[:flow]
@@ -128,58 +128,52 @@ module Locations
     end
 
     def new
-      store_location
-      pass_query_params
       find_location
       find_licenses
       @description = LocationDescription.new
       @description.location = @location
 
       # Render a blank form.
-      initialize_description_source(@description)
+      initialize_description_source
     end
 
     # Create new description.
     def create
-      store_location
-      pass_query_params
       find_location
       find_licenses
       @description = LocationDescription.new
       @description.location = @location
 
       # Render a blank form.
-      initialize_description_source(@description)
+      initialize_description_source
       @description.attributes = allowed_location_description_params
-      check_create_validity_and_save_or_flash_and_redirect
+      if @description.valid?
+        save_new_description_flash_and_redirect
+      else
+        flash_object_errors(@description)
+        render_new
+      end
     end
 
     def edit
-      store_location
-      pass_query_params
-      @description = LocationDescription.find(params[:id].to_s)
-      find_licenses
+      return unless find_description!
 
-      # check_description_edit_permission is partly broken.
-      # It, LocationController, and NameController need repairs.
-      # See https://www.pivotaltracker.com/story/show/174737948
-      check_description_edit_permission(@description, params[:description])
+      return unless check_description_edit_permission!
+
+      find_description_parent
+      find_licenses
     end
 
     def update
-      store_location
-      pass_query_params
-      @description = LocationDescription.find(params[:id].to_s)
+      return unless find_description!
+
+      return unless check_description_edit_permission!
+
+      find_description_parent
       find_licenses
-
-      check_description_edit_permission(@description,
-                                        params[:description])
-
       @description.attributes = allowed_location_description_params
 
-      # Modify permissions based on changes to the two "public" checkboxes.
-      modify_description_permissions(@description)
-
+      modify_description_permissions
       save_if_changes_made_or_flash
     end
 
@@ -196,45 +190,49 @@ module Locations
       @location = Location.find(params[:id].to_s)
     end
 
-    # TODO: If locations start to get a default public description,
-    #       maybe move this action to the Descriptions.rb concern
-    def check_create_validity_and_save_or_flash_and_redirect
-      if @description.valid?
-        initialize_description_permissions(@description)
-        @description.save
-
-        log_description_created
-        flash_notice(
-          :runtime_location_description_success.t(id: @description.id)
-        )
-        redirect_to(@description.show_link_args)
-      else
-        flash_object_errors(@description)
-      end
+    def find_description_parent
+      @location = Location.find(@description.parent_id.to_s)
     end
 
+    def render_new
+      render("new", location: new_location_description_path(@location.id))
+    end
+
+    def render_edit
+      render("edit", location: edit_location_description_path(@location.id))
+    end
+
+    # called by :create
+    def save_new_description_flash_and_redirect
+      initialize_description_permissions(@description)
+      @description.save
+
+      log_description_created
+      flash_notice(
+        :runtime_location_description_success.t(id: @description.id)
+      )
+      redirect_to(@description.show_link_args)
+    end
+
+    # called by :update
     def save_if_changes_made_or_flash
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
-        redirect_to(@description.show_link_args)
+        render_edit
 
       # Try to save and flash if there were error(s).
       elsif !@description.save
         flash_object_errors(@description)
+        render_edit
 
       # Updated successfully.
       else
         flash_notice(
           :runtime_edit_location_description_success.t(id: @description.id)
         )
-
-        # Log action in parent location.
         log_description_updated
-
-        # Delete old description after resolving conflicts of merge.
         resolve_merge_conflicts_and_delete_old_description
-
         redirect_to(@description.show_link_args)
       end
     end

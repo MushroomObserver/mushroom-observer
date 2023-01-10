@@ -20,6 +20,8 @@ module Names
     include ::Descriptions
     include ::Names::Descriptions::SharedPrivateMethods
 
+    before_action :store_location, except: [:index, :destroy]
+    before_action :pass_query_params, except: [:index]
     before_action :login_required
     before_action :disable_link_prefetching, except: [
       :show, :new, :create, :edit, :update
@@ -115,8 +117,6 @@ module Names
     # --------------------------------------------------------------------------
 
     def show
-      store_location
-      pass_query_params
       return unless find_description!
 
       case params[:flow]
@@ -142,20 +142,16 @@ module Names
     ############################################################################
 
     def new
-      store_location
-      pass_query_params
       find_name
       find_licenses
       @description = NameDescription.new
       @description.name = @name
 
       # Render a blank form.
-      initialize_description_source(@description)
+      initialize_description_source
     end
 
     def create
-      store_location
-      pass_query_params
       find_name
       find_licenses
       @description = NameDescription.new
@@ -164,39 +160,12 @@ module Names
       # Create new description.
       @description.attributes = allowed_name_description_params
       @description.source_type = @description.source_type.to_sym
-      validitate_description_and_save_or_flash_and_redirect
-    end
-
-    def edit
-      store_location
-      pass_query_params
-      return unless find_description!
-
-      find_licenses
-      check_description_edit_permission(@description,
-                                        params[:description])
-    end
-
-    def update
-      store_location
-      pass_query_params
-      return unless find_description!
-
-      find_licenses
-      check_description_edit_permission(@description, params[:description])
-      @description.attributes = allowed_name_description_params
-      @description.source_type = @description.source_type.to_sym
-
-      modify_description_permissions(@description)
-      update_review_status_if_changes_substantial
-      save_if_changes_made_or_flash
-    end
-
-    def destroy
-      pass_query_params
-      return unless find_description!
-
-      check_delete_permission_flash_and_redirect
+      if @description.valid?
+        save_new_description_flash_and_redirect
+      else
+        flash_object_errors(@description)
+        render_new
+      end
     end
 
     private
@@ -205,40 +174,78 @@ module Names
       @name = Name.find(params[:id].to_s)
     end
 
-    def validitate_description_and_save_or_flash_and_redirect
-      if @description.valid?
-        initialize_description_permissions(@description)
-        @description.save
-
-        set_default_description_if_public
-        update_parent_classification_cache
-        @name.save if @name.changed?
-        log_description_created
-        flash_notice(:runtime_name_description_success.t(id: @description.id))
-
-        redirect_to(@description.show_link_args)
-      else
-        flash_object_errors(@description)
-        render("new", location: new_name_description_path(@name.id))
-      end
+    def find_description_parent
+      @name = Name.find(@description.parent_id.to_s)
     end
 
-    # Make this the "default" description if there isn't one and this is
-    # publicly readable and writable.
+    def render_new
+      render("new", location: new_name_description_path(@name.id))
+    end
+
+    def render_edit
+      render("edit", location: edit_name_description_path(@name.id))
+    end
+
+    # called by :create
+    def save_new_description_flash_and_redirect
+      initialize_description_permissions
+      @description.save
+
+      set_default_description_if_public
+      update_parent_classification_cache
+      @name.save if @name.changed?
+      log_description_created
+      flash_notice(:runtime_name_description_success.t(id: @description.id))
+
+      redirect_to(@description.show_link_args)
+    end
+
+    # called by :create. Make this the "default" description
+    # if there isn't one and this is publicly readable and writable.
     def set_default_description_if_public
       return unless !@name.description && @description.fully_public?
 
       @name.description = @description
     end
 
+    # called by :create
     # Keep the parent's classification cache up to date.
     def update_parent_classification_cache
-      if (@name.description == @description) &&
-         (@name.classification != @description.classification)
-        @name.classification = @description.classification
-      end
+      return unless (@name.description == @description) &&
+                    (@name.classification != @description.classification)
+
+      @name.classification = @description.classification
     end
 
+    public
+
+    def edit
+      return unless find_description!
+
+      return unless check_description_edit_permission!
+
+      find_description_parent
+      find_licenses
+    end
+
+    def update
+      return unless find_description!
+
+      return unless check_description_edit_permission!
+
+      find_description_parent
+      find_licenses
+      @description.attributes = allowed_name_description_params
+      @description.source_type = @description.source_type.to_sym
+
+      modify_description_permissions # does not redirect
+      update_review_status_if_changes_substantial # does not redirect
+      save_updated_description_if_changed_or_flash
+    end
+
+    private
+
+    # called by :update
     # If substantive changes are made by a reviewer, call this act a
     # "review", even though they haven't actually changed the review
     # status.  If it's a non-reviewer, this will revert it to "unreviewed".
@@ -248,35 +255,33 @@ module Names
       @description.update_review_status(@description.review_status)
     end
 
-    def save_if_changes_made_or_flash
+    # called by :update
+    def save_updated_description_if_changed_or_flash
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        redirect_to(@description.show_link_args)
+        render_edit
 
       # Try to save and flash if there were error(s).
       elsif !@description.save
         flash_object_errors(@description)
+        render_edit
 
       # Updated successfully.
       else
-        flash_success_update_parent_and_redirect
+        flash_notice(
+          :runtime_edit_name_description_success.t(id: @description.id)
+        )
+        update_classification_cache_and_save_name
+        log_description_updated
+        resolve_merge_conflicts_and_delete_old_description # does not redirect
+        redirect_to(@description.show_link_args)
       end
     end
 
-    def flash_success_update_parent_and_redirect
-      flash_notice(
-        :runtime_edit_name_description_success.t(id: @description.id)
-      )
-      name = @description.name
-      update_classification_cache_and_save_name(name)
-      log_description_updated
-      resolve_merge_conflicts_and_delete_old_description
-      redirect_to(@description.show_link_args)
-    end
-
     # Update name's classification cache.
-    def update_classification_cache_and_save_name(name)
+    def update_classification_cache_and_save_name
+      name = @description.name
       if (name.description == @description) &&
          (name.classification != @description.classification)
         name.classification = @description.classification
@@ -292,6 +297,14 @@ module Names
         permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
                :look_alikes, :uses, :refs, :notes, :source_name, :project_id,
                :source_type, :public, :public_write)
+    end
+
+    public
+
+    def destroy
+      return unless find_description!
+
+      check_delete_permission_flash_and_redirect
     end
   end
 end
