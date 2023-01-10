@@ -749,6 +749,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                                     as: "approve_name_tracker")
   # Name EOL Data: show:
   get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
+  get("name/eol", to: "names/eol_data#show", as: "names_eol_data")
   get("names/eol_preview", to: "names/eol_data/preview#show",
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
