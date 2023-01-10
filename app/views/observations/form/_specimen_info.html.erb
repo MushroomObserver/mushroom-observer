@@ -30,8 +30,10 @@
   <!-- specimen_info -->
   <div id="specimen_info" class="<%= "hidden" if !@observation.specimen %>">
 
-    <%= render(partial: "collection_number", locals: { f: f } ) %>
-    <%= render(partial: "herbarium_record", locals: { f: f } ) %>
+    <%= render(partial: "observations/form/collection_number",
+               locals: { f: f } ) %>
+    <%= render(partial: "observations/form/herbarium_record",
+               locals: { f: f } ) %>
 
   </div><!--#specimen_info-->
   <!-- /specimen_info -->
