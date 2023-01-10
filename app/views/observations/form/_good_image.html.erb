@@ -1,0 +1,74 @@
+<table class="table-observation-images">
+  <tr>
+    <td>
+      <%= label_tag("image_#{image.id}_notes",
+                    :NOTES.t + ":") %>
+    </td>
+    <td>
+      <%= text_area(:good_image, :notes,
+                    value: image.notes,
+                    index: image.id,
+                    rows: 1,
+                    class: "form-control form-control-sm") %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= label_tag(
+            "image_#{image.id}_original_name",
+            :form_observations_original_name.t + ":"
+          ) %>
+    </td>
+    <td>
+      <%= text_field(:good_image, :original_name,
+                      value: image.original_name,
+                      index: image.id,
+                      size: 40,
+                      class: "form-control form-control-sm") %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= label_tag("image_#{image.id}_copyright_holder",
+                    "#{:form_images_copyright_holder.t}:") %>
+    </td>
+    <td>
+      <%= text_field(:good_image, :copyright_holder,
+                      value: image.copyright_holder,
+                      index: image.id,
+                      class: "form-control form-control-sm") %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= label_tag("image_#{image.id}_when_1i",
+                    :form_images_when_taken.t + ":") %>
+    </td>
+    <td>
+      <div class="form-inline">
+        <%= date_select(:good_image, :when,
+              date_select_opts(image).merge(object: image,
+                                            index: image.id),
+              { class: "form-control form-control-sm",
+                onchange:
+                "CHANGED_DATES[#{image.id}] = true"}) %>
+        <% turn_into_year_auto_completer(
+              "good_image_#{image.id}_when_1i"
+            ) %>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= label_tag("image_#{image.id}_license_id",
+            "#{:form_images_select_license.t}:".html_safe) %>
+    </td>
+    <td>
+      <%= select(:good_image, :license_id,
+                  License.current_names_and_ids(image.license),
+                  { selected: image.license_id,
+                    index: image.id },
+                  { class: "form-control form-control-sm" }) %>
+    </td>
+  </tr>
+</table>

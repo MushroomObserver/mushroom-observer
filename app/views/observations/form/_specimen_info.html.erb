@@ -13,14 +13,14 @@
     </div>
     <%= help_block_with_arrow("up") do %>
       <%= :form_observations_specimen_available_help.t %>
-    <% end %>
+    <% end  # help_block_with_arrow do %>
 
     <!-- no_specimen_info -->
     <% if button_name == :SAVE_EDITS.l %>
       <div class="well well-sm help-block">
         <%= :form_observations_edit_specimens_help.t %>
-      </div>
-    <% end %><!--.well-->
+      </div><!--.well-->
+    <% end # if button_name %>
     <!-- /no_specimen_info -->
 
   </div><!--.col-->
@@ -29,62 +29,10 @@
 <% if button_name == :CREATE.l %>
   <!-- specimen_info -->
   <div id="specimen_info" class="<%= "hidden" if !@observation.specimen %>">
-    <div class="row mb-3">
-      <div class="col-sm-6">
 
-        <%= fields_for(:collection_number) do |fcn| %>
-          <div class="form-group">
-            <%= fcn.label(:name, :collection_number_name.t + ":") %>
-            <%= fcn.text_field(:name, value: @collectors_name,
-                               class: "form-control") %>
-          </div>
-          <div class="form-group">
-            <%= fcn.label(:number, :collection_number_number.t + ":") %>
-            <%= fcn.text_field(:number, value: @collectors_number,
-                               class: "form-control") %>
-          </div>
-        <% end %>
+    <%= render(partial: "collection_number", locals: { f: f } ) %>
+    <%= render(partial: "herbarium_record", locals: { f: f } ) %>
 
-      </div>
-      <div class="col-sm-6">
-        <%= help_block_with_arrow("left", id: "collection_number_help") do %>
-          <%= :form_observations_collection_number_help.t %>
-        <% end %>
-      </div>
-    </div><!--.row-->
-
-    <div class="row mb-3">
-      <div class="col-sm-6">
-
-        <%= fields_for(:herbarium_record) do |fhr| %>
-          <div class="form-group">
-            <%= fhr.label(:herbarium_name,
-                          :herbarium_record_herbarium_name.t + ":") %>
-            <%= fhr.text_field(:herbarium_name, value: @herbarium_name,
-                              class: "form-control") %>
-            <% turn_into_herbarium_auto_completer(
-                :herbarium_record_herbarium_name
-              ) %>
-          </div>
-          <div class="form-group">
-            <%= fhr.label(:herbarium_id,
-                          :herbarium_record_accession_number.t + ":") %>
-            <%= fhr.text_field(:herbarium_id, value: @herbarium_id,
-                              class: "form-control") %>
-          </div>
-          <div class="form-group">
-            <%= fhr.label(:notes, "#{:herbarium_record_notes.t}:") %>
-            <%= fhr.text_field(:notes, value: "", class: "form-control") %>
-          </div>
-        <% end %>
-
-      </div>
-      <div class="col-sm-6">
-        <%= help_block_with_arrow("left", id: "herbarium_record_help") do %>
-          <%= :form_observations_herbarium_record_help.t %>
-        <% end %>
-      </div>
-    </div><!--.row-->
   </div><!--#specimen_info-->
   <!-- /specimen_info -->
 
