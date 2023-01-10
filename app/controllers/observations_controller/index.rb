@@ -130,7 +130,7 @@ module ObservationsController::Index
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(observation_path(observation.id))
+      redirect_to(permanent_observation_path(observation.id))
     else
       render_observation_search_results(pattern)
     end
@@ -142,7 +142,7 @@ module ObservationsController::Index
       search.errors.each do |error|
         flash_error(error.to_s)
       end
-      render(observations_path)
+      render("index", location: observations_path)
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
       show_selected_observations(

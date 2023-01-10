@@ -8,7 +8,7 @@ class PostObservationTest < IntegrationTestCase
   NEW_OBSERVATION_TEMPLATE = "observations/new"
   CREATE_OBSERVATION_TEMPLATE = "observations"
   EDIT_OBSERVATION_TEMPLATE = "observations/edit"
-  CREATE_LOCATION_TEMPLATE = "location/create_location"
+  CREATE_LOCATION_TEMPLATE = "locations/new"
   OBSERVATION_INDEX_TEMPLATE = "observations/index"
 
   PASADENA_EXTENTS = {

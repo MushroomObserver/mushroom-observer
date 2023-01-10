@@ -58,7 +58,7 @@ class ObservationsControllerTest < FunctionalTestCase
         assert_response(:redirect)
         assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
       else
-        assert_redirected_to(%r{/location/create_location})
+        assert_redirected_to(/#{new_location_path}/)
       end
     rescue MiniTest::Assertion => e
       flash = get_last_flash.to_s
@@ -1737,7 +1737,7 @@ class ObservationsControllerTest < FunctionalTestCase
         vote: { value: "3" }
       }
     }
-    expected_page = :create_location
+    expected_page = new_location_path
 
     # Can we create observation with existing genus?
     agaricus = names(:agaricus)
@@ -2054,8 +2054,7 @@ class ObservationsControllerTest < FunctionalTestCase
       params,
       "mary"
     )
-    # assert_redirected_to(new_location_path)
-    assert_redirected_to(/new_location_path/)
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
@@ -2092,8 +2091,7 @@ class ObservationsControllerTest < FunctionalTestCase
       params,
       "mary"
     )
-    # assert_redirected_to(new_location_path)
-    assert_redirected_to(/new_location_path/)
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)

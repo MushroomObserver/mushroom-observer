@@ -88,12 +88,12 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(past_desc_count, LocationDescription::Version.count)
   end
 
-  # Post "create_location" with errors.
+  # Post "create" with errors.
   def construct_location_error(params)
     location_error(:create, params)
   end
 
-  # Post "update_location" with errors.
+  # Put "update" with errors.
   def update_location_error(params)
     location_error(:update, params)
   end

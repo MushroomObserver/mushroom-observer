@@ -798,7 +798,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(owner)
     put(:update, params: params)
     # assert_redirected_to(controller: "/locations", action: :new)
-    assert_redirected_to(%r{/location/create_location})
+    assert_redirected_to(new_location_path)
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
@@ -1029,7 +1029,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Lepiota sp Author"
     ].join("\r\n")
     post(:create, params: params)
-    assert_redirected_to(%r{/location/create_location})
+    assert_redirected_to(new_location_path)
     assert_equal(
       [
         "Fungi",
@@ -1061,7 +1061,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Psalliota sp."
     ].join("\r\n")
     post(:create, params: params)
-    assert_redirected_to(%r{/location/create_location})
+    assert_redirected_to(new_location_path)
     assert_equal(
       [
         "Fungi",

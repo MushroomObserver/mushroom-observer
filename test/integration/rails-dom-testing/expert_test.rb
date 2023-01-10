@@ -224,7 +224,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("location/create_location")
+    assert_template("locations/new")
 
     spl.reload
     obs = spl.observations

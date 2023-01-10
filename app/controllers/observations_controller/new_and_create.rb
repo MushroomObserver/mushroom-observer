@@ -336,7 +336,7 @@ module ObservationsController::NewAndCreate
       redirect_to(new_location_path(where: @observation.place_name,
                                     set_observation: @observation.id))
     else
-      redirect_to(observation_path(@observation.id))
+      redirect_to(permanent_observation_path(@observation.id))
     end
   end
 

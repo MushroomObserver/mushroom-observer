@@ -213,7 +213,7 @@ module ObservationsController::EditAndUpdate
       redirect_with_query(new_location_path(where: @observation.place_name,
                                             set_observation: @observation.id))
     else
-      redirect_with_query(observation_path(@observation.id))
+      redirect_with_query(permanent_observation_path(@observation.id))
     end
   end
 end
