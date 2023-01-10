@@ -706,12 +706,12 @@ class LocationsControllerTest < FunctionalTestCase
     params = { id: location.id }
 
     login(location.user.login)
-    delete(:destroy_location, params: params)
+    delete(:destroy, params: params)
     assert(Location.exists?(location.id),
            "Location should be destroyable only if user is in admin mode")
 
     make_admin
-    delete(:destroy_location, params: params)
+    delete(:destroy, params: params)
     assert_redirected_to(locations_path)
     assert_not(Location.exists?(location.id),
                "Failed to destroy Location #{location.id}, '#{location.name}'")

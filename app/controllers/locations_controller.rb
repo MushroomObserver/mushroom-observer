@@ -307,7 +307,7 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   def new
-    init_ivars_for_new
+    init_caller_ivars_for_new
 
     # Render a blank form.
     user_name = Location.user_name(@user, @display_name)
