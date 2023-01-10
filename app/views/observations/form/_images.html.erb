@@ -1,42 +1,19 @@
 <%
 # Images (already attached) section of create_observation form
+good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 %>
 
 <div class="" id="observation_images">
-  <% # @observation.thumb_image_id ||= 0 %>
 
-  <% if @good_images.any? %>
+  <p class="font-weight-bold">Images:</p>
 
-    <p class="font-weight-bold"><b>Images:</b></p>
+  <% @good_images.each do |image| %>
 
-    <% @good_images.each do |image| %>
+    <%= render(partial: "observations/form/good_image",
+               locals: { f: f, image: image }) %>
 
-      <div class="row mt-3 form_image">
+  <% end # @good_images.each do image %>
 
-        <!-- GOOD_IMAGE -->
-        <div class="col-xs-1" style="max-width:30px">
-          <%= f.radio_button(:thumb_image_id, image.id) %>
-        </div><!--.col-->
-
-        <div class="col-xs-11 col-sm-3">
-          <%= thumbnail(image, border: 0,
-                        obs: @observation.id, votes: true) %>
-        </div><!--.col-->
-
-        <div class="col-xs-12 col-sm-8">
-          <% if check_permission(image) %>
-            <%= render(partial: "observations/form/good_image",
-                       locals: { f: f, image: image }) %>
-          <% end # if check_permission %>
-        </div><!--.col-->
-        <!-- GOOD_IMAGE -->
-
-      </div><!--.row.form_image-->
-
-    <% end # @good_images.each do image %>
-
-  <% end # if @good_images %>
-
-  <%= hidden_field_tag(:good_images, @good_images.map { |o| o.id }.join(" ")) %>
+  <%= hidden_field_tag(:good_images, good_image_ids_str) %>
 
 </div><!--#observation_images-->
