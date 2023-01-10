@@ -78,6 +78,7 @@ module Projects
       @candidate = find_or_goto_index(User, params[:candidate])
     end
 
+    # Redirects back to show_project.
     def add_member(str, project)
       if (user = find_member(str))
         set_status(project, :member, user, :add)
@@ -85,6 +86,7 @@ module Projects
       else
         flash_error(:add_members_not_found.t(str))
       end
+      redirect_to(project_path(project.id, q: get_query_param))
     end
 
     def find_member(str)
@@ -93,6 +95,7 @@ module Projects
       User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
     end
 
+    # Redirects back to show_project.
     def update_member_status(project, candidate)
       admin = member = :remove
       case params[:commit]
