@@ -14,7 +14,7 @@
 
 module Locations
   class DescriptionsController < ApplicationController
-    include Descriptions
+    include ::Descriptions
     include ::Locations::Descriptions::SharedPrivateMethods
 
     before_action :store_location, except: [:index, :destroy]
@@ -204,7 +204,7 @@ module Locations
 
     # called by :create
     def save_new_description_flash_and_redirect
-      initialize_description_permissions(@description)
+      initialize_description_permissions
       @description.save
 
       log_description_created

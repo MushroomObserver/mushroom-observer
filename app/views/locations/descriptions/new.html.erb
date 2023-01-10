@@ -7,7 +7,7 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
-  action: location_descriptions_path(@description.location_id)
+  action = location_descriptions_path(@description.location_id)
 %>
 
 <%= render(partial: "form", locals: { form: form, button: :CREATE }) %>

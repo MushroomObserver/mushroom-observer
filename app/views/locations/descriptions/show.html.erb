@@ -20,7 +20,8 @@
 </div><!--.row-->
 
 <div class="container-text">
-  <%= render(partial: "show/location_description", object: @description) %>
+  <%= render(partial: "locations/descriptions/show/location_description",
+             object: @description) %>
   <%= render(partial: "comments/comments_for_object",
               locals: {object: @description, controls: true, limit: 10}) %>
   <%= show_object_footer(@description) %>
