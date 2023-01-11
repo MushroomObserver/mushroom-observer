@@ -405,26 +405,26 @@ class AbstractModelTest < UnitTestCase
 
   def test_show_controller
     assert_equal("/articles", Article.show_controller)
-    assert_equal("/phony", Phony.show_controller)
+    assert_equal("/phonies", Phony.show_controller)
   end
 
   def test_show_action
     assert_equal(:show, Article.show_action)
-    assert_equal("show_#{Phony.name.underscore}".to_sym, Phony.show_action)
+    assert_equal(:show, Phony.show_action)
   end
 
   def test_show_url
     assert_equal("#{MO.http_domain}/articles/2020",
                  Article.show_url(2020))
     assert_equal(
-      "#{MO.http_domain}#{Phony.show_controller}/#{Phony.show_action}/2020",
+      "#{MO.http_domain}/phonies/2020",
       Phony.show_url(2020)
     )
   end
 
   def test_index_action
     assert_equal(:index, Article.index_action)
-    assert_equal("index_#{Phony.name.underscore}".to_sym, Phony.index_action)
+    assert_equal(:index, Phony.index_action)
   end
 
   # fixture for above tests
@@ -438,7 +438,7 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------
 
   def test_show_urls
-    assert_show_url(APIKey, "/account/show_api_key")
+    # assert_show_url(APIKey, "/account/show_api_key") # index not show
     assert_show_url(CollectionNumber, "/collection_numbers")
     assert_show_url(Comment, "/comments")
     assert_show_url(ExternalSite, "/external_site/show_external_site")
