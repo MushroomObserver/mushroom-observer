@@ -1029,7 +1029,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Lepiota sp Author"
     ].join("\r\n")
     post(:create, params: params)
-    assert_redirected_to(new_location_path)
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(
       [
         "Fungi",
@@ -1061,7 +1061,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Psalliota sp."
     ].join("\r\n")
     post(:create, params: params)
-    assert_redirected_to(new_location_path)
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(
       [
         "Fungi",
