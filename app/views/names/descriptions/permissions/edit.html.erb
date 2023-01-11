@@ -8,8 +8,8 @@
                     @description.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  action = edit_name_description_permissions_path(@description.id,
-                                                  q: get_query_param)
+  action = { controller: "/names/descriptions/permissions", action: :update,
+             id: @description.id, q: get_query_param }
 %>
 
 <%= render(partial: "shared/adjust_permissions",

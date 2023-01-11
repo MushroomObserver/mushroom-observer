@@ -15,7 +15,8 @@
   end
   @tabsets = { right: draw_tab_set(tabs) }
 
-  action = name_description_path(@description.id, q: get_query_param)
+  action = { controller: "/names/descriptions", action: :update,
+             id: @description.id, q: get_query_param }
 %>
 
 <%= render(partial: "names/descriptions/form",

@@ -743,9 +743,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Name Trackers: form and callback:
   get("names/:id/trackers/new", to: "names/trackers#new",
                                 as: "new_name_tracker")
-  post("names/:id/trackers", to: "names/trackers#create",
-                             as: "name_trackers")
-  # Approve Name Tracker: email GET endpoint
+  post("names/:id/trackers", to: "names/trackers#create")
+  # edit: there's no tracker id because you can only have one per name
+  get("names/:id/trackers/edit", to: "names/trackers#edit",
+                                 as: "edit_name_tracker")
+  match("names/:id/trackers", to: "names/trackers#update", via: [:put, :patch])
+  # Approve Name Tracker: GET endpoint for admin email links
   get("names/trackers/:id/approve", to: "names/trackers/approve#new",
                                     as: "approve_name_tracker")
   # Name EOL Data: show:

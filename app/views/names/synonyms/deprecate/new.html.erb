@@ -6,7 +6,8 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
-  action = deprecate_name_synonym_path(@name.id, approved_name: @what)
+  action = { controller: "/names/synonyms/deprecate", action: :create,
+             id: @name.id, approved_name: @what }
 %>
 
 <%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>

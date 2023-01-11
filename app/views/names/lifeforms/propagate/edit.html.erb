@@ -6,7 +6,8 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
-  action = propagate_name_lifeform_path(@name.id, q: get_query_param)
+  action = { controller: "/names/lifeforms/propagate", action: :update,
+             id: @name.id, q: get_query_param }
 %>
 
 <%= form_with(url: action, id: "propagate_name_lifeform_form") do |f| %>

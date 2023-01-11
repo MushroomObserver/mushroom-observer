@@ -6,7 +6,8 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
-  action = approve_name_synonym_path(@name.id)
+  action = { controller: "/names/synonyms/approve", action: :create,
+             id: @name.id }
 %>
 
 <%= form_with(url: action, id: "name_approve_synonym_form") do |f| %>

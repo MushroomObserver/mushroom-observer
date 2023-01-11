@@ -5,25 +5,35 @@
 #  approve_tracker::
 module Names
   class TrackersController < ApplicationController
+    before_action :pass_query_params
     before_action :login_required
     before_action :disable_link_prefetching
 
     # Form accessible from show_name that lets a user setup a tracker
     # with notifications for a name.
     def new
-      pass_query_params
       return unless find_name!
 
-      try_to_find_name_tracker
-      initialize_tracking_form
+      initialize_tracking_form_new
     end
 
     def create
-      pass_query_params
       return unless find_name!
 
-      try_to_find_name_tracker
-      submit_tracking_form
+      submit_tracking_form_create
+    end
+
+    def edit
+      return unless find_name!
+
+      initialize_tracking_form_edit
+    end
+
+    def update
+      return unless find_name!
+
+      find_name_tracker
+      initialize_tracking_form_update
     end
 
     private
@@ -32,29 +42,35 @@ module Names
       @name = find_or_goto_index(Name, params[:id].to_s)
     end
 
-    def try_to_find_name_tracker
+    def find_name_tracker
       @name_tracker = NameTracker.find_by(name_id: params[:id].to_s,
                                           user_id: @user.id)
     end
 
-    def initialize_tracking_form
-      if @name_tracker
-        @note_template = @name_tracker.note_template
-        @name_tracker.note_template_enabled = @note_template.present?
-        @interest = Interest.find_by(target: @name_tracker)
-      else
-        @note_template = :email_tracking_note_template.l(
-          species_name: @name.real_text_name,
-          mailing_address: @user.mailing_address_for_tracking_template,
-          users_name: @user.legal_name
-        )
-      end
+    def initialize_tracking_form_new
+      @note_template = :email_tracking_note_template.l(
+        species_name: @name.real_text_name,
+        mailing_address: @user.mailing_address_for_tracking_template,
+        users_name: @user.legal_name
+      )
     end
 
-    def submit_tracking_form
+    def initialize_tracking_form_edit
+      @note_template = @name_tracker.note_template
+      @name_tracker.note_template_enabled = @note_template.present?
+      @interest = Interest.find_by(target: @name_tracker)
+    end
+
+    def submit_tracking_form_create
+      name_id = params[:id].to_s
+      create_or_update_name_tracker_and_interest(name_id)
+      redirect_to(name_path(@name.id, q: get_query_param))
+    end
+
+    def submit_tracking_form_udpate
       name_id = params[:id].to_s
       case params[:commit]
-      when :ENABLE.l, :UPDATE.l
+      when :UPDATE.l
         create_or_update_name_tracker_and_interest(name_id)
       when :DISABLE.l
         destroy_name_tracker_interest_and_flash
