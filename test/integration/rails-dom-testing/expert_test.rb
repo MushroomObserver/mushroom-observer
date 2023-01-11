@@ -163,7 +163,7 @@ class ExpertTest < IntegrationTestCase
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
-    open_form("#species_list_form") do |form|
+    open_form("#location_form") do |form|
       form.assert_value("location_display_name", new_location_reverse)
       form.change("location_display_name", newer_location_reverse)
       form.change("location_north", "35.6622")
@@ -193,7 +193,7 @@ class ExpertTest < IntegrationTestCase
     assert_template("comments/new")
     assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='species_lists/#{spl.id}']", text: /cancel/i)
-    open_form("#species_list_form") do |form|
+    open_form("#comment_form") do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")
       form.submit
