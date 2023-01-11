@@ -228,7 +228,7 @@ class LurkerTest < CapybaraIntegrationTestCase
   def test_obs_at_location
     login
     # Start at distribution map for Fungi.
-    visit("/name/map/#{names(:fungi).id}")
+    visit("/names/map/#{names(:fungi).id}")
 
     # Get a list of locations shown on map. (One defined, one undefined.)
     within("#right_tabs") { click_link("Show Locations") }

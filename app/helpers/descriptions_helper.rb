@@ -51,7 +51,7 @@ module DescriptionsHelper
     end
     if desc.public && @user && (desc.parent.description_id != desc.id)
       tabs << put_button(name: :show_description_make_default.t,
-                         path: { controller: "/#{type}s/descriptions/default",
+                         path: { controller: "/#{type}s/descriptions/defaults",
                                  action: :update, id: desc.id,
                                  q: get_query_param },
                          help: :show_description_make_default_help.l)

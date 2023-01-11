@@ -552,7 +552,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       put("images/detach", to: "glossary_terms/images#detach",
                            as: "detach_image_from")
       get("versions", to: "glossary_terms/versions#show",
-                      as: "show_past")
+                      as: "versions")
     end
   end
 
@@ -984,7 +984,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
     old_controller: "glossary", new_controller: "glossary_terms",
-    actions: [:controller, :show, :list, :index, :show_past]
+    actions: [:controller, :show, :list, :index]
   )
 
   # ----- Herbaria: legacy action redirects

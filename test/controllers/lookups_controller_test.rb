@@ -123,11 +123,11 @@ class LookupsControllerTest < FunctionalTestCase
     login
     p_id = projects(:eol_project).id
     get(:lookup_project, params: { id: p_id })
-    assert_redirected_to(/project_path(p_id)/)
+    assert_redirected_to(/#{project_path(p_id)}/)
     get(:lookup_project, params: { id: "Bolete" })
-    assert_redirected_to(/project_path(projects(:bolete_project).id)/)
+    assert_redirected_to(/#{project_path(projects(:bolete_project).id)}/)
     get(:lookup_project, params: { id: "Bogus" })
-    assert_redirected_to(/projects_path/)
+    assert_redirected_to(/#{projects_path}/)
     assert_flash_error
     get(:lookup_project, params: { id: "project" })
     # Must test against regex because passed query param borks path match

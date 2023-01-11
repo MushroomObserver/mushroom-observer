@@ -279,7 +279,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       get(show_name_uri)
       click_mo_link(href: %r{descriptions/new})
       # assert_template("names/descriptions/new")
-      open_form do |form|
+      open_form("#name_description_form") do |form|
         check_name_description_form_defaults(form)
         fill_in_name_description_form(form)
         form.submit
@@ -364,7 +364,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_name_description_fields
-      open_form do |form|
+      open_form("#name_description_form") do |form|
         form.send("assert_#{source_name_field_state}", "source_type")
         form.send("assert_#{source_type_field_state}", "source_name")
         form.send("assert_#{permission_fields_state}", "public_write")

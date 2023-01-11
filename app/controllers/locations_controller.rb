@@ -159,6 +159,15 @@ class LocationsController < ApplicationController
     query = restrict_query_to_box(query)
 
     # Get matching *undefined* locations.
+    get_matching_undefined_locations(query, args)
+
+    # Paginate the defined locations using the usual helper.
+    args[:always_index] = @undef_pages&.num_total&.positive?
+    args[:action] = args[:action] || :index
+    show_index_of_objects(query, args)
+  end
+
+  def get_matching_undefined_locations(query, args)
     @undef_location_format = User.current_location_format
     if (query2 = coerce_query_for_undefined_locations(query))
       select_args = {
@@ -187,11 +196,6 @@ class LocationsController < ApplicationController
       @undef_pages = nil
       @undef_data = nil
     end
-
-    # Paginate the defined locations using the usual helper.
-    args[:always_index] = @undef_pages&.num_total&.positive?
-    args[:action] = args[:action] || :index
-    show_index_of_objects(query, args)
   end
 
   public # for test!
