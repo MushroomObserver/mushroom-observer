@@ -1,6 +1,7 @@
 <%
   # NOTE: action was `observations_of_name`. Whether before or after refactor,
   # this action needed a `name` param but there's none here. Reverting to index
+  name_link = {}
   name_link = observations_path(name: @name) if @name
 
   if @show_user
