@@ -1,4 +1,4 @@
-<% 
+<%
 anon_values = [
   [:prefs_votes_anonymous_no.l, :no],
   [:prefs_votes_anonymous_yes.l, :yes],
@@ -26,25 +26,13 @@ filename_values = [
               :prefs_votes_anonymous.t + ":") %><br/>
   <%= f.select(:votes_anonymous, anon_values, {},
                { class: "form-control d-inline-block w-auto mr-3" }) %>
-
-  <span class="help-note">
-    <%= put_button(name: :prefs_change_image_vote_anonymity.t,
-                   path: images_bulk_vote_anonymity_updater_path) %>
-  </span>
-
 </div>
 
 <div class="form-group mt-3">
   <%= f.label(:keep_filenames,
               :prefs_keep_image_filenames.t + ":") %><br/>
-  <%= f.select(:keep_filenames, filename_values, {}, 
+  <%= f.select(:keep_filenames, filename_values, {},
                { class: "form-control d-inline-block w-auto mr-3" }) %>
-
-  <span class="help-note">
-    <%= put_button(name: :prefs_bulk_filename_purge.t,
-                   path: images_bulk_filename_purge_path,
-                   data: { confirm: :prefs_bulk_filename_purge_confirm.l }) %>
-  </span>
 </div>
 
 <div class="form-group mt-3">
@@ -52,10 +40,6 @@ filename_values = [
   <span class="help-note">(<%= :prefs_license_note.t %>)</span><br/>
   <%= f.select(:license_id, @licenses, {},
                 { class: "form-control d-inline-block w-auto mr-3" }) %>
-  <span class="help-note">
-    <%= put_button(name: :bulk_license_link.t, 
-                   path: images_license_updater_path) %>
-  </span>
 </div>
 
 <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
