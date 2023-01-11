@@ -1,7 +1,6 @@
 <%
   @title = :show_name_title.t(name: @name.display_name)
 
-  description_links = list_descriptions(@name) || []
   Textile.register_name(@name)
 
   tabs = [
@@ -36,18 +35,7 @@
   <!--LEFT COLUMN-->
   <div class="col-sm-5">
 
-    <div id="name_confident_observations">
-      <% if @first_four&.length&.positive? %>
-        <strong><%= :show_name_most_confident.t %>:</strong>
-        <div class="panel panel-default">
-          <% @first_four.each do |obs| %>
-            <div class="panel-body">
-              <%= show_best_image(obs) %>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
-    </div><!--#name_confident_observations-->
+    <%= render(partial: "names/show/confident_observations_panel") %>
 
     <div id="name_previous_export" class="mb-4">
       <%= show_previous_version(@name) %>
@@ -67,85 +55,13 @@
   <!--RIGHT COLUMN-->
   <div class="col-sm-7">
 
-    <div id="name_observations_menu">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <div class="row">
-            <div class="col-sm-7 name-section">
-              <%= tag.p(:show_observations_of.t) %>
-              <div class="pl-3">
-                <%= # Observations of this name
-                  tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
-                <%= # Observations of taxon under other names
-                  tag.p(taxon_obss_other_names(@name) ||
-                        "#{:taxon_obss_other_names.t} (0)") %>
-                <%= # Observations of taxon under any name
-                  tag.p(taxon_observations(@name) || "#{:obss_of_taxon.t} (0)") %>
-                <%= # Observations of other taxa where this taxon was proposed
-                  tag.p(taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
-                <%= # Observations where this Nae was proposed
-                  tag.p(name_proposed(@name) ||
-                        "#{:obss_name_proposed.t} (0)") %>
-              <%= name_section_link(:show_subtaxa_obss.t,
-                                      @has_subtaxa, @subtaxa_query) %>
-              </div>
-            </div>
-            <div class="col-sm-5 name-section">
-              <% if @name.searchable_in_registry? %>
-                <%= tag.p(link_to(
-                      "MyCoPortal", mycoportal_url(@name), target: :_blank
-                    )) %>
-              <% end %>
-              <%= tag.p(link_to(
-                    "EOL", @name.eol_url, target: :_blank
-                  )) if @name.eol_url %>
-              <%= tag.p(link_to(
-                    :google_images.t,
-                    "https://images.google.com/images?q=#{@name.real_text_name}",
-                    target: :_blank
-                  )) %>
-              <%= tag.p(link_with_query(
-                    :show_name_distribution_map.t, map_names_path(@name.id)
-                  )) %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <%= render(partial: "names/show/observation_panel") %>
     <%= render(partial: "names/show/nomenclature",
               locals: { name: @name, synonyms: true }) %>
 
     <div class="row">
-      <div class="col-sm-6">
-        <div id="name_classification">
-          <strong><%= :show_name_classification.t %>:</strong>
-            <% if @user %>
-              [<%= link_with_query(:EDIT.t,
-                                   edit_name_classification_path(@name.id)) %>]
-            <% end %>
-          <div class="panel panel-default">
-            <div class="panel-body name-section" id="classification_section">
-              <%= render(partial: "names/show/classification") %>
-            </div>
-          </div>
-        </div><!--#name_classification-->
-      </div>
-
-      <div class="col-sm-6">
-        <div id="name_lifeform">
-          <strong><%= :show_name_lifeform.t %>:</strong>
-            <% if @user %>
-              [<%= link_with_query(:EDIT.t,
-                                   edit_name_lifeform_path(@name.id)) %>]
-            <% end %>
-          <div class="panel panel-default">
-            <div class="panel-body name-section" id="lifeform_section">
-              <%= render(partial: "names/show/lifeform") %>
-            </div>
-          </div>
-        </div>
-      </div><!--#name_lifeform-->
+      <%= render(partial: "names/show/classification_panel") %>
+      <%= render(partial: "names/show/lifeform_panel") %>
     </div>
 
     <% inject_javascript_at_end %(
@@ -158,68 +74,17 @@
     ) %>
 
     <% if @name.has_notes? %>
-      <div id="name_notes">
-        <strong><%= :show_name_notes.t %>:</strong>
-          [<%= link_with_query(:EDIT.t, edit_name_path(@name.id)) %>]
-        <div class="panel panel-default">
-          <div class="panel-body">
-              <%= @name.notes.tpl %>
-          </div>
-        </div>
-      </div><!--#name_notes-->
+      <%= render(partial: "names/show/notes_panel") %>
     <% end %>
 
     <% if !@best_description.blank? %>
-      <div id="name_best_description">
-        <strong><%= :show_name_brief_description.t %>:</strong>
-          [<%= link_with_query(:show_name_see_more.t,
-                                name_description_path(
-                                  @name.description.id
-                                )) %> |
-            <%= link_with_query(:EDIT.t,
-                                edit_name_description_path(
-                                  @name.description.id
-                                )) %>]
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <%= @best_description.tpl %>
-          </div>
-        </div>
-      </div><!--#name_best_description-->
+      <%= render(partial: "names/show/best_description_panel") %>
     <% end %>
 
-    <div id="name_descriptions">
-      <strong><%= :show_name_descriptions.t %>:</strong>
-        [<%= link_with_query(:show_name_create_description.t,
-                             new_name_description_path(@name.id)) %>]
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <% description_links.each do |desc| %>
-          <div><%= desc %></div>
-          <% end %>
-          <%= :show_name_no_descriptions.t if description_links.empty? %>
-        </div>
-      </div>
-    </div><!--#name_descriptions-->
+    <%= render(partial: "names/show/descriptions_panel") %>
 
     <% if @projects && @projects.length > 0 %>
-      <div id="name_projects">
-        <div>
-          <strong><%= :show_name_create_draft.t %>:</strong>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <% @projects.each do |project| %>
-              <%= link_with_query(project.title,
-                                  new_name_description_path(
-                                    @name.id,
-                                    project: project.id,
-                                    source: :project
-                                  )) %><br>
-            <% end %>
-          </div>
-        </div>
-      </div><!--#name_projects-->
+      <%= render(partial: "names/show/projects_panel") %>
     <% end %>
 
   </div><!--RIGHT COLUMN-->

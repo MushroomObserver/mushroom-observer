@@ -1,0 +1,14 @@
+<div class="col-sm-6">
+  <div id="name_lifeform">
+    <strong><%= :show_name_lifeform.t %>:</strong>
+      <% if @user %>
+        [<%= link_with_query(:EDIT.t,
+                              edit_name_lifeform_path(@name.id)) %>]
+      <% end %>
+    <div class="panel panel-default">
+      <div class="panel-body name-section" id="lifeform_section">
+        <%= render(partial: "names/show/lifeform") %>
+      </div>
+    </div>
+  </div>
+</div><!--#name_lifeform-->

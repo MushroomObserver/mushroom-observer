@@ -4,10 +4,6 @@ require("test_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
 class LurkerTest < CapybaraIntegrationTestCase
-  # temporarily use these extensions until webdriver is installed
-  # include here to avoid name conflict with MO extensions
-  # include CapybaraHelper
-
   def test_poke_around
     # Start at index.
     reset_session!

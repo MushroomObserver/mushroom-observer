@@ -724,6 +724,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       as: "propagate_name_lifeform")
   # Names Map: show:
   get("names/map", to: "names/maps#show", as: "map_names")
+  get("names/:id/map", to: "names/maps#show", as: "map_name")
   # Edit Name Synonyms: form and callback:
   get("names/:id/synonyms/edit", to: "names/synonyms#edit",
                                  as: "edit_name_synonyms")
