@@ -441,7 +441,7 @@ class AbstractModelTest < UnitTestCase
     # assert_show_url(APIKey, "/account/show_api_key") # index not show
     assert_show_url(CollectionNumber, "/collection_numbers")
     assert_show_url(Comment, "/comments")
-    assert_show_url(ExternalSite, "/external_site/show_external_site")
+    assert_show_url(ExternalSite, "/external_sites")
     assert_show_url(Herbarium, "/herbaria")
     assert_show_url(HerbariumRecord, "/herbarium_records")
     assert_show_url(Image, "/images")
