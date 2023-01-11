@@ -551,10 +551,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "remove_images_from")
       put("images/detach", to: "glossary_terms/images#detach",
                            as: "detach_image_from")
-      get("versions", to: "glossary_terms/versions#show",
-                      as: "versions")
     end
   end
+  get("glossary_terms/:id/versions", to: "glossary_terms/versions#show",
+                                     as: "glossary_term_versions")
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do

@@ -41,7 +41,8 @@ class StudentTest < IntegrationTestCase
       get(url)
       # The latest ND should be Mary's draft
       marys_draft = NameDescription.last
-      assert_select("a[href*=names/descriptions]", 1) do |links|
+      assert_select("a[href*=?]",
+                    name_description_path(marys_draft.id), 1) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
       assert_no_match(/#{gen_desc}/, response.body)

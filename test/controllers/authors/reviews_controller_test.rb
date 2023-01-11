@@ -16,7 +16,7 @@ module Authors
       assert(rolf.in_group?("reviewers"))
       login("rolf")
       requires_user(:show,
-                    [{ controller: "/location",
+                    [{ controller: "/locations",
                        action: :show,
                        id: desc.location_id }],
                     params)

@@ -27,7 +27,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ***** show *****
   def test_show
     term = glossary_terms(:square_glossary_term)
-    prior_version_path = show_past_glossary_term_path(
+    prior_version_path = glossary_term_versions_path(
       term.id, version: term.version - 1
     )
     login
