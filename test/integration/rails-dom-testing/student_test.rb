@@ -98,7 +98,6 @@ class StudentTest < IntegrationTestCase
 
       # Make sure it shows up on main show_name page and can edit it.
       get(url)
-      binding.break
       assert_select("a[href*=?]", edit_name_description_path(marys_draft.id))
       assert_select("form input[value='Destroy']")
       assert_select("form[action=?]", name_description_path(marys_draft.id))
