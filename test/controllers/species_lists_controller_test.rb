@@ -797,8 +797,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login(owner)
     put(:update, params: params)
-    # assert_redirected_to(controller: "/locations", action: :new)
-    assert_redirected_to(new_location_path)
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
@@ -836,7 +835,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
-    # Creates "New", 'New name', observations/splentry/naming.
     assert_equal(BASE_CONTRIBUTION + v_nam * 2 + v_obs,
                  spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
