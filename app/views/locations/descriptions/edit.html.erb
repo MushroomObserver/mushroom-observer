@@ -13,7 +13,8 @@
                             action: :edit, id: @description.id)
   end
   @tabsets = { right: draw_tab_set(tabs) }
-  action = location_description_path(@description.id, q: get_query_param)
+  action = { controller: "/locations/descriptions", action: :update,
+             id: @description.id, q: get_query_param }
 %>
 
 <%= render(partial: "form", locals: { action: action, button: :UPDATE }) %>

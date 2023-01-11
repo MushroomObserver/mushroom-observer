@@ -147,6 +147,5 @@ module Locations
       assert_not_empty(loc.descriptions)
       assert_equal(params[:description][:notes], loc.descriptions.last.notes)
     end
-
   end
 end
