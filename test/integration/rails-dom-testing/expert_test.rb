@@ -41,7 +41,7 @@ class ExpertTest < IntegrationTestCase
     login!(dick)
     get("/species_lists/new")
     member_notes = "Member notes."
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
       form.change("title", "List Title")
@@ -68,7 +68,7 @@ class ExpertTest < IntegrationTestCase
     assert_select("#ambiguous_names", /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       assert_equal(list.split("\r\n").sort,
                    form.get_value!("list_members").split("\r\n").sort)
       form.check(
@@ -103,7 +103,7 @@ class ExpertTest < IntegrationTestCase
     # Try making some edits, too.
     click_mo_link(href: /#{edit_species_list_path(spl.id)}/)
     new_member_notes = "New member notes."
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.assert_value("list_members", "")
       form.assert_value("title", "List Title")
       form.assert_value("place_name", albion_name_reverse)
@@ -131,7 +131,7 @@ class ExpertTest < IntegrationTestCase
     assert_select("#ambiguous_names", /Amanita baccata.*sensu Borealis/)
 
     # Fix the ambiguous name.
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.check(/chosen_multiple_names_\d+_#{amanita[1].id}/)
       form.submit
     end
@@ -163,7 +163,7 @@ class ExpertTest < IntegrationTestCase
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.assert_value("location_display_name", new_location_reverse)
       form.change("location_display_name", newer_location_reverse)
       form.change("location_north", "35.6622")
@@ -193,7 +193,7 @@ class ExpertTest < IntegrationTestCase
     assert_template("comments/new")
     assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='species_lists/#{spl.id}']", text: /cancel/i)
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")
       form.submit
