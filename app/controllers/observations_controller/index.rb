@@ -142,7 +142,7 @@ module ObservationsController::Index
       search.errors.each do |error|
         flash_error(error.to_s)
       end
-      render("index", location: observations_path)
+      redirect_to(observations_path)
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
       show_selected_observations(
