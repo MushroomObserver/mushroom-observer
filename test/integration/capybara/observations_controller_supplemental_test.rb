@@ -90,6 +90,17 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
     assert_not_includes(species_list.observations, observation)
   end
 
+  def test_observation_remove_collection_number
+    obs = observations(:minimal_unknown_obs)
+    user = obs.user
+
+    login(user)
+    visit(observation_path(obs.id))
+    page.find("#observation_collection_numbers").click_on("Remove")
+
+    assert_empty(obs.collection_numbers)
+  end
+
   def test_locales_when_sending_email_question
     sender = users(:rolf)
     receiver = users(:mary)
