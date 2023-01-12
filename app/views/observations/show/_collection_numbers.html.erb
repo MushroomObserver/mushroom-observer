@@ -27,12 +27,14 @@
                                  id: number.id,
                                  params: { back: observation.id }
                                )) %> |
-           <%= link_with_query(:REMOVE.t,
-                               collection_number_remove_observation_path(
-                                 collection_number_id: number.id,
-                                 params: { observation_id: observation.id }
-                               ),
-                               { data: { confirm: :are_you_sure.t } }) %>]
+           <%= patch_button(name: :REMOVE.t,
+                            path: collection_number_remove_observation_path(
+                              collection_number_id: number.id,
+                              observation_id: observation.id,
+                              q: get_query_param,
+                            ),
+                            data: { confirm: :are_you_sure.t }) %>]
+
         </li>
       <% end %>
     </ul>
