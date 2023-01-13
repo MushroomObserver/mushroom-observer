@@ -841,6 +841,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
 
+  # ----- Lookups: legacy action redirects ---------------------------
+  # The only legacy lookup that was ok'd for use by external sites
+  get("/observer/lookup_name(/:id)", to: "lookups#lookup_name", id: /\S.*/)
+
   # ----- Observations: legacy action redirects ----------------------------
   get("/observer/create_observation", to: redirect("/observations/new"))
   get("/observer/observation_search", to: redirect("/observations"))
