@@ -335,11 +335,11 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_name_description_groups
       desc = name_description
       data = group_expectations
-      assert_obj_list_equal(data[:admins], desc.admin_groups)
-      assert_obj_list_equal(data[:writers], desc.writer_groups)
-      assert_obj_list_equal(data[:readers], desc.reader_groups)
-      assert_user_list_equal(data[:authors], desc.authors)
-      assert_user_list_equal(data[:editors], desc.editors)
+      assert_obj_arrays_equal(data[:admins], desc.admin_groups)
+      assert_obj_arrays_equal(data[:writers], desc.writer_groups)
+      assert_obj_arrays_equal(data[:readers], desc.reader_groups)
+      assert_user_arrays_equal(data[:authors], desc.authors)
+      assert_user_arrays_equal(data[:editors], desc.editors)
     end
 
     def check_abilities
@@ -357,7 +357,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_edit_description_link_behavior
       click_mo_link(href: edit_name_description_uri)
       if edit_description_requires_login?
-        assert_match(%r{account/login}, response.body)
+        assert_match(%r{account/login/new}, response.body)
       else
         check_name_description_fields
       end

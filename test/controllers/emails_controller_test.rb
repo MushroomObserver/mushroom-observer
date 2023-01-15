@@ -102,7 +102,7 @@ class EmailsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:commercial_inquiry, params)
-    assert_redirected_to(controller: :image, action: :show_image, id: image.id)
+    assert_redirected_to(controller: :images, action: :show, id: image.id)
   end
 
   def test_send_ask_observation_question

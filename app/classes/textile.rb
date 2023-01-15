@@ -325,7 +325,7 @@ class Textile < String
       size = Regexp.last_match[1] || "thumb"
       id   = Regexp.last_match[2]
       src  = Image.url(size, id)
-      link = "#{MO.http_domain}/image/show_image/#{id}"
+      link = "#{MO.http_domain}/images/#{id}"
       "\"!#{src}!\":#{link}"
     end
   end

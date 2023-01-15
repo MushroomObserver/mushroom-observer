@@ -20,13 +20,13 @@ class NPlusOneTest < IntegrationTestCase
     get("/herbaria?flavor=all")
     get("/location/list_locations")
     get("/name/list_names")
-    get("/image/list_images")
+    get("/images")
     get("/observations")
     get("/activity_logs")
-    get("/project/list_projects")
+    get("/projects")
     get("/publications")
     get("/sequences?flavor=all")
-    get("/species_list/list_species_lists")
+    get("/species_lists")
   end
 
   def test_download_observations

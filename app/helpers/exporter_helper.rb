@@ -37,7 +37,7 @@ module ExporterHelper
       content_tag(:b, ok_msg, class: "text-nowrap")
     else
       link_with_query(ok_msg,
-                      { controller: :export,
+                      { controller: "/export",
                         action: action,
                         type: obj.type_tag,
                         id: obj.id, value: 1 },
@@ -45,7 +45,7 @@ module ExporterHelper
     end + " | " +
       if status
         link_with_query(not_ok_msg,
-                        { controller: :export,
+                        { controller: "/export",
                           action: action,
                           type: obj.type_tag,
                           id: obj.id, value: 0 },

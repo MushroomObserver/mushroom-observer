@@ -1,0 +1,14 @@
+<%
+# NOTE: Move template to account/profile/images/new
+#       Account::Profile::ImagesController#new
+# Partial should be in shared
+@title = :image_reuse_title.t(name: @user.legal_name)
+@container = :full
+form_action = { controller: "/account/profile/images",
+                action: :attach,
+                id: @user.id,
+                q: get_query_param }
+%>
+
+<%= render(partial: "shared/images_to_reuse",
+           locals: { form_action: form_action }) %>

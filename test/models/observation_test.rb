@@ -193,7 +193,7 @@ class ObservationTest < UnitTestCase
   # --------------------------------------
   def test_email_notification_1
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -266,12 +266,12 @@ class ObservationTest < UnitTestCase
     obs.change_vote(new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
     assert_equal(2, QueuedEmail.count)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_email_notification_2
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -351,12 +351,12 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: mary,
                  comment: new_comment.id)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_email_notification_3
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
 
@@ -461,12 +461,12 @@ class ObservationTest < UnitTestCase
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
                  note: "notes,location,added_image,removed_image")
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_email_notification_4
     NameTracker.all.map(&:destroy)
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
 
     obs = observations(:coprinus_comatus_obs)
     marys_interest = Interest.create(
@@ -534,7 +534,7 @@ class ObservationTest < UnitTestCase
                  observation: 0,
                  note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
                        "(#{observations(:coprinus_comatus_obs).id})")
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_vote_favorite

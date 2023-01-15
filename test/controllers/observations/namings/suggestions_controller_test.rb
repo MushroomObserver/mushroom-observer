@@ -13,8 +13,8 @@ module Observations::Namings
       obs.vote_cache = 2.0
       obs.save
       assert_not_nil(obs.thumb_image)
-      assert_obj_list_equal([], name2a.reload.observations)
-      assert_obj_list_equal([obs], name2b.reload.observations)
+      assert_obj_arrays_equal([], name2a.reload.observations)
+      assert_obj_arrays_equal([obs], name2b.reload.observations)
       suggestions = '[[["Coprinus comatus",0.7654],' \
                       '["Lentinellus ursinus",0.321]]]'
 

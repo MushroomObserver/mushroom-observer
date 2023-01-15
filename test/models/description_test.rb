@@ -20,7 +20,7 @@ class DescriptionTest < UnitTestCase
       [dick_score, dick],
       [katrina_score, katrina]
     ].each do |score, user|
-      assert_equal(10 + score, user.reload.contribution,
+      assert_equal(score + 10, user.reload.contribution,
                    "Contribution for #{user.login} wrong: #{msg}")
     end
   end

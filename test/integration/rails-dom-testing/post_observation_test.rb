@@ -43,7 +43,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def submit_observation_form_with_errors
-    submit_form_with_changes(create_observation_form_first_changes)
+    submit_form_with_changes(create_observation_form_first_changes,
+                             /create/i, "#observation_form")
     assert_template(NEW_OBSERVATION_TEMPLATE)
     assert_has_location_warning(/Unknown country/)
     assert_form_has_correct_values(
@@ -53,7 +54,8 @@ class PostObservationTest < IntegrationTestCase
 
   def submit_observation_form_without_errors
     File.stub(:rename, false) do
-      submit_form_with_changes(create_observation_form_second_changes)
+      submit_form_with_changes(create_observation_form_second_changes,
+                               /create/i, "#observation_form")
     end
     assert_flash_for_create_observation
     assert_template(CREATE_LOCATION_TEMPLATE)
@@ -62,7 +64,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def submit_location_form_with_errors
-    submit_form_with_changes(create_location_form_first_changes)
+    submit_form_with_changes(create_location_form_first_changes,
+                             /create/i, "#location_form")
     assert_template(CREATE_LOCATION_TEMPLATE)
     assert_has_location_warning(/County may not be required/)
     assert_form_has_correct_values(
@@ -71,7 +74,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def submit_location_form_without_errors
-    submit_form_with_changes(create_location_form_second_changes)
+    submit_form_with_changes(create_location_form_second_changes,
+                             /create/i, "#location_form")
     assert_flash_for_create_location
     assert_template(SHOW_OBSERVATION_TEMPLATE)
     assert_new_location_is_correct(expected_values_after_location)
@@ -87,7 +91,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def submit_observation_form_with_changes
-    submit_form_with_changes(edit_observation_form_changes)
+    submit_form_with_changes(edit_observation_form_changes,
+                             /edit/i, "#observation_form")
     assert_flash_for_edit_observation
     assert_template(SHOW_OBSERVATION_TEMPLATE)
     assert_edit_observation_is_correct(expected_values_after_edit)
@@ -177,7 +182,7 @@ class PostObservationTest < IntegrationTestCase
   def assert_observation_has_correct_image(expected_values)
     new_obs = Observation.last
     new_img = Image.last
-    assert_obj_list_equal([new_img], new_obs.images)
+    assert_obj_arrays_equal([new_img], new_obs.images)
     assert_dates_equal(expected_values[:when], new_img.when)
     assert_equal(expected_values[:user].legal_name, new_img.copyright_holder)
     assert_equal(expected_values[:image_notes], new_img.notes.strip)
@@ -212,7 +217,7 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations?where")
     assert_link_exists_containing(show_location_path(new_loc.id))
-    assert_link_exists_containing(show_image_path(new_img.id))
+    assert_link_exists_containing(image_path(new_img.id))
   end
 
   def review_flash(patterns)

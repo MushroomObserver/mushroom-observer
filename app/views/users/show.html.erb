@@ -10,7 +10,7 @@
   [
     [ :comments, :comments, :index, { by_user: @show_user.id } ],
     [ :comments_for, :comments, :index, { for_user: @show_user.id } ],
-    [ :images, :image, :images_by_user, {} ],
+    [ :images, :images, :index, { by_user: @show_user.id } ],
     [ :location_description_authors, :location,
       :location_descriptions_by_author, {} ],
     [ :location_description_editors, :location,
@@ -22,7 +22,7 @@
     [ :names, :name, :names_by_user, {} ],
     [ :names_versions, :name, :names_by_editor, {} ],
     [ :observations, :observations, :index, { user: @show_user.id } ],
-    [ :species_lists, :species_list, :species_lists_by_user, {} ],
+    [ :species_lists, :species_lists, :index, { by_user: @show_user.id } ],
     [ :life_list, :checklists, :show, {} ]
   ].each do |key, controller, action, params|
     links[key] = url_for(controller: controller, action: action,

@@ -1,9 +1,9 @@
 <%
   @title = :prefs_title.t
   tabs = [
-    link_to(:bulk_license_link.t, image_license_updater_path),
+    link_to(:bulk_license_link.t, images_edit_licenses_path),
     link_to(:prefs_change_image_vote_anonymity.t,
-            image_bulk_vote_anonymity_updater_path),
+            images_edit_vote_anonymity_path),
     link_to(:profile_link.t, edit_account_profile_path),
     link_to(:show_user_your_notifications.t, interests_path),
     link_to(:account_api_keys_link.t, account_api_keys_path)
@@ -20,3 +20,5 @@
   <%= render(partial: "account/preferences/notes", locals: { f: form })%>
   <%= render(partial: "account/preferences/email", locals: { f: form })%>
 <% end %>
+
+<%= render(partial: "account/preferences/put_buttons")%>

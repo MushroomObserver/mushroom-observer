@@ -129,7 +129,7 @@ module ObservationsController::Index
   # Display matrix of Observations whose notes, etc. match a string pattern.
   def observation_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
+    if pattern.match?(/^\d+$/) && (observation = Observation.safe_find(pattern))
       redirect_to(controller: :observations, action: :show,
                   id: observation.id)
     else
@@ -229,10 +229,7 @@ module ObservationsController::Index
 
     @links << [
       :list_observations_add_to_list.t,
-      add_query_param(
-        { controller: :species_list, action: :add_remove_observations },
-        query
-      )
+      add_query_param(edit_species_list_observations_path, query)
     ]
 
     @links << [
