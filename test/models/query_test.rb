@@ -992,7 +992,7 @@ class QueryTest < UnitTestCase
     assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
     # assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?) # (converted to in_set)
     assert_not(q8c.record.new_record?)
     assert_equal(q8a, q8c)
     assert_not(q9c.record.new_record?)
@@ -1109,7 +1109,7 @@ class QueryTest < UnitTestCase
     assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
     # assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?) # (converted to in_set)
   end
 
   def test_observation_name_coercion
@@ -1203,7 +1203,7 @@ class QueryTest < UnitTestCase
     assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
     # assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?) # (converted to in_set)
     assert_not(q8c.record.new_record?)
     assert_equal(q8a, q8c)
     assert_not(q9c.record.new_record?)
