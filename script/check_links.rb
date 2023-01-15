@@ -29,10 +29,10 @@ def find_links(val)
 end
 
 def test_link!(id, link)
-  STDERR.puts "testing: #{link}"
+  warn("testing: #{link}")
   return if system("curl", "-o/dev/null", "-sfIL", link)
 
-  puts "#{id} #{link}"
+  puts("#{id} #{link}")
 end
 
 table = ARGV[0]
