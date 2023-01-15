@@ -19,4 +19,11 @@ class VisualModel < AbstractModel
       end
     }.to_json
   end
+
+  def image_counts(included = true)
+    VisualGroupImage.includes(:visual_group).where(
+      visual_group: { visual_model_id: id },
+      included: included
+    ).group(:visual_group_id).count
+  end
 end

@@ -6,7 +6,6 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups or /visual_groups.json
   def index
     @visual_model = VisualModel.find(params[:visual_model_id])
-    @visual_groups = @visual_model.visual_groups.order(:name)
   end
 
   # GET /visual_groups/1 or /visual_groups/1.json
@@ -41,15 +40,14 @@ class VisualGroupsController < ApplicationController
 
   # POST /visual_groups or /visual_groups.json
   def create
-    params = visual_group_params
     if params.include?(:name_list)
-      create_from_list(params)
+      create_from_list
     else
-      create_one_visual_group(params)
+      create_one_visual_group
     end
   end
 
-  def create_from_list(params)
+  def create_from_list
     model = VisualModel.find(params[:visual_model_id])
     params[:name_list].split(/[\n,\r]/).each do |raw_name|
       name = raw_name.strip
@@ -67,8 +65,8 @@ class VisualGroupsController < ApplicationController
     end
   end
 
-  def create_one_visual_group(params)
-    @visual_group = VisualGroup.new(params)
+  def create_one_visual_group
+    @visual_group = VisualGroup.new(visual_group_params)
     @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
 
     if @visual_group.save
@@ -111,9 +109,7 @@ class VisualGroupsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def visual_group_params
-    params.permit(:visual_group, :name_list,
-                  :visual_model_id, :name,
-                  :approved, :description)
+    params.require(:visual_group).permit(:name, :approved, :description)
   end
 
   def calc_show_vals(count)

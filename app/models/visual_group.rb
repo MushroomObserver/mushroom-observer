@@ -21,7 +21,7 @@ class VisualGroup < AbstractModel
   end
 
   def add_initial_images
-    VisualGroupImages.new(name, nil).vals.each do |row|
+    image_ids_by_name_vote(name, 1.5).each do |row|
       VisualGroupImage.create!(visual_group: self,
                                image_id: row[0],
                                included: true)
@@ -34,5 +34,14 @@ class VisualGroup < AbstractModel
 
   def included_image_ids
     visual_group_images.where(included: true).pluck(:image_id)
+  end
+
+  private
+
+  def image_ids_by_name_vote(name, vote)
+    ObservationImage.joins({ observation: :name }).where(
+      "observations.vote_cache >= ? AND names.text_name = ?", vote, name
+    ).order("observations.vote_cache desc").
+      pluck(:image_id, "observations.vote_cache")
   end
 end
