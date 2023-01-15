@@ -20,14 +20,11 @@ class VisualGroup < AbstractModel
     visual_group_images.where(included: false).count
   end
 
-  def add_image(image)
-    images << image
-    save
-  end
-
-  def add_images(new_images)
-    new_images.each do |image|
-      add_image(image) if image.visual_group(visual_model) != self
+  def add_initial_images
+    VisualGroupImages.new(name, nil).vals.each do |row|
+      VisualGroupImage.create!(visual_group: self,
+                               image_id: row[0],
+                               included: true)
     end
   end
 

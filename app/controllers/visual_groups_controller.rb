@@ -41,10 +41,38 @@ class VisualGroupsController < ApplicationController
 
   # POST /visual_groups or /visual_groups.json
   def create
-    @visual_group = VisualGroup.new(visual_group_params)
+    params = visual_group_params
+    if params.include?(:name_list)
+      create_from_list(params)
+    else
+      create_one_visual_group(params)
+    end
+  end
+
+  def create_from_list(params)
+    model = VisualModel.find(params[:visual_model_id])
+    params[:name_list].split(/[\n,\r]/).each do |raw_name|
+      name = raw_name.strip
+      create_visual_group(model, name) if name != ""
+    end
+    redirect_to(visual_model_visual_groups_url(model))
+  end
+
+  def create_visual_group(model, name)
+    group = VisualGroup.new(visual_model: model, name: name)
+    if group.save
+      group.add_initial_images
+    else
+      flash_object_errors(group)
+    end
+  end
+
+  def create_one_visual_group(params)
+    @visual_group = VisualGroup.new(params)
     @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
 
     if @visual_group.save
+      @visual_group.add_initial_images
       redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
                                                  @visual_group),
                   notice: :runtime_visual_group_created_at.t)
@@ -83,8 +111,9 @@ class VisualGroupsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def visual_group_params
-    params.require(:visual_group).permit(:visual_model_id, :name,
-                                         :approved, :description)
+    params.permit(:visual_group, :name_list,
+                  :visual_model_id, :name,
+                  :approved, :description)
   end
 
   def calc_show_vals(count)

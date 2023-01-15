@@ -2629,9 +2629,13 @@
   visual_group_includes_names: Includes images from these names
 
   # Links to CRUD pages
-  visual_group_back_to_index: Back to Visual Group Index
-  visual_group_edit: Edit Visual Group
-  visual_group_show: Show Visual Group
+  visual_group_back_to_index: "Back to [:VISUAL_GROUP] Index"
+  visual_group_edit: "Edit [:VISUAL_GROUP]"
+  visual_group_show: "Show [:VISUAL_GROUP]"
+  visual_group_create: "Create [:VISUAL_GROUP]"
+
+  # visual_groups/index
+  visual_group_image_count: "Image Count"
 
   # visual_groups/show
   definitional_images: Definitional Images
