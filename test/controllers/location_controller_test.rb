@@ -155,14 +155,17 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_location_bounding_box
+    north = south = east = west = 0
     delta = 0.001
     login
-    get(:list_locations, params: { north: 0, south: 0, east: 0, west: 0 })
+    get(:list_locations,
+        params: { north: north, south: south, east: east, west: west })
     query = Query.find(QueryRecord.last.id)
-    assert_equal(0 + delta, query.params[:north])
-    assert_equal(0 - delta, query.params[:south])
-    assert_equal(0 + delta, query.params[:east])
-    assert_equal(0 - delta, query.params[:west])
+
+    assert_equal(north + delta, query.params[:north])
+    assert_equal(south - delta, query.params[:south])
+    assert_equal(east + delta, query.params[:east])
+    assert_equal(west - delta, query.params[:west])
 
     get(:list_locations,
         params: { north: 90, south: -90, east: 180, west: -180 })
@@ -204,10 +207,10 @@ class LocationControllerTest < FunctionalTestCase
                                notes: "Santa Fe",
                                user: @mary)
     get(:list_by_country, params: { country: "USA" })
-    assert_obj_list_equal(usa_loc_array << loc_usa, assigns(:objects), :sort)
+    assert_obj_arrays_equal(usa_loc_array << loc_usa, assigns(:objects), :sort)
 
     get(:list_by_country, params: { country: "Mexico" })
-    assert_obj_list_equal([], assigns(:objects))
+    assert_obj_arrays_equal([], assigns(:objects))
 
     loc_mex1 = Location.create!(
       name: "Somewhere, Chihuahua, Mexico",
@@ -228,7 +231,7 @@ class LocationControllerTest < FunctionalTestCase
       user: @mary
     )
     get(:list_by_country, params: { country: "Mexico" })
-    assert_obj_list_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
+    assert_obj_arrays_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
   def test_locations_by_user
@@ -284,7 +287,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:bolete_project_private_location_desc)
     get(:show_location_description, params: { id: desc.id })
     assert_flash_error
-    assert_redirected_to(controller: :project, action: :show_project,
+    assert_redirected_to(controller: "/projects", action: :show,
                          id: desc.project.id)
 
     # description is private, for a project, project doesn't exist
@@ -414,7 +417,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :location, action: :show_location,
                          id: loc.id)
     assert_equal(count + 1, Location.count)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
 
@@ -580,8 +583,8 @@ class LocationControllerTest < FunctionalTestCase
 
     # Rolf was already author, Mary doesn't become editor because
     # there was no change.
-    assert_user_list_equal([rolf], loc.description.authors)
-    assert_user_list_equal([], loc.description.editors)
+    assert_user_arrays_equal([rolf], loc.description.authors)
+    assert_user_arrays_equal([], loc.description.editors)
   end
 
   # Test update for north > 90.
@@ -785,15 +788,15 @@ class LocationControllerTest < FunctionalTestCase
 
     # Full match with albion.
     requires_login(:list_merge_options, where: albion.display_name)
-    assert_obj_list_equal([albion], assigns(:matches))
+    assert_obj_arrays_equal([albion], assigns(:matches))
 
     # Should match against albion.
     requires_login(:list_merge_options, where: "Albion, CA")
-    assert_obj_list_equal([albion], assigns(:matches))
+    assert_obj_arrays_equal([albion], assigns(:matches))
 
     # Should match against albion.
     requires_login(:list_merge_options, where: "Albion Field Station, CA")
-    assert_obj_list_equal([albion], assigns(:matches))
+    assert_obj_arrays_equal([albion], assigns(:matches))
 
     # Shouldn't match anything.
     requires_login(:list_merge_options, where: "Somewhere out there")

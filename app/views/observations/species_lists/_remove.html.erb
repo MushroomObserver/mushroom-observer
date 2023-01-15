@@ -1,0 +1,26 @@
+<%
+# row of species lists you could remove this obs from
+when_span = content_tag(:span, species_list.when, class: :ListWhen)
+what_span = content_tag(:span, species_list.unique_text_name, class: :ListWhat)
+species_list_link = link_to(when_span + ": " + what_span,
+                            species_list.show_link_args)
+
+rmv_link = put_button(name: :REMOVE.t,
+                      path: observation_species_list_path(
+                        id: @observation.id, species_list_id: species_list.id,
+                        commit: "remove"
+                      ),
+                      data: { confirm: :are_you_sure.l })
+%>
+
+<tr>
+  <td>
+    <%= species_list_link %><br/>
+    <span class="ListWhere"><%= species_list.place_name.t %></span> |
+    <span class="ListWho"><%= user_link(species_list.user) %></span>
+  </td>
+
+  <td>
+    <%= rmv_link if check_permission(species_list) %>
+  </td>
+</tr>

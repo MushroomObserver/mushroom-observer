@@ -68,6 +68,12 @@ class Naming < AbstractModel
     "/observations"
   end
 
+  # Override the default show_url
+  # (this is a hack, here, to get the right URL)
+  def self.show_url
+    false
+  end
+
   def self.construct(args, observation)
     now = Time.zone.now
     naming = Naming.new(args)

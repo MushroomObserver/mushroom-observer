@@ -13,7 +13,7 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :image),
-    "#{MO.http_domain}/image/show_image/#{@image.id}"])
+    "#{MO.http_domain}/images/#{@image.id}"])
   links.push([:email_links_stop_sending.t,
     "#{MO.http_domain}/account/no_email/#{@user.id}?type=general_commercial"])
   links.push([:email_links_change_prefs.t,

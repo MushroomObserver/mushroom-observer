@@ -1723,6 +1723,7 @@ class ApplicationController < ActionController::Base
       num_per_page: num_per_page
     )
   end
+  helper_method :paginate_numbers
 
   private ##########
 
@@ -1811,6 +1812,7 @@ class ApplicationController < ActionController::Base
     count = @user&.layout_count || MO.default_layout_count
     { "count" => count }
   end
+  helper_method :calc_layout_params
 
   def permission?(obj, error_message)
     result = (in_admin_mode? || obj.can_edit?(@user))
@@ -1854,6 +1856,13 @@ class ApplicationController < ActionController::Base
     ).find_by(id: id) ||
       flash_error_and_goto_index(Observation, id)
   end
+
+  def query_images_to_reuse(all_users, user)
+    return create_query(:Image, :all, by: :updated_at) if all_users || !user
+
+    create_query(:Image, :by_user, user: user, by: :updated_at)
+  end
+  helper_method :query_images_to_reuse
 
   ##############################################################################
 

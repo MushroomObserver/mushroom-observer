@@ -138,7 +138,7 @@
         assert_equal(@expectations[:observation].is_collection_location, @new_observation.is_collection_location)
         assert_equal(@expectations[:observation].specimen, @new_observation.specimen)
         assert_equal(@expectations[:observation].notes, @new_observation.notes)
-        assert_obj_list_equal([@new_image], @new_observation.images)
+        assert_obj_arrays_equal([@new_image], @new_observation.images)
         assert_dates_equal(@expectations[:image].when, @new_image.when)
         assert_equal(@expectations[:image].copyright_holder, @new_image.copyright_holder)
         assert_equal(@expectations[:image].notes, @new_image.notes)
@@ -171,7 +171,7 @@
         assert_match(@new_image.notes, response.body)
         assert_select('a[href*=observations_at_where]', 0)
         assert_select('a[href*=show_location]', 1)
-        assert_select('a[href*=show_image]')
+        assert_select('a[href*=images]')
       end
 
       def sess.evaluate_change_location

@@ -291,9 +291,10 @@ class AjaxControllerTest < FunctionalTestCase
     # Assert
     assert_template(layout: nil)
     assert_template(layout: false)
-    assert_template(partial: "image/_image_vote_links")
+    assert_template(partial: "shared/_image_vote_links")
   end
 
+  # They're not links, they're forms. `button_to`
   def test_image_vote_renders_correct_links
     # #Arrange
     login("dick")
@@ -301,18 +302,17 @@ class AjaxControllerTest < FunctionalTestCase
     # Act
     good_ajax_request(:vote,
                       type: :image, id: images(:in_situ_image).id, value: 3)
-
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']"
+      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=0']"
     )
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']"
+      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=1']"
     )
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']"
+      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=2']"
     )
     assert_select(
-      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']"
+      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=4']"
     )
   end
 

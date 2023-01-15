@@ -444,14 +444,14 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(ExternalSite, "/external_site/show_external_site")
     assert_show_url(Herbarium, "/herbaria")
     assert_show_url(HerbariumRecord, "/herbarium_records")
-    assert_show_url(Image, "/image/show_image")
+    assert_show_url(Image, "/images")
     assert_show_url(Location, "/location/show_location")
     assert_show_url(Name, "/name/show_name")
-    assert_show_url(Naming, "/observations/show_naming")
+    # assert_show_url(Naming, "/observations/show_naming") # there is no show
     assert_show_url(Observation, "/observations")
-    assert_show_url(Project, "/project/show_project")
+    assert_show_url(Project, "/projects")
     assert_show_url(Sequence, "/sequences")
-    assert_show_url(SpeciesList, "/species_list/show_species_list")
+    assert_show_url(SpeciesList, "/species_lists")
     assert_show_url(User, "/users")
   end
 

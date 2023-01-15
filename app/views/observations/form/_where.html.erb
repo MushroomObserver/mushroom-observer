@@ -12,7 +12,7 @@
       <%= :form_observations_dubious_help.t(button: button_name) %>
     </p>
   </div><!--.container-text-->
-<% end %>
+<% end # if @dubious_where_reasons.any? %>
 <!-- /WHERE_REASONS -->
 
 <!-- WHERE -->
@@ -34,10 +34,10 @@
         if User.current_location_format == "scientific"
           loc1 = Location.reverse_name(loc1)
           loc2 = Location.reverse_name(loc2)
-        end
+        end # if User.current_location_format
         :form_observations_where_help.t(loc1: loc1, loc2: loc2)
       %>
-    <% end %>
+    <% end # help_block_with_arrow do %>
   </div>
 </div><!--.row-->
 
@@ -46,7 +46,7 @@
     <button type="button" class="map-locate btn btn-default my-3">Locate on Map</button>
     <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
       <%= :form_observations_locate_on_map_help.t %>
-    <% end %>
+    <% end  # help_block_with_arrow do %>
   </div>
 </div><!--.row-->
 <!-- /WHERE -->
@@ -62,7 +62,7 @@
     </div>
     <%= help_block_with_arrow("up", id: "is_collection_location_help") do %>
       <%= :form_observations_is_collection_location_help.t %>
-    <% end %>
+    <% end  # help_block_with_arrow do %>
   </div><!--.col-->
 </div><!--.row-->
 <!-- /IS_COLLECTION_LOCATION -->
@@ -71,7 +71,7 @@
 <div class="row mt-3" id="observation_geolocation">
   <div class="col-sm-6">
     <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
-    <div id="observationFormMap" class="form-observation-map hidden"
+    <div id="observation_form_map" class="observation-form-map hidden"
          data-indicator-url="<%= asset_path('indicator.gif') %>"></div>
     <div>
       <button type="button" class="map-open btn btn-default"><%= :form_observations_open_map.t %></span>
@@ -81,7 +81,7 @@
   <div class="col-sm-6">
     <%= help_block_with_arrow("left", id: "geolocation_help") do %>
       <%= :form_observations_lat_long_help.t %>
-    <% end %>
+    <% end  # help_block_with_arrow do %>
   </div>
 </div><!--.row-->
 

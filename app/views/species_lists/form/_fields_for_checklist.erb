@@ -1,0 +1,14 @@
+<div class="container-text" id="checklist_data">
+  <p>
+    <b class="text-nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
+  </p>
+  <p>
+    <% @checklist.sort_by(&:first).each do |name, id| %>
+      <%= fields_for(:checklist_data) do |fcd| %>
+      <%= fcd.check_box(id, checked: @checklist_names[id]) %>
+      <%= fcd.label(id, name.t) %>
+      <% end %>
+      <br/>
+    <% end %>
+  </p>
+</div>

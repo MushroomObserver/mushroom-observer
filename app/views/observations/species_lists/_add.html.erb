@@ -1,0 +1,25 @@
+<%
+# row of species lists you could add this obs to
+when_span = content_tag(:span, species_list.when, class: :ListWhen)
+what_span = content_tag(:span, species_list.unique_text_name, class: :ListWhat)
+species_list_link = link_to(when_span + ": " + what_span,
+                            species_list.show_link_args)
+
+add_link = put_button(name: :ADD.t,
+                      path: observation_species_list_path(
+                        id: @observation.id, species_list_id: species_list.id,
+                        commit: "add"
+                      ))
+%>
+
+<tr>
+  <td>
+    <%= species_list_link %><br/>
+    <span class="ListWhere"><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
+    <span class="ListWho"><%= user_link(species_list.user) %></span>
+  </td>
+
+  <td>
+    <%= add_link if check_permission(species_list) %>
+  </td>
+</tr>

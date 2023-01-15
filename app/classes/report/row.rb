@@ -162,12 +162,13 @@ module Report
       @vals[25].blank? ? nil : @vals[25].to_f.round
     end
 
+    # disable cop because 25 is a proxy for a non-literal operand
     def val(num)
-      @vals[25 + num]
+      @vals[25 + num] # rubocop:disable Style/YodaExpression
     end
 
     def add_val(val, num)
-      @vals[25 + num] = val
+      @vals[25 + num] = val # rubocop:disable Style/YodaExpression
     end
   end
 end

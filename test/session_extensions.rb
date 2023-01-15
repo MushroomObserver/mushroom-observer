@@ -211,8 +211,8 @@ module SessionExtensions
   #
   ##############################################################################
 
-  def assert_form_has_correct_values(expected_values)
-    open_form do |form|
+  def assert_form_has_correct_values(expected_values, args = [])
+    open_form(*args) do |form|
       expected_values.each do |key, value|
         if value == true
           form.assert_checked(key)
@@ -225,8 +225,8 @@ module SessionExtensions
     end
   end
 
-  def submit_form_with_changes(changes)
-    open_form do |form|
+  def submit_form_with_changes(changes, button = nil, args = [])
+    open_form(*args) do |form|
       changes.each do |key, value|
         if value == true
           form.check(key)
@@ -236,7 +236,7 @@ module SessionExtensions
           form.change(key, value)
         end
       end
-      form.submit
+      form.submit(button)
     end
   end
 

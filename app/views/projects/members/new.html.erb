@@ -1,0 +1,55 @@
+<%
+  @title = :add_members_title.t(title: @project.title)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
+
+  action = project_members_path(project_id: @project.id, q: get_query_param)
+%>
+
+<div class="container-text mt-3 pb-2">
+
+  <%= form_with(url: action, id: "project_member_form") do |f| %>
+
+    <h4><%= :LOGIN_NAME.t %>:</h4>
+
+    <%= text_field_tag(:candidate, @candidate, size: 40,
+                                               data: { autofocus: true },
+                                               class: "form-control") %><br/>
+    <% turn_into_user_auto_completer(:candidate) %>
+
+    <%= f.submit(:ADD.t, class: "btn btn-default ml-3") %>
+
+  <% end %>
+
+</div><!--.container-text-->
+
+<table class="table-striped table-project-members mt-3">
+  <thead>
+    <tr>
+      <th><%= :Login_name.t %></th>
+      <th><%= :Full_name.t %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.sort_by(&:login).each do |user| %>
+      <tr>
+        <td>
+          <%= user_link(user, user.login) %>
+        </td>
+        <td>
+          <%= user.name %>
+        </td>
+        <td>
+          <%= post_button(name: :ADD.t,
+                          path: project_members_path(project_id: @project.id,
+                                                     candidate: user.id)) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -151,9 +151,9 @@ class IpStats
     # and load into average percentage of server time used.  It weights
     # recent activity more heavily than old activity.
     def calc_weight(now, time)
-      return 0.0 if now - time > 60 * STATS_TIME
+      return 0.0 if now - time > STATS_TIME * 60
 
-      (60 * STATS_TIME - (now - time)) /
+      (STATS_TIME * 60 - (now - time)) /
         STATS_TIME / STATS_TIME / 60 / 60 * 2
     end
 

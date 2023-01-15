@@ -69,30 +69,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  image: {
-    add_image: {},
-    advanced_search: {},
-    bulk_filename_purge: {},
-    bulk_vote_anonymity_updater: {},
-    cast_vote: {},
-    destroy_image: {},
-    edit_image: {},
-    image_search: {},
-    images_by_user: {},
-    images_for_project: {},
-    index_image: {},
-    license_updater: {},
-    list_images: {},
-    next_image: {},
-    prev_image: {},
-    remove_images: {},
-    remove_images_for_glossary_term: {},
-    reuse_image: {},
-    reuse_image_for_glossary_term: {},
-    # show_image: {},
-    show_original: {},
-    transform_image: {}
-  },
   location: {
     add_to_location: {},
     adjust_permissions: {},
@@ -198,33 +174,33 @@ ACTIONS = {
     project_search: {}
     # show_project: {}
   },
-  species_list: {
-    add_observation_to_species_list: {},
-    add_remove_observations: {},
-    bulk_editor: {},
-    clear_species_list: {},
-    create_species_list: {},
-    destroy_species_list: {},
-    download: {},
-    edit_species_list: {},
-    index_species_list: {},
-    list_species_lists: {},
-    make_report: {},
-    manage_projects: {},
-    manage_species_lists: {},
-    name_lister: {},
-    next_species_list: {},
-    post_add_remove_observations: {},
-    prev_species_list: {},
-    print_labels: {},
-    remove_observation_from_species_list: {},
-    # show_species_list: {},
-    species_list_search: {},
-    species_lists_by_title: {},
-    species_lists_by_user: {},
-    species_lists_for_project: {},
-    upload_species_list: {}
-  },
+  # species_list: {
+  #   add_observation_to_species_list: {},
+  #   add_remove_observations: {},
+  #   bulk_editor: {},
+  #   clear_species_list: {},
+  #   create_species_list: {},
+  #   destroy_species_list: {},
+  #   download: {},
+  #   edit_species_list: {},
+  #   index_species_list: {},
+  #   list_species_lists: {},
+  #   make_report: {},
+  #   manage_projects: {},
+  #   manage_species_lists: {},
+  #   name_lister: {},
+  #   next_species_list: {},
+  #   post_add_remove_observations: {},
+  #   prev_species_list: {},
+  #   print_labels: {},
+  #   remove_observation_from_species_list: {},
+  #   # show_species_list: {},
+  #   species_list_search: {},
+  #   species_lists_by_title: {},
+  #   species_lists_by_user: {},
+  #   species_lists_for_project: {},
+  #   upload_species_list: {}
+  # },
   support: {
     confirm: {},
     donate: {},
@@ -344,6 +320,9 @@ end
 
 # ----------------------------
 #  Helpers.
+#
+#  To access paths in the console:
+#    include Rails.application.routes.url_helpers
 # ----------------------------
 
 # Get an array of API endpoints for all versions of API.
@@ -467,7 +446,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    patch("profile/remove_image", controller: "profile") # alternate path
+    get("profile/images", to: "profile/images#reuse",
+                          as: "profile_select_image")
+    post("profile/images(/:id)", to: "profile/images#attach",
+                                 as: "profile_update_image")
+    put("profile/images(/:id)", to: "profile/images#detach",
+                                as: "profile_remove_image")
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -559,6 +543,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
+
+    member do
+      get("images/reuse", to: "glossary_terms/images#reuse",
+                          as: "reuse_images_for")
+      post("images/attach", to: "glossary_terms/images#attach",
+                            as: "attach_image_to")
+      get("images/remove", to: "glossary_terms/images#remove",
+                           as: "remove_images_from")
+      put("images/detach", to: "glossary_terms/images#detach",
+                           as: "detach_image_from")
+    end
   end
 
   # ----- Herbaria: standard actions -------------------------------------------
@@ -574,6 +569,26 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :herbarium_records do
     resource :remove_observation, only: [:update], module: :herbarium_records
   end
+
+  # ----- Images: Namespace differences are for memorable path names
+  namespace :images do
+    put("/purge_filenames", to: "/images/filenames#update",
+                            as: "bulk_filename_purge")
+    get("/licenses/edit", to: "/images/licenses#edit",
+                          as: "edit_licenses")
+    put("/licenses", to: "/images/licenses#update",
+                     as: "license_updater")
+    get("/votes/anonymity", to: "/images/votes/anonymity#edit",
+                            as: "edit_vote_anonymity")
+    put("/votes/anonymity", to: "/images/votes/anonymity#update",
+                            as: "bulk_vote_anonymity_updater")
+  end
+  resources :images, only: [:index, :show, :destroy] do
+    member do
+      put("transform", to: "images/transformations#update", as: "transform")
+    end
+  end
+  put("/images/:id/vote", to: "images/votes#update", as: "image_vote")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -612,16 +627,47 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
+      get("images/new", to: "observations/images#new",
+                        as: "new_image_for")
+      post("images", to: "observations/images#create",
+                     as: "upload_image_for")
+      get("images/reuse", to: "observations/images#reuse",
+                          as: "reuse_images_for")
+      post("images/attach", to: "observations/images#attach",
+                            as: "attach_image_to")
+      get("images/remove", to: "observations/images#remove",
+                           as: "remove_images_from")
+      put("images/detach", to: "observations/images#detach",
+                           as: "detach_images_from")
     end
     collection do
       get("map", to: "observations/maps#index")
-      get("print_labels", to: "observations/downloads#print_labels",
-                          as: "print_labels_for")
+      post("print_labels", to: "observations/downloads#print_labels",
+                           as: "print_labels_for")
     end
   end
+  # NOTE: the intentional "backwards" param specificity here:
+  get("/observations/:id/species_lists/edit",
+      to: "observations/species_lists#edit",
+      as: "edit_observation_species_lists")
+  match("/observations/:id/species_lists/:species_list_id(/:commit)",
+        to: "observations/species_lists#update",
+        via: [:put, :patch],
+        as: "observation_species_list")
+  # These are in observations because they share private methods with
+  # :new and :create, which are currently observation-specific
+  get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
+  match("/images/:id", to: "observations/images#update", via: [:put, :patch])
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
+
+  resources :projects do
+    resources :members, only: [:new, :create, :edit, :update],
+                        controller: "projects/members", param: :candidate
+    resources :admin_requests, only: [:new, :create],
+                               controller: "projects/admin_requests"
+  end
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
@@ -645,6 +691,42 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
+  # ----- Species Lists: standard actions -----------------------------------
+  resources :species_lists, id: /\d+/
+
+  put("/species_lists/:id/clear", to: "species_lists#clear",
+                                  as: "clear_species_list")
+
+  get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
+                                        as: "new_species_list_name_lister")
+  post("/species_lists/name_lister", to: "species_lists/name_lists#create",
+                                     as: "species_list_name_lister")
+  get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
+                                        as: "new_species_list_upload")
+  post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
+                                     as: "species_list_uploads")
+  get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
+                                          as: "new_species_list_download")
+  post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
+                                       as: "species_list_downloads")
+  post("/species_lists/:id/downloads/print_labels",
+       to: "species_lists/downloads#print_labels",
+       as: "species_list_download_print_labels")
+  get("/species_lists/observations/edit",
+      to: "species_lists/observations#edit",
+      as: "edit_species_list_observations")
+  match("/species_lists/observations(/:commit)",
+        to: "species_lists/observations#update",
+        via: [:put, :patch],
+        as: "species_list_observations")
+  get("/species_lists/:id/projects",
+      to: "species_lists/projects#edit",
+      as: "edit_species_list_projects")
+  match("/species_lists/:id/projects",
+        to: "species_lists/projects#update",
+        via: [:put, :patch],
+        as: "species_list_projects")
+
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"
@@ -660,22 +742,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 
-  # ----- Image:
-  get("/image/show_image/:id", to: "image#show_image",
-                               as: "show_image")
   # ----- Location:
   get("/location/show_location/:id", to: "location#show_location",
                                      as: "show_location")
   # ----- Name:
   get("/name/show_name/:id", to: "name#show_name",
                              as: "show_name")
-  # ----- Project:
-  get("/project/show_project/:id", to: "project#show_project",
-                                   as: "show_project")
-  # ----- Species List:
-  get("/species_list/show_species_list/:id",
-      to: "species_list#show_species_list",
-      as: "show_species_list")
 
   # ----- end temporary show routes for path_builder with id ---------------
 
@@ -746,6 +818,12 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
+  # ----- Images: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "image", new_controller: "images",
+    actions: [:index, :show]
+  )
+
   # ----- Interests: legacy action redirects
   redirect_legacy_actions(
     old_controller: "interest", new_controller: "interests",
@@ -762,6 +840,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/textile", to: redirect("/info/textile_sandbox"))
   get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
+
+  # ----- Lookups: legacy action redirects ---------------------------
+  # The only legacy lookup that was ok'd for use by external sites
+  get("/observer/lookup_name(/:id)", to: "lookups#lookup_name", id: /\S.*/)
 
   # ----- Observations: legacy action redirects ----------------------------
   get("/observer/create_observation", to: redirect("/observations/new"))

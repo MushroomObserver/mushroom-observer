@@ -240,7 +240,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_edit_image
     login("mary")
-    get("/image/edit_image/1")
+    get("/images/1/edit")
   end
 
   # ------------------------------------------------------------------------

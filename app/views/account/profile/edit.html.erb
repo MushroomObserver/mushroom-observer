@@ -2,7 +2,7 @@
   @title = :profile_title.t
 
   tabs = [
-    link_to(:bulk_license_link.t, image_license_updater_path),
+    link_to(:bulk_license_link.t, images_license_updater_path),
     link_to(:show_user_your_notifications.t, interests_path),
     link_to(:prefs_link.t, edit_account_preferences_path),
     link_to(:account_api_keys_link.t, account_api_keys_path)
@@ -13,17 +13,15 @@
 
 <div class="row">
   <div class="col-sm-7">
-    <%= render(partial: "form") %>
+    <%= render(partial: "account/profile/form") %>
   </div>
 
   <div class="col-sm-5 text-center">
     <% if @user.image %>
-      <%= thumbnail(@user.image_id, {votes: false}) %>
-      <%= link_to(:profile_image_remove.t,
-                  account_profile_remove_image_path,
-                  { method: :patch,
-                    class: "btn btn-default",
-                    data: { confirm: :are_you_sure.l } }) %>
+      <%= thumbnail(@user.image_id, { votes: false }) %>
+      <%= put_button(name: :profile_image_remove.t,
+                     path: account_profile_remove_image_path,
+                     data: { confirm: :are_you_sure.l }) %>
     <% end %>
   </div>
 </div><!--.row-->

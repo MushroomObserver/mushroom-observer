@@ -36,7 +36,7 @@ class AccountControllerTest < FunctionalTestCase
     # Make sure user groups are updated correctly.
     assert(UserGroup.all_users.users.include?(user))
     assert(group = UserGroup.one_user(user))
-    assert_user_list_equal([user], group.users)
+    assert_user_arrays_equal([user], group.users)
   end
 
   def test_bad_signup

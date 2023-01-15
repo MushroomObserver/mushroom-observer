@@ -193,13 +193,13 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     number = CollectionNumber.last
-    assert_obj_list_equal([number], obs.reload.collection_numbers)
+    assert_obj_arrays_equal([number], obs.reload.collection_numbers)
 
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_text(/shared/i)
-    assert_obj_list_equal([number], obs.reload.collection_numbers)
+    assert_obj_arrays_equal([number], obs.reload.collection_numbers)
   end
 
   def test_create_collection_number_already_used
@@ -341,8 +341,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     num1.update(name: "Joe Schmoe")
     assert_users_equal(rolf, num1.user)
     assert_users_equal(rolf, num2.user)
-    assert_obj_list_equal([num1], obs1.collection_numbers)
-    assert_obj_list_equal([num2], obs2.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.collection_numbers)
+    assert_obj_arrays_equal([num2], obs2.collection_numbers)
     params = {
       name: num1.name,
       number: num1.number
@@ -353,8 +353,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
-    assert_obj_list_equal([new_num], obs1.collection_numbers)
-    assert_obj_list_equal([new_num], obs2.reload.collection_numbers)
+    assert_obj_arrays_equal([new_num], obs1.collection_numbers)
+    assert_obj_arrays_equal([new_num], obs2.reload.collection_numbers)
     assert_equal("Joe Schmoe", new_num.name)
     assert_equal("07-123a", new_num.number)
     # Make sure it updates the herbarium record which shared the old
@@ -399,28 +399,28 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     num1 = collection_numbers(:agaricus_campestris_coll_num)
     num2 = collection_numbers(:coprinus_comatus_coll_num)
     num1.add_observation(obs2)
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
-    assert_obj_list_equal([num1, num2], obs2.reload.collection_numbers, :sort)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num1, num2], obs2.reload.collection_numbers, :sort)
 
     # Make sure user must be logged in.
     delete(:destroy, params: { id: num1.id })
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure only owner obs can destroy num from it.
     login("mary")
     delete(:destroy, params: { id: num1.id })
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure badly-formed queries don't crash.
     login("rolf")
     # get(:destroy)
     delete(:destroy, params: { id: "bogus" })
-    assert_obj_list_equal([num1], obs1.reload.collection_numbers)
+    assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
 
     # Owner can destroy it.
     delete(:destroy, params: { id: num1.id })
     assert_empty(obs1.reload.collection_numbers)
-    assert_obj_list_equal([num2], obs2.reload.collection_numbers)
+    assert_obj_arrays_equal([num2], obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num1.id))
 
     # Admin can destroy it.
