@@ -139,8 +139,8 @@ class ImagesController < ApplicationController
     args = {
       action: "index",
       matrix: true,
-      include: [:user, { observations: :name }, :subjects, :best_glossary_terms,
-                :glossary_terms, :image_votes]
+      include: [:user, { observations: :name }, :subjects,
+                :glossary_term_thumbnails, :glossary_terms, :image_votes]
     }.merge(args)
 
     # Add some alternate sorting criteria.
