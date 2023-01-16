@@ -67,13 +67,4 @@ class VisualModelsController < ApplicationController
   def visual_model_params
     params.require(:visual_model).permit(:name, :reviewed)
   end
-
-  def create_visual_group(model, name)
-    group = VisualGroup.new(visual_model: model, name: name)
-    if group.save
-      group.add_initial_images
-    else
-      flash_object_errors(group)
-    end
-  end
 end

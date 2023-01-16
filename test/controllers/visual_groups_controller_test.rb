@@ -4,7 +4,7 @@ require "test_helper"
 
 class VisualGroupsControllerTest < FunctionalTestCase
   setup do
-    @visual_group = visual_groups(:visual_group_one)
+    @visual_group = visual_groups(:visual_group_two)
     @visual_model = @visual_group.visual_model
   end
 
