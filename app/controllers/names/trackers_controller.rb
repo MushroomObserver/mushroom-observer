@@ -26,6 +26,7 @@ module Names
     def edit
       return unless find_name!
 
+      find_name_tracker
       initialize_tracking_form_edit
     end
 
@@ -33,7 +34,7 @@ module Names
       return unless find_name!
 
       find_name_tracker
-      initialize_tracking_form_update
+      submit_tracking_form_udpate
     end
 
     private
@@ -43,8 +44,7 @@ module Names
     end
 
     def find_name_tracker
-      @name_tracker = NameTracker.find_by(name_id: params[:id].to_s,
-                                          user_id: @user.id)
+      @name_tracker = NameTracker.find_by(name_id: @name.id, user_id: @user.id)
     end
 
     def initialize_tracking_form_new
@@ -62,16 +62,14 @@ module Names
     end
 
     def submit_tracking_form_create
-      name_id = params[:id].to_s
-      create_or_update_name_tracker_and_interest(name_id)
+      create_or_update_name_tracker_and_interest(@name.id)
       redirect_to(name_path(@name.id, q: get_query_param))
     end
 
     def submit_tracking_form_udpate
-      name_id = params[:id].to_s
       case params[:commit]
       when :UPDATE.l
-        create_or_update_name_tracker_and_interest(name_id)
+        create_or_update_name_tracker_and_interest(@name.id)
       when :DISABLE.l
         destroy_name_tracker_interest_and_flash
       end

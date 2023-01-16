@@ -98,7 +98,7 @@ module Names
         }
       }
       login("rolf")
-      post(:create, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(name.id))
       # This is needed before the next find for some reason
       count_after = NameTracker.count
@@ -130,7 +130,7 @@ module Names
         }
       }
       login("rolf")
-      post(:create, params: params)
+      put(:update, params: params)
       assert_redirected_to(name_path(name.id))
       name_tracker = NameTracker.find_by(name: name, user: rolf)
       assert_nil(name_tracker)
