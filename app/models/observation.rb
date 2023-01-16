@@ -1177,9 +1177,9 @@ class Observation < AbstractModel
   # thumbnail to next available Image.  Saves change to thumbnail, might save
   # change to Image.  Returns Image.
   def remove_image(img)
-    if image_ids.include?(img.id) || thumb_image_id == img.id
-      image_ids.delete(img.id)
-      update(thumb_image_id: image_ids.empty? ? nil : image_ids.first) \
+    if images.include?(img) || thumb_image_id == img.id
+      images.delete(img)
+      update(thumb_image: images.empty? ? nil : images.first) \
         if thumb_image_id == img.id
       notify_users(:removed_image)
     end
