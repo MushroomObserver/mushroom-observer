@@ -35,7 +35,7 @@ class ProjectsController < ApplicationController
   def index
     if params[:pattern].present?
       project_search
-    elsif params[:by].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_project
     else
       list_projects

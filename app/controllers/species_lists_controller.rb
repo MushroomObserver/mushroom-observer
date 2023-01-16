@@ -53,7 +53,7 @@ class SpeciesListsController < ApplicationController
       species_lists_for_project
     elsif params[:by] == "title"
       species_lists_by_title
-    elsif params[:by].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_species_list
     else
       list_species_lists

@@ -54,7 +54,7 @@ class CommentsController < ApplicationController
       show_comments_by_user
     elsif params[:for_user].present?
       show_comments_for_user
-    elsif params[:by].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_comment
     else
       list_comments

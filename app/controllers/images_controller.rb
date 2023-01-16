@@ -47,7 +47,7 @@ class ImagesController < ApplicationController
       images_by_user
     elsif params[:for_project].present?
       images_for_project
-    elsif params[:by].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_image
     else
       list_images
