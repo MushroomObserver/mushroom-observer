@@ -17,6 +17,10 @@ class QuerySupplementalTest < CapybaraIntegrationTestCase
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")
+    # FIXME: ok, the prob is search is off.
+    #   it's making the query flavor   :all
+    #   instead of                     :with_observations_in_set
+
     click_link("Show Locations")
     click_link("Map Locations")
 
