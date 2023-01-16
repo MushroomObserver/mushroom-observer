@@ -490,7 +490,7 @@ class LocationsController < ApplicationController
 
   def return_to_caller
     if @set_observation
-      redirect_to(observations_path(@set_observation))
+      redirect_to(observation_path(@set_observation))
     elsif @set_species_list
       redirect_to(species_list_path(@set_species_list))
     elsif @set_herbarium
