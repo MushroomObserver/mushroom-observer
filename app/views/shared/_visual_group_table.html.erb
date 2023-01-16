@@ -30,11 +30,11 @@
            @visual_model.visual_groups.order(:name).each do |visual_group| %>
           <tr>
             <td><%= link_to(visual_group.name, visual_group) %></td>
-      	    <td><%= included_counts[visual_group.id] || 0 %></td>
-      	    <td><%= excluded_counts[visual_group.id] || 0 %></td>
+            <td><%= included_counts[visual_group.id] || 0 %></td>
+            <td><%= excluded_counts[visual_group.id] || 0 %></td>
             <td><%= link_to(:EDIT.t, edit_visual_group_path(visual_group)) %></td>
             <td><%= link_to(:DESTROY.t, visual_group, method: :delete,
-      		        data: { confirm: :are_you_sure.t }) %></td>
+                            data: { confirm: :are_you_sure.t }) %></td>
           </tr>
         <% end %>
       </tbody>
