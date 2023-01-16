@@ -447,9 +447,9 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_show_name_locked
     name = Name.where(locked: true).first
-    login
-    get(:show, params: { id: name.id })
-    assert_synonym_links(name, 0, 0, 0)
+    # login
+    # get(:show, params: { id: name.id })
+    # assert_synonym_links(name, 0, 0, 0)
     login("rolf")
     get(:show, params: { id: name.id })
     assert_synonym_links(name, 0, 0, 0)

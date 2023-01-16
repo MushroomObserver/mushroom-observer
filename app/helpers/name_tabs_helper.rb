@@ -30,13 +30,13 @@ module NameTabsHelper
   end
 
   def approve_synonym_form_link(name)
-    return unless name.deprecated
+    return unless name.deprecated && (in_admin_mode? || !name.locked)
 
     link_with_query(:APPROVE.t, approve_name_synonym_form_path(name.id))
   end
 
   def deprecate_synonym_form_link(name)
-    return if name.deprecated
+    return unless !name.deprecated && (in_admin_mode? || !name.locked)
 
     link_with_query(:DEPRECATE.t, deprecate_name_synonym_form_path(name.id))
   end
