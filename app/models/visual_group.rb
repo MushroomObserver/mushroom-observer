@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "extensions"
+
 class VisualGroup < AbstractModel
   has_many :visual_group_images, dependent: :destroy
   has_many :images, through: :visual_group_images
