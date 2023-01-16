@@ -39,6 +39,16 @@ class VisualModelsController < ApplicationController
     end
   end
 
+  # POST /visual/models/1/add_list
+  def add_list
+    model = VisualModel.find(params[:id])
+    params[:name_list].split(/[\n,\r]/).each do |raw_name|
+      name = raw_name.strip
+      create_visual_group(model, name) if name != ""
+    end
+    redirect_to(visual_model_visual_groups_url(model))
+  end
+
   # PATCH/PUT /visual_models/1
   def update
     @visual_model = VisualModel.find(params[:id])
@@ -66,5 +76,14 @@ class VisualModelsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def visual_model_params
     params.require(:visual_model).permit(:name, :reviewed)
+  end
+
+  def create_visual_group(model, name)
+    group = VisualGroup.new(visual_model: model, name: name)
+    if group.save
+      group.add_initial_images
+    else
+      flash_object_errors(group)
+    end
   end
 end

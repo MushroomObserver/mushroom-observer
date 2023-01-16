@@ -40,32 +40,6 @@ class VisualGroupsController < ApplicationController
 
   # POST /visual_groups or /visual_groups.json
   def create
-    if params.include?(:name_list)
-      create_from_list
-    else
-      create_one_visual_group
-    end
-  end
-
-  def create_from_list
-    model = VisualModel.find(params[:visual_model_id])
-    params[:name_list].split(/[\n,\r]/).each do |raw_name|
-      name = raw_name.strip
-      create_visual_group(model, name) if name != ""
-    end
-    redirect_to(visual_model_visual_groups_url(model))
-  end
-
-  def create_visual_group(model, name)
-    group = VisualGroup.new(visual_model: model, name: name)
-    if group.save
-      group.add_initial_images
-    else
-      flash_object_errors(group)
-    end
-  end
-
-  def create_one_visual_group
     @visual_group = VisualGroup.new(visual_group_params)
     @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
 
