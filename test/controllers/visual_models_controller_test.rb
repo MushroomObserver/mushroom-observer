@@ -85,29 +85,4 @@ class VisualModelsControllerTest < FunctionalTestCase
     end
     assert_redirected_to visual_models_url
   end
-
-  test "should add multiple visual groups" do
-    login
-    assert_difference({ "VisualGroup.count" => 3,
-                        "VisualGroupImage.count" => 2 }) do
-      post(:add_list, params: {
-             id: @visual_model.id,
-             name_list: "Coprinus comatus, Boletus edulis, Peltigera"
-           })
-    end
-
-    assert_redirected_to visual_model_visual_groups_url(@visual_model)
-  end
-
-  test "should fail with tabs" do
-    login
-    assert_no_difference("VisualGroup.count") do
-      post(:add_list, params: {
-             id: @visual_model.id,
-             name_list: "Coprinus\tcomatus"
-           })
-    end
-
-    assert_redirected_to visual_model_visual_groups_url(@visual_model)
-  end
 end

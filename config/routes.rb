@@ -739,8 +739,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :visual_models, id: /\d+/ do
     resources :visual_groups, id: /\d+/, shallow: true
   end
-  post("/visual_models/:id/add_list", to: "visual_models#add_list",
-                                      as: "visual_models_add_list")
 
   # Temporary shorter path builders for non-CRUDified controllers SHOW
 

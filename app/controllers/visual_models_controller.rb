@@ -39,16 +39,6 @@ class VisualModelsController < ApplicationController
     end
   end
 
-  # POST /visual/models/1/add_list
-  def add_list
-    model = VisualModel.find(params[:id])
-    params[:name_list].split(/[\n,\r]/).each do |raw_name|
-      name = raw_name.strip
-      create_visual_group(model, name) if name != ""
-    end
-    redirect_to(visual_model_visual_groups_url(model))
-  end
-
   # PATCH/PUT /visual_models/1
   def update
     @visual_model = VisualModel.find(params[:id])
