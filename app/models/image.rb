@@ -1075,10 +1075,6 @@ class Image < AbstractModel
     self.when.year
   end
 
-  def visual_group(visual_model)
-    visual_groups.find_by(visual_model: visual_model)
-  end
-
   ##############################################################################
 
   protected
