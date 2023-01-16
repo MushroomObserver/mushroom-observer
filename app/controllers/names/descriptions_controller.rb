@@ -38,7 +38,7 @@ module Names
         name_descriptions_by_author
       elsif params[:by_editor].present?
         name_descriptions_by_editor
-      elsif params[:by].present?
+      elsif params[:by].present? || params[:q].present? || params[:id].present?
         index_name_description
       else
         list_name_descriptions

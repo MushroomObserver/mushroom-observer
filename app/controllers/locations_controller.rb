@@ -47,7 +47,7 @@ class LocationsController < ApplicationController
       locations_by_user
     elsif params[:by_editor].present?
       locations_by_editor
-    elsif params[:by].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_location
     else
       list_locations

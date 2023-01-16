@@ -70,7 +70,7 @@ class NamesController < ApplicationController
       names_by_user
     elsif params[:by_editor].present?
       names_by_editor
-    elsif params[:by].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_name
     else
       list_names

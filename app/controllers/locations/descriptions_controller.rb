@@ -38,7 +38,7 @@ module Locations
         location_descriptions_by_author
       elsif params[:by_editor].present?
         location_descriptions_by_editor
-      elsif params[:by].present?
+      elsif params[:by].present? || params[:q].present? || params[:id].present?
         index_location_description
       else
         list_location_descriptions
