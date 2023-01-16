@@ -39,9 +39,10 @@ class VisualGroup < AbstractModel
   private
 
   def image_ids_by_name_vote(name, vote)
-    ObservationImage.joins({ observation: :name }).where(
-      "observations.vote_cache >= ? AND names.text_name = ?", vote, name
-    ).order("observations.vote_cache desc").
-      pluck(:image_id, "observations.vote_cache")
+    ObservationImage.joins({ observation: :name }).
+      where(Observation[:vote_cache].gt(vote)).
+      where(names: { text_name: name }).
+      order(vote_cache: :desc).
+      pluck(:image_id, :vote_cache)
   end
 end
