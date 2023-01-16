@@ -144,4 +144,15 @@ class RedirectsTest < IntegrationTestCase
       :get, "/herbarium/show_herbarium/#{nybg.id}", herbarium_path(nybg)
     )
   end
+
+  # Observer/lookup_... to Lookups  ---------------------------------
+
+  # The only legacy lookup that was ok'd for use by external sites
+  def test_lookup_name_get
+    name = names(:fungi)
+    login
+    assert_old_url_redirects_to_new_path(
+      :get, "/observer/lookup_name/#{name.id}", show_name_path(name.id)
+    )
+  end
 end
