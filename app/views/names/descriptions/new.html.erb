@@ -8,7 +8,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 
   action = { controller: "/names/descriptions", action: :create,
-             id: @description.id, q: get_query_param }
+             id: @description.name_id, q: get_query_param }
 %>
 
 <%= render(partial: "names/descriptions/form",

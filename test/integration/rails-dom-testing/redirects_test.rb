@@ -152,7 +152,7 @@ class RedirectsTest < IntegrationTestCase
     name = names(:fungi)
     login
     assert_old_url_redirects_to_new_path(
-      :get, "/observer/lookup_name/#{name.id}", show_name_path(name.id)
+      :get, "/observer/lookup_name/#{name.id}", name_path(name.id)
     )
   end
 end
