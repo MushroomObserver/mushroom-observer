@@ -100,7 +100,7 @@ class StudentTest < IntegrationTestCase
       get(url)
       assert_select("a[href*=?]", edit_name_description_path(marys_draft.id))
       assert_select("form input[value='Destroy']")
-      assert_select("form[action=?]", name_description_path(marys_draft.id))
+      assert_select("form[action*=?]", name_description_path(marys_draft.id))
 
       # Now give it some text to make sure it *can* (but doesn't) actually get
       # displayed (content, that is) on main show_name page.

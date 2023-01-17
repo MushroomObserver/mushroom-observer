@@ -79,7 +79,6 @@ module DescriptionsHelper
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
   def show_embedded_description_title(desc)
-    type = desc.type_tag
     parent_type = desc.parent.type_tag
     title = description_title(desc)
     links = []
@@ -90,7 +89,8 @@ module DescriptionsHelper
     end
     if is_admin?(desc)
       # FIXME: needs query_param somehow
-      links << destroy_button(name: :show_description_destroy.t, target: desc)
+      links << destroy_button(name: :show_description_destroy.t, target: desc,
+                              q: get_query_param)
     end
     content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
   end
@@ -128,7 +128,7 @@ module DescriptionsHelper
         links = []
         if writer
           links << link_with_query(:EDIT.t,
-                                   { controller: obj.show_controller,
+                                   { controller: desc.show_controller,
                                      action: :edit,
                                      id: desc.id })
         end
@@ -143,9 +143,9 @@ module DescriptionsHelper
     end
 
     # Add "fake" default public description if there aren't any public ones.
-    if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
+    if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, { controller: obj.show_controller,
+      link = link_with_query(:CREATE.t, { controller: desc.show_controller,
                                           action: :new,
                                           id: obj.id })
       str += indent + "[" + link + "]"
@@ -179,8 +179,9 @@ module DescriptionsHelper
     # Show existing drafts, with link to create new one.
     head = content_tag(:b, :show_name_descriptions.t) + ": "
     head += link_with_query(:show_name_create_description.t,
-                            { controller: obj.show_controller,
-                              action: "new", id: obj.id })
+                            { controller: "#{obj.show_controller}/descriptions",
+                              action: :new,
+                              id: obj.id })
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(obj).map { |link| indent + link }
@@ -194,10 +195,14 @@ module DescriptionsHelper
     if projects.present?
       head2 = :show_name_create_draft.t + ": "
       list = [head2] + projects.map do |project|
-        item = link_with_query(project.title,
-                               { controller: obj.show_controller,
-                                 action: :new, id: obj.id,
-                                 project: project.id, source: "project" })
+        item = link_with_query(
+          project.title,
+          { controller: "#{obj.show_controller}/descriptions",
+            action: :new,
+            id: obj.id,
+            project: project.id,
+            source: "project" }
+        )
         indent + item
       end
       html2 = list.safe_join(safe_br)

@@ -55,7 +55,7 @@ class NamesController < ApplicationController
   #
   ##############################################################################
 
-  def index
+  def index # rubocop:disable Metrics/AbcSize
     if params[:advanced_search].present?
       advanced_search
     elsif params[:pattern].present?
@@ -137,7 +137,7 @@ class NamesController < ApplicationController
   end
 
   # Display list of names that match a string.
-  def name_search
+  def name_search # rubocop:disable Metrics/AbcSize
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (name = Name.safe_find(pattern))
@@ -170,38 +170,7 @@ class NamesController < ApplicationController
   # Show selected search results as a list with 'index' template.
   def show_selected_names(query, args = {})
     store_query_in_session(query)
-    @links ||= []
-    args = {
-      controller: "/names",
-      action: "index",
-      letters: "names.sort_name",
-      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
-    }.merge(args)
-
-    # Tired of not having an easy link to index.
-    if query.flavor == :with_observations
-      @links << [:all_objects.t(type: :name), names_path]
-    end
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name", :sort_by_name.t],
-      ["created_at", :sort_by_created_at.t],
-      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-       :sort_by_updated_at.t],
-      ["num_views", :sort_by_num_views.t]
-    ]
-
-    # Add "show observations" link if this query can be coerced into an
-    # observation query.
-    @links << coerced_query_link(query, Observation)
-
-    # Add "show descriptions" link if this query can be coerced into a
-    # description query.
-    if query.coercable?(:NameDescription)
-      @links << [:show_objects.t(type: :description),
-                 name_descriptions_path(q: get_query_param(query))]
-    end
+    args = add_default_index_args(query, args)
 
     # Add some extra fields to the index for authored_names.
     if query.flavor == :with_descriptions
@@ -219,6 +188,26 @@ class NamesController < ApplicationController
       # it will *not* get passed to show_index_of_objects.
       show_index_of_objects(query, args)
     end
+  end
+
+  def add_default_index_args(query, args)
+    args = {
+      controller: "/names",
+      action: "index",
+      letters: "names.sort_name",
+      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
+    }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["name", :sort_by_name.t],
+      ["created_at", :sort_by_created_at.t],
+      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+       :sort_by_updated_at.t],
+      ["num_views", :sort_by_num_views.t]
+    ]
+
+    args
   end
 
   public

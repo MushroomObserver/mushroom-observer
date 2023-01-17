@@ -1,9 +1,5 @@
 <%
-  tabs = [
-    link_to(:name_index_add_name.t, new_name_path),
-  ]
-  tabs += create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  @tabsets = index_names_tabset(query: @query)
   @container = :full
 
   flash_error(@error) if @error && @objects.empty?

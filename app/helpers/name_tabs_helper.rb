@@ -52,4 +52,41 @@ module NameTabsHelper
                       new_name_tracker_path(name.id))
     end
   end
+
+  ##########################################################################
+  #
+  #    Index:
+
+  def index_names_tabset(query:)
+    tabs = [
+      new_name_link,
+      names_with_observations_link(query),
+      observations_of_these_names_link(query),
+      descriptions_of_these_names_link(query)
+    ].flatten.reject(&:empty?)
+    { right: draw_tab_set(tabs) }
+  end
+
+  def new_name_link
+    link_to(:name_index_add_name.t, new_name_path)
+  end
+
+  def names_with_observations_link(query)
+    return unless query && (query.flavor == :with_observations)
+
+    link_to(:all_objects.t(type: :name), names_path(with_observations: true))
+  end
+
+  def observations_of_these_names_link(query)
+    return unless query
+
+    coerced_query_link(query, Observation)
+  end
+
+  def descriptions_of_these_names_link(query)
+    return unless query && query.coercable?(:NameDescription)
+
+    link_to(:show_objects.t(type: :description),
+            name_descriptions_path(q: get_query_param(query)))
+  end
 end
