@@ -229,14 +229,14 @@ class Image < AbstractModel
   has_many :glossary_term_images, dependent: :destroy
   has_many :glossary_terms, through: :glossary_term_images
   has_many :thumb_glossary_terms, class_name: "GlossaryTerm",
-                                      foreign_key: "thumb_image_id",
-                                      inverse_of: :thumb_image
+                                  foreign_key: "thumb_image_id",
+                                  inverse_of: :thumb_image
 
   has_many :observation_images, dependent: :destroy
   has_many :observations, through: :observation_images
   has_many :thumb_observations, class_name: "Observation",
-                                    foreign_key: "thumb_image_id",
-                                    inverse_of: :thumb_image
+                                foreign_key: "thumb_image_id",
+                                inverse_of: :thumb_image
 
   has_many :project_images, dependent: :destroy
   has_many :projects, through: :project_images
