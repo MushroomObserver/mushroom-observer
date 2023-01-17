@@ -26,7 +26,7 @@ merges = description.parent.descriptions - [description]
       <input type="hidden" name="delete" value="0"/>
     <% end %>
 
-    <% button = moves.any? ? :merge_descriptions_merge.l : nil
+    <% button = merges.any? ? :merge_descriptions_merge.l : nil
     if button %>
       <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
     <% end %>
