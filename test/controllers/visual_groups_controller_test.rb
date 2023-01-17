@@ -109,7 +109,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: @visual_group.id,
             visual_group:
-              { name: "Tab %{\t} here",
+              { name: "Tab\there",
                 approved: @visual_group.approved }
           })
     assert_flash_text(/#{:cannot_include_tabs.t}/)
