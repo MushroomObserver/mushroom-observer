@@ -1983,6 +1983,7 @@
   show_description_edit: "[:EDIT]"
   show_description_clone: Clone
   show_description_merge: Merge With Another
+  show_description_move: Move This Description
   show_description_publish: Publish
   show_description_make_default: Make Default
   show_description_adjust_permissions: Adjust Permissions
@@ -1990,6 +1991,7 @@
   show_description_write_permissions: Edit
   show_description_clone_help: Create your own description based on this description.
   show_description_merge_help: Merge this description into another, then remove this one.
+  show_description_move_help: Move this description to a different [parent].
   show_description_publish_help: Publish this draft and make it the default public description.
   show_description_make_default_help: Make this the default description that is shown on the main '[:show_name(name=:name)]' page.
   show_description_adjust_permissions_help: Change the set of users who are allowed to view, modify or administrate this description.

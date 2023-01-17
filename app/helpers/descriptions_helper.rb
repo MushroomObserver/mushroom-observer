@@ -72,6 +72,16 @@ module DescriptionsHelper
                     help: :show_description_merge_help.l)
   end
 
+  def move_description_link(description, admin)
+    return unless admin
+
+    parent_type = description.parent.type_tag.to_s
+    link_with_query(:show_description_move.t,
+                    { controller: "#{description.show_controller}/moves",
+                      action: :new, id: description.id },
+                    help: :show_description_move_help.l(parent: parent_type))
+  end
+
   def adjust_permissions_link(description, admin)
     return unless admin
 

@@ -1,0 +1,35 @@
+<%
+moves = description.parent.synonyms - [description.parent]
+moves.reject!(&:is_misspelling?)
+%>
+
+<div class="container-text">
+
+  <%= form_with(url: action, id: "move_descriptions_form") do |f| %>
+
+    <h4><%= :merge_descriptions_move_header.t %>:</h4><!-- .text-larger -->
+    <p><span class="help-note"><%= :merge_descriptions_move_help.t %></span></p>
+
+    <% if moves.any? %>
+      <ul type="none">
+        <% moves.sort_by.each do |name|
+          [ (a.deprecated ? 1 : 0), a.sort_name, a.id ] %>
+          <li><%= radio_button_tag(:target, name.id,
+                    merges.length == 0 && moves.length == 1) %>
+              <%= name.display_name.t %></li>
+        <% end %>
+      </ul>
+
+      <%= check_box_tag(:delete, "1", description.is_admin?(@user)) %>
+        <%= :merge_descriptions_delete_after.t %>
+      <input type="hidden" name="delete" value="0"/>
+    <% end %>
+
+    <% button = moves.any? ? :merge_descriptions_move.l : nil
+    if button %>
+      <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+    <% end %>
+
+  <% end %>
+
+</div><!--.container-text-->
