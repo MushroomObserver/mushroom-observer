@@ -2,11 +2,15 @@
 
 module DescriptionsHelper
   def writer?(desc)
-    desc.writer?(@user) || in_admin_mode?
+    desc.writer?(User.current) || in_admin_mode?
   end
 
   def is_admin?(desc)
-    desc.is_admin?(@user) || in_admin_mode?
+    desc.is_admin?(User.current) || in_admin_mode?
+  end
+
+  def reader?(desc)
+    desc.is_reader?(User.current) || in_admin_mode?
   end
 
   # Create tabs for show_description page.
@@ -25,8 +29,8 @@ module DescriptionsHelper
                                 action: :edit, id: desc.id })
     end
     if admin
-      # FIXME: needs query_param somehow
-      tabs << destroy_button(name: :show_description_destroy.t, target: desc)
+      tabs << destroy_button(name: :show_description_destroy.t, target: desc,
+                             q: get_query_param)
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
@@ -49,7 +53,7 @@ module DescriptionsHelper
         help: :show_description_adjust_permissions_help.l
       )
     end
-    if desc.public && @user && (desc.parent.description_id != desc.id)
+    if desc.public && User.current && (desc.parent.description_id != desc.id)
       tabs << put_button(name: :show_description_make_default.t,
                          path: { controller: "/#{type}s/descriptions/defaults",
                                  action: :update, id: desc.id,
@@ -88,7 +92,6 @@ module DescriptionsHelper
                                  action: :edit, id: desc.id })
     end
     if is_admin?(desc)
-      # FIXME: needs query_param somehow
       links << destroy_button(name: :show_description_destroy.t, target: desc,
                               q: get_query_param)
     end
@@ -96,21 +99,27 @@ module DescriptionsHelper
   end
 
   # Show list of name/location descriptions.
-  def list_descriptions(obj, fake_default = false)
-    type = obj.type_tag
-
+  def list_descriptions(object:, fake_default: false)
+    user = User.current
     # Filter out empty descriptions (unless it's public or one you own).
-    list = obj.descriptions.includes(:user).select do |desc|
-      desc.notes? || (desc.user == @user) ||
+    list = object.descriptions.includes(:user).select do |desc|
+      desc.notes? || (desc.user == user) ||
         reviewer? || (desc.source_type == :public)
     end
 
-    # Sort, putting the default one on top, followed by public ones, followed
-    # by others ending in personal ones, sorting by "length" among groups.
+    list = sort_description_list(object, list)
+
+    make_list_links(list, fake_default)
+  end
+
+  # Sort, putting the default one on top, followed by public ones, followed
+  # by others ending in personal ones, sorting by "length" among groups.
+  # rubocop:disable Metrics/AbcSize
+  def sort_description_list(object, list)
     type_order = Description.all_source_types
     list.sort_by! do |x|
       [
-        (x.id == obj.description_id ? 0 : 1),
+        (x.id == object.description_id ? 0 : 1),
         type_order.index(x.source_type),
         -x.note_status[0],
         -x.note_status[1],
@@ -119,7 +128,11 @@ module DescriptionsHelper
       ]
     end
 
-    # Turn each into a link to show_description, and add optional controls.
+    list
+  end
+
+  # Turn each into a link to show_description, and add optional controls.
+  def make_list_links(list, fake_default)
     list.map! do |desc|
       item = description_link(desc)
       writer = writer?(desc)
@@ -133,9 +146,8 @@ module DescriptionsHelper
                                      id: desc.id })
         end
         if admin
-          # FIXME: needs query_param somehow
           links << destroy_button(name: :show_description_destroy.t,
-                                  target: desc)
+                                  target: desc, q: get_query_param)
         end
         item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
       end
@@ -157,7 +169,7 @@ module DescriptionsHelper
 
   # Show list of alternate descriptions for show_object page.
   #
-  #   <%= show_alt_descriptions(name, projects) %>
+  #   <%= show_alt_descriptions(object: name, projects: projects) %>
   #
   #   # Renders something like this:
   #   <p>
@@ -173,43 +185,51 @@ module DescriptionsHelper
   #       One More Project
   #   </p>
   #
-  def show_alt_descriptions(obj, projects = nil)
-    type = obj.type_tag
+  def show_alt_descriptions(object:, projects: nil)
+    type = object.type_tag
 
     # Show existing drafts, with link to create new one.
     head = content_tag(:b, :show_name_descriptions.t) + ": "
-    head += link_with_query(:show_name_create_description.t,
-                            { controller: "#{obj.show_controller}/descriptions",
-                              action: :new,
-                              id: obj.id })
+    head += link_with_query(
+      :show_name_create_description.t,
+      { controller: "#{object.show_controller}/descriptions",
+        action: :new,
+        id: object.id }
+    )
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(obj).map { |link| indent + link }
+    list = list_descriptions(object: object).map { |link| indent + link }
     any = list.any?
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t unless any
     html = list.safe_join(safe_br)
     html = content_tag(:p, html)
 
-    # Show list of projects user is a member of.
-    if projects.present?
-      head2 = :show_name_create_draft.t + ": "
-      list = [head2] + projects.map do |project|
-        item = link_with_query(
-          project.title,
-          { controller: "#{obj.show_controller}/descriptions",
-            action: :new,
-            id: obj.id,
-            project: project.id,
-            source: "project" }
-        )
-        indent + item
-      end
-      html2 = list.safe_join(safe_br)
-      html += content_tag(:p, html2)
-    end
+    add_list_of_projects(object, html, projects) if projects.present?
     html
   end
+
+  # Show list of projects user is a member of.
+  def add_list_of_projects(object, html, projects)
+    return if projects.blank?
+
+    head2 = :show_name_create_draft.t + ": "
+    list = [head2] + projects.map do |project|
+      item = link_with_query(
+        project.title,
+        { controller: "#{object.show_controller}/descriptions",
+          action: :new,
+          id: object.id,
+          project: project.id,
+          source: "project" }
+      )
+      indent + item
+    end
+    html2 = list.safe_join(safe_br)
+    html += content_tag(:p, html2)
+    html
+  end
+  # rubocop:enable Metrics/AbcSize
 
   # Create a div for notes in Description subclasses.
   #
@@ -240,7 +260,7 @@ module DescriptionsHelper
                :default.l
              elsif desc.public
                :public.l
-             elsif desc.is_reader?(@user) || in_admin_mode?
+             elsif reader?(desc)
                :restricted.l
              else
                :private.l
