@@ -349,7 +349,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       # assert_link_exists(show_name_description_uri, can_see_description?)
       assert_link_exists(edit_name_description_uri,
                          edit_description_link_there?)
-      assert_link_exists(destroy_name_description_uri,
+      assert_form_exists(destroy_name_description_uri,
                          destroy_description_link_there?)
       check_edit_description_link_behavior if edit_description_link_there?
     end
@@ -372,11 +372,19 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       end
     end
 
-    def assert_link_exists(name, val)
+    def assert_link_exists(uri, val)
       if val
-        assert_select("a[href='#{name}']")
+        assert_select("a[href*='#{uri}']")
       else
-        assert_select("a[href='#{name}']", 0)
+        assert_select("a[href*='#{uri}']", 0)
+      end
+    end
+
+    def assert_form_exists(uri, val)
+      if val
+        assert_select("form[action*='#{uri}']")
+      else
+        assert_select("form[action*='#{uri}']", 0)
       end
     end
   end
