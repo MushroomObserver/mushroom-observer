@@ -98,9 +98,21 @@ class VisualGroupsControllerTest < FunctionalTestCase
     patch(:update, params: {
             id: @visual_group.id,
             visual_group:
-              { name: "",
+            { name: "",
+              approved: @visual_group.approved }
+          })
+    assert_redirected_to edit_visual_group_url(@visual_group)
+  end
+
+  test "should prevent names with tabs" do
+    login
+    patch(:update, params: {
+            id: @visual_group.id,
+            visual_group:
+              { name: "Tab %{\t} here",
                 approved: @visual_group.approved }
           })
+    assert_flash_text(/#{:cannot_include_tabs.t}/)
     assert_redirected_to edit_visual_group_url(@visual_group)
   end
 
