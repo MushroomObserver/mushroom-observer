@@ -16,18 +16,17 @@ module Descriptions::Moves
 
       @description = @src
 
-      # Doesn't have permission to see source.
-      return unless !in_admin_mode? && !@src.is_reader?(@user)
+      # render the form, if have permission
+      return if in_admin_mode? || @src.is_reader?(@user)
 
+      # Doesn't have permission to see source.
       flash_error(:runtime_description_private.t)
       redirect_to(object_path_with_query(@src.parent))
     end
 
     # POST method. Moves the description to a new parent object.
     def create
-      return unless (@src = find_description!(params[:id].to_s))
-
-      return unless check_src_permission!
+      return unless check_src_exists! && check_src_permission!
 
       @description = @src
       return unless check_dest_exists!
@@ -37,6 +36,12 @@ module Descriptions::Moves
     end
 
     private
+
+    def check_src_exists!
+      return true if (@src = find_description!(params[:id].to_s))
+
+      false
+    end
 
     def check_src_permission!
       return true if in_admin_mode? || @src.is_reader?(@user)

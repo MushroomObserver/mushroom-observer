@@ -17,6 +17,7 @@ module Descriptions::Merges
 
       @description = @src
 
+      # render the form, if have permission
       return if in_admin_mode? || @src.is_reader?(@user)
 
       # Doesn't have permission to see source.
@@ -40,7 +41,6 @@ module Descriptions::Merges
     def check_src_exists!
       return true if (@src = find_description!(params[:id].to_s))
 
-      render("new")
       false
     end
 
