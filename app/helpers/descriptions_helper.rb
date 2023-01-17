@@ -14,65 +14,99 @@ module DescriptionsHelper
   end
 
   # Create tabs for show_description page.
-  def show_description_tab_set(desc)
-    type = desc.type_tag.to_s.sub(/_description/, "").to_sym
-    admin = is_admin?(desc)
-    tabs = []
-    if true
-      tabs << link_with_query(:show_object.t(type: type),
-                              { controller: "/#{type}s",
-                                action: :show, id: desc.parent_id })
-    end
-    if writer?(desc)
-      tabs << link_with_query(:show_description_edit.t,
-                              { controller: "/#{type}s/descriptions",
-                                action: :edit, id: desc.id })
-    end
-    if admin
-      tabs << destroy_button(name: :show_description_destroy.t, target: desc,
-                             q: get_query_param)
-    end
-    if true
-      tabs << link_with_query(:show_description_clone.t,
-                              { controller: "/#{type}s/descriptions",
-                                action: :new,
-                                id: desc.parent_id, clone: desc.id },
-                              help: :show_description_clone_help.l)
-    end
-    if admin
-      tabs << link_with_query(:show_description_merge.t,
-                              { controller: "/#{type}s/descriptions/merges",
-                                action: :new, id: desc.id },
-                              help: :show_description_merge_help.l)
-    end
-    if admin
-      tabs << link_with_query(
-        :show_description_adjust_permissions.t,
-        { controller: "/#{type}s/descriptions/permissions",
-          action: :edit, id: desc.id },
-        help: :show_description_adjust_permissions_help.l
-      )
-    end
-    if desc.public && User.current && (desc.parent.description_id != desc.id)
-      tabs << put_button(name: :show_description_make_default.t,
-                         path: { controller: "/#{type}s/descriptions/defaults",
-                                 action: :update, id: desc.id,
-                                 q: get_query_param },
-                         help: :show_description_make_default_help.l)
-    end
-    if (desc.source_type == :project) &&
-       (project = desc.source_object)
-      tabs << link_with_query(:show_object.t(type: :project),
-                              project.show_link_args)
-    end
-    if admin && (desc.source_type != :public)
-      tabs << put_button(name: :show_description_publish.t,
-                         path: { controller: "/#{type}s/descriptions/publish",
-                                 action: :update, id: desc.id,
-                                 q: get_query_param },
-                         help: :show_description_publish_help.l)
-    end
-    tabs
+  def show_description_tabset(description:, pager: false)
+    type = description.parent.type_tag
+    admin = is_admin?(description)
+    # assemble HTML for "tabset" for show_{type}_description
+    tabs = [
+      show_parent_link(description, type),
+      edit_description_link(description),
+      destroy_description_link(description, admin),
+      clone_description_link(description),
+      merge_description_link(description, admin),
+      adjust_permissions_link(description, admin),
+      make_default_link(description),
+      project_link(description),
+      publish_draft_link(description, admin)
+    ].flatten.reject(&:empty?)
+    tabset = { right: draw_tab_set(tabs) }
+    tabset = tabset.merge(pager_for: description) if pager
+    tabset
+  end
+
+  def show_parent_link(description, type)
+    link_with_query(:show_object.t(type: type),
+                    { controller: description.parent.show_controller,
+                      action: :show, id: description.parent_id })
+  end
+
+  def edit_description_link(description)
+    return unless writer?(description)
+
+    link_with_query(:show_description_edit.t,
+                    { controller: description.show_controller,
+                      action: :edit, id: description.id })
+  end
+
+  def destroy_description_link(description, admin)
+    return unless admin
+
+    destroy_button(name: :show_description_destroy.t,
+                   target: description, q: get_query_param)
+  end
+
+  def clone_description_link(description)
+    link_with_query(:show_description_clone.t,
+                    { controller: description.show_controller,
+                      action: :new, id: description.parent_id,
+                      clone: description.id },
+                    help: :show_description_clone_help.l)
+  end
+
+  def merge_description_link(description, admin)
+    return unless admin
+
+    link_with_query(:show_description_merge.t,
+                    { controller: "#{description.show_controller}/merges",
+                      action: :new, id: description.id },
+                    help: :show_description_merge_help.l)
+  end
+
+  def adjust_permissions_link(description, admin)
+    return unless admin
+
+    link_with_query(:show_description_adjust_permissions.t,
+                    { controller: "#{description.show_controller}/permissions",
+                      action: :edit, id: description.id },
+                    help: :show_description_adjust_permissions_help.l)
+  end
+
+  def make_default_link(description)
+    return unless description.public && User.current &&
+                  (description.parent.description_id != description.id)
+
+    put_button(name: :show_description_make_default.t,
+               path: { controller: "#{description.show_controller}/defaults",
+                       action: :update, id: description.id,
+                       q: get_query_param },
+               help: :show_description_make_default_help.l)
+  end
+
+  def project_link(description)
+    return unless (description.source_type == :project) &&
+                  (project = description.source_object)
+
+    link_with_query(:show_object.t(type: :project), project.show_link_args)
+  end
+
+  def publish_draft_link(description, admin)
+    return unless admin && (description.source_type != :public)
+
+    put_button(name: :show_description_publish.t,
+               path: { controller: "#{description.show_controller}/publish",
+                       action: :update, id: description.id,
+                       q: get_query_param },
+               help: :show_description_publish_help.l)
   end
 
   # Header of the embedded description within a show_object page.

@@ -8,6 +8,5 @@ module Locations::Descriptions
 
     include ::Descriptions::Permissions
     include ::Locations::Descriptions::SharedPrivateMethods
-
   end
 end

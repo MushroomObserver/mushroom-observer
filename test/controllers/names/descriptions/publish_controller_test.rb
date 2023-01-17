@@ -21,18 +21,14 @@ module Names::Descriptions
 
     # Other members cannot.
     def test_publish_draft_member
-      publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina,
-                           merged: false, conflict: false)
+      publish_draft_helper(name_descriptions(:draft_agaricus_campestris),
+                           katrina, merged: false, conflict: false)
     end
 
     # Non-members certainly can't.
     def test_publish_draft_non_member
-      publish_draft_helper(
-        name_descriptions(:draft_agaricus_campestris),
-        dick,
-        merged: false,
-        conflict: false
-      )
+      publish_draft_helper(name_descriptions(:draft_agaricus_campestris),
+                           dick, merged: false, conflict: false)
     end
 
     # Non-members certainly can't.

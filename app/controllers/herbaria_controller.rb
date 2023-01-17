@@ -364,7 +364,8 @@ class HerbariaController < ApplicationController
 
     flash_notice(:create_herbarium_must_define_location.t)
     redirect_to(new_location_path(back: @back,
-                where: @herbarium.place_name, set_herbarium: @herbarium.id))
+                                  where: @herbarium.place_name,
+                                  set_herbarium: @herbarium.id))
     true
   end
 

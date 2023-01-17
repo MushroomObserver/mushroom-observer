@@ -223,10 +223,9 @@ module Names
 
       existing_synonyms = {}
       split_name = nil
+      # Check all names not matching selected one
       selected_synonym.names.each do |n|
-        unless n != selected_name
-          next
-        end # Check all names not matching selected one
+        next if n == selected_name
 
         assert_not(n.deprecated)
         split_name = n

@@ -176,7 +176,9 @@ module Descriptions
         @description.admin_groups << UserGroup.one_user(@user)
 
       else
-        raise(:runtime_invalid_source_type.t(value: @description.source_type.inspect))
+        raise(:runtime_invalid_source_type.t(
+                value: @description.source_type.inspect
+              ))
       end
     end
 

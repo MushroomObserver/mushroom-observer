@@ -187,8 +187,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     # There should be no locations of that name, though.
     select("Locations", from: "search_type")
     click_button("Search")
-    # FIXME: Commenting this out. This is not what you get when you do this.
-    # assert_match("Location Search", page.title, "Wrong page")
+    assert_match("Index", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
 

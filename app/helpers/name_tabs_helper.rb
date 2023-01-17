@@ -72,7 +72,7 @@ module NameTabsHelper
   end
 
   def names_with_observations_link(query)
-    return unless query && (query.flavor == :with_observations)
+    return unless query&.flavor == :with_observations
 
     link_to(:all_objects.t(type: :name), names_path(with_observations: true))
   end

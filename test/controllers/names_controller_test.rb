@@ -53,19 +53,22 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
-  def test_names_with_observations # observation_index
+  # observation_index
+  def test_names_with_observations
     login
     get(:index, params: { with_observations: true })
     assert_template("index")
   end
 
-  def test_names_with_observations_by_letter # observation_index
+  # observation_index
+  def test_names_with_observations_by_letter
     login
     get(:index, params: { with_observations: true, letter: "A" })
     assert_template("index")
   end
 
-  def test_names_with_descriptions # authored_names
+  # authored_names
+  def test_names_with_descriptions
     login
     get(:index, params: { with_descriptions: true })
     assert_template("index")

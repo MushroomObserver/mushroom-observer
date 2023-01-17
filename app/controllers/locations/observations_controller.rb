@@ -44,7 +44,9 @@ module Locations
         o.where = nil
         next if o.save
 
-        flash_error(:runtime_location_merge_failed.t(name: o.unique_format_name))
+        flash_error(
+          :runtime_location_merge_failed.t(name: o.unique_format_name)
+        )
         success = false
       end
       success

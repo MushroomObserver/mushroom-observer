@@ -28,8 +28,8 @@ module Authors
       }
       post_requires_login(:create, params)
       assert_redirected_to(name_description_path(
-        name_descriptions(:coprinus_comatus_desc).id
-      ))
+                             name_descriptions(:coprinus_comatus_desc).id
+                           ))
       assert_flash_text(:request_success.t)
 
       params = {
@@ -42,8 +42,8 @@ module Authors
       }
       post_requires_login(:create, params)
       assert_redirected_to(location_description_path(
-        location_descriptions(:albion_desc).id
-      ))
+                             location_descriptions(:albion_desc).id
+                           ))
       assert_flash_text(:request_success.t)
     end
   end
