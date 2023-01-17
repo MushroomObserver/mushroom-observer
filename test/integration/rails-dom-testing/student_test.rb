@@ -41,16 +41,17 @@ class StudentTest < IntegrationTestCase
       get(url)
       # The latest ND should be Mary's draft
       marys_draft = NameDescription.last
+      # Both show and edit links share this path segment
       assert_select("a[href*=?]",
-                    name_description_path(marys_draft.id), 1) do |links|
+                    name_description_path(marys_draft.id), 2) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
       assert_no_match(/#{gen_desc}/, response.body)
       assert_select("a[href*=?]", new_name_description_path(name.id), 1)
       click_mo_link(href: name_description_path(marys_draft.id))
-      assert_select("a[href*=?", edit_name_description_path(marys_draft.id))
+      assert_select("a[href*=?]", edit_name_description_path(marys_draft.id))
       assert_select("form input[value='Destroy']")
-      assert_select("form[action=?]", name_description_path(marys_draft.id))
+      assert_select("form[action*=?]", name_description_path(marys_draft.id))
       click_mo_link(href: edit_name_description_path(marys_draft.id))
       open_form("#name_description_form") do |form|
         form.assert_value("source_type", "project")
@@ -99,6 +100,7 @@ class StudentTest < IntegrationTestCase
       # Make sure it shows up on main show_name page and can edit it.
       get(url)
       assert_select("a[href*=?]", edit_name_description_path(marys_draft.id))
+      # Both of these test for a destroy button:
       assert_select("form input[value='Destroy']")
       assert_select("form[action*=?]", name_description_path(marys_draft.id))
 
@@ -127,9 +129,10 @@ class StudentTest < IntegrationTestCase
     # Can view but not edit.
     def check_another_student(url)
       get(url)
-      click_mo_link(href: /show_name_description/)
-      assert_select("a[href*=edit_name_description]", 0)
-      assert_select("a[href*=destroy_name_description]", 0)
+      marys_draft = NameDescription.last
+      click_mo_link(href: name_description_path(marys_draft.id))
+      assert_select("a[href*=?]", edit_name_description_path(marys_draft.id), 0)
+      assert_select("form input[value='Destroy']", 0)
     end
   end
 
@@ -137,8 +140,9 @@ class StudentTest < IntegrationTestCase
     # Knows it exists but can't even view it.
     def check_another_user(url)
       get(url)
-      assert_select("a[href*=show_name_description]", 1)
-      click_mo_link(href: /show_name_description/)
+      marys_draft = NameDescription.last
+      assert_select("a[href*=?]", name_description_path(marys_draft.id), 1)
+      click_mo_link(href: name_description_path(marys_draft.id))
       assert_flash_error
       assert_nil(assigns(:description))
     end
