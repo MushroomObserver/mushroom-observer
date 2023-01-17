@@ -270,8 +270,7 @@ class AmateurTest < IntegrationTestCase
     login("dick")
     assert_template("observations/show")
     assert_select("div.thumbnail-map", 1)
-
-    click_mo_link(label: "Hide thumbnail map.")
+    click_mo_link(label: "Hide thumbnail map")
     assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
 
