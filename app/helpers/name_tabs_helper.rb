@@ -84,7 +84,7 @@ module NameTabsHelper
   end
 
   def descriptions_of_these_names_link(query)
-    return unless query && query.coercable?(:NameDescription)
+    return unless query&.coercable?(:NameDescription)
 
     link_to(:show_objects.t(type: :description),
             name_descriptions_path(q: get_query_param(query)))
