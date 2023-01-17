@@ -184,7 +184,7 @@
 #
 class Observation < AbstractModel
   belongs_to :thumb_image, class_name: "Image",
-                           inverse_of: :thumbnail_glossary_terms
+                           inverse_of: :thumb_glossary_terms
   belongs_to :name # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log

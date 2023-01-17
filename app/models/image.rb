@@ -183,9 +183,9 @@ require("mimemagic")
 #  unique_format_name:: Marked-up title.
 #  unique_text_name::   Plain-text title.
 #  observations::       Observations that use this image.
-#  thumbnail_observations:: Observations that use this as their "thumbnail".
+#  thumb_observations:: Observations that use this as their "thumbnail".
 #  glossary_terms::     GlossaryTerms that use this image.
-#  thumbnail_glossary_terms:: GlossaryTerms that use this as their "thumbnail".
+#  thumb_glossary_terms:: GlossaryTerms that use this as their "thumbnail".
 #  has_size?::          Does image have this size?
 #  size::               Calculate size of image of given type.
 #
@@ -228,13 +228,13 @@ class Image < AbstractModel
 
   has_many :glossary_term_images, dependent: :destroy
   has_many :glossary_terms, through: :glossary_term_images
-  has_many :thumbnail_glossary_terms, class_name: "GlossaryTerm",
+  has_many :thumb_glossary_terms, class_name: "GlossaryTerm",
                                       foreign_key: "thumb_image_id",
                                       inverse_of: :thumb_image
 
   has_many :observation_images, dependent: :destroy
   has_many :observations, through: :observation_images
-  has_many :thumbnail_observations, class_name: "Observation",
+  has_many :thumb_observations, class_name: "Observation",
                                     foreign_key: "thumb_image_id",
                                     inverse_of: :thumb_image
 
@@ -246,7 +246,7 @@ class Image < AbstractModel
 
   has_many :image_votes, dependent: :destroy
 
-  has_many :subjects, class_name: "User"
+  has_many :profile_users, class_name: "User"
 
   belongs_to :user
   belongs_to :license
@@ -261,7 +261,7 @@ class Image < AbstractModel
 
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
-    observations + subjects + glossary_terms
+    observations + profile_users + glossary_terms
   end
 
   # Is image used by an object other than obj
@@ -900,7 +900,7 @@ class Image < AbstractModel
 
   # Callback that changes objects referencing an image that is being destroyed.
   def update_thumbnails
-    (thumbnail_glossary_terms + thumbnail_observations + subjects).each do |obj|
+    (thumb_glossary_terms + thumb_observations + profile_users).each do |obj|
       obj.remove_image(self)
     end
   end

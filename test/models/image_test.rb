@@ -158,9 +158,9 @@ class ImageTest < UnitTestCase
     term2 = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     assert_obj_arrays_equal([term1, term2].sort_by(&:id),
                             img1.glossary_terms.sort_by(&:id))
-    assert_obj_arrays_equal([term1], img1.thumbnail_glossary_terms)
+    assert_obj_arrays_equal([term1], img1.thumb_glossary_terms)
     assert_obj_arrays_equal([term2], img2.glossary_terms)
-    assert_obj_arrays_equal([term2], img2.thumbnail_glossary_terms)
+    assert_obj_arrays_equal([term2], img2.thumb_glossary_terms)
   end
 
   def test_delete_thmubnail_of_glossary_term_with_no_other_images
@@ -185,7 +185,7 @@ class ImageTest < UnitTestCase
     assert_not_nil(thumb)
     assert_not_empty(other_images)
     assert_includes(thumb.glossary_terms, term)
-    assert_includes(thumb.thumbnail_glossary_terms, term)
+    assert_includes(thumb.thumb_glossary_terms, term)
     thumb_id = thumb.id
     other_image_ids = other_images.map(&:id)
 
@@ -220,7 +220,7 @@ class ImageTest < UnitTestCase
     assert_not_nil(thumb)
     assert_not_empty(other_images)
     assert_includes(thumb.observations, obs)
-    assert_includes(thumb.thumbnail_observations, obs)
+    assert_includes(thumb.thumb_observations, obs)
     thumb_id = thumb.id
     other_image_ids = other_images.map(&:id)
 
