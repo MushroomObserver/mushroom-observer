@@ -130,7 +130,12 @@ class Textile < String
     fully_qualify_links!
     restore_pre_existing_links!(saved_links)
 
-    self
+    # Some Name Citations contain bracketed years. Ex:
+    #   Hyménomycètes (Alençon): 103 (1874) [1878]
+    # We want them to render as such, but Redcloth converts them
+    # (and other brackted integers) into footnote references.
+    # So restore the bracketed years that RedCloth munged.
+    restore_bracketed_years!
   end
 
   # Register one or more names (instances) so that subsequent textile strings
@@ -400,5 +405,13 @@ class Textile < String
 
   def fully_qualify_links!
     gsub!(%r{href="/}, "href=\"#{MO.http_domain}/")
+  end
+
+  # Match a bracketed year [nnnn] which Redcloth converted to
+  # <sup class="footnote" id="fnr1878"><a href="#fn1878">1878</a></sup>
+  YEAR_MUNGED_AS_FN = %r{<sup class="footnote" id="fnr(\d\d\d\d)(.+/sup?)>}
+
+  def restore_bracketed_years!
+    gsub(%r{<sup class="footnote" id="fnr(\d\d\d\d)(.+/sup?)>}, '[\1]')
   end
 end
