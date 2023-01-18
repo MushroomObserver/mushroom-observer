@@ -212,6 +212,7 @@ class TextileTest < UnitTestCase
       str, str.tl,
       "Textilized bracketed years should render as such, not footnote calls"
     )
+
     fn = "45"
     assert_equal(
       "<sup class=\"footnote\" id=\"fnr#{fn}\">" \
