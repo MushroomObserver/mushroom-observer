@@ -57,7 +57,6 @@ module Descriptions::Merges
       return true if (@dest = find_description!(target))
 
       flash_error(:runtime_invalid.t(type: '"target"', value: target))
-      render("new")
       false
     end
 

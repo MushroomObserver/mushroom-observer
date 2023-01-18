@@ -21,12 +21,12 @@ module Names::Descriptions
     end
 
     def test_form_permissions
-      # login rolf, and try to merge.
+      # login rolf, and try to access.
       login("rolf")
       get(:new, params: { id: rolf_desc.id })
       assert_response(:success)
 
-      # Now try to merge from mary's. Should get bounced, redirected to name
+      # Now try to access from mary's. Should get bounced, redirected to name
       get(:new, params: { id: mary_desc.id })
       assert_redirected_to(name_path(mary_desc.parent_id))
 
@@ -49,7 +49,7 @@ module Names::Descriptions
         delete: 0
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_edit_description_denied.t)
+      assert_flash_text(/You have not been given permission/)
     end
 
     def test_merge_descriptions_notes_conflict
@@ -61,7 +61,7 @@ module Names::Descriptions
       }
       post(:create, params: params)
       # shouldn't work, there is a conflict. requires manual resolution
-      assert_flash(/Please merge the two descriptions/)
+      assert_flash_text(/Please merge the two descriptions/)
       # dick didn't delete, so the original desc should still be there.
       assert(rolf_desc.reload)
 
@@ -72,7 +72,7 @@ module Names::Descriptions
         delete: 1
       }
       post(:create, params: params)
-      assert_flash(/Please merge the two descriptions/)
+      assert_flash_text(/Please merge the two descriptions/)
       assert(rolf_desc.reload)
 
       # Blank the first gen_desc to avoid conflict.
@@ -88,7 +88,7 @@ module Names::Descriptions
         delete: 0
       }
       post(:create, params: params)
-      assert_flash(/Successfully merged the descriptions/)
+      assert_flash_text(/Successfully merged the descriptions/)
       assert_equal(rolf_desc.reload, NameDescription.find(rd_id))
 
       # Delete after merge will not work even if specified. dick is not an admin
@@ -98,21 +98,27 @@ module Names::Descriptions
         delete: 1
       }
       post(:create, params: params)
-      assert_flash(/Successfully merged the descriptions/)
+      assert_flash_text(/Successfully merged the descriptions/)
       assert_equal(rolf_desc.reload, NameDescription.find(rd_id))
 
       # To merge with delete, make dick an admin in_admin_mode
       make_admin("dick")
-      params = {
-        id: rolf_desc.id,
-        target: mary_desc.id,
-        delete: 1
-      }
       post(:create, params: params)
-      assert_flash(/Successfully merged the descriptions/)
+      assert_flash_text(/Successfully merged the descriptions/)
       assert_raises(ActiveRecord::RecordNotFound) do
         NameDescription.find(rd_id)
       end
+    end
+
+    def test_merge_with_nonexistant_description
+      login("rolf")
+      params = {
+        id: rolf_desc.id,
+        target: "bogus",
+        delete: 0
+      }
+      post(:create, params: params)
+      assert_flash_text(/Sorry, the name description you tried to display/)
     end
   end
 end

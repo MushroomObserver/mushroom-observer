@@ -56,13 +56,12 @@ module Descriptions::Moves
       return true if (@dest = find_or_goto_index(@src.parent.class, target))
 
       flash_error(:runtime_invalid.t(type: '"target"', value: target))
-      render("new")
       false
     end
 
     # Perform actual move of a description from one name to another.
     def move_description
-      if delete_after
+      if @delete_after
         move_description_to_another_name
       else
         clone_description_to_another_name
@@ -147,7 +146,7 @@ module Descriptions::Moves
                   name: desc.unique_partial_format_name,
                   touch: true)
         flash_notice(:runtime_description_copy_success.
-                     t(old: src_title, new: desc.format_name))
+                     t(old: @src.format_name, new: desc.format_name))
         redirect_to(object_path_with_query(desc))
       else
         flash_object_errors(desc)
