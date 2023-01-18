@@ -17,4 +17,4 @@ fi
 
 echo Going for it
 
-git pull && bundle install && rake lang:update && rake assets:precompile && rake db:migrate && uni reload
+git pull && bundle install && rake lang:update && rake assets:precompile && rake db:migrate && uni reload && echo SUCCESS
