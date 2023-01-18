@@ -45,5 +45,27 @@ module Names::Descriptions
       get(:edit, params: { id: peltigera_desc.id })
       assert_redirected_to(name_description_path(peltigera_desc.id))
     end
+
+    # draft_cc_desc has
+    # admin_groups: eol_admins plus katrina_only,
+    # writer_groups: eol_admins plus katrina_only,
+    # reader_groups: eol_users plus katrina_only
+    def test_change_permissions
+      login("rolf")
+      # NOTE: params are not right here
+      params = {
+        id: draft_cc_desc.id,
+        group_reader: [user_groups(:bolete_admins).id],
+        group_writer: [user_groups(:bolete_admins).id],
+        group_admin: [user_groups(:bolete_admins).id],
+        writein_name: [],
+        writein_reader: [],
+        writein_writer: [],
+        writein_admin: []
+      }
+      put(:update, params: params)
+      assert_redirected_to(name_description_path(draft_cc_desc.id))
+      assert_flash_text(/No changes made/)
+    end
   end
 end

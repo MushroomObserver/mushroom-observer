@@ -35,9 +35,6 @@ module Descriptions::Permissions
 
       if done
         redirect_to(object_path_with_query(@description))
-
-      # Gather list of all the groups, authors, editors and owner.
-      # If the user wants more they can write them in.
       else
         gather_list_of_groups
       end
@@ -65,11 +62,9 @@ module Descriptions::Permissions
 
       if done
         redirect_to(object_path_with_query(@description))
-
-      # Gather list of all the groups, authors, editors and owner.
-      # If the user wants more they can write them in.
       else
         gather_list_of_groups
+        render("new")
       end
     end
 
@@ -117,6 +112,9 @@ module Descriptions::Permissions
       done
     end
 
+    # Gather list of all the groups for the form, authors, editors and owner.
+    # If the user wants more they can write them in.
+    # This gets hit both on :edit and :update
     def gather_list_of_groups
       @groups = (
         [UserGroup.all_users] +
@@ -138,7 +136,7 @@ module Descriptions::Permissions
     def assemble_data
       @data = [nil]
       done = true
-      params[:writein_name].keys.sort.each do |n|
+      params[:writein_name]&.keys&.sort&.each do |n|
         name   = begin
                    params[:writein_name][n].to_s
                  rescue StandardError
