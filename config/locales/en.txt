@@ -2629,9 +2629,10 @@
   visual_group_includes_names: Includes images from these names
 
   # Links to CRUD pages
-  visual_group_back_to_index: Back to Visual Group Index
-  visual_group_edit: Edit Visual Group
-  visual_group_show: Show Visual Group
+  visual_group_index: "[:VISUAL_GROUP] Index"
+  visual_group_edit: "Edit [:VISUAL_GROUP]"
+  visual_group_show: "Show [:VISUAL_GROUP]"
+  visual_group_create: "Create [:VISUAL_GROUP]"
 
   # visual_groups/show
   definitional_images: Definitional Images
@@ -2650,8 +2651,8 @@
 
   # visual_models/show
   show_visual_model_title: "[name] [:VISUAL_MODEL]"
-  show_visual_model_back_to_index: Back to Visual Model Index
-  show_visual_model_edit: Edit Visual Model
+  show_visual_model_edit: "[:EDIT] [:VISUAL_MODEL]"
+  show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
 
   # visual_models/destroy
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
