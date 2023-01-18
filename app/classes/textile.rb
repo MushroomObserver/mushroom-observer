@@ -113,15 +113,15 @@ class Textile < String
     # Textile will screw with "@John Doe@".  We need to protect at signs now.
     gsub!("@", "&#64;")
 
-    # Let Textile munge the thing up now.
-    red = RedCloth.new(self)
-
     # Quote bracketed years
     # in order to stop RedCloth from turning them into footnote calls
     # Some Name Citations contain bracketed years. Ex:
     #   Hyménomycètes (Alençon): 103 (1874) [1878]
     # We want them to render as such, not footnote references.
-    red.gsub!(BRACKETED_YEAR, '==[==\1]') if red.match?(BRACKETED_YEAR)
+    gsub!(BRACKETED_YEAR, '==[==\1]') if match?(BRACKETED_YEAR)
+
+    # Let Textile munge the thing up now.
+    red = RedCloth.new(self)
 
     red.sanitize_html = sanitize
     replace(red.to_html)
