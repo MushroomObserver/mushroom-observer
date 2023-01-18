@@ -85,9 +85,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     patch(:update, params: {
             id: @visual_group.id,
-            visual_group:
-              { name: @visual_group.name,
-                approved: @visual_group.approved }
+            visual_group: {
+              name: @visual_group.name,
+              approved: @visual_group.approved
+            }
           })
     assert_redirected_to visual_model_visual_groups_url(@visual_model,
                                                         @visual_group)
@@ -97,9 +98,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     patch(:update, params: {
             id: @visual_group.id,
-            visual_group:
-              { name: "",
-                approved: @visual_group.approved }
+            visual_group: {
+              name: "",
+              approved: @visual_group.approved
+            }
           })
     assert_redirected_to edit_visual_group_url(@visual_group)
   end
