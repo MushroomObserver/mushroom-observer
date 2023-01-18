@@ -1,21 +1,2 @@
-<%
-  @title = :show_visual_model_title.t(name: @visual_model.name)
-%>
-
-<p id="notice"><%= notice %></p>
-
-<p>
-  <%= :MEMBERS.t %>
-  <ul>
-    <% @visual_model.visual_groups.each do |group|
-       link = link_to(group.name.t, visual_group_path(group.id)) %>
-      <li>
-	<%= content_tag(:p, link) %>
-      </li>
-    <% end %>
-  </ul>
-</p>
-
-<%= link_to 'Add Visual Group', new_visual_model_visual_group_path(@visual_model) %> |
-<%= link_to :show_visual_model_edit.t, edit_visual_model_path(@visual_model) %> |
-<%= link_to :show_visual_model_back_to_index.t, visual_models_path %>
+<%= render(partial: "shared/visual_group_table",
+           locals: { visual_model: @visual_model }) %>

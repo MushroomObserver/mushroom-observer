@@ -41,6 +41,17 @@ class VisualModelsControllerTest < FunctionalTestCase
     assert_redirected_to new_visual_model_url
   end
 
+  test "should not create visual_model due to tab" do
+    login
+    assert_no_difference("VisualModel.count") do
+      post(:create, params: { visual_model: {
+             name: "Name\twith\ttab"
+           } })
+    end
+
+    assert_redirected_to new_visual_model_url
+  end
+
   test "should show visual_model" do
     login
     get(:show, params: { id: visual_models(:visual_model_one).id })
