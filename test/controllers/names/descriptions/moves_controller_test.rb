@@ -36,6 +36,9 @@ module Names::Descriptions
     def test_form_permissions
       # login rolf, and try to access.
       login("rolf")
+      get(:new, params: { id: "bogus" })
+      assert_redirected_to(name_descriptions_path)
+
       get(:new, params: { id: rolf_desc.id })
       assert_response(:success)
 
@@ -82,6 +85,15 @@ module Names::Descriptions
       # It should get cloned. Reload the descriptions, not the name
       new_desc = coprinus_name.descriptions.reload.last
       assert_equal(NameDescription.last.id, new_desc.id)
+
+      # Try with delete
+      params = {
+        id: mary_desc.id,
+        target: coprinus_name.id,
+        delete: 1
+      }
+      post(:create, params: params)
+      assert_flash_success
     end
 
     def test_move_description_clashing_classifications

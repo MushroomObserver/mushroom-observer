@@ -69,7 +69,7 @@ module Descriptions::Moves
     end
 
     # Just transfer the description over.
-    def move_description_to_new_name
+    def move_description_to_another_name
       src_was_default = (@src.parent.description_id == @src.id)
       make_dest_default = @dest.description_id.nil? && src_was_default
 
