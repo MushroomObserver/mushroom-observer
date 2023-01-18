@@ -6,9 +6,9 @@
 #
 #  DESCRIPTION::
 #
-#  Makes a new snapshot of the database in:
+#  Makes a new snapshot of the database on the image server:
 #
-#    db/backups/
+#    /data/images/mo/backup/database-YYYYMMDD.gz
 #
 ################################################################################
 set -e
@@ -25,9 +25,15 @@ db=mo_$RAILS_ENV
 # Create a new snapshot.
 mysqldump --defaults-extra-file=$config_file $db | gzip -c - > $snapshot_file
 chmod 640 $snapshot_file
-scp $snapshot_file $remote_host:$backup_dir/$backup_file
 
-ssh $remote_host "ls $backup_dir/*" > $temp_file.1
+# Transfer snapshot to image server and abort if this fails.
+dest=$remote_host:$backup_dir/$backup_file
+scp $snapshot_file $dest || \
+  echo "Failed to transfer $snapshot_file to $dest!" && exit 1
+
+# Get listing of snapshots currently on the image server.
+# (Make extra certain that these are actually files in the backup dir!!)
+ssh $remote_host "ls -d $backup_dir/*" | egrep "^$backup_dir/" > $temp_file.1
 
 # Decide which snapshots we want to keep.
 (
@@ -38,8 +44,10 @@ ssh $remote_host "ls $backup_dir/*" > $temp_file.1
 ) | sort -u > $temp_file.2
 
 # Delete everything in this directory that's not one of the kept backups.
+# The -f tells it not to complain if there is nothing to delete.
 comm -23 $temp_file.1 $temp_file.2 | ssh $remote_host 'xargs rm -f'
 
+# Tidy up temp files, but leave the latest snapshot on the webserver.
+# It just overwrites it each time, so it should be fine.
 rm -f $temp_file.?
-
 exit 0
