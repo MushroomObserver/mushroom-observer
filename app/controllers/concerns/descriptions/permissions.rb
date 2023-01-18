@@ -17,7 +17,6 @@ module Descriptions::Permissions
   included do
     # Form to adjust permissions on a description.
     def edit
-      pass_query_params
       return unless (@description = find_description!(params[:id].to_s))
 
       done = false
@@ -45,7 +44,6 @@ module Descriptions::Permissions
     end
 
     def update
-      pass_query_params
       return unless (@description = find_description!(params[:id].to_s))
 
       done = false
@@ -62,44 +60,7 @@ module Descriptions::Permissions
 
       # We're on.
       else
-        old_readers = @description.reader_groups.sort_by(&:id)
-        old_writers = @description.writer_groups.sort_by(&:id)
-        old_admins  = @description.admin_groups.sort_by(&:id)
-
-        # Update permissions on list of users and groups at the top.
-        update_groups(@description, :readers, params[:group_reader])
-        update_groups(@description, :writers, params[:group_writer])
-        update_groups(@description, :admins,  params[:group_admin])
-
-        # Look up write-ins and adjust their permissions.
-        done = assemble_data
-
-        # Were any changes made?
-        new_readers = @description.reader_groups.sort_by(&:id)
-        new_writers = @description.writer_groups.sort_by(&:id)
-        new_admins  = @description.admin_groups.sort_by(&:id)
-        if (old_readers != new_readers) ||
-           (old_writers != new_writers) ||
-           (old_admins != new_admins)
-
-          # Give feedback to assure user that their changes were made.
-          flash_description_changes(old_readers, new_readers, :reader)
-          flash_description_changes(old_writers, new_writers, :writer)
-          flash_description_changes(old_admins,  new_admins,  :admin)
-
-          # Keep the "public" flag updated.
-          public = @description.reader_groups.include?(UserGroup.all_users)
-          if @description.public != public
-            @description.public = public
-            @description.save
-          end
-
-          @description.parent.log(:log_changed_permissions,
-                                  user: @user.login, touch: false,
-                                  name: @description.unique_partial_format_name)
-        else
-          flash_notice(:runtime_description_adjust_permissions_no_changes.t)
-        end
+        done = change_group_permissions
       end
 
       if done
@@ -110,6 +71,50 @@ module Descriptions::Permissions
       else
         gather_list_of_groups
       end
+    end
+
+    def change_group_permissions
+      old_readers = @description.reader_groups.sort_by(&:id)
+      old_writers = @description.writer_groups.sort_by(&:id)
+      old_admins  = @description.admin_groups.sort_by(&:id)
+
+      # Update permissions on list of users and groups at the top.
+      update_groups(@description, :readers, params[:group_reader])
+      update_groups(@description, :writers, params[:group_writer])
+      update_groups(@description, :admins,  params[:group_admin])
+
+      # Look up write-ins and adjust their permissions.
+      done = assemble_data
+
+      # Were any changes made?
+      new_readers = @description.reader_groups.sort_by(&:id)
+      new_writers = @description.writer_groups.sort_by(&:id)
+      new_admins  = @description.admin_groups.sort_by(&:id)
+      changes_made = ((old_readers != new_readers) ||
+                      (old_writers != new_writers) ||
+                      (old_admins != new_admins))
+
+      if changes_made
+        # Give feedback to assure user that their changes were made.
+        flash_description_changes(old_readers, new_readers, :reader)
+        flash_description_changes(old_writers, new_writers, :writer)
+        flash_description_changes(old_admins,  new_admins,  :admin)
+
+        # Keep the "public" flag updated.
+        public = @description.reader_groups.include?(UserGroup.all_users)
+        if @description.public != public
+          @description.public = public
+          @description.save
+        end
+
+        @description.parent.log(:log_changed_permissions,
+                                user: @user.login, touch: false,
+                                name: @description.unique_partial_format_name)
+      else
+        flash_notice(:runtime_description_adjust_permissions_no_changes.t)
+      end
+
+      done
     end
 
     def gather_list_of_groups
