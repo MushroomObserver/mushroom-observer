@@ -27,7 +27,7 @@ mysqldump --defaults-extra-file=$config_file $db | gzip -c - > $snapshot_file
 chmod 640 $snapshot_file
 scp $snapshot_file $remote_host:$backup_dir/$backup_file
 
-ssh $remote_host 'ls $backup_dir/*' > $temp_file.1
+ssh $remote_host "ls $backup_dir/*" > $temp_file.1
 
 # Decide which snapshots we want to keep.
 (
