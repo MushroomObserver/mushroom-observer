@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ ! -d config ]; then
+if [ "$PWD" != "/var/web/mo" ]; then
     echo Please run this from /var/web/mo.
     exit 1
 fi
