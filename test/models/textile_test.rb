@@ -207,9 +207,9 @@ class TextileTest < UnitTestCase
   end
 
   def test_bracketed_integers
-    str = "Hyménomycètes (Alençon): 103 (1874) [1878]"
+    citation = "Hyménomycètes (Alençon): 103 (1874) [1878]"
     assert_equal(
-      str, str.tl,
+      citation, citation.tl,
       "Textilized bracketed years should render as such, not footnote calls"
     )
 
