@@ -75,11 +75,13 @@ module Names::Descriptions
       assert_flash(/Please merge the two descriptions/)
       assert(rolf_desc.reload)
 
-      # Blank the first gen_desc to avoid conflict. Merge should work
+      # Blank the first gen_desc to avoid conflict.
       rolf_desc.update(gen_desc: nil)
       rolf_desc.reload
       assert_nil(rolf_desc.gen_desc)
+      rd_id = rolf_desc.id
 
+      # Merge should work, no delete.
       params = {
         id: rolf_desc.id,
         target: mary_desc.id,
@@ -87,10 +89,30 @@ module Names::Descriptions
       }
       post(:create, params: params)
       assert_flash(/Successfully merged the descriptions/)
+      assert_equal(rolf_desc.reload, NameDescription.find(rd_id))
+
+      # Delete after merge will not work even if specified. dick is not an admin
+      params = {
+        id: rolf_desc.id,
+        target: mary_desc.id,
+        delete: 1
+      }
+      post(:create, params: params)
+      assert_flash(/Successfully merged the descriptions/)
+      assert_equal(rolf_desc.reload, NameDescription.find(rd_id))
+
+      # To merge with delete, make dick an admin in_admin_mode
+      make_admin("dick")
+      params = {
+        id: rolf_desc.id,
+        target: mary_desc.id,
+        delete: 1
+      }
+      post(:create, params: params)
+      assert_flash(/Successfully merged the descriptions/)
+      assert_raises(ActiveRecord::RecordNotFound) do
+        NameDescription.find(rd_id)
+      end
     end
-
-    def test_merge_descriptions; end
-
-    def test_merge_incompatible_descriptions; end
   end
 end
