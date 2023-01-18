@@ -37,6 +37,7 @@ class Textile < String
   @@last_variety    = nil
 
   URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
+  BRACKETED_YEAR = /\[(\d\d\d\d)\]/
 
   ########## Class methods #####################################################
 
@@ -114,6 +115,14 @@ class Textile < String
 
     # Let Textile munge the thing up now.
     red = RedCloth.new(self)
+
+    # Quote bracketed years
+    # in order to stop RedCloth from turning them into footnote calls
+    # Some Name Citations contain bracketed years. Ex:
+    #   Hyménomycètes (Alençon): 103 (1874) [1878]
+    # We want them to render as such, not footnote references.
+    red.gsub!(BRACKETED_YEAR, '==[==\1]') if red.match?(BRACKETED_YEAR)
+
     red.sanitize_html = sanitize
     replace(red.to_html)
 
@@ -130,12 +139,7 @@ class Textile < String
     fully_qualify_links!
     restore_pre_existing_links!(saved_links)
 
-    # Some Name Citations contain bracketed years. Ex:
-    #   Hyménomycètes (Alençon): 103 (1874) [1878]
-    # We want them to render as such, but Redcloth converts them
-    # (and other brackted integers) into footnote references.
-    # So restore the bracketed years that RedCloth munged.
-    restore_bracketed_years!
+    self
   end
 
   # Register one or more names (instances) so that subsequent textile strings
@@ -405,13 +409,5 @@ class Textile < String
 
   def fully_qualify_links!
     gsub!(%r{href="/}, "href=\"#{MO.http_domain}/")
-  end
-
-  # Match a bracketed year [nnnn] which Redcloth converted to
-  # <sup class="footnote" id="fnr1878"><a href="#fn1878">1878</a></sup>
-  YEAR_MUNGED_AS_FN = %r{<sup class="footnote" id="fnr(\d\d\d\d)(.+/sup?)>}
-
-  def restore_bracketed_years!
-    gsub(%r{<sup class="footnote" id="fnr(\d\d\d\d)(.+/sup?)>}, '[\1]')
   end
 end
