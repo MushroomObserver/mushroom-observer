@@ -177,6 +177,9 @@ module ObservationsController::Index
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)
 
+    # make @query available to the :index template for query-dependent tabs
+    # @query = query
+
     show_index_of_objects(query, args)
   end
 
