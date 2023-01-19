@@ -88,12 +88,11 @@ module ObservationTabsHelper
                         where: query.params[:user_where]
                       )),
       link_with_query(:list_observations_location_merge.l,
-                      new_location_merge_path(
+                      location_merges_form_path(
                         where: query.params[:user_where]
                       )),
       link_with_query(:list_observations_location_all.l,
                       locations_path)
-
     ]
   end
 

@@ -492,7 +492,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/map", to: "locations/maps#show", as: "map_locations")
   # Merge Locations: form and callback
   get("locations/merges/new", to: "locations/merges#new",
-                              as: "location_merge_options")
+                              as: "location_merges_form")
   post("locations/merges", to: "locations/merges#create",
                            as: "location_merges")
   # Add Observation (matching :where) to Location: update
