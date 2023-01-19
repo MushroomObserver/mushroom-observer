@@ -69,138 +69,9 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  # location: {
-  #   add_to_location: {},
-  #   adjust_permissions: {},
-  #   advanced_search: {},
-  #   create_location: {},
-  #   create_location_description: {},
-  #   destroy_location: {},
-  #   destroy_location_description: {},
-  #   edit_location: {},
-  #   edit_location_description: {},
-  #   help: {},
-  #   index_location: {},
-  #   index_location_description: {},
-  #   list_by_country: {},
-  #   list_countries: {},
-  #   list_location_descriptions: {},
-  #   list_locations: {},
-  #   list_merge_options: {},
-  #   location_descriptions_by_author: {},
-  #   location_descriptions_by_editor: {},
-  #   location_search: {},
-  #   locations_by_editor: {},
-  #   locations_by_user: {},
-  #   make_description_default: {},
-  #   map_locations: {},
-  #   merge_descriptions: {},
-  #   next_location: {},
-  #   next_location_description: {},
-  #   prev_location: {},
-  #   prev_location_description: {},
-  #   publish_description: {},
-  #   reverse_name_order: {},
-  #   # show_location: {},
-  #   show_location_description: {},
-  #   show_past_location: {},
-  #   show_past_location_description: {}
-  # },
-  # name: {
-  #   adjust_permissions: {},
-  #   advanced_search: {},
-  #   approve_name: {},
-  #   approve_tracker: {},
-  #   authored_names: {},
-  #   bulk_name_edit: {},
-  #   change_synonyms: {},
-  #   create_name: {},
-  #   create_name_description: {},
-  #   deprecate_name: {},
-  #   destroy_name_description: {},
-  #   edit_classification: {},
-  #   edit_lifeform: {},
-  #   edit_name: {},
-  #   edit_name_description: {},
-  #   email_tracking: {},
-  #   eol: {},
-  #   eol_expanded_review: {},
-  #   eol_preview: {},
-  #   index_name: {},
-  #   index_name_description: {},
-  #   inherit_classification: {},
-  #   list_name_descriptions: {},
-  #   list_names: {},
-  #   make_description_default: {},
-  #   map: {},
-  #   merge_descriptions: {},
-  #   name_descriptions_by_author: {},
-  #   name_descriptions_by_editor: {},
-  #   name_search: {},
-  #   names_by_author: {},
-  #   names_by_editor: {},
-  #   names_by_user: {},
-  #   needed_descriptions: {},
-  #   next_name: {},
-  #   next_name_description: {},
-  #   observation_index: {},
-  #   prev_name: {},
-  #   prev_name_description: {},
-  #   propagate_classification: {},
-  #   propagate_lifeform: {},
-  #   publish_description: {},
-  #   refresh_classification: {},
-  #   set_review_status: {},
-  #   # show_name: {},
-  #   show_name_description: {},
-  #   show_past_name: {},
-  #   show_past_name_description: {},
-  #   test_index: {}
-  # },
   pivotal: {
     index: {}
   },
-  project: {
-    add_members: {},
-    add_project: {},
-    admin_request: {},
-    change_member_status: {},
-    destroy_project: {},
-    edit_project: {},
-    index_project: {},
-    list_projects: {},
-    next_project: {},
-    prev_project: {},
-    project_search: {}
-    # show_project: {}
-  },
-  # species_list: {
-  #   add_observation_to_species_list: {},
-  #   add_remove_observations: {},
-  #   bulk_editor: {},
-  #   clear_species_list: {},
-  #   create_species_list: {},
-  #   destroy_species_list: {},
-  #   download: {},
-  #   edit_species_list: {},
-  #   index_species_list: {},
-  #   list_species_lists: {},
-  #   make_report: {},
-  #   manage_projects: {},
-  #   manage_species_lists: {},
-  #   name_lister: {},
-  #   next_species_list: {},
-  #   post_add_remove_observations: {},
-  #   prev_species_list: {},
-  #   print_labels: {},
-  #   remove_observation_from_species_list: {},
-  #   # show_species_list: {},
-  #   species_list_search: {},
-  #   species_lists_by_title: {},
-  #   species_lists_by_user: {},
-  #   species_lists_for_project: {},
-  #   upload_species_list: {}
-  # },
   support: {
     confirm: {},
     donate: {},
@@ -658,24 +529,31 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   put("locations/descriptions/:id/default",
       to: "locations/descriptions/defaults#update",
       as: "make_default_location_description")
-  # Publish Draft Location Description: callback:
-  put("locations/descriptions/:id/publish",
-      to: "locations/descriptions/publish#update",
-      as: "location_description_publish")
+  # Publish Draft Location Description: callback. Not used yet.
+  # put("locations/descriptions/:id/publish",
+  #     to: "locations/descriptions/publish#update",
+  #     as: "location_description_publish")
   # Merge Location Descriptions: form and callback:
   get("locations/descriptions/:id/merges/new",
       to: "locations/descriptions/merges#new",
-      as: "location_description_merge_form")
+      as: "location_description_merges_form")
   post("locations/descriptions/:id/merges",
        to: "locations/descriptions/merges#create",
        as: "location_description_merges")
-  # Edit Location Description Permissions: form and callback:
-  get("locations/descriptions/:id/permissions/edit",
-      to: "locations/descriptions/permissions#edit",
-      as: "edit_location_description_permissions")
-  put("locations/descriptions/:id/permissions",
-      to: "locations/descriptions/permissions#update",
-      as: "location_description_permissions")
+  # Move Location Descriptions: form and callback:
+  get("locations/descriptions/:id/moves/new",
+      to: "locations/descriptions/moves#new",
+      as: "location_description_moves_form")
+  post("locations/descriptions/:id/moves",
+       to: "locations/descriptions/moves#create",
+       as: "location_description_moves")
+  # Edit Location Description Permissions: form and callback. Not used yet.
+  # get("locations/descriptions/:id/permissions/edit",
+  #     to: "locations/descriptions/permissions#edit",
+  #     as: "edit_location_description_permissions")
+  # put("locations/descriptions/:id/permissions",
+  #     to: "locations/descriptions/permissions#update",
+  #     as: "location_description_permissions")
   # Location Description Versions: show:
   get("locations/descriptions/:id/versions",
       to: "locations/descriptions/versions#show",
@@ -791,14 +669,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Merge Name Descriptions: form and callback:
   get("names/descriptions/:id/merges/new",
       to: "names/descriptions/merges#new",
-      as: "name_description_merge_form")
+      as: "name_description_merges_form")
   post("names/descriptions/:id/merges",
        to: "names/descriptions/merges#create",
        as: "name_description_merges")
   # Move Name Descriptions: form and callback:
   get("names/descriptions/:id/moves/new",
       to: "names/descriptions/moves#new",
-      as: "name_description_move_form")
+      as: "name_description_moves_form")
   post("names/descriptions/:id/moves",
        to: "names/descriptions/moves#create",
        as: "name_description_moves")
