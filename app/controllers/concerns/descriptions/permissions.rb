@@ -139,6 +139,15 @@ module Descriptions::Permissions
       end
     end
 
+    # Return name of group or user if it's a one-user group.
+    def group_name(group)
+      return(:adjust_permissions_all_users.t) if group.name == "all users"
+      return(:REVIEWERS.t) if group.name == "reviewers"
+      return(group.users.first.legal_name) if /^user \d+$/.match?(group.name)
+
+      group.name
+    end
+
     private
 
     # used by :update
@@ -261,15 +270,6 @@ module Descriptions::Permissions
         name = group_name(group)
         flash_notice(:"runtime_description_removed_#{type}".t(name: name))
       end
-    end
-
-    # Return name of group or user if it's a one-user group.
-    def group_name(group)
-      return(:adjust_permissions_all_users.t) if group.name == "all users"
-      return(:REVIEWERS.t) if group.name == "reviewers"
-      return(group.users.first.legal_name) if /^user \d+$/.match?(group.name)
-
-      group.name
     end
 
     # Update the permissions for a write-in.
