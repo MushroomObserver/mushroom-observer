@@ -32,8 +32,7 @@ module ObservationTabsHelper
 
   def google_distribution_map_for(obs_name)
     link_with_query(:show_name_distribution_map.t,
-                    { controller: "/names/maps", action: :show,
-                      id: obs_name.id })
+                    map_name_path(id: obs_name.id))
   end
 
   def general_questions_link(obs, user)

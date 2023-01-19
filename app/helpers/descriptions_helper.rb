@@ -24,10 +24,10 @@ module DescriptionsHelper
       destroy_description_link(description, admin),
       clone_description_link(description),
       merge_description_link(description, admin),
-      adjust_permissions_link(description, admin),
+      adjust_permissions_link(description, type, admin),
       make_default_link(description),
       project_link(description),
-      publish_draft_link(description, admin)
+      publish_draft_link(description, type, admin)
     ].flatten.reject(&:empty?)
     tabset = { right: draw_tab_set(tabs) }
     tabset = tabset.merge(pager_for: description) if pager
@@ -82,8 +82,8 @@ module DescriptionsHelper
                     help: :show_description_move_help.l(parent: parent_type))
   end
 
-  def adjust_permissions_link(description, admin)
-    return unless admin
+  def adjust_permissions_link(description, type, admin)
+    return unless admin && type == :name
 
     link_with_query(:show_description_adjust_permissions.t,
                     { controller: "#{description.show_controller}/permissions",
@@ -109,8 +109,9 @@ module DescriptionsHelper
     link_with_query(:show_object.t(type: :project), project.show_link_args)
   end
 
-  def publish_draft_link(description, admin)
-    return unless admin && (description.source_type != :public)
+  def publish_draft_link(description, type, admin)
+    return unless admin && (type == :name) &&
+                  (description.source_type != :public)
 
     put_button(name: :show_description_publish.t,
                path: { controller: "#{description.show_controller}/publish",
