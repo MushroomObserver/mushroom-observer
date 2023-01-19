@@ -205,4 +205,20 @@ class TextileTest < UnitTestCase
       %("#{str}" should be within a <div class="textile>")
     )
   end
+
+  def test_bracketed_integers
+    citation = "Hyménomycètes (Alençon): 103 (1874) [1878]"
+    assert_equal(
+      citation, citation.tl,
+      "Textilized bracketed years should render as such, not footnote calls"
+    )
+
+    fn = "45"
+    assert_equal(
+      "<sup class=\"footnote\" id=\"fnr#{fn}\">" \
+        "<a href=\"#fn#{fn}\">#{fn}</a></sup>",
+      "[#{fn}]".tl,
+      "Textilized non-year integers should render as footnote calls"
+    )
+  end
 end

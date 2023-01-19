@@ -37,6 +37,7 @@ class Textile < String
   @@last_variety    = nil
 
   URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
+  BRACKETED_YEAR = /\[(\d\d\d\d)\]/
 
   ########## Class methods #####################################################
 
@@ -112,8 +113,16 @@ class Textile < String
     # Textile will screw with "@John Doe@".  We need to protect at signs now.
     gsub!("@", "&#64;")
 
+    # Quote bracketed years
+    # in order to stop RedCloth from turning them into footnote calls
+    # Some Name Citations contain bracketed years. Ex:
+    #   Hyménomycètes (Alençon): 103 (1874) [1878]
+    # We want them to render as such, not footnote references.
+    gsub!(BRACKETED_YEAR, '==[==\1]') if match?(BRACKETED_YEAR)
+
     # Let Textile munge the thing up now.
     red = RedCloth.new(self)
+
     red.sanitize_html = sanitize
     replace(red.to_html)
 
