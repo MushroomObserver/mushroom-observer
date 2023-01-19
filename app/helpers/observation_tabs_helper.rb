@@ -101,11 +101,12 @@ module ObservationTabsHelper
             map_observations_path(q: get_query_param(query)))
   end
 
+  # NOTE: coerced_query_link returns an array
   def coerced_query_tabs(query)
     [
-      link_to(coerced_query_link(query, Location)),
-      link_to(coerced_query_link(query, Name)),
-      link_to(coerced_query_link(query, Image))
+      link_to(*coerced_query_link(query, Location)),
+      link_to(*coerced_query_link(query, Name)),
+      link_to(*coerced_query_link(query, Image))
     ]
   end
 
