@@ -23,11 +23,11 @@ module Locations::Descriptions
 
     def test_non_public_description_cannot_be_default
       desc = location_descriptions(:user_private_location_desc)
-      current_default = desc.parent.description
+      assert_nil(desc.parent.description)
       make_description_default_helper(desc)
       desc.parent.reload
       assert_not_equal(desc, desc.parent.description)
-      assert_equal(current_default, desc.parent.description)
+      assert_nil(desc.parent.description)
     end
   end
 end
