@@ -7,11 +7,6 @@
     link_with_query(:cancel_and_show.t(type: :location_description),
                     @description.show_link_args)
   ]
-  if @description.is_admin?(@user) || in_admin_mode?
-    tabs << link_with_query(:show_description_adjust_permissions.t,
-                            controller: "/locations/descriptions/permissions",
-                            action: :edit, id: @description.id)
-  end
   @tabsets = { right: draw_tab_set(tabs) }
   action = { controller: "/locations/descriptions", action: :update,
              id: @description.id, q: get_query_param }
