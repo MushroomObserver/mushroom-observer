@@ -128,6 +128,7 @@ module Names::Descriptions
       assert_flash_text(/Sorry, the name you tried to display/)
     end
 
+    # if @delete_after & src_was_default
     def test_move_description_replacing_default; end
   end
 end

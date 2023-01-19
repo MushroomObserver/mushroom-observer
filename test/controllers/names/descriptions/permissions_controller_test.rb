@@ -51,7 +51,6 @@ module Names::Descriptions
     # writer_groups: eol_admins plus katrina_only,
     # admin_groups: eol_admins plus katrina_only,
     def test_change_permissions
-      login("rolf")
       assert_equal(draft_cc_desc.reader_group_ids,
                    [user_groups(:eol_users).id, user_groups(:katrina_only).id])
       assert_equal(draft_cc_desc.writer_group_ids,
@@ -69,6 +68,19 @@ module Names::Descriptions
         writein_writer: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
         writein_admin: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
       }
+
+      # Dick is not permitted to edit.
+      login("dick")
+      put(:update, params: params)
+      assert_flash_text(/You must be an admin for a description/)
+
+      # Rolf is permitted to edit.
+      login("rolf")
+      # Try to edit a different, public description: no dice
+      put(:update, params: params.merge(id: peltigera_desc.id))
+      assert_flash_text(/This type of description has fixed permissions/)
+
+      # Edit this description's permissions.
       put(:update, params: params)
       assert_redirected_to(name_description_path(draft_cc_desc.id))
       fx = get_last_flash

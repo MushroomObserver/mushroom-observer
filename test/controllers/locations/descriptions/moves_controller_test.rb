@@ -7,11 +7,12 @@ module Locations::Descriptions
   class MovesControllerTest < FunctionalTestCase
     include ObjectLinkHelper
 
-    def test_try_move_no_permission; end
+    def test_form_permissions; end
 
-    def test_move_description_to_new_location; end
+    def test_move_descriptions_permissions; end
+
     def test_move_description_to_nonexistant_location; end
 
-    def test_move_description_to_new_location_notes_conflict; end
+    def test_move_description_replacing_default; end
   end
 end
