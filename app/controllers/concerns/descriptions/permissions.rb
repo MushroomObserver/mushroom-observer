@@ -11,9 +11,80 @@
 #                                       Hash of groups.
 #  update_group::                       Update 1 type of permission for 1 group.
 
+#  NOTE: The write-in names offer autocomplete, but they currently do not force
+#  an autocompleted user, nor do they store a user ID. Admins may type whatever,
+#  and the update_writein method will try to find the user by regex.
+
+# SAMPLE PARAMS HASH structure is a bit convoluted.
+# You might expect:
+# params: {
+#   groups: {
+#     14: {
+#       read: 1,
+#       write: 0,
+#       admin: 0
+#     }
+#     1: {
+#       read: 0,
+#       write: 1,
+#       admin: 1
+#     }
+#     225: {
+#       read: 0,
+#       write: 0,
+#       admin: 1
+#     }
+#     3333: {
+#       read: 0,
+#       write: 0,
+#       admin: 1
+#     }
+#   },
+#   writeins: {
+#     "jason": {
+#       read: 0,
+#       write: 1,
+#       admin: 1
+#     }
+#   }
+# }
+#
+# but it's like this:
+# params: {
+#   "utf8"=>"✓",
+#   "authenticity_token"=>"2FG9QUb2iCG/FvJLVFpcFBOQVwUKM0jmhP5AUOs",
+#   "group_reader"=>{"14"=>"1", "1"=>"0", "225"=>"0", "3333"=>"0"},
+#   "group_writer"=>{"14"=>"0", "1"=>"1", "225"=>"0", "3333"=>"0"},
+#   "group_admin"=>{"14"=>"0", "1"=>"1", "225"=>"0", "3333"=>"0"},
+#   "writein_name"=>{
+#     "1"=>"jason", "2"=>"", "3"=>"", "4"=>"", "5"=>"", "6"=>""
+#   },
+#   "writein_reader"=>{
+#     "1"=>"1", "2"=>"0", "3"=>"0", "4"=>"0", "5"=>"0", "6"=>"0"
+#   },
+#   "writein_writer"=>{
+#     "1"=>"1", "2"=>"0", "3"=>"0", "4"=>"0", "5"=>"0", "6"=>"0"
+#   },
+#   "writein_admin"=>{
+#     "1"=>"1", "2"=>"0", "3"=>"0", "4"=>"0", "5"=>"0", "6"=>"0"
+#   },
+#   "commit"=>"Submit",
+#   "q"=>"1m0k8",
+#   "id"=>"2490"
+# }
+# group_ids: (+ user_id if applicable)
+# 14    all_users,
+# 1     reviewers,
+# 225   walt sturgeon (Mycowalt) (author, owner) 369
+# 3333  Nimmo (barky) (site admin) 3477
+# writeins:
+# 139   Jason Hollinger (jason) 252
+
 module Descriptions::Permissions
   extend ActiveSupport::Concern
 
+  # rubocop:disable Metrics/BlockLength
+  # rubocop:disable Metrics/AbcSize
   included do
     # Form to adjust permissions on a description.
     def edit
@@ -68,6 +139,9 @@ module Descriptions::Permissions
       end
     end
 
+    private
+
+    # used by :update
     def change_group_permissions
       old_readers = @description.reader_groups.sort_by(&:id)
       old_writers = @description.writer_groups.sort_by(&:id)
@@ -112,9 +186,10 @@ module Descriptions::Permissions
       done
     end
 
-    # Gather list of all the groups for the form, authors, editors and owner.
-    # If the user wants more they can write them in.
-    # This gets hit both on :edit and :update
+    # Gather the list of all user groups that have access to this description.
+    # Authors, editors and owner are printed in a table, with checkboxes to
+    # adjust their permissions. If the admin wants more they can write them in.
+    # Gets hit both on :edit and :update
     def gather_list_of_groups
       @groups = (
         [UserGroup.all_users] +
@@ -133,10 +208,15 @@ module Descriptions::Permissions
                 @groups.select { |g| g.name.match(/^user \d+$/) }
     end
 
+    # used by :update
+    # NOTE: the param data is asymmetrical. Unlike the :group_reader etc that
+    # are indexed by user_group ID, :writein_reader etc are indexed by row #.
+    # The names for each row (used by regex to find an ID) are in a separate
+    # array, :writein_name. Every row gets (blank) data even if there's no name.
     def assemble_data
       @data = [nil]
       done = true
-      params[:writein_name]&.keys&.sort&.each do |n|
+      params[:writein_name].keys.sort.each do |n|
         name   = begin
                    params[:writein_name][n].to_s
                  rescue StandardError
@@ -237,4 +317,6 @@ module Descriptions::Permissions
 
     include ::Descriptions
   end
+  # rubocop:enable Metrics/BlockLength
+  # rubocop:enable Metrics/AbcSize
 end

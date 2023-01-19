@@ -47,25 +47,35 @@ module Names::Descriptions
     end
 
     # draft_cc_desc has
-    # admin_groups: eol_admins plus katrina_only,
-    # writer_groups: eol_admins plus katrina_only,
     # reader_groups: eol_users plus katrina_only
+    # writer_groups: eol_admins plus katrina_only,
+    # admin_groups: eol_admins plus katrina_only,
     def test_change_permissions
       login("rolf")
-      # NOTE: params are not right here
+      assert_equal(draft_cc_desc.reader_group_ids,
+                   [user_groups(:eol_users).id, user_groups(:katrina_only).id])
+      assert_equal(draft_cc_desc.writer_group_ids,
+                   [user_groups(:eol_admins).id, user_groups(:katrina_only).id])
+      assert_equal(draft_cc_desc.admin_group_ids,
+                   [user_groups(:eol_admins).id, user_groups(:katrina_only).id])
       params = {
         id: draft_cc_desc.id,
-        group_reader: [user_groups(:bolete_admins).id],
-        group_writer: [user_groups(:bolete_admins).id],
-        group_admin: [user_groups(:bolete_admins).id],
-        writein_name: [],
-        writein_reader: [],
-        writein_writer: [],
-        writein_admin: []
+        group_reader: { user_groups(:eol_admins).id => 1 },
+        group_writer: { user_groups(:eol_admins).id => 0 },
+        group_admin: { user_groups(:eol_admins).id => 1 },
+        writein_name: { 1 => "dick", 2 => "", 3 => "",
+                        4 => "", 5 => "", 6 => "" },
+        writein_reader: { 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
+        writein_writer: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 },
+        writein_admin: { 1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0 }
       }
       put(:update, params: params)
       assert_redirected_to(name_description_path(draft_cc_desc.id))
-      assert_flash_text(/No changes made/)
+      fx = get_last_flash
+      assert_includes(fx, "Gave view permission to EOL Project.admin")
+      assert_includes(fx, "Gave edit permission to Tricky Dick")
+      assert_includes(fx, "Revoked edit permission for EOL Project.admin")
+      assert_includes(fx, "Gave admin permission to Tricky Dick")
     end
   end
 end
