@@ -86,8 +86,7 @@ module Descriptions::Moves
     end
 
     def remove_parent_default_desc_and_log_it
-      @src.parent.description_id = nil
-      @src.parent.save
+      @src.parent.update(description_id: nil)
       @src.parent.log(:log_changed_default_description,
                       user: @user.login,
                       name: :none,
@@ -95,8 +94,7 @@ module Descriptions::Moves
     end
 
     def set_src_parent_to_dest_and_log_it
-      @src.parent = @dest
-      @src.save
+      @src.update(parent_id: @dest.id)
       @src.parent.log(:log_object_moved_by_user,
                       user: @user.login,
                       from: @src.unique_partial_format_name,
@@ -105,8 +103,7 @@ module Descriptions::Moves
     end
 
     def make_src_the_new_default_description_for_dest_and_log_it
-      @dest.description_id = @src
-      @dest.save
+      @dest.update(description_id: @src.id)
       @dest.log(:log_changed_default_description,
                 user: @user.login,
                 name: @src.unique_partial_format_name,

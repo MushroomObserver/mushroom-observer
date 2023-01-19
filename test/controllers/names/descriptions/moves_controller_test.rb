@@ -33,6 +33,11 @@ module Names::Descriptions
       names(:coprinus)
     end
 
+    # A name with no desc
+    def stereum_name
+      names(:stereum)
+    end
+
     def test_form_permissions
       # login rolf, and try to access.
       login("rolf")
@@ -129,6 +134,18 @@ module Names::Descriptions
     end
 
     # if @delete_after & src_was_default
-    def test_move_description_replacing_default; end
+    def test_move_description_replacing_default
+      login("dick")
+      params = {
+        id: peltigera_desc.id,
+        target: stereum_name.id,
+        delete: 1
+      }
+
+      post(:create, params: params)
+      assert_flash_success
+      assert_redirected_to(name_description_path(peltigera_desc.id))
+      assert_equal(stereum_name.reload.description_id, peltigera_desc.id)
+    end
   end
 end
