@@ -6,7 +6,6 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups or /visual_groups.json
   def index
     @visual_model = VisualModel.find(params[:visual_model_id])
-    @visual_groups = @visual_model.visual_groups.order(:name)
   end
 
   # GET /visual_groups/1 or /visual_groups/1.json
@@ -45,6 +44,7 @@ class VisualGroupsController < ApplicationController
     @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
 
     if @visual_group.save
+      @visual_group.add_initial_images
       redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
                                                  @visual_group),
                   notice: :runtime_visual_group_created_at.t)
@@ -83,8 +83,7 @@ class VisualGroupsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def visual_group_params
-    params.require(:visual_group).permit(:visual_model_id, :name,
-                                         :approved, :description)
+    params.require(:visual_group).permit(:name, :approved, :description)
   end
 
   def calc_show_vals(count)

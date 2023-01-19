@@ -116,7 +116,7 @@ class LocationTest < UnitTestCase
     loc  = locations(:albion)
     desc = location_descriptions(:albion_desc)
 
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     QueuedEmail.all.map(&:destroy)
     location_version = loc.version
     description_version = desc.version
@@ -319,7 +319,7 @@ class LocationTest < UnitTestCase
                  old_description_version: desc.version,
                  new_description_version: desc.version)
     assert_equal(4, QueuedEmail.count)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_parse_latitude

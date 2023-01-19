@@ -155,14 +155,17 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_location_bounding_box
+    north = south = east = west = 0
     delta = 0.001
     login
-    get(:list_locations, params: { north: 0, south: 0, east: 0, west: 0 })
+    get(:list_locations,
+        params: { north: north, south: south, east: east, west: west })
     query = Query.find(QueryRecord.last.id)
-    assert_equal(0 + delta, query.params[:north])
-    assert_equal(0 - delta, query.params[:south])
-    assert_equal(0 + delta, query.params[:east])
-    assert_equal(0 - delta, query.params[:west])
+
+    assert_equal(north + delta, query.params[:north])
+    assert_equal(south - delta, query.params[:south])
+    assert_equal(east + delta, query.params[:east])
+    assert_equal(west - delta, query.params[:west])
 
     get(:list_locations,
         params: { north: 90, south: -90, east: 180, west: -180 })
@@ -284,7 +287,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:bolete_project_private_location_desc)
     get(:show_location_description, params: { id: desc.id })
     assert_flash_error
-    assert_redirected_to(controller: :project, action: :show_project,
+    assert_redirected_to(controller: "/projects", action: :show,
                          id: desc.project.id)
 
     # description is private, for a project, project doesn't exist
@@ -414,7 +417,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :location, action: :show_location,
                          id: loc.id)
     assert_equal(count + 1, Location.count)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
 

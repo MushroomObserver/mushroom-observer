@@ -406,7 +406,7 @@ class LocationController < ApplicationController
     elsif @description.source_type == "project"
       flash_error(:runtime_show_draft_denied.t)
       if (project = @description.project)
-        redirect_to(controller: :project, action: :show_project,
+        redirect_to(controller: "/projects", action: :show,
                     id: project.id)
       else
         redirect_to(action: :show_location, id: @description.location_id)
@@ -548,7 +548,7 @@ class LocationController < ApplicationController
                       action: :show,
                       id: @set_observation)
         elsif @set_species_list
-          redirect_to(controller: :species_list, action: :show_species_list,
+          redirect_to(controller: :species_lists, action: :show,
                       id: @set_species_list)
         elsif @set_herbarium
           if (herbarium = Herbarium.safe_find(@set_herbarium))

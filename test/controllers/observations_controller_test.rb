@@ -71,7 +71,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + 2 * g_num + 10 * n_num,
+    assert_equal(score + o_num + g_num * 2 + n_num * 10,
                  user.reload.contribution,
                  "Wrong User score")
     return unless o_num == 1
@@ -1440,7 +1440,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_that_generates_email
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
     name_trackers = NameTracker.where(name: name)
@@ -1461,7 +1461,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(name.id, nam.name_id) # Make sure it's the right name
     assert_not_nil(obs.rss_log)
     assert_equal(count_before + 1, QueuedEmail.count)
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
   end
 
   def test_create_observation_with_decimal_geolocation_and_unknown_name
@@ -1574,7 +1574,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + 2 * g_num + 10 * n_num,
+    assert_equal(score + o_num + g_num * 2 + n_num * 10,
                  user.reload.contribution,
                  "Wrong User score")
     assert_not_equal(

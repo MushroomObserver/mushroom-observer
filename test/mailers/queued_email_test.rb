@@ -4,12 +4,12 @@ require("test_helper")
 
 class QueuedEmailTest < UnitTestCase
   def setup
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     super
   end
 
   def teardown
-    QueuedEmail.queue_emails(false)
+    QueuedEmail.queue = false
     super
   end
 

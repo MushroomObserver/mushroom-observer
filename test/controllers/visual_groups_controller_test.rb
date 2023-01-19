@@ -4,7 +4,7 @@ require "test_helper"
 
 class VisualGroupsControllerTest < FunctionalTestCase
   setup do
-    @visual_group = visual_groups(:visual_group_one)
+    @visual_group = visual_groups(:visual_group_two)
     @visual_model = @visual_group.visual_model
   end
 
@@ -50,6 +50,20 @@ class VisualGroupsControllerTest < FunctionalTestCase
     assert_redirected_to new_visual_model_visual_group_url(@visual_model)
   end
 
+  test "should not create visual_group due to tab" do
+    login
+    assert_no_difference("VisualGroup.count") do
+      post(:create, params: {
+             visual_model_id: @visual_model.id,
+             visual_group: {
+               name: "Name\twith\ttab",
+               approved: @visual_group.approved
+             }
+           })
+    end
+    assert_redirected_to new_visual_model_visual_group_url(@visual_model)
+  end
+
   test "should show visual_group" do
     login
     get(:show, params: {
@@ -85,9 +99,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     patch(:update, params: {
             id: @visual_group.id,
-            visual_group:
-              { name: @visual_group.name,
-                approved: @visual_group.approved }
+            visual_group: {
+              name: @visual_group.name,
+              approved: @visual_group.approved
+            }
           })
     assert_redirected_to visual_model_visual_groups_url(@visual_model,
                                                         @visual_group)
@@ -97,9 +112,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     patch(:update, params: {
             id: @visual_group.id,
-            visual_group:
-              { name: "",
-                approved: @visual_group.approved }
+            visual_group: {
+              name: "",
+              approved: @visual_group.approved
+            }
           })
     assert_redirected_to edit_visual_group_url(@visual_group)
   end

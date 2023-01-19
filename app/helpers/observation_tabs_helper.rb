@@ -48,7 +48,8 @@ module ObservationTabsHelper
     return unless user
 
     link_with_query(:show_observation_manage_species_lists.t,
-                    controller: :species_list, action: :manage_species_lists,
+                    controller: "/observations/species_lists",
+                    action: :edit,
                     id: obs.id)
   end
 

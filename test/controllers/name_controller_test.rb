@@ -49,7 +49,7 @@ class NameControllerTest < FunctionalTestCase
       assert_template(:create_name_description)
       assert_template("name/_form_name_description")
     else
-      assert_redirected_to(controller: "project", action: "show_project",
+      assert_redirected_to(controller: "/projects", action: :show,
                            id: project.id)
     end
     assert_equal(count, NameDescription.count)
@@ -891,7 +891,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert(name = Name.find_by(text_name: text_name))
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts + 10, rolf.reload.contribution)
     assert_equal(icn_id, name.icn_id)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
@@ -4354,7 +4354,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_approve_tracker_with_template
-    QueuedEmail.queue_emails(true)
+    QueuedEmail.queue = true
     assert_equal(0, QueuedEmail.count)
 
     tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
@@ -4383,6 +4383,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_warning
     assert(tracker.reload.approved)
     assert_equal(1, QueuedEmail.count)
+    QueuedEmail.queue = false
   end
 
   # ----------------------------
@@ -4693,7 +4694,7 @@ class NameControllerTest < FunctionalTestCase
     # Test draft creation by project non-member.
     login("dick")
     get(:create_name_description, params: params.merge(project: project.id))
-    assert_redirected_to(controller: "project", action: "show_project",
+    assert_redirected_to(controller: "/projects", action: :show,
                          id: project.id)
     assert_flash_error
   end
@@ -4726,9 +4727,7 @@ class NameControllerTest < FunctionalTestCase
     # Test draft creation by project non-member.
     login("dick")
     get(:create_name_description, params: params.merge(project: project.id))
-    assert_redirected_to(controller: "project",
-                         action: "show_project",
-                         id: project.id)
+    assert_redirected_to(controller: "/projects", action: :show, id: project.id)
     assert_flash_error
 
     # Test clone of private description if not reader.

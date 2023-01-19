@@ -410,7 +410,7 @@ class Image < AbstractModel
     w = width
     h = height
     if width && height
-      d = w > h ? w : h
+      d = [w, h].max
       max = case size.to_s
             when "thumbnail" then 160
             when "small" then 320
@@ -1073,10 +1073,6 @@ class Image < AbstractModel
 
   def year
     self.when.year
-  end
-
-  def visual_group(visual_model)
-    visual_groups.find_by(visual_model: visual_model)
   end
 
   ##############################################################################
