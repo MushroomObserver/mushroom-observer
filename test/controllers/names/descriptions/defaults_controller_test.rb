@@ -5,8 +5,6 @@ require("set")
 
 module Names::Descriptions
   class DefaultsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     def make_description_default_helper(desc)
       user = desc.user
       params = {
