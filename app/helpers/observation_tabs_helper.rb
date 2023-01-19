@@ -87,9 +87,13 @@ module ObservationTabsHelper
 
     [
       link_with_query(:list_observations_location_define.l,
-                      new_location_path(where: query.params[:user_where])),
+                      new_location_path(
+                        where: query.params[:user_where]
+                      )),
       link_with_query(:list_observations_location_merge.l,
-                      new_location_merge_path(where: query.params[:user_where])),
+                      new_location_merge_path(
+                        where: query.params[:user_where]
+                      )),
       link_with_query(:list_observations_location_all.l,
                       locations_path)
 
