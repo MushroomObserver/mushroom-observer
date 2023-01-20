@@ -10,7 +10,11 @@ class VisualGroupImages
     add_joins(included)
     add_project
     add_conditions(name, included)
-    query.order(tables[:observations][:vote_cache].desc)
+    add_order_and_limit(count)
+  end
+
+  def add_order_and_limit(count)
+    query.order(attribute(:observations, :vote_cache).desc)
     query.take(count) unless count.nil?
   end
 
@@ -61,8 +65,8 @@ class VisualGroupImages
   end
 
   def add_conditions(name, included)
-    query.where(tables[:names][:text_name].eq(name))
-    query.where(tables[:observations][:vote_cache].gteq(VOTE_LIMIT))
-    query.where(tables[:visual_group_images][:included].eq(included))
+    query.where(attribute(:names, :text_name).eq(name))
+    query.where(attribute(:observations, :vote_cache).gteq(VOTE_LIMIT))
+    query.where(attribute(:visual_group_images, :included).eq(included))
   end
 end
