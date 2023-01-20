@@ -10,7 +10,7 @@ module VersionsHelper
   #   Version: N <br/>
   #   Previous Version: N-1<br/>
   #
-  def show_previous_version(obj)
+  def show_previous_version(obj) # rubocop:disable Metrics/AbcSize
     html = :VERSION.t + ": " + obj.version.to_s
     latest_version = obj.versions.latest
     html += safe_br
@@ -40,38 +40,19 @@ module VersionsHelper
   #       1: Original Name<br/>
   #   </p>
   #
-  def show_past_versions(obj, args = {})
+  def show_past_versions(obj, args = {}) # rubocop:disable Metrics/AbcSize
     versions = obj.versions.reverse
     table = versions.map do |ver|
       # Date change was made.
-      date = begin
-               ver.updated_at.web_date
-             rescue StandardError
-               :unknown.t
-             end
+      date = find_ver_date(ver)
 
       # User making the change.
-      user = if (user = User.safe_find(ver.user_id))
-               user_link(user, user.login)
-             else
-               :unknown.t
-             end
+      user = find_ver_user(ver, user)
 
       # Version number (and name if available).
       link = "#{:VERSION.t} #{ver.version}"
       link += " #{ver.format_name.t}" if ver.respond_to?(:format_name)
-      if ver.version != obj.version
-        link = if ver == obj.versions.last
-                 link_with_query(link, controller: obj.show_controller,
-                                       action: obj.show_action,
-                                       id: obj.id)
-               else
-                 link_with_query(link,
-                                 controller: "#{obj.show_controller}/versions",
-                                 action: :show, id: obj.id,
-                                 version: ver.version)
-               end
-      end
+      link = link_to_ver(link, ver, obj) if ver.version != obj.version
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
       i = indent
@@ -80,5 +61,32 @@ module VersionsHelper
 
     table = make_table(table, class: "ml-4")
     tag.p(:VERSIONS.t) + table + safe_br
+  end
+
+  def find_ver_date(ver)
+    ver.updated_at.web_date
+  rescue StandardError
+    :unknown.t
+  end
+
+  def find_ver_user(ver, user)
+    if (user = User.safe_find(ver.user_id))
+      user_link(user, user.login)
+    else
+      :unknown.t
+    end
+  end
+
+  def link_to_ver(link, ver, obj)
+    if ver == obj.versions.last
+      link_with_query(link, controller: obj.show_controller,
+                            action: obj.show_action,
+                            id: obj.id)
+    else
+      link_with_query(link,
+                      controller: "#{obj.show_controller}/versions",
+                      action: :show, id: obj.id,
+                      version: ver.version)
+    end
   end
 end
