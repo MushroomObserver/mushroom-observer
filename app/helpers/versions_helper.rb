@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 # helpers which create html which links to prior version(s)
-# JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
-# actions are normalized.
-# See https://www.pivotaltracker.com/story/show/174440291
 module VersionsHelper
   # Just shows the current version number and a link to see the previous.
   #
@@ -14,7 +11,7 @@ module VersionsHelper
   #   Previous Version: N-1<br/>
   #
   def show_previous_version(obj)
-    html = "#{:VERSION.t}: #{obj.version}".html_safe
+    html = "#{:VERSION.t}: #{obj.version}"
     latest_version = obj.versions.latest
     html += safe_br
     return html unless latest_version
