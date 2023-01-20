@@ -11,7 +11,7 @@ module VersionsHelper
   #   Previous Version: N-1<br/>
   #
   def show_previous_version(obj)
-    html = "#{:VERSION.t}: #{obj.version}"
+    html = :VERSION.t + ": " + obj.version.to_s
     latest_version = obj.versions.latest
     html += safe_br
     return html unless latest_version
