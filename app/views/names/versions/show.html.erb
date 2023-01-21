@@ -8,22 +8,13 @@
     link_to(:show_name.t(name: @name.display_name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+  @container = :text
 %>
 
-<div class="row mt-3">
-  <div class="col-sm-7 col-lg-9">
-    <%= render(partial: "names/show/nomenclature",
-              locals: { name: @name, synonyms: false }) %>
-    </div>
-  </div>
-  <div class="col-sm-5 col-lg-3">
-    <div class="list-group">
-      <div class="list-group-item name-section">
-        <%= show_past_versions(@name, bold: lambda {|v| !v.deprecated}) %>
-      </div>
-    </div>
-  </div>
-</div><!--.row-->
+<div class="mt-4"></div>
+<%= render(partial: "names/show/nomenclature",
+          locals: { name: @name, synonyms: false }) %>
+
+<%= show_past_versions(@name, bold: lambda {|v| !v.deprecated}) %>
 
 <%= show_object_footer(@name) %>
