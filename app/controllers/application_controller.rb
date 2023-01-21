@@ -1539,6 +1539,27 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Dispatch to various index methods from a Dispatch array
+  def page_dispatch(params, dispatch)
+    dispatch.each do |key, func|
+      return method(func).call if key_match(key, params)
+    end
+  end
+
+  # Allows key to be symbol, a list of symbols, or false
+  def key_match(key, params)
+    if key.is_a?(Array)
+      key.each do |subkey|
+        return true if params[subkey].present?
+      end
+      false
+    elsif key
+      params[key].present?
+    else
+      true
+    end
+  end
+
   private ##########
 
   def apply_content_filters(query)
