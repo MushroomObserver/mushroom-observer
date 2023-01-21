@@ -10,21 +10,13 @@ module VersionsHelper
   #   Version: N <br/>
   #   Previous Version: N-1<br/>
   #
-  def show_previous_version(obj) # rubocop:disable Metrics/AbcSize
-    html = :VERSION.t + ": " + obj.version.to_s
-    latest_version = obj.versions.latest
-    html += safe_br
-    return html unless latest_version
-
-    if (previous_version = latest_version.previous)
-      str = :show_name_previous_version.t + " " + previous_version.version.to_i
-      html += link_with_query(str,
-                              controller: "#{obj.show_controller}/versions",
-                              action: :show, id: obj.id,
-                              version: previous_version.version)
-      html += safe_br
+  def show_previous_version(obj)
+    previous_version = obj.versions.latest&.previous
+    if previous_version
+      previous_version_link(previous_version, obj)
+    else
+      initial_html(obj)
     end
-    html
   end
 
   # Show list of past versions for show_past_object pages.
@@ -40,27 +32,42 @@ module VersionsHelper
   #       1: Original Name<br/>
   #   </p>
   #
-  def show_past_versions(obj, args = {}) # rubocop:disable Metrics/AbcSize
-    versions = obj.versions.reverse
-    table = versions.map do |ver|
-      # Date change was made.
-      date = find_ver_date(ver)
-
-      # User making the change.
-      user = find_ver_user(ver, user)
-
-      # Version number (and name if available).
-      link = "#{:VERSION.t} #{ver.version}"
-      link += " #{ver.format_name.t}" if ver.respond_to?(:format_name)
-      link = link_to_ver(link, ver, obj) if ver.version != obj.version
-      link = content_tag(:b, link) if args[:bold]&.call(ver)
-
-      i = indent
-      [date, i, user, i, link, i]
-    end
-
-    table = make_table(table, class: "ml-4")
+  def show_past_versions(obj, args = {})
+    table = make_table(build_version_table(obj, args), class: "ml-4")
     tag.p(:VERSIONS.t) + table + safe_br
+  end
+
+  private
+
+  def previous_version_link(previous_version, obj)
+    str = :show_name_previous_version.t + " " + previous_version.version.to_i
+    initial_html(obj) +
+      link_with_query(str,
+                      controller: "#{obj.show_controller}/versions",
+                      action: :show, id: obj.id,
+                      version: previous_version.version) +
+      safe_br
+  end
+
+  def initial_html(obj)
+    :VERSION.t + ": " + obj.version.to_s + safe_br
+  end
+
+  def build_version_table(obj, args)
+    obj.versions.reverse.map do |ver|
+      [find_ver_date(ver), indent,
+       find_ver_user(ver), indent,
+       calc_link(obj, ver, args), indent]
+    end
+  end
+
+  def calc_link(obj, ver, args)
+    link = query_link(obj, ver, initial_link(ver))
+    if args[:bold]&.call(ver)
+      content_tag(:b, link)
+    else
+      link
+    end
   end
 
   def find_ver_date(ver)
@@ -69,15 +76,36 @@ module VersionsHelper
     :unknown.t
   end
 
-  def find_ver_user(ver, user)
-    if (user = User.safe_find(ver.user_id))
-      user_link(user, user.login)
-    else
-      :unknown.t
-    end
+  def find_ver_user(ver)
+    user = User.safe_find(ver.user_id)
+    return :unknown.t unless user
+
+    user_link(user, user.login)
   end
 
   def link_to_ver(link, ver, obj)
+    if ver == obj.versions.last
+      link_with_query(link, controller: obj.show_controller,
+                            action: obj.show_action,
+                            id: obj.id)
+    else
+      link_with_query(link,
+                      controller: "#{obj.show_controller}/versions",
+                      action: :show, id: obj.id,
+                      version: ver.version)
+    end
+  end
+
+  def initial_link(ver)
+    link = "#{:VERSION.t} #{ver.version}"
+    return link unless ver.respond_to?(:format_name)
+
+    link + " #{ver.format_name.t}"
+  end
+
+  def query_link(obj, ver, link)
+    return link if ver.version != obj.version
+
     if ver == obj.versions.last
       link_with_query(link, controller: obj.show_controller,
                             action: obj.show_action,
