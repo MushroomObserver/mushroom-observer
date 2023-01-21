@@ -34,16 +34,16 @@ module Names
     ############################################################################
 
     def index
-      if params[:by_author].present?
-        name_descriptions_by_author
-      elsif params[:by_editor].present?
-        name_descriptions_by_editor
-      elsif params[:by].present? || params[:q].present? || params[:id].present?
-        index_name_description
-      else
-        list_name_descriptions
-      end
+      page_dispatch(params, INDEX_DISPATCH)
     end
+
+    # if params[x].present?, call action
+    INDEX_DISPATCH = [
+      [:by_author, :name_descriptions_by_author],
+      [:by_editor, :name_descriptions_by_editor],
+      [[:by, :q, :id], :index_name_description],
+      [false, :list_name_descriptions]
+    ].freeze
 
     private
 

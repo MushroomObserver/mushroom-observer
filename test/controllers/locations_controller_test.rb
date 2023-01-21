@@ -179,6 +179,12 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_bogus_param
+    login
+    get(:index, params: { bogus: "234" })
+    assert_template("index")
+  end
+
   def test_location_pattern_search_id
     loc = locations(:salt_point)
 

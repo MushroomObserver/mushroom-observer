@@ -34,16 +34,16 @@ module Locations
     ############################################################################
 
     def index
-      if params[:by_author].present?
-        location_descriptions_by_author
-      elsif params[:by_editor].present?
-        location_descriptions_by_editor
-      elsif params[:by].present? || params[:q].present? || params[:id].present?
-        index_location_description
-      else
-        list_location_descriptions
-      end
+      page_dispatch(params, INDEX_DISPATCH)
     end
+
+    # if params[x].present?, call action
+    INDEX_DISPATCH = [
+      [:by_author, :location_descriptions_by_author],
+      [:by_editor, :location_descriptions_by_editor],
+      [[:by, :q, :id], :index_location_description],
+      [false, :list_location_descriptions]
+    ].freeze
 
     private
 

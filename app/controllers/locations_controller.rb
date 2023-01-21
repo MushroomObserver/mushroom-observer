@@ -37,34 +37,19 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   def index
-    # if params[:advanced_search].present?
-    #   advanced_search
-    # elsif params[:pattern].present?
-    #   location_search
-    # elsif params[:country].present?
-    #   list_by_country
-    # elsif params[:by_user].present?
-    #   locations_by_user
-    # elsif params[:by_editor].present?
-    #   locations_by_editor
-    # elsif params[:by].present? || params[:q].present? || params[:id].present?
-    #   index_location
-    # else
-    #   list_locations
-    # end
     page_dispatch(params, INDEX_DISPATCH)
   end
 
-  # TODO: test a bogus param
+  # if params[x].present?, call action
   INDEX_DISPATCH = [
-    [[:advanced_search, :advanced_search],
-     [:pattern, :location_search],
-     [:country, :list_by_country],
-     [:by_user, :locations_by_user],
-     [:by_editor, :locations_by_editor],
-     [[:by, :q, :id], :index_location],
-     [false, :list_locations]]
-  ]
+    [:advanced_search, :advanced_search],
+    [:pattern, :location_search],
+    [:country, :list_by_country],
+    [:by_user, :locations_by_user],
+    [:by_editor, :locations_by_editor],
+    [[:by, :q, :id], :index_location],
+    [false, :list_locations]
+  ].freeze
 
   private
 

@@ -55,27 +55,22 @@ class NamesController < ApplicationController
   #
   ##############################################################################
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
-      advanced_search
-    elsif params[:pattern].present?
-      name_search
-    elsif params[:with_observations].present?
-      observation_index
-    elsif params[:with_descriptions].present?
-      names_with_descriptions
-    elsif params[:need_descriptions].present?
-      names_needing_descriptions
-    elsif params[:by_user].present?
-      names_by_user
-    elsif params[:by_editor].present?
-      names_by_editor
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_name
-    else
-      list_names
-    end
+  def index
+    page_dispatch(params, INDEX_DISPATCH)
   end
+
+  # if params[x].present?, call action
+  INDEX_DISPATCH = [
+    [:advanced_search, :advanced_search],
+    [:pattern, :name_search],
+    [:with_observations, :observation_index],
+    [:with_descriptions, :names_with_descriptions],
+    [:need_descriptions, :names_needing_descriptions],
+    [:by_user, :names_by_user],
+    [:by_editor, :names_by_editor],
+    [[:by, :q, :id], :index_name],
+    [false, :list_names]
+  ].freeze
 
   private
 
