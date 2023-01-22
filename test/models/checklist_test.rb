@@ -31,10 +31,6 @@ class ChecklistTest < UnitTestCase
     species.map { |name| name.split(" ", 2).first }.uniq
   end
 
-  def just_names(species)
-    species.pluck(0)
-  end
-
   def test_checklist_for_site
     data = Checklist::ForSite.new
     obss_of_species = Observation.joins(:name).
@@ -42,7 +38,7 @@ class ChecklistTest < UnitTestCase
     all_species = obss_of_species.map { |obs| obs.name.text_name }.uniq.sort
     all_genera = genera(all_species).uniq
     assert_equal(all_genera, data.genera)
-    assert_equal(all_species, just_names(data.species))
+    assert_equal(all_species, data.species)
   end
 
   def test_checklist_for_users
@@ -56,7 +52,7 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_genera)
     assert_equal(1, data.num_species)
     assert_equal(genera(katrinas_species), data.genera)
-    assert_equal(katrinas_species, just_names(data.species))
+    assert_equal(katrinas_species, data.species)
 
     data = Checklist::ForUser.new(rolf)
     assert_equal(6, data.num_genera)
@@ -68,7 +64,7 @@ class ChecklistTest < UnitTestCase
     assert_equal(expect, data.num_species)
 
     assert_equal(genera(rolfs_species), data.genera)
-    assert_equal(rolfs_species, just_names(data.species))
+    assert_equal(rolfs_species, data.species)
 
     User.current = dick
     before_data = Checklist::ForUser.new(dick)
@@ -109,7 +105,7 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_genera)
     assert_equal(1, data.num_species)
     assert_equal(["Coprinus"], data.genera)
-    assert_equal([["Coprinus comatus", obs.name_id]], data.species)
+    assert_equal(["Coprinus comatus"], data.species)
   end
 
   def test_checklist_for_species_lists
@@ -126,6 +122,6 @@ class ChecklistTest < UnitTestCase
     assert_equal(1, data.num_genera)
     assert_equal(1, data.num_species)
     assert_equal(["Coprinus"], data.genera)
-    assert_equal([["Coprinus comatus", obs.name_id]], data.species)
+    assert_equal(["Coprinus comatus"], data.species)
   end
 end

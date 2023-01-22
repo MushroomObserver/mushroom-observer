@@ -110,36 +110,35 @@ class Checklist
 
   def count_nonsynonyms_and_gather_synonyms
     synonyms = {}
-    Name.connection.select_rows(query).each do |id, name, syn_id, deprecated|
+    Name.connection.select_rows(query).each do |text_name, syn_id, deprecated|
       if syn_id && deprecated == 1
         # wait until we find an accepted synonym
         synonyms[syn_id] ||= nil
       elsif syn_id
         # use the first accepted synonym we encounter
-        synonyms[syn_id] ||= [name, id]
+        synonyms[syn_id] ||= text_name
       else
         # count non-synonyms immediately
-        count_species([name, id])
+        count_species(text_name)
       end
     end
     synonyms
   end
 
   def count_synonyms(synonyms)
-    synonyms.each do |syn_id, text_info|
-      text_info ||= Name.where(synonym_id: syn_id, rank: ranks_to_consider).
-                    order(deprecated: :asc).pick(:text_name, :id)
-      count_species(text_info)
+    synonyms.each do |syn_id, text_name|
+      text_name ||= Name.where(synonym_id: syn_id, rank: ranks_to_consider).
+                    order(deprecated: :asc).pick(:text_name)
+      count_species(text_name)
     end
   end
 
-  def count_species(text_info)
-    return if text_info.blank?
+  def count_species(text_name)
+    return if text_name.blank?
 
-    text_name, id = text_info
     g, s = text_name.split(" ", 3)
     @genera[g] = g
-    @species[[g, s]] = ["#{g} #{s}", id] # Can't be hash since it gets sorted
+    @species[[g, s]] = "#{g} #{s}"
   end
 
   def ranks_to_consider
@@ -158,7 +157,7 @@ class Checklist
     tables += args[:tables] || []
     conditions += args[:conditions] || []
     %(
-      SELECT n.id, n.text_name, n.synonym_id, n.deprecated
+      SELECT n.text_name, n.synonym_id, n.deprecated
       FROM #{tables.join(", ")}
       WHERE (#{conditions.join(") AND (")})
     )
