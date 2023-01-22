@@ -69,7 +69,7 @@
           <% (1..num_cols).each do |col| %>
             <% if count < names.length %>
               <div class="col-sm-3"><i>
-                <%= link_to(names[count][0], name_url(names[count][1])) %>
+                <%= link_to(names[count][0], show_name_url(names[count][1])) %>
                 <% count += 1 %>
                </i></div>
             <% end %>
