@@ -140,10 +140,10 @@ module ObservationsHelper
       proposer_links = ""
     end
 
-    [name_link(naming), proposer_links].safe_join
+    [naming_name_link(naming), proposer_links].safe_join
   end
 
-  def name_link(naming)
+  def naming_name_link(naming)
     link_with_query(
       naming.display_name_brief_authors.t.break_name.small_author,
       show_name_path(id: naming.name)
