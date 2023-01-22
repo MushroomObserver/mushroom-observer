@@ -1222,7 +1222,7 @@
   source_credit_mo_website: Created using the "Mushroom Observer website":https://mushroomobserver.org.
   source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
   source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
-  source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md.
+  source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
 
   ##############################################################################
 
@@ -1723,7 +1723,7 @@
   login_explain_login_requirement: To prevent automated programs from consuming too much of our resources, we limit website use to registered users.
   login_data_without_login_caption: Get MO Data Without Logging In
   login_images_without_login: Get "MO Images for Machine Learning":/articles/20.
-  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md#csv-files.
+  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files.
 
   # account/logout
   logout_title: Logout

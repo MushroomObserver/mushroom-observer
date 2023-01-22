@@ -209,8 +209,8 @@ ORDER BY observations.id ASC
 ```
 See also the database diagram here:
 
-* <https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif>
+* <https://github.com/MushroomObserver/mushroom-observer/blob/main/DATA_STRUCTURE.gif>
 
 and the database schema here:
 
-* <https://github.com/MushroomObserver/mushroom-observer/blob/master/db/schema.rb>
+* <https://github.com/MushroomObserver/mushroom-observer/blob/main/db/schema.rb>

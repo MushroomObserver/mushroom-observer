@@ -4,11 +4,11 @@ name: Continuous Integration
 
 on:
   push:
-    # branches: master
+    # branches: main
     branches:
       - "*" # Run on pushes on all branches
   pull_request:
-    branches: master
+    branches: main
 
 jobs:
   test:
