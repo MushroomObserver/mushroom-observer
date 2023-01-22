@@ -1,0 +1,6 @@
+<div class="<%= classes[:heading] %>">
+  <%= :app_working_on_mo.t %>
+</div>
+<%= link_to(:app_report_a_bug.t, emails_ask_webmaster_question_path,
+            { class: classes[:indent],
+              id: "nav_bug_report_link" }) %>
