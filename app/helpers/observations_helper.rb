@@ -33,8 +33,6 @@ module ObservationsHelper
     end
   end
 
-  private
-
   # name portion of Observation title
   def obs_title_consensus_id(name)
     if name.deprecated &&
@@ -76,8 +74,6 @@ module ObservationsHelper
             show_name_path(id: name.id))
   end
 
-  public ######################################################################
-
   ##### Observation Naming "table" content #########
   def observation_naming_header_row(observation, logged_in)
     any_names = observation.namings&.length&.positive?
@@ -101,8 +97,8 @@ module ObservationsHelper
 
   def observation_naming_row(observation, naming, logged_in)
     {
-      name: name_html(naming),
-      proposer: proposer_html(naming),
+      name: naming_name_html(naming),
+      proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
       your_vote: logged_in ? your_vote_html(naming) : "",
       eyes: eyes_html(observation, naming),
@@ -125,9 +121,7 @@ module ObservationsHelper
     buttons.safe_join(tag.br)
   end
 
-  private
-
-  def name_html(naming)
+  def naming_name_html(naming)
     Textile.register_name(naming.name)
 
     if check_permission(naming)
@@ -150,7 +144,7 @@ module ObservationsHelper
     )
   end
 
-  def proposer_html(naming)
+  def naming_proposer_html(naming)
     user_link = user_link(naming.user, naming.user.login)
 
     # row props have mobile-friendly labels
