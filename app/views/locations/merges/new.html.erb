@@ -20,17 +20,4 @@
     </div>
   <% end %>
 
-  <% if @others.any? %>
-    <div class="col-md-6">
-      <div class="h4">
-        <%= :list_merge_options_others.t %>
-      </div>
-      <table class="table table-striped table-location-merge-options">
-        <% @others.each do |location| %>
-          <%= render(partial: "row", locals: { location: location }) %>
-        <% end %>
-      </table>
-    </div>
-  <% end %>
-
 </div><!--.row-->
