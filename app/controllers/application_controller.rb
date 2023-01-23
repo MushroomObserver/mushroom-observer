@@ -1399,22 +1399,6 @@ class ApplicationController < ActionController::Base
   # query_params_set::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
-  class << self
-    attr :dispatch_table_for_index_subactions
-  end
-
-  def index
-    dispatch_index_to_subaction
-  end
-
-  def dispatch_index_to_subaction
-    self.class.
-      dispatch_table_for_index_subactions.each do |subaction_key, subaction|
-      return send(subaction || subaction_key) if params[subaction_key].present?
-    end
-    default_index_action
-  end
-
   def show_index_of_objects(query, args = {})
     letter_arg   = args[:letter_arg] || :letter
     number_arg   = args[:number_arg] || :page
@@ -1556,6 +1540,18 @@ class ApplicationController < ActionController::Base
   end
 
   private ##########
+
+  class << self
+    attr :dispatch_table_for_index_subactions
+  end
+
+  def dispatch_index_to_subaction
+    self.class.
+      dispatch_table_for_index_subactions.each do |subaction_key, subaction|
+      return send(subaction || subaction_key) if params[subaction_key].present?
+    end
+    default_index_action
+  end
 
   def apply_content_filters(query)
     filters = users_content_filters || {}

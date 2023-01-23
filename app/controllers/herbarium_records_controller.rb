@@ -26,6 +26,10 @@ class HerbariumRecordsController < ApplicationController
     id: :index_herbarium_record
   }.freeze
 
+  def index
+    dispatch_index_to_subaction
+  end
+
   def show
     case params[:flow]
     when "next"
