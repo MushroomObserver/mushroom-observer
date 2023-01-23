@@ -4,52 +4,11 @@
 module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   # Searches come first because they may have the other params
-=begin
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  # NOTE: ABC offense could be fixed with the technique described in
-  # https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179469322
-  def index # rubocop:disable Metrics/AbcSize
-    # cop disabled because immediate fix is ugly and the offense is avoidable
-    # by fixing the ABC offense. See above
-    if params[:advanced_search].present? # rubocop:disable Style/GuardClause
-      advanced_search and return
-    elsif params[:pattern].present?
-      observation_search and return
-    elsif params[:look_alikes].present? && params[:name].present?
-      observations_of_look_alikes and return
-    elsif params[:related_taxa].present? && params[:name].present?
-      observations_of_related_taxa and return
-    elsif params[:name].present?
-      observations_of_name and return
-    elsif params[:user].present?
-      observations_by_user and return
-    elsif params[:location].present?
-      observations_at_location and return
-    elsif params[:where].present?
-      observations_at_where and return
-    elsif params[:project].present?
-      observations_for_project and return
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_observation and return
-    else
-      list_observations and return
-    end
+  def index
+    dispatch_to_index_subaction
   end
-=end
 
-@dispatch_table_for_index_subactions = {
-  advanced_search: :advanced_search,
-  pattern: :image_search,
-  by_user: :images_by_user,
-  for_project: :images_for_project,
-  by: :index_image,
-}.freeze
-
-def index
-  dispatch_to_index_subaction
-end
-
- # Displays matrix of selected Observations (based on current Query).
+  # Displays matrix of selected Observations (based on current Query).
   # NOTE: Why are all the :id params converted .to_s below?
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
@@ -195,7 +154,13 @@ end
     show_index_of_objects(query, args)
   end
 
+  #########################################################################
+
   private
+
+  def default_index_action
+    list_observations
+  end
 
   def create_advanced_search_query(params) # rubocop:disable Metrics/AbcSize
     search = {}
