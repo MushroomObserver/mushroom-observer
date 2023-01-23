@@ -17,7 +17,7 @@ class HerbariumRecordsController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
 
-  KEY_TO_SUBACTION = {
+  @dispatch_table_for_index_subactions = {
     pattern: :herbarium_record_search,
     herbarium_id: :herbarium_index,
     observation_id: :observation_index,
@@ -25,13 +25,6 @@ class HerbariumRecordsController < ApplicationController
     q: :index_herbarium_record,
     id: :index_herbarium_record
   }.freeze
-
-  def index
-    KEY_TO_SUBACTION.each do |subaction_key, subaction|
-      return send(subaction || subaction_key) if params[subaction_key].present?
-    end
-    default_index_action
-  end
 
   def show
     case params[:flow]
