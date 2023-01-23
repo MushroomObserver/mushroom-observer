@@ -248,7 +248,7 @@ module DescriptionsHelper
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t unless any
     html = list.safe_join(safe_br)
-    html = content_tag(:p, html)
+    html = content_tag(:div, html)
 
     add_list_of_projects(object, html, projects) if projects.present?
     html
@@ -278,20 +278,21 @@ module DescriptionsHelper
 
   # Create a div for notes in Description subclasses.
   #
-  #   <%= colored_box(even_or_odd, html) %>
+  #   <%= notes_panel(html) %>
   #
-  #   <% colored_box(even_or_odd) do %>
+  #   <% notes_panel() do %>
   #     Render stuff in here.  Note lack of "=" in line above.
   #   <% end %>
   #
-  def colored_notes_box(even, msg = nil, &block)
+  def notes_panel(msg = nil, &block)
     msg = capture(&block) if block
-    classes = "ListLine#{even ? 0 : 1} mx-10px p-3 dotted-border"
-    result = content_tag(:div, msg, class: classes)
+    result = content_tag(:div, msg, class: "panel-body")
+    wrapper = content_tag(:div, result,
+                          class: "panel panel-default dotted-border")
     if block
-      concat(result)
+      concat(wrapper)
     else
-      result
+      wrapper
     end
   end
 

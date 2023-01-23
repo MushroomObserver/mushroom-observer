@@ -11,7 +11,7 @@
           locals: { name: object, synonyms: true })
     if object.has_notes?
       str += tag.p("#{:show_name_notes.t}:")
-      str += colored_notes_box(true, object.notes.tpl)
+      str += notes_panel(object.notes.tpl)
     end
     content_tag(:div, str, class: "name-section m-3")
 

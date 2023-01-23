@@ -19,31 +19,32 @@
   <% end %>
 
   <% if reviewer? %>
-    <%= indent + put_button(name: :review_unvetted.t,
-        path: name_description_review_status_path(desc.id,
-          value: "unvetted", q: get_query_param)
-        ) %><br/>
-    <%= indent + put_button(name: :review_vetted.t,
-        path: name_description_review_status_path(desc.id,
-          value: "vetted", q: get_query_param)
-        ) %><br/>
-    <%= indent + put_button(name: :review_inaccurate.t,
-        path: name_description_review_status_path(desc.id,
-          value: "inaccurate", q: get_query_param)
-        ) %><br/>
-  <% end %><br/>
+    <div class="ml-3 mb-5">
+      <%= put_button(name: :review_unvetted.t,
+          path: name_description_review_status_path(desc.id,
+            value: "unvetted", q: get_query_param)
+          ) %><br/>
+      <%= put_button(name: :review_vetted.t,
+          path: name_description_review_status_path(desc.id,
+            value: "vetted", q: get_query_param)
+          ) %><br/>
+      <%= put_button(name: :review_inaccurate.t,
+          path: name_description_review_status_path(desc.id,
+            value: "inaccurate", q: get_query_param)
+          ) %>
+    </div>
+  <% end %>
 <% end %>
 
-<% even = true
+<%
 any = false
 notes = desc.all_notes
 NameDescription.all_note_fields.each do |field|
   value = notes[field].to_s
   if value.match(/\S/)
-    even = !even
     any = true %>
     <%= "form_names_#{field}".to_sym.t %>:
-    <%= colored_notes_box(even, value.tpl) %>
+    <%= notes_panel(value.tpl) %>
     <br/>
   <% end %>
 <% end %>
