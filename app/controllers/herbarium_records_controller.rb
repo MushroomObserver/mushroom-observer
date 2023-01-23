@@ -27,7 +27,7 @@ class HerbariumRecordsController < ApplicationController
   }.freeze
 
   def index
-    dispatch_index_to_subaction
+    dispatch_to_index_subaction
   end
 
   def show

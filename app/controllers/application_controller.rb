@@ -1545,7 +1545,7 @@ class ApplicationController < ActionController::Base
     attr :dispatch_table_for_index_subactions
   end
 
-  def dispatch_index_to_subaction
+  def dispatch_to_index_subaction
     self.class.
       dispatch_table_for_index_subactions.each do |subaction_key, subaction|
       return send(subaction || subaction_key) if params[subaction_key].present?
