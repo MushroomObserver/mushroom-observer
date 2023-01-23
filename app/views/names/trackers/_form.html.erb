@@ -1,0 +1,32 @@
+<%
+# This form can create OR update a tracker, via params[:commit]
+# Idk why rails does not recognize the model scope and nest the attributes.
+%>
+<%= form_with(model: @name_tracker, url: action,
+              id: "name_tracker_form") do |f| %>
+
+  <div class="text-center my-3">
+    <%= if @name_tracker
+      f.submit(:UPDATE.t, class: "btn btn-default") + " " +
+        f.submit(:DISABLE.t, class: "btn btn-default")
+    else
+      f.submit(:ENABLE.t, class: "btn btn-default")
+    end %>
+  </div><!-- .text-center -->
+
+  <%= fields_for(:name_tracker) do |fnt| %>
+    <div class="mt-5">
+      <%= fnt.check_box(:note_template_enabled,
+                        class: "form-control-xxx") %>
+      <%= fnt.label(:note_template_enabled, :email_tracking_note.t) %>
+    </div>
+
+    <div class="help-note mt-2 mb-5">
+      <%= :email_tracking_note_help.t %>
+    </div>
+
+    <%= fnt.text_area(:note_template, cols: 80, rows: 16,
+                      value: @note_template, data: { autofocus: true }) %><br/>
+  <% end %>
+
+<% end %>

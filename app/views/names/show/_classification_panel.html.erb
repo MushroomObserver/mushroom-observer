@@ -1,0 +1,14 @@
+<div class="col-sm-6">
+  <div id="name_classification">
+    <strong><%= :show_name_classification.t %>:</strong>
+      <% if @user %>
+        [<%= link_with_query(:EDIT.t,
+                              edit_name_classification_path(@name.id)) %>]
+      <% end %>
+    <div class="panel panel-default">
+      <div class="panel-body name-section" id="classification_section">
+        <%= render(partial: "names/show/classification") %>
+      </div>
+    </div>
+  </div><!--#name_classification-->
+</div>

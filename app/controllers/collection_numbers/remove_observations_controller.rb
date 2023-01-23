@@ -4,7 +4,7 @@
 #
 # Route: `collection_number_remove_observation_path`
 # Only one action here. Call namespaced controller actions with a hash like
-# `{ controller: "collection_numbers/remove_observation", action: :update }`
+# `{ controller: "/collection_numbers/remove_observation", action: :update }`
 module CollectionNumbers
   class RemoveObservationsController < ApplicationController
     before_action :login_required

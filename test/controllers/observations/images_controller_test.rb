@@ -11,8 +11,9 @@ module Observations
       # qr = QueryRecord.last.id.alphabetize
       assert_form_action(action: :create, id: obs.id)
       # Check that image cannot be added to an observation the user doesn't own.
-      post(:create, params: { id: observations(:minimal_unknown_obs).id })
-      assert_redirected_to(controller: "/observations", action: :show)
+      obs_no_own = observations(:minimal_unknown_obs)
+      post(:create, params: { id: obs_no_own.id })
+      assert_redirected_to(permanent_observation_path(obs_no_own.id))
     end
 
     def test_add_images_empty
@@ -120,8 +121,7 @@ module Observations
                                image4: "" } })
 
       assert_flash_error("image.process_image failure should cause flash error")
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: obs.id)
+      assert_redirected_to(permanent_observation_path(obs.id))
     end
 
     def test_edit_image
@@ -316,8 +316,7 @@ module Observations
       get(:reuse, params: params)
 
       # assert_redirected_to(%r{/#{obs.id}$})
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: obs.id)
+      assert_redirected_to(permanent_observation_path(obs.id))
 
       login("rolf", "testpassword")
       get(:reuse, params: params)
@@ -347,8 +346,7 @@ module Observations
       image = images(:disconnected_coprinus_comatus_image)
       assert_not(obs.images.member?(image))
       post_requires_login(:attach, id: obs.id, img_id: image.id)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: obs.id)
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert(obs.reload.images.member?(image))
       assert(updated_at != obs.updated_at)
     end
@@ -366,15 +364,13 @@ module Observations
       assert_not_equal("mary", owner)
       post_requires_login(:attach, params, "mary")
       # assert_template(controller: "/observations", action: :show)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: obs.id)
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert_not(obs.reload.images.member?(image))
 
       login(owner)
       post(:attach, params: params)
       # assert_template(controller: "/observations", action: :show)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: obs.id)
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert(obs.reload.images.member?(image))
       assert(updated_at != obs.updated_at)
     end
@@ -447,7 +443,7 @@ module Observations
         selected: selected
       }
       put_requires_login(:detach, params, "mary")
-      assert_redirected_to(controller: "/observations", action: :show)
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert_equal(10, mary.reload.contribution)
       assert(obs.reload.images.member?(keep))
       assert_not(obs.images.member?(remove))
@@ -460,7 +456,7 @@ module Observations
         selected: selected
       }
       put(:detach, params: params)
-      assert_redirected_to(controller: "/observations", action: :show)
+      assert_redirected_to(permanent_observation_path(obs.id))
       # Observation gets downgraded to 1 point because it no longer has images.
       # assert_equal(1, mary.reload.contribution)
       assert_equal(10, mary.reload.contribution)

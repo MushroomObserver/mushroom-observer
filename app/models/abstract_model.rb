@@ -43,8 +43,6 @@
 #  show_url::           "Official" URL for this database object.
 #  show_link_args::     "Official" link_to args for this database object.
 #  index_action::       Name of action to display index of these objects
-#  next_action          Name of action to display next one of these objects
-#  prev_action          Name of action to display previous one of these objects
 #
 #  ==== Callbacks
 #  before_create::      Do several things before creating a new record.
@@ -373,7 +371,7 @@ class AbstractModel < ApplicationRecord
   #
   #   Article.show_controller => :articles # for normalized controller
   #
-  #   Name.show_controller => :name # unnormalized controller & special cases
+  #   Name.show_controller => :name
   #
   # NOTE: `show_controller` MUST string-interpolate the controller name after
   # a leading forward slash, in order to explicitly specify a "top level"
@@ -388,11 +386,7 @@ class AbstractModel < ApplicationRecord
   # object whose path cannot be easily interpolated. - AN 10/2022
   #
   def self.show_controller
-    if controller_normalized?
-      "/#{name.pluralize.underscore}" # Rails standard for most controllers
-    else
-      "/#{name.underscore}" # old MO controller names and any special cases
-    end
+    "/#{name.pluralize.underscore}" # Rails standard for most controllers
   end
 
   def show_controller
@@ -416,7 +410,7 @@ class AbstractModel < ApplicationRecord
   # that displays search index for this object.
   #
   #   Article.index_action => :index # normalized controller
-  #   Name.index_action => :index_name # unormalized
+  #   Name.index_action => :index # unormalized
   #
   # WARNING.
   # 1. There is no standard Rails action name for displaying a **search** index.
@@ -431,9 +425,7 @@ class AbstractModel < ApplicationRecord
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
   def self.index_action
-    return :index if controller_normalized? # Rails standard
-
-    "index_#{name.underscore}".to_sym # Old MO style
+    :index
   end
 
   def index_action
@@ -443,9 +435,9 @@ class AbstractModel < ApplicationRecord
   # Return the link_to args of the "index_<object>" action
   # (the index, indexed to a particular id)
   #
-  #   Name.index_link_args(12) => {controller: "/name", action: :index_name,
+  #   Name.index_link_args(12) => {controller: "/names", action: :index,
   #                                id: 12}
-  #   name.index_link_args     => {controller: "/name", action: :index_name,
+  #   name.index_link_args     => {controller: "/names", action: :index,
   #                                id: 12}
   #
   def self.index_link_args(id)
@@ -465,9 +457,7 @@ class AbstractModel < ApplicationRecord
   #   name.show_action => :show_name
   #
   def self.show_action
-    return :show if controller_normalized? # Rails standard
-
-    "show_#{name.underscore}".to_sym # Old MO style
+    :show
   end
 
   def show_action
@@ -480,67 +470,25 @@ class AbstractModel < ApplicationRecord
   #   Article.show_url(12) => "https://mushroomobserver.org/articles/12"
   #
   #   # unnormalized controller
-  #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
-  #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
+  #   Name.show_url(12) => "https://mushroomobserver.org/names/12"
+  #   name.show_url     => "https://mushroomobserver.org/names/12"
   #
   # NOTE: show_controller now has leading forward slash,
   # to account for namespacing
   #
   def self.show_url(id)
-    if controller_normalized?
-      "#{MO.http_domain}#{show_controller}/#{id}"
-    else
-      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
-    end
+    "#{MO.http_domain}#{show_controller}/#{id}"
   end
 
   def show_url
     self.class.show_url(id)
   end
 
-  # Return the name of the "show_past_<object>" action
-  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
-  # actions are normalized.
-  # See https://www.pivotaltracker.com/story/show/174440291
-  def self.show_past_action
-    return :show_past if controller_normalized? # Rails standard
-
-    "show_past_#{name.underscore}".to_sym # Old MO style
-  end
-
-  def show_past_action
-    self.class.show_past_action
-  end
-
-  # Return the name of the "next" action
-  # See comments above at show_action
-  def self.next_action
-    return :show if controller_normalized? # Rails standard
-
-    "next_#{name.underscore}".to_sym # Old MO style
-  end
-
-  def next_action
-    self.class.next_action
-  end
-
-  # Return the name of the "prev" action
-  # See comments above at show_action
-  def self.prev_action
-    return :show if controller_normalized? # Rails standard
-
-    "prev_#{name.underscore}".to_sym # Old MO style
-  end
-
-  def prev_action
-    self.class.prev_action
-  end
-
   # Return the link_to args of the "show_<object>" action
   #
-  #   Name.show_link_args(12) => {controller: "/name", action: :show_name,
+  #   Name.show_link_args(12) => {controller: "/names", action: :show,
   #                               id: 12}
-  #   name.show_link_args     => {controller: "/name", action: :show_name,
+  #   name.show_link_args     => {controller: "/names", action: :show,
   #                               id: 12}
   #
   def self.show_link_args(id)
@@ -584,14 +532,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the name of the "edit_<object>" action (as a simple
   # lowercase string) that displays this object.
-  #
-  #   Name.edit_action => "edit_name"
-  #   name.edit_action => "edit_name"
-  #
   def self.edit_action
-    return :edit if controller_normalized? # Rails standard
-
-    "edit_#{name.underscore}".to_sym # Old MO styl
+    :edit
   end
 
   def edit_action
@@ -600,11 +542,11 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "edit_<object>" action
   #
-  #   Name.edit_url(12) => "https://mushroomobserver.org/name/edit_name/12"
-  #   name.edit_url     => "https://mushroomobserver.org/name/edit_name/12"
+  #   Name.edit_url(12) => "https://mushroomobserver.org/names/12/edit"
+  #   name.edit_url     => "https://mushroomobserver.org/names/12/edit"
   #
   def self.edit_url(id)
-    "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
+    "#{MO.http_domain}/#{edit_controller}/#{id}/#{edit_action}"
   end
 
   def edit_url
@@ -613,8 +555,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "edit_<object>" action
   #
-  #   Name.edit_link_args(12) => {controller: :name, action: :edit_name, id: 12}
-  #   name.edit_link_args     => {controller: :name, action: :edit_name, id: 12}
+  #   Name.edit_link_args(12) => {controller: "/names", action: :edit, id: 12}
+  #   name.edit_link_args     => {controller: "/names", action: :edit, id: 12}
   #
   def self.edit_link_args(id)
     { controller: edit_controller, action: edit_action, id: id }
@@ -645,22 +587,21 @@ class AbstractModel < ApplicationRecord
   #   Name.destroy_action => "destroy_name"
   #
   def self.destroy_action
-    return :destroy if controller_normalized? # Rails standard
-
-    "destroy_#{name.underscore}".to_sym # Old MO styl
+    :destroy
   end
 
   def destroy_action
     self.class.destroy_action
   end
 
-  # Return the URL of the "destroy_<object>" action
+  # Return the URL of the "destroy_<object>" action.
+  # For CRUD, must pass method: :delete or use destroy_button helper
   #
-  #   Name.destroy_url(12) => "https://mushroomobserver.org/name/destroy_name/12"
-  #   name.destroy_url     => "https://mushroomobserver.org/name/destroy_name/12"
+  #   Name.destroy_url(12) => "https://mushroomobserver.org/names/12"
+  #   name.destroy_url     => "https://mushroomobserver.org/names/12"
   #
   def self.destroy_url(id)
-    "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"
+    "#{MO.http_domain}/#{destroy_controller}/#{id}"
   end
 
   def destroy_url
@@ -670,9 +611,9 @@ class AbstractModel < ApplicationRecord
   # Return the link_to args of the "destroy_<object>" action
   #
   #   Name.destroy_link_args(12) =>
-  #     {controller: :name, action: :destroy_name, id: 12}
+  #     {controller: "/names", action: :destroy, id: 12}
   #   name.destroy_link_args     =>
-  #     {controller: :name, action: :destroy_name, id: 12}
+  #     {controller: "/names", action: :destroy, id: 12}
   #
   def self.destroy_link_args(id)
     { controller: destroy_controller, action: destroy_action, id: id }

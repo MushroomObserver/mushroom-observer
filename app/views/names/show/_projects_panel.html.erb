@@ -1,0 +1,17 @@
+<div id="name_projects">
+  <div>
+    <strong><%= :show_name_create_draft.t %>:</strong>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <% @projects.each do |project| %>
+        <%= link_with_query(project.title,
+                            new_name_description_path(
+                              @name.id,
+                              project: project.id,
+                              source: :project
+                            )) %><br>
+      <% end %>
+    </div>
+  </div>
+</div><!--#name_projects-->

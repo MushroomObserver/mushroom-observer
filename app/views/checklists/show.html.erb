@@ -6,11 +6,9 @@
     tabs = [
       link_to(:show_object.t(type: :profile), user_path(@show_user.id)),
       link_to(:show_objects.t(type: :observation),
-              controller: :observations, action: :index,
-              user: @show_user.id),
+              observations_path(user: @show_user.id)),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
-              controller: :emails, action: :ask_user_question,
-              id: @show_user.id)
+              emails_ask_user_question_path(@show_user.id))
     ]
     @tabsets = { right: draw_tab_set(tabs) }
 
@@ -58,7 +56,7 @@
   <div class="panel-body checklist">
     <ul class="list-unstyled">
       <% names.each do |name| %>
-        <li><i><%= link_to(name[0], show_name_url(name[1])) %></i></li>
+        <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>
       <% end %>
     </ul>
   </div>

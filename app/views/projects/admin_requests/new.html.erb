@@ -1,6 +1,7 @@
 <%
   @title = :admin_request_title.t(title: @project.title)
-  action = project_admin_requests_path(project_id: @project.id)
+  action = { controller: "/projects/admin_requests", action: :create,
+             project_id: @project.id }
 %>
 
 <%= form_with(scope: :email, url: action,

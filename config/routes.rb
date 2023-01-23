@@ -69,138 +69,9 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  location: {
-    add_to_location: {},
-    adjust_permissions: {},
-    advanced_search: {},
-    create_location: {},
-    create_location_description: {},
-    destroy_location: {},
-    destroy_location_description: {},
-    edit_location: {},
-    edit_location_description: {},
-    help: {},
-    index_location: {},
-    index_location_description: {},
-    list_by_country: {},
-    list_countries: {},
-    list_location_descriptions: {},
-    list_locations: {},
-    list_merge_options: {},
-    location_descriptions_by_author: {},
-    location_descriptions_by_editor: {},
-    location_search: {},
-    locations_by_editor: {},
-    locations_by_user: {},
-    make_description_default: {},
-    map_locations: {},
-    merge_descriptions: {},
-    next_location: {},
-    next_location_description: {},
-    prev_location: {},
-    prev_location_description: {},
-    publish_description: {},
-    reverse_name_order: {},
-    # show_location: {},
-    show_location_description: {},
-    show_past_location: {},
-    show_past_location_description: {}
-  },
-  name: {
-    adjust_permissions: {},
-    advanced_search: {},
-    approve_name: {},
-    approve_tracker: {},
-    authored_names: {},
-    bulk_name_edit: {},
-    change_synonyms: {},
-    create_name: {},
-    create_name_description: {},
-    deprecate_name: {},
-    destroy_name_description: {},
-    edit_classification: {},
-    edit_lifeform: {},
-    edit_name: {},
-    edit_name_description: {},
-    email_tracking: {},
-    eol: {},
-    eol_expanded_review: {},
-    eol_preview: {},
-    index_name: {},
-    index_name_description: {},
-    inherit_classification: {},
-    list_name_descriptions: {},
-    list_names: {},
-    make_description_default: {},
-    map: {},
-    merge_descriptions: {},
-    name_descriptions_by_author: {},
-    name_descriptions_by_editor: {},
-    name_search: {},
-    names_by_author: {},
-    names_by_editor: {},
-    names_by_user: {},
-    needed_descriptions: {},
-    next_name: {},
-    next_name_description: {},
-    observation_index: {},
-    prev_name: {},
-    prev_name_description: {},
-    propagate_classification: {},
-    propagate_lifeform: {},
-    publish_description: {},
-    refresh_classification: {},
-    set_review_status: {},
-    # show_name: {},
-    show_name_description: {},
-    show_past_name: {},
-    show_past_name_description: {},
-    test_index: {}
-  },
   pivotal: {
     index: {}
   },
-  project: {
-    add_members: {},
-    add_project: {},
-    admin_request: {},
-    change_member_status: {},
-    destroy_project: {},
-    edit_project: {},
-    index_project: {},
-    list_projects: {},
-    next_project: {},
-    prev_project: {},
-    project_search: {}
-    # show_project: {}
-  },
-  # species_list: {
-  #   add_observation_to_species_list: {},
-  #   add_remove_observations: {},
-  #   bulk_editor: {},
-  #   clear_species_list: {},
-  #   create_species_list: {},
-  #   destroy_species_list: {},
-  #   download: {},
-  #   edit_species_list: {},
-  #   index_species_list: {},
-  #   list_species_lists: {},
-  #   make_report: {},
-  #   manage_projects: {},
-  #   manage_species_lists: {},
-  #   name_lister: {},
-  #   next_species_list: {},
-  #   post_add_remove_observations: {},
-  #   prev_species_list: {},
-  #   print_labels: {},
-  #   remove_observation_from_species_list: {},
-  #   # show_species_list: {},
-  #   species_list_search: {},
-  #   species_lists_by_title: {},
-  #   species_lists_by_user: {},
-  #   species_lists_for_project: {},
-  #   upload_species_list: {}
-  # },
   support: {
     confirm: {},
     donate: {},
@@ -542,8 +413,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
-    get "show_past", on: :member
-
     member do
       get("images/reuse", to: "glossary_terms/images#reuse",
                           as: "reuse_images_for")
@@ -555,6 +424,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "detach_image_from")
     end
   end
+  get("glossary_terms/:id/versions", to: "glossary_terms/versions#show",
+                                     as: "glossary_term_versions")
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -609,6 +480,221 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  # ----- Locations: a lot of actions  ----------------------------
+  resources :locations, id: /\d+/
+  # Location Countries: show
+  get("locations(/:id)/countries", to: "locations/countries#index",
+                                   as: "location_countries")
+  # Location Help: show
+  get("locations/help", to: "locations/help#show")
+  # Map Locations: show
+  get("locations/map", to: "locations/maps#show", as: "map_locations")
+  # Merge Locations: form and callback
+  get("locations/merges/new", to: "locations/merges#new",
+                              as: "location_merges_form")
+  post("locations/merges", to: "locations/merges#create",
+                           as: "location_merges")
+  # Add Observation (matching :where) to Location: update
+  patch("locations/add_to_location", to: "locations/observations#update",
+                                     as: "add_observation_to_location")
+  # Location Reverse name order: update
+  put("locations/:id/reverse_name_order",
+      to: "locations/reverse_name_order#update",
+      as: "location_reverse_name_order")
+  # Location Versions: show
+  get("locations/:id/versions", to: "locations/versions#show",
+                                as: "location_versions")
+
+  # like resources, but using just an :id param:
+  get("locations(/:id)/descriptions",
+      to: "locations/descriptions#index",
+      as: "location_descriptions")
+  get("locations/descriptions/:id",
+      to: "locations/descriptions#show",
+      as: "location_description")
+  get("locations/:id/descriptions/new",
+      to: "locations/descriptions#new",
+      as: "new_location_description")
+  get("locations/descriptions/:id/edit",
+      to: "locations/descriptions#edit",
+      as: "edit_location_description")
+  post("locations/:id/descriptions",
+       to: "locations/descriptions#create")
+  match("locations/descriptions/:id",
+        to: "locations/descriptions#update", via: [:put, :patch])
+  delete("locations/descriptions/:id", to: "locations/descriptions#destroy")
+
+  # Make Descripton Default: callback only:
+  put("locations/descriptions/:id/default",
+      to: "locations/descriptions/defaults#update",
+      as: "make_default_location_description")
+  # Publish Draft Location Description: callback. Not used yet.
+  # put("locations/descriptions/:id/publish",
+  #     to: "locations/descriptions/publish#update",
+  #     as: "location_description_publish")
+  # Merge Location Descriptions: form and callback:
+  get("locations/descriptions/:id/merges/new",
+      to: "locations/descriptions/merges#new",
+      as: "location_description_merges_form")
+  post("locations/descriptions/:id/merges",
+       to: "locations/descriptions/merges#create",
+       as: "location_description_merges")
+  # Move Location Descriptions: form and callback:
+  get("locations/descriptions/:id/moves/new",
+      to: "locations/descriptions/moves#new",
+      as: "location_description_moves_form")
+  post("locations/descriptions/:id/moves",
+       to: "locations/descriptions/moves#create",
+       as: "location_description_moves")
+  # Edit Location Description Permissions: form and callback. Not used yet.
+  # get("locations/descriptions/:id/permissions/edit",
+  #     to: "locations/descriptions/permissions#edit",
+  #     as: "edit_location_description_permissions")
+  # put("locations/descriptions/:id/permissions",
+  #     to: "locations/descriptions/permissions#update",
+  #     as: "location_description_permissions")
+  # Location Description Versions: show:
+  get("locations/descriptions/:id/versions",
+      to: "locations/descriptions/versions#show",
+      as: "location_description_versions")
+
+  # ----- Names: a lot of actions  ----------------------------
+  resources :names, id: /\d+/
+  # Test Index
+  get("names/test_index", to: "names#test_index", as: "names_test_index")
+
+  # Edit Name Classification: form and callback:
+  get("names/:id/classification/edit",
+      to: "names/classification#edit",
+      as: "edit_name_classification")
+  match("names/:id/classification",
+        to: "names/classification#update", via: [:put, :patch],
+        as: "name_classification")
+  # Inherit Name Classification: form and callback:
+  get("names/:id/classification/inherit/new",
+      to: "names/classification/inherit#new",
+      as: "inherit_name_classification_form")
+  post("names/:id/classification/inherit",
+       to: "names/classification/inherit#create",
+       as: "inherit_name_classification")
+  # Propagate Name Classification: callback only:
+  put("names/:id/classification/propagate",
+      to: "names/classification/propagate#update",
+      as: "propagate_name_classification")
+  # Refresh Name Classification: callback only:
+  put("names/:id/classification/refresh",
+      to: "names/classification/refresh#update",
+      as: "refresh_name_classification")
+  # Edit Lifeforms: form and callback:
+  get("names/:id/lifeforms/edit",
+      to: "names/lifeforms#edit",
+      as: "edit_name_lifeform")
+  match("names/:id/lifeforms",
+        to: "names/lifeforms#update", via: [:put, :patch],
+        as: "name_lifeforms")
+  # Propagate Lifeforms: form and callback:
+  get("names/:id/lifeforms/propagate/edit",
+      to: "names/lifeforms/propagate#edit",
+      as: "propagate_name_lifeform_form")
+  put("names/:id/lifeforms/propagate",
+      to: "names/lifeforms/propagate#update",
+      as: "propagate_name_lifeform")
+  # Names Map: show:
+  get("names/map", to: "names/maps#show", as: "map_names")
+  get("names/:id/map", to: "names/maps#show", as: "map_name")
+  # Edit Name Synonyms: form and callback:
+  get("names/:id/synonyms/edit", to: "names/synonyms#edit",
+                                 as: "edit_name_synonyms")
+  match("names/:id/synonyms", to: "names/synonyms#update", via: [:put, :patch],
+                              as: "name_synonyms")
+  # Approve Name Synonyms: form and callback:
+  get("names/:id/synonyms/approve/new", to: "names/synonyms/approve#new",
+                                        as: "approve_name_synonym_form")
+  post("names/:id/synonyms", to: "names/synonyms/approve#create",
+                             as: "approve_name_synonym")
+  # Deprecate Name Synonyms: form and callback:
+  get("names/:id/synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
+                                          as: "deprecate_name_synonym_form")
+  post("names/:id/synonyms", to: "names/synonyms/deprecate#create",
+                             as: "deprecate_name_synonym")
+  # Name Trackers: form and callback:
+  get("names/:id/trackers/new", to: "names/trackers#new",
+                                as: "new_name_tracker")
+  post("names/:id/trackers", to: "names/trackers#create")
+  # edit: there's no tracker id because you can only have one per name
+  get("names/:id/trackers/edit", to: "names/trackers#edit",
+                                 as: "edit_name_tracker")
+  match("names/:id/trackers", to: "names/trackers#update", via: [:put, :patch])
+  # Approve Name Tracker: GET endpoint for admin email links
+  get("names/trackers/:id/approve", to: "names/trackers/approve#new",
+                                    as: "approve_name_tracker")
+  # Name EOL Data: show:
+  get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
+  get("names/eol_preview", to: "names/eol_data/preview#show",
+                           as: "names_eol_preview")
+  get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
+                                   as: "names_eol_expanded_review")
+  # Name Versions: show
+  get("names/:id/versions", to: "names/versions#show",
+                            as: "name_versions")
+
+  # like resources, but using just an :id param:
+  get("names(/:id)/descriptions",
+      to: "names/descriptions#index",
+      as: "name_descriptions")
+  get("names/descriptions/:id",
+      to: "names/descriptions#show",
+      as: "name_description")
+  get("names/:id/descriptions/new",
+      to: "names/descriptions#new",
+      as: "new_name_description")
+  get("names/descriptions/:id/edit",
+      to: "names/descriptions#edit",
+      as: "edit_name_description")
+  post("names/:id/descriptions",
+       to: "names/descriptions#create")
+  match("names/descriptions/:id",
+        to: "names/descriptions#update", via: [:put, :patch])
+  delete("names/descriptions/:id", to: "names/descriptions#destroy")
+
+  # Make Descripton Default: callback only:
+  put("names/descriptions/:id/default",
+      to: "names/descriptions/defaults#update",
+      as: "make_default_name_description")
+  # Publish Name Description Drafts: callback:
+  put("names/descriptions/:id/publish",
+      to: "names/descriptions/publish#update",
+      as: "name_description_publish")
+  # Merge Name Descriptions: form and callback:
+  get("names/descriptions/:id/merges/new",
+      to: "names/descriptions/merges#new",
+      as: "name_description_merges_form")
+  post("names/descriptions/:id/merges",
+       to: "names/descriptions/merges#create",
+       as: "name_description_merges")
+  # Move Name Descriptions: form and callback:
+  get("names/descriptions/:id/moves/new",
+      to: "names/descriptions/moves#new",
+      as: "name_description_moves_form")
+  post("names/descriptions/:id/moves",
+       to: "names/descriptions/moves#create",
+       as: "name_description_moves")
+  # Edit Name Description Permissions: form and callback:
+  get("names/descriptions/:id/permissions/edit",
+      to: "names/descriptions/permissions#edit",
+      as: "edit_name_description_permissions")
+  put("names/descriptions/:id/permissions",
+      to: "names/descriptions/permissions#update",
+      as: "name_description_permissions")
+  # Name Description Versions: show
+  get("names/descriptions/:id/versions",
+      to: "names/descriptions/versions#show",
+      as: "name_description_versions")
+  # Set review_status: callback only:
+  put("names/descriptions/:id/review_status",
+      to: "names/descriptions/review_status#update",
+      as: "name_description_review_status")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
@@ -740,17 +826,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :visual_groups, id: /\d+/, shallow: true
   end
 
-  # Temporary shorter path builders for non-CRUDified controllers SHOW
-
-  # ----- Location:
-  get("/location/show_location/:id", to: "location#show_location",
-                                     as: "show_location")
-  # ----- Name:
-  get("/name/show_name/:id", to: "name#show_name",
-                             as: "show_name")
-
-  # ----- end temporary show routes for path_builder with id ---------------
-
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   ACTIONS[:ajax].each_key do |action|
@@ -798,7 +873,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
     old_controller: "glossary", new_controller: "glossary_terms",
-    actions: [:controller, :show, :list, :index, :show_past]
+    actions: [:controller, :show, :list, :index]
   )
 
   # ----- Herbaria: legacy action redirects
@@ -840,6 +915,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/textile", to: redirect("/info/textile_sandbox"))
   get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
+
+  # ----- Names: legacy action redirects -----------------------------------
+  get("name/eol", to: redirect("names/eol_data#show"))
 
   # ----- Lookups: legacy action redirects ---------------------------
   # The only legacy lookup that was ok'd for use by external sites

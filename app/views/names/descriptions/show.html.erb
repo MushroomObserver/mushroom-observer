@@ -1,0 +1,29 @@
+<%
+  @title ||= @description.format_name.t
+  @tabsets = show_description_tabset(description: @description, pager: false)
+  @container = :wide
+%>
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <div class="row">
+
+      <div class="col-xs-12 col-md-6">
+        <%= render( partial: "shared/show_description",
+                    locals: { description: @description }) %>
+      </div><!-- .col -->
+
+      <div class="col-xs-12 col-md-6">
+        <%= show_alt_descriptions(object: @name, projects: @projects) %>
+      </div><!-- .col -->
+
+    </div><!-- .row -->
+  </div><!-- .panel-body -->
+</div><!-- .panel -->
+
+<%= render(partial: "names/descriptions/show/name_description",
+           object: @description, locals: { review: true }) %>
+<%= render(partial: "comments/comments_for_object",
+           locals: { object: @description, controls: true, limit: 10 }
+          ) if false%>
+<%= show_object_footer(@description) %>

@@ -8,94 +8,6 @@ class ExpertTest < IntegrationTestCase
     NameDescription.all_note_fields.index_with { |_f| nil }
   end
 
-  # --------------------------------------------------------
-  #  Test passing of arguments around in bulk name editor.
-  # --------------------------------------------------------
-
-  def test_bulk_name_editor
-    name1 = "Caloplaca arnoldii"
-    author1 = "(Wedd.) Zahlbr."
-
-    name2 = "Caloplaca arnoldii ssp. obliterate"
-    author2 = "(Pers.) Gaya"
-
-    name3 = "Acarospora nodulosa var. reagens"
-    author3 = "Zahlbr."
-
-    name4 = "Lactarius subalpinus"
-    name5 = "Lactarius newname"
-
-    list =
-      "#{name1} #{author1}\r\n" \
-      "#{name2} #{author2}\r\n" \
-      "#{name3} #{author3}\r\n" \
-      "#{name4} = #{name5}"
-
-    login!(dick)
-    get("/name/bulk_name_edit")
-    open_form do |form|
-      form.assert_value("list_members", "")
-      form.change("list_members", list)
-      form.submit
-    end
-    assert_flash_error
-    assert_response(:success)
-    assert_template("name/bulk_name_edit")
-
-    # Don't mess around, just let it do whatever it does, and make sure it is
-    # correct.  I don't want to make any assumptions about how the internals
-    # work (e.g., I don't want to make any assertions about the hidden fields)
-    # -- all I want to be sure of is that it doesn't mess up our list of names.
-    open_form do |form|
-      assert_equal(list.split("\r\n").sort,
-                   form.get_value!("list_members").split("\r\n").sort)
-      # field = form.get_field('approved_names')
-      form.submit
-    end
-    assert_flash_success
-    assert_template("rss_logs/index")
-
-    assert_not_nil(Name.find_by(text_name: "Caloplaca"))
-
-    names = Name.where(text_name: name1)
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(author1, names.first.author)
-    assert_equal(false, names.first.deprecated)
-
-    names = Name.where(text_name: name2.sub(/ssp/, "subsp"))
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(author2, names.first.author)
-    assert_equal(false, names.first.deprecated)
-
-    names = Name.where(text_name: name2.sub(/ssp/, "subsp"))
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(author2, names.first.author)
-    assert_equal(false, names.first.deprecated)
-
-    assert_not_nil(Name.find_by(text_name: "Acarospora"))
-    assert_not_nil(Name.find_by(text_name: "Acarospora nodulosa"))
-
-    names = Name.where(text_name: name3)
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(author3, names.first.author)
-    assert_equal(false, names.first.deprecated)
-
-    names = Name.where(text_name: name4)
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(false, names.first.deprecated)
-
-    names = Name.where(text_name: name5)
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal("", names.first.author)
-    assert_equal(true, names.first.deprecated)
-
-    # I guess this is left alone, even though you would probably
-    # expect it to be deprecated.
-    names = Name.where(text_name: "Lactarius alpinus")
-    assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(false, names.first.deprecated)
-  end
-
   # ----------------------------------------------------------
   #  Test passing of arguments around in species list forms.
   # ----------------------------------------------------------
@@ -129,7 +41,7 @@ class ExpertTest < IntegrationTestCase
     login!(dick)
     get("/species_lists/new")
     member_notes = "Member notes."
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
       form.change("title", "List Title")
@@ -156,7 +68,7 @@ class ExpertTest < IntegrationTestCase
     assert_select("#ambiguous_names", /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       assert_equal(list.split("\r\n").sort,
                    form.get_value!("list_members").split("\r\n").sort)
       form.check(
@@ -191,7 +103,7 @@ class ExpertTest < IntegrationTestCase
     # Try making some edits, too.
     click_mo_link(href: /#{edit_species_list_path(spl.id)}/)
     new_member_notes = "New member notes."
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.assert_value("list_members", "")
       form.assert_value("title", "List Title")
       form.assert_value("place_name", albion_name_reverse)
@@ -219,12 +131,12 @@ class ExpertTest < IntegrationTestCase
     assert_select("#ambiguous_names", /Amanita baccata.*sensu Borealis/)
 
     # Fix the ambiguous name.
-    open_form do |form|
+    open_form("#species_list_form") do |form|
       form.check(/chosen_multiple_names_\d+_#{amanita[1].id}/)
       form.submit
     end
     assert_flash_success
-    assert_template("location/create_location")
+    assert_template("locations/new")
 
     spl.reload
     obs = spl.observations
@@ -251,7 +163,7 @@ class ExpertTest < IntegrationTestCase
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
-    open_form do |form|
+    open_form("#location_form") do |form|
       form.assert_value("location_display_name", new_location_reverse)
       form.change("location_display_name", newer_location_reverse)
       form.change("location_north", "35.6622")
@@ -281,7 +193,7 @@ class ExpertTest < IntegrationTestCase
     assert_template("comments/new")
     assert_select("#title", text: /#{spl.title}/)
     assert_select("a[href*='species_lists/#{spl.id}']", text: /cancel/i)
-    open_form do |form|
+    open_form("#comment_form") do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")
       form.submit

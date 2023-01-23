@@ -1,0 +1,8 @@
+<% if in_admin_mode? %>
+  <div class="form-inline mt-3">
+    <div class="form-group">
+      <%= f.check_box(:locked) %>
+      <%= f.label(:locked, :form_locations_locked.t) %>
+    </div>
+  </div>
+<% end %>
