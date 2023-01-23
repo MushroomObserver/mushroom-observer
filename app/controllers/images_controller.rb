@@ -43,7 +43,7 @@ class ImagesController < ApplicationController
     pattern: :image_search,
     by_user: :images_by_user,
     for_project: :images_for_project,
-    by: :index_image,
+    by: :index_image
   }.freeze
 
   def index

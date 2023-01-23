@@ -4,6 +4,7 @@
 module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   # Searches come first because they may have the other params
+=begin
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   # NOTE: ABC offense could be fixed with the technique described in
   # https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179469322
@@ -34,8 +35,21 @@ module ObservationsController::Index
       list_observations and return
     end
   end
+=end
 
-  # Displays matrix of selected Observations (based on current Query).
+@dispatch_table_for_index_subactions = {
+  advanced_search: :advanced_search,
+  pattern: :image_search,
+  by_user: :images_by_user,
+  for_project: :images_for_project,
+  by: :index_image,
+}.freeze
+
+def index
+  dispatch_to_index_subaction
+end
+
+ # Displays matrix of selected Observations (based on current Query).
   # NOTE: Why are all the :id params converted .to_s below?
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
