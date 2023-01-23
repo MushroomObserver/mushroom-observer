@@ -1,8 +1,5 @@
 <%
-  # NOTE: action was `observations_of_name`. Whether before or after refactor,
-  # this action needed a `name` param but there's none here. Reverting to index
-  name_link = {}
-  name_link = observations_path(name: @name) if @name
+  @container = :wide
 
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
@@ -14,7 +11,6 @@
               emails_ask_user_question_path(@show_user.id))
     ]
     @tabsets = { right: draw_tab_set(tabs) }
-    name_link[:user_id] = @show_user.id
 
   elsif @project
     @title = :checklist_for_project_title.t(project: @project.title)
@@ -23,7 +19,6 @@
       link_to(:list_objects.t(type: :project), projects_path)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
-    name_link[:project_id] = @project.id
 
   elsif @species_list
     @title = :checklist_for_species_list_title.t(list: @species_list.title)
@@ -38,7 +33,6 @@
       ]
     end
     @tabsets = { right: draw_tab_set(tabs) }
-    name_link[:species_list_id] = @species_list.id
 
   else
     @title = :checklist_for_site_title.t
@@ -48,35 +42,22 @@
     ]
     @tabsets = { right: draw_tab_set(tabs) }
   end
+
+  @container = :full
+  names = @data.species
 %>
 
-<div class="text-center">
+<div class="my-4">
   <%= :checklist_summary.t(species: @data.num_species,
                            genera: @data.num_genera) %>
-  <br/>
-  <br/>
+</div>
 
-  <style>
-    table.checklist td {
-      padding: 0px 1em 0px 1em;
-    }
-  </style>
-
-  <table class="checklist">
-    <% num_cols = 5
-    names = @data.species
-    col_length = ((names.length + num_cols - 1).to_f / num_cols).truncate
-    (1..col_length).each do |row| %>
-      <tr>
-        <% (1..num_cols).each do |col| %>
-          <% i = (col-1) * col_length + row - 1
-          if i < names.length %>
-            <td><i>
-              <%= link_to(names[i], name_link.merge(name: names[i])) %>
-            </i></td>
-          <% end %>
-        <% end %>
-      </tr>
-    <% end %>
-  </table>
-</div><!--.text-center-->
+<div class="panel panel-default">
+  <div class="panel-body checklist">
+    <ul class="list-unstyled">
+      <% names.each do |name| %>
+        <li><i><%= link_to(name[0], show_name_url(name[1])) %></i></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
