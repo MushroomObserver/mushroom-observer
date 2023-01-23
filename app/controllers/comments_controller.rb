@@ -75,15 +75,15 @@ class CommentsController < ApplicationController
     dispatch_to_index_subaction
   end
 
-##############################################################################
+  ############################################################################
 
-private
+  private
 
-def default_index_action
-  list_comments
-end
+  def default_index_action
+    list_comments
+  end
 
-# Show selected list of comments, based on current Query.  (Linked from
+  # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
   def index_comment
     query = find_or_create_query(:Comment, by: params[:by])
