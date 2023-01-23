@@ -56,7 +56,7 @@
   <div class="panel-body checklist">
     <ul class="list-unstyled">
       <% names.each do |name| %>
-        <li><i><%= link_to(name[0], show_name_url(name[1])) %></i></li>
+        <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>
       <% end %>
     </ul>
   </div>
