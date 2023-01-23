@@ -30,7 +30,7 @@ class HerbariumRecordsController < ApplicationController
     KEY_TO_SUBACTION.each do |index_key, subaction|
       return send(subaction || index_key) if params[index_key].present?
     end
-    list_herbarium_records
+    default_index_action
   end
 
   def show
@@ -95,6 +95,10 @@ class HerbariumRecordsController < ApplicationController
   ##############################################################################
 
   private
+
+  def default_index_action
+    list_herbarium_records
+  end
 
   def set_ivars_for_new
     @layout = calc_layout_params
