@@ -32,14 +32,13 @@ class ProjectsController < ApplicationController
   before_action :pass_query_params, except: [:index]
   before_action :disable_link_prefetching, except: [:edit, :show]
 
+  @dispatch_table_for_index_subactions = {
+    pattern: :project_search,
+    by: :index_project
+  }.freeze
+
   def index
-    if params[:pattern].present?
-      project_search
-    elsif params[:by].present?
-      index_project
-    else
-      list_projects
-    end
+    dispatch_to_index_subaction
   end
 
   # Display project by itself.
@@ -183,6 +182,10 @@ class ProjectsController < ApplicationController
   #  :section: Index private methods
   #
   ##############################################################################
+
+  def default_index_action
+    list_projects
+  end
 
   # Show list of selected projects, based on current Query.
   def index_project
