@@ -43,7 +43,7 @@ class CommentsController < ApplicationController
   #  :section: Searches and Indexes
   #
   ##############################################################################
-
+=begin
   # rubocop:disable Metrics/AbcSize
   def index
     if params[:target].present?
@@ -61,10 +61,29 @@ class CommentsController < ApplicationController
     end
   end
   # rubocop:enable Metrics/AbcSize
+=end
 
-  private
+  @dispatch_table_for_index_subactions = {
+    target: :show_comments_for_target,
+    pattern: :comment_search,
+    by_user: :show_comments_by_user,
+    for_user: :show_comments_for_user,
+    by: :index_comment
+  }.freeze
 
-  # Show selected list of comments, based on current Query.  (Linked from
+  def index
+    dispatch_to_index_subaction
+  end
+
+##############################################################################
+
+private
+
+def default_index_action
+  list_comments
+end
+
+# Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
   def index_comment
     query = find_or_create_query(:Comment, by: params[:by])
