@@ -43,25 +43,6 @@ class CommentsController < ApplicationController
   #  :section: Searches and Indexes
   #
   ##############################################################################
-=begin
-  # rubocop:disable Metrics/AbcSize
-  def index
-    if params[:target].present?
-      show_comments_for_target
-    elsif params[:pattern].present?
-      comment_search
-    elsif params[:by_user].present?
-      show_comments_by_user
-    elsif params[:for_user].present?
-      show_comments_for_user
-    elsif params[:by].present?
-      index_comment
-    else
-      list_comments
-    end
-  end
-  # rubocop:enable Metrics/AbcSize
-=end
 
   @dispatch_table_for_index_subactions = {
     target: :show_comments_for_target,
