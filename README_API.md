@@ -209,7 +209,7 @@ ORDER BY observations.id ASC
 ```
 See also the database diagram here:
 
-* <https://github.com/MushroomObserver/mushroom-observer/blob/main/DATA_STRUCTURE.gif>
+* [DATA_STRUCTURE.gif](DATA_STRUCTURE.gif)
 
 and the database schema here:
 
