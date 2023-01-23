@@ -10,8 +10,9 @@ module Locations
     def test_list_merge_options
       albion = locations(:albion)
 
-      # Full match with albion.
+      # Full match with "Albion, California, USA"
       requires_login(:new, where: albion.display_name)
+      binding.break
       assert_obj_arrays_equal([albion], assigns(:matches))
 
       # Should match against albion.
