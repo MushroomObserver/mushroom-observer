@@ -17,21 +17,32 @@ class HerbariumRecordsController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
 
-  # rubocop:disable Metrics/AbcSize
+  INDEX_SUBACTION_KEYS = [
+    :pattern,
+    :herbarium_id,
+    :observation_id,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  KEY_TO_SUBACTION = {
+    pattern: :herbarium_record_search,
+    herbarium_id: :herbarium_index,
+    observation_id: :observation_index,
+    by: :index_herbarium_record,
+    q: :index_herbarium_record,
+    id: :index_herbarium_record
+  }.freeze
+
   def index
-    if params[:pattern].present? # rubocop:disable Style/GuardClause
-      herbarium_record_search and return
-    elsif params[:herbarium_id].present?
-      herbarium_index and return
-    elsif params[:observation_id].present?
-      observation_index and return
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_herbarium_record and return
-    else
-      list_herbarium_records and return
+    INDEX_SUBACTION_KEYS.each do |subaction|
+      if params[subaction].present?
+        return send(KEY_TO_SUBACTION[subaction] || subaction)
+      end
     end
+    list_herbarium_records
   end
-  # rubocop:enable Metrics/AbcSize
 
   def show
     case params[:flow]
