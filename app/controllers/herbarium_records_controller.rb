@@ -27,8 +27,8 @@ class HerbariumRecordsController < ApplicationController
   }.freeze
 
   def index
-    KEY_TO_SUBACTION.each do |index_key, subaction|
-      return send(subaction || index_key) if params[index_key].present?
+    KEY_TO_SUBACTION.each do |subaction_key, subaction|
+      return send(subaction || subaction_key) if params[subaction_key].present?
     end
     default_index_action
   end
