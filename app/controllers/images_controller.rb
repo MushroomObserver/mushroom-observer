@@ -38,23 +38,25 @@ class ImagesController < ApplicationController
   #
   ##############################################################################
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
-      advanced_search
-    elsif params[:pattern].present?
-      image_search
-    elsif params[:by_user].present?
-      images_by_user
-    elsif params[:for_project].present?
-      images_for_project
-    elsif params[:by].present?
-      index_image
-    else
-      list_images
-    end
+  @dispatch_table_for_index_subactions = {
+    advanced_search: :advanced_search,
+    pattern: :image_search,
+    by_user: :images_by_user,
+    for_project: :images_for_project,
+    by: :index_image,
+  }.freeze
+
+  def index
+    dispatch_to_index_subaction
   end
 
+  ########################
+
   private
+
+  def default_index_action
+    list_images
+  end
 
   # Display matrix of selected images, based on current Query.
   def index_image
