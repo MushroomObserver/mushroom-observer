@@ -213,4 +213,4 @@ See also the database diagram here:
 
 and the database schema here:
 
-* <https://github.com/MushroomObserver/mushroom-observer/blob/main/db/schema.rb>
+* [db/schema.rb](db/schema.rb)
