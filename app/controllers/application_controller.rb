@@ -1541,6 +1541,22 @@ class ApplicationController < ActionController::Base
 
   private ##########
 
+  class << self
+    attr :index_subaction_dispatch_table, :index_subaction_param_keys
+  end
+
+  def dispatch_to_index_subaction
+    self.class.index_subaction_param_keys.each do |subaction|
+      if params[subaction].present?
+        return send(
+          self.class.index_subaction_dispatch_table[subaction] ||
+          subaction
+        )
+      end
+    end
+    default_index_action
+  end
+
   def apply_content_filters(query)
     filters = users_content_filters || {}
     @any_content_filters_applied = false

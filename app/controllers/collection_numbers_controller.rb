@@ -14,7 +14,7 @@ class CollectionNumbersController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
 
-  INDEX_SUBACTION_PARAM_KEYS = [
+  @index_subaction_param_keys = [
     :pattern,
     :observation_id,
     :by,
@@ -22,7 +22,7 @@ class CollectionNumbersController < ApplicationController
     :id
   ].freeze
 
-  INDEX_SUBACTION_DISPATCH_TABLE = {
+  @index_subaction_dispatch_table = {
     pattern: :collection_number_search,
     observation_id: :observation_index,
     by: :index_collection_number,
@@ -96,18 +96,6 @@ class CollectionNumbersController < ApplicationController
   ##############################################################################
 
   private
-
-  def dispatch_to_index_subaction
-    INDEX_SUBACTION_PARAM_KEYS.each do |subaction|
-      if params[subaction].present?
-        return send(
-          INDEX_SUBACTION_DISPATCH_TABLE[subaction] ||
-          subaction
-        )
-      end
-    end
-    default_index_action
-  end
 
   def default_index_action
     list_collection_numbers
