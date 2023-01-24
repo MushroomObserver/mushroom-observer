@@ -130,8 +130,7 @@ module ObservationsController::Index
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(controller: :observations, action: :show,
-                  id: observation.id)
+      redirect_to(permanent_observation_path(observation.id))
     else
       render_observation_search_results(pattern)
     end
@@ -143,7 +142,7 @@ module ObservationsController::Index
       search.errors.each do |error|
         flash_error(error.to_s)
       end
-      render(controller: :observations, action: :index)
+      render("index", location: observations_path)
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
       show_selected_observations(
@@ -171,12 +170,14 @@ module ObservationsController::Index
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
 
-    @links = define_index_links(query)
     args = define_index_args(query, args)
 
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)
+
+    # make @query available to the :index template for query-dependent tabs
+    @query = query
 
     show_index_of_objects(query, args)
   end
@@ -200,48 +201,8 @@ module ObservationsController::Index
     names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  # rubocop:disable Metrics/AbcSize
-  def define_index_links(query)
-    @links ||= []
-
-    # Add some extra links to the index user is sent to if they click on an
-    # undefined location.
-    if query.flavor == :at_where
-      @links << [:list_observations_location_define.l,
-                 { controller: :location, action: :create_location,
-                   where: query.params[:user_where] }]
-      @links << [:list_observations_location_merge.l,
-                 { controller: :location, action: :list_merge_options,
-                   where: query.params[:user_where] }]
-      @links << [:list_observations_location_all.l,
-                 { controller: :location, action: :list_locations }]
-    end
-
-    @links << [
-      :show_object.t(type: :map),
-      map_observations_path(q: get_query_param(query))
-    ]
-
-    @links << coerced_query_link(query, Location)
-    @links << coerced_query_link(query, Name)
-    @links << coerced_query_link(query, Image)
-
-    @links << [
-      :list_observations_add_to_list.t,
-      add_query_param(edit_species_list_observations_path, query)
-    ]
-
-    @links << [
-      :list_observations_download_as_csv.t,
-      add_query_param(new_observations_download_path, query)
-    ]
-    @links
-  end
-  # rubocop:enable Metrics/AbcSize
-
   def define_index_args(query, args)
-    args = { controller: :observations,
+    args = { controller: "/observations",
              action: :index,
              matrix: true,
              include: [:name, :location, :user, :rss_log,

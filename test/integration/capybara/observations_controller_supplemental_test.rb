@@ -18,7 +18,7 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
   def test_map_observations
     login
     name = names(:boletus_edulis)
-    visit("/name/map/#{name.id}")
+    visit("/names/#{name.id}/map")
     click_link("Show Observations")
     click_link("Show Map")
     title = page.find("#title")

@@ -71,8 +71,7 @@ module Observations
       params = assigns(:params)
       nam = params.naming
 
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: nam.observation_id)
+      assert_redirected_to(permanent_observation_path(nam.observation_id))
       assert_equal(new_name, nam.text_name)
       assert_not_equal(old_name, nam.text_name)
       assert_not(nam.name.deprecated)
@@ -113,8 +112,7 @@ module Observations
         chosen_name: { name_id: names(:amanita_baccata_arora).id }
       }
       put(:update, params: params)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: nmg.observation.id)
+      assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning naming with no vote.
       assert_equal(12, rolf.reload.contribution)
       params = assigns(:params)
@@ -159,8 +157,7 @@ module Observations
         chosen_name: { name_id: chosen_name.id }
       }
       put(:update, params: params)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: nmg.observation.id)
+      assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning naming, with no vote.
       assert_equal(12, rolf.reload.contribution)
       params = assigns(:params)
@@ -184,8 +181,7 @@ module Observations
         chosen_name: {}
       }
       put(:update, params: params)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: nmg.observation.id)
+      assert_redirected_to(permanent_observation_path(nmg.observation.id))
       # Must be cloning the naming, but no votes?
       assert_equal(12, rolf.reload.contribution)
       params = assigns(:params)
@@ -495,8 +491,8 @@ module Observations
       }
       login("dick")
       post(:create, params: params)
-      assert_redirected_to(controller: "/observations", action: :show,
-                           id: observations(:coprinus_comatus_obs).id)
+      obs = observations(:coprinus_comatus_obs)
+      assert_redirected_to(permanent_observation_path(obs.id))
       # Dick is getting points for the naming, vote, and name change.
       assert_equal(12 + 10, dick.reload.contribution)
       naming = Naming.last

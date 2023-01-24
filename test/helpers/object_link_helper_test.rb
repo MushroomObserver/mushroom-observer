@@ -6,7 +6,7 @@ require("test_helper")
 class ObjectLinkHelperTest < ActionView::TestCase
   def test_name_link
     name = names(:suillus)
-    path = show_name_path(name.id)
+    path = name_path(name.id)
     html_id = "show_name_link_#{name.id}"
 
     link_text = "#{:NAME.l} ##{name.id}"

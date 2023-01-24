@@ -22,7 +22,7 @@ Here are some new ‘notes’ to play with.
 
 Here are some handy links:
 
-Show this location: https://mushroomobserver.org/location/show_location/820908802
+Show this location: https://mushroomobserver.org/locations/820908802
 I'm not interested in this location: https://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:albion) %>&type=Location&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
 Change your preferences: https://mushroomobserver.org/account/preferences/edit
 Latest changes at Mushroom Observer: https://mushroomobserver.org

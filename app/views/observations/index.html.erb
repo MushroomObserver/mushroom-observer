@@ -1,8 +1,6 @@
 <%
-  if @links.any? && @objects.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+  @tabsets = index_observation_tabset(query: @query) if @objects.any?
+
   @container = :full
 
   flash_error(@error) if @error && @objects.empty?

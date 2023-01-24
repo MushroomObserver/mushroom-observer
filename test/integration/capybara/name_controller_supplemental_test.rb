@@ -10,7 +10,7 @@ class NameControllerSupplementalTest < CapybaraIntegrationTestCase
   def test_email_tracking_template_no_email_address_symbol
     login(rolf)
 
-    visit("/name/email_tracking/#{names(:boletus_edulis).id}")
+    visit("/names/#{names(:boletus_edulis).id}/trackers/new")
     template = find("#name_tracker_note_template")
     template.assert_no_text(":mailing_address")
   end

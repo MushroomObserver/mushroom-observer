@@ -1,0 +1,25 @@
+<%
+# Form to edit or delete a tracker, via params[:commit]
+
+  @title = :email_tracking_title.t(name: @name.display_name)
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :name), name_path(@name.id))
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  action = { controller: "/names/trackers", action: :update, id: @name.id,
+             q: get_query_param }
+%>
+
+<div class="mt-5 mb-5">
+  <%= if @name.at_or_below_species?
+    :email_tracking_help_below_species.tp(
+      name: @name.display_name_without_authors
+    )
+  else
+    :email_tracking_help_above_species.tp(rank: @name.rank_translated)
+  end %>
+</div>
+
+<%= render(partial: "names/trackers/form", locals: { action: action }) %>

@@ -118,10 +118,14 @@ class LocationDescription < Description
   #  :section: Descriptions
   #
   ##############################################################################
-
-  # Override the default show_controller
   def self.show_controller
-    "/location"
+    # Not the generated default in AbstractModel, because controller namespaced.
+    "/locations/descriptions"
+  end
+
+  # Eliminate when controller_normalized? goes.
+  def self.show_action
+    :show
   end
 
   # Returns an Array of all the descriptive text fields (Symbol's).

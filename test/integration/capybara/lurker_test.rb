@@ -4,10 +4,6 @@ require("test_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
 class LurkerTest < CapybaraIntegrationTestCase
-  # temporarily use these extensions until webdriver is installed
-  # include here to avoid name conflict with MO extensions
-  # include CapybaraHelper
-
   def test_poke_around
     # Start at index.
     reset_session!
@@ -142,14 +138,14 @@ class LurkerTest < CapybaraIntegrationTestCase
     # Check out Name
     go_back_after do
       # (Should be at least two links to show the Name.)
-      assert(assert_selector("#content a[href^='/name/show_name/#{name.id}']",
+      assert(assert_selector("#content a[href^='/names/#{name.id}']",
                              minimum: 2))
 
       click_link("About #{name.text_name}")
       # (Make sure the page contains create_name_description.)
       assert(
         assert_selector(
-          "#content a[href^='/name/create_name_description/#{name.id}']"
+          "#content a[href^='/names/#{name.id}/descriptions/new']"
         )
       )
     end
@@ -191,7 +187,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     # There should be no locations of that name, though.
     select("Locations", from: "search_type")
     click_button("Search")
-    assert_match("Location Search", page.title, "Wrong page")
+    assert_match("Index", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
 
@@ -228,7 +224,7 @@ class LurkerTest < CapybaraIntegrationTestCase
   def test_obs_at_location
     login
     # Start at distribution map for Fungi.
-    visit("/name/map/#{names(:fungi).id}")
+    visit("/names/#{names(:fungi).id}/map")
 
     # Get a list of locations shown on map. (One defined, one undefined.)
     within("#right_tabs") { click_link("Show Locations") }

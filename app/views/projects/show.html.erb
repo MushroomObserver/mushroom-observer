@@ -71,8 +71,8 @@
         <b><%= :SPECIES_LISTS.t %>:</b>
         <% if @project.species_lists.any? %>
           <%= @project.species_lists.length %>
-          (<%= link_to(:SHOW.t, controller: :species_lists,
-                       action: :index, for_project: @project.id) %>)
+          (<%= link_to(:SHOW.t,
+                       species_lists_path(for_project: @project.id)) %>)
         <% else %>
           <%= :NONE.t %>
         <% end %>
@@ -83,9 +83,7 @@
         <div class="ml-3">
           <% @drafts.each do |draft| %>
             <%= link_with_query(draft.name&.display_name&.t,
-                                { controller: :name,
-                                  action: :show_name_description,
-                                  id: draft.id }) %>
+                                name_description_path(draft.id)) %>
             (<%= user_link(draft.user) %>)<br/>
           <% end %>
         </div>

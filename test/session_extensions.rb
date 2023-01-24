@@ -195,7 +195,7 @@ module SessionExtensions
   # Get an Array of URLs for the given links.
   #
   #   # This gets all the name links in the results of the last page.
-  #   urls = get_links('div.results a[href^=/name/show_name]')
+  #   urls = get_links('div.results a[href^=/names]')
   #
   def get_links(*args)
     results = []
@@ -307,7 +307,7 @@ module SessionExtensions
   # in::    Link contained in a given element type(s).
   # Sample use:
   #   click_mo_link(label: "Show Observation")
-  #   click_mo_link(href: /show_name/)
+  #   click_mo_link(href: /names/)
   #   click_mo_link(label: "User", in: :sort_tabs)
   def click_mo_link(args = {})
     return true if try_finding_matching_anchor(args)

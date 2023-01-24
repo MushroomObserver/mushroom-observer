@@ -109,7 +109,7 @@ class Description < AbstractModel
   end
 
   # Shorthand for "public && public_write"
-  def fully_public
+  def fully_public?
     public && public_write
   end
 

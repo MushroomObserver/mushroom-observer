@@ -2,7 +2,7 @@
 
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
-  before_action :login_required # except: [:index, :show, :show_past]
+  before_action :login_required
   before_action :store_location, except: [:create, :update, :destroy]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
@@ -17,7 +17,8 @@ class GlossaryTermsController < ApplicationController
   end
 
   def show
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    return unless find_glossary_term!
+
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
@@ -31,7 +32,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def edit
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    return unless find_glossary_term!
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -48,7 +49,8 @@ class GlossaryTermsController < ApplicationController
   end
 
   def update
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    return unless find_glossary_term!
+
     @glossary_term.attributes = params[:glossary_term].
                                 permit(:name, :description)
     @glossary_term.user = @user
@@ -59,7 +61,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def destroy
-    @glossary_term = GlossaryTerm.find(params[:id])
+    return unless find_glossary_term!
     return if redirect_non_admins!
 
     old_images = @glossary_term.images.to_a
@@ -72,6 +74,15 @@ class GlossaryTermsController < ApplicationController
     else
       redirect_to(glossary_term_path(@glossary_term.id))
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  def find_glossary_term!
+    @glossary_term = find_or_goto_index(GlossaryTerm,
+                                        params[:id].to_s)
   end
 
   def redirect_non_admins!
@@ -87,28 +98,6 @@ class GlossaryTermsController < ApplicationController
       image.destroy if image&.all_subjects&.empty?
     end
   end
-
-  # ---------- Non-standard REST Actions ---------------------------------------
-
-  # Show past version of GlossaryTerm.
-  # Accessible only from show_glossary_term page.
-  def show_past
-    unless (@glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s))
-      return
-    end
-
-    @glossary_term.revert_to(params[:version].to_i)
-  end
-
-  # ---------- Public methods (unrouted) ---------------------------------------
-
-  ##############################################################################
-
-  private
-
-  # --------- Filters
-
-  # --------- Other private methods
 
   def assign_image_form_ivars
     @copyright_holder = params[:copyright_holder] || @user.name

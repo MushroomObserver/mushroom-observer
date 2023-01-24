@@ -48,9 +48,7 @@ module ShowNameHelper
     query.save
     link_to(
       title,
-      add_query_param(
-        { controller: :observations, action: :index }, query
-      )
+      add_query_param(observations_path, query)
     ) + " (#{count})"
   end
 
