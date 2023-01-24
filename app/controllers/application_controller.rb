@@ -1554,7 +1554,7 @@ class ApplicationController < ActionController::Base
         )
       end
     end
-    default_index_action
+    default_index_subaction
   end
 
   def apply_content_filters(query)

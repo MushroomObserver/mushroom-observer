@@ -97,7 +97,7 @@ class CollectionNumbersController < ApplicationController
 
   private
 
-  def default_index_action
+  def default_index_subaction
     list_collection_numbers
   end
 
