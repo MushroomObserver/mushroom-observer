@@ -111,8 +111,14 @@ module Name::Format
   # author(s) string shortened per ICN Recommendation 46C.2
   # Relies on name.author having a comma only if there are > 2 authors
   def brief_author
-    author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
-      sub(/,.*/, " et al.") # then shorten any remaining > 2 authors
+    str = author
+    # pull of any qualifiers at the end, like "ined.", "nom. prov.", etc.
+    if (match = author.match(/^(.*)(, [a-z. ]+)$/))
+      str, ending = match[1, 2]
+    end
+    str.sub(/,.*\)/, " et al.)"). # shorten > 2 authors in parens
+      sub(/,.*/, " et al.") +     # then shorten any remaining > 2 authors
+      ending.to_s                 # tack qualifiers back onto end
   end
 
   module ClassMethods
