@@ -13,11 +13,11 @@ module ObservationsHelper
   #   Observation nnn: Ccc ddd Author(s) (Site ID) (Aaa bbb)
   # Observer preference shown, consensus not deprecated:
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
-  def show_obs_title(obs)
+  def show_obs_title(obs:, owner_naming: nil)
     capture do
       concat(:show_observation_header.t)
       concat(" #{obs.id || "?"}: ")
-      concat(obs_title_consensus_id(obs.name))
+      concat(obs_title_consensus_id(name: obs.name, owner_naming: owner_naming))
     end
   end
 
@@ -33,8 +33,10 @@ module ObservationsHelper
     end
   end
 
+  private
+
   # name portion of Observation title
-  def obs_title_consensus_id(name)
+  def obs_title_consensus_id(name:, owner_naming:)
     if name.deprecated &&
        (current_name = name.best_preferred_synonym).present?
       capture do
@@ -50,8 +52,7 @@ module ObservationsHelper
       capture do
         concat(link_to_display_name_brief_authors(name))
         # Differentiate this Name from Observer Preference
-        # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-        concat(" (#{:show_observation_site_id.t})") if @owner_naming # rubocop:disable Rails/HelperInstanceVariable
+        concat(" (#{:show_observation_site_id.t})") if owner_naming
       end
     end
   end
@@ -63,6 +64,8 @@ module ObservationsHelper
       :show_observation_no_clear_preference
     end
   end
+
+  public
 
   def link_to_display_name_brief_authors(name)
     link_to(name.display_name_brief_authors.t,
@@ -120,6 +123,8 @@ module ObservationsHelper
     end
     buttons.safe_join(tag.br)
   end
+
+  private
 
   def naming_name_html(naming)
     Textile.register_name(naming.name)

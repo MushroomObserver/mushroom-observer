@@ -32,8 +32,8 @@ module AjaxController::Vote
     # Send four things: Recalculated show_obs_title,
     # refreshed votes table, the new vote %, and the new num_votes
     render(inline: %(<div>
-      <%= content_tag(:div, show_obs_title(@observation),
-            title: show_obs_title(@observation).strip_html.html_safe) %>
+      <%= content_tag(:div, show_obs_title(obs: @observation),
+            title: show_obs_title(obs: @observation).strip_html.html_safe) %>
       <%= content_tag(:div, render(partial: 'observations/namings/votes/table',
             locals: { do_cancel: false, observation: @observation,
                       naming: @naming })) %>
