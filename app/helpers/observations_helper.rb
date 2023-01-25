@@ -36,7 +36,7 @@ module ObservationsHelper
   private
 
   # name portion of Observation title
-  def obs_title_consensus_id(name:, owner_naming:)
+  def obs_title_consensus_id(name:, owner_naming: nil)
     if name.deprecated &&
        (current_name = name.best_preferred_synonym).present?
       capture do
