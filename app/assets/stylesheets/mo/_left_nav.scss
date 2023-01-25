@@ -137,11 +137,28 @@ $sidebar-max-width: 15em;
       }
       padding-left: 5px;
     }
+
+    &#nav_bug_report_link {
+      color: $LEFT_BAR_HEADER_FG_COLOR;
+      &:hover,
+      &:focus {
+        color: $LEFT_BAR_FG_COLOR;
+      }
+    }
   }
 
   .list-group-item,
   a.dropdown-toggle {
     color: $LEFT_BAR_FG_COLOR;
     background-color: $LEFT_BAR_BG_COLOR;
+  }
+}
+
+
+.theme-black-on-white {
+  .navigation-themed {
+    .list-group-item#nav_bug_report_link {
+      @extend .text-danger;
+    }
   }
 }

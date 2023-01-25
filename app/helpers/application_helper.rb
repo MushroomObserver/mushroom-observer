@@ -82,6 +82,24 @@ module ApplicationHelper
     end
   end
 
+  def css_theme
+    if in_admin_mode?
+      "Admin"
+    elsif session[:real_user_id].present?
+      "Sudo"
+    elsif browser.bot? || !@user
+      MO.default_theme
+    elsif MO.themes.member?(controller.action_name)
+      # when looking at a theme's info page render it in that theme
+      controller.action_name
+    elsif @user && @user&.theme.present? &&
+          MO.themes.member?(@user.theme)
+      @user.theme
+    elsif @user
+      MO.themes.sample
+    end
+  end
+
   # --------- links and buttons ------------------------------------------------
 
   # Call link_to with query params added.
