@@ -33,19 +33,34 @@ module Locations
     #
     ############################################################################
 
-    def index
-      if params[:by_author].present?
-        location_descriptions_by_author
-      elsif params[:by_editor].present?
-        location_descriptions_by_editor
-      elsif params[:by].present? || params[:q].present? || params[:id].present?
-        index_location_description
-      else
-        list_location_descriptions
-      end
+    @index_subaction_param_keys = [
+      :by_author,
+      :by_editor,
+      :by,
+      :q,
+      :id
+    ].freeze
+
+    @index_subaction_dispatch_table = {
+      by_author: :location_descriptions_by_author,
+      by_editor: :location_descriptions_by_editor,
+      by: :index_location_description,
+      q: :index_location_description,
+      id: :index_location_description
+    }.freeze
+
+    # Disable cop because method definition prevents a
+    # Rails/LexicallyScopedActionFilter offense
+    # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+    def index # rubocop:disable Lint/UselessMethodDefinition
+      super
     end
 
     private
+
+    def default_index_subaction
+      list_location_descriptions
+    end
 
     # Displays a list of selected locations, based on current Query.
     def index_location_description
