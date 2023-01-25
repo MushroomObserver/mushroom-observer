@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require("test_helper")
+
 class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
     login

@@ -21,7 +21,7 @@
                       valid_names: @valid_names,
                       suggest_corrections: @suggest_corrections,
                       parent_deprecated: @parent_deprecated,
-                      names: @names }) %>
+                      names: @names }) if @what.present? %>
 
   <p><%= f.label(:proposed_name, :name_deprecate_preferred.t) %>:
     <%= f.text_field(:proposed_name,
