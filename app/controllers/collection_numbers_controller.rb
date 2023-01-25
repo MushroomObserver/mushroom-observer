@@ -30,7 +30,10 @@ class CollectionNumbersController < ApplicationController
     id: :index_collection_number
   }.freeze
 
-  def index
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
     super
   end
 
