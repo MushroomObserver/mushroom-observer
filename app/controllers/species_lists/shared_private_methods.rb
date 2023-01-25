@@ -49,7 +49,7 @@ module SpeciesLists
       # Okay, at this point we've apparently validated the new list of names.
       # Save the OTHER changes to the species list, then let this other method
       # (construct_observations) create the observations.  This always succeeds,
-      # so we can redirect to show_species_list (or chain to create_location).
+      # so we can redirect to show_species_list (or chain to create location).
       if !failed && @dubious_where_reasons == []
         if @species_list.save
           redirected = update_redirect_and_flash_notices(create_or_update,
@@ -172,8 +172,8 @@ module SpeciesLists
       construct_observations(@species_list, sorter)
 
       if @species_list.location.nil?
-        redirect_to(controller: "location", action: "create_location",
-                    where: @place_name, set_species_list: @species_list.id)
+        redirect_to(new_location_path(where: @place_name,
+                                      set_species_list: @species_list.id))
       else
         redirect_to(species_list_path(@species_list))
       end

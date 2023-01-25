@@ -312,7 +312,7 @@ class User < AbstractModel
   has_many :edited_locations, through: :location_description_editors,
                               source: :location_description
 
-  belongs_to :image         # mug shot
+  belongs_to :image, inverse_of: :profile_users # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
@@ -1081,7 +1081,7 @@ class User < AbstractModel
             images.joins(:glossary_term_images) -
             images.joins(:observation_images) -
             images.joins(:project_images) -
-            images.joins(:subjects)).
+            images.joins(:profile_users)).
           map(&:id)
     Image.where(id: ids).delete_all
   end

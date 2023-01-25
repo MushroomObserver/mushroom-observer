@@ -16,8 +16,8 @@ module Authors
       assert(rolf.in_group?("reviewers"))
       login("rolf")
       requires_user(:show,
-                    [{ controller: "/location",
-                       action: :show_location,
+                    [{ controller: "/locations",
+                       action: :show,
                        id: desc.location_id }],
                     params)
       assert_template(:show)
@@ -29,7 +29,7 @@ module Authors
 
       # Make sure it fails to let unauthorized users see page.
       get(:show, params: params)
-      assert_redirected_to(show_location_path(id: locations(:albion).id))
+      assert_redirected_to(location_path(id: locations(:albion).id))
 
       # Make Rolf an author.
       desc.add_author(rolf)
@@ -70,7 +70,7 @@ module Authors
 
       # Make sure it fails to let unauthorized users see page.
       get(:show, params: params)
-      assert_redirected_to(show_name_path(id: name.id))
+      assert_redirected_to(name_path(id: name.id))
 
       # Make Rolf an author.
       desc.add_author(rolf)

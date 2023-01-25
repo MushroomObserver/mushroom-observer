@@ -6,8 +6,7 @@
     <%= link_with_query(:INDEX.t, controller: object.show_controller,
                         action: object.index_action, id: object.id) %> |
     <% if @mappable %>
-      <%= link_with_query(:MAP.t, controller: :location,
-                          action: :map_locations) %> |
+      <%= link_with_query(:MAP.t, map_locations_path) %> |
     <% end %>
     <%= link_next(object) %>
   </div>

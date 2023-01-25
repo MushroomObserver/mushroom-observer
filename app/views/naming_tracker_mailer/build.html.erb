@@ -1,6 +1,6 @@
 <%
   observation_url = "#{MO.http_domain}/#{@observation.id}"
-  name_url        = "#{MO.http_domain}/name/show_name/#{@naming.name_id}"
+  name_url        = "#{MO.http_domain}/names/#{@naming.name_id}"
   observer_url    = "#{MO.http_domain}/users/#{@observation.user_id}"
   identifier_url  = "#{MO.http_domain}/users/#{@naming.user_id}"
 

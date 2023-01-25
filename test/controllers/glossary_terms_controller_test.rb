@@ -27,7 +27,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ***** show *****
   def test_show
     term = glossary_terms(:square_glossary_term)
-    prior_version_path = show_past_glossary_term_path(
+    prior_version_path = glossary_term_versions_path(
       term.id, version: term.version - 1
     )
     login
@@ -300,26 +300,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert(GlossaryTerm.exists?(term.id),
            "Non-admin should not be able to destroy glossary term")
-  end
-
-  # ---------- Other actions ---------------------------------------------------
-
-  def test_show_past
-    term = glossary_terms(:square_glossary_term)
-    version = term.versions.first # oldest version
-    login
-    get(:show_past, params: { id: term.id, version: version.version })
-
-    assert_response(:success)
-    assert_head_title(:show_past_glossary_term_title.l(num: version.version,
-                                                       name: term.name))
-
-    ESSENTIAL_ATTRIBUTES.each do |attr|
-      assert_select("body", /#{version.send(attr)}/,
-                    "Page is missing glossary term #{attr}")
-    end
-    assert_select("a[href='#{glossary_term_path(term.id)}']", true,
-                  "Page should have link to last (current) version")
   end
 
   # ---------- helpers ---------------------------------------------------------

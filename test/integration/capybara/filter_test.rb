@@ -32,11 +32,11 @@ class FilterTest < CapybaraIntegrationTestCase
     # And hits should not contain obs (which is imageless)
     results.assert_no_text(obs.id.to_s)
 
-    # Show Locations should be filtered
+    # Show Locations (from obs index) should be filtered
     click_link("Show Locations")
     page.find("#title_bar").assert_text(:filtered.t)
 
-    # And mapping them should also be filtered.
+    # And mapping them (from locations index) should also be filtered.
     click_link("Map Locations")
     page.find("#title_bar").assert_text(:filtered.t)
 

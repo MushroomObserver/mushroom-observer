@@ -81,13 +81,11 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "56", type: :name } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :name, action: :name_search,
-                         pattern: "56")
+    assert_redirected_to(names_path(pattern: "56"))
 
     params = { search: { pattern: "78", type: :location } }
     get(:pattern, params: params)
-    assert_redirected_to(controller: :location, action: :location_search,
-                         pattern: "78")
+    assert_redirected_to(locations_path(pattern: "78"))
 
     params = { search: { pattern: "90", type: :comment } }
     get(:pattern, params: params)

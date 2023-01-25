@@ -24,9 +24,10 @@
 
   <h4 class="d-inline-block mt-0"><%= :MAP.t %></h4>
   <span class="pull-right inline">
-    <%= link_with_query(:show_observation_hide_map.t,
-                        controller: :javascript, action: :hide_thumbnail_map,
-                        id: @observation.id) %>
+    <%= link_with_query(
+          :show_observation_hide_map.t,
+          javascript_hide_thumbnail_map_path(id: @observation.id)
+        ) %>
   </span>
 
   <div class="thumbnail-map-container">

@@ -15,7 +15,7 @@
             <%= link_with_query(obs.unique_format_name.t, obs.show_link_args) %>
           </div>
         <% end %>
-        <% @image.subjects.each do |user| %>
+        <% @image.profile_users.each do |user| %>
           <div>
             <%= :USER.t %>:
             <%= link_with_query(user.format_name.t, user.show_link_args) %>

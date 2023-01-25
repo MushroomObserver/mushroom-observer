@@ -68,12 +68,12 @@ module ObservationsHelper
 
   def link_to_display_name_brief_authors(name)
     link_to(name.display_name_brief_authors.t,
-            show_name_path(id: name.id))
+            name_path(id: name.id))
   end
 
   def link_to_display_name_without_authors(name)
     link_to(name.display_name_without_authors.t,
-            show_name_path(id: name.id))
+            name_path(id: name.id))
   end
 
   public ######################################################################
@@ -146,7 +146,7 @@ module ObservationsHelper
   def name_link(naming)
     link_with_query(
       naming.display_name_brief_authors.t.break_name.small_author,
-      show_name_path(id: naming.name)
+      name_path(id: naming.name)
     )
   end
 

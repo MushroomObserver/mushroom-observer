@@ -108,7 +108,7 @@ module ApplicationHelper
              end
            else
              { controller: object.show_controller,
-               action: object.next_action, id: object.id }
+               action: :show, id: object.id }
            end
     link_with_query("#{:FORWARD.t} »", path)
   end
@@ -123,7 +123,7 @@ module ApplicationHelper
              end
            else
              { controller: object.show_controller,
-               action: object.prev_action, id: object.id }
+               action: :show, id: object.id }
            end
     link_with_query("« #{:BACK.t}", path)
   end

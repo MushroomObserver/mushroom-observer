@@ -71,9 +71,7 @@ module Observations::Namings
     #   # Naming.refresh_vote_cache
     #   Observation.refresh_vote_cache
     #   flash_notice(:refresh_vote_cache.t)
-    #   redirect_with_query(controller: :rss_logs,
-    #                       action: :index,
-    #                       id: observation.id)
+    #   redirect_with_query(rss_logs_path(observation.id))
     # end
   end
 end
