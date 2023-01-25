@@ -153,3 +153,12 @@ $sidebar-max-width: 15em;
     background-color: $LEFT_BAR_BG_COLOR;
   }
 }
+
+
+.theme-black-on-white {
+  .navigation-themed {
+    .list-group-item#nav_bug_report_link {
+      @extend .text-danger;
+    }
+  }
+}
