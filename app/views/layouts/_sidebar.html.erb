@@ -21,9 +21,6 @@ classes = {
     <%= render(partial: "layouts/sidebar/info",
                 locals: { classes: classes }) %>
 
-    <%= render(partial: "layouts/sidebar/bug_report",
-                locals: { classes: classes }) %>
-
     <% if in_admin_mode? %>
       <%= render(partial: "layouts/sidebar/admin",
                   locals: { classes: classes }) %>

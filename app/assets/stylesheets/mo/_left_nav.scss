@@ -137,6 +137,14 @@ $sidebar-max-width: 15em;
       }
       padding-left: 5px;
     }
+
+    &#nav_bug_report_link {
+      color: $LEFT_BAR_HEADER_FG_COLOR;
+      &:hover,
+      &:focus {
+        color: $LEFT_BAR_FG_COLOR;
+      }
+    }
   }
 
   .list-group-item,

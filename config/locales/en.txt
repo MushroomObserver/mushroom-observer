@@ -1289,7 +1289,6 @@
   app_publications: Publications
   app_more: More
   app_other: Other
-  app_working_on_mo: We're updating!
   app_report_a_bug: Report a bug
 
   # This is for the search bar at the top of every page.
