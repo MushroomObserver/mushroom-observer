@@ -17,21 +17,30 @@ class HerbariumRecordsController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
 
-  # rubocop:disable Metrics/AbcSize
-  def index
-    if params[:pattern].present? # rubocop:disable Style/GuardClause
-      herbarium_record_search and return
-    elsif params[:herbarium_id].present?
-      herbarium_index and return
-    elsif params[:observation_id].present?
-      observation_index and return
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_herbarium_record and return
-    else
-      list_herbarium_records and return
-    end
+  @index_subaction_param_keys = [
+    :pattern,
+    :herbarium_id,
+    :observation_id,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    pattern: :herbarium_record_search,
+    herbarium_id: :herbarium_index,
+    observation_id: :observation_index,
+    by: :index_herbarium_record,
+    q: :index_herbarium_record,
+    id: :index_herbarium_record
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
-  # rubocop:enable Metrics/AbcSize
 
   def show
     case params[:flow]
@@ -95,6 +104,10 @@ class HerbariumRecordsController < ApplicationController
   ##############################################################################
 
   private
+
+  def default_index_subaction
+    list_herbarium_records
+  end
 
   def set_ivars_for_new
     @layout = calc_layout_params
