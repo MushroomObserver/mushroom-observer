@@ -54,7 +54,7 @@ class LocationsController < ApplicationController
     by_editor: :locations_by_editor,
     by: :index_location,
     q: :index_location,
-    id: :index_location,
+    id: :index_location
   }.freeze
 
   # Disable cop because method definition prevents a

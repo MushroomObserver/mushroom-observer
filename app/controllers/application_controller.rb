@@ -1383,7 +1383,7 @@ class ApplicationController < ActionController::Base
     default_index_subaction
   end
 
-# Render an index or set of search results as a list or matrix. Arguments:
+  # Render an index or set of search results as a list or matrix. Arguments:
   # query::     Query instance describing search/index.
   # args::      Hash of options.
   #
