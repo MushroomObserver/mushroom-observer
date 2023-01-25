@@ -90,7 +90,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.12.2)
-    concurrent-ruby (1.1.10)
+    concurrent-ruby (1.2.0)
     crack (0.4.5)
       rexml
     crass (1.0.6)
@@ -203,12 +203,12 @@ GEM
     raindrops (0.20.0)
     rake (13.0.6)
     rbtree (0.4.6)
-    regexp_parser (2.6.1)
+    regexp_parser (2.6.2)
     reline (0.3.2)
       io-console (~> 0.5)
     rexml (3.2.5)
     rtf (0.3.3)
-    rubocop (1.43.0)
+    rubocop (1.44.1)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.2.0.0)
