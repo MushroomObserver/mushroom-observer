@@ -32,14 +32,21 @@ class ProjectsController < ApplicationController
   before_action :pass_query_params, except: [:index]
   before_action :disable_link_prefetching, except: [:edit, :show]
 
-  def index
-    if params[:pattern].present?
-      project_search
-    elsif params[:by].present?
-      index_project
-    else
-      list_projects
-    end
+  @index_subaction_param_keys = [
+    :pattern,
+    :by
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    pattern: :project_search,
+    by: :index_project
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
 
   # Display project by itself.
@@ -183,6 +190,10 @@ class ProjectsController < ApplicationController
   #  :section: Index private methods
   #
   ##############################################################################
+
+  def default_index_subaction
+    list_projects
+  end
 
   # Show list of selected projects, based on current Query.
   def index_project
