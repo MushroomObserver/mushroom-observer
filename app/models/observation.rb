@@ -183,7 +183,8 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
-  belongs_to :thumb_image, class_name: "Image"
+  belongs_to :thumb_image, class_name: "Image",
+                           inverse_of: :thumb_glossary_terms
   belongs_to :name # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log
@@ -1176,12 +1177,10 @@ class Observation < AbstractModel
   # thumbnail to next available Image.  Saves change to thumbnail, might save
   # change to Image.  Returns Image.
   def remove_image(img)
-    if images.include?(img)
+    if images.include?(img) || thumb_image_id == img.id
       images.delete(img)
-      if thumb_image_id == img.id
-        self.thumb_image = images.empty? ? nil : images.first
-        save
-      end
+      update(thumb_image: images.empty? ? nil : images.first) \
+        if thumb_image_id == img.id
       notify_users(:removed_image)
     end
     img
