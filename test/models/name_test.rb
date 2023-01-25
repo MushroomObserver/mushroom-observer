@@ -3629,13 +3629,26 @@ class NameTest < UnitTestCase
 
   def test_more_brief_authors
     name = Name.new
+
     name.author = "(A, B, C, D & E)"
     assert_equal("(A et al.)", name.send(:brief_author))
+
     name.author = "(Blah) A, B, C, D & E"
     assert_equal("(Blah) A et al.", name.send(:brief_author))
+
     name.author = "One & Two, nom. prov."
     assert_equal("One & Two, nom. prov.", name.send(:brief_author))
-    name.author = "(A, B & C) D, E & F, ined."
-    assert_equal("(A et al.) D et al., ined.", name.send(:brief_author))
+
+    name.author = "(A, B & C) D, E & F ined."
+    assert_equal("(A et al.) D et al. ined.", name.send(:brief_author))
+
+    name.author = "(A, B & C) D, E & F nom illeg"
+    assert_equal("(A et al.) D et al. nom illeg", name.send(:brief_author))
+
+    name.author = "(A, B & C) D, E & F nom cons"
+    assert_equal("(A et al.) D et al.", name.send(:brief_author))
+
+    name.author = "(A, B & C) D, E & F, sp. nov."
+    assert_equal("(A et al.) D et al.", name.send(:brief_author))
   end
 end

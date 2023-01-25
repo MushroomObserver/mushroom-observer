@@ -108,13 +108,21 @@ module Name::Format
 
   private
 
+  PROV                       = /[a-z]+\.? prov\.?|ined\.?|ad ?int\.?/
+  INVAL                      = /[a-z]+\.? (inval|illeg(it)?)\.?/
+  ANY_ENDING_AFTER_COMMA     = /^(.*)(, [a-z. ]+)$/
+  SOME_ENDINGS_WITHOUT_COMMA = /^(.*)( (#{PROV}|#{INVAL}))$/
+  ENDINGS_WORTH_KEEPING      = / (#{PROV}|#{INVAL})$/
+
   # author(s) string shortened per ICN Recommendation 46C.2
   # Relies on name.author having a comma only if there are > 2 authors
   def brief_author
     str = author
     # pull of any qualifiers at the end, like "ined.", "nom. prov.", etc.
-    if (match = author.match(/^(.*)(, [a-z. ]+)$/))
+    if (match = author.match(ANY_ENDING_AFTER_COMMA) ||
+                author.match(SOME_ENDINGS_WITHOUT_COMMA))
       str, ending = match[1, 2]
+      ending = "" unless ending.match(ENDINGS_WORTH_KEEPING)
     end
     str.sub(/,.*\)/, " et al.)"). # shorten > 2 authors in parens
       sub(/,.*/, " et al.") +     # then shorten any remaining > 2 authors
