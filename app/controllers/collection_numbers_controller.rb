@@ -31,7 +31,7 @@ class CollectionNumbersController < ApplicationController
   }.freeze
 
   def index
-    dispatch_to_index_subaction
+    super
   end
 
   def show

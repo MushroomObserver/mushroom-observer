@@ -2,12 +2,10 @@
 
 # see observations_controller.rb
 module ObservationsController::Index
-  # Displays matrix of all Observations, sorted by date.
-  # NOTE: dipatch tables are in ObservationController
-  def index
-    # NOTE: dispatch table is in ObservationsController
-    dispatch_to_index_subaction
-  end
+
+  ###########################################################################
+  # Section: Observation#index subactions
+  # Methods called by #index via a dispatch table in ObservationController
 
   # Displays matrix of selected Observations (based on current Query).
   # NOTE: Why are all the :id params converted .to_s below?
@@ -139,6 +137,8 @@ module ObservationsController::Index
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
   end
+
+  ###########################################################################
 
   # Show selected search results as a matrix with "index" template.
   def show_selected_observations(query, args = {})
