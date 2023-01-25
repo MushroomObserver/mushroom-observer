@@ -2,10 +2,16 @@
 
 # see observations_controller.rb
 module ObservationsController::Index
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
+  end
 
   ###########################################################################
-  # Section: Observation#index subactions
-  # Methods called by #index via a dispatch table in ObservationController
+  # index subactions:
+  # methods called by #index via a dispatch table in ObservationController
 
   # Displays matrix of selected Observations (based on current Query).
   # NOTE: Why are all the :id params converted .to_s below?
