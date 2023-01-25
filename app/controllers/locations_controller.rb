@@ -36,25 +36,39 @@ class LocationsController < ApplicationController
   #
   ##############################################################################
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
-      advanced_search
-    elsif params[:pattern].present?
-      location_search
-    elsif params[:country].present?
-      list_by_country
-    elsif params[:by_user].present?
-      locations_by_user
-    elsif params[:by_editor].present?
-      locations_by_editor
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_location
-    else
-      list_locations
-    end
+  @index_subaction_param_keys = [
+    :advanced_search,
+    :pattern,
+    :country,
+    :by_user,
+    :by_editor,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    pattern: :location_search,
+    country: :list_by_country,
+    by_user: :locations_by_user,
+    by_editor: :locations_by_editor,
+    by: :index_location,
+    q: :index_location,
+    id: :index_location,
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
 
   private
+
+  def default_index_subaction
+    list_locations
+  end
 
   # Displays a list of selected locations, based on current Query.
   def index_location
