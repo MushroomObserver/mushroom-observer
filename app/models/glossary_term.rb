@@ -9,7 +9,7 @@ class GlossaryTerm < AbstractModel
 
   belongs_to(:thumb_image,
              class_name: "Image",
-             inverse_of: :best_glossary_terms)
+             inverse_of: :thumb_glossary_terms)
   belongs_to :user
   belongs_to :rss_log
 
