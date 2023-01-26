@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Activity feed / Website default page
 class RssLogsController < ApplicationController
   # Uncertain these are necessary, can delete if not.
   require "find"
@@ -12,29 +13,19 @@ class RssLogsController < ApplicationController
   ]
   before_action :disable_link_prefetching
 
-  # Default page.  Just displays latest happenings.  The actual action is
+  # Default page. Just displays latest happenings. The actual action is
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query, if exists).
   def index
     # POST requests with param `type` potentially show an array of types
     # of objects. The array comes from the checkboxes in tabset
-    if params[:type].present?
-      types = Array(params[:type])
-      types = RssLog.all_types.intersection(types)
-      types = "all" if types.length == RssLog.all_types.length
-      types = "none" if types.empty?
-      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-      query = find_or_create_query(:RssLog, type: types)
-    # Previously saved query, incorporating type and other params
-    elsif params[:q].present?
-      query = find_query(:RssLog)
-      query ||= create_query(:RssLog, :all,
-                             type: @user ? @user.default_rss_type : "all")
-    # Fresh version of the index, no existing query
-    else
-      query = create_query(:RssLog, :all,
-                           type: @user ? @user.default_rss_type : "all")
-    end
+    query = if params[:type].present?
+              type_query
+            elsif params[:q].present?
+              saved_or_new_query
+            else
+              new_query
+            end
     show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
   end
 
@@ -61,7 +52,27 @@ class RssLogsController < ApplicationController
     render_xml(layout: false)
   end
 
+  #########################################################
+
   private
+
+  def type_query
+    types = Array(params[:type])
+    types = RssLog.all_types.intersection(types)
+    types = "all" if types.length == RssLog.all_types.length
+    types = "none" if types.empty?
+    types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+    find_or_create_query(:RssLog, type: types)
+  end
+
+  def saved_or_new_query
+    find_query(:RssLog) || new_query
+  end
+
+  def new_query
+    create_query(:RssLog, :all,
+                 type: @user ? @user.default_rss_type : "all")
+  end
 
   # Show selected search results as a matrix with "index" template.
   def show_selected_rss_logs(query, args = {})
@@ -88,17 +99,19 @@ class RssLogsController < ApplicationController
     @types = query.params[:type].to_s.split.sort
     @links = []
 
-    # Let the user make this their default and fine tune.
-    if @user
-      if params[:make_default] == "1"
-        @user.default_rss_type = @types.join(" ")
-        @user.save_without_our_callbacks
-      elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [:rss_make_default.t,
-                   add_query_param(action: :index, make_default: 1)]
-      end
-    end
-
+    update_user_default_rss_type
     show_index_of_objects(query, args)
+  end
+
+  def update_user_default_rss_type
+    return unless @user
+
+    if params[:make_default] == "1"
+      @user.default_rss_type = @types.join(" ")
+      @user.save_without_our_callbacks
+    elsif @user.default_rss_type.to_s.split.sort != @types
+      @links << [:rss_make_default.t,
+                 add_query_param(action: :index, make_default: 1)]
+    end
   end
 end
