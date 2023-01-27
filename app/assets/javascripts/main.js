@@ -56,12 +56,12 @@ jQuery(document).ready(function () {
   });
 
   // Lightbox button show/hide. Delete: done by CSS now
-  // jQuery('body').on("mouseenter mouseleave", '[data-toggle="expand-icon"]', function (e){
-  //     var btn = jQuery(this).find('.theater-btn');
-  //     if( e.type == "mouseleave")
-  //         return btn.hide();
-  //     var img = jQuery(this).find('img');
-  //     btn.css('right', img.position().left).show();
-  // });
+  jQuery('body').on("mouseenter mouseleave", '[data-toggle="expand-icon"]', function (e){
+    var btn = jQuery(this).find('.theater-btn');
+    if( e.type == "mouseleave")
+        return btn.hide();
+    var img = jQuery(this).find('img');
+    btn.css('right', img.position().left).show();
+  });
 
 });
