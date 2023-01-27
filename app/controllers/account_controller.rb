@@ -169,10 +169,7 @@ class AccountController < ApplicationController
     end
   end
 
-  SPAM_BLOCKERS = %w[
-    hotmail.com
-    live.com
-  ].freeze
+  SPAM_BLOCKERS = %w[].freeze
 
   BOGUS_LOGINS = /houghgype|vemslons/
 
