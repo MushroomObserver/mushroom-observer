@@ -1,9 +1,9 @@
 jQuery(document).ready(function () {
-  // http://api.jquery.com/delegate/
 
   var $show_votes_container = jQuery('#show_votes_container');
   var $quality_vote_container = jQuery('#quality_vote_container');
-  jQuery("body").delegate("[data-role='image_vote']", 'click', function(event){
+
+  jQuery("body").on('click', "[data-role='image_vote']", function(event){
     event.preventDefault();
     var data = $(this).data();
     image_vote(data.id, data.val);

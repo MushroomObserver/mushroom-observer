@@ -330,7 +330,7 @@ function MultiImageUploader(localized_text) {
 
     $addedImagesContainer.append(_this.dom_element); //add it to the page
 
-    _this.dom_element.find('.remove_image_link').click(function () {  // bind the destroy function
+    _this.dom_element.find('.remove_image_link').on('click', function () {  // bind the destroy function
       _this.destroy();
       dateUpdater.refreshBox();
     });
@@ -436,7 +436,7 @@ function MultiImageUploader(localized_text) {
       var $camera_date = _this.dom_element.find(".camera_date_text");
       $camera_date.text(_exifSimpleDate.asDateString());//shows the exif date by the photo
       $camera_date.data('exif_date', _exifSimpleDate);
-      $camera_date.click(function () {
+      $camera_date.on('click', function () {
         _this.imageDate(_exifSimpleDate);
         dateUpdater.refreshBox();
       })

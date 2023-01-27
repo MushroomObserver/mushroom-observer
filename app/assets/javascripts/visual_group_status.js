@@ -1,7 +1,6 @@
 jQuery(document).ready(function () {
-  // http://api.jquery.com/delegate/
 
-  jQuery("body").delegate("[data-role='visual_group_status']", 'click', function(event){
+  jQuery("body").on('click', "[data-role='visual_group_status']", function(event){
     event.preventDefault();
     var data = $(this).data();
       visual_group_status(data.imgid, data.vgid, data.status);

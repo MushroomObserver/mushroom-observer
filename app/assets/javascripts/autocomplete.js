@@ -161,7 +161,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
       elem.focus(function(event) { return this2.switch_inputs(event, elem) });
-      elem.click(function(event) { return this2.our_click(event) });
+      elem.on('click', function(event) { return this2.our_click(event) });
       elem.blur(function(event) { return this2.our_blur(event) });
       elem.keydown(function(event) { return this2.our_keydown(event) });
       elem.keyup(function(event) { return this2.our_keyup(event) });

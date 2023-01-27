@@ -67,12 +67,12 @@ $(document).ready(function () {
       }
 
       // set bounds on map
-      $('.map-locate').click(function () {
+      $('.map-locate').on('click', function () {
         focusMap();
       });
 
       // clear map button
-      $('.map-clear').click(function () {
+      $('.map-clear').on('click', function () {
         clearMap();
       });
 
@@ -153,11 +153,11 @@ $(document).ready(function () {
     });
   };
 
-  $('.map-open').click(function () {
+  $('.map-open').on('click', function () {
     if (!opened) open_map();
   });
 
-  $('.map-locate').click(function () {
+  $('.map-locate').on('click', function () {
     if (!opened) open_map("focus_immediately");
   });
 });

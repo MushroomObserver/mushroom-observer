@@ -2,13 +2,13 @@ function APIKeyModule() {
   jQuery(document).ready(function () {
 
     // bindings
-    jQuery('[data-role="edit_api_key"]').click(function (event) {
+    jQuery('[data-role="edit_api_key"]').on('click', function (event) {
       var keyId = $(this).data().id;
       event.preventDefault();
       shouldShowEditFields(keyId, true);
     });
 
-    jQuery('[data-role="activate_api_key"]').click(function (event) {
+    jQuery('[data-role="activate_api_key"]').on('click', function (event) {
       var keyId = $(this).data().id;
       event.preventDefault();
       activateKey(keyId);
@@ -25,12 +25,12 @@ function APIKeyModule() {
       }
     });
 
-    jQuery('[data-role="key_notes_save"]').click(function () {
+    jQuery('[data-role="key_notes_save"]').on('click', function () {
       var keyId = $(this).data().id;
       saveKey(keyId);
     });
 
-    jQuery('[data-role="key_notes_cancel"]').click(function () {
+    jQuery('[data-role="key_notes_cancel"]').on('click', function () {
       var keyId = $(this).data().id;
       shouldShowEditFields(keyId, false);
     });

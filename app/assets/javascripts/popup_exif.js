@@ -9,7 +9,7 @@ function popup_exif(image_id) {
           )
         )
       )
-    ).click(function () {
+    ).on('click', function () {
       cover.remove();
       document.onkeypress = old_keypress;
     });

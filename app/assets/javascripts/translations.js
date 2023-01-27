@@ -23,7 +23,7 @@ function TranslationsModule(localizedText) {
     var iframe = document.getElementById('hidden_frame');
     iframe.addEventListener('load', iframe_load);
 
-    $tag_links.click(function (event) {
+    $tag_links.on('click', function (event) {
       event.preventDefault();
       if (CHANGED)
         confirm
@@ -38,25 +38,25 @@ function TranslationsModule(localizedText) {
     });
 
     // Attach listeners as delegates since they are injected into the dom.
-    $post_form.delegate('textarea', 'change, keypress', function() {
+    $post_form.on('change, keypress', 'textarea', function() {
       form_changed();
     });
 
-    $post_form.delegate('#cancel_button', 'click', function () {
+    $post_form.on('click', '#cancel_button', function () {
       clear_form();
     });
 
-    $post_form.delegate('#reload_button', 'click', function () {
+    $post_form.on('click', '#reload_button', function () {
       var data = $(this).data();
       show_tag(LOCALE, data.tag);
     });
 
-    $post_form.delegate('#locale', 'change', function () {
+    $post_form.on('change', '#locale', function () {
       var data = $(this).data();
       show_tag($(this).val(), data.tag);
     });
 
-    $post_form.delegate('[data-role="show_old_version"]', 'click', function(event) {
+    $post_form.on('click', '[data-role="show_old_version"]', function(event) {
       event.preventDefault()
       var data = $(this).data();
       show_old_version(data.id);
@@ -74,7 +74,7 @@ function TranslationsModule(localizedText) {
       var str = window.hidden_frame.str;
       if (tag != undefined) {
         // Make tag in left column gray because it's now been translated.
-        // Want only untranslated tags to be bold black to stand out better.  
+        // Want only untranslated tags to be bold black to stand out better.
         jQuery('#str_' + tag).html(str).addClass('translated faint');
       } else if (LOADED) {
         CHANGED = true;
