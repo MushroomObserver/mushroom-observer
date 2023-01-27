@@ -81,7 +81,7 @@ class AccountController < ApplicationController
   # This is the welcome page for new users who just created an account.
   def welcome; end
 
-  private
+  private #################################################
 
   def initialize_new_user
     now = Time.zone.now
@@ -174,10 +174,18 @@ class AccountController < ApplicationController
   BOGUS_LOGINS = /houghgype|vemslons/
 
   def notify_root_of_blocked_verification_email(user)
-    domain = user.email.to_s.sub(/^.*@/, "")
-    return unless SPAM_BLOCKERS.any?(domain)
-    return if user.login.to_s.match(BOGUS_LOGINS)
+    return if verification_emails_blocked_as_spam?(user) ||
+              bogus_login?(user)
 
     Account::VerificationsController.notify_root_of_verification_email(user)
+  end
+
+  def verification_emails_blocked_as_spam?(user)
+    domain = user.email.to_s.sub(/^.*@/, "")
+    SPAM_BLOCKERS.any?(domain)
+  end
+
+  def bogus_login?(user)
+    user.login.to_s.match?(BOGUS_LOGINS)
   end
 end
