@@ -116,15 +116,31 @@ class AccountController < ApplicationController
     true
   end
 
+  # Some recurring patterns we've noticed
+  BOGUS_EMAILS = / namnerbca\.com |
+                   0mg0mg0mg |
+                   yourmail@gmail\.com |
+                   @mnawl.sibicomail\.com
+                   /ix
+
+  # Some recurring patterns we've noticed
   BOGUS_LOGINS = / houghgype |
-                   Uplilla |
+                   uplilla |
                    vemslons /ix
 
   def evil_signup_credentials?
-    BOGUS_LOGINS.match?(@new_user.login) ||
-      /namnerbca.com$/ =~ @new_user.email ||
+    bogus_email? || bogus_login?
+  end
+
+  def bogus_email?
+    BOGUS_EMAILS.match?(@new_user.email) ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
-      @new_user.email.remove(".").include?("blizkoyan2017")
+      @new_user.email.remove(".").include?("blizkoyan") ||
+      @new_user.email.count(".") > 5
+  end
+
+  def bogus_login?
+    BOGUS_LOGINS.match?(@new_user.login)
   end
 
   def make_sure_theme_is_valid!
