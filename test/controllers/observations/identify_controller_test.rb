@@ -5,8 +5,8 @@ require("test_helper")
 module Observations
   class IdentifyControllerTest < FunctionalTestCase
     def test_identify_observations_index
-      obs = Observation.needs_identification
       login("mary")
+      obs = Observation.needs_identification(users(:mary))
 
       get(:index)
       # binding.break
