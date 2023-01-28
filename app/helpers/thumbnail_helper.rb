@@ -62,15 +62,16 @@ module ThumbnailHelper
 
   def image_caption_html(orig_url, image_id, obs_data = {})
     capture do
-      render(partial: "shared/lightbox/original_and_exif_links",
-             locals: { orig_url: orig_url, image_id: image_id })
+      concat(render(partial: "shared/lightbox/original_and_exif_links",
+                    locals: { orig_url: orig_url, image_id: image_id }))
+
       if obs_data[:id].present?
-        url = observation_namings_path(observation_id: obs_data[:id],
-                                       approved_name: nil)
-        render(partial: "observations/show/observation",
-               locals: { observation: obs_data[:obs] })
-        render(partial: "observations/namings/form",
-               locals: { action: :create, url: url, show_reasons: true })
+        # url = observation_namings_path(observation_id: obs_data[:id],
+        #                                approved_name: nil)
+        concat(render(partial: "observations/show/observation",
+                      locals: { observation: obs_data[:obs] }))
+        # render(partial: "observations/namings/form",
+        #        locals: { action: :create, url: url, show_reasons: true })
       end
     end
   end
