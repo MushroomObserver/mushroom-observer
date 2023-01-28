@@ -14,7 +14,7 @@ jQuery(document).ready(function () {
   jQuery('[data-toggle="tooltip"]').tooltip({ container: 'body' });
 
   // HAMBURGER HELPER
-  jQuery('[data-toggle="offcanvas"]').click(function () {
+  jQuery('[data-toggle="offcanvas"]').on('click', function () {
     jQuery(document).scrollTop(0);
     jQuery('.row-offcanvas').toggleClass('active');
     jQuery('#main_container').toggleClass('hidden-overflow-x');
@@ -22,14 +22,14 @@ jQuery(document).ready(function () {
   });
 
   // SEARCH BAR FINDER
-  jQuery('[data-toggle="search"]').click(function () {
+  jQuery('[data-toggle="search"]').on('click', function () {
     jQuery(document).scrollTop(0);
     var target = jQuery(this).data().target;
     // jQuery(target).css('margin-top', '32px');
     jQuery(target).toggleClass('hidden-xs');
   });
 
-  jQuery('[data-dismiss="alert"]').click(function () {
+  jQuery('[data-dismiss="alert"]').on('click', function () {
     setCookie('hideBanner2', BANNER_TIME, 30);
   });
 
@@ -54,4 +54,24 @@ jQuery(document).ready(function () {
       $.rails.enableElement(this);
     })
   });
+
+  // BS3 Matrix box image thumbnail lightbox button show/hide/position.
+  jQuery('body').on("mouseenter mouseleave", '[data-toggle="expand-icon"]', function (e){
+    var btn = jQuery(this).find('.theater-btn');
+    if( e.type == "mouseleave")
+        return btn.hide();
+    var img = jQuery(this).find('img');
+    btn.css('right', img.position().left).show();
+  });
+
+  // very precise binding for dynamically generated lightbox links
+  // they are not there on page load, only when lightbox activated
+  jQuery('body').on('click', '#lightbox .lb-dataContainer button.lightbox_link', function(e) {
+    e.stopPropagation();
+    var button = jQuery(e.target),
+        modal_target_id = button.data("target");
+    // must pass the button itself as second param
+    jQuery(modal_target_id).modal("toggle", button);
+  });
+
 });
