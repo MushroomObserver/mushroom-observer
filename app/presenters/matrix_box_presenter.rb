@@ -11,7 +11,7 @@ class MatrixBoxPresenter
     :where,     # location of object or target
     :time       # when object or target was last modified
 
-  def initialize(object, view, link_type = nil)
+  def initialize(object, view, link_type = :target)
     case object
     when Image
       image_to_presenter(object, view)
@@ -50,7 +50,8 @@ class MatrixBoxPresenter
       if target&.respond_to?(:thumb_image) && target&.thumb_image
         view.thumbnail(target.thumb_image,
                        link: { controller: target.show_controller,
-                               action: target.show_action, id: target.id })
+                               action: target.show_action, id: target.id },
+                       obs_data: obs_data_hash(target))
       end
     return unless (temp = rss_log.detail)
 
@@ -97,20 +98,12 @@ class MatrixBoxPresenter
     return unless observation.thumb_image
 
     # This allows an obs box to link to a naming form, or show_obs
-    link = if link_type == :naming
-             { controller: "/observations/namings", action: :new,
-               observation_id: observation.id }
-           else
-             { controller: "/observations", action: :show,
-               id: observation.id }
-           end
     # Thumbnail can likewise have a "propose a name" link
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: link,
+                     link: obs_or_naming_link(observation, link_type),
                      link_type: link_type,
-                     obs_data: { id: observation.id,
-                                 obs: observation })
+                     obs_data: obs_data_hash(observation))
   end
 
   # Grabs all the information needed for view from User instance.
@@ -138,5 +131,21 @@ class MatrixBoxPresenter
 
   def fancy_time
     time&.fancy_time
+  end
+
+  def obs_or_naming_link(observation, link_type)
+    if link_type == :naming
+      { controller: "/observations/namings", action: :new,
+        observation_id: observation.id }
+    else
+      { controller: "/observations", action: :show,
+        id: observation.id }
+    end
+  end
+
+  def obs_data_hash(observation)
+    return {} unless observation&.respond_to?(:is_collection_location)
+
+    { id: observation.id, obs: observation }
   end
 end

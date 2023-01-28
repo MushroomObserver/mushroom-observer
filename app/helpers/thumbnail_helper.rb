@@ -24,8 +24,8 @@ module ThumbnailHelper
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
       notes: "",
-      obs_data: {},
-      link_type: nil
+      link_type: :target,
+      obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
   end
@@ -61,10 +61,11 @@ module ThumbnailHelper
     end
   end
 
-  def image_caption_html(orig_url, image_id, obs_data = {}, link_type)
+  def image_caption_html(image_id, obs_data, link_type)
+    orig_url = Image.url(:original, image_id)
     capture do
       if obs_data[:id].present?
-        if link_type == :naming
+        if link_type == :naming || obs_data[:obs].vote_cache <= 0
           url = new_observation_naming_path(observation_id: obs_data[:id])
           concat(link_to(:create_naming.t, url,
                          { class: "btn btn-primary my-3 mr-3 d-inline-block",

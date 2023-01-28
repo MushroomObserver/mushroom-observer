@@ -8,13 +8,13 @@
   large_url  = Image.url(:large, image_id)
   huge_url   = Image.url(:huge, image_id)
   full_url   = Image.url(:full_size, image_id)
-  orig_url   = Image.url(:original, image_id)
   # If the image is part of an image set.
   is_set = is_set || true
 
-  # Lightbox stuff:
+  # Lightbox stuff. obs_data comes from the matrix_box presenter,
+  # link_type from view (for naming links)
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-  caption = image_caption_html(orig_url, image_id, obs_data, link_type)
+  caption = image_caption_html(image_id, obs_data, link_type)
 
   # Show original name?
   show_original_name = original && image && !image.original_name.blank? &&
