@@ -78,10 +78,19 @@ module ThumbnailHelper
         # render(partial: "observations/namings/form",
         #        locals: { action: :create, url: url, show_reasons: true })
       end
-      concat(render(partial: "shared/lightbox/original_and_exif_links",
-                    locals: { orig_url: orig_url, image_id: image_id,
-                              obs_data: obs_data }))
+      concat(original_image_link(orig_url) + " | " + image_exif_link(image_id))
     end
+  end
+
+  def original_image_link(orig_url)
+    link_to(:image_show_original.t, orig_url,
+            { class: "lightbox_link", target: "_blank", rel: "noopener" })
+  end
+
+  def image_exif_link(image_id)
+    "<button type='button' class='btn btn-link lightbox_link' \
+    data-toggle='modal' data-target='#image_exif_modal' \
+    data-image='#{image_id}'>#{:image_show_exif.t}</button>"
   end
 
   # Grab the copyright_text for an Image.

@@ -9,6 +9,7 @@ module Observations
       login("mary")
 
       get(:index)
+      # binding.break
       assert_no_flash
       assert_equal(obs.length, obs.length)
       assert_response(:success)
