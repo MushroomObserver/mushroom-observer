@@ -57,12 +57,7 @@ class AccountController < ApplicationController
 
     initialize_new_user
 
-    if block_evil_signups!
-      # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
-      render(status: :too_many_requests,
-             content_type: "text/plain",
-             plain: "We grow weary of this. Please go away.") and return
-    end
+    return block_evil_signups! if evil_signup_credentials?
 
     unless make_sure_theme_is_valid!
       redirect_back_or_default(action: :welcome)
@@ -111,9 +106,10 @@ class AccountController < ApplicationController
   # the Verification email will cause Undelivered Mail Returned to Send; and/or
   # it's a known spammer.
   def block_evil_signups!
-    return false unless evil_signup_credentials?
-
-    true
+    # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
+    render(status: :too_many_requests,
+           content_type: "text/plain",
+           plain: "We grow weary of this. Please go away.")
   end
 
   # Some recurring patterns we've noticed
