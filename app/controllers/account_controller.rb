@@ -74,10 +74,7 @@ class AccountController < ApplicationController
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
     VerifyMailer.build(@new_user).deliver_now
-    if verification_emails_blocked_as_spam?(user) ||
-       bogus_login?(user)
-      notify_root_of_blocked_verification_email(@new_user)
-    end
+    notify_root_of_blocked_verification_email(@new_user)
     redirect_back_or_default(account_welcome_path)
   end
 
@@ -120,8 +117,12 @@ class AccountController < ApplicationController
     true
   end
 
+  BOGUS_LOGINS = / houghgype |
+                   Uplilla |
+                   vemslons /ix
+
   def evil_signup_credentials?
-    /(Vemslons|Uplilla)$/ =~ @new_user.login ||
+    BOGUS_LOGINS.match?(@new_user.login) ||
       /namnerbca.com$/ =~ @new_user.email ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
       @new_user.email.remove(".").include?("blizkoyan2017")
@@ -174,9 +175,7 @@ class AccountController < ApplicationController
 
   SPAM_BLOCKERS = %w[].freeze
 
-  BOGUS_LOGINS = /houghgype|vemslons/
-
-  def notify_root_of_blocked_verification_email(user)
+  def notify_root_if_blocked_verification_email(user)
     Account::VerificationsController.notify_root_of_verification_email(user)
   end
 
