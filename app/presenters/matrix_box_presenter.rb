@@ -11,12 +11,12 @@ class MatrixBoxPresenter
     :where,     # location of object or target
     :time       # when object or target was last modified
 
-  def initialize(object, view)
+  def initialize(object, view, link_type = nil)
     case object
     when Image
       image_to_presenter(object, view)
     when Observation
-      observation_to_presenter(object, view)
+      observation_to_presenter(object, view, link_type)
     when RssLog
       rss_log_to_presenter(object, view)
     when User
@@ -81,7 +81,7 @@ class MatrixBoxPresenter
   end
 
   # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view)
+  def observation_to_presenter(observation, view, link_type)
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
@@ -96,11 +96,19 @@ class MatrixBoxPresenter
     end
     return unless observation.thumb_image
 
+    # This allows an obs box to link to a naming form, or show_obs
+    link = if link_type == :naming
+             { controller: "/observations/namings", action: :new,
+               observation_id: observation.id }
+           else
+             { controller: "/observations", action: :show,
+               id: observation.id }
+           end
+    # Thumbnail can likewise have a "propose a name" link
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: "/observations",
-                             action: :show,
-                             id: observation.id },
+                     link: link,
+                     link_type: link_type,
                      obs_data: { id: observation.id,
                                  obs: observation })
   end

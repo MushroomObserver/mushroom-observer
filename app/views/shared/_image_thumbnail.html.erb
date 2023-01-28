@@ -14,7 +14,7 @@
 
   # Lightbox stuff:
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-  caption = image_caption_html(orig_url, image_id, obs_data)
+  caption = image_caption_html(orig_url, image_id, obs_data, link_type)
 
   # Show original name?
   show_original_name = original && image && !image.original_name.blank? &&

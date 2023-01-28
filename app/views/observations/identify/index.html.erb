@@ -2,7 +2,7 @@
   # @tabsets = index_observation_tabset(query: @query) if @objects.any?
 
   @container = :full
-  @title = "Observations Needing Identification: #{@objects.length}"
+  @title = "#{:obs_needing_id.t}"
 
   flash_error(@error) if @error && @objects.empty?
 %>
@@ -10,6 +10,7 @@
 <%= paginate_block(@pages) do %>
   <ul class="row list-unstyled mt-3">
     <%= render(partial: "shared/matrix_box",
+               locals: { link_type: :naming },
                layout: "shared/matrix_table",
                collection: @objects,
                as: :object) %>

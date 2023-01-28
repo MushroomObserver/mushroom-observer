@@ -730,7 +730,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("map", to: "observations/maps#index")
       post("print_labels", to: "observations/downloads#print_labels",
                            as: "print_labels_for")
-      get("identify", to: "observations/identify#index")
+      get("identify", to: "observations/identify#index", as: "identify")
     end
   end
   # NOTE: the intentional "backwards" param specificity here:

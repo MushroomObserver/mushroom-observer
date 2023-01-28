@@ -185,9 +185,22 @@ body:after {
   }
 
   .lb-caption {
-    font-size: 13px;
-    font-weight: bold;
-    line-height: 1em;
+    color: white;
+
+    a,
+    a:visited {
+      color: white;
+    }
+
+    .panel {
+      background-color: transparent;
+      border-color: transparent;
+      color: #ccc;
+    }
+
+    .panel-body {
+      padding: 0;
+    }
   }
 
   .lb-number {
