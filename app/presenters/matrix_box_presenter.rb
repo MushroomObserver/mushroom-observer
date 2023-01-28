@@ -102,10 +102,7 @@ class MatrixBoxPresenter
                              action: :show,
                              id: observation.id },
                      obs_data: { id: observation.id,
-                                 when: observation.when.web_date,
-                                 who: who,
-                                 where: where,
-                                 notes: observation.notes })
+                                 obs: observation })
   end
 
   # Grabs all the information needed for view from User instance.
