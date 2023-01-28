@@ -10,7 +10,7 @@
   full_url   = Image.url(:full_size, image_id)
   orig_url   = Image.url(:original, image_id)
   # If the image is part of an image set.
-  is_set = is_set || false
+  is_set = is_set || true
 
   # Lightbox stuff:
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
