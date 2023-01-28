@@ -30,7 +30,7 @@ module JavascriptHelper
         browser.webkit_full_version.to_i >= 602
   end
 
-  # Schedule javascript modules for inclusion in header.  This is much safer
+  # Schedule javascript modules for inclusion in footer.  This is much safer
   # than javascript_include_tag(), since that one is ignorant of whether the
   # given module(s) have been included yet or not, and of correct order.
   #   # Example usage in view template:
@@ -48,9 +48,9 @@ module JavascriptHelper
     @javascript_files += args
   end
 
-  # This is called in the header section in the layout.  It returns the
+  # This is called in the footer section in the layout.  It returns the
   # javascript modules in correct order (see above).
-  #   # Example usage in layout header:
+  #   # Example usage in layout footer:
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
   def javascript_includes
     @javascript_files ||= []

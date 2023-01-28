@@ -77,8 +77,7 @@ class MatrixBoxPresenter
     self.thumbnail = view.thumbnail(image,
                                     link: { controller: image.show_controller,
                                             action: image.show_action,
-                                            id: image.id },
-                                    responsive: true)
+                                            id: image.id })
   end
 
   # Grabs all the information needed for view from Observation instance.

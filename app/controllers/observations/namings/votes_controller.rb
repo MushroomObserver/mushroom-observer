@@ -16,7 +16,7 @@ module Observations::Namings
     end
 
     # NOTE: MOST VOTES CAST NEVER HIT THIS CONTROLLER! THEY GO BY AJAX.
-    # Changes in the state of the Vote selects are handled by vote_by_ajax.js
+    # Changes in the state of the Vote selects handled by naming_vote_ajax.js
     # and sent to the AjaxController::Vote module at the path
     # "/ajax/vote/naming/" + naming_id, which changes naming votes directly.
 
