@@ -78,7 +78,8 @@ module ThumbnailHelper
         # render(partial: "observations/namings/form",
         #        locals: { action: :create, url: url, show_reasons: true })
       end
-      concat(original_image_link(orig_url) + " | " + image_exif_link(image_id))
+      concat(original_image_link(orig_url).html_safe + " | " +
+             image_exif_link(image_id).html_safe)
     end
   end
 
