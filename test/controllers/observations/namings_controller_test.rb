@@ -622,6 +622,7 @@ module Observations
       assert_template("observations/namings/edit")
       assert_template("observations/show/_observation")
       assert_template("shared/_form_name_feedback")
+      assert_template("observations/namings/_form")
       assert_template("observations/namings/_fields")
       assert_template("observations/show/_images")
     end
