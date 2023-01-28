@@ -23,7 +23,8 @@ module ThumbnailHelper
       theater_on_click: false,
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
-      notes: ""
+      notes: "",
+      obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
   end

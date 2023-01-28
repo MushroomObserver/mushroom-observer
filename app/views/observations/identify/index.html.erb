@@ -1,7 +1,8 @@
 <%
-  @tabsets = index_observation_tabset(query: @query) if @objects.any?
+  # @tabsets = index_observation_tabset(query: @query) if @objects.any?
 
   @container = :full
+  @title = "Observations Needing Identification: #{@objects.length}"
 
   flash_error(@error) if @error && @objects.empty?
 %>
