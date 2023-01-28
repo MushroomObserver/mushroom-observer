@@ -7,7 +7,6 @@ module ThumbnailHelper
   #   size::             Size to show, default is thumbnail.
   #   votes::            Show vote buttons?
   #   original::         Show original file name?
-  #   responsive::       Force image to fit into container.
   #   theater_on_click:: Should theater mode be opened when image clicked?
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
@@ -21,7 +20,6 @@ module ThumbnailHelper
       size: :small,
       votes: true,
       original: false,
-      responsive: true,
       theater_on_click: false,
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
@@ -36,8 +34,7 @@ module ThumbnailHelper
     thumbnail(obs.thumb_image,
               link: observation_path(id: obs.id),
               size: :thumbnail,
-              votes: true,
-              responsive: false) + image_copyright(obs.thumb_image)
+              votes: true) + image_copyright(obs.thumb_image)
   end
 
   # Grab the copyright_text for an Image.

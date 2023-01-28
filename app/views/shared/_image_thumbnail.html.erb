@@ -14,12 +14,10 @@
 
   # Lightbox stuff:
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-  show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
-  show_exif = "<button type='button' class='btn btn-link lightbox_link'
-    data-toggle='modal' data-target='#image_exif_modal'
-    data-image='#{image_id}'>#{:image_show_exif.t}</button>"
-  # We're using the lightbox "data-title" for these links
-  caption = "#{show_orig} | #{show_exif}".html_safe
+  caption = capture do
+    render(partial: "shared/lightbox/original_and_exif_links",
+           locals: { orig_url: orig_url, image_id: image_id } )
+  end
 
   # Show original name?
   show_original_name = original && image && !image.original_name.blank? &&
