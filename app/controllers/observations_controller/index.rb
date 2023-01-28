@@ -205,7 +205,7 @@ module ObservationsController::Index
     args = { controller: "/observations",
              action: :index,
              matrix: true,
-             include: [:name, :location, :user, :rss_log,
+             include: [:name, :location, :user, :namings, :rss_log,
                        { thumb_image: :image_votes }] }.merge(args)
 
     # Add some alternate sorting criteria.
