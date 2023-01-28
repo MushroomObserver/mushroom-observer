@@ -57,18 +57,16 @@ class AccountController < ApplicationController
 
     initialize_new_user
 
-    return block_evil_signups! if evil_signup_credentials?
+    return abort_signup_with_client_error if evil_signup_credentials?
 
-    unless make_sure_theme_is_valid!
-      redirect_back_or_default(action: :welcome)
-      return
+    if make_sure_theme_is_valid!
+      return render(action: :new) unless validate_and_save_new_user!
+
+      UserGroup.create_user(@new_user)
+      flash_notice("#{:runtime_signup_success.tp}#:{email_spam_notice.tp}")
+      VerifyMailer.build(@new_user).deliver_now
     end
 
-    render(action: :new) and return unless validate_and_save_new_user!
-
-    UserGroup.create_user(@new_user)
-    flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
-    VerifyMailer.build(@new_user).deliver_now
     redirect_back_or_default(account_welcome_path)
   end
 
@@ -105,7 +103,7 @@ class AccountController < ApplicationController
   # where "evil" means: sending a Verification email will throw an error;
   # the Verification email will cause Undelivered Mail Returned to Send; and/or
   # it's a known spammer.
-  def block_evil_signups!
+  def abort_signup_with_client_error
     # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
     render(status: :too_many_requests,
            content_type: "text/plain",
