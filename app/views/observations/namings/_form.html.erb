@@ -1,0 +1,15 @@
+<%
+# Fields must be separate because they're included in the obs form too.
+button_name = (action == :create) ? :CREATE.l : :SAVE_EDITS.l
+method = (action == :create) ? :post : :patch
+%>
+
+<%= form_with(model: @naming, url: url, method: method) do |f| %>
+
+  <%= f.submit(button_name, class: "btn btn-default center-block mt-5") %>
+
+  <%= render(partial: "fields",
+             locals: { action: :create, button_name: button_name,
+                       show_reasons: true }) %>
+
+<% end # form %>
