@@ -9,7 +9,7 @@ method = (action == :create) ? :post : :patch
   <%= f.submit(button_name, class: "btn btn-default center-block mt-5") %>
 
   <%= render(partial: "fields",
-             locals: { action: :create, button_name: button_name,
+             locals: { action: action, button_name: button_name,
                        show_reasons: true }) %>
 
 <% end # form %>
