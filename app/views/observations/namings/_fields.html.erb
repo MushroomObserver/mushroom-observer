@@ -1,5 +1,5 @@
 <%
-# Changing naming form html in _form_new.erb in case we want to roll back
+# This is included by obs form, naming new/edit form + lightbox identifier
 
 # Prefer NamingParams, but use raw params if no params.
 what = @params.what rescue @what
@@ -22,7 +22,6 @@ locals = {
   parent_deprecated: parent_deprecated,
   names: names
 }
-@container = :wide
 %>
 
 <div class="row">
