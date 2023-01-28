@@ -74,7 +74,10 @@ class AccountController < ApplicationController
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
     VerifyMailer.build(@new_user).deliver_now
-    notify_root_of_blocked_verification_email(@new_user)
+    if verification_emails_blocked_as_spam?(user) ||
+       bogus_login?(user)
+      notify_root_of_blocked_verification_email(@new_user)
+    end
     redirect_back_or_default(account_welcome_path)
   end
 
@@ -174,9 +177,6 @@ class AccountController < ApplicationController
   BOGUS_LOGINS = /houghgype|vemslons/
 
   def notify_root_of_blocked_verification_email(user)
-    return if verification_emails_blocked_as_spam?(user) ||
-              bogus_login?(user)
-
     Account::VerificationsController.notify_root_of_verification_email(user)
   end
 
