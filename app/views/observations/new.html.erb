@@ -2,8 +2,7 @@
   @title = :create_observation_title.t
 
   tabs = [
-    link_with_query(:create_herbarium.t,
-                    controller: :herbaria, action: :create)
+    link_with_query(:create_herbarium.t, new_herbarium_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide

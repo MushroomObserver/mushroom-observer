@@ -51,14 +51,13 @@ CONTROLLER_FILE = "#{Rails.root}/app/controllers/NAME_controller.rb".freeze
 OBJECT_TYPES = [
   ["observations",
    "Observation",
-   "observations/ID",
-   "observations/show/ID"],
+   "observations/ID"],
   ["names",
    "Name",
-   "name/show_name/ID"],
+   "names/ID"],
   ["locations",
    "Location",
-   "location/show_location/ID"],
+   "locations/ID"],
   ["species_lists",
    "SpeciesList",
    "species_lists/ID"],
@@ -67,18 +66,16 @@ OBJECT_TYPES = [
    "projects/ID"],
   ["glossary_terms",
    "GlossaryTerm",
-   "glossary_terms/ID",
-   "glossary_terms/show/ID"],
+   "glossary_terms/ID"],
   ["herbaria",
    "Herbarium",
-   "herbaria/ID",
-   "herbaria/show/ID"],
+   "herbaria/ID"],
   ["name_descriptions",
    "NameDescription",
-   "name/show_name_description/ID"],
+   "names/descriptions/ID"],
   ["location_descriptions",
    "LocationDescription",
-   "location/show_location_description/ID"]
+   "locations/descriptions/ID"]
 ].freeze
 
 # Values: [ title, URL, update_frequency ]
@@ -146,7 +143,7 @@ ROBOTS_HEADER = <<~"TXT".freeze
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
-  Disallow: /name/show_name
+  Disallow: /names
 
 TXT
 # The rest of #write_robots_file must follow immediately

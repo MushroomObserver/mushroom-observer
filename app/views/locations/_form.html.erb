@@ -1,0 +1,48 @@
+
+<%= form_with(model: @location, url: action, id: "location_form") do |f| %>
+
+  <% if !@location.locked || in_admin_mode? %>
+
+    <% if @dubious_where_reasons.any? %>
+      <div class="alert alert-warning mb-3 mt-3">
+        <p>
+          <%= @dubious_where_reasons.safe_join(safe_br) %>
+        </p>
+        <p class="help-block">
+          <%= :form_locations_dubious_help.t %>
+        </p>
+      </div><!--.alert-->
+    <% end %>
+
+    <div class="row">
+      <div class="col-md-8 col-lg-6">
+
+        <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+
+        <%= render(partial: "locations/form/admin_locked_field",
+                   locals: { f: f }) %>
+
+        <%= render(partial: "locations/form/display_name_field",
+                   locals: { f: f }) %>
+
+        <%= render(partial: "locations/form/lat_long_alt_fields",
+                   locals: { f: f }) %>
+
+      </div><!--.col-->
+
+      <div class="col-md-4 col-lg-6 mb-3 mt-3">
+
+        <%= render(partial: "locations/form/gmap") %>
+
+      </div><!--.col-md-4 col-lg-6-->
+    </div><!--.row-->
+
+  <% else %>
+
+    <%= render(partial: "locations/form/show_locked") %>
+
+  <% end %>
+
+  <%= render(partial: "locations/form/notes_field", locals: { f: f }) %>
+
+<% end %>

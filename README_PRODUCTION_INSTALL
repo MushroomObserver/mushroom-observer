@@ -109,7 +109,7 @@ root> cd /var/web/mushroom-observer
 root> su mo
 mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
-on code not on the master branch.]
+on code not on the main branch.]
 
 # If trying to keep a completely fresh installation:
 mo> mkdir log log/old tmp tmp/pids tmp/sockets

@@ -77,8 +77,7 @@ class MatrixBoxPresenter
     self.thumbnail = view.thumbnail(image,
                                     link: { controller: image.show_controller,
                                             action: image.show_action,
-                                            id: image.id },
-                                    responsive: true)
+                                            id: image.id })
   end
 
   # Grabs all the information needed for view from Observation instance.
@@ -86,7 +85,7 @@ class MatrixBoxPresenter
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
-    self.what  = view.link_with_query(name, controller: :observations,
+    self.what  = view.link_with_query(name, controller: "/observations",
                                             action: :show,
                                             id: observation.id)
     self.where = view.location_link(observation.place_name,
@@ -99,7 +98,7 @@ class MatrixBoxPresenter
 
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: :observations,
+                     link: { controller: "/observations",
                              action: :show,
                              id: observation.id })
   end

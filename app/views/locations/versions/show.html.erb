@@ -1,0 +1,18 @@
+<%
+  @title = :show_past_location_title.t(
+    num: @location.version,
+    name: @location.display_name
+  )
+
+  tabs = [
+    link_to(:show_location.t(location: @location.display_name),
+            location_path(@location.id))
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= show_past_versions(@location) %>
+
+<%= render(partial: "locations/show/location", object: @location) %>
+
+<%= show_object_footer(@location) %>

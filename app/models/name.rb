@@ -439,7 +439,7 @@ class Name < AbstractModel
     WebmasterMailer.build(
       sender_email: user.email,
       subject: "#{user.login} created #{name.real_text_name}",
-      content: "#{MO.http_domain}/name/show_name/#{name.id}"
+      content: "#{MO.http_domain}/names/#{name.id}"
     )
   end
 

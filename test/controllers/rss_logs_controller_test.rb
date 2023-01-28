@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require("test_helper")
+
 class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
     login
     get(:index)
     assert_template("shared/_matrix_box")
-    assert_link_in_html(:app_intro.t, controller: :info, action: :intro)
+    assert_link_in_html(:app_intro.t, info_intro_path)
 
     get(:index)
     assert_template("shared/_matrix_box")

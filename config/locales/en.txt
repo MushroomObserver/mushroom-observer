@@ -1222,7 +1222,7 @@
   source_credit_mo_website: Created using the "Mushroom Observer website":https://mushroomobserver.org.
   source_credit_mo_android_app: Created using the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34.
   source_credit_mo_iphone_app: Created using the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34.
-  source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md.
+  source_credit_mo_api: Created using the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
 
   ##############################################################################
 
@@ -1289,6 +1289,7 @@
   app_publications: Publications
   app_more: More
   app_other: Other
+  app_report_a_bug: Report a Bug
 
   # This is for the search bar at the top of every page.
   app_find: Find
@@ -1359,16 +1360,16 @@
   commercial_inquiry_title: Commercial Inquiry About [name]
   commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image as well as your email address.
 
-  # location/create_location_description
+  # locations/descriptions/new
   create_location_description_title: "[:create_name_description_title]"
 
-  # location/create_location
+  # locations/new
   create_location_title: "[:create_object(type=:location)]"
 
-  # name/create_name_description
+  # names/descriptions/new
   create_name_description_title: Create Description for [name]
 
-  # name/create_name
+  # names/new
   create_name_title: "[:create_object(type=:name)]"
   create_name_multiple_names_match: There are already multiple names matching "[str]".
   create_name_duplicate_identifier: is used by another Name
@@ -1707,7 +1708,7 @@
   location_dubious_unknown_country: Unknown country '[country]'
   location_dubious_unknown_state: Unrecognized state or province '[state]' for '[country]'.
 
-  # account/login
+  # account/login/new
   login_please_login: Please login
   login_login: Login
   login_user: User name or Email address
@@ -1723,7 +1724,7 @@
   login_explain_login_requirement: To prevent automated programs from consuming too much of our resources, we limit website use to registered users.
   login_data_without_login_caption: Get MO Data Without Logging In
   login_images_without_login: Get "MO Images for Machine Learning":/articles/20.
-  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md#csv-files.
+  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files.
 
   # account/logout
   logout_title: Logout
@@ -1983,6 +1984,7 @@
   show_description_edit: "[:EDIT]"
   show_description_clone: Clone
   show_description_merge: Merge With Another
+  show_description_move: Move This Description
   show_description_publish: Publish
   show_description_make_default: Make Default
   show_description_adjust_permissions: Adjust Permissions
@@ -1990,6 +1992,7 @@
   show_description_write_permissions: Edit
   show_description_clone_help: Create your own description based on this description.
   show_description_merge_help: Merge this description into another, then remove this one.
+  show_description_move_help: Move this description to a different [parent].
   show_description_publish_help: Publish this draft and make it the default public description.
   show_description_make_default_help: Make this the default description that is shown on the main '[:show_name(name=:name)]' page.
   show_description_adjust_permissions_help: Change the set of users who are allowed to view, modify or administrate this description.
@@ -2017,7 +2020,7 @@
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
 
-  # name/show_name
+  # names
   show_name_title: "[:NAME]: [name]"
   show_name_add_name: "[:add_object(type=:name)]"
   show_name_edit_name: "[:edit_object(type=:name)]"
@@ -2066,7 +2069,7 @@
   gsd_species_synonymy: GSD Species Synonymy
   sf_species_synonymy: SF Species Synonymy
 
-  # name/show_name - links to observations
+  # names - links to observations
   show_name_observations: More [:OBSERVATIONS]
   show_name_observations_of: More [:OBSERVATIONS] of [name]
   show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
@@ -2178,10 +2181,10 @@
   # location/show_past_location_description
   show_past_location_description_title: "[:VERSION] [num]: [name]"
 
-  # name/show_past_name
+  # names/versions/show
   show_past_name_title: "[:VERSION] [num]: [name]"
 
-  # name/show_past_name_description
+  # names/descriptions/versions/show
   show_past_name_description_title: "[:VERSION] [num]: [name]"
 
   # object/show_past_versions
@@ -2609,7 +2612,7 @@
 
   # support/wrapup_2012
   wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
-  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/images/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/users/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/info/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/names/383\">Show Name</a> and <a href=\"/images/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/users/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/info/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
 
   cannot_be_blank: cannot be blank
 
@@ -2629,9 +2632,10 @@
   visual_group_includes_names: Includes images from these names
 
   # Links to CRUD pages
-  visual_group_back_to_index: Back to Visual Group Index
-  visual_group_edit: Edit Visual Group
-  visual_group_show: Show Visual Group
+  visual_group_index: "[:VISUAL_GROUP] Index"
+  visual_group_edit: "Edit [:VISUAL_GROUP]"
+  visual_group_show: "Show [:VISUAL_GROUP]"
+  visual_group_create: "Create [:VISUAL_GROUP]"
 
   # visual_groups/show
   definitional_images: Definitional Images
@@ -2650,8 +2654,8 @@
 
   # visual_models/show
   show_visual_model_title: "[name] [:VISUAL_MODEL]"
-  show_visual_model_back_to_index: Back to Visual Model Index
-  show_visual_model_edit: Edit Visual Model
+  show_visual_model_edit: "[:EDIT] [:VISUAL_MODEL]"
+  show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
 
   # visual_models/destroy
   destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
@@ -2776,7 +2780,7 @@
   image_vote_anonymity_made_public: Made all of your image votes public.  Please also check your vote preference below to ensure that future votes are also public.
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/emails/ask_webmaster_question for help.
 
-  # interest-related controls in name/show_name, observation/show_observation, etc.
+  # interest-related controls in names, observations, etc.
   interest_watch: Watch
   interest_ignore: Ignore
   interest_watch_help: Click here if you want us to send you email whenever there is a change in this [object].
@@ -3385,8 +3389,8 @@
   how_adding_comments: "*Adding Comments* - When you are looking at an \"Observation\":#observation, if you would like to post or respond to a \"Comment\":#comment, select the '[:show_comments_add_comment]' link near the top of the page.  If you are not currently logged in to a \"User\":#user account, you will be asked to log in.  Once you are logged in, you will be given a form asking for a summary and your comment.  Note that you can do some simple formatting in the comment section.  This is briefly documented below the text field with a link to detailed documentation.  You can also add links within a comment using standard HTML formatting.  The HTML gets automatically cleaned to avoid security problems like script injection, so try not to get too fancy."
   how_tracking_species: "*Tracking a Particular Species or Genus Through Email* - [:app_title] allows you to request an email any time a particular \"Name\":#name is given to an \"Observation\":#observation.  If that name is a genus or species it will also send you an email whenever a species or subspecies is observed.  To turn this feature on, go to the page for a Name you are interested in (see \"Searching\":#searching) and click '[:show_name_email_tracking]'.  You can configure it so that the person who made the observation that was given that name will be sent a customized email to let them know you are interested in their observation.  If you don't provide any instructions, they will not be sent an email.  If the observer gives the name at the time the observation is created, they will be shown your message immediately through the website. You can modify or disable your request for a particular name by going back to that name and again selecting '[:show_name_email_tracking]' and clicking the '[:DISABLE]' button on the page that comes up."
   how_describing_species: "*Describing Species* - Click any \"Name\":#name link you see throughout the site.  For example, click on 'Names' under 'Indexes' on the left side of the page then click on any of the results, or search for a name in the search bar, or click the 'About &lt;&#110;ame&gt;...' link at the top of any \"Observation\":#observation page.  These all take you to a page summarizing everything we know about this taxon.  If you are familiar with this species and there is something you would like to add, click '[:show_name_edit_name]' and add your notes.  You are encouraged to cite references including field guides and scientific papers.  Short quotes from references are fine, but please don't make extensive quotes without obtaining permission from the original author."
-  how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it.  The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/project/list_projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'.  The person who creates the project is always a member and an administrator for that project.  An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page.  Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages.  Any User can send requests to the admins for a project.  These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species.  Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators.  When a description is published it will become the official description if no official description exists yet."
-  how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/name/map/284), Location Maps (e.g., \"Salt Point State Park\":/location/show_location/4) and the \"[:map_locations_global_map]\":/location/map_locations.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name.  The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map.  This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected.  When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'.  By default it is checked.  If you uncheck it, that observation will not appear in any occurrence maps."
+  how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it.  The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'.  The person who creates the project is always a member and an administrator for that project.  An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page.  Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages.  Any User can send requests to the admins for a project.  These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species.  Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators.  When a description is published it will become the official description if no official description exists yet."
+  how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/location/map_locations.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name.  The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map.  This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected.  When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'.  By default it is checked.  If you uncheck it, that observation will not appear in any occurrence maps."
   how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location.  These observations will not appear in our \"occurrence maps\":#maps.  An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'.  Undefined location names will be followed by a link labeled '[:SEARCH]'.  If you click the link for an undefined location, it will show a list of observations reported for that location.  The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'.  Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location.  Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined.  Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/location/list_locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location).  In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park').  You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/location/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users).  If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's.  This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details.  Merging defined locations is restricted since it can cause significant data loss."
   how_creating_species_lists: "*Creating Species Lists* - To create a \"Species List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel.  Fill out the various fields.  In the 'Write-In Species' field, you should give each species a \"Name\":#name on a line by itself.  When you go to create the list, each line is checked to see if there is a match in the database.  If there is no matching name, you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names.  Each name given in the 'Write-In Species' field (or loaded from a file) will be used to create a completely new \"Observation\":#observation.  The '[:form_species_lists_list_notes]' are only shown when the entire species list is shown.  Use '[:form_species_lists_member_notes]' to indicate text you would like to add to each new observation.\n\nThere are several methods of collecting a set of existing observations into a new list.  In the simplest method, first create an empty species list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'.  This will give you the opportunity to add that observation to any species list you own.  (Note, you can add anyone's observations to a species list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names.  For example, you may use the search bar at the top of the page or the '\"[:app_advanced_search]\":/search/advanced' feature to request all observations from Michigan.  When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel), and it will give you a list of all the matching names to choose from in the new species list form.\n\nLastly, when you are viewing an existing species list, you may click '[:species_list_show_clone_list]' or '[:species_list_show_set_source]' at the top of the page.  '[:species_list_show_clone_list]' will take you directly to a new species list form, with all the information of the existing list already filled in.  '[:species_list_show_set_source]' will copy that species list's names to the clipboard.  The next time you click '[:app_create_list]', the new species list form will give you this list of names to choose from (unless you show another observation or name index in the meantime)."
 
@@ -3726,7 +3730,7 @@
 
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
-  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/name/show_name/31080.
+  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/names/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].

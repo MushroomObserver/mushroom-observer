@@ -333,12 +333,10 @@ module ObservationsController::NewAndCreate
 
   def redirect_to_next_page
     if @observation.location.nil?
-      redirect_to(controller: :location,
-                  action: :create_location,
-                  where: @observation.place_name,
-                  set_observation: @observation.id)
+      redirect_to(new_location_path(where: @observation.place_name,
+                                    set_observation: @observation.id))
     else
-      redirect_to(action: :show, id: @observation.id)
+      redirect_to(permanent_observation_path(@observation.id))
     end
   end
 
@@ -349,7 +347,7 @@ module ObservationsController::NewAndCreate
     init_specimen_vars_for_reload
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
-    render(action: :new)
+    render(action: :new, location: new_observation_path(q: get_query_param))
   end
 end
 # rubocop:enable Metrics/ModuleLength

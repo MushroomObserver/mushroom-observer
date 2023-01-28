@@ -8,7 +8,7 @@ class PostObservationTest < IntegrationTestCase
   NEW_OBSERVATION_TEMPLATE = "observations/new"
   CREATE_OBSERVATION_TEMPLATE = "observations"
   EDIT_OBSERVATION_TEMPLATE = "observations/edit"
-  CREATE_LOCATION_TEMPLATE = "location/create_location"
+  CREATE_LOCATION_TEMPLATE = "locations/new"
   OBSERVATION_INDEX_TEMPLATE = "observations/index"
 
   PASADENA_EXTENTS = {
@@ -216,7 +216,7 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations?where")
-    assert_link_exists_containing(show_location_path(new_loc.id))
+    assert_link_exists_containing(location_path(new_loc.id))
     assert_link_exists_containing(image_path(new_img.id))
   end
 

@@ -467,8 +467,9 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.mailing_address)
     assert_equal("", herbarium.description)
     assert_empty(herbarium.curators)
-    assert_redirected_to(controller: :location, action: :create_location,
-                         where: "New Location", set_herbarium: herbarium.id)
+    assert_redirected_to(new_location_path(
+                           where: "New Location", set_herbarium: herbarium.id
+                         ))
   end
 
   def test_create_personal_herbarium
@@ -607,8 +608,9 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_equal(last_update, nybg.reload.updated_at)
-    assert_redirected_to(controller: :emails, action: :merge_request,
-                         type: :Herbarium, old_id: nybg.id, new_id: other.id)
+    assert_redirected_to(emails_merge_request_path(
+                           type: :Herbarium, old_id: nybg.id, new_id: other.id
+                         ))
   end
 
   def test_update_with_duplicate_name_by_owner_of_all_records
@@ -638,8 +640,8 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_nil(nybg.reload.location)
-    assert_redirected_to(controller: :location, action: :create_location,
-                         where: "New Location", set_herbarium: nybg.id)
+    assert_redirected_to(new_location_path(where: "New Location",
+                                           set_herbarium: nybg.id))
   end
 
   def test_update_user_make_personal_by_owner_of_some_records

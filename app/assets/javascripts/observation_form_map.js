@@ -9,17 +9,15 @@ var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
 // ./observations/new
 $(document).ready(function () {
   var opened = false;
-  var map_div = $('#observationFormMap');
+  // NOTE: for gmap, map_div can't be a jQuery object. only use vanilla JS w/ it
+  var map_div = document.getElementById('observation_form_map');
 
   var open_map = function (focus_immediately) {
     opened = true;
-    var indicator_url = map_div.data("indicator-url");
+    var indicator_url = map_div.dataset.indicatorUrl //("indicator-url");
 
-    map_div.removeClass("hidden").css({
-      "background-position": "center center",
-      "background-image": "url(" + indicator_url + ")",
-      "background-repeat": "no-repeat"
-    });
+    map_div.classList.remove("hidden");
+    map_div.style.backgroundImage = "url(" + indicator_url + ")";
     $('.map-clear').removeClass("hidden");
     $('.map-open').hide();
 
@@ -69,12 +67,12 @@ $(document).ready(function () {
       }
 
       // set bounds on map
-      $('.map-locate').click(function () {
+      $('.map-locate').on('click', function () {
         focusMap();
       });
 
       // clear map button
-      $('.map-clear').click(function () {
+      $('.map-clear').on('click', function () {
         clearMap();
       });
 
@@ -155,11 +153,11 @@ $(document).ready(function () {
     });
   };
 
-  $('.map-open').click(function () {
+  $('.map-open').on('click', function () {
     if (!opened) open_map();
   });
 
-  $('.map-locate').click(function () {
+  $('.map-locate').on('click', function () {
     if (!opened) open_map("focus_immediately");
   });
 });

@@ -24,7 +24,7 @@ module ImageTabsHelper
       link_with_query(:show_object.t(type: :observation),
                       permanent_observation_path(obs.id)),
       link_with_query(:show_object.t(type: :name),
-                      show_name_path(obs.name.id)),
+                      name_path(obs.name.id)),
       link_to(:google_images.t,
               "http://images.google.com/images?q=#{obs.name.search_name}")
     ]

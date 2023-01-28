@@ -270,8 +270,7 @@ class AmateurTest < IntegrationTestCase
     login("dick")
     assert_template("observations/show")
     assert_select("div.thumbnail-map", 1)
-
-    click_mo_link(label: "Hide thumbnail map.")
+    click_mo_link(label: "Hide thumbnail map")
     assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
 
@@ -322,7 +321,7 @@ class AmateurTest < IntegrationTestCase
   end
 
   # Note that this only tests non-JS vote submission.
-  # Most users will have their vote sent via AJAX from vote_by_ajax.js
+  # Most users will have their vote sent via AJAX from naming_vote_ajax.js
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")

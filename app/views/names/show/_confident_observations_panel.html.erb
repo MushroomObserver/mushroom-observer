@@ -1,0 +1,12 @@
+<div id="name_confident_observations">
+  <% if @first_four&.length&.positive? %>
+    <strong><%= :show_name_most_confident.t %>:</strong>
+    <div class="panel panel-default">
+      <% @first_four.each do |obs| %>
+        <div class="panel-body">
+          <%= show_best_image(obs) %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div><!--#name_confident_observations-->

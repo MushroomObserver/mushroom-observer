@@ -5,7 +5,7 @@ function SuggestionModule(ids, url, text) {
     var button = $("[data-role='suggest_names']");
     var whirly = " <span class='spinner-right mx-2'></span>";
 
-    button.click(function (event) {
+    button.on('click', function (event) {
       button.attr("disabled", "disabled");
       var cover = $("<div class='cover'>").appendTo($(document.body));
       var progress = $("<div class='popup'>").appendTo($(document.body))

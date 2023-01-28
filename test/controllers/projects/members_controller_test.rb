@@ -147,7 +147,7 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, mary.login)
-      assert_response(:success)
+      assert_redirected_to(project_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(true, target_user.in_group?(eol_project.user_group.name))
@@ -180,7 +180,7 @@ module Projects
         candidate: "#{target_user.login} <Should Ignore This>"
       }
       post_requires_login(:create, params, mary.login)
-      assert_response(:success)
+      assert_redirected_to(project_path(eol_project.id))
       target_user.reload
       assert_not(target_user.in_group?(eol_project.admin_group.name))
       assert(target_user.in_group?(eol_project.user_group.name))
@@ -194,7 +194,7 @@ module Projects
         candidate: "freddymercury"
       }
       post_requires_login(:create, params, mary.login)
-      assert_response(:success)
+      assert_redirected_to(project_path(eol_project.id))
       assert_flash_error
       assert_equal(num_before, eol_project.reload.user_group.users.count)
     end

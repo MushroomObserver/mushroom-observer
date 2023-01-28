@@ -24,22 +24,8 @@
 <meta property="og:title" content="Mushroom Observer"/>
 <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
 <%=
-  css = MO.default_theme
-  if in_admin_mode?
-    css = "Admin"
-  elsif session[:real_user_id].present?
-    css = "Sudo"
-  elsif browser.bot?
-    css = MO.default_theme
-  elsif MO.themes.member?(controller.action_name)
-    # when looking at a theme's info page render it in that theme
-    css = controller.action_name
-  elsif @user
-    css = @user.theme
-    css = MO.themes.sample unless MO.themes.member?(css)
-  end
-  stylesheet_link_tag(css, media: "screen") +
-  stylesheet_link_tag(css, media: "print")
+  stylesheet_link_tag(@css_theme, media: "screen") +
+  stylesheet_link_tag(@css_theme, media: "print")
 %>
 <%= @header unless @header.blank? %>
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->

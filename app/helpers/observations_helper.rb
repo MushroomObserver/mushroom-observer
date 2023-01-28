@@ -13,11 +13,11 @@ module ObservationsHelper
   #   Observation nnn: Ccc ddd Author(s) (Site ID) (Aaa bbb)
   # Observer preference shown, consensus not deprecated:
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
-  def show_obs_title(obs)
+  def show_obs_title(obs:, owner_naming: nil)
     capture do
       concat(:show_observation_header.t)
       concat(" #{obs.id || "?"}: ")
-      concat(obs_title_consensus_id(obs.name))
+      concat(obs_title_consensus_id(name: obs.name, owner_naming: owner_naming))
     end
   end
 
@@ -36,7 +36,7 @@ module ObservationsHelper
   private
 
   # name portion of Observation title
-  def obs_title_consensus_id(name)
+  def obs_title_consensus_id(name:, owner_naming: nil)
     if name.deprecated &&
        (current_name = name.best_preferred_synonym).present?
       capture do
@@ -52,8 +52,7 @@ module ObservationsHelper
       capture do
         concat(link_to_display_name_brief_authors(name))
         # Differentiate this Name from Observer Preference
-        # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-        concat(" (#{:show_observation_site_id.t})") if @owner_naming # rubocop:disable Rails/HelperInstanceVariable
+        concat(" (#{:show_observation_site_id.t})") if owner_naming
       end
     end
   end
@@ -66,17 +65,17 @@ module ObservationsHelper
     end
   end
 
+  public
+
   def link_to_display_name_brief_authors(name)
     link_to(name.display_name_brief_authors.t,
-            show_name_path(id: name.id))
+            name_path(id: name.id))
   end
 
   def link_to_display_name_without_authors(name)
     link_to(name.display_name_without_authors.t,
-            show_name_path(id: name.id))
+            name_path(id: name.id))
   end
-
-  public ######################################################################
 
   ##### Observation Naming "table" content #########
   def observation_naming_header_row(observation, logged_in)
@@ -101,8 +100,8 @@ module ObservationsHelper
 
   def observation_naming_row(observation, naming, logged_in)
     {
-      name: name_html(naming),
-      proposer: proposer_html(naming),
+      name: naming_name_html(naming),
+      proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
       your_vote: logged_in ? your_vote_html(naming) : "",
       eyes: eyes_html(observation, naming),
@@ -127,7 +126,7 @@ module ObservationsHelper
 
   private
 
-  def name_html(naming)
+  def naming_name_html(naming)
     Textile.register_name(naming.name)
 
     if check_permission(naming)
@@ -140,17 +139,17 @@ module ObservationsHelper
       proposer_links = ""
     end
 
-    [name_link(naming), proposer_links].safe_join
+    [naming_name_link(naming), proposer_links].safe_join
   end
 
-  def name_link(naming)
+  def naming_name_link(naming)
     link_with_query(
       naming.display_name_brief_authors.t.break_name.small_author,
-      show_name_path(id: naming.name)
+      name_path(id: naming.name)
     )
   end
 
-  def proposer_html(naming)
+  def naming_proposer_html(naming)
     user_link = user_link(naming.user, naming.user.login)
 
     # row props have mobile-friendly labels

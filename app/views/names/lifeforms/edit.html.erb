@@ -1,0 +1,37 @@
+<%
+  @title = :edit_lifeform_title.t(name: @name.display_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+  @container = :wide
+
+  action = { controller: "/names/lifeforms", action: :update,
+            id: @name.id, q: get_query_param }
+%>
+
+<%= form_with(url: action, id: "name_lifeform_form") do |f| %>
+
+  <p><%= :edit_lifeform_help.t %></p>
+
+  <table class="table-lifeform">
+    <% Name.all_lifeforms.each do |word| %>
+      <tr>
+        <td>
+          <%= check_box_tag("lifeform_#{word}", "1",
+                            @name.lifeform.include?(" #{word} "),
+                            class: "form-control-xxx mt-2") %>
+          <%= f.label("lifeform_#{word}", :"lifeform_#{word}".t) %>
+        </td>
+        <td class="container-text">
+          <%= :"lifeform_help_#{word}".t %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+
+  <%= f.submit(:edit_lifeform_save.t,
+               class: "btn btn-default center-block mt-3") %>
+
+<% end %>

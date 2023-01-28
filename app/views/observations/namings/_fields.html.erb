@@ -1,5 +1,5 @@
 <%
-# Changing naming form html in _form_new.erb in case we want to roll back
+# This is included by obs form, naming new/edit form + lightbox identifier
 
 # Prefer NamingParams, but use raw params if no params.
 what = @params.what rescue @what
@@ -22,7 +22,7 @@ locals = {
   parent_deprecated: parent_deprecated,
   names: names
 }
-@container = :wide %>
+%>
 
 <div class="row">
   <div class="col-xs-12 col-sm-6">
@@ -45,7 +45,7 @@ locals = {
     <div class="col-sm-6">
       <%= help_block_with_arrow("left", id: "naming_name_help") do %>
         <%= tag.p(:form_naming_name_help.t) %>
-      <% end %>
+      <% end # help_block_with_arrow do %>
     </div>
   </div><!--.row-->
 
@@ -61,7 +61,7 @@ locals = {
                          class: "form-control",
                          data: { autofocus: focus_on_vote }) %>
         </div>
-      <% end %>
+      <% end # fields_for(:vote) %>
 
       <%= f_n.fields_for(:reasons) do |f_r| %>
         <% reasons.values.sort_by(&:order).each do |r| %>
@@ -85,12 +85,12 @@ locals = {
                               index: r.num, rows: 3, value: r.notes,
                               class: "form-control") %>
           </div>
-        <% end %>
-      <% end %>
+        <% end # reasons.values.each %>
+      <% end  # fields_for(:reasons) do %>
 
     </div><!--.col-->
   </div><!--.row-->
-<% end %>
+<% end # fields_for(:naming) do %>
 
 <%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
 <% inject_javascript_at_end %(

@@ -8,7 +8,7 @@ class ShowNameHelperTest < IntegrationTestCase
   def test_links_to_observations_of
     login
     # on ShowObservation page
-    get("/name/show_name/#{names(:chlorophyllum_rachodes).id}")
+    get("/names/#{names(:chlorophyllum_rachodes).id}")
     assert_match(:obss_of_this_name.l, response.body)
     assert_match(:taxon_obss_other_names.l, response.body)
     assert_match(:obss_of_taxon.l, response.body)

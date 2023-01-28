@@ -85,14 +85,6 @@ class RedirectsTest < IntegrationTestCase
                  @response.request.fullpath)
   end
 
-  def test_show_past_glossary_term
-    term = glossary_terms(:conic_glossary_term)
-    login
-    get("/glossary/show_past_glossary_term/#{term.id}?version=1")
-    assert_equal(show_past_glossary_term_path(term.id, version: 1),
-                 @response.request.fullpath)
-  end
-
   # Herbarium to Herbaria ------------------------------------------------------
   #
   # legacy Herbarium action (method)  upddated Herbaria action (method)
@@ -150,6 +142,17 @@ class RedirectsTest < IntegrationTestCase
     login
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium/show_herbarium/#{nybg.id}", herbarium_path(nybg)
+    )
+  end
+
+  # Observer/lookup_... to Lookups  ---------------------------------
+
+  # The only legacy lookup that was ok'd for use by external sites
+  def test_lookup_name_get
+    name = names(:fungi)
+    login
+    assert_old_url_redirects_to_new_path(
+      :get, "/observer/lookup_name/#{name.id}", name_path(name.id)
     )
   end
 end

@@ -63,3 +63,14 @@ user_private_location_desc:
   authors: dick
   reader_groups: dick_only
   writer_groups: dick_only
+
+user_public_location_desc:
+  location: gualala
+  user: dick
+  version: 1
+  notes: Public location description, not for a project
+  source_type: <%= LocationDescription.source_types[:user] %>
+  public: 1
+  authors: dick
+  reader_groups: all_users
+  writer_groups: all_users

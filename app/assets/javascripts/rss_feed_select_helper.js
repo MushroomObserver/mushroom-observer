@@ -4,16 +4,16 @@
  */
 
 jQuery(document).ready(function() {
-    jQuery("[data-toggle='checkbox']").click(function() {
+    jQuery("[data-toggle='checkbox']").on('click', function() {
         var $checkbox = $(this).find('input[type="checkbox"]');
             $checkbox.prop('checked', !$checkbox.prop('checked'));
     });
 
-    jQuery("[data-toggle='checkbox'] input").click(function(e) {
+    jQuery("[data-toggle='checkbox'] input").on('click', function(e) {
         e.stopPropagation();
     });
 
-    jQuery("[data-toggle='checkbox'] a").click(function(e) {
+    jQuery("[data-toggle='checkbox'] a").on('click', function(e) {
         e.stopPropagation();
     });
 });

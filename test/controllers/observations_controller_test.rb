@@ -58,7 +58,7 @@ class ObservationsControllerTest < FunctionalTestCase
         assert_response(:redirect)
         assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
       else
-        assert_redirected_to(%r{/location/create_location})
+        assert_redirected_to(/#{new_location_path}/)
       end
     rescue MiniTest::Assertion => e
       flash = get_last_flash.to_s
@@ -617,7 +617,8 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_show_observation
     # As of now, the vote form doesn't print unless there are namings - 11/22
-    # assert_form_action(controller: :vote, action: :cast_votes, id: obs_id)
+    # assert_form_action(controller: "/observations/namings/votes",
+    #                    action: :update, naming_id: obs.namings.first.id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs = observations(:coprinus_comatus_obs)
@@ -1736,7 +1737,7 @@ class ObservationsControllerTest < FunctionalTestCase
         vote: { value: "3" }
       }
     }
-    expected_page = :create_location
+    expected_page = new_location_path
 
     # Can we create observation with existing genus?
     agaricus = names(:agaricus)
@@ -2004,7 +2005,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
     params = { id: obs.id }
     requires_user(:edit,
-                  [{ controller: :observations, action: :show }],
+                  [{ controller: "/observations", action: :show }],
                   params)
 
     assert_form_action(action: :update, id: obs.id)
@@ -2049,12 +2050,11 @@ class ObservationsControllerTest < FunctionalTestCase
     }
     put_requires_user(
       :update,
-      [{ controller: :observations, action: :show }],
+      [{ controller: "/observations", action: :show }],
       params,
       "mary"
     )
-    # assert_redirected_to(controller: :location, action: :create_location)
-    assert_redirected_to(/#{location_create_location_path}/)
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
@@ -2087,12 +2087,11 @@ class ObservationsControllerTest < FunctionalTestCase
     }
     put_requires_user(
       :update,
-      [{ controller: :observations, action: :show }],
+      [{ controller: "/observations", action: :show }],
       params,
       "mary"
     )
-    # assert_redirected_to(controller: :location, action: :create_location)
-    assert_redirected_to(%r{/location/create_location})
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)
@@ -2119,7 +2118,7 @@ class ObservationsControllerTest < FunctionalTestCase
     }
     put_requires_user(
       :update,
-      [{ controller: :observations, action: :show }],
+      [{ controller: "/observations", action: :show }],
       params,
       "mary"
     )
@@ -2805,13 +2804,11 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(
       /watch\d*.png/,
-      controller: "/interests", action: :set_interest,
-      type: "Observation", id: minimal_unknown.id, state: 1
+      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
     assert_image_link_in_html(
       /ignore\d*.png/,
-      controller: "/interests", action: :set_interest,
-      type: "Observation", id: minimal_unknown.id, state: -1
+      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
@@ -2820,13 +2817,11 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(
       /halfopen\d*.png/,
-      controller: "/interests", action: :set_interest,
-      type: "Observation", id: minimal_unknown.id, state: 0
+      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
       /ignore\d*.png/,
-      controller: "/interests", action: :set_interest,
-      type: "Observation", id: minimal_unknown.id, state: -1
+      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
     )
 
     # Destroy that interest, create new one with interest off.
@@ -2836,13 +2831,11 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(
       /halfopen\d*.png/,
-      controller: "/interests", action: :set_interest,
-      type: "Observation", id: minimal_unknown.id, state: 0
+      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
     )
     assert_image_link_in_html(
       /watch\d*.png/,
-      controller: "/interests", action: :set_interest,
-      type: "Observation", id: minimal_unknown.id, state: 1
+      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
     )
   end
 
@@ -2886,7 +2879,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: obs.id })
     assert_response(:success)
-    assert_template(:show)
+    assert_template("show")
     assert_select("form#cast_vote_#{naming1.id} select#vote_value>" \
                   "option[selected=selected][value='#{vote1.value}']")
     assert_select("form#cast_vote_#{naming2.id} select#vote_value>" \

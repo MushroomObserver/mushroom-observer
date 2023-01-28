@@ -1,0 +1,33 @@
+<div class="row mb-3">
+
+  <div class="col-sm-6">
+    <%= fields_for(:herbarium_record) do |fhr| %>
+      <div class="form-group">
+        <%= fhr.label(:herbarium_name,
+                      :herbarium_record_herbarium_name.t + ":") %>
+        <%= fhr.text_field(:herbarium_name, value: @herbarium_name,
+                          class: "form-control") %>
+        <% turn_into_herbarium_auto_completer(
+            :herbarium_record_herbarium_name
+          ) %>
+      </div>
+      <div class="form-group">
+        <%= fhr.label(:herbarium_id,
+                      :herbarium_record_accession_number.t + ":") %>
+        <%= fhr.text_field(:herbarium_id, value: @herbarium_id,
+                          class: "form-control") %>
+      </div>
+      <div class="form-group">
+        <%= fhr.label(:notes, "#{:herbarium_record_notes.t}:") %>
+        <%= fhr.text_field(:notes, value: "", class: "form-control") %>
+      </div>
+    <% end # fields_for(:herbarium_record) %>
+  </div>
+
+  <div class="col-sm-6">
+    <%= help_block_with_arrow("left", id: "herbarium_record_help") do %>
+      <%= :form_observations_herbarium_record_help.t %>
+    <% end # help_block_with_arrow do %>
+  </div>
+
+</div><!--.row-->

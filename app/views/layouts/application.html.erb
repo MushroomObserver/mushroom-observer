@@ -1,10 +1,17 @@
+<%
+@css_theme = css_theme
+
+whos_calling = "#{controller.controller_name}__#{controller.action_name}"
+theme_class = " theme-#{@css_theme.underscore.dasherize}"
+body_class = whos_calling + theme_class
+%>
 <!DOCTYPE html>
 <html>
 <head>
   <%= render(partial: "layouts/app/head") %>
 </head>
 
-<body class="<%= controller.controller_name %>__<%= controller.action_name %>">
+<body class="<%= body_class %>">
   <% if Rails.env == "production" %>
     <%= render(partial: "layouts/app/gtm_iframe") %>
   <% end %>
@@ -49,6 +56,8 @@
     </div><!-- #right_side -->
   </div><!-- .row-offcanvas -->
 </div><!-- #main_container -->
+
+<%= render(partial: "shared/image_exif_modal") %>
 
 <%= render(partial: "layouts/app/media_query_tests") %>
 

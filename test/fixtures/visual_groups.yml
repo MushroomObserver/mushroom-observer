@@ -8,7 +8,7 @@ visual_group_one:
   visual_model: visual_model_one
 
 visual_group_two:
-  name: Visual Group Two
+  name: Peltigera
   approved: false
   description: Visual Group Two includes Peltigera
   images: peltigera_image

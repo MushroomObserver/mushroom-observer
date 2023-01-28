@@ -72,14 +72,14 @@ $(document).ready(function () {
     }
   });
 
-  container.click(function () { window.location = THUMBNAIL_MAP_LINK });
+  container.on('click', function () { window.location = THUMBNAIL_MAP_LINK });
 
-  container.find(".plus-button").click(function (event) {
+  container.find(".plus-button").on('click', function (event) {
     zoom_map(1);
     return cancel(event);
   });
 
-  container.find(".minus-button").click(function (event) {
+  container.find(".minus-button").on('click', function (event) {
     zoom_map(-1);
     return cancel(event);
   });

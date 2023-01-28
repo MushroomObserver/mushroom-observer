@@ -21,7 +21,7 @@
 #
 #  1. Anonymous User pokes around until they try to post a Comment, say.  This
 #     page requires a login (via +login_required+ filter in controller, see
-#     below).  This causes the User to be redirected to <tt>/account/login</tt>.
+#     below).  This causes the User to be redirected to /account/login/new.
 #
 #  2. If the User already has an account, they login here, and wind up
 #     redirected back to the form that triggered the login.
@@ -52,7 +52,7 @@
 #
 #  3. +set_timezone+: Set timezone from cookie set by client's browser.
 #
-#  4. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
+#  4. +login_required+: (optional) Redirects to /account/login/new if not
 #     logged in.
 #
 #  == Contribution Score
@@ -312,7 +312,7 @@ class User < AbstractModel
   has_many :edited_locations, through: :location_description_editors,
                               source: :location_description
 
-  belongs_to :image         # mug shot
+  belongs_to :image, inverse_of: :profile_users # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
@@ -1081,7 +1081,7 @@ class User < AbstractModel
             images.joins(:glossary_term_images) -
             images.joins(:observation_images) -
             images.joins(:project_images) -
-            images.joins(:subjects)).
+            images.joins(:profile_users)).
           map(&:id)
     Image.where(id: ids).delete_all
   end

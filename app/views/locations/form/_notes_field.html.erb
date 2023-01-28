@@ -1,0 +1,6 @@
+<div class="form-group container-text mt-3">
+  <%= f.label(:notes, :NOTES.t + ":") %>
+  <div class="help-block"><%= :form_locations_notes_help.t %></div>
+  <%= f.text_area(:notes, class: "form-control") %>
+  <%= render(partial: "shared/textilize_help") %>
+</div><!--.container-text-->

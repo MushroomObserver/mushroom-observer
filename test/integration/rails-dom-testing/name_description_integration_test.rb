@@ -257,35 +257,35 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def show_name_uri
       name = name_we_are_working_on
-      "/name/show_name/#{name.id}"
+      "/names/#{name.id}"
     end
 
     def show_name_description_uri
       desc = name_description
-      "/name/show_name_description/#{desc.id}"
+      "/names/descriptions/#{desc.id}"
     end
 
     def edit_name_description_uri
       desc = name_description
-      "/name/edit_name_description/#{desc.id}"
+      "/names/descriptions/#{desc.id}/edit"
     end
 
     def destroy_name_description_uri
       desc = name_description
-      "/name/destroy_name_description/#{desc.id}"
+      "/names/descriptions/#{desc.id}"
     end
 
     def create_name_description
       get(show_name_uri)
-      click_mo_link(href: /create_name_description/)
-      # assert_template("name/create_name_description")
-      open_form do |form|
+      click_mo_link(href: %r{descriptions/new})
+      # assert_template("names/descriptions/new")
+      open_form("#name_description_form") do |form|
         check_name_description_form_defaults(form)
         fill_in_name_description_form(form)
         form.submit
       end
       assert_flash_success
-      # assert_template("name/show_name_description")
+      # assert_template("names/descriptions/show")
     end
 
     def check_name_description_form_defaults(form)
@@ -349,7 +349,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       # assert_link_exists(show_name_description_uri, can_see_description?)
       assert_link_exists(edit_name_description_uri,
                          edit_description_link_there?)
-      assert_link_exists(destroy_name_description_uri,
+      assert_form_exists(destroy_name_description_uri,
                          destroy_description_link_there?)
       check_edit_description_link_behavior if edit_description_link_there?
     end
@@ -357,14 +357,14 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_edit_description_link_behavior
       click_mo_link(href: edit_name_description_uri)
       if edit_description_requires_login?
-        assert_match(%r{account/login}, response.body)
+        assert_match(%r{account/login/new}, response.body)
       else
         check_name_description_fields
       end
     end
 
     def check_name_description_fields
-      open_form do |form|
+      open_form("#name_description_form") do |form|
         form.send("assert_#{source_name_field_state}", "source_type")
         form.send("assert_#{source_type_field_state}", "source_name")
         form.send("assert_#{permission_fields_state}", "public_write")
@@ -372,11 +372,19 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       end
     end
 
-    def assert_link_exists(name, val)
+    def assert_link_exists(uri, val)
       if val
-        assert_select("a[href='#{name}']")
+        assert_select("a[href*='#{uri}']")
       else
-        assert_select("a[href='#{name}']", 0)
+        assert_select("a[href*='#{uri}']", 0)
+      end
+    end
+
+    def assert_form_exists(uri, val)
+      if val
+        assert_select("form[action*='#{uri}']")
+      else
+        assert_select("form[action*='#{uri}']", 0)
       end
     end
   end

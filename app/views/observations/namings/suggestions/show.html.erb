@@ -1,6 +1,6 @@
 <%
   @owner_naming = owner_naming_line(@observation) # must before show_obs_title
-  @title = show_obs_title(@observation)
+  @title = show_obs_title(obs: @observation, owner_naming: @owner_naming)
   num_images = @observation.images.length
 
   tabs = [
@@ -33,16 +33,17 @@
       <tr>
         <td>
           <%= link_with_query(sugg.name.display_name_brief_authors.t,
-                              show_name_path(id: sugg.name.id)) %><br/>
+                              name_path(id: sugg.name.id)) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
             (<%= :suggestions_already_proposed.t %>)
           <% else %>
             <%= link_with_query(:suggestions_propose_name.t,
-                                { controller: :naming, action: :create,
-                                  id: @observation.id,
+                                new_observation_naming_path(
+                                  @observation.id,
                                   name: sugg.name.search_name,
-                                  ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence" },
+                                  ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"
+                                ),
                                 { class: "btn btn-default mt-3" }) %>
             <% end %>
             <br/><br/>
