@@ -7,7 +7,7 @@ module Observations
 
     def index
       @layout = calc_layout_params
-      @objects = Observation.needs_identification.limit(@layout["count"])
+      @objects = Observation.needs_identification.limit(@layout["count"] * 2)
     end
   end
 end
