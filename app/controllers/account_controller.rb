@@ -107,7 +107,9 @@ class AccountController < ApplicationController
     # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
     render(status: :too_many_requests,
            content_type: "text/plain",
-           plain: "We grow weary of this. Please go away.")
+           plain: "We blocked your signup because your chosen login name or " \
+                  "email address matches one used by a spammer. " \
+                  "Please contact us if you have been blocked in error.")
   end
 
   # Some recurring patterns we've noticed
