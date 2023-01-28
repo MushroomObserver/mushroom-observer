@@ -102,16 +102,3 @@ class RssLogsController < ApplicationController
     show_index_of_objects(query, args)
   end
 end
-
-  def update_user_default_rss_type
-    return unless @user
-
-    if params[:make_default] == "1"
-      @user.default_rss_type = @types.join(" ")
-      @user.save_without_our_callbacks
-    elsif @user.default_rss_type.to_s.split.sort != @types
-      @links << [:rss_make_default.t,
-                 add_query_param(action: :index, make_default: 1)]
-    end
-  end
-end
