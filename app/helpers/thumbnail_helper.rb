@@ -37,6 +37,28 @@ module ThumbnailHelper
               votes: true) + image_copyright(obs.thumb_image)
   end
 
+  # NOTE: The local var `link` might be to #show_image as you'd expect,
+  # or it may be a GET with params[:img_id] to the actions for #reuse_image
+  # or #remove_image ...or any other link. Firing a POST to those actions
+  # might require printing a Rails post_button and putting something like
+  # Bootstrap's .stretched-link class on the generated form input.
+  # However, the whole reuse_image page is currently a form - refactor?
+  def image_link_html(link = "", link_method = :get)
+    case link_method
+    when :get
+      link_with_query("", link, class: "image-link ab-fab")
+    when :post
+      post_button(name: "", path: link, class: "image-link ab-fab")
+    when :put
+      put_button(name: "", path: link, class: "image-link ab-fab")
+    when :patch
+      patch_button(name: "", path: link, class: "image-link ab-fab")
+    when :delete
+      destroy_button(name: "", target: link,
+                     class: "image-link ab-fab")
+    end
+  end
+
   # Grab the copyright_text for an Image.
   def image_copyright(image)
     link = if image.copyright_holder == image.user.legal_name
