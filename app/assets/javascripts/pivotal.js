@@ -9,23 +9,23 @@ function MOPivotalModule(stories, localizedText) {
     var CUR_LABEL = "all";
     var CUR_STORY = null;
 
-    jQuery("[data-role='click_on_label']").click(function (event) {
+    jQuery("[data-role='click_on_label']").on('click', function (event) {
       event.preventDefault();
       click_on_label($(this).data().label)
     });
 
-    jQuery("[data-role='click_on_story']").click(function (event) {
+    jQuery("[data-role='click_on_story']").on('click', function (event) {
       event.preventDefault();
       click_on_story($(this).data().story);
     });
 
-    jQuery("[data-role='vote_on_story']").click(function (event) {
+    jQuery("[data-role='vote_on_story']").on('click', function (event) {
       event.preventDefault();
       var data = $(this).data();
       vote_on_story(data.story, data.user, data.vote);
     });
 
-    jQuery("body").delegate(("[data-role='post_comment']"), 'click', function (event) {
+    jQuery("body").on('click', "[data-role='post_comment']", function (event) {
       event.preventDefault();
       post_comment($(this).data().story);
     });

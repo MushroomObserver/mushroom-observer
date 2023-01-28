@@ -28,3 +28,29 @@
   box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
   transition: width 0.6s ease 0s;
 }
+
+//
+// lightbox activator button
+// --------------------------------------------------
+
+.theater-btn {
+  position: absolute;
+  background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.59);
+  color: black;
+  padding: 5px;
+  top: 0px;
+  border: 1px solid;
+  text-decoration: none;
+  display: none;
+  font-size: 18px;
+
+  &:hover,
+  &:focus {
+    background: black;
+    color: white;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+  }
+}

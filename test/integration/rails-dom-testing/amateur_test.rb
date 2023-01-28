@@ -321,7 +321,7 @@ class AmateurTest < IntegrationTestCase
   end
 
   # Note that this only tests non-JS vote submission.
-  # Most users will have their vote sent via AJAX from vote_by_ajax.js
+  # Most users will have their vote sent via AJAX from naming_vote_ajax.js
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
