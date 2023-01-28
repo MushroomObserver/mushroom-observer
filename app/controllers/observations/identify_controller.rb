@@ -7,7 +7,9 @@ module Observations
 
     def index
       @layout = calc_layout_params
-      @objects = Observation.needs_identification.limit(@layout["count"] * 2)
+      # @pages = paginate_numbers(:page, @layout["count"])
+      @objects = Observation.needs_identification(@user).
+                 order(created_at: :desc).limit(@layout["count"] * 2)
     end
   end
 end
