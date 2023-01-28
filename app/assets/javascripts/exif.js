@@ -1,5 +1,6 @@
 /**
  * Created by raymond on 1/1/15.
+ * Used by multi_image_upload.js
  */
 /**https://github.com/jseidelin/exif-js/**/
 

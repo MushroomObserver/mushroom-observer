@@ -35,7 +35,7 @@ module AjaxController::EXIF
 
   def render_exif_data(result, hide_gps)
     @data = parse_exif_data(result, hide_gps)
-    render(inline: "<%= make_table(@data) %>")
+    render(partial: "images/exif_data", locals: { data: @data })
   end
 
   def parse_exif_data(result, hide_gps)

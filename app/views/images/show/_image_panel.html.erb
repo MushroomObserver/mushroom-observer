@@ -4,28 +4,30 @@
     <div class="text-center small image-controls">
       <% if check_permission(@image) %>
         <%= put_button(name: :image_show_rotate_left.t,
-                       path: transform_image_path(id: @image.id, 
+                       path: transform_image_path(id: @image.id,
                                                   op: :rotate_left,
                                                   q: get_query_param,
-                                                  size: @size)) %> | 
+                                                  size: @size)) %> |
         <%= put_button(name: :image_show_rotate_right.t,
-                       path: transform_image_path(id: @image.id, 
+                       path: transform_image_path(id: @image.id,
                                                   op: :rotate_right,
                                                   q: get_query_param,
-                                                  size: @size)) %> | 
+                                                  size: @size)) %> |
         <%= put_button(name: :image_show_mirror.t,
-                       path: transform_image_path(id: @image.id, 
-                                                  op: :mirror, 
+                       path: transform_image_path(id: @image.id,
+                                                  op: :mirror,
                                                   q: get_query_param,
-                                                  size: @size)) %> | 
+                                                  size: @size)) %> |
       <% end %>
       <%= link_to(:image_show_original.t,
-                  Image.url(:original, @image.id)) %>
-      <% inject_javascript_at_end %(
-        jQuery(".image-controls").append(
-          " | <a href='javascript:popup_exif(#{@image.id})'>#{j :image_show_exif.t}</a>"
-        );
-      ) %>
+                  Image.url(:original, @image.id)) %> |
+      <button
+        type="button" class="btn btn-link"
+        data-toggle="modal" data-target="#image_exif_modal"
+        data-image="<%= @image.id %>"><%= :image_show_exif.t %></button>
+      <% # link_to(:image_show_exif.t,
+          #        "javascript:popup_exif(#{@image.id})")
+          %>
     </div><!--.text-center-->
   </div><!--.panel-heading-->
   <div class="panel-body">
@@ -63,7 +65,7 @@
                   locals: { image: @image }) %>
       <% end %>
       <% if !@image.original_name.blank? &&
-            (check_permission(@image) || 
+            (check_permission(@image) ||
               @image.user && @image.user.keep_filenames == "keep_and_show") %>
         <%= @image.original_name %>
       <% end %>

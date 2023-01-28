@@ -7,7 +7,7 @@
 //= require box_resizer
 //= require csrf_token
 //= require external_link
-//= require image_vote
+//= require image_vote_ajax
 //= require image_export
 //= require validate_file_input_fields
 //= require main
@@ -15,10 +15,10 @@
 //= require observation_form_map
 //= require suggestions
 //= require thumbnail_map
-//= require vote_by_ajax
+//= require naming_vote_ajax
 //= require pivotal
 //= require lightbox
-//= require popup_exif
+//= require image_exif_modal_ajax
 
 lightbox.option({
   'fadeDuration': 0,

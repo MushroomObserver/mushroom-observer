@@ -13,7 +13,7 @@ body:after {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 1020;
   background-color: black;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
@@ -24,12 +24,13 @@ body:after {
   position: absolute;
   left: 0;
   width: 100%;
-  z-index: 10000;
+  z-index: 1030;
   text-align: center;
   line-height: 0;
   font-weight: normal;
 
-  a.lightbox_link {
+  a.lightbox_link,
+  button.btn-link.lightbox_link {
     color: white;
     text-decoration: underline;
   }

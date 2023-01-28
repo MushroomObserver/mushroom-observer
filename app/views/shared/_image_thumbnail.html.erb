@@ -15,7 +15,10 @@
   # Lightbox stuff:
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
   show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
-  show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
+  show_exif = "<button type='button' class='btn btn-link lightbox_link'
+    data-toggle='modal' data-target='#image_exif_modal'
+    data-image='#{image_id}'>#{:image_show_exif.t}</button>"
+  # We're using the lightbox "data-title" for these links
   caption = "#{show_orig} | #{show_exif}".html_safe
 
   # Show original name?
