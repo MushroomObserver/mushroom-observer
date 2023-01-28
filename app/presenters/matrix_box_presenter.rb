@@ -101,7 +101,12 @@ class MatrixBoxPresenter
       view.thumbnail(observation.thumb_image,
                      link: { controller: "/observations",
                              action: :show,
-                             id: observation.id })
+                             id: observation.id },
+                     obs_data: { id: observation.id,
+                                 when: observation.when.web_date,
+                                 who: who,
+                                 where: where,
+                                 notes: observation.notes })
   end
 
   # Grabs all the information needed for view from User instance.
