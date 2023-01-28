@@ -74,7 +74,6 @@ class AccountController < ApplicationController
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
     VerifyMailer.build(@new_user).deliver_now
-    notify_root_of_blocked_verification_email(@new_user)
     redirect_back_or_default(account_welcome_path)
   end
 
@@ -171,20 +170,5 @@ class AccountController < ApplicationController
     elsif @new_user.email != @new_user.email_confirmation
       @new_user.errors.add(:email, :validate_user_email_mismatch.t)
     end
-  end
-
-  SPAM_BLOCKERS = %w[].freeze
-
-  def notify_root_if_blocked_verification_email(user)
-    Account::VerificationsController.notify_root_of_verification_email(user)
-  end
-
-  def verification_emails_blocked_as_spam?(user)
-    domain = user.email.to_s.sub(/^.*@/, "")
-    SPAM_BLOCKERS.any?(domain)
-  end
-
-  def bogus_login?(user)
-    user.login.to_s.match?(BOGUS_LOGINS)
   end
 end
