@@ -6,14 +6,14 @@
 [codeclimate_maintainability_badge]: https://codeclimate.com/github/MushroomObserver/mushroom-observer.png
 [codeclimate_status_overview]: https://codeclimate.com/github/MushroomObserver/mushroom-observer
 [Coveralls]: https://coveralls.io/
-[coveralls_badge]: https://coveralls.io/repos/MushroomObserver/mushroom-observer/badge.png?branch=master
-[coveralls_build]: https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=master
+[coveralls_badge]: https://coveralls.io/repos/MushroomObserver/mushroom-observer/badge.png?branch=main
+[coveralls_build]: https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=main
 [Gemfile]: [/Gemfile]
 [git]: https://git-scm.com/
 [Github Actions]: https://docs.github.com/en/actions
 [github_actions_badge]: https://github.com/MushroomObserver/mushroom-observer/workflows/Continuous%20Integration/badge.svg
 [github_actions_workflow_runs]: https://github.com/MushroomObserver/mushroom-observer/actions
-[License]: https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE
+[License]: /LICENSE
 [minitest]: http://docs.seattlerb.org/minitest/
 [RuboCop]: https://rubocop.org/
 
