@@ -2,38 +2,16 @@
 
 # see observations_controller.rb
 module ObservationsController::Index
-  # Displays matrix of all Observations, sorted by date.
-  # Searches come first because they may have the other params
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  # NOTE: ABC offense could be fixed with the technique described in
-  # https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179469322
-  def index # rubocop:disable Metrics/AbcSize
-    # cop disabled because immediate fix is ugly and the offense is avoidable
-    # by fixing the ABC offense. See above
-    if params[:advanced_search].present? # rubocop:disable Style/GuardClause
-      advanced_search and return
-    elsif params[:pattern].present?
-      observation_search and return
-    elsif params[:look_alikes].present? && params[:name].present?
-      observations_of_look_alikes and return
-    elsif params[:related_taxa].present? && params[:name].present?
-      observations_of_related_taxa and return
-    elsif params[:name].present?
-      observations_of_name and return
-    elsif params[:user].present?
-      observations_by_user and return
-    elsif params[:location].present?
-      observations_at_location and return
-    elsif params[:where].present?
-      observations_at_where and return
-    elsif params[:project].present?
-      observations_for_project and return
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_observation and return
-    else
-      list_observations and return
-    end
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
+
+  ###########################################################################
+  # index subactions:
+  # methods called by #index via a dispatch table in ObservationController
 
   # Displays matrix of selected Observations (based on current Query).
   # NOTE: Why are all the :id params converted .to_s below?
@@ -166,6 +144,8 @@ module ObservationsController::Index
     redirect_to(search_advanced_path)
   end
 
+  ###########################################################################
+
   # Show selected search results as a matrix with "index" template.
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
@@ -183,6 +163,10 @@ module ObservationsController::Index
   end
 
   private
+
+  def default_index_subaction
+    list_observations
+  end
 
   def create_advanced_search_query(params) # rubocop:disable Metrics/AbcSize
     search = {}

@@ -54,30 +54,46 @@ class NamesController < ApplicationController
   #  :section: Indexes and Searches
   #
   ##############################################################################
+  @index_subaction_param_keys = [
+    :advanced_search,
+    :pattern,
+    :with_observations,
+    :with_descriptions,
+    :need_descriptions,
+    :by_user,
+    :by_editor,
+    :by,
+    :q,
+    :id
+  ].freeze
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
-      advanced_search
-    elsif params[:pattern].present?
-      name_search
-    elsif params[:with_observations].present?
-      observation_index
-    elsif params[:with_descriptions].present?
-      names_with_descriptions
-    elsif params[:need_descriptions].present?
-      names_needing_descriptions
-    elsif params[:by_user].present?
-      names_by_user
-    elsif params[:by_editor].present?
-      names_by_editor
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_name
-    else
-      list_names
-    end
+  @index_subaction_dispatch_table = {
+    pattern: :name_search,
+    with_observations: :observation_index,
+    with_descriptions: :names_with_descriptions,
+    need_descriptions: :names_needing_descriptions,
+    by_user: :names_by_user,
+    by_editor: :names_by_editor,
+    by: :index_name,
+    q: :index_name,
+    id: :index_name
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
 
+  ###################################
+  #  private index methods
+
   private
+
+  def default_index_subaction
+    list_names
+  end
 
   # Display list of names in last index/search query.
   def index_name

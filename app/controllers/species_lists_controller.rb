@@ -42,22 +42,25 @@ class SpeciesListsController < ApplicationController
     :update
   ]
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
-      advanced_search
-    elsif params[:pattern].present?
-      species_list_search
-    elsif params[:by_user].present?
-      species_lists_by_user
-    elsif params[:for_project].present?
-      species_lists_for_project
-    elsif params[:by] == "title"
-      species_lists_by_title
-    elsif params[:by].present?
-      index_species_list
-    else
-      list_species_lists
-    end
+  @index_subaction_param_keys = [
+    :pattern,
+    :by_user,
+    :for_project,
+    :by
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    pattern: :species_list_search,
+    by_user: :species_lists_by_user,
+    for_project: :species_lists_for_project,
+    by: :by_title_or_selected_by_query
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
 
   # def show_species_list
@@ -148,6 +151,10 @@ class SpeciesListsController < ApplicationController
   #
   ##############################################################################
 
+  def default_index_subaction
+    list_species_lists
+  end
+
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
   def index_species_list
@@ -197,6 +204,11 @@ class SpeciesListsController < ApplicationController
       query = create_query(:SpeciesList, :pattern_search, pattern: pattern)
       show_selected_species_lists(query)
     end
+  end
+
+  # choose another subaction when params[:by].present?
+  def by_title_or_selected_by_query
+    params[:by] == "title" ? species_lists_by_title : index_species_list
   end
 
   # Show selected list of species_lists.

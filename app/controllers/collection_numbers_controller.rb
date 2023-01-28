@@ -14,16 +14,27 @@ class CollectionNumbersController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:pattern].present? # rubocop:disable Style/GuardClause
-      collection_number_search and return
-    elsif params[:observation_id].present?
-      observation_index and return
-    elsif params[:by].present? || params[:q].present? || params[:id].present?
-      index_collection_number and return
-    else
-      list_collection_numbers and return
-    end
+  @index_subaction_param_keys = [
+    :pattern,
+    :observation_id,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    pattern: :collection_number_search,
+    observation_id: :observation_index,
+    by: :index_collection_number,
+    q: :index_collection_number,
+    id: :index_collection_number
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
 
   def show
@@ -88,6 +99,10 @@ class CollectionNumbersController < ApplicationController
   ##############################################################################
 
   private
+
+  def default_index_subaction
+    list_collection_numbers
+  end
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
   def index_collection_number
