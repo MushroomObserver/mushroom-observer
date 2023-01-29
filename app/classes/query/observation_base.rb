@@ -91,6 +91,9 @@ module Query
       where << "observations.name_id = #{Name.unknown.id} OR " \
                "observations.vote_cache <= 0"
       where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
+               "FROM observation_views WHERE observation_views.user_id = " \
+               "#{User.current_id} AND observation_views.reviewed = 1)"
+      where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
                "FROM votes WHERE user_id = #{User.current_id})"
     end
 
