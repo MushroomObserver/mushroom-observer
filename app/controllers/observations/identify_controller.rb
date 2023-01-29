@@ -4,12 +4,14 @@ module Observations
   class IdentifyController < ApplicationController
     before_action :login_required
     before_action :disable_link_prefetching
+    before_action :pass_query_params
 
     def index
       @layout = calc_layout_params
-      # @pages = paginate_numbers(:page, @layout["count"])
-      @objects = Observation.needs_identification(@user).
-                 order(created_at: :desc).limit(@layout["count"] * 2)
+      old_query = find_or_create_query(:Observation)
+      new_query = Query.lookup_and_save(old_query.model, old_query.flavor,
+                                        old_query.params.merge(needs_id: true))
+      show_index_of_objects(new_query)
     end
   end
 end

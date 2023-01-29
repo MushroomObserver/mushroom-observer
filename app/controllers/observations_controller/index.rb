@@ -217,6 +217,7 @@ module ObservationsController::Index
       [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
        :sort_by_updated_at.t],
       ["confidence", :sort_by_confidence.t],
+      # ["needs_id", :sort_by_needs_id.t],
       ["thumbnail_quality", :sort_by_thumbnail_quality.t],
       ["num_views", :sort_by_num_views.t]
     ]
