@@ -88,8 +88,10 @@ module Query
     end
 
     def initialize_needs_id
-      @where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-                "FROM votes WHERE user_id = #{User.current_id})"
+      where << "observations.name_id = #{Name.unknown.id} OR " \
+               "observations.vote_cache <= 0"
+      where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
+               "FROM votes WHERE user_id = #{User.current_id})"
     end
 
     def initialize_projects_parameter

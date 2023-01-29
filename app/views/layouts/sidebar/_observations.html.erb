@@ -7,7 +7,7 @@
             observations_path(user: @user.id),
             { class: classes[:indent],
               id: "nav_your_observations_link" }) if @user %>
-<%= link_to(:app_help_id_obs.t, identify_observations_path,
+<%= link_to(:app_help_id_obs.t, identify_observations_path(q: get_query_param),
             { class: classes[:indent],
               id: "nav_identify_observations_link" }) %>
 <%= link_to(:app_sort_by_date_obs.t, observations_path,
