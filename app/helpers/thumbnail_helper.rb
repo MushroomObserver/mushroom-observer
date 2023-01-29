@@ -63,24 +63,30 @@ module ThumbnailHelper
 
   def image_caption_html(image_id, obs_data, link_type)
     orig_url = Image.url(:original, image_id)
-    capture do
-      if obs_data[:id].present?
-        if link_type == :naming || obs_data[:obs].vote_cache <= 0
-          url = new_observation_naming_path(observation_id: obs_data[:id])
-          concat(link_to(:create_naming.t, url,
-                         { class: "btn btn-primary my-3 mr-3 d-inline-block",
-                           target: "_blank", rel: "noopener" }))
-        end
-        concat(content_tag(:div, show_obs_title(obs: obs_data[:obs]),
-                           class: "d-block"))
-        concat(render(partial: "observations/show/observation",
-                      locals: { observation: obs_data[:obs] }))
-        # render(partial: "observations/namings/form",
-        #        locals: { action: :create, url: url, show_reasons: true })
-      end
-      concat(original_image_link(orig_url).html_safe + " | " +
-             image_exif_link(image_id).html_safe)
+    html = []
+    if obs_data[:id].present?
+      html = image_observation_data(html, obs_data, link_type)
     end
+    html << original_image_link(orig_url) + " | " +
+            image_exif_link(image_id)
+    safe_join(html)
+  end
+
+  def image_observation_data(html, obs_data, link_type)
+    if link_type == :naming || obs_data[:obs].vote_cache <= 0
+      html << link_to(
+        :create_naming.t,
+        new_observation_naming_path(observation_id: obs_data[:id]),
+        { class: "btn btn-primary my-3 mr-3 d-inline-block",
+          target: "_blank", rel: "noopener" }
+      )
+    end
+    html << content_tag(:div, show_obs_title(obs: obs_data[:obs]),
+                        class: "d-block")
+    html << render(partial: "observations/show/observation",
+                   locals: { observation: obs_data[:obs] })
+    # render(partial: "observations/namings/form",
+    #        locals: { action: :create, url: url, show_reasons: true })
   end
 
   def original_image_link(orig_url)
