@@ -47,6 +47,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("#results tr", numbers.count)
   end
 
+  def test_collection_number_search_by_id
+    id = collection_numbers(:minimal_unknown_coll_num).id
+
+    login
+    get(:index, params: { pattern: id })
+
+    assert_redirected_to(collection_number_path(id))
+  end
+
   def test_collection_number_search_by_number
     col = collection_numbers(:minimal_unknown_coll_num)
     number = col.number
