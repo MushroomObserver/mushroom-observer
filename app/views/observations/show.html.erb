@@ -12,8 +12,10 @@
 
 <div class="row">
   <div class="col-md-8 float-sm-left">
-    <%= render(partial: "observations/show/observation",
-               locals: { observation: @observation }) %>
+    <%= panel_block(id: "observation_details", class: "name-section") do
+      render(partial: "observations/show/observation",
+             locals: { observation: @observation })
+    end %>
   </div>
   <div class="col-md-4 float-sm-right">
     <% if @user %>

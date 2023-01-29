@@ -14,4 +14,16 @@ module FormsHelper
       end
     end
   end
+
+  def panel_block(**args, &block)
+    content_tag(
+      :div,
+      class: "panel panel-default #{args[:class]}",
+      id: args[:id]
+    ) do
+      content_tag(:div, class: "panel-body") do
+        concat(capture(&block).to_s)
+      end
+    end
+  end
 end
