@@ -262,9 +262,12 @@ class Observation < AbstractModel
   scope :without_confident_name, lambda {
     without_name.or(where(vote_cache: ..0))
   }
-  scope :without_vote_by_user, lambda { |user|
+  scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    joins(:votes).where(Vote[:user_id].not_eq(user_id))
+    joins(:votes).where(user_id: user_id)
+  }
+  scope :without_vote_by_user, lambda { |user|
+    where.not(id: Observation.with_vote_by_user(user).pluck(:id))
   }
   scope :needs_identification, lambda { |user|
     without_confident_name.without_vote_by_user(user).distinct
