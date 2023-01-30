@@ -9,11 +9,11 @@ thead tr {
 
 .table-striped {
   tbody > tr:nth-child(odd) {
-    background-color: $LIST_ODD_BG_COLOR;
+    background-color: $table-bg-accent;
   }
 
   tbody > tr:nth-child(even) {
-    background-color: $LIST_EVEN_BG_COLOR;
+    background-color: $table-bg;
   }
 }
 
@@ -293,11 +293,11 @@ section.table-namings {
   }
 
   tr:nth-child(odd) {
-    background-color: $LIST_ODD_BG_COLOR;
+    background-color: $table-bg-accent;
   }
 
   tr:nth-child(even) {
-    background-color: $LIST_EVEN_BG_COLOR;
+    background-color: $table-bg;
   }
 }
 

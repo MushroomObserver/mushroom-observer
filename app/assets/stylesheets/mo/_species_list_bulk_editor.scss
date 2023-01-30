@@ -12,15 +12,15 @@
   }
 
   tr:nth-child(odd) {
-    border: 1px solid $LIST_ODD_BG_COLOR;
+    border: 1px solid $table-bg-accent;
   }
 
   tr:nth-child(even) {
-    border: 1px solid $LIST_EVEN_BG_COLOR;
+    border: 1px solid $table-bg;
   }
 
   tr.hot {
-    border: 1px solid $LIST_BORDER_COLOR;
+    border: 1px solid $table-border-color;
   }
 
   tr.hot a,
@@ -58,10 +58,10 @@ div.row_controls {
   position: absolute;
   text-align: left;
   padding: 2px 5px 2px 5px;
-  border: 1px solid $LIST_BORDER_COLOR;
+  border: 1px solid $table-border-color;
   border-top: none;
   color: $LIST_FG_COLOR;
-  background: $LIST_ODD_BG_COLOR;
+  background: $table-bg-accent;
   z-index: 2;
   white-space: nowrap;
 }
