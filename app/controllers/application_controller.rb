@@ -161,24 +161,21 @@ class ApplicationController < ActionController::Base
 
   # Kick out agents responsible for excessive traffic.
   def kick_out_excessive_traffic
-    return true unless IpStats.blocked?(request.remote_ip)
-    return true if params[:controller] == "account" &&
-                   params[:action] == "login"
-    return true if session[:user_id].present?
+    return true if is_cool?
 
     logger.warn("BLOCKED #{request.remote_ip}")
-    msg = "We have noticed a lot of server-intensive traffic from this IP" \
-          "address (#{request.remote_ip}). There may be better ways of" \
-          "doing what you are trying to do. Please contact the webmaster" \
-          "(#{MO.webmaster_email_address}) so that we can talk about it." \
-          "So that we can best help you, please: \n" \
-          "- include a copy of this message; \n" \
-          "- tell how you generally use Mushroom Observer; \n" \
-          "- tell us what you were doing when you received this message."
-    render(plain: msg,
+    render(plain: :kick_out_message.t(email: MO.webmaster_email_address),
            status: :too_many_requests,
            layout: false)
     false
+  end
+
+  def is_cool?
+    return true unless IpStats.blocked?(request.remote_ip)
+    return true if params[:controller] == "account" &&
+                   params[:action] == "login"
+
+    session[:user_id].present?
   end
 
   # Physically eject robots unless they're looking at accepted pages.
@@ -1417,58 +1414,11 @@ class ApplicationController < ActionController::Base
   #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
-    type = query.model.type_tag
-
-    apply_content_filters(query)
-
-    # Tell site to come back here on +redirect_back_or_default+.
-    store_location
-
-    # Clear out old query from session.  (Don't do it if caller just finished
-    # storing *this* query in there, though!!)
-    clear_query_in_session if session[:checklist_source] != query.id
-
-    # Pass this query on when clicking on results.
-    query_params_set(query)
-
-    # Supply default error message to display if no results found.
-    @error ||= :runtime_no_matches.t(type: type)
-
-    # Get user prefs for displaying results as a matrix.
-    @layout = calc_layout_params if args[:matrix]
-
-    # Inform the query that we'll need the first letters as well as ids.
-    query.need_letters = args[:letters] if args[:letters]
-
-    # Get number of results first so we know how to paginate.
-    @timer_start = Time.current
-    @num_results = query.num_results
-    @timer_end = Time.current
-
-    # Supply a default title.
-    # If no results, then title is empty but not nil.
-    # Result: No title is displayed
-    # (overriding any title specified in the view)
-    # and the html <title> metadata == a translated tag or the action name
-    # see ApplicationHelper#title_tag_contents
-    @num_results.zero? ? @title = args[:no_hits_title] : @title ||= query.title
-
-    # Add magic links for sorting if enough results to sort
-    @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
-
-    # If only one result (before pagination), redirect to 'show' action.
+    show_index_setup(query, args)
     if (@num_results == 1) && !args[:always_index]
-      redirect_with_query(controller: query.model.show_controller,
-                          action: query.model.show_action,
-                          id: query.result_ids.first)
-
-    # Otherwise paginate results.  (Everything we need should be cached now.)
+      show_action_redirect(query)
     else
-      calc_pages(args, query)
-      find_objects(args, query)
-
-      # Give the caller the opportunity to add extra columns.
-      #### Refactor problem?????
+      calc_pages(query, args)
       if block_given?
         @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
@@ -1476,18 +1426,88 @@ class ApplicationController < ActionController::Base
           data[object.id] = row
         end
       end
-
-      if args[:template]
-        render(template: args[:template]) # Render the list if given template.
-      elsif args[:action]
-        render(action: args[:action])
-      end
+      show_index_render(args)
     end
   end
 
   private ##########
 
-  def find_objects(args, query)
+  def show_index_setup(query, args)
+    apply_content_filters(query)
+    store_location
+    clear_query_in_session if session[:checklist_source] != query.id
+    query_params_set(query)
+    @error ||= :runtime_no_matches.t(type: query.model.type_tag)
+    @layout = calc_layout_params if args[:matrix]
+    show_index_count_results(query, args)
+  end
+
+  def apply_content_filters(query)
+    filters = users_content_filters || {}
+    @any_content_filters_applied = false
+    ContentFilter.all.each do |fltr|
+      apply_one_content_filter(fltr, query, filters[fltr.sym])
+    end
+  end
+
+  def apply_one_content_filter(fltr, query, user_filter)
+    key = fltr.sym
+    return unless query.takes_parameter?(key)
+    return if query.params.key?(key)
+    return unless fltr.on?(user_filter)
+
+    # This is a "private" method used by Query#validate_params.
+    # It would be better to add these parameters before the query is
+    # instantiated. Or alternatively, make query validation lazy so
+    # we can continue to add parameters up until we first ask it to
+    # execute the query.
+    query.params[key] = query.validate_value(fltr.type, fltr.sym,
+                                             user_filter.to_s)
+    @any_content_filters_applied = true
+  end
+
+  def show_index_count_results(query, args)
+    query.need_letters = args[:letters] if args[:letters]
+    @timer_start = Time.current
+    @num_results = query.num_results
+    @timer_end = Time.current
+    @num_results.zero? ? @title = args[:no_hits_title] : @title ||= query.title
+    @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
+  end
+
+  def show_action_redirect(query)
+    redirect_with_query(controller: query.model.show_controller,
+                        action: query.model.show_action,
+                        id: query.result_ids.first)
+  end
+
+  def calc_pages(query, args)
+    number_arg = args[:number_arg] || :page
+    @pages = if args[:letters]
+               paginate_letters(args[:letter_arg] || :letter, number_arg,
+                                num_per_page(args))
+             else
+               paginate_numbers(number_arg, num_per_page(args))
+             end
+    skip_if_coming_back(query, args)
+    find_objects(query, args)
+  end
+
+  def num_per_page(args)
+    return @layout["count"] if args[:matrix]
+
+    args[:num_per_page] || 50
+  end
+
+  def skip_if_coming_back(query, args)
+    if args[:id].present? &&
+       params[@pages.letter_arg].blank? &&
+       params[@pages.number_arg].blank?
+      @pages.show_index(query.index(args[:id]))
+    end
+  end
+
+  def find_objects(query, args)
     include = args[:include] || nil
     # Instantiate correct subset.
     logger.warn("QUERY starting: #{query.query.inspect}")
@@ -1499,51 +1519,11 @@ class ApplicationController < ActionController::Base
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
-  def calc_pages(args, query)
-    number_arg = args[:number_arg] || :page
-    @pages = if args[:letters]
-               paginate_letters(args[:letter_arg] || :letter, number_arg,
-                                num_per_page(args))
-             else
-               paginate_numbers(number_arg, num_per_page(args))
-             end
-    skip_if_coming_back(args, query)
-  end
-
-  def num_per_page(args)
-    return @layout["count"] if args[:matrix]
-
-    args[:num_per_page] || 50
-  end
-
-  def skip_if_coming_back(args, query)
-    if args[:id].present? &&
-       params[@pages.letter_arg].blank? &&
-       params[@pages.number_arg].blank?
-      @pages.show_index(query.index(args[:id]))
-    end
-  end
-
-  def apply_content_filters(query)
-    filters = users_content_filters || {}
-    @any_content_filters_applied = false
-    ContentFilter.all.each do |fltr|
-      key = fltr.sym
-      # applicable to this query?
-      next unless query.takes_parameter?(key)
-      # overridden by search, etc.?
-      next if query.params.key?(key)
-      # in user's content filter?
-      next unless fltr.on?(filters[key])
-
-      # This is a "private" method used by Query#validate_params.
-      # It would be better to add these parameters before the query is
-      # instantiated. Or alternatively, make query validation lazy so
-      # we can continue to add parameters up until we first ask it to
-      # execute the query.
-      query.params[key] = query.validate_value(fltr.type, fltr.sym,
-                                               filters[key].to_s)
-      @any_content_filters_applied = true
+  def show_index_render(args)
+    if args[:template]
+      render(template: args[:template]) # Render the list if given template.
+    elsif args[:action]
+      render(action: args[:action])
     end
   end
 
