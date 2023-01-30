@@ -88,6 +88,30 @@ $navbar-default-link-active-bg: $TOP_BAR_LINK_BG_COLOR;
 $navbar-default-link-disabled-color: mix($TOP_BAR_LINK_FG_COLOR, $TOP_BAR_LINK_BG_COLOR, 75%);
 $navbar-default-link-disabled-bg: $TOP_BAR_LINK_BG_COLOR;
 
+// Reset inverted navbar basics
+$navbar-inverse-color:                      $LEFT_BAR_FG_COLOR;
+$navbar-inverse-bg:                         $LEFT_BAR_BG_COLOR;
+$navbar-inverse-border:                     $LEFT_BAR_BORDER_COLOR;
+
+// Inverted navbar links
+$navbar-inverse-link-color:                 $LEFT_BAR_FG_COLOR;
+$navbar-inverse-link-hover-color:           $LEFT_BAR_HOVER_FG_COLOR;
+$navbar-inverse-link-hover-bg:              $LEFT_BAR_HOVER_BG_COLOR;
+$navbar-inverse-link-active-color:          $navbar-inverse-link-hover-color;
+$navbar-inverse-link-active-bg:             darken($navbar-inverse-bg, 10%);
+$navbar-inverse-link-disabled-color:        $LEFT_BAR_HEADER_FG_COLOR;
+$navbar-inverse-link-disabled-bg:           $LEFT_BAR_HEADER_BG_COLOR;
+
+// Inverted navbar brand label
+$navbar-inverse-brand-color:                $navbar-inverse-link-color;
+$navbar-inverse-brand-hover-color:          $LEFT_BAR_HOVER_FG_COLOR;
+$navbar-inverse-brand-hover-bg:             $LEFT_BAR_BG_COLOR;
+
+// Inverted navbar toggle - not used?
+$navbar-inverse-toggle-hover-bg:            $LEFT_BAR_BG_COLOR;
+$navbar-inverse-toggle-icon-bar-bg:         $LEFT_BAR_FG_COLOR;
+$navbar-inverse-toggle-border-color:        $LEFT_BAR_BORDER_COLOR;
+
 $pagination-color: $PAGER_FG_COLOR;
 $pagination-bg: $PAGER_BG_COLOR;
 $pagination-border: $PAGER_BORDER_COLOR;
