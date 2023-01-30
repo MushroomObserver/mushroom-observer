@@ -8,44 +8,51 @@
   show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
   show_lists = @user && @observation.species_lists.any?
   show_links = @user && (@observation.external_links.any? || @new_sites.any?)
+
+  obs_locals = { observation: @observation }
 %>
 
 <div class="row">
   <div class="col-md-8 float-sm-left">
     <%= panel_block(id: "observation_details", class: "name-section") do
-      render(partial: "observations/show/observation",
-             locals: { observation: @observation })
+      render(partial: "observations/show/observation", locals: obs_locals)
     end %>
   </div>
   <div class="col-md-4 float-sm-right">
     <% if @user %>
-      <%= render(partial: "observations/show/name_info",
-                 locals: { observation: @observation }) %>
+      <%= panel_block(id: "observation_name_info",
+                      class: "name-section small") do
+        render(partial: "observations/show/name_info", locals: obs_locals)
+      end %>
 
       <% if show_lists %>
-        <%= render(partial: "observations/show/species_lists",
-                   locals: {observation: @observation}) %>
+        <%= panel_with_header(header: :show_lists_header.t,
+                              id: "observation_species_lists",
+                              inner_class: "p-0") do
+          render(partial: "observations/show/species_lists", locals: obs_locals)
+        end %>
       <% end %>
 
       <% if show_links %>
-        <%= render(partial: "observations/show/links",
-                   locals: {observation: @observation}) %>
+        <%= panel_with_header(header: :EXTERNAL_LINKS.t,
+                              id: "observation_links",
+                              inner_class: "p-0") do
+          render(partial: "observations/show/links", locals: obs_locals)
+        end %>
       <% end %>
     <% end %>
 
     <% if show_map %>
       <%= render(partial: "observations/show/thumbnail_map",
-                 locals: { observation: @observation }) %>
+                 locals: obs_locals) %>
     <% end %>
 
-    <%= render(partial: "observations/show/images",
-               locals: { observation: @observation }) %>
+    <%= render(partial: "observations/show/images", locals: obs_locals) %>
   </div>
 
   <div class="col-md-8 float-sm-left">
     <% if @user %>
-      <%= render(partial: "observations/show/namings",
-                 locals: { observation: @observation }) %>
+      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
     <% end %>
 
     <%= render(partial: "comments/comments_for_object",
