@@ -4,22 +4,20 @@
   @container = :wide
 %>
 
-<div class="panel panel-default">
-  <div class="panel-body">
-    <div class="row">
+<%= panel_block do %>
+  <div class="row">
 
-      <div class="col-xs-12 col-md-6">
-        <%= render( partial: "shared/show_description",
-                    locals: { description: @description }) %>
-      </div><!-- .col -->
+    <div class="col-xs-12 col-md-6">
+      <%= render( partial: "shared/show_description",
+                  locals: { description: @description }) %>
+    </div><!-- .col -->
 
-      <div class="col-xs-12 col-md-6">
-        <%= show_alt_descriptions(object: @name, projects: @projects) %>
-      </div><!-- .col -->
+    <div class="col-xs-12 col-md-6">
+      <%= show_alt_descriptions(object: @name, projects: @projects) %>
+    </div><!-- .col -->
 
-    </div><!-- .row -->
-  </div><!-- .panel-body -->
-</div><!-- .panel -->
+  </div><!-- .row -->
+<% end %>
 
 <%= render(partial: "names/descriptions/show/name_description",
            object: @description, locals: { review: true }) %>

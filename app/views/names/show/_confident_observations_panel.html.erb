@@ -1,12 +1,13 @@
-<div id="name_confident_observations">
-  <% if @first_four&.length&.positive? %>
-    <strong><%= :show_name_most_confident.t %>:</strong>
-    <div class="panel panel-default">
-      <% @first_four.each do |obs| %>
-        <div class="panel-body">
-          <%= show_best_image(obs) %>
-        </div>
-      <% end %>
-    </div>
+<% if @first_four&.length&.positive? %>
+  <%= panel_with_outer_heading(
+    heading: "#{:show_name_most_confident.t}:",
+    h_tag: :strong,
+    id: "name_confident_observations"
+  ) do %>
+    <% @first_four.each do |obs| %>
+      <%= content_tag(:div, class: "my-4") do
+        show_best_image(obs)
+      end %>
+    <% end %>
   <% end %>
-</div><!--#name_confident_observations-->
+<% end %>
