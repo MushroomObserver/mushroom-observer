@@ -71,6 +71,7 @@ class NamesControllerTest < FunctionalTestCase
   def test_names_with_descriptions
     login
     get(:index, params: { with_descriptions: true })
+    assert_match(/not the default/i, @response.body)
     assert_template("index")
   end
 
