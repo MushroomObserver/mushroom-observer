@@ -3,19 +3,19 @@
 // --------------------------------------------------
 
 thead tr {
-  color: $LIST_HEADER_FG_COLOR;
-  background-color: $LIST_HEADER_BG_COLOR;
+  color: $list-group-disabled-color; // like navbar-inverse
+  background-color: $list-group-disabled-bg;
 }
 
-.table-striped {
-  tbody > tr:nth-child(odd) {
-    background-color: $table-bg-accent;
-  }
+// .table-striped {
+//   tbody > tr:nth-child(odd) {
+//     background-color: $table-bg-accent;
+//   }
 
-  tbody > tr:nth-child(even) {
-    background-color: $table-bg;
-  }
-}
+//   tbody > tr:nth-child(even) {
+//     background-color: $table-bg;
+//   }
+// }
 
 .table-curators,
 .table-description-permissions,
@@ -75,7 +75,7 @@ thead tr {
   }
 
   tr {
-    border-top: 1px solid $LIST_BORDER_COLOR;
+    border-top: 1px solid $list-group-border;
   }
 
   tr:first-child {
@@ -89,7 +89,7 @@ thead tr {
   }
 
   td {
-    border-top: 1px solid $LIST_BORDER_COLOR;
+    border-top: 1px solid $list-group-border;
   }
 
   th:first-child,
@@ -121,7 +121,7 @@ thead tr {
 
 .table-review-donations {
   th, td {
-    border-right: 1px solid $LIST_BORDER_COLOR;
+    border-right: 1px solid $list-group-border;
   }
 
   th:last-child,
@@ -143,6 +143,7 @@ thead tr {
   }
 }
 
+// Not a <table>
 section.table-namings {
   width: 100%;
 
@@ -291,19 +292,6 @@ section.table-namings {
   tr td {
     padding: .1em 1em;
   }
-
-  tr:nth-child(odd) {
-    background-color: $table-bg-accent;
-  }
-
-  tr:nth-child(even) {
-    background-color: $table-bg;
-  }
-}
-
-table.table-compact tr td {
-  padding-top: 3px !important;
-  padding-bottom: 3px !important;
 }
 
 table.ips tr td,
