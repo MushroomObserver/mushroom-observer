@@ -1417,11 +1417,7 @@ class ApplicationController < ActionController::Base
   #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
-    letter_arg   = args[:letter_arg] || :letter
-    number_arg   = args[:number_arg] || :page
-    num_per_page = args[:num_per_page] || 50
-    include      = args[:include] || nil
-    type         = query.model.type_tag
+    type = query.model.type_tag
 
     apply_content_filters(query)
 
@@ -1439,10 +1435,7 @@ class ApplicationController < ActionController::Base
     @error ||= :runtime_no_matches.t(type: type)
 
     # Get user prefs for displaying results as a matrix.
-    if args[:matrix]
-      @layout = calc_layout_params
-      num_per_page = @layout["count"]
-    end
+    @layout = calc_layout_params if args[:matrix]
 
     # Inform the query that we'll need the first letters as well as ids.
     query.need_letters = args[:letters] if args[:letters]
@@ -1471,29 +1464,11 @@ class ApplicationController < ActionController::Base
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
     else
-      @pages = if args[:letters]
-                 paginate_letters(letter_arg, number_arg, num_per_page)
-               else
-                 paginate_numbers(number_arg, num_per_page)
-               end
-
-      # Skip to correct place if coming back in to index from show_object.
-      if args[:id].present? &&
-         params[@pages.letter_arg].blank? &&
-         params[@pages.number_arg].blank?
-        @pages.show_index(query.index(args[:id]))
-      end
-
-      # Instantiate correct subset.
-      logger.warn("QUERY starting: #{query.query.inspect}")
-      @timer_start = Time.current
-      @objects = query.paginate(@pages, include: include)
-      @timer_end = Time.current
-      logger.warn("QUERY finished: model=#{query.model}, " \
-                  "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
-                  "time=#{(@timer_end - @timer_start).to_f}")
+      calc_pages(args, query)
+      find_objects(args, query)
 
       # Give the caller the opportunity to add extra columns.
+      #### Refactor problem?????
       if block_given?
         @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
@@ -1511,6 +1486,43 @@ class ApplicationController < ActionController::Base
   end
 
   private ##########
+
+  def find_objects(args, query)
+    include = args[:include] || nil
+    # Instantiate correct subset.
+    logger.warn("QUERY starting: #{query.query.inspect}")
+    @timer_start = Time.current
+    @objects = query.paginate(@pages, include: include)
+    @timer_end = Time.current
+    logger.warn("QUERY finished: model=#{query.model}, " \
+                "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
+                "time=#{(@timer_end - @timer_start).to_f}")
+  end
+
+  def calc_pages(args, query)
+    number_arg = args[:number_arg] || :page
+    @pages = if args[:letters]
+               paginate_letters(args[:letter_arg] || :letter, number_arg,
+                                num_per_page(args))
+             else
+               paginate_numbers(number_arg, num_per_page(args))
+             end
+    skip_if_coming_back(args, query)
+  end
+
+  def num_per_page(args)
+    return @layout["count"] if args[:matrix]
+
+    args[:num_per_page] || 50
+  end
+
+  def skip_if_coming_back(args, query)
+    if args[:id].present? &&
+       params[@pages.letter_arg].blank? &&
+       params[@pages.number_arg].blank?
+      @pages.show_index(query.index(args[:id]))
+    end
+  end
 
   def apply_content_filters(query)
     filters = users_content_filters || {}
