@@ -22,6 +22,15 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
+  def test_index_by
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title").text.downcase == "herbarium records by #{by}"
+  end
+
   def test_herbarium_with_no_herbarium_records_index
     login
     get(:index, params: { herbarium_id: herbaria(:dick_herbarium).id })
