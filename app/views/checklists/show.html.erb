@@ -52,12 +52,10 @@
                            genera: @data.num_genera) %>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-body checklist">
-    <ul class="list-unstyled">
-      <% names.each do |name| %>
-        <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>
-      <% end %>
-    </ul>
-  </div>
-</div>
+<%= panel_block(inner_class: "checklist") do %>
+  <ul class="list-unstyled">
+    <% names.each do |name| %>
+      <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>
+    <% end %>
+  </ul>
+<% end %>

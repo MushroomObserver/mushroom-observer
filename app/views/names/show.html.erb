@@ -20,11 +20,9 @@
     </div>
 
     <div id="name_authors_editors">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <%= show_authors_and_editors(@name) %>
-        </div>
-      </div>
+      <%= panel_block do %>
+        <%= show_authors_and_editors(@name) %>
+      <% end %>
     </div>
 
   </div><!--LEFT COLUMN-->

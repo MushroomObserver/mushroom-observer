@@ -1,24 +1,17 @@
-<h4>
-  <%= :show_lists_header.t %>
-</h4>
-<div class="list-group">
-  <div class="list-group-item p-0">
-    <table class="table table-responsive mx-0 mb-0">
-      <% observation.species_lists.each do |spl| %>
-        <tr>
-          <td style="border-top:0">
-            <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
-            <%= if check_permission(spl)
-              put_button(name: :REMOVE.t,
-                        path: observation_species_list_path(
-                          id: @observation.id, species_list_id: spl.id,
-                          commit: "remove"
-                        ),
-                        data: { confirm: :are_you_sure.l })
-            end %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-  </div>
-</div>
+<table class="table table-responsive mx-0 mb-0">
+  <% observation.species_lists.each do |spl| %>
+    <tr>
+      <td style="border-top:0">
+        <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
+        <%= if check_permission(spl)
+          put_button(name: :REMOVE.t,
+                    path: observation_species_list_path(
+                      id: @observation.id, species_list_id: spl.id,
+                      commit: "remove"
+                    ),
+                    data: { confirm: :are_you_sure.l })
+        end %>
+      </td>
+    </tr>
+  <% end %>
+</table>
