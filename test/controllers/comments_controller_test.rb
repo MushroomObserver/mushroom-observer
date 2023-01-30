@@ -46,7 +46,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_index_no_for_object.t(type: :comment))
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
   end
 
   def test_show_comments_for_invalid_target_type

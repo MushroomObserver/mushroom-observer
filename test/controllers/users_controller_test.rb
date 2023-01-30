@@ -69,8 +69,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_empty(css_select("#sorts"),
                  "There should be no sort links")
 
-    flash_text = :runtime_no_matches_pattern.t(type: "users",
-                                               value: unmatched_pattern)
+    flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
   end
 
