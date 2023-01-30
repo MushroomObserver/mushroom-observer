@@ -33,19 +33,36 @@ module Names
     #
     ############################################################################
 
-    def index
-      if params[:by_author].present?
-        name_descriptions_by_author
-      elsif params[:by_editor].present?
-        name_descriptions_by_editor
-      elsif params[:by].present? || params[:q].present? || params[:id].present?
-        index_name_description
-      else
-        list_name_descriptions
-      end
+    @index_subaction_param_keys = [
+      :by_author,
+      :by_editor,
+      :by,
+      :q,
+      :id
+    ].freeze
+
+    @index_subaction_dispatch_table = {
+      by_author: :name_descriptions_by_author,
+      by_editor: :name_descriptions_by_editor,
+      by: :index_name_description,
+      q: :index_name_description,
+      id: :index_name_description
+    }.freeze
+
+    # Disable cop because method definition prevents a
+    # Rails/LexicallyScopedActionFilter offense
+    # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+    def index # rubocop:disable Lint/UselessMethodDefinition
+      super
     end
 
+    #############################################
+
     private
+
+    def default_index_subaction
+      list_name_descriptions
+    end
 
     # Display list of names in last index/search query.
     def index_name_description

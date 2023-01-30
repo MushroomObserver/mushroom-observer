@@ -40,10 +40,7 @@ class VisualGroupsController < ApplicationController
 
   # POST /visual_groups or /visual_groups.json
   def create
-    @visual_group = VisualGroup.new(visual_group_params)
-    @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
-
-    if @visual_group.save
+    if save_visual_group
       @visual_group.add_initial_images
       redirect_to(visual_model_visual_groups_url(@visual_group.visual_model,
                                                  @visual_group),
@@ -102,5 +99,11 @@ class VisualGroupsController < ApplicationController
              where(included: @status != "excluded").pluck(:image_id, :included)
     end
     VisualGroupImages.new(@filter, nil, count).vals
+  end
+
+  def save_visual_group
+    @visual_group = VisualGroup.new(visual_group_params)
+    @visual_group.visual_model = VisualModel.find(params[:visual_model_id])
+    @visual_group.save
   end
 end

@@ -57,31 +57,23 @@ class AccountController < ApplicationController
 
     initialize_new_user
 
-    if block_evil_signups!
-      # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
-      render(status: :too_many_requests,
-             content_type: "text/plain",
-             plain: "We grow weary of this. Please go away.") and return
+    return abort_signup_with_client_error if evil_signup_credentials?
+
+    if make_sure_theme_is_valid!
+      return render(action: :new) unless validate_and_save_new_user!
+
+      UserGroup.create_user(@new_user)
+      flash_notice("#{:runtime_signup_success.tp}#:{email_spam_notice.tp}")
+      VerifyMailer.build(@new_user).deliver_now
     end
 
-    unless make_sure_theme_is_valid!
-      redirect_back_or_default(action: :welcome)
-      return
-    end
-
-    render(action: :new) and return unless validate_and_save_new_user!
-
-    UserGroup.create_user(@new_user)
-    flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
-    VerifyMailer.build(@new_user).deliver_now
-    notify_root_of_blocked_verification_email(@new_user)
     redirect_back_or_default(account_welcome_path)
   end
 
   # This is the welcome page for new users who just created an account.
   def welcome; end
 
-  private
+  private #################################################
 
   def initialize_new_user
     now = Time.zone.now
@@ -111,17 +103,40 @@ class AccountController < ApplicationController
   # where "evil" means: sending a Verification email will throw an error;
   # the Verification email will cause Undelivered Mail Returned to Send; and/or
   # it's a known spammer.
-  def block_evil_signups!
-    return false unless evil_signup_credentials?
-
-    true
+  def abort_signup_with_client_error
+    # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
+    render(status: :too_many_requests,
+           content_type: "text/plain",
+           plain: "We blocked your signup because your chosen login name or " \
+                  "email address matches one used by a spammer. " \
+                  "Please contact us if you have been blocked in error.")
   end
 
+  # Some recurring patterns we've noticed
+  BOGUS_EMAILS = / namnerbca\.com |
+                   0mg0mg0mg |
+                   yourmail@gmail\.com |
+                   @mnawl.sibicomail\.com
+                   /ix
+
+  # Some recurring patterns we've noticed
+  BOGUS_LOGINS = / houghgype |
+                   uplilla |
+                   vemslons /ix
+
   def evil_signup_credentials?
-    /(Vemslons|Uplilla)$/ =~ @new_user.login ||
-      /namnerbca.com$/ =~ @new_user.email ||
+    bogus_email? || bogus_login?
+  end
+
+  def bogus_email?
+    BOGUS_EMAILS.match?(@new_user.email) ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
-      @new_user.email.remove(".").include?("blizkoyan2017")
+      @new_user.email.remove(".").include?("blizkoyan") ||
+      @new_user.email.count(".") > 5
+  end
+
+  def bogus_login?
+    BOGUS_LOGINS.match?(@new_user.login)
   end
 
   def make_sure_theme_is_valid!
@@ -167,20 +182,5 @@ class AccountController < ApplicationController
     elsif @new_user.email != @new_user.email_confirmation
       @new_user.errors.add(:email, :validate_user_email_mismatch.t)
     end
-  end
-
-  SPAM_BLOCKERS = %w[
-    hotmail.com
-    live.com
-  ].freeze
-
-  BOGUS_LOGINS = /houghgype|vemslons/
-
-  def notify_root_of_blocked_verification_email(user)
-    domain = user.email.to_s.sub(/^.*@/, "")
-    return unless SPAM_BLOCKERS.any?(domain)
-    return if user.login.to_s.match(BOGUS_LOGINS)
-
-    Account::VerificationsController.notify_root_of_verification_email(user)
   end
 end

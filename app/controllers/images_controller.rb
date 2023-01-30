@@ -38,23 +38,33 @@ class ImagesController < ApplicationController
   #
   ##############################################################################
 
-  def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
-      advanced_search
-    elsif params[:pattern].present?
-      image_search
-    elsif params[:by_user].present?
-      images_by_user
-    elsif params[:for_project].present?
-      images_for_project
-    elsif params[:by].present?
-      index_image
-    else
-      list_images
-    end
+  @index_subaction_param_keys = [
+    :advanced_search,
+    :pattern,
+    :by_user,
+    :for_project,
+    :by
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    pattern: :image_search,
+    by_user: :images_by_user,
+    for_project: :images_for_project,
+    by: :index_image
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
 
   private
+
+  def default_index_subaction
+    list_images
+  end
 
   # Display matrix of selected images, based on current Query.
   def index_image

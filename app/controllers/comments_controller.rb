@@ -44,25 +44,34 @@ class CommentsController < ApplicationController
   #
   ##############################################################################
 
-  # rubocop:disable Metrics/AbcSize
-  def index
-    if params[:target].present?
-      show_comments_for_target
-    elsif params[:pattern].present?
-      comment_search
-    elsif params[:by_user].present?
-      show_comments_by_user
-    elsif params[:for_user].present?
-      show_comments_for_user
-    elsif params[:by].present?
-      index_comment
-    else
-      list_comments
-    end
+  @index_subaction_param_keys = [
+    :target,
+    :pattern,
+    :by_user,
+    :for_user,
+    :by
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    target: :show_comments_for_target,
+    pattern: :comment_search,
+    by_user: :show_comments_by_user,
+    for_user: :show_comments_for_user,
+    by: :index_comment
+  }.freeze
+
+  # Disable cop because method definition prevents a
+  # Rails/LexicallyScopedActionFilter offense
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
+  def index # rubocop:disable Lint/UselessMethodDefinition
+    super
   end
-  # rubocop:enable Metrics/AbcSize
 
   private
+
+  def default_index_subaction
+    list_comments
+  end
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
