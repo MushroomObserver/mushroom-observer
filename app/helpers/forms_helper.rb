@@ -17,7 +17,7 @@ module FormsHelper
 
   def panel_with_outer_heading(**args, &block)
     html = []
-    h_tag = args[:h_tag].present? ? args[:h_tag] : :h4
+    h_tag = (args[:h_tag].presence || :h4)
     html << content_tag(h_tag, args[:heading]) if args[:heading]
     html << panel_block(**args, &block)
     safe_join(html)
