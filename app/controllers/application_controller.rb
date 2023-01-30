@@ -1436,57 +1436,7 @@ class ApplicationController < ActionController::Base
     query_params_set(query)
 
     # Supply default error message to display if no results found.
-    @error ||= case query.flavor
-               when :all
-                 :runtime_no_objects.t(type: type)
-               when :at_location
-                 loc = query.find_cached_parameter_instance(Location, :location)
-                 :runtime_index_no_at_location.t(type: type,
-                                                 location: loc.display_name)
-               when :at_where
-                 :runtime_index_no_at_location.t(
-                   type: type, location: query.params[:location]
-                 )
-               when :by_author
-                 user = query.find_cached_parameter_instance(User, :user)
-                 :runtime_user_hasnt_authored.t(type: type,
-                                                user: user.legal_name)
-               when :by_editor
-                 user = query.find_cached_parameter_instance(User, :user)
-                 :runtime_user_hasnt_edited.t(type: type, user: user.legal_name)
-               when :by_rss_log
-                 :runtime_index_no_by_rss_log.t(type: type)
-               when :by_user
-                 user = query.find_cached_parameter_instance(User, :user)
-                 :runtime_user_hasnt_created.t(type: type,
-                                               user: user.legal_name)
-               when :for_target
-                 :runtime_index_no_for_object.t(type: type)
-               when :for_user
-                 user = query.find_cached_parameter_instance(User, :user)
-                 :runtime_index_no_for_user.t(type: type, user: user.legal_name)
-               when :in_species_list
-                 spl = query.find_cached_parameter_instance(SpeciesList,
-                                                            :species_list)
-                 :runtime_index_no_in_species_list.t(type: type,
-                                                     name: spl.title)
-               when :inside_observation
-                 id = query.params[:observation]
-                 :runtime_index_no_inside_observation.t(type: type, id: id)
-               when :pattern_search
-                 :runtime_no_matches_pattern.t(
-                   type: type, value: query.params[:pattern].to_s
-                 )
-               when :regexp_search
-                 :runtime_no_matches_regexp.t(type: type,
-                                              value: query.params[:regexp].to_s)
-               when :with_descriptions
-                 :runtime_index_no_with.t(type: type, attachment: :description)
-               when :with_observations
-                 :runtime_index_no_with.t(type: type, attachment: :observation)
-               else
-                 :runtime_no_matches.t(type: type)
-               end
+    @error ||= :runtime_no_matches.t(type: type)
 
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
