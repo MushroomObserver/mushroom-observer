@@ -27,17 +27,16 @@ class CommentsControllerTest < FunctionalTestCase
     assert_redirected_to(comment_path(id))
   end
 
-  def test_index_pattern_text
-    text = "Let's"
+  def test_index_pattern_search_str
+    search_str = "Let's"
     assert(comments(:minimal_unknown_obs_comment_2).summary.
-           match?(text))
-    assert(comments(:detailed_unknown_obs_comment).summary.
-           match?(text))
+           start_with?(search_str),
+           "Search string must have a hit in Comment fixtures")
 
     login
-    get(:index, params: { pattern: text })
+    get(:index, params: { pattern: search_str })
 
-    assert_select("#title").text.downcase == "comments matching '#{text}'"
+    assert_select("#title").text.downcase == "comments matching '#{search_str}'"
   end
 
   def test_show_comment
