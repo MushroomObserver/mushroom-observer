@@ -196,6 +196,20 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_advanced_search_error
+    query_without_conditions = Query.lookup_and_save(
+      :Location, :advanced_search
+    )
+
+    login
+    get(:index,
+        params: @controller.query_params(query_without_conditions).
+                            merge(advanced_search: true))
+
+    assert_flash_error(:runtime_no_conditions.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
   def test_location_bounding_box
     north = south = east = west = 0
     delta = 0.001
@@ -216,6 +230,25 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(-90, query.params[:south])
     assert_equal(180, query.params[:east])
     assert_equal(-180, query.params[:west])
+  end
+
+  def test_index_by
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title").text.downcase == "locations by #{by}"
+  end
+
+  def test_pattern
+    search_str = "California"
+
+    login
+    get(:index, params: { pattern: search_str })
+
+    assert_select("#title").text.downcase == \
+      "locations matching '#{search_str}'"
   end
 
   def test_list_by_country
