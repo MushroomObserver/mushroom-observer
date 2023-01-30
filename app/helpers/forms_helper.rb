@@ -15,9 +15,9 @@ module FormsHelper
     end
   end
 
-  def panel_with_header(**args, &block)
+  def panel_with_heading(**args, &block)
     html = []
-    html << content_tag(:h4, args[:header]) if args[:header]
+    html << content_tag(:h4, args[:heading]) if args[:heading]
     html << panel_block(**args, &block)
     safe_join(html)
   end
