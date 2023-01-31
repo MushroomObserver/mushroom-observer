@@ -5,6 +5,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?
+  @container = :wide
 %>
 
 <%= paginate_block(@pages) do %>
