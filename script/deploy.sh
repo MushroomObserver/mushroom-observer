@@ -15,8 +15,8 @@ if [ "$RAILS_ENV" != "production" ]; then
     exit 1
 fi
 
-if [ "$(git branch | grep '^\*')" != "* master" ]; then
-    echo Please switch to master branch.
+if [ "$(git branch | grep '^\*')" != "* main" ]; then
+    echo Please switch to main branch.
     exit 1
 fi
 
