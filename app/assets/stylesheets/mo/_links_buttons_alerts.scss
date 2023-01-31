@@ -3,47 +3,12 @@
 // --------------------------------------------------
 
 a {
-  // background-color: $LINK_BG_COLOR;
   font-weight: normal;
 }
 
 a:visited {
   color: $LINK_VISITED_FG_COLOR;
-  // background-color: transparent;
 }
-
-a:hover {
-  color: $link-hover-color;
-  // background-color: $LINK_HOVER_BG_COLOR;
-}
-
-// .btn:hover,
-// .btn-default:hover {
-//   color: $BUTTON_HOVER_FG_COLOR;
-//   background-color: $BUTTON_HOVER_BG_COLOR;
-//   border-color: $BUTTON_HOVER_BORDER_COLOR;
-// }
-
-// .btn.active {
-//   color: $BUTTON_ACTIVE_FG_COLOR;
-//   background-color: $BUTTON_ACTIVE_BG_COLOR;
-//   box-shadow: none;
-// }
-
-// .btn-primary:hover {
-//   color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
-//   background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR !important;
-//   border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
-// }
-
-// .form-control {
-  //   color: $BUTTON_FG_COLOR;
-  //   border-width: $INPUT_BORDER_WIDTH;
-  //   border-style: $INPUT_BORDER_STYLE;
-  //   border-radius: $INPUT_BORDER_RADIUS;
-  //   border-color: $btn-default-color;
-  //   padding: $padding-small-vertical $padding-small-horizontal;
-// }
 
 input.has_error,
 textarea.has_error,
@@ -59,17 +24,12 @@ select.has_error {
 .alert {
   margin: 0.5em 0;
   border-width: 2px;
-  // border-style: solid;
-  // border-radius: $border-radius-base;
   padding: 0.5em 1.0em;
   text-align: left;
 
   // message banner at top
   // --------------------------------------------------
   &.message-banner {
-    // border-width: 2px;
-    // border-style: solid;
-    // border-radius: $border-radius-base;
     font-size: 150%;
     text-align: center;
   }
