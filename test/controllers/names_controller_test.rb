@@ -53,6 +53,15 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_index_by
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title").text.downcase == "names by #{by}"
+  end
+
   # observation_index
   def test_names_with_observations
     login
@@ -144,6 +153,20 @@ class NamesControllerTest < FunctionalTestCase
     query.record.delete
     login
     get(:index, params: params)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  def test_advanced_search_error
+    query_without_conditions = Query.lookup_and_save(
+      :Name, :advanced_search
+    )
+
+    login
+    get(:index,
+        params: @controller.query_params(query_without_conditions).
+                            merge(advanced_search: true))
+
+    assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
   end
 
