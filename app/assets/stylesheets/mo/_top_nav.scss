@@ -3,10 +3,6 @@
 // --------------------------------------------------
 
 .navbar-default {
-  color: $navbar-default-color;
-  background-color: $navbar-default-bg;
-  // margin-left: 10px;
-  border-color: $navbar-default-border;
   border-width: 1px;
   border-style: solid;
   border-radius: 0;
@@ -27,7 +23,6 @@
   }
 
   .navbar-nav {
-    margin-top: 8px;
     margin-right: 2px;
   }
 
@@ -35,9 +30,8 @@
   .navbar-nav > li > a.dropdown-toggle {
     color: $navbar-default-color !important;
     background-color: $navbar-default-bg !important;
-    margin: 0px 4px;
-    border: 0px;
-    padding: 2px 4px;
+    padding-left: 8px;
+    padding-right: 8px;
 
     &:hover {
       color: $navbar-default-link-hover-color !important;
