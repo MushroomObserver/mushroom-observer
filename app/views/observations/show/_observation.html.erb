@@ -6,10 +6,8 @@
   <%= observation.is_collection_location ?
         :show_observation_collection_location.t :
         :show_observation_seen_at.t %>:
-  <span class="font-weight-bold">
-    <%= location_link(observation.place_name,
-                      observation.location, nil, true) %>
-  </span>
+  <%= location_link(observation.place_name,
+                    observation.location, nil, true) %>
 </p>
 
 <p id="observation_lat_lng">
@@ -35,7 +33,7 @@
 </p>
 
 <p id="observation_who">
-  <%= :WHO.t %>: <span class="font-weight-bold"><%= user_link(observation.user) %></span>
+  <%= :WHO.t %>: <span><%= user_link(observation.user) %></span>
 </p>
 
 <% if @user %>

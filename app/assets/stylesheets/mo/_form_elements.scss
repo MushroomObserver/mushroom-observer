@@ -6,6 +6,12 @@ input[type=checkbox] {
   margin-top: 1px;
 }
 
+input.has-error,
+textarea.has-error,
+select.has-error {
+  border-color: $alert-danger-border !important;
+}
+
 // got this trick from:
 // http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
 .file-field {

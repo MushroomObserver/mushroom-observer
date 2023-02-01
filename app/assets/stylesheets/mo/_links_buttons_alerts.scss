@@ -2,19 +2,8 @@
 // link, button, alert themed styles
 // --------------------------------------------------
 
-a {
-  font-weight: normal;
-}
-
 a:visited {
   color: $LINK_VISITED_FG_COLOR;
-}
-
-input.has_error,
-textarea.has_error,
-select.has_error {
-  @extend .form-control;
-  border-color: $alert-danger-border;
 }
 
 //
