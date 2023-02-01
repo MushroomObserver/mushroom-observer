@@ -15,7 +15,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title").text.downcase == "comments by #{by}"
+    assert_select("#title", text: "Comments by #{by.capitalize}")
   end
 
   def test_index_pattern_id

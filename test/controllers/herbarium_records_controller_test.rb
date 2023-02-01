@@ -28,7 +28,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title").text.downcase == "herbarium records by #{by}"
+    assert_select("#title", text: "Fungarium Records by #{by.capitalize}")
   end
 
   def test_herbarium_with_no_herbarium_records_index

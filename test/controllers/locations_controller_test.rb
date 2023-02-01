@@ -238,7 +238,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title").text.downcase == "locations by #{by}"
+    assert_select("#title", text: "Locations by #{by.capitalize}")
   end
 
   def test_pattern
@@ -247,9 +247,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: search_str })
 
-    assert_select("#title").text.downcase == \
-      "locations matching '#{search_str}'"
-  end
+    assert_select("#title", text: "Locations Matching ‘#{search_str}’")
+    end
 
   def test_list_by_country
     login

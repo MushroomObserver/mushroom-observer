@@ -59,7 +59,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title").text.downcase == "names by #{by}"
+    assert_select("#title", text: "Names by #{by.capitalize}")
   end
 
   # observation_index
