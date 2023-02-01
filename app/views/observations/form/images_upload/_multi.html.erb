@@ -8,9 +8,12 @@ legible_max_size = (max_size.to_f/1024/1024).round
 <%= hidden_field(:observation, :thumb_image_id) %>
 
 <div class="row">
-  <div class="col-sm-6">
-    <input type="file" multiple id="multiple_images_button"
-           accept="image/*" class="mt-3"/>
+  <div class="col-sm-6 mt-3">
+    <label class="btn btn-default file-field">
+      <input type="file" multiple id="multiple_images_button"
+             accept="image/*"/>
+      <%= :select_file.t %>
+    </label>
   </div><!--.col-->
   <div class="col-sm-6">
     <%= help_block_with_arrow("left", id: "upload_multi_help") do %>
