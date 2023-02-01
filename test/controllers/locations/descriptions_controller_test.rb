@@ -46,6 +46,15 @@ module Locations
     #
     #    INDEX
 
+    def test_index_sorted_by_user
+      by = "user"
+
+      login
+      get(:index, params: { by: by })
+
+      assert_select("#title", text: "Location Descriptions by #{by.capitalize}")
+    end
+
     def test_list_location_descriptions
       login("mary")
       burbank = locations(:burbank)
