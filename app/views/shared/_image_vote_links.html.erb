@@ -4,15 +4,15 @@
 %>
 
 <% if vote_percentage %>
-  <div class="vote-meter"  title="<%="#{image.num_votes} #{:Votes.t}" %>">
-    <div id="vote_meter_bar_<%= image.id %>" class="vote-meter-bar"
+  <div class="vote-meter progress"  title="<%="#{image.num_votes} #{:Votes.t}" %>">
+    <div id="vote_meter_bar_<%= image.id %>" class="progress-bar"
          role="progressbar" style="width: <%=vote_percentage%>%">
     </div>
   </div>
 <% end %>
 
 <div id="vote_buttons">
-  <div class="image_vote_links_container mt-n2" id="image_vote_links_<%= image.id %>">
+  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>">
     <div class="text-center small">
       <%= if user && !image.users_vote(user).blank?
         image_vote_link(image, 0) + "&nbsp;".html_safe
