@@ -47,6 +47,8 @@
   background: rgba(128,128,128,0.50);
 }
 
+
+// used in naming_vote_ajax.js (whirly) and suggestions
 .popup {
   z-index: 1000;
   border: 1px solid $modal-content-border-color;
@@ -55,6 +57,7 @@
   display: none;
 }
 
+// used in external_link.js // pivotal has own thing
 .popup-dialog {
   z-index: 1000;
   position: absolute;
