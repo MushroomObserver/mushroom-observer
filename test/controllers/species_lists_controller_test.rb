@@ -101,6 +101,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
+  def test_index_sorted_by_user
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Species Lists by #{by.capitalize}")
+  end
+
   def test_index_species_list_by_past_bys
     login
     get(:index, params: { by: :modified })
