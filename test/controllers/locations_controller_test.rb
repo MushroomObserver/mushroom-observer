@@ -248,7 +248,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: search_str })
 
     assert_select("#title", text: "Locations Matching ‘#{search_str}’")
-    end
+  end
 
   def test_list_by_country
     login
