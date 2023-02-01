@@ -532,11 +532,33 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_index_at_location_without_observations
     location = locations(:unused_location)
     params = { location: location }
+    flash_matcher = Regexp.new(
+      Regexp.escape_except_spaces(
+        :runtime_no_matches.t(type: :observation)
+      )
+    )
 
     login
     get(:index, params: params)
 
-    assert_flash_error(:runtime_no_matches.t("observations"))
+    assert_flash(flash_matcher)
+    assert_template(:index)
+  end
+
+  def test_index_at_location_with_nonexistent_location
+    location = "non-existent"
+    params = { location: location }
+    flash_matcher = Regexp.new(
+      Regexp.escape_except_spaces(
+        :runtime_object_not_found.t(type: :location, id: location)
+      )
+    )
+
+    login
+    get(:index, params: params)
+
+    assert_flash(flash_matcher)
+    assert_redirected_to(locations_path)
   end
 
   def test_index_at_where
