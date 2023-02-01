@@ -1,7 +1,7 @@
 <!--SIDEBAR LOGO AND NAVIGATION-->
 <%
 classes = {
-  wrapper: "navigation-themed list-group list-group-compact",
+  wrapper: "navbar navbar-inverse sidebar-nav list-group",
   heading: "list-group-item disabled font-weight-bold",
   item: "list-group-item",
   admin: "list-group-item list-group-item-danger indent",
@@ -13,7 +13,8 @@ classes = {
 <div id="navigation">
 
   <a id="logo_link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-    <img class="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+    <img class="logo-trim img-responsive py-10px" alt="Mushroom Observer Logo"
+         src="/logo-trim.png"/>
   </a><!-- #logo_link -->
 
   <div class="<%= classes[:wrapper] %>">
@@ -52,7 +53,7 @@ classes = {
     <%= render(partial: "layouts/sidebar/languages",
                 locals: { classes: classes }) %>
 
-  </div><!-- .navigation-themed -->
+  </div><!-- .sidebar-nav -->
 
 </div><!-- #navigation -->
 <!--/SIDEBAR LOGO AND NAVIGATION-->

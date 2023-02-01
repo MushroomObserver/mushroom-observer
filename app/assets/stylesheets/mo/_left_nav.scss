@@ -71,9 +71,9 @@ $sidebar-max-width: 15em;
 // left nav bar
 // --------------------------------------------------
 
-.navigation-themed {
-  background-color: $navbar-inverse-bg;
-  border-color: $navbar-inverse-border;
+.sidebar-nav {
+  // background-color: $navbar-inverse-bg;
+  // border-color: $navbar-inverse-border;
   border-width: 1px;
   border-style: solid;
   border-top-left-radius: 0;
@@ -82,18 +82,10 @@ $sidebar-max-width: 15em;
   border-bottom-right-radius: 5px;
   padding-left: 0px;
   padding-right: 0px;
-  margin-bottom: 10em;
+  margin-bottom: 2px;
 
   a {
     font-weight: normal;
-  }
-
-  &.list-group {
-    margin-bottom: 2px;
-
-    &.list-group-compact .list-group-item {
-      padding: 4px;
-    }
   }
 
   .list-group-item {
@@ -102,6 +94,7 @@ $sidebar-max-width: 15em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 4px;
     // background-color: $navbar-inverse-bg;
 
     &:hover,
@@ -141,7 +134,7 @@ $sidebar-max-width: 15em;
 
 
 .theme-black-on-white {
-  .navigation-themed {
+  .sidebar-nav {
     .list-group-item#nav_bug_report_link {
       @extend .text-danger;
     }

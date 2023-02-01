@@ -13,7 +13,7 @@
 <%= form_with(url: action, id: "propagate_name_lifeform_form") do |f| %>
 
   <p><b><%= :ADD.t %>:</b> <%= :propagate_lifeform_add.t %></p>
-  <table class="table-lifeform">
+  <table class="table-lifeform table-striped">
     <% Name.all_lifeforms.
             select { |word| @name.lifeform.include?(" #{word} ") }.
             each do |word| %>
@@ -32,7 +32,7 @@
   <br/>
 
   <p><b><%= :REMOVE.t %>:</b> <%= :propagate_lifeform_remove.t %></p>
-  <table class="table-lifeform">
+  <table class="table-lifeform table-striped">
     <% Name.all_lifeforms.
             reject { |word| @name.lifeform.include?(" #{word} ") }.
             each do |word| %>

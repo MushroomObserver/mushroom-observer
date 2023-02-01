@@ -20,7 +20,7 @@ jQuery(document).ready(function () {
       success: function(text) {
         var div = jQuery("#image_vote_links_" + id);
         var $updatedLinks = $updatedLinks = jQuery(text);
-        div.html($updatedLinks.find(".image_vote_links_container").first().html());
+        div.html($updatedLinks.find(".image-vote-links").first().html());
 
         var newVotePercentage = div.parent().find('span.data_container').data('percentage');
         jQuery("#vote_meter_bar_" + id).css('width', newVotePercentage + "%")
