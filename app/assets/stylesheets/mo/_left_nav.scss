@@ -72,8 +72,6 @@ $sidebar-max-width: 15em;
 // --------------------------------------------------
 
 .sidebar-nav {
-  // background-color: $navbar-inverse-bg;
-  // border-color: $navbar-inverse-border;
   border-width: 1px;
   border-style: solid;
   border-top-left-radius: 0;
@@ -95,7 +93,6 @@ $sidebar-max-width: 15em;
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 4px;
-    // background-color: $navbar-inverse-bg;
 
     &:hover,
     &:focus,
