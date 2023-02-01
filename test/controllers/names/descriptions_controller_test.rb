@@ -30,6 +30,15 @@ module Names
       assert_template("names/descriptions/index")
     end
 
+    def test_index_sorted_by_user
+      by = "user"
+
+      login
+      get(:index, params: { by: by })
+
+      assert_select("#title", text: "Name Descriptions by #{by.capitalize}")
+    end
+
     def test_name_descriptions_by_author
       login
       get(:index, params: { by_author: rolf.id })
