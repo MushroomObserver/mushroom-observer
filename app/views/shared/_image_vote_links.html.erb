@@ -11,8 +11,8 @@
   </div>
 <% end %>
 
-<div id="vote_buttons">
-  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>">
+<div class="vote-buttons">
+  <div class="image-vote-links" id="image_vote_links_<%= image.id %>">
     <div class="text-center small">
       <%= if user && !image.users_vote(user).blank?
         image_vote_link(image, 0) + "&nbsp;".html_safe
