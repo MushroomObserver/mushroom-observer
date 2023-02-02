@@ -79,7 +79,10 @@ module Names
 
     # Display list of name_descriptions that a given user is author on.
     def name_descriptions_by_author
-      user = find_or_goto_index(User, params[:by_author].to_s)
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_author].to_s,
+        index_path: name_descriptions_path
+      )
       return unless user
 
       query = create_query(:NameDescription, :by_author, user: user)
@@ -88,7 +91,10 @@ module Names
 
     # Display list of name_descriptions that a given user is editor on.
     def name_descriptions_by_editor
-      user = find_or_goto_index(User, params[:by_editor].to_s)
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_editor].to_s,
+        index_path: name_descriptions_path
+      )
       return unless user
 
       query = create_query(:NameDescription, :by_editor, user: user)
