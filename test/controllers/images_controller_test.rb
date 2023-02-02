@@ -25,7 +25,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_template(partial: "_matrix_box")
   end
 
-  def test_index_image_by_user
+  def test_index_images_sorted_by_user
     login
     get(:index, params: { by: "user" })
     assert_select("title", text: "Mushroom Observer: Images by User")
