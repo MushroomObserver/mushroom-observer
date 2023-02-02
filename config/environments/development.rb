@@ -89,7 +89,7 @@ MushroomObserver::Application.configure do
   config.assets.digest = false
 
   # Enable web console for MushroomObserver VM
-  config.web_console.permitted_ips = "10.0.2.2"
+  config.web_console.allowed_ips = "10.0.2.2"
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
