@@ -155,7 +155,7 @@ module ObservationsHelper
     # row props have mobile-friendly labels
     [content_tag(:small, "#{:show_namings_user.t}: ",
                  class: "visible-xs-inline mr-4"),
-     content_tag(:strong, user_link)].safe_join
+     user_link].safe_join
   end
 
   def consensus_vote_html(naming)
