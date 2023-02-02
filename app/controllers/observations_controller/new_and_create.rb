@@ -137,20 +137,27 @@ module ObservationsController::NewAndCreate
   # not a hash.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
 
-  def create_observation_object(args) # rubocop:disable Metrics/AbcSize
+  def create_observation_object(args)
     now = Time.zone.now
-    observation = if args
-                    Observation.new(args.permit(permitted_observation_args).to_h)
-                  else
-                    Observation.new
-                  end
+    observation = new_observation(args)
     observation.created_at = now
     observation.updated_at = now
     observation.user       = @user
     observation.name       = Name.unknown
     observation.source     = "mo_website"
+    determine_observation_location(observation)
+  end
+
+  def new_observation(args)
+    if args
+      Observation.new(args.permit(permitted_observation_args).to_h)
+    else
+      Observation.new
+    end
+  end
+
+  def determine_observation_location(observation)
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.long && observation.place_name.blank?)
       observation.location = Location.unknown

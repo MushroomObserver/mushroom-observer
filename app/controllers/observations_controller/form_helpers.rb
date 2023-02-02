@@ -16,8 +16,8 @@
 module ObservationsController::FormHelpers
   private
 
-  # Note this array syntax. VSCode won't allow nested square brackets (?).
-  # The nested attributes MUST come last.
+  # Note this array syntax: The nested attributes MUST come last.
+  # VSCode won't allow nested square brackets (?).
   def permitted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
      "when(3i)", :specimen, :thumb_image_id, :is_collection_location,
