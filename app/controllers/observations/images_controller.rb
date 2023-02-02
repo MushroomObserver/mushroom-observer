@@ -89,7 +89,7 @@ module Observations
     def process_image(args, upload) # rubocop:disable Metrics/AbcSize
       return if upload.blank?
 
-      @image = Image.new(args.permit(whitelisted_image_args))
+      @image = Image.new(args.permit(permitted_image_args))
       @image.created_at = Time.current
       @image.updated_at = @image.created_at
       @image.user       = @user
@@ -198,7 +198,7 @@ module Observations
       @licenses = current_license_names_and_ids
       check_image_permission!
 
-      @image.attributes = whitelisted_image_params
+      @image.attributes = permitted_image_params
 
       if image_or_projects_updated
         # redirect_with_query(image_path(@image.id))
@@ -222,8 +222,8 @@ module Observations
       redirect_with_query(image_path(@image))
     end
 
-    def whitelisted_image_params
-      params.require(:image).permit(whitelisted_image_args)
+    def permitted_image_params
+      params.require(:image).permit(permitted_image_args)
     end
 
     def image_or_projects_updated

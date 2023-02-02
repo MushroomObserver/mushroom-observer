@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
 module ObservationsController::NewAndCreate
   include ObservationsController::FormHelpers
 
@@ -133,6 +132,9 @@ module ObservationsController::NewAndCreate
 
   # Roughly create observation object.  Will validate and save later
   # once we're sure everything is correct.
+  # NOTE: You MUST call `to_h` on the permitted params, because param nesting.
+  # As of rails 5, params are an ActionController::Parameters object,
+  # not a hash.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
@@ -140,7 +142,7 @@ module ObservationsController::NewAndCreate
   def create_observation_object(args) # rubocop:disable Metrics/AbcSize
     now = Time.zone.now
     observation = if args
-                    Observation.new(args.permit(whitelisted_observation_args))
+                    Observation.new(args.permit(permitted_observation_args).to_h)
                   else
                     Observation.new
                   end
@@ -164,19 +166,6 @@ module ObservationsController::NewAndCreate
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
-  end
-
-  # Symbolize keys; delete key/value pair if value blank
-  # Also avoids whitelisting issues
-  def notes_to_sym_and_compact
-    return Observation.no_notes unless notes_param_present?
-
-    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
-    symbolized.compact_blank!
-  end
-
-  def notes_param_present?
-    params[:observation] && params[:observation][:notes].present?
   end
 
   def validate_name(params)
@@ -350,4 +339,3 @@ module ObservationsController::NewAndCreate
     render(action: :new, location: new_observation_path(q: get_query_param))
   end
 end
-# rubocop:enable Metrics/ModuleLength

@@ -481,7 +481,7 @@ class LocationsController < ApplicationController
   end
 
   def create_location_ivar(done, db_name)
-    @location = Location.new(allowed_location_params)
+    @location = Location.new(permitted_location_params)
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
@@ -612,7 +612,7 @@ class LocationsController < ApplicationController
 
   ##############################################################################
 
-  def allowed_location_params
+  def permitted_location_params
     params.require(:location).
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end
