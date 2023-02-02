@@ -104,7 +104,10 @@ class LocationsController < ApplicationController
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor
-    user = find_or_goto_index(User, params[:by_editor].to_s)
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: locations_path
+    )
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
