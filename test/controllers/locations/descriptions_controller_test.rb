@@ -46,7 +46,7 @@ module Locations
     #
     #    INDEX
 
-    def test_index_sorted_by_user
+    def test_sort_by_user
       by = "user"
 
       login

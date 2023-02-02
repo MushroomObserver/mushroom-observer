@@ -174,7 +174,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   ######## Index ################################################
 
-  def test_page_loads
+  def test_index_page_loads
     login
     get(:index)
     assert_template("shared/_matrix_box")
@@ -207,12 +207,9 @@ class ObservationsControllerTest < FunctionalTestCase
 
     get(:index, params: { user: rolf.id })
     assert_template("shared/_matrix_box")
-
-    # get(:login)
-    # assert_redirected_to(new_account_login_path)
   end
 
-  def test_index_sorted_by_user
+  def test_index_sort_by_user
     by = "user"
 
     login

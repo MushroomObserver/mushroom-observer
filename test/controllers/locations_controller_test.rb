@@ -232,7 +232,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(-180, query.params[:west])
   end
 
-  def test_index_by
+  def test_index_sort_by_user
     by = "user"
 
     login
@@ -302,7 +302,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
-  def test_locations_by_user
+  def test_by_user
     login
     get(:index, params: { by_user: rolf.id })
     assert_template("index")
@@ -319,7 +319,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
-  def test_locations_by_editor
+  def test_by_editor
     login
     get(:index, params: { by_editor: rolf.id })
     assert_template("index")

@@ -36,7 +36,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/no matching collection numbers found/i)
   end
 
-  def test_collection_number_search
+  def test_pattern_search_str
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
     login
@@ -47,7 +47,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("#results tr", numbers.count)
   end
 
-  def test_collection_number_search_by_id
+  def test_pattern_id
     id = collection_numbers(:minimal_unknown_coll_num).id
 
     login

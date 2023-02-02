@@ -22,7 +22,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_index_by
+  def test_index_sort_by_user
     by = "user"
 
     login
