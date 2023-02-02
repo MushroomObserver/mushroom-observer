@@ -98,16 +98,6 @@ module ObservationsController::EditAndUpdate
 
   private
 
-  def update_whitelisted_observation_attributes
-    @observation.attributes = whitelisted_observation_params || {}
-  end
-
-  def whitelisted_observation_params
-    return unless params[:observation]
-
-    params[:observation].permit(whitelisted_observation_args)
-  end
-
   def warn_if_unchecking_specimen_with_records_present!
     return if @observation.specimen
     return unless @observation.specimen_was

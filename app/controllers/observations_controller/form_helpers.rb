@@ -22,6 +22,16 @@ module ObservationsController::FormHelpers
      :gps_hidden]
   end
 
+  def update_permitted_observation_attributes
+    @observation.attributes = permitted_observation_params || {}
+  end
+
+  def permitted_observation_params
+    return unless params[:observation]
+
+    params[:observation].permit(permitted_observation_args)
+  end
+
   def init_license_var
     @licenses = License.current_names_and_ids(@user.license)
   end
