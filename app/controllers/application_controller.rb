@@ -1655,7 +1655,23 @@ class ApplicationController < ActionController::Base
     nil
   end
 
+  # Like find_or_goto_index, but allows redirect to a different index
+  def find_obj_or_goto_index(model:, obj_id:, index_path:)
+    model.safe_find(obj_id) ||
+      flash_obj_not_found_and_goto_index(
+        model: model, obj_id: obj_id, index_path: index_path
+      )
+  end
+
   private ##########
+
+  def flash_obj_not_found_and_goto_index(model:, obj_id:, index_path:)
+    flash_error(
+      :runtime_object_not_found.t(id: obj_id, type: model.type_tag)
+    )
+    redirect_with_query(index_path)
+    nil
+  end
 
   # Redirects to an appropriate fallback index in case of unrecoverable error.
   # Most such errors are dealt with on a case-by-case basis in the controllers,

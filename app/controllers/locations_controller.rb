@@ -92,30 +92,14 @@ class LocationsController < ApplicationController
 
   # Display list of locations that a given user created.
   def locations_by_user
-    user = other_model_obj_or_goto_index(
-      other_model: User,
-      obj_id: params[:by_user].to_s,
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
       index_path: locations_path
     )
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
     show_selected_locations(query, link_all_sorts: true)
-  end
-
-  def other_model_obj_or_goto_index(other_model:, obj_id:, index_path:)
-    other_model.safe_find(obj_id) ||
-      flash_other_model_error_and_goto_index(
-        other_model: other_model, obj_id: obj_id, index_path: index_path
-      )
-  end
-
-  def flash_other_model_error_and_goto_index(other_model:, obj_id:, index_path:)
-    flash_error(
-      :runtime_object_not_found.t(id: obj_id, type: other_model.type_tag)
-    )
-    redirect_with_query(index_path)
-    nil
   end
 
   # Display list of locations that a given user is editor on.
