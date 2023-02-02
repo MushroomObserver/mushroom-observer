@@ -364,7 +364,7 @@ class NamesController < ApplicationController
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
 
-    @name.attributes = allowed_name_params[:name]
+    @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
     render("new", location: new_name_path)
@@ -716,7 +716,7 @@ class NamesController < ApplicationController
   # ----------------------------------------------------------------------------
 
   # allow some mass assignment for purposes of reloading form
-  def allowed_name_params
+  def permitted_name_params
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end

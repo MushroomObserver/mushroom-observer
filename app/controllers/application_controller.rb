@@ -1886,7 +1886,7 @@ class ApplicationController < ActionController::Base
   private
 
   # defined here because used by both image_controller and observer_controller
-  def whitelisted_image_args
+  def permitted_image_args
     [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
   end
 end

@@ -75,7 +75,7 @@ module SpeciesLists
       @species_list.user = @user
       if params[:species_list]
         args = params[:species_list]
-        @species_list.attributes = args.permit(whitelisted_species_list_args)
+        @species_list.attributes = args.permit(permitted_species_list_args)
       end
       @species_list.title = @species_list.title.to_s.strip_squeeze
     end
@@ -518,7 +518,7 @@ module SpeciesLists
       end
     end
 
-    def whitelisted_species_list_args
+    def permitted_species_list_args
       ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]
     end
 

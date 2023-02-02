@@ -175,7 +175,7 @@ class CollectionNumbersController < ApplicationController
 
   def create_collection_number
     @collection_number =
-      CollectionNumber.new(whitelisted_collection_number_params)
+      CollectionNumber.new(permitted_collection_number_params)
     normalize_parameters
     return if flash_error_and_reload_if_form_has_errors
 
@@ -193,7 +193,7 @@ class CollectionNumbersController < ApplicationController
 
   def update_collection_number
     old_format_name = @collection_number.format_name
-    @collection_number.attributes = whitelisted_collection_number_params
+    @collection_number.attributes = permitted_collection_number_params
     normalize_parameters
     return if flash_error_and_reload_if_form_has_errors
 
@@ -236,7 +236,7 @@ class CollectionNumbersController < ApplicationController
     false
   end
 
-  def whitelisted_collection_number_params
+  def permitted_collection_number_params
     return {} unless params[:collection_number]
 
     params.require(:collection_number).permit(:name, :number)

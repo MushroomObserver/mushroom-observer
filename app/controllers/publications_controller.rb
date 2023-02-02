@@ -50,7 +50,7 @@ class PublicationsController < ApplicationController
   # POST /publications
   # POST /publications.xml
   def create
-    params = whitelisted_publication_params.merge(user: User.current)
+    params = permitted_publication_params.merge(user: User.current)
     @publication = Publication.new(params)
     respond_to do |format|
       if @publication.save
@@ -79,7 +79,7 @@ class PublicationsController < ApplicationController
       if !can_edit?(@publication)
         format.html { redirect_to(publications_url) }
         format.xml  { render(xml: "can't edit", status: :unprocessable_entity) }
-      elsif @publication.update(whitelisted_publication_params)
+      elsif @publication.update(permitted_publication_params)
         flash_notice(:runtime_updated_at.t(type: :publication))
         format.html { redirect_to(@publication) }
         format.xml  { head(:ok) }
@@ -117,7 +117,7 @@ class PublicationsController < ApplicationController
 
   private
 
-  def whitelisted_publication_params
+  def permitted_publication_params
     if params[:publication]
       params[:publication].permit(:full, :link, :how_helped, :mo_mentioned,
                                   :peer_reviewed)

@@ -161,7 +161,7 @@ module Locations
 
       # Render a blank form.
       initialize_description_source
-      @description.attributes = allowed_location_description_params
+      @description.attributes = permitted_location_description_params
       if @description.valid?
         save_new_description_flash_and_redirect
       else
@@ -186,7 +186,7 @@ module Locations
 
       find_description_parent
       find_licenses
-      @description.attributes = allowed_location_description_params
+      @description.attributes = permitted_location_description_params
 
       modify_description_permissions
       save_if_changes_made_or_flash
@@ -252,7 +252,7 @@ module Locations
       end
     end
 
-    def allowed_location_description_params
+    def permitted_location_description_params
       params.require(:description).
         permit(:source_type, :source_name, :project_id, :public_write, :public,
                :license_id, :gen_desc, :ecology, :species, :notes, :refs)

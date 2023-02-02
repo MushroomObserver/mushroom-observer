@@ -207,7 +207,7 @@ class HerbariumRecordsController < ApplicationController
 
   def create_herbarium_record
     @herbarium_record =
-      HerbariumRecord.new(whitelisted_herbarium_record_params)
+      HerbariumRecord.new(permitted_herbarium_record_params)
     normalize_parameters
     return if flash_error_and_reload_if_form_has_errors
 
@@ -229,7 +229,7 @@ class HerbariumRecordsController < ApplicationController
 
   def update_herbarium_record
     old_herbarium = @herbarium_record.herbarium
-    @herbarium_record.attributes = whitelisted_herbarium_record_params
+    @herbarium_record.attributes = permitted_herbarium_record_params
     normalize_parameters
     return if flash_error_and_reload_if_form_has_errors
 
@@ -264,7 +264,7 @@ class HerbariumRecordsController < ApplicationController
     false
   end
 
-  def whitelisted_herbarium_record_params
+  def permitted_herbarium_record_params
     return {} unless params[:herbarium_record]
 
     params.require(:herbarium_record).
