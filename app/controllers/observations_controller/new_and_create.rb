@@ -140,7 +140,7 @@ module ObservationsController::NewAndCreate
   def create_observation_object(args) # rubocop:disable Metrics/AbcSize
     now = Time.zone.now
     observation = if args
-                    Observation.new(args.permit(whitelisted_observation_args))
+                    Observation.new(args.permit(permitted_observation_args))
                   else
                     Observation.new
                   end
@@ -167,7 +167,7 @@ module ObservationsController::NewAndCreate
   end
 
   # Symbolize keys; delete key/value pair if value blank
-  # Also avoids whitelisting issues
+  # Also avoids permitted param issues
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
 
