@@ -90,13 +90,18 @@ class LocationsController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   end
 
-  # Display list of locations that a given user is author on.
+  # Display list of locations that a given user created.
   def locations_by_user
-    user = find_or_goto_index(User, params[:by_user].to_s )
-    return unless user
+    user = User.safe_find(params[:by_user].to_s)
 
-    query = create_query(:Location, :by_user, user: user)
-    show_selected_locations(query, link_all_sorts: true)
+    if user
+      query = create_query(:Location, :by_user, user: user)
+      show_selected_locations(query, link_all_sorts: true)
+    else
+      flash_error(:runtime_object_not_found.t(id: params[:by_user].to_s,
+                                              type: User.type_tag))
+      redirect_to(locations_path)
+    end
   end
 
   # Display list of locations that a given user is editor on.
