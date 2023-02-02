@@ -243,14 +243,14 @@ class CommentsController < ApplicationController
                   allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
-    @comment.attributes = whitelisted_comment_params if params[:comment]
+    @comment.attributes = permitted_comment_params if params[:comment]
 
     save_comment_or_flash_errors_and_redirect!
   end
 
   private
 
-  def whitelisted_comment_params
+  def permitted_comment_params
     params[:comment].permit([:summary, :comment])
   end
 
@@ -294,7 +294,7 @@ class CommentsController < ApplicationController
     return unless allowed_to_see!(@target) &&
                   check_permission_or_redirect!(@comment, @target)
 
-    @comment.attributes = whitelisted_comment_params if params[:comment]
+    @comment.attributes = permitted_comment_params if params[:comment]
     return unless comment_updated?
 
     redirect_with_query(controller: @target.show_controller,

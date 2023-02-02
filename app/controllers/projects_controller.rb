@@ -140,7 +140,7 @@ class ProjectsController < ApplicationController
     elsif (project2 = Project.find_by_title(@title)) &&
           (project2 != @project)
       flash_error(:add_project_already_exists.t(title: @title))
-    elsif !@project.update(whitelisted_project_params)
+    elsif !@project.update(permitted_project_params)
       flash_object_errors(@project)
     else
       @project.log_update
@@ -248,7 +248,7 @@ class ProjectsController < ApplicationController
   #
   ##############################################################################
 
-  def whitelisted_project_params
+  def permitted_project_params
     params.require(:project).permit(:title, :summary)
   end
 
@@ -268,7 +268,7 @@ class ProjectsController < ApplicationController
     admin_group.users << @user
 
     # Create project.
-    @project = Project.new(whitelisted_project_params)
+    @project = Project.new(permitted_project_params)
     @project.user = @user
     @project.user_group = user_group
     @project.admin_group = admin_group
