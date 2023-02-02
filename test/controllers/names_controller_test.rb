@@ -89,10 +89,32 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_names_by_user_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(names_path)
+  end
+
   def test_names_by_editor
     login
     get(:index, params: { by_editor: rolf.id })
     assert_template("index")
+  end
+
+  def test_names_by_editor_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_editor: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(names_path)
   end
 
   def test_names_needing_descriptions
