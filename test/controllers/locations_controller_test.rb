@@ -333,7 +333,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_editor: bad_user_id })
 
     assert_flash_error("id ##{bad_user_id}")
-    assert_redirected_to(users_path)
+    assert_redirected_to(locations_path)
   end
 
   ##############################################################################
