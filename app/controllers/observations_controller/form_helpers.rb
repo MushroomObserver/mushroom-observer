@@ -16,7 +16,7 @@
 module ObservationsController::FormHelpers
   private
 
-  def whitelisted_observation_args
+  def permitted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
      "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
      :gps_hidden]
@@ -120,7 +120,7 @@ module ObservationsController::FormHelpers
             name = upload.original_filename.force_encoding("utf-8")
           end
           # image = Image.new(args2) # Rails 3.2
-          image = Image.new(args2.permit(whitelisted_image_args))
+          image = Image.new(args2.permit(permitted_image_args))
           # image = Image.new(args2.permit(:all))
           image.created_at = Time.zone.now
           image.updated_at = image.created_at
@@ -175,7 +175,7 @@ module ObservationsController::FormHelpers
       args = param_lookup([:good_image, image.id.to_s])
       next unless args
 
-      image.attributes = args.permit(whitelisted_image_args)
+      image.attributes = args.permit(permitted_image_args)
       next unless image.when_changed? ||
                   image.notes_changed? ||
                   image.copyright_holder_changed? ||
