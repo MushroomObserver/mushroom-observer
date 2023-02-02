@@ -80,7 +80,7 @@ module ObservationsController::EditAndUpdate
     init_new_image_var(@observation.when)
     @any_errors = false
 
-    update_whitelisted_observation_attributes
+    update_permitted_observation_attributes
     @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!
     strip_images_if_observation_gps_hidden
