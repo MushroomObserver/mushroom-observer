@@ -20,7 +20,6 @@ class API2
       :user
     ]
 
-    # rubocop:disable Metrics/AbcSize
     def query_params
       {
         where: sql_id_condition,
