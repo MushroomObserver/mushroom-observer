@@ -158,14 +158,6 @@ class LocationsController < ApplicationController
     # observation query.
     @links << coerced_query_link(query, Observation)
 
-    # Add "show descriptions" link if this query can be coerced into an
-    # location description query.
-    if query.coercable?(:LocationDescription)
-      @links << [:show_objects.t(type: :description),
-                 add_query_param({ action: :index_location_description },
-                                 query)]
-    end
-
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)
