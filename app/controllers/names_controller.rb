@@ -155,7 +155,7 @@ class NamesController < ApplicationController
   end
 
   # Display list of names that match a string.
-  def name_search # rubocop:disable Metrics/AbcSize
+  def name_search
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (name = Name.safe_find(pattern))

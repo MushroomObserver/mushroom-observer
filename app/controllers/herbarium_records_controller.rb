@@ -297,7 +297,7 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.notes = @herbarium_record.notes.to_s.strip
   end
 
-  def validate_herbarium_name! # rubocop:disable Metrics/AbcSize
+  def validate_herbarium_name!
     name = @herbarium_record.herbarium_name.to_s
     name2 = name.sub(/^[^-]* - /, "")
     herbarium = Herbarium.where(name: [name, name2]).first ||

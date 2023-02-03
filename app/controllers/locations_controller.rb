@@ -281,7 +281,7 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
-  def show # rubocop:disable Metrics/AbcSize
+  def show
     clear_query_in_session
     case params[:flow]
     when "next"
@@ -545,7 +545,7 @@ class LocationsController < ApplicationController
     save_flash_and_redirect_or_render!
   end
 
-  def determine_and_check_location(db_name) # rubocop:disable Metrics/AbcSize
+  def determine_and_check_location(db_name)
     @location.north = params[:location][:north] if params[:location][:north]
     @location.south = params[:location][:south] if params[:location][:south]
     @location.east  = params[:location][:east]  if params[:location][:east]

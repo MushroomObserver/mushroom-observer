@@ -16,7 +16,7 @@ module Names::Synonyms
       init_ivars_for_new
     end
 
-    def create # rubocop:disable Metrics/AbcSize
+    def create
       return unless find_name!
 
       return if abort_if_name_locked!(@name)
