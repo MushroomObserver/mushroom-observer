@@ -25,7 +25,18 @@ class ImagesControllerTest < FunctionalTestCase
     assert_template(partial: "_matrix_box")
   end
 
-  def test_index_image_by_user
+  def test_images_by_user_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(images_path)
+  end
+
+  def test_index_images_sorted_by_user
     login
     get(:index, params: { by: "user" })
     assert_select("title", text: "Mushroom Observer: Images by User")

@@ -53,6 +53,15 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_index_sort_by_user
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Names by #{by.capitalize}")
+  end
+
   # observation_index
   def test_names_with_observations
     login
@@ -80,10 +89,32 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_names_by_user_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(names_path)
+  end
+
   def test_names_by_editor
     login
     get(:index, params: { by_editor: rolf.id })
     assert_template("index")
+  end
+
+  def test_names_by_editor_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_editor: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(names_path)
   end
 
   def test_names_needing_descriptions
@@ -144,6 +175,20 @@ class NamesControllerTest < FunctionalTestCase
     query.record.delete
     login
     get(:index, params: params)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  def test_advanced_search_error
+    query_without_conditions = Query.lookup_and_save(
+      :Name, :advanced_search
+    )
+
+    login
+    get(:index,
+        params: @controller.query_params(query_without_conditions).
+                            merge(advanced_search: true))
+
+    assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
   end
 

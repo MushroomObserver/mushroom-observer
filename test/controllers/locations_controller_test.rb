@@ -196,6 +196,20 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_advanced_search_error
+    query_without_conditions = Query.lookup_and_save(
+      :Location, :advanced_search
+    )
+
+    login
+    get(:index,
+        params: @controller.query_params(query_without_conditions).
+                            merge(advanced_search: true))
+
+    assert_flash_error(:runtime_no_conditions.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
   def test_location_bounding_box
     north = south = east = west = 0
     delta = 0.001
@@ -216,6 +230,24 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(-90, query.params[:south])
     assert_equal(180, query.params[:east])
     assert_equal(-180, query.params[:west])
+  end
+
+  def test_index_sort_by_user
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Locations by #{by.capitalize}")
+  end
+
+  def test_pattern
+    search_str = "California"
+
+    login
+    get(:index, params: { pattern: search_str })
+
+    assert_select("#title", text: "Locations Matching ‘#{search_str}’")
   end
 
   def test_list_by_country
@@ -270,16 +302,38 @@ class LocationsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
-  def test_locations_by_user
+  def test_by_user
     login
     get(:index, params: { by_user: rolf.id })
     assert_template("index")
   end
 
-  def test_locations_by_editor
+  def test_by_user_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(locations_path)
+  end
+
+  def test_by_editor
     login
     get(:index, params: { by_editor: rolf.id })
     assert_template("index")
+  end
+
+  def test_by_editor_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_editor: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(locations_path)
   end
 
   ##############################################################################

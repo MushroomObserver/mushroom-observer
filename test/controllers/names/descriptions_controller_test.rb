@@ -30,10 +30,30 @@ module Names
       assert_template("names/descriptions/index")
     end
 
+    def test_index_sorted_by_user
+      by = "user"
+
+      login
+      get(:index, params: { by: by })
+
+      assert_select("#title", text: "Name Descriptions by #{by.capitalize}")
+    end
+
     def test_name_descriptions_by_author
       login
       get(:index, params: { by_author: rolf.id })
       assert_template("names/descriptions/index")
+    end
+
+    def test_name_descriptions_by_author_bad_user_id
+      bad_user_id = 666
+      assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+      login
+      get(:index, params: { by_author: bad_user_id })
+
+      assert_flash_error("id ##{bad_user_id}")
+      assert_redirected_to(name_descriptions_path)
     end
 
     def test_name_descriptions_by_editor
@@ -42,6 +62,17 @@ module Names
       assert_redirected_to(action: :show,
                            id: name_descriptions(:coprinus_comatus_desc).id,
                            params: @controller.query_params)
+    end
+
+    def test_name_descriptions_by_editor_bad_user_id
+      bad_user_id = 666
+      assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+      login
+      get(:index, params: { by_editor: bad_user_id })
+
+      assert_flash_error("id ##{bad_user_id}")
+      assert_redirected_to(name_descriptions_path)
     end
 
     def test_show_name_description

@@ -93,11 +93,10 @@ class ImagesController < ApplicationController
 
   # Display matrix of images by a given user.
   def images_by_user
-    user = if params[:by_user]
-             find_or_goto_index(User, params[:by_user].to_s)
-           else
-             @user
-           end
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: images_path
+    )
     return unless user
 
     query = create_query(:Image, :by_user, user: user)

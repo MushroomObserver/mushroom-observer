@@ -121,7 +121,10 @@ class NamesController < ApplicationController
 
   # Display list of names that a given user is author on.
   def names_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:by_user].to_s) : @user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: names_path
+    )
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
@@ -133,11 +136,10 @@ class NamesController < ApplicationController
 
   # Display list of names that a given user is editor on.
   def names_by_editor
-    user = if params[:id]
-             find_or_goto_index(User, params[:by_editor].to_s)
-           else
-             @user
-           end
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_editor].to_s,
+      index_path: names_path
+    )
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
