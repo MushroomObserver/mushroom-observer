@@ -119,7 +119,6 @@ end
 # Or would this scatter the code?
 # Thinking the scope could be useful for graphQL, or it could use this class.
 #
-# rubocop:disable Metrics/AbcSize
 class AutoCompleteLocation < AutoCompleteByWord
   attr_accessor :reverse
 
@@ -199,5 +198,4 @@ class AutoCompleteHerbarium < AutoCompleteByWord
       code.empty? ? name : "#{code} - #{name}"
     end.sort
   end
-  # rubocop:enable Metrics/AbcSize
 end

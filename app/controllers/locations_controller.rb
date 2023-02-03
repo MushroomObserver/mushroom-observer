@@ -141,7 +141,6 @@ class LocationsController < ApplicationController
   end
 
   # Show selected search results as a list with 'list_locations' template.
-  # rubocop:disable Metrics/AbcSize
   def show_selected_locations(query, args = {})
     @links ||= []
 
@@ -274,7 +273,6 @@ class LocationsController < ApplicationController
 
     result
   end
-  # rubocop:enable Metrics/AbcSize
 
   ##############################################################################
   #
