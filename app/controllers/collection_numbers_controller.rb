@@ -14,27 +14,22 @@ class CollectionNumbersController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
 
-  @index_subaction_param_keys = [
-    :pattern,
-    :observation_id,
-    :by,
-    :q,
-    :id
+  DISPATCH_PARAM_TO_INDEX_SUBACTION = [
+    [:pattern, :collection_number_search],
+    [:observation_id, :observation_index],
+    [:by, :index_collection_number],
+    [:q, :index_collection_number],
+    [:id, :index_collection_number]
   ].freeze
-
-  @index_subaction_dispatch_table = {
-    pattern: :collection_number_search,
-    observation_id: :observation_index,
-    by: :index_collection_number,
-    q: :index_collection_number,
-    id: :index_collection_number
-  }.freeze
 
   # Disable cop because method definition prevents a
   # Rails/LexicallyScopedActionFilter offense
   # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
   def index # rubocop:disable Lint/UselessMethodDefinition
-    super
+    DISPATCH_PARAM_TO_INDEX_SUBACTION.each do |param_key, subaction|
+      return send(subaction) if params[param_key].present?
+    end
+    default_index_subaction
   end
 
   def show
