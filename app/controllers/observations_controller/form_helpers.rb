@@ -16,19 +16,18 @@
 module ObservationsController::FormHelpers
   private
 
-  # Note this array syntax: The nested attributes MUST come last.
-  # VSCode won't allow nested square brackets (?).
+  # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-     "when(3i)", :specimen, :thumb_image_id, :is_collection_location,
-     :gps_hidden, { notes: [:Other] }]
+     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
+     :gps_hidden]
   end
 
   def update_permitted_observation_attributes
     @observation.attributes = permitted_observation_params || {}
   end
 
-  # NOTE: You MUST call `to_h` on the permitted params, because param nesting.
+  # NOTE: call `to_h` on the permitted params if problems with nested params.
   # As of rails 5, params are an ActionController::Parameters object,
   # not a hash.
   def permitted_observation_params
@@ -38,7 +37,7 @@ module ObservationsController::FormHelpers
   end
 
   # Symbolize keys; delete key/value pair if value blank
-  # Also avoids whitelisting issues
+  # Also avoids param permitting issues
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
 
@@ -47,7 +46,7 @@ module ObservationsController::FormHelpers
   end
 
   def notes_param_present?
-    params[:observation] && params[:observation][:notes].present?
+    params.dig(:observation, :notes).present?
   end
 
   def init_license_var

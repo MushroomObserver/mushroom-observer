@@ -132,9 +132,6 @@ module ObservationsController::NewAndCreate
 
   # Roughly create observation object.  Will validate and save later
   # once we're sure everything is correct.
-  # NOTE: You MUST call `to_h` on the permitted params, because param nesting.
-  # As of rails 5, params are an ActionController::Parameters object,
-  # not a hash.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
 
@@ -149,6 +146,9 @@ module ObservationsController::NewAndCreate
     determine_observation_location(observation)
   end
 
+  # NOTE: Call `to_h` on the permitted params if problems with nested params.
+  # As of rails 5, params are an ActionController::Parameters object,
+  # not a hash.
   def new_observation(args)
     if args
       Observation.new(args.permit(permitted_observation_args).to_h)
