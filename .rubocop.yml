@@ -90,12 +90,6 @@ Lint/NonAtomicFileOperation: # new in 1.31
   Enabled: false
 
 Metrics/AbcSize:
-  # Rubocop default: 15
-  # Even short simple methods sometimes exceed 15.
-  # Simplifying them further just forces us to make tons of tiny
-  # trivial methods with really cumbersome names, without actually making
-  # the code any better.
-  Max: 20
   # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
     - "test//**/*"
@@ -212,6 +206,13 @@ Style/AsciiComments:
 Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it
   # Is this still true? JDC 2020-08-17
+  Enabled: false
+Style/Documentation:
+  # Unnecessary in Rails code if following the Rails Way.
+  # We ignore it regularly.
+  # When we follow it, the documentation often adds nothing.
+  # And see Martin, Clean Code, ch. 4
+  #   (Redundant Comments and Mandated Comments are Bad Comments)
   Enabled: false
 Style/DoubleNegation:
   # Rubocop default: true
