@@ -107,7 +107,7 @@ Lint/Void:
 # Offense count: 283
 # Configuration parameters: AllowedMethods, AllowedPatterns, IgnoredMethods, CountRepeatedAttributes.
 Metrics/AbcSize:
-  Max: 17
+  Max: 136
 
 # Offense count: 29
 # Configuration parameters: CountComments, CountAsOne, ExcludedMethods, AllowedMethods, AllowedPatterns, IgnoredMethods.
