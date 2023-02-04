@@ -3,34 +3,13 @@
 # Controls viewing and modifying collection numbers.
 class CollectionNumbersController < ApplicationController
   before_action :login_required
-  # except: [
-  #   :index,
-  #   :index_collection_number,
-  #   :list_collection_numbers,
-  #   :collection_number_search,
-  #   :observation_index,
-  #   :show
-  # ]
+
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  DISPATCH_PARAM_TO_INDEX_SUBACTION = [
-    [:pattern, :collection_number_search],
-    [:observation_id, :observation_index],
-    [:by, :index_collection_number],
-    [:q, :index_collection_number],
-    [:id, :index_collection_number]
-  ].freeze
-
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    DISPATCH_PARAM_TO_INDEX_SUBACTION.each do |param_key, subaction|
-      return send(subaction) if params[param_key].present?
-    end
-    default_index_subaction
-  end
+  @index_subaction_param_keys = [:pattern, :observation_id].freeze
 
   def show
     case params[:flow]
@@ -99,33 +78,29 @@ class CollectionNumbersController < ApplicationController
     list_collection_numbers
   end
 
-  # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_collection_number
+  # Show list of collection_numbers.
+  def list_collection_numbers
+    store_location
     query = find_or_create_query(:CollectionNumber, by: params[:by])
+    return show_selected_collection_numbers(query) if params[:id].blank?
+
     show_selected_collection_numbers(query, id: params[:id].to_s,
                                             always_index: true)
   end
 
-  # Show list of collection_numbers.
-  def list_collection_numbers
-    store_location
-    query = create_query(:CollectionNumber, :all)
-    show_selected_collection_numbers(query)
-  end
-
   # Display list of CollectionNumbers whose text matches a string pattern.
-  def collection_number_search
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (collection_number = CollectionNumber.safe_find(pattern))
+  def pattern
+    pat = params[:pattern].to_s
+    if pat.match?(/^\d+$/) &&
+       (collection_number = CollectionNumber.safe_find(pat))
       redirect_to(action: :show, id: collection_number.id)
     else
-      query = create_query(:CollectionNumber, :pattern_search, pattern: pattern)
+      query = create_query(:CollectionNumber, :pattern_search, pattern: pat)
       show_selected_collection_numbers(query)
     end
   end
 
-  def observation_index
+  def observation_id
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:observation_id].to_s)
