@@ -16,6 +16,7 @@
 module ObservationsController::FormHelpers
   private
 
+  # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
      "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
@@ -26,10 +27,26 @@ module ObservationsController::FormHelpers
     @observation.attributes = permitted_observation_params || {}
   end
 
+  # NOTE: call `to_h` on the permitted params if problems with nested params.
+  # As of rails 5, params are an ActionController::Parameters object,
+  # not a hash.
   def permitted_observation_params
     return unless params[:observation]
 
-    params[:observation].permit(permitted_observation_args)
+    params[:observation].permit(permitted_observation_args).to_h
+  end
+
+  # Symbolize keys; delete key/value pair if value blank
+  # Also avoids param permitting issues
+  def notes_to_sym_and_compact
+    return Observation.no_notes unless notes_param_present?
+
+    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    symbolized.compact_blank!
+  end
+
+  def notes_param_present?
+    params.dig(:observation, :notes).present?
   end
 
   def init_license_var
