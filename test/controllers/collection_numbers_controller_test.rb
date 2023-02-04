@@ -90,6 +90,27 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("#results tr", query.num_results)
   end
 
+  def test_index_with_id_and_sorted
+    last_number = CollectionNumber.last
+    params = { id: last_number.id, by: :reverse_date }
+
+    login
+    get(:index, params: params)
+
+    assert_response(:success)
+    assert_template(:index)
+    assert(
+      collection_number_links.first[:href].
+        start_with?(collection_number_path(last_number.id)),
+      "Index's 1st CollectionNumber link should be link to the " \
+      "last CollectionNumber"
+    )
+  end
+
+  def collection_number_links
+    assert_select("a[href ^= '/collection_numbers/']")
+  end
+
   def test_show_collection_number
     login
     # get(:show)
