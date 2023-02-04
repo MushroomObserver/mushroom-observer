@@ -123,7 +123,22 @@ module Query
         add_joins(*joins)
       end
 
-      def add_image_size_condition(vals, *joins)
+      # FIXME: delete this comment and following temporary method
+      def phony_add_rank_condition_with_abc_gt_seventeen(vals, *joins)
+        return if vals.empty?
+
+        min, max = vals
+        max ||= min
+        all_ranks = Name.all_ranks
+        a = all_ranks.index(min) || 0
+        b = all_ranks.index(max) || (all_ranks.length - 1)
+        a, b = b, a if a > b
+        ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
+        @where << "names.`rank` IN (#{ranks.join(",")})"
+        add_joins(*joins)
+      end
+
+      def phony_add_image_size_condition(vals, *joins)
         return if vals.empty?
 
         min, max = vals
@@ -141,6 +156,30 @@ module Query
       end
 
       def add_image_type_condition(vals, *joins)
+        return if vals.empty?
+
+        exts  = Image.all_extensions.map(&:to_s)
+        mimes = Image.all_content_types.map(&:to_s) - [""]
+        types = vals & exts
+        return if vals.empty?
+
+        other = types.include?("raw")
+        types -= ["raw"]
+        types = types.map { |x| mimes[exts.index(x)] }
+        str1 = "images.content_type IN ('#{types.join("','")}')"
+        str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
+        @where << if types.empty?
+                    str2
+                  elsif other
+                    "#{str1} OR #{str2}"
+                  else
+                    str1
+                  end
+        add_joins(*joins)
+      end
+
+      # FIXME: delete this comment and following temporary method
+      def phony_add_image_type_condition_with_abc_gt_twenty(vals, *joins)
         return if vals.empty?
 
         exts  = Image.all_extensions.map(&:to_s)
