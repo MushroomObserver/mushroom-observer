@@ -20,8 +20,11 @@ module Names
     include ::Descriptions
     include ::Names::Descriptions::SharedPrivateMethods
 
+    # disable cop because index is defined in ApplicationController
+    # rubocop:disable Rails/LexicallyScopedActionFilter
     before_action :store_location, except: [:index, :destroy]
     before_action :pass_query_params, except: [:index]
+    # rubocop:enable Rails/LexicallyScopedActionFilter
     before_action :login_required
     before_action :disable_link_prefetching, except: [
       :show, :new, :create, :edit, :update
@@ -29,39 +32,24 @@ module Names
 
     ############################################################################
     #
-    #  :section: Description Indexes and Searches
-    #
-    ############################################################################
+    #  Index
 
-    @index_subaction_param_keys = [
-      :by_author,
-      :by_editor,
-      :by,
-      :q,
-      :id
-    ].freeze
-
-    @index_subaction_dispatch_table = {
-      by_author: :name_descriptions_by_author,
-      by_editor: :name_descriptions_by_editor,
-      by: :index_name_description,
-      q: :index_name_description,
-      id: :index_name_description
-    }.freeze
-
-    # Disable cop because method definition prevents a
-    # Rails/LexicallyScopedActionFilter offense
-    # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-    def index # rubocop:disable Lint/UselessMethodDefinition
-      super
-    end
+    # Used by ApplicationController to dispatch #index to a private method
+    @index_subaction_param_keys = [:by_author, :by_editor].freeze
 
     #############################################
 
-    private
+    private # private methods used by #index
 
     def default_index_subaction
       list_name_descriptions
+    end
+
+    # Display list of all (correctly-spelled) name_descriptions in the database.
+    def list_name_descriptions
+      sorted_by = params[:by].present? ? params[:by].to_s : :name
+      query = create_query(:NameDescription, :all, by: sorted_by)
+      show_selected_name_descriptions(query)
     end
 
     # Display list of names in last index/search query.
@@ -71,14 +59,8 @@ module Names
                                              always_index: true)
     end
 
-    # Display list of all (correctly-spelled) name_descriptions in the database.
-    def list_name_descriptions
-      query = create_query(:NameDescription, :all, by: :name)
-      show_selected_name_descriptions(query)
-    end
-
     # Display list of name_descriptions that a given user is author on.
-    def name_descriptions_by_author
+    def by_author
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_author].to_s,
         index_path: name_descriptions_path
@@ -90,7 +72,7 @@ module Names
     end
 
     # Display list of name_descriptions that a given user is editor on.
-    def name_descriptions_by_editor
+    def by_editor
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_editor].to_s,
         index_path: name_descriptions_path
