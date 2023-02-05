@@ -232,13 +232,13 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(-180, query.params[:west])
   end
 
-  def test_index_sort_by_user
-    by = "user"
+  def  test_index_with_non_default_sort
+    by = "num_views"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Locations by #{by.capitalize}")
+    assert_select("#title", text: "Locations by Popularity")
   end
 
   def test_pattern

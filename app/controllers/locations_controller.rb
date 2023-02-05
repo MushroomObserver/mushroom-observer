@@ -3,13 +3,12 @@
 require("geocoder")
 
 #  :index
-#   :advanced_search,
-#   :index_location,
-#   :list_by_country,
-#   :list_locations,
-#   :location_search,
-#   :locations_by_editor,
-#   :locations_by_user,
+#   params:
+#   :by_editor
+#   :by_user
+#   :country
+#   :index_location
+#   :pattern
 #  :show,
 #  :new,
 #  :create,
@@ -19,8 +18,11 @@ require("geocoder")
 
 # Locations controller.
 class LocationsController < ApplicationController
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index, :destroy]
   before_action :pass_query_params, except: [:index]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :new,
@@ -32,39 +34,20 @@ class LocationsController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Searches and Indexes
-  #
-  ##############################################################################
+  # index::
 
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :advanced_search,
     :pattern,
     :country,
     :by_user,
     :by_editor,
-    :by,
-    :q,
-    :id
   ].freeze
 
-  @index_subaction_dispatch_table = {
-    pattern: :location_search,
-    country: :list_by_country,
-    by_user: :locations_by_user,
-    by_editor: :locations_by_editor,
-    by: :index_location,
-    q: :index_location,
-    id: :index_location
-  }.freeze
+  #############################################
 
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
-
-  private
+  private # private methods used by #index
 
   def default_index_subaction
     list_locations
@@ -77,7 +60,7 @@ class LocationsController < ApplicationController
   end
 
   # Displays a list of all locations whose country matches the id param.
-  def list_by_country
+  def country
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
@@ -86,12 +69,13 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations.
   def list_locations
-    query = create_query(:Location, :all, by: :name)
+    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
+    query = create_query(:Location, :all, by: sorted_by)
     show_selected_locations(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user created.
-  def locations_by_user
+  def by_user
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:by_user].to_s,
       index_path: locations_path
@@ -103,7 +87,7 @@ class LocationsController < ApplicationController
   end
 
   # Display list of locations that a given user is editor on.
-  def locations_by_editor
+  def by_editor
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:by_editor].to_s,
       index_path: locations_path
@@ -115,7 +99,7 @@ class LocationsController < ApplicationController
   end
 
   # Displays a list of locations matching a given string.
-  def location_search
+  def pattern
     pattern = params[:pattern].to_s
     loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
     if loc
@@ -202,6 +186,8 @@ class LocationsController < ApplicationController
     end
   end
 
+  #############################################
+
   public # for test!
 
   # Try to turn this into a query on observations.where instead.
@@ -277,10 +263,6 @@ class LocationsController < ApplicationController
   # rubocop:enable Metrics/AbcSize
 
   ##############################################################################
-  #
-  #  :section: Show Location
-  #
-  ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
   def show # rubocop:disable Metrics/AbcSize
@@ -307,12 +289,6 @@ class LocationsController < ApplicationController
 
     init_projects_ivar
   end
-
-  ##############################################################################
-  #
-  #  :section: Create/Edit/Destroy Location
-  #
-  ##############################################################################
 
   def new
     init_caller_ivars_for_new
