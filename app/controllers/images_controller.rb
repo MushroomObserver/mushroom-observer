@@ -5,71 +5,44 @@
 #
 #  == Actions
 #
-#  ==== Searches and Indexes
-#  index::                 Display a matrix of images:
-#      (private methods)
-#  list_images::           all images, by creation date descending
-#  images_by_user::        by a given user
-#  images_for_project      attached to a given project
-#  image_search::          whose attributes match a string pattern
-#  advanced_search::       matching Advanced Search results
-#  index_image::           current query
-#  show_selected_images::  search results
-#
-#  ==== Show Images
+#  index::
 #  show::                  can use params[:flow] :next, :prev
-#
-#  ==== Work With Images
 #  new::                   Upload images for observation.
 #  edit::                  Edit notes, etc. for image.
 #  create::                New form commits here
 #  update::                Edit form commits here
 #  destroy::               Callback: destroy image.
+#
+#  == Helper Methods
+#
 #  process_image::         (helper for add_image)
 #
 class ImagesController < ApplicationController
   before_action :login_required
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
   before_action :disable_link_prefetching, except: [:show]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   ##############################################################################
   #
-  #  :section: Searches and Indexes
-  #
-  ##############################################################################
+  # index::
 
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :advanced_search,
     :pattern,
     :by_user,
     :for_project,
-    :by
   ].freeze
 
-  @index_subaction_dispatch_table = {
-    pattern: :image_search,
-    by_user: :images_by_user,
-    for_project: :images_for_project,
-    by: :index_image
-  }.freeze
+  #############################################
 
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
-
-  private
+  private # private methods used by #index
 
   def default_index_subaction
     list_images
-  end
-
-  # Display matrix of selected images, based on current Query.
-  def index_image
-    query = find_or_create_query(:Image, by: params[:by])
-    show_selected_images(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display matrix of images, most recent first.
@@ -87,12 +60,19 @@ class ImagesController < ApplicationController
       return
     end
 
-    query = create_query(:Image, :all, by: :created_at)
+    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
+    query = create_query(:Image, :all, by: sorted_by)
     show_selected_images(query)
   end
 
+  # Display matrix of selected images, based on current Query.
+  def index_image
+    query = find_or_create_query(:Image, by: params[:by])
+    show_selected_images(query, id: params[:id].to_s, always_index: true)
+  end
+
   # Display matrix of images by a given user.
-  def images_by_user
+  def by_user
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:by_user].to_s,
       index_path: images_path
@@ -104,7 +84,7 @@ class ImagesController < ApplicationController
   end
 
   # Display matrix of Image's attached to a given project.
-  def images_for_project
+  def for_project
     project = find_or_goto_index(Project, params[:for_project].to_s)
     return unless project
 
@@ -113,7 +93,7 @@ class ImagesController < ApplicationController
   end
 
   # Display matrix of images whose notes, names, etc. match a string pattern.
-  def image_search
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (image = Image.safe_find(pattern))
