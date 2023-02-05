@@ -1,26 +1,7 @@
 # frozen_string_literal: true
 
-#
-#  = Comments Controller
-#
-#  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
-#
-#  ==== Searches and Indexes
-#  index:: see ApplicationController (params call private methods below)
-#
-#  - list_comments::
-#  - by_user::
-#  - target::
-#  - for_user::
-#  - pattern::
-#  - index_comment::
-#  - show_selected_comments::
-#
 #  ==== Show, CRUD actions
+#  index::
 #  show:: (use params for next and prev)
 #  new::
 #  create::
@@ -39,11 +20,9 @@ class CommentsController < ApplicationController
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
   ##############################################################################
-  #
-  #  :section: Searches and Indexes
-  #
-  ##############################################################################
 
+  # index::
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :target,
     :pattern,
