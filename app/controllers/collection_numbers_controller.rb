@@ -3,11 +3,12 @@
 # Controls viewing and modifying collection numbers.
 class CollectionNumbersController < ApplicationController
   before_action :login_required
-
-  # rubocop:disable Rails/LexicallyScopedActionFilter
-  before_action :pass_query_params, except: :index
-  before_action :store_location, except: [:index, :destroy]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
+  before_action :pass_query_params, only: [
+    :show, :new, :create, :edit, :update, :destroy
+  ]
+  before_action :store_location, only: [
+    :show, :new, :create, :edit, :update
+  ]
 
   @index_subaction_param_keys = [:pattern, :observation_id].freeze
 
