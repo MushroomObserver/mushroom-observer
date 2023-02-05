@@ -10,13 +10,13 @@
 #   P = prefetching allowed
 #
 #  ==== Searches and Indexes
-#  index:: (params call private methods below)
+#  index:: see ApplicationController (params call private methods below)
 #
 #  - list_comments::
-#  - show_comments_by_user::
-#  - show_comments_for_target::
-#  - show_comments_for_user::
-#  - comment_search::
+#  - by_user::
+#  - target::
+#  - for_user::
+#  - pattern::
 #  - index_comment::
 #  - show_selected_comments::
 #
@@ -28,7 +28,7 @@
 #  update::
 #  destroy::
 #
-################################################################################
+#
 class CommentsController < ApplicationController
   before_action :login_required
   before_action :pass_query_params, except: [:index]
@@ -52,20 +52,7 @@ class CommentsController < ApplicationController
     :by
   ].freeze
 
-  @index_subaction_dispatch_table = {
-    target: :show_comments_for_target,
-    pattern: :comment_search,
-    by_user: :show_comments_by_user,
-    for_user: :show_comments_for_user,
-    by: :index_comment
-  }.freeze
-
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
+  ###########################################################
 
   private
 
@@ -87,7 +74,7 @@ class CommentsController < ApplicationController
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def show_comments_by_user
+  def by_user
     user = find_or_goto_index(User, params[:by_user].to_s) || @user
     return unless user
 
@@ -96,7 +83,7 @@ class CommentsController < ApplicationController
   end
 
   # Shows comments for a given user, most recent first. (Linked from show_user.)
-  def show_comments_for_user
+  def for_user
     user = find_or_goto_index(User, params[:for_user].to_s) || @user
     return unless user
 
@@ -106,7 +93,7 @@ class CommentsController < ApplicationController
 
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def show_comments_for_target
+  def target
     model = Comment.safe_model_from_name(params[:type])
     if !model
       flash_error(:runtime_invalid.t(type: '"type"',
@@ -120,7 +107,7 @@ class CommentsController < ApplicationController
   end
 
   # Display list of Comment's whose text matches a string pattern.
-  def comment_search
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
