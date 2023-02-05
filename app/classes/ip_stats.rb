@@ -59,7 +59,6 @@ class IpStats
       update_one_stat(hash, vals, weight, do_activity)
     end
 
-    # rubocop:disable Metrics/AbcSize
     def update_one_stat(hash, vals, weight, do_activity)
       time, ip, user, load, controller, action, api_key = *vals
       hash[:ip] = ip
@@ -70,7 +69,6 @@ class IpStats
       hash[:activity] << [time, load.to_f, controller, action] \
         if do_activity
     end
-    # rubocop:enable Metrics/AbcSize
 
     def clean_stats
       cutoff = (Time.now.utc - STATS_TIME * 60).to_s

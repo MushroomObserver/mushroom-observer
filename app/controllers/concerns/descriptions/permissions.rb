@@ -84,7 +84,6 @@ module Descriptions::Permissions
   extend ActiveSupport::Concern
 
   # rubocop:disable Metrics/BlockLength
-  # rubocop:disable Metrics/AbcSize
   included do
     # Form to adjust permissions on a description.
     def edit
@@ -318,5 +317,4 @@ module Descriptions::Permissions
     include ::Descriptions
   end
   # rubocop:enable Metrics/BlockLength
-  # rubocop:enable Metrics/AbcSize
 end

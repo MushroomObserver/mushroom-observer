@@ -45,7 +45,6 @@ module Report
         ].freeze
       end
 
-      # rubocop:disable Metrics/AbcSize
       def format_row(row)
         taxon_set.add([row.name_id, row.name_text_name])
         ids.append(row.obs_id)
@@ -78,7 +77,6 @@ module Report
           clean_value(row.obs_notes)
         ]
       end
-      # rubocop:enable Metrics/AbcSize
 
       def clean_value(value)
         value&.tr("\t", " ")&.gsub("\n", "  ")&.gsub("\r", "  ")
