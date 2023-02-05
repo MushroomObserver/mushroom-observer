@@ -2,7 +2,7 @@
 
 #  ==== Show, CRUD actions
 #  index::
-#  show:: (use params for next and prev)
+#  show::
 #  new::
 #  create::
 #  edit::
@@ -12,8 +12,11 @@
 #
 class CommentsController < ApplicationController
   before_action :login_required
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
   before_action :disable_link_prefetching, except: [:new, :edit, :show]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
