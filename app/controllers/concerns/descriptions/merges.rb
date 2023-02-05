@@ -89,7 +89,7 @@ module Descriptions::Merges
     # Attempt to merge one description into another, deleting the old one
     # if requested.  It will only do so if there is no conflict on any of the
     # description fields, i.e. one or the other is blank for any given field.
-    def perform_merge # rubocop:disable Metrics/AbcSize
+    def perform_merge
       src_notes  = @src.all_notes
       dest_notes = @dest.all_notes
       result = false

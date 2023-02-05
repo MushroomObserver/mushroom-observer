@@ -68,7 +68,7 @@ module ObservationsController::NewAndCreate
     init_list_vars
   end
 
-  def defaults_from_last_observation_created # rubocop:disable Metrics/AbcSize
+  def defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
     # created if it was less than an hour ago
     # (i.e. if its creation time is larger than one hour ago)
@@ -94,9 +94,7 @@ module ObservationsController::NewAndCreate
 
   public
 
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-
-  def create # rubocop:disable Metrics/AbcSize
+  def create
     @observation = create_observation_object(params[:observation])
     # set these again, in case they are not defined
     init_license_var
@@ -135,9 +133,7 @@ module ObservationsController::NewAndCreate
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-
-  def create_observation_object(args) # rubocop:disable Metrics/AbcSize
+  def create_observation_object(args)
     now = Time.zone.now
     observation = if args
                     Observation.new(args.permit(permitted_observation_args))
