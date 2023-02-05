@@ -22,13 +22,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_index_sort_by_user
-    by = "user"
+  def test_index_with_non_default_sort
+    by = "herbarium_name"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Fungarium Records by #{by.capitalize}")
+    assert_select("#title", text: "Fungarium Records by Fungarium")
   end
 
   def test_herbarium_with_no_herbarium_records_index
