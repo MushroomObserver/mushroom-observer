@@ -39,20 +39,19 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_images_sorted_by_user
     login
     get(:index, params: { by: "user" })
-    assert_select("title", text: "Mushroom Observer: Images by User")
+    assert_select("#title", text: "Images by User")
   end
 
-  def test_index_image_by_copyright_holder
+  def test_index_images_sorted_by_copyright_holder
     login
     get(:index, params: { by: "copyright_holder" })
-    assert_select("title",
-                  text: "Mushroom Observer: Images by Copyright Holder")
+    assert_select("#title", text: "Images by Copyright Holder")
   end
 
-  def test_index_image_by_name
+  def test_index_with_non_default_sort
     login
     get(:index, params: { by: "name" })
-    assert_select("title", text: "Mushroom Observer: Images by Name")
+    assert_select("#title", text: "Images by Name")
   end
 
   def test_images_for_project
