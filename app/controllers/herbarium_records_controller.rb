@@ -4,43 +4,19 @@
 # rubocop:disable Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
-  # except: [
-  #   :index_herbarium_record,
-  #   :list_herbarium_records,
-  #   :herbarium_record_search,
-  #   :herbarium_index,
-  #   :observation_index,
-  #   :show_herbarium_record,
-  #   :next_herbarium_record,
-  #   :prev_herbarium_record
-  # ]
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
+  # index
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,
     :herbarium_id,
     :observation_id,
-    :by,
-    :q,
-    :id
   ].freeze
-
-  @index_subaction_dispatch_table = {
-    pattern: :herbarium_record_search,
-    herbarium_id: :herbarium_index,
-    observation_id: :observation_index,
-    by: :index_herbarium_record,
-    q: :index_herbarium_record,
-    id: :index_herbarium_record
-  }.freeze
-
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
 
   def show
     case params[:flow]
@@ -129,7 +105,8 @@ class HerbariumRecordsController < ApplicationController
   # Show list of herbarium_records.
   def list_herbarium_records
     store_location
-    query = create_query(:HerbariumRecord, :all, by: :herbarium_label)
+    sorted_by = params[:by].present? ? params[:by].to_s : :name
+    query = create_query(:HerbariumRecord, :all, by: sorted_by)
     show_selected_herbarium_records(query)
   end
 
