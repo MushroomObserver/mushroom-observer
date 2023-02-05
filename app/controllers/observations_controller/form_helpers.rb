@@ -189,7 +189,7 @@ module ObservationsController::FormHelpers
   # mininal editing.  INPUT: params[:good_images] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
 
-  def update_good_images(arg) # rubocop:disable Metrics/AbcSize
+  def update_good_images(arg)
     # Get list of images first.
     images = (arg || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
