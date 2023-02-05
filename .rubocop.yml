@@ -207,6 +207,11 @@ Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it
   # Is this still true? JDC 2020-08-17
   Enabled: false
+Style/Documentation:
+  # We often ignore this and bare-bones comments add nothing useful.
+  # And see Martin, Clean Code, ch. 4
+  #   (Redundant Comments and Mandated Comments are Bad Comments)
+  Enabled: false
 Style/DoubleNegation:
   # Rubocop default: true
   # Allow double bang. In the rare places we do this, its use is justified.
