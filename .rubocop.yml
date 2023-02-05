@@ -90,12 +90,6 @@ Lint/NonAtomicFileOperation: # new in 1.31
   Enabled: false
 
 Metrics/AbcSize:
-  # Rubocop default: 15
-  # Even short simple methods sometimes exceed 15.
-  # Simplifying them further just forces us to make tons of tiny
-  # trivial methods with really cumbersome names, without actually making
-  # the code any better.
-  Max: 20
   # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
     - "test//**/*"
