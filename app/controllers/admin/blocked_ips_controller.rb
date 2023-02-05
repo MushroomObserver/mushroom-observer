@@ -29,7 +29,6 @@ module Admin
       end
     end
 
-    # rubocop:disable Metrics/AbcSize
     # I think this is as good as it gets: just a simple switch statement of
     # one-line commands.  Breaking this up doesn't make sense to me.
     # -JPH 2020-10-09
@@ -48,7 +47,6 @@ module Admin
         IpStats.clear_blocked_ips
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
     def validate_ip!(ip)
       return false if ip.blank?

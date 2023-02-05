@@ -159,7 +159,6 @@ module DescriptionsHelper
 
   # Sort, putting the default one on top, followed by public ones, followed
   # by others ending in personal ones, sorting by "length" among groups.
-  # rubocop:disable Metrics/AbcSize
   def sort_description_list(object, list)
     type_order = Description.all_source_types
     list.sort_by! do |x|
@@ -274,7 +273,6 @@ module DescriptionsHelper
     html += content_tag(:p, html2)
     html
   end
-  # rubocop:enable Metrics/AbcSize
 
   # Create a div for notes in Description subclasses.
   #
