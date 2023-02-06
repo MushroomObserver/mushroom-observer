@@ -2,14 +2,8 @@
 
 # see observations_controller.rb
 module ObservationsController::Index
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
-
-  ###########################################################################
+  # #index - defined in Application Controller
+  #
   # index subactions:
   # methods called by #index via a dispatch table in ObservationController
 
@@ -24,13 +18,14 @@ module ObservationsController::Index
 
   # Displays matrix of all Observation's, sorted by date.
   def list_observations
-    query = create_query(:Observation, :all, by: :date)
+    sorted_by = params[:by].present? ? params[:by].to_s : :date
+    query = create_query(:Observation, :all, by: sorted_by)
     show_selected_observations(query)
   end
 
   # Displays matrix of Observations with the given name proposed but not
   # actually that name.
-  def observations_of_look_alikes
+  def look_alikes
     query = create_query(:Observation, :all,
                          names: [params[:name]],
                          include_synonyms: true,
@@ -41,7 +36,7 @@ module ObservationsController::Index
   end
 
   # Displays matrix of Observations with the given text_name (or search_name).
-  def observations_of_name
+  def name
     query = create_query(:Observation, :all,
                          names: [params[:name]],
                          include_synonyms: true,
@@ -50,7 +45,7 @@ module ObservationsController::Index
   end
 
   # Displays matrix of Observations of subtaxa of the parent of the given name.
-  def observations_of_related_taxa
+  def related_taxa
     query = create_query(:Observation, :all,
                          names: parents(params[:name]),
                          include_subtaxa: true,
@@ -59,7 +54,7 @@ module ObservationsController::Index
   end
 
   # Displays matrix of User's Observations, by date.
-  def observations_by_user
+  def user
     return unless (
       user = find_or_goto_index(User, params[:user])
     )
@@ -69,7 +64,7 @@ module ObservationsController::Index
   end
 
   # Displays matrix of Observations at a Location, by date.
-  def observations_at_location
+  def location
     return unless (
       location = find_or_goto_index(Location, params[:location].to_s)
     )
@@ -79,7 +74,7 @@ module ObservationsController::Index
   end
 
   # Display matrix of Observations whose "where" matches a string.
-  def observations_at_where
+  def where
     where = params[:where].to_s
     params[:location] = where
     query = create_query(:Observation, :at_where,
@@ -89,7 +84,7 @@ module ObservationsController::Index
   end
 
   # Display matrix of Observations attached to a given project.
-  def observations_for_project
+  def project
     return unless (
       project = find_or_goto_index(Project, params[:project].to_s)
     )
@@ -99,7 +94,7 @@ module ObservationsController::Index
   end
 
   # Display matrix of Observations whose notes, etc. match a string pattern.
-  def observation_search
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) && (observation = Observation.safe_find(pattern))
       redirect_to(permanent_observation_path(observation.id))
@@ -159,7 +154,7 @@ module ObservationsController::Index
   private
 
   def default_index_subaction
-    list_observations
+    index_observation
   end
 
   def create_advanced_search_query(params) # rubocop:disable Metrics/AbcSize

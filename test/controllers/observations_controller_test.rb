@@ -209,7 +209,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
   end
 
-  def test_index_sort_by_user
+  def test_index_with_non_default_sort
     by = "user"
 
     login
@@ -2905,6 +2905,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: :modified })
     assert_response(:success)
+
     get(:index, params: { by: :created })
     assert_response(:success)
   end

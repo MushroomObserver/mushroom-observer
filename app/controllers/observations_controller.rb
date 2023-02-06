@@ -30,8 +30,8 @@ class ObservationsController < ApplicationController
     :edit
   ]
 
-  # NOTE: These ivars need to be ivars of ObservationController
-  # Defining them in index.rb does not work
+  # NOTE: Must be an ivar of ObservationController
+  # Defining it in index.rb does not work
   @index_subaction_param_keys = [
     :advanced_search, # Searches come 1st because they may have the other params
     :pattern,
@@ -41,23 +41,6 @@ class ObservationsController < ApplicationController
     :user,
     :location,
     :where,
-    :project,
-    :by,
-    :q,
-    :id
+    :project
   ].freeze
-
-  @index_subaction_dispatch_table = {
-    pattern: :observation_search,
-    look_alikes: :observations_of_look_alikes,
-    related_taxa: :observations_of_related_taxa,
-    name: :observations_of_name,
-    user: :observations_by_user,
-    location: :observations_at_location,
-    where: :observations_at_where,
-    project: :observations_for_project,
-    by: :index_observation,
-    q: :index_observation,
-    id: :index_observation
-  }.freeze
 end
