@@ -127,13 +127,17 @@ class SpeciesListsController < ApplicationController
 
   # Display list of all species_lists, sorted by date.
   def list_species_lists
-    if params[:by].present? && !params[:id] && !params[:q]
-      return index_species_list unless params[:by] == "title"
+    if params_include_by_but_neither_id_nor_q? && params[:by] != "title"
+      return index_species_list
     end
 
     sorted_by = params[:by] == "title" ? :title : :date
     query = create_query(:SpeciesList, :all, by: sorted_by)
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
+  end
+
+  def params_include_by_but_neither_id_nor_q?
+    params[:by].present? && params[:id].blank? && params[:q].blank?
   end
 
   # Display list of selected species_lists, based on current Query.
@@ -160,17 +164,6 @@ class SpeciesListsController < ApplicationController
 
     query = create_query(:SpeciesList, :for_project, project: project)
     show_selected_species_lists(query, always_index: 1)
-  end
-
-  # choose another subaction when params[:by].present?
-  def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : index_species_list
-  end
-
-  # Display list of all species_lists, sorted by title.
-  def species_lists_by_title
-    query = create_query(:SpeciesList, :all, by: :title)
-    show_selected_species_lists(query)
   end
 
   # Display list of SpeciesList's whose title, notes, etc. matches a string
