@@ -1,46 +1,11 @@
 # frozen_string_literal: true
 
-#
-#  = Names Controller
-#
-#  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
-#
-#  index::                       (replace list_names::)
-#                                Alphabetical list of all names, used or not.
-#  params
-#  :by                           (replace ::index_name)
-#    index_name::                List of results of index/search.
-#  :with_observations            (replace ::observation_index)
-#    names_with_observations::   Alphabetical list of names people have seen.
-#  :with_descriptions            (replace ::authored_names)
-#    names_with_descriptions::   Alpha names with descriptions (with authors)
-#  :by_user                      (replace names_by_user:: ::names_by_author)
-#    names_by_user::             Alphabetical list of names created by user.
-#  :by_editor                    (replace names_by_editor::)
-#    names_by_editor::           Alphabetical list of names edited by user
-#  :pattern                      (replace name_search::)
-#    name_search::               Seach for string in name, notes, etc.
-#  :need_descriptions            (replace ::needed_descriptions)
-#    names_needing_descriptions::
-#
-#  show_name::                   Show info about name.
-#  show_past_name::              Show past versions of name info.
-#  prev_name::                   Show previous name in index.
-#  next_name::                   Show next name in index.
-#
-#  create_name::                 Create new name.
-#  edit_name::                   Edit name.
-#
-#    DELETE THIS
-#  bulk_name_edit::              Create/synonymize/deprecate a list of names.
-#
 class NamesController < ApplicationController
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index]
   before_action :pass_query_params, except: [:index]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :show,
@@ -49,11 +14,12 @@ class NamesController < ApplicationController
     :edit,
     :update
   ]
+
   ##############################################################################
   #
-  #  :section: Indexes and Searches
-  #
-  ##############################################################################
+  # index::
+
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :advanced_search,
     :pattern,
@@ -61,35 +27,12 @@ class NamesController < ApplicationController
     :with_descriptions,
     :need_descriptions,
     :by_user,
-    :by_editor,
-    :by,
-    :q,
-    :id
+    :by_editor
   ].freeze
 
-  @index_subaction_dispatch_table = {
-    pattern: :name_search,
-    with_observations: :observation_index,
-    with_descriptions: :names_with_descriptions,
-    need_descriptions: :names_needing_descriptions,
-    by_user: :names_by_user,
-    by_editor: :names_by_editor,
-    by: :index_name,
-    q: :index_name,
-    id: :index_name
-  }.freeze
-
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
-
   ###################################
-  #  private index methods
 
-  private
+  private # private methods used by #index
 
   def default_index_subaction
     list_names
@@ -103,24 +46,25 @@ class NamesController < ApplicationController
 
   # Display list of all (correctly-spelled) names in the database.
   def list_names
-    query = create_query(:Name, :all, by: :name)
+    sorted_by = params[:by].present? ? params[:by].to_s : :name
+    query = create_query(:Name, :all, by: sorted_by)
     show_selected_names(query)
   end
 
   # Display list of names that have observations.
-  def observation_index
+  def with_observations
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
   end
 
   # Display list of names with descriptions that have authors.
-  def names_with_descriptions
+  def with_descriptions
     query = create_query(:Name, :with_descriptions)
     show_selected_names(query)
   end
 
   # Display list of names that a given user is author on.
-  def names_by_user
+  def by_user
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:by_user].to_s,
       index_path: names_path
@@ -132,10 +76,10 @@ class NamesController < ApplicationController
   end
 
   # This no longer makes sense, but is being requested by robots.
-  alias names_by_author names_by_user
+  alias names_by_author by_user
 
   # Display list of names that a given user is editor on.
-  def names_by_editor
+  def by_editor
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:by_editor].to_s,
       index_path: names_path
@@ -148,14 +92,14 @@ class NamesController < ApplicationController
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
-  def names_needing_descriptions
+  def need_descriptions
     @help = :needed_descriptions_help
     query = Name.descriptions_needed
     show_selected_names(query, num_per_page: 100)
   end
 
   # Display list of names that match a string.
-  def name_search # rubocop:disable Metrics/AbcSize
+  def pattern # rubocop:disable Metrics/AbcSize
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (name = Name.safe_find(pattern))
@@ -227,6 +171,8 @@ class NamesController < ApplicationController
 
     args
   end
+
+  ###################################
 
   public
 

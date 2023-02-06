@@ -53,13 +53,13 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
-  def test_index_sort_by_user
-    by = "user"
+  def  test_index_with_non_default_sort
+    by = "num_views"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Names by #{by.capitalize}")
+    assert_select("#title", text: "Names by Popularity")
   end
 
   # observation_index
