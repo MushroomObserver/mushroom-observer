@@ -81,10 +81,6 @@ class HerbariumRecordsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_herbarium_records
-  end
-
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
@@ -95,11 +91,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
 
-  # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_herbarium_record
-    query = find_or_create_query(:HerbariumRecord, by: params[:by])
-    show_selected_herbarium_records(query, id: params[:id].to_s,
-                                           always_index: true)
+  def default_index_subaction
+    list_herbarium_records
   end
 
   # Show list of herbarium_records.
@@ -110,8 +103,15 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query)
   end
 
+  # Displays matrix of selected HerbariumRecord's (based on current Query).
+  def index_herbarium_record
+    query = find_or_create_query(:HerbariumRecord, by: params[:by])
+    show_selected_herbarium_records(query, id: params[:id].to_s,
+                                           always_index: true)
+  end
+
   # Display list of HerbariumRecords whose text matches a string pattern.
-  def herbarium_record_search
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (herbarium_record = HerbariumRecord.safe_find(pattern))
@@ -122,7 +122,7 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
-  def herbarium_index
+  def herbarium_id
     store_location
     query = create_query(:HerbariumRecord, :in_herbarium,
                          herbarium: params[:herbarium_id].to_s,
@@ -130,7 +130,7 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  def observation_index
+  def observation_id
     store_location
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:observation_id].to_s,
