@@ -1,53 +1,14 @@
 # frozen_string_literal: true
 
-#
-#  = Projects Controller
-#
-#  == Actions
-#   L = login required
-#   A = admin required
-#   V = has view
-#   P = prefetching allowed
-#
-#  ==== Index
-#  index::
-#  (private methods)
-#  list_projects::
-#  project_search::
-#  index_project::
-#  show_selected_projects::  (helper)
-#
-#  ==== Show, Create, Edit
-#  show::
-#  new::
-#  edit::
-#  create::
-#  update::
-#  destroy::
-#
-################################################################################
-
 class ProjectsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  # disable cop because index is defined in ApplicationController
+  before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :disable_link_prefetching, except: [:edit, :show]
 
-  @index_subaction_param_keys = [
-    :pattern,
-    :by
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    pattern: :project_search,
-    by: :index_project
-  }.freeze
-
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
+  # index::
+  # ApplicationController uses this table to dispatch #index to a private method
+  @index_subaction_param_keys = [:pattern].freeze
 
   # Display project by itself.
   # Linked from: observations/show, list_projects
@@ -150,14 +111,11 @@ class ProjectsController < ApplicationController
     render(:edit, location: edit_project_path(@project.id, q: get_query_param))
   end
 
-  ##############################################################################
-
   # Callback to destroy a project.
   # Linked from: show_project, observations/show
   # Redirects to observations/show.
   # Inputs: params[:id]
   # Outputs: none
-  # def destroy_project
   def destroy # rubocop:disable Metrics/AbcSize
     return unless find_project!
 
@@ -173,7 +131,7 @@ class ProjectsController < ApplicationController
     end
   end
 
-  private
+  private ############################################################
 
   def set_ivars_for_show
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
@@ -185,12 +143,7 @@ class ProjectsController < ApplicationController
               includes(:name, :user)
   end
 
-  ##############################################################################
-  #
-  #  :section: Index private methods
-  #
-  ##############################################################################
-
+  ############ Index private methods
   def default_index_subaction
     list_projects
   end
@@ -203,12 +156,13 @@ class ProjectsController < ApplicationController
 
   # Show list of latest projects.  (Linked from left panel.)
   def list_projects
-    query = create_query(:Project, :all, by: :title)
+    sorted_by = params[:by].present? ? params[:by].to_s : :name
+    query = create_query(:Project, :all, by: sorted_by)
     show_selected_projects(query)
   end
 
   # Display list of Project's whose title or notes match a string pattern.
-  def project_search
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))

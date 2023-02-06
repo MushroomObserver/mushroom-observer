@@ -70,13 +70,13 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("form[action=?]", project_path(p_id))
   end
 
-  def test_list_projects
+  def test_index_list_projects
     login
     get(:index)
     assert_template("index")
   end
 
-  def test_project_search
+  def test_index_pattern_search
     login
     p_id = projects(:bolete_project).id
     # try searching by project title. Note that search saves a query record
@@ -88,10 +88,13 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_template("show")
   end
 
-  def test_index_by_updated_at
+  def test_index_with_non_default_sort
     login
+
     get(:index, params: { by: "updated_at" })
+
     assert_template("index")
+    assert_select("#title", text: "Projects by Time Last Modified")
   end
 
   def test_add_project
