@@ -110,7 +110,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Species Lists by #{by.capitalize}")
   end
 
-  def test_index_species_list_by_past_bys
+  def test_index_by_past_bys
     login
     get(:index, params: { by: :modified })
     assert_response(:success)
@@ -118,7 +118,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_list_species_lists
+  def test_index_list_species_lists
     login
     get(:index)
     assert_template(:index)
@@ -196,25 +196,25 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  def test_species_lists_by_title
+  def test_index_by_title
     login
     get(:index, params: { by: "title" })
     assert_template(:index)
   end
 
-  def test_species_lists_by_user
+  def test_index_of_user
     login
     get(:index, params: { by_user: rolf.id })
     assert_template(:index)
   end
 
-  def test_species_lists_for_project
+  def test_index_for_project
     login
     get(:index, params: { for_project: projects(:bolete_project).id })
     assert_template(:index)
   end
 
-  def test_species_list_search
+  def test_index_pattern_search
     login
     spl = species_lists(:unknown_species_list)
     get(:index, params: { pattern: spl.id.to_s })
@@ -224,7 +224,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_list_species_list_by_user
+  def test_show_flow
     login
     query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
     query_params = @controller.query_params(query)
