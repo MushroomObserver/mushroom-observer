@@ -79,11 +79,10 @@ module Names
 
     # Display list of name_descriptions that a given user is author on.
     def name_descriptions_by_author
-      user = if params[:by_author]
-               find_or_goto_index(User, params[:by_author].to_s)
-             else
-               @user
-             end
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_author].to_s,
+        index_path: name_descriptions_path
+      )
       return unless user
 
       query = create_query(:NameDescription, :by_author, user: user)
@@ -92,11 +91,10 @@ module Names
 
     # Display list of name_descriptions that a given user is editor on.
     def name_descriptions_by_editor
-      user = if params[:by_editor]
-               find_or_goto_index(User, params[:by_editor].to_s)
-             else
-               @user
-             end
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_editor].to_s,
+        index_path: name_descriptions_path
+      )
       return unless user
 
       query = create_query(:NameDescription, :by_editor, user: user)
@@ -175,7 +173,7 @@ module Names
       @description.name = @name
 
       # Create new description.
-      @description.attributes = allowed_name_description_params
+      @description.attributes = permitted_name_description_params
       @description.source_type = @description.source_type.to_sym
       if @description.valid?
         save_new_description_flash_and_redirect
@@ -252,7 +250,7 @@ module Names
 
       find_description_parent
       find_licenses
-      @description.attributes = allowed_name_description_params
+      @description.attributes = permitted_name_description_params
       @description.source_type = @description.source_type.to_sym
 
       modify_description_permissions # does not redirect
@@ -309,7 +307,7 @@ module Names
     # TODO: should public, public_write and source_type be removed from list?
     # They should be individually checked and set, since we
     # don't want them to have arbitrary values
-    def allowed_name_description_params
+    def permitted_name_description_params
       params.required(:description).
         permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
                :look_alikes, :uses, :refs, :notes, :source_name, :project_id,

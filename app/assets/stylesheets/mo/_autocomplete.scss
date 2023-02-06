@@ -4,10 +4,10 @@
 
 div.auto_complete {
   position: absolute;
-  color: $MENU_FG_COLOR;
-  background-color: $MENU_BG_COLOR;
+  color: $dropdown-link-color;
+  background-color: $dropdown-bg;
   margin: 0px;
-  border: 1px solid $MENU_BORDER_COLOR;
+  border: 1px solid $dropdown-border;
   padding: 0px;
   overflow-x: hidden;
   display: none;
@@ -29,8 +29,8 @@ div.auto_complete {
     }
 
     li.selected {
-      color: $MENU_HOT_FG_COLOR;
-      background-color: $MENU_HOT_BG_COLOR;
+      color: $dropdown-link-hover-color;
+      background-color: $dropdown-link-hover-bg;
     }
   }
 }

@@ -28,12 +28,6 @@ module ObservationsController::Index
     show_selected_observations(query)
   end
 
-  # Displays matrix of all Observations, alphabetically.
-  def observations_by_name
-    query = create_query(:Observation, :all, by: :name)
-    show_selected_observations(query)
-  end
-
   # Displays matrix of Observations with the given name proposed but not
   # actually that name.
   def observations_of_look_alikes

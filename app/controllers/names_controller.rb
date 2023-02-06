@@ -121,7 +121,10 @@ class NamesController < ApplicationController
 
   # Display list of names that a given user is author on.
   def names_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:by_user].to_s) : @user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: names_path
+    )
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
@@ -133,11 +136,10 @@ class NamesController < ApplicationController
 
   # Display list of names that a given user is editor on.
   def names_by_editor
-    user = if params[:id]
-             find_or_goto_index(User, params[:by_editor].to_s)
-           else
-             @user
-           end
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_editor].to_s,
+      index_path: names_path
+    )
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
@@ -364,7 +366,7 @@ class NamesController < ApplicationController
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
 
-    @name.attributes = allowed_name_params[:name]
+    @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
     render("new", location: new_name_path)
@@ -716,7 +718,7 @@ class NamesController < ApplicationController
   # ----------------------------------------------------------------------------
 
   # allow some mass assignment for purposes of reloading form
-  def allowed_name_params
+  def permitted_name_params
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end

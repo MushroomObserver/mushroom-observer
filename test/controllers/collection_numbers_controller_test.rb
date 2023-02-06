@@ -36,7 +36,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/no matching collection numbers found/i)
   end
 
-  def test_collection_number_search
+  def test_pattern_search_str
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
     login
@@ -45,6 +45,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_template(:index)
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", numbers.count)
+  end
+
+  def test_pattern_id
+    id = collection_numbers(:minimal_unknown_coll_num).id
+
+    login
+    get(:index, params: { pattern: id })
+
+    assert_redirected_to(collection_number_path(id))
   end
 
   def test_collection_number_search_by_number

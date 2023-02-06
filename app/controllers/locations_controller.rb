@@ -90,13 +90,12 @@ class LocationsController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   end
 
-  # Display list of locations that a given user is author on.
+  # Display list of locations that a given user created.
   def locations_by_user
-    user = if params[:id]
-             find_or_goto_index(User, params[:by_user].to_s)
-           else
-             @user
-           end
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: locations_path
+    )
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
@@ -105,11 +104,10 @@ class LocationsController < ApplicationController
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor
-    user = if params[:id]
-             find_or_goto_index(User, params[:by_editor].to_s)
-           else
-             @user
-           end
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_editor].to_s,
+      index_path: locations_path
+    )
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
@@ -159,14 +157,6 @@ class LocationsController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     @links << coerced_query_link(query, Observation)
-
-    # Add "show descriptions" link if this query can be coerced into an
-    # location description query.
-    if query.coercable?(:LocationDescription)
-      @links << [:show_objects.t(type: :description),
-                 add_query_param({ action: :index_location_description },
-                                 query)]
-    end
 
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
@@ -481,7 +471,7 @@ class LocationsController < ApplicationController
   end
 
   def create_location_ivar(done, db_name)
-    @location = Location.new(allowed_location_params)
+    @location = Location.new(permitted_location_params)
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
@@ -612,7 +602,7 @@ class LocationsController < ApplicationController
 
   ##############################################################################
 
-  def allowed_location_params
+  def permitted_location_params
     params.require(:location).
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end

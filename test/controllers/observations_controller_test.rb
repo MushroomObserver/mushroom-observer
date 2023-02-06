@@ -172,7 +172,9 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_page_loads
+  ######## Index ################################################
+
+  def test_index_page_loads
     login
     get(:index)
     assert_template("shared/_matrix_box")
@@ -205,9 +207,15 @@ class ObservationsControllerTest < FunctionalTestCase
 
     get(:index, params: { user: rolf.id })
     assert_template("shared/_matrix_box")
+  end
 
-    # get(:login)
-    # assert_redirected_to(new_account_login_path)
+  def test_index_sort_by_user
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Observations by #{by.capitalize}")
   end
 
   def test_observations_by_unknown_user
@@ -506,6 +514,58 @@ class ObservationsControllerTest < FunctionalTestCase
 
     get(:index, params: { pattern: "Coprinus comatus" })
     assert_response(:redirect)
+  end
+
+  def test_index_at_location_with_observations
+    location = locations(:obs_default_location)
+    params = { location: location.id }
+
+    login
+    get(:index, params: params)
+
+    assert_select("#title", text: "Observations from #{location.name}")
+  end
+
+  def test_index_at_location_without_observations
+    location = locations(:unused_location)
+    params = { location: location }
+    flash_matcher = Regexp.new(
+      Regexp.escape_except_spaces(
+        :runtime_no_matches.t(type: :observation)
+      )
+    )
+
+    login
+    get(:index, params: params)
+
+    assert_flash(flash_matcher)
+    assert_template(:index)
+  end
+
+  def test_index_at_location_with_nonexistent_location
+    location = "non-existent"
+    params = { location: location }
+    flash_matcher = Regexp.new(
+      Regexp.escape_except_spaces(
+        :runtime_object_not_found.t(type: :location, id: location)
+      )
+    )
+
+    login
+    get(:index, params: params)
+
+    assert_flash(flash_matcher)
+    assert_redirected_to(locations_path)
+  end
+
+  def test_index_at_where
+    location = locations(:obs_default_location)
+    params = { where: location.name }
+
+    login
+    get(:index, params: params)
+
+    assert_select("#title", text: "Observations from ‘#{location.name}’")
   end
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?

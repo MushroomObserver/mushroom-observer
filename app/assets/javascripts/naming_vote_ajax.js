@@ -32,6 +32,7 @@ function VoteByAjaxModule(translations) {
           });
         }
 
+        // could print this as a modal instead, and just activate it
         var whirly = $("<div class='popup'>").appendTo($("body"))
           .css("padding", "1em 2em")
           .append(

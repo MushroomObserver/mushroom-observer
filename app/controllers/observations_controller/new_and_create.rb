@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength
 module ObservationsController::NewAndCreate
   include ObservationsController::FormHelpers
 
@@ -135,20 +134,30 @@ module ObservationsController::NewAndCreate
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
 
-  def create_observation_object(args) # rubocop:disable Metrics/AbcSize
+  def create_observation_object(args)
     now = Time.zone.now
-    observation = if args
-                    Observation.new(args.permit(whitelisted_observation_args))
-                  else
-                    Observation.new
-                  end
+    observation = new_observation(args)
     observation.created_at = now
     observation.updated_at = now
     observation.user       = @user
     observation.name       = Name.unknown
     observation.source     = "mo_website"
+    determine_observation_location(observation)
+  end
+
+  # NOTE: Call `to_h` on the permitted params if problems with nested params.
+  # As of rails 5, params are an ActionController::Parameters object,
+  # not a hash.
+  def new_observation(args)
+    if args
+      Observation.new(args.permit(permitted_observation_args).to_h)
+    else
+      Observation.new
+    end
+  end
+
+  def determine_observation_location(observation)
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.long && observation.place_name.blank?)
       observation.location = Location.unknown
@@ -164,19 +173,6 @@ module ObservationsController::NewAndCreate
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
-  end
-
-  # Symbolize keys; delete key/value pair if value blank
-  # Also avoids whitelisting issues
-  def notes_to_sym_and_compact
-    return Observation.no_notes unless notes_param_present?
-
-    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
-    symbolized.compact_blank!
-  end
-
-  def notes_param_present?
-    params[:observation] && params[:observation][:notes].present?
   end
 
   def validate_name(params)
@@ -350,4 +346,3 @@ module ObservationsController::NewAndCreate
     render(action: :new, location: new_observation_path(q: get_query_param))
   end
 end
-# rubocop:enable Metrics/ModuleLength

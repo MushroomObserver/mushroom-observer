@@ -6,12 +6,10 @@ description_links = list_descriptions(object: @name) || []
   <strong><%= :show_name_descriptions.t %>:</strong>
     [<%= link_with_query(:show_name_create_description.t,
                           new_name_description_path(@name.id)) %>]
-  <div class="panel panel-default">
-    <div class="panel-body">
-      <% description_links.each do |desc| %>
-      <div><%= desc %></div>
-      <% end %>
-      <%= :show_name_no_descriptions.t if description_links.empty? %>
-    </div>
-  </div>
+  <%= panel_block do %>
+    <% description_links.each do |desc| %>
+    <div><%= desc %></div>
+    <% end %>
+    <%= :show_name_no_descriptions.t if description_links.empty? %>
+  <% end %>
 </div><!--#name_descriptions-->

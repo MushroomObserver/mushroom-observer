@@ -1,9 +1,5 @@
 <div id="name_notes">
   <strong><%= :show_name_notes.t %>:</strong>
     [<%= link_with_query(:EDIT.t, edit_name_path(@name.id)) %>]
-  <div class="panel panel-default">
-    <div class="panel-body">
-        <%= @name.notes.tpl %>
-    </div>
-  </div>
+  <%= panel_block do @name.notes.tpl end %>
 </div><!--#name_notes-->

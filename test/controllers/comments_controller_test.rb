@@ -9,6 +9,36 @@ class CommentsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
+  def test_index_sort_by_user
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Comments by #{by.capitalize}")
+  end
+
+  def test_index_pattern_id
+    id = comments(:fungi_comment).id
+
+    login
+    get(:index, params: { pattern: id })
+
+    assert_redirected_to(comment_path(id))
+  end
+
+  def test_index_pattern_search_str
+    search_str = "Let's"
+    assert(comments(:minimal_unknown_obs_comment_2).summary.
+           start_with?(search_str),
+           "Search string must have a hit in Comment fixtures")
+
+    login
+    get(:index, params: { pattern: search_str })
+
+    assert_select("#title").text.downcase == "comments matching '#{search_str}'"
+  end
+
   def test_show_comment
     login
     get(:show,
