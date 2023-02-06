@@ -30,8 +30,7 @@ class CommentsController < ApplicationController
     :target,
     :pattern,
     :by_user,
-    :for_user,
-    :by
+    :for_user
   ].freeze
 
   ###########################################################
@@ -51,7 +50,8 @@ class CommentsController < ApplicationController
 
   # Show list of latest comments. (Linked from left panel.)
   def list_comments
-    query = create_query(:Comment, :all, by: :created_at)
+    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
+    query = create_query(:Comment, :all, by: sorted_by)
     show_selected_comments(query)
   end
 
