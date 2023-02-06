@@ -18,22 +18,22 @@ xml.tag!(
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
+  if object.classification.present?
+    parse = Name.parse_classification(object.classification)
+    xml.parents(number: parse.length) do
+      parse.each do |rank, name|
+        xml.parent do
+          xml_string(xml, :name, name)
+          xml_string(xml, :rank, rank.to_s.downcase)
+        end
+      end
+    end
+  end
   if detail
     if object.synonym_id
       xml.synonyms(number: object.synonyms.length - 1) do
         (object.synonyms - [object]).each do |synonym|
           xml_detailed_object(xml, :synonym, synonym)
-        end
-      end
-    end
-    if object.classification.present?
-      parse = Name.parse_classification(object.classification)
-      xml.parents(number: parse.length) do
-        parse.each do |rank, name|
-          xml.parent do
-            xml_string(xml, :name, name)
-            xml_string(xml, :rank, rank.to_s.downcase)
-          end
         end
       end
     end
