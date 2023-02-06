@@ -204,7 +204,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Species Lists by Name")
+    assert_select("#title", text: "Species Lists by Title")
   end
 
   def test_index_of_user
