@@ -101,7 +101,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_index_sort_by_user
+  def test_index_default_sort_order
+    login
+    get(:index)
+
+    assert_template(:index)
+    assert_select("#title", text: "Species Lists by Date")
+  end
+
+  def test_index_sorted_by_user
     by = "user"
 
     login
@@ -116,12 +124,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:success)
     get(:index, params: { by: :created })
     assert_response(:success)
-  end
-
-  def test_index_list_species_lists
-    login
-    get(:index)
-    assert_template(:index)
   end
 
   def test_show_species_list
@@ -196,10 +198,13 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  def test_index_by_title
+  def test_index_sort_by_title
+    by = "title"
+
     login
-    get(:index, params: { by: "title" })
-    assert_template(:index)
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Species Lists by Name")
   end
 
   def test_index_of_user
