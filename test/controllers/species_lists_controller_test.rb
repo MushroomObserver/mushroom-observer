@@ -207,6 +207,25 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Species Lists by Title")
   end
 
+  def test_index_with_id_and_sort_by_title
+    list = species_lists(:unknown_species_list)
+    by = "title"
+
+    login
+    get(:index, params: { id: list.id, by: by })
+
+    assert_select("#title", text: "Species Lists by Title")
+  end
+
+  def test_index_with_id
+    list = species_lists(:unknown_species_list)
+
+    login
+    get(:index, params: { id: list.id })
+
+    assert_select("#title", text: "Species Lists by Date")
+  end
+
   def test_index_of_user
     login
     get(:index, params: { by_user: rolf.id })
