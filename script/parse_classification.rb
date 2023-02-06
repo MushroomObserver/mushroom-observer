@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 NAME_REGEXP    = /_([^_]*)_/
 DOMAIN_REGEXP  = /Domain: #{NAME_REGEXP}/
