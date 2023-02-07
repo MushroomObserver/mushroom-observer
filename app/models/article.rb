@@ -78,4 +78,8 @@ class Article < AbstractModel
   def self.news_articles_project
     Project.find_by(title: "News Articles")
   end
+
+  def self.default_order
+    Query::ArticleBase.default_order
+  end
 end
