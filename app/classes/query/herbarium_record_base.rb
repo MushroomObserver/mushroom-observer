@@ -59,7 +59,7 @@ class Query::HerbariumRecordBase < Query::Base
                          params[:accession_number_has])
   end
 
-  def default_order
+  def self.default_order
     "herbarium_label"
   end
 end

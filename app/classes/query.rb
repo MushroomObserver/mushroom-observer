@@ -306,4 +306,8 @@ module Query
   def self.lookup(*args)
     Query::Base.lookup(*args)
   end
+
+  def default_order
+    self.class.default_order
+  end
 end
