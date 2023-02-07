@@ -156,7 +156,7 @@ class ProjectsController < ApplicationController
 
   # Show list of latest projects.  (Linked from left panel.)
   def list_projects
-    sorted_by = params[:by].present? ? params[:by].to_s : :name
+    sorted_by = params[:by].present? ? params[:by].to_s : :title
     query = create_query(:Project, :all, by: sorted_by)
     show_selected_projects(query)
   end

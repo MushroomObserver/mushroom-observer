@@ -70,9 +70,11 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("form[action=?]", project_path(p_id))
   end
 
-  def test_index_list_projects
+  def test_index
     login
     get(:index)
+
+    assert_select("#title", text: "Projects by Title")
     assert_template("index")
   end
 
