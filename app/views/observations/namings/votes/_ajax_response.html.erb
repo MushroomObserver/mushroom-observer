@@ -1,8 +1,8 @@
 <%
 # Response for a naming vote.
 # Renders divs that are used to update page content by naming_vote.js
-# Recalculated show_obs_title, refreshed votes table,
-# the new vote %, and the new num_votes
+# Sends: a recalculated show_obs_title, the refreshed votes table,
+#        the new vote %, and the new num_votes
 %>
 <div>
   <%= content_tag(:div, show_obs_title(obs: @observation),
