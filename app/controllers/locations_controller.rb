@@ -50,7 +50,7 @@ class LocationsController < ApplicationController
   private # private methods used by #index
 
   def default_index_subaction
-    list_locations
+    index_location
   end
 
   # Displays a list of selected locations, based on current Query.
