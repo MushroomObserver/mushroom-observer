@@ -8,6 +8,7 @@
                     observation_path(id: @observation.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :double
 %>
 
 <div class="row">
@@ -59,7 +60,7 @@
           </td>
           <td>
             <%= thumbnail(sugg.image_obs.thumb_image,
-                          link: show_image_path(id: sugg.image_obs.id)) \
+                          link: image_path(id: sugg.image_obs.id)) \
                           if sugg.image_obs.present? %>
         </td>
       </tr>
