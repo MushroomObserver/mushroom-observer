@@ -10,6 +10,11 @@ function SuggestionModule(ids, url, text) {
       var progress = $("#naming_ajax_progress_caption")
         .html(text.suggestions_processing_images + "..." + whirly);
       var progressModal = $("#naming_ajax_progress").modal("show");
+      var resetModal = function () {
+        progress.empty();
+        progressModal.modal("hide");
+        button.attr("disabled", null);
+      }
 
       var results = [];
       var any_worked = false;
@@ -33,6 +38,7 @@ function SuggestionModule(ids, url, text) {
                 whirly);
               var out = JSON.stringify(results);
               url = url.replace("xxx", encodeURIComponent(out));
+              resetModal();
               if (event.ctrlKey)
                 window.open(url, "_blank");
               else
@@ -40,9 +46,7 @@ function SuggestionModule(ids, url, text) {
             } else {
               progress.html(text.suggestions_error);
               window.setTimeout(() => {
-                progress.empty();
-                progressModal.modal("hide");
-                button.attr("disabled", null);
+                resetModal();
               }, 1000);
             }
           }
