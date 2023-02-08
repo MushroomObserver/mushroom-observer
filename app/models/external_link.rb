@@ -60,4 +60,8 @@ class ExternalLink < AbstractModel
   def self.index_action; end
   def self.show_url(id); end
   def self.show_link_args(id); end
+
+  def self.default_order
+    ::Query::ExternalLinkBase.default_order
+  end
 end

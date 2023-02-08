@@ -2670,6 +2670,10 @@ class NameTest < UnitTestCase
 
   # --------------------------------------
 
+  def test_default_order
+    assert_equal("name", Name.default_order)
+  end
+
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
     return unless sql_collates_accents?

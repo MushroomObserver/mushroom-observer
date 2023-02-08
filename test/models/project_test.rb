@@ -104,4 +104,8 @@ class ProjectTest < UnitTestCase
     proj.log_destroy
     assert_nil(log.reload.target_id)
   end
+
+  def test_default_order
+    assert_equal("title", Project.default_order)
+  end
 end

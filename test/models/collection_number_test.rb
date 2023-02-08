@@ -9,4 +9,8 @@ class CollectionNumberTest < UnitTestCase
     assert(num.name)
     assert(num.number)
   end
+
+  def test_default_order
+    assert_equal("name_and_number", CollectionNumber.default_order)
+  end
 end

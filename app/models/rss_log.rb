@@ -343,6 +343,12 @@ class RssLog < AbstractModel
     results
   end
 
+  def self.default_order
+    ::Query::RssLogBase.default_order
+  end
+
+  #########################################################
+
   private
 
   def decode_orphan_title(line)

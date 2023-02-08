@@ -135,6 +135,8 @@
 #
 #  == Class methods
 #
+#  default_order
+#
 #  ==== Constants
 #  unknown::                 "Unknown": instance of Name.
 #  names_for_unknown::       "Unknown": accepted names in local language.
@@ -674,6 +676,10 @@ class Name < AbstractModel
   def self.count_observations(names)
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
+  end
+
+  def self.default_order
+    ::Query::NameBase.default_order
   end
 
   ##############################################################################

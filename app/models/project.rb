@@ -207,6 +207,10 @@ class Project < AbstractModel
     find_using_wildcards("title", str)
   end
 
+  def self.default_order
+    ::Query::ProjectBase.default_order
+  end
+
   ##############################################################################
   #
   #  :section: Logging

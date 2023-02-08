@@ -16,4 +16,8 @@ class ArticleTest < UnitTestCase
     article.destroy!
     assert_nil(log.reload.target_id)
   end
+
+  def test_default_order
+    assert_equal("created_at", Article.default_order)
+  end
 end

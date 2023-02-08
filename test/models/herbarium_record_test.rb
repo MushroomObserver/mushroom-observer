@@ -40,4 +40,8 @@ class HerbariumRecordTest < UnitTestCase
       assert_equal("My very own herbarium", user.personal_herbarium_name)
     end
   end
+
+  def test_default_order
+    assert_equal("herbarium_label", HerbariumRecord.default_order)
+  end
 end

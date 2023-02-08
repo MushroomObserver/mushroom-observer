@@ -13,6 +13,10 @@
 #  updated_at::         Date/time it was last updated.
 #  user::               user who created article
 #
+# == class methods
+#
+#  default_order        default MO query sort order
+#
 # == methods
 #  author::             user.name + user.login
 #  can_edit?            Can the user create, edit, or delete Articles?
@@ -80,6 +84,6 @@ class Article < AbstractModel
   end
 
   def self.default_order
-    Query::ArticleBase.default_order
+    ::Query::ArticleBase.default_order
   end
 end

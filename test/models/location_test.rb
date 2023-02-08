@@ -108,6 +108,10 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.versions.first.user_id)
   end
 
+  def test_default_order
+    assert_equal("name", Location.default_order)
+  end
+
   # --------------------------------------
   #  Test email notification heuristics.
   # --------------------------------------

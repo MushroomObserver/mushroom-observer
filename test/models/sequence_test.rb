@@ -301,4 +301,8 @@ class SequenceTest < UnitTestCase
       sequences(:bare_with_numbers_sequence).blast_url
     )
   end
+
+  def test_default_order
+    assert_equal("created_at", Sequence.default_order)
+  end
 end

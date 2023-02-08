@@ -199,6 +199,10 @@ class Comment < AbstractModel
     all_types.find { |m| m.name == name }
   end
 
+  def self.default_order
+    ::Query::CommentBase.default_order
+  end
+
   ############################################################################
 
   protected

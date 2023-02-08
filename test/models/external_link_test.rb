@@ -50,4 +50,8 @@ class ExternalLinkTest < UnitTestCase
     )
     assert_empty(link3.errors)
   end
+
+  def test_default_order
+    assert_equal("url", ExternalLink.default_order)
+  end
 end
