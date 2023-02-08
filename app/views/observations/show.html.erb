@@ -13,12 +13,12 @@
 %>
 
 <div class="row">
-  <div class="col-sm-8 col-lg-6 float-sm-left">
+  <div class="col-sm-8 col-lg-7 float-sm-left">
     <%= panel_block(id: "observation_details", class: "name-section") do
       render(partial: "observations/show/observation", locals: obs_locals)
     end %>
   </div>
-  <div class="col-sm-4 col-lg-6 float-sm-right">
+  <div class="col-sm-4 col-lg-5 float-sm-right">
     <% if @user %>
       <%= panel_block(id: "observation_name_info",
                       class: "name-section small") do
@@ -50,7 +50,7 @@
     <%= render(partial: "observations/show/images", locals: obs_locals) %>
   </div>
 
-  <div class="col-sm-8 col-lg-6 float-sm-left">
+  <div class="col-sm-8 col-lg-7 float-sm-left">
     <% if @user %>
       <%= render(partial: "observations/show/namings", locals: obs_locals) %>
     <% end %>
