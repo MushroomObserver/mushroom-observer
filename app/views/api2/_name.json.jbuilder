@@ -14,15 +14,15 @@ json.updated_at(object.updated_at.try(&:utc))
 json.number_of_views(object.num_views)
 json.last_viewed(object.last_view.try(&:utc))
 json.ok_for_export(object.ok_for_export ? true : false)
+if object.classification.present?
+  parse = Name.parse_classification(object.classification)
+  json.parents(parse.map do |rank, name|
+    { name: name, rank: rank.to_s.downcase }
+  end)
+end
 if detail
   if object.synonym_id
     json.synonyms((object.synonyms - [object]).map { |x| json_name(x) })
-  end
-  if object.classification.present?
-    parse = Name.parse_classification(object.classification)
-    json.parents(parse.map do |rank, name|
-      { name: name, rank: rank.to_s.downcase }
-    end)
   end
   if object.comments.any?
     json.comments(object.comments.map { |x| json_comment(x) })
