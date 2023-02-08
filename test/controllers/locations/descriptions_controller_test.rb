@@ -46,7 +46,7 @@ module Locations
     #
     #    INDEX
 
-    def test_sort_by_user
+    def test_index_sorted_by_user
       by = "user"
 
       login
@@ -55,7 +55,7 @@ module Locations
       assert_select("#title", text: "Location Descriptions by #{by.capitalize}")
     end
 
-    def test_list_location_descriptions
+    def test_index_list_all
       login("mary")
       burbank = locations(:burbank)
       burbank.description = LocationDescription.create!(
@@ -66,7 +66,7 @@ module Locations
       assert_template("index")
     end
 
-    def test_location_descriptions_by_author
+    def test_index_by_author
       desc = location_descriptions(:albion_desc)
       login
       get(:index, params: { by_author: rolf.id })
@@ -75,7 +75,7 @@ module Locations
       )
     end
 
-    def test_location_descriptions_by_editor
+    def test_index_by_editor
       login
       get(:index, params: { by_editor: rolf.id })
       assert_template("index")
