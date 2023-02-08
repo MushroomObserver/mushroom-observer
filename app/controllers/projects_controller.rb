@@ -106,7 +106,7 @@ class ProjectsController < ApplicationController
     redirect_to(project_path(@project.id, q: get_query_param))
   end
 
-  def create # rubocop:disable Metrics/AbcSize
+  def create
     title = params[:project][:title].to_s
     project = Project.find_by_title(title)
     user_group = UserGroup.find_by_name(title)
@@ -126,7 +126,7 @@ class ProjectsController < ApplicationController
     render(:new, location: new_project_path(q: get_query_param))
   end
 
-  def update # rubocop:disable Metrics/AbcSize
+  def update
     return unless find_project!
 
     unless check_permission!(@project)
@@ -158,7 +158,7 @@ class ProjectsController < ApplicationController
   # Inputs: params[:id]
   # Outputs: none
   # def destroy_project
-  def destroy # rubocop:disable Metrics/AbcSize
+  def destroy
     return unless find_project!
 
     if !check_permission!(@project)
@@ -256,7 +256,7 @@ class ProjectsController < ApplicationController
     @project = find_or_goto_index(Project, params[:id].to_s)
   end
 
-  def create_project(title, admin_name) # rubocop:disable Metrics/AbcSize
+  def create_project(title, admin_name)
     # Create members group.
     user_group = UserGroup.new
     user_group.name = title

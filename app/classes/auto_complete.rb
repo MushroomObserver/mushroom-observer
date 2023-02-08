@@ -199,5 +199,4 @@ class AutoCompleteHerbarium < AutoCompleteByWord
       code.empty? ? name : "#{code} - #{name}"
     end.sort
   end
-  # rubocop:enable Metrics/AbcSize
 end

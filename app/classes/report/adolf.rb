@@ -51,7 +51,6 @@ module Report
       ]
     end
 
-    # rubocop:disable Metrics/AbcSize Metrics/MethodLength
     def format_row(row)
       notes, orig_label = parse_orig_label(row)
       [

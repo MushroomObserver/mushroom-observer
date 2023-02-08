@@ -174,7 +174,6 @@ class Project < AbstractModel
   end
 
   # NOTE: Arel is definitely more efficient than AR for this join.
-  # rubocop:disable Metrics/AbcSize
   def arel_select_leave_these_img_ids(obs, imgs)
     img_ids = imgs.map(&:id)
 
@@ -188,7 +187,6 @@ class Project < AbstractModel
       )
     ).project(ObservationImage[:image_id])
   end
-  # rubocop:enable Metrics/AbcSize
 
   # Add species_list to this project if not already done so.  Saves it.
   def add_species_list(spl)

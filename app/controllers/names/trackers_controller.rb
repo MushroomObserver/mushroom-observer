@@ -117,7 +117,6 @@ module Names
 
     # disable cop because method is clear and
     # there's no easy way to reduce ABC count of <2, 20, 3> 20.32/20
-    # rubocop:disable Metrics/AbcSize
     def notify_admins_of_name_tracker(name_tracker)
       return if name_tracker.note_template.blank?
       # Only give notifications when users turn on the template function,
@@ -139,6 +138,5 @@ module Names
       # Let the user know that the note_template feature requires approval.
       flash_notice(:email_tracking_awaiting_approval.t)
     end
-    # rubocop:enable Metrics/AbcSize
   end
 end

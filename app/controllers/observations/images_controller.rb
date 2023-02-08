@@ -86,7 +86,7 @@ module Observations
       redirect_with_query(permanent_observation_path(id: @observation.id))
     end
 
-    def process_image(args, upload) # rubocop:disable Metrics/AbcSize
+    def process_image(args, upload)
       return if upload.blank?
 
       @image = Image.new(args.permit(permitted_image_args))
