@@ -7,12 +7,9 @@ function SuggestionModule(ids, url, text) {
 
     button.on('click', function (event) {
       button.attr("disabled", "disabled");
-      var cover = $("<div class='cover'>").appendTo($(document.body));
-      var progress = $("<div class='popup'>").appendTo($(document.body))
-        .html(text.suggestions_processing_images + "..." + whirly)
-        .css("padding", "1em 2em")
-        .center()
-        .show();
+      var progress = $("#naming_ajax_progress_caption")
+        .html(text.suggestions_processing_images + "..." + whirly);
+      var progressModal = $("#naming_ajax_progress").modal("show");
 
       var results = [];
       var any_worked = false;
@@ -41,10 +38,12 @@ function SuggestionModule(ids, url, text) {
               else
                 window.location.href = url;
             } else {
-              alert(text.suggestions_error);
-              progress.remove();
-              cover.remove();
-              button.attr("disabled", null);
+              progress.html(text.suggestions_error);
+              window.setTimeout(() => {
+                progress.empty();
+                progressModal.modal("hide");
+                button.attr("disabled", null);
+              }, 1000);
             }
           }
         });

@@ -33,7 +33,11 @@ function VoteByAjaxModule(translations) {
         }
 
         // bootstrap modal printed in layout already, just activate it
-        $('#save_naming_vote').modal('show')
+        $('#naming_ajax_progress_caption').append(
+          $("<span>").text(translations.show_namings_saving + "... "),
+          $("<span class='spinner-right mx-2'></span>")
+        );
+        $("#naming_ajax_progress").modal('show');
 
         $.ajax("/ajax/vote/naming/" + naming_id, {
           data: {value: value, authenticity_token: csrf_token()},
@@ -41,7 +45,8 @@ function VoteByAjaxModule(translations) {
           async: true,
           complete: function (request) {
             _haveVotesChanged = false;
-            $('#save_naming_vote').modal('hide')
+            $('#naming_ajax_progress').modal('hide');
+            $('#naming_ajax_progress_caption').empty();
             if (request.status == 200) {
               var html     = $(request.responseText);
               var title    = html.children().eq(0);
