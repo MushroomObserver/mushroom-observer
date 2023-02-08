@@ -14,8 +14,10 @@
                         id: "modal_header_#{naming.id}") %>
       </div>
       <div class="modal-body" id="show_votes_<%= naming.id %>_frame">
-        <%= render(partial: "observations/namings/votes/table",
-                  locals: { naming: naming }) %>
+        <div class="position-relative">
+          <%= render(partial: "observations/namings/votes/table",
+                     locals: { naming: naming }) %>
+        </div>
       </div>
     </div>
   </div>

@@ -20,27 +20,31 @@ eyes = content_tag(:div,
 <div id="observation_namings">
 
   <!--TABLE OF NAMES -->
-  <section class="table-namings">
-    <header class="table-row">
-      <div class="table-cell"><%= header[:heading] %></div>
-      <div class="table-cell"><%= header[:user_name] %></div>
-      <div class="table-cell"><%= header[:consensus_vote] %></div>
-      <div class="table-cell"><%= header[:your_vote] %></div>
-      <div class="table-cell"></div>
-    </header>
+  <div class="namings-table">
+    <div class="container-fluid">
+      <header class="row">
+        <div class="col col-xs-12 col-sm-3"><%= header[:heading] %></div>
+        <div class="col col-sm-3 hidden-xs"><%= header[:user_name] %></div>
+        <div class="col col-sm-2 hidden-xs"><%= header[:consensus_vote] %></div>
+        <div class="col col-sm-3 hidden-xs"><%= header[:your_vote] %></div>
+        <div class="col col-sm-1 hidden-xs"></div>
+      </header>
+    </div>
 
-    <% namings.each do |naming| %>
-      <%= render(partial: "observations/namings/row",
-                 locals: { naming: naming, observation: observation,
-                           logged_in: logged_in }) %>
-    <% end # each naming %>
-  </section>
+    <div class="container-fluid panel">
+      <% namings.each do |naming| %>
+        <%= render(partial: "observations/namings/row",
+                    locals: { naming: naming, observation: observation,
+                              logged_in: logged_in }) %>
+      <% end # each naming %>
+    </div>
+  </div>
   <!--/TABLE OF NAMES -->
 
   <!--HELP TEXT AND EYES -->
   <div class="float-sm-right my-2 ml-3"><%= buttons %></div>
   <div class="help-block container-text my-2"><%= help %></div>
-  <div class="row">
+  <div class="row hidden-xs">
     <div class="col-xs-6"><%= eye %></div>
     <div class="col-xs-6"><%= eyes %></div>
   </div>
