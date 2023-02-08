@@ -32,15 +32,8 @@ function VoteByAjaxModule(translations) {
           });
         }
 
-        // could print this as a modal instead, and just activate it
-        var whirly = $("<div class='popup'>").appendTo($("body"))
-          .css("padding", "1em 2em")
-          .append(
-            $("<span>").text(translations.show_namings_saving + "... "),
-            $("<span class='spinner-right mx-2'></span>")
-          )
-          .center()
-          .show();
+        // bootstrap modal printed in layout already, just activate it
+        $('#save_naming_vote').modal('show')
 
         $.ajax("/ajax/vote/naming/" + naming_id, {
           data: {value: value, authenticity_token: csrf_token()},
@@ -48,7 +41,7 @@ function VoteByAjaxModule(translations) {
           async: true,
           complete: function (request) {
             _haveVotesChanged = false;
-            whirly.remove();
+            $('#save_naming_vote').modal('hide')
             if (request.status == 200) {
               var html     = $(request.responseText);
               var title    = html.children().eq(0);
