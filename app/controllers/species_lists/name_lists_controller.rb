@@ -15,7 +15,7 @@ module SpeciesLists
       @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
     end
 
-    def create # rubocop:disable Metrics/AbcSize
+    def create
       # Names are passed in as string, one name per line.
       results = params[:results] || ""
       @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }

@@ -114,13 +114,15 @@ module ObjectLinkHelper
   #   # If you don't have a full User instance handy:
   #   Modified by: <%= user_link(login, user_id) %>
   #
-  def user_link(user, name = nil)
+  def user_link(user, name = nil, args = {})
     if user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
-      link_to(name, user_path(user), { id: "show_user_link_#{user}" })
+      link_to(name, user_path(user),
+              args.merge({ id: "show_user_link_#{user}" }))
     elsif user
       name ||= user.unique_text_name
-      link_to(name, user_path(user.id), { id: "show_user_link_#{user.id}" })
+      link_to(name, user_path(user.id),
+              args.merge({ id: "show_user_link_#{user.id}" }))
     else
       "?"
     end

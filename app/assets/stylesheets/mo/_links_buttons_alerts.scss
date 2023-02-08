@@ -2,7 +2,7 @@
 // link, button, alert themed styles
 // --------------------------------------------------
 
-a:visited {
+a:not(.btn):visited {
   color: $LINK_VISITED_FG_COLOR;
 }
 

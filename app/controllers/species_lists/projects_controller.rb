@@ -63,7 +63,7 @@ module SpeciesLists
       states
     end
 
-    def commit_and_redirect # rubocop:disable Metrics/AbcSize
+    def commit_and_redirect
       case params[:commit]
       when :ATTACH.l
         if attach_objects_to_projects

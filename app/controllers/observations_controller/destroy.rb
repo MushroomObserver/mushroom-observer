@@ -6,8 +6,7 @@ module ObservationsController::Destroy
   # Linked from: observations/show (note that links require jquery_ujs)
   # Inputs: params[:id] (observation)
   # Redirects to next obs in query or :index.
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-  def destroy # rubocop:disable Metrics/AbcSize
+  def destroy
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))
 

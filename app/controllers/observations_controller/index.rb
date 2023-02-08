@@ -157,7 +157,7 @@ module ObservationsController::Index
     index_observation
   end
 
-  def create_advanced_search_query(params) # rubocop:disable Metrics/AbcSize
+  def create_advanced_search_query(params)
     search = {}
     search[:name] = params[:name] if params[:name].present?
     search[:location] = params[:location] if params[:location].present?

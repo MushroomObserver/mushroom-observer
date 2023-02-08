@@ -64,9 +64,7 @@ module ObservationsController::EditAndUpdate
 
   public
 
-  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
-
-  def update # rubocop:disable Metrics/AbcSize
+  def update
     return unless (@observation = find_or_goto_index(
       Observation, params[:id].to_s
     ))

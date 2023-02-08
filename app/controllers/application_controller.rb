@@ -1907,7 +1907,8 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # defined here because used by both image_controller and observer_controller
+  # defined here because used by both images_controller and
+  # observations_controller
   def permitted_image_args
     [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
   end

@@ -111,7 +111,6 @@ module Descriptions::Moves
     end
 
     # Create a clone in the destination name/location.
-    # rubocop:disable Metrics/AbcSize
     def clone_description_to_another_name
       desc = clone_src_description
 
@@ -149,7 +148,6 @@ module Descriptions::Moves
         flash_object_errors(desc)
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
     def clone_src_description
       @src.class.new(

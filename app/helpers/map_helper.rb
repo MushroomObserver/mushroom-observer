@@ -117,7 +117,7 @@ module MapHelper
     end.compact_blank.uniq
   end
 
-  def mapset_info_window(set, args) # rubocop:disable Metrics/AbcSize
+  def mapset_info_window(set, args)
     lines = []
     observations = set.observations
     locations = set.underlying_locations
@@ -147,7 +147,7 @@ module MapHelper
     label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
   end
 
-  def mapset_submap_links(set, args, type) # rubocop:disable Metrics/AbcSize
+  def mapset_submap_links(set, args, type)
     params = args[:query_params] || {}
     params = params.merge(mapset_box_params(set))
     case type.to_s
@@ -183,7 +183,7 @@ module MapHelper
     }
   end
 
-  def mapset_coords(set) # rubocop:disable Metrics/AbcSize
+  def mapset_coords(set)
     if set.is_point?
       format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
     else
