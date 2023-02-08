@@ -62,8 +62,4 @@ class HerbariumTest < UnitTestCase
     assert_equal(curators.map(&:id).sort, curator_ids.sort)
     assert_obj_arrays_equal(herbarium_records, result.herbarium_records)
   end
-
-  def test_default_order
-    assert_equal("name", Herbarium.default_order)
-  end
 end

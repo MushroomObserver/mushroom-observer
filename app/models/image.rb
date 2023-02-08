@@ -433,10 +433,6 @@ class Image < AbstractModel
     [w, h]
   end
 
-  def self.default_order
-    ::Query::ImageBase.default_order
-  end
-
   ##############################################################################
   #
   #  :section: Image Upload

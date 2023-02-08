@@ -75,10 +75,6 @@ class RssLogTest < UnitTestCase
     assert_operator(max, ">", log.notes.length)
   end
 
-  def test_default_order
-    assert_equal("updated_at", RssLog.default_order)
-  end
-
   # ---------- helpers ---------------------------------------------------------
 
   def normalized_rss_log_types

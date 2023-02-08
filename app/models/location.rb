@@ -34,7 +34,6 @@
 #
 #  primer::             List of User's latest Locations to prime auto-completer.
 #  clean_name::         Clean a name before doing searches on it.
-#  default_order::      MO query default sort order
 #
 #  == Scopes
 #
@@ -191,10 +190,6 @@ class Location < AbstractModel
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
     Observation.update_cache("location", "where", id, name) if name_changed?
-  end
-
-  def self.default_order
-    ::Query::LocationBase.default_order
   end
 
   ##############################################################################

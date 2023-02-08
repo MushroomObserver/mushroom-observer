@@ -136,8 +136,4 @@ class HerbariumRecord < AbstractModel
               touch: true)
     end
   end
-
-  def self.default_order
-    ::Query::HerbariumRecordBase.default_order
-  end
 end

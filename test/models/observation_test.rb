@@ -19,10 +19,6 @@ class ObservationTest < UnitTestCase
 
   ##############################################################################
 
-  def test_default_order
-    assert_equal("date", Observation.default_order)
-  end
-
   # Add an observation to the database
   def test_create
     create_new_objects

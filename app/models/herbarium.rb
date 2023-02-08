@@ -165,8 +165,4 @@ class Herbarium < AbstractModel
   def self.find_by_name_with_wildcards(str)
     find_using_wildcards("name", str)
   end
-
-  def self.default_order
-    ::Query::HerbariumBase.default_order
-  end
 end

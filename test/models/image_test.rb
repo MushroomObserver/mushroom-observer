@@ -280,8 +280,4 @@ class ImageTest < UnitTestCase
     assert_empty(ImageVote.where(image_id: image_id),
                  "Failed to delete ImageVotes attached to destroyed image!")
   end
-
-  def test_default_order
-    assert_equal("created_at", Image.default_order)
-  end
 end

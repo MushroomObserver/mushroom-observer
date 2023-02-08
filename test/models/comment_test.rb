@@ -133,8 +133,4 @@ class CommentTest < UnitTestCase
     end
     "These emails were sent:\n#{strs.join("\n")}"
   end
-
-  def test_default_order
-    assert_equal("created_at", Comment.default_order)
-  end
 end

@@ -57,8 +57,4 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_empty(site3.errors)
   end
-
-  def test_default_order
-    assert_equal("name", ExternalSite.default_order)
-  end
 end

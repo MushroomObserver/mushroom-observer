@@ -22,8 +22,4 @@ class ExternalSite < AbstractModel
   def member?(user)
     user.in_group?(project.user_group)
   end
-
-  def self.default_order
-    ::Query::ExternalSiteBase.default_order
-  end
 end

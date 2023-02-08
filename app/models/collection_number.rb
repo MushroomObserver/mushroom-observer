@@ -37,7 +37,7 @@
 #
 #  == Class methods
 #
-#  default_order        default MO query sort order
+#  None
 #
 #  == Instance methods
 #
@@ -112,9 +112,5 @@ class CollectionNumber < AbstractModel
     HerbariumRecord.joins(observations: :collection_numbers).where(
       accession_number: old_format_name, collection_numbers: { id: id }
     ).update_all(accession_number: format_name)
-  end
-
-  def self.default_order
-    ::Query::CollectionNumberBase.default_order
   end
 end

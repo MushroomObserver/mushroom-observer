@@ -421,10 +421,6 @@ class Observation < AbstractModel
     true
   end
 
-  def self.default_order
-    ::Query::ObservationBase.default_order
-  end
-
   def can_edit?(user = User.current)
     Project.can_edit?(self, user)
   end

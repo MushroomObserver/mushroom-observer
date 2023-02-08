@@ -22,7 +22,6 @@
 #
 #  blast_url_prefix    part of url prepended to BLAST QUERY
 #  locus_width         Default # of chars (including diaresis) to truncate locus
-#  default_order       MO Query default sort order
 #
 #  == Instance Methods
 #
@@ -145,10 +144,6 @@ class Sequence < AbstractModel
   # url of a search for accession
   def accession_url
     "#{WebSequenceArchive.search_prefix(archive)}#{accession}"
-  end
-
-  def self.default_order
-    ::Query::SequenceBase.default_order
   end
 
   ##############################################################################
