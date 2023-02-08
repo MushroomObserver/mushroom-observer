@@ -23,6 +23,19 @@ thead tr {
   }
 }
 
+.table-naming-votes {
+  background: none;
+  width: 100%;
+
+  th:not(:first-child) {
+    text-align: center;
+  }
+
+  td:nth-child(3) {
+    text-align: center;
+  }
+}
+
 .table-description-permissions {
   th, td {
     padding: 0.1em 0;
