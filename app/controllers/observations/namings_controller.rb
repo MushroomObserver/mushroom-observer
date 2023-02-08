@@ -14,6 +14,13 @@ module Observations
         load_for_show_observation_or_goto_index(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
+      respond_to do |format|
+        format.html
+        format.json {
+          render_json(partial: "observations/namings/form",
+                      locals: { action: :create, url: url, show_reasons: true })
+        }
+      end
     end
 
     def create
