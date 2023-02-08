@@ -56,7 +56,7 @@ class Query::ProjectBase < Query::Base
     )
   end
 
-  def default_order
+  def self.default_order
     "title"
   end
 end
