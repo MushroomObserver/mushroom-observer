@@ -1,5 +1,9 @@
 // Namings is not a <table>, but has table-like layout properties
 .namings-table {
+  .row {
+    border-radius: $panel-border-radius;
+  }
+
   header.row {
     .col {
       padding: $panel-body-padding;
