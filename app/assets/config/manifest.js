@@ -20,7 +20,7 @@
 //= link Admin.css
 //= link Agaricus.css
 //= link Amanita.css
-//= link BlackOnWhite.css
 //= link Cantharellaceae.css
 //= link Hygrocybe.css
 //= link Sudo.css
+//= link BlackOnWhite.css

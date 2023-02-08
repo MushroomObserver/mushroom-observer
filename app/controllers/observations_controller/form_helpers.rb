@@ -136,7 +136,6 @@ module ObservationsController::FormHelpers
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
 
   # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/AbcSize
   def create_image_objects(args, observation, good_images)
     bad_images = []
     if args
@@ -182,14 +181,13 @@ module ObservationsController::FormHelpers
     bad_images
   end
   # rubocop:enable Metrics/MethodLength
-  # rubocop:enable Metrics/AbcSize
 
   # List of images that we've successfully downloaded, but which
   # haven't been attached to the observation yet.  Also supports some
   # mininal editing.  INPUT: params[:good_images] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
 
-  def update_good_images(arg) # rubocop:disable Metrics/AbcSize
+  def update_good_images(arg)
     # Get list of images first.
     images = (arg || "").split.filter_map do |id|
       Image.safe_find(id.to_i)

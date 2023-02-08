@@ -1016,7 +1016,7 @@ class Image < AbstractModel
   #   {"license_count"=>1, "copyright_holder"=>"Tim Wheeler", "license_id"=>2}]
   #   map(&:attributes) gives you a hash of your selects with their keys
 
-  def self.licenses_for_user_by_type(user) # rubocop:disable Metrics/AbcSize
+  def self.licenses_for_user_by_type(user)
     display_names = {}
     current_names_and_ids = {}
 

@@ -14,7 +14,6 @@ class API2
       :user
     ]
 
-    # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/MethodLength
     def query_params
       n, s, e, w = parse_bounding_box!
@@ -53,7 +52,6 @@ class API2
         obs_notes_has: parse(:string, :obs_notes_has, help: 1)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
 
     def create_params

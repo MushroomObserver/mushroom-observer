@@ -182,7 +182,7 @@ module Query
       add_join(:locations!)
     end
 
-    def default_order
+    def self.default_order
       "date"
     end
   end

@@ -117,7 +117,7 @@ module SpeciesLists
       sorter
     end
 
-    def check_if_name_sorter_failed(sorter) # rubocop:disable Metrics/AbcSize
+    def check_if_name_sorter_failed(sorter)
       failed = false
 
       # Does list have "Name one = Name two" type lines?
@@ -184,7 +184,7 @@ module SpeciesLists
     # Uses the member instance vars, as well as:
     #   params[:chosen_approved_names]    Names from radio boxes.
     #   params[:checklist_data]           Names from LHS check boxes.
-    def construct_observations(spl, sorter) # rubocop:disable Metrics/AbcSize
+    def construct_observations(spl, sorter)
       # Put together a list of arguments to use when creating new observations.
       spl_args = init_spl_args(spl)
 

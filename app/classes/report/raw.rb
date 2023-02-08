@@ -39,7 +39,6 @@ module Report
       ]
     end
 
-    # rubocop:disable Metrics/AbcSize Metrics/MethodLength
     def format_row(row)
       [
         row.obs_id,

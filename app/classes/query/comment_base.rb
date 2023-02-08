@@ -27,7 +27,7 @@ module Query
       super
     end
 
-    def default_order
+    def self.default_order
       "created_at"
     end
   end

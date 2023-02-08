@@ -161,7 +161,7 @@ class Naming < AbstractModel
   end
 
   # Send email notifications after creating or changing the Name.
-  def create_emails # rubocop:disable Metrics/AbcSize
+  def create_emails
     return unless @name_changed
 
     @name_changed = false
@@ -355,7 +355,7 @@ class Naming < AbstractModel
   #     votes  = record[:votes]  # List of actual votes.
   #   end
   #
-  def calc_vote_table # rubocop:disable Metrics/AbcSize
+  def calc_vote_table
     # Initialize table.
     table = {}
     Vote.opinion_menu.each do |str, val|

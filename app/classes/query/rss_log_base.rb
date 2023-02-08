@@ -41,7 +41,7 @@ class Query::RssLogBase < Query::Base
              end
   end
 
-  def default_order
+  def self.default_order
     "updated_at"
   end
 end

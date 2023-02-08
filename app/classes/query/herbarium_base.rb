@@ -26,7 +26,7 @@ class Query::HerbariumBase < Query::Base
     super
   end
 
-  def default_order
+  def self.default_order
     "name"
   end
 end

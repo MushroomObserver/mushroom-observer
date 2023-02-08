@@ -384,8 +384,16 @@ class API2Test < UnitTestCase
     do_basic_get_test(Location)
   end
 
+  def test_basic_location_description_get
+    do_basic_get_test(LocationDescription, public: true)
+  end
+
   def test_basic_name_get
     do_basic_get_test(Name)
+  end
+
+  def test_basic_name_description_get
+    do_basic_get_test(NameDescription, public: true)
   end
 
   def test_basic_observation_get
@@ -408,8 +416,8 @@ class API2Test < UnitTestCase
     do_basic_get_test(User)
   end
 
-  def do_basic_get_test(model)
-    expected_object = model.first
+  def do_basic_get_test(model, *args)
+    expected_object = args.empty? ? model.first : model.where(*args).first
     api = API2.execute(
       method: :get,
       action: model.type_tag,

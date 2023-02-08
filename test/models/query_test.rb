@@ -2199,8 +2199,19 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_all
-    all = LocationDescription.all.to_a
-    assert_query(all, :LocationDescription, :all, by: :id)
+    gualala = locations(:gualala)
+    all_descs = LocationDescription.all.to_a
+    all_gualala_descs = LocationDescription.where(location: gualala).to_a
+    public_gualala_descs = LocationDescription.where(location: gualala,
+                                                     public: true).to_a
+    assert(all_gualala_descs.length < all_descs.length)
+    assert(public_gualala_descs.length < all_gualala_descs.length)
+
+    assert_query(all_descs, :LocationDescription, :all, by: :id)
+    assert_query(all_gualala_descs, :LocationDescription, :all,
+                 by: :id, locations: gualala)
+    assert_query(public_gualala_descs, :LocationDescription, :all,
+                 by: :id, locations: gualala, public: "yes")
   end
 
   def test_location_description_by_user
@@ -2607,8 +2618,17 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_all
-    all = NameDescription.all.to_a
-    assert_query(all, :NameDescription, :all, by: :id)
+    pelt = names(:peltigera)
+    all_descs = NameDescription.all.to_a
+    all_pelt_descs = NameDescription.where(name: pelt).to_a
+    public_pelt_descs = NameDescription.where(name: pelt, public: true).to_a
+    assert(all_pelt_descs.length < all_descs.length)
+    assert(public_pelt_descs.length < all_pelt_descs.length)
+
+    assert_query(all_descs, :NameDescription, :all, by: :id)
+    assert_query(all_pelt_descs, :NameDescription, :all, by: :id, names: pelt)
+    assert_query(public_pelt_descs, :NameDescription, :all,
+                 by: :id, names: pelt, public: "yes")
   end
 
   def test_name_description_by_user

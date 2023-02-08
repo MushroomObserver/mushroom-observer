@@ -85,7 +85,7 @@ module ObservationsHelper
                else
                  :show_namings_no_names_yet.t
                end)
-    heading_html = content_tag(:h4, heading, class: "table-title mb-0")
+    heading_html = content_tag(:h4, heading, class: "table-title my-0")
     user_heading_html = content_tag(:small, :show_namings_user.t)
     consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
     your_heading_html = content_tag(:small, :show_namings_your_vote.t)
@@ -150,7 +150,8 @@ module ObservationsHelper
   end
 
   def naming_proposer_html(naming)
-    user_link = user_link(naming.user, naming.user.login)
+    user_link = user_link(naming.user, naming.user.login,
+                          { class: "btn btn-link px-0" })
 
     # row props have mobile-friendly labels
     [content_tag(:small, "#{:show_namings_user.t}: ",
