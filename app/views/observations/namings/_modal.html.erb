@@ -15,7 +15,8 @@
       </div>
       <div class="modal-body" id="modal_propose_naming_body">
         <%= render(partial: 'observations/namings/form',
-                   locals: { action: :create, show_reasons: true }) %>
+                   locals: { action: :create, show_reasons: true,
+                             local: false }) %>
       </div>
     </div>
   </div>
