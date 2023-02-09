@@ -13,7 +13,7 @@ function VoteByAjaxModule(translations) {
     };
 
     var attach_bindings = function () {
-      change_vote_selects().change(function (event) {
+      change_vote_selects().on("change", function (event) {
         var _this = $(this);
         var value = _this.val();
         var naming_id = _this.data("id");

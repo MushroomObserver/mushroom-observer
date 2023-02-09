@@ -9,8 +9,6 @@
   ]
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
-  url = observation_namings_path(observation_id: @observation.id,
-        approved_name: @params.what, q: get_query_param)
 %>
 
 <div class="row">
@@ -21,8 +19,8 @@
     </div>
 
     <div class="mt-3">
-      <%= render(partial: "form",
-                 locals: { action: :create, url: url, show_reasons: true }) %>
+      <%= render(partial: "observations/namings/form",
+                 locals: { action: :create, show_reasons: true }) %>
     </div>
   </div><!--.col-->
 
