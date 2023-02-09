@@ -110,7 +110,7 @@ module Observations
         save_changes
         # send back a refreshed namings partial with the new naming
         render(partial: "observations/namings/table",
-               locals: { observation: @params.observation })
+               locals: { observation: @params.observation }, layout: false)
       else
         # Handle error response (incl naming reasons!) and re-render form
       end
