@@ -33,6 +33,17 @@ module ObservationsHelper
     end
   end
 
+  # gathers the user's @votes indexed by naming
+  def gather_users_votes(obs, user = nil)
+    return [] unless user
+
+    obs.namings.each_with_object({}) do |naming, votes|
+      votes[naming.id] =
+        naming.votes.find { |vote| vote.user_id == user.id } ||
+        Vote.new(value: 0)
+    end
+  end
+
   private
 
   # name portion of Observation title

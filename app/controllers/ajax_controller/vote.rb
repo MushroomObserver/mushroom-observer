@@ -28,7 +28,7 @@ module AjaxController::Vote
 
     @naming.change_vote(value, @user)
     @observation = @naming.observation
-    @votes = gather_users_votes(@observation, @user)
+    # FIXME: delete @votes = gather_users_votes(@observation, @user)
     render(partial: "observations/namings/votes/ajax_response")
   end
 
