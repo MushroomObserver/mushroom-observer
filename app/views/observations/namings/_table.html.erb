@@ -4,6 +4,7 @@
 logged_in = @user&.verified
 namings = observation.namings.sort_by(&:created_at)
 header = observation_naming_header_row(observation, logged_in)
+votes = gather_users_votes(observation, @user)
 %>
 
 <div class="namings-table">
@@ -21,7 +22,7 @@ header = observation_naming_header_row(observation, logged_in)
     <% namings.each do |naming| %>
       <%= render(partial: "observations/namings/row",
                   locals: { naming: naming, observation: observation,
-                            logged_in: logged_in }) %>
+                            votes: votes, logged_in: logged_in }) %>
     <% end # each naming %>
   </div>
 </div>

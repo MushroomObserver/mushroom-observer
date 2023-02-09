@@ -1868,15 +1868,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Bad place for this, but need proper refactor to have a good place.
-  def gather_users_votes(obs, user)
-    obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
-    end
-  end
-
   def load_for_show_observation_or_goto_index(id)
     Observation.includes(
       :collection_numbers,
