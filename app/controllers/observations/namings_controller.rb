@@ -14,12 +14,13 @@ module Observations
         load_for_show_observation_or_goto_index(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
+
       respond_to do |format|
         format.html
-        format.json {
+        format.json do
           render(partial: "observations/namings/form",
-                 locals: { action: :create, url: url, show_reasons: true })
-        }
+                 locals: { action: :create, show_reasons: true })
+        end
       end
     end
 
@@ -31,7 +32,10 @@ module Observations
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
-      create_post
+      respond_to do |format|
+        format.html { create_post }
+        format.json { create_ajax }
+      end
     end
 
     def edit
@@ -87,6 +91,17 @@ module Observations
         flash_object_errors(@params.naming) if @params.name_missing?
         @params.add_reasons(param_lookup([:naming, :reasons]))
         render(action: :new) and return
+      end
+    end
+
+    def create_ajax
+      if rough_draft && can_save?
+        save_changes
+        # send back a refreshed namings partial with the new naming
+        render(partial: "observations/namings/table",
+               locals: { observation: @params.observation })
+      else
+        # Handle error response (incl naming reasons!) and re-render form
       end
     end
 

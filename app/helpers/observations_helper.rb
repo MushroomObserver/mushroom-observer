@@ -115,7 +115,11 @@ module ObservationsHelper
                                new_observation_naming_path(
                                  observation_id: observation.id
                                ),
-                               { class: "btn btn-default" })
+                               { class: "btn btn-default",
+                                 id: "propose_naming_button",
+                                 data: { toggle: "modal",
+                                         target: "#modal_propose_naming",
+                                         obs: observation.id.to_s } })
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
