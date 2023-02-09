@@ -22,7 +22,7 @@ $('#modal_propose_naming').on('show.bs.modal', function (event) {
 
   jQuery.ajax(url, {
     type: 'GET',
-    contentType: "text/javascript",
+    dataType: 'json',
     complete: function (request) {
       if (request.status != 200) {
         modal.find('.modal-body').html(request.responseText);

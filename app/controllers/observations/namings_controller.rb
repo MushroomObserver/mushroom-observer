@@ -15,13 +15,14 @@ module Observations
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
 
+      @observation = @params.observation
+      @reasons = @params.reasons
+
       respond_to do |format|
         format.html
-        format.json do
-          render(inline: "<p>Fruity!</p>")
-          # render(partial: "observations/namings/form",
-          #        locals: { action: :create, show_reasons: true })
-        end
+        format.js {
+          render(layout: false)
+        }
       end
     end
 
@@ -32,6 +33,9 @@ module Observations
         load_for_show_observation_or_goto_index(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
+
+      @observation = @params.observation
+      @reasons = @params.reasons
 
       respond_to do |format|
         format.html { create_post }
@@ -51,6 +55,9 @@ module Observations
 
       @params.vote = naming.owners_vote
       @params.edit_init
+
+      @observation = @params.observation
+      @reasons = @params.reasons
     end
 
     def update
@@ -64,6 +71,9 @@ module Observations
       end
 
       @params.vote = naming.owners_vote
+
+      @observation = @params.observation
+      @reasons = @params.reasons
       edit_post
     end
 

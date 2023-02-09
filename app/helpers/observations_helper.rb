@@ -124,7 +124,7 @@ module ObservationsHelper
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
-                           class: "btn btn-default" })
+                           class: "btn btn-default mt-2" })
     end
     buttons.safe_join(tag.br)
   end
