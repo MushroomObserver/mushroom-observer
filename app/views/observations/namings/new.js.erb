@@ -1,6 +1,12 @@
 $('body').append('<%= j render(partial: "observations/namings/modal") %>');
 $('#modal_propose_naming').modal('show');
 
+$('#modal_propose_naming').on('shown.bs.modal', function() {
+  $('#naming_name').focus()
+  console.log("should be completing");
+  new MOAutocompleter({ input_id: "naming_name" });
+});
+
 $('#modal_propose_naming').on('hidden.bs.modal', function () {
   $(this).remove();
 });

@@ -6,7 +6,7 @@ namings = observation.namings.sort_by(&:created_at)
 header = observation_naming_header_row(observation, logged_in)
 %>
 
-<div class="namings-table">
+<div class="namings-table" id="namings_table">
   <div class="container-fluid">
     <header class="row">
       <div class="col col-xs-12 col-sm-3"><%= header[:heading] %></div>

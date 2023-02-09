@@ -17,7 +17,8 @@ end
 
 %>
 
-<%= form_with(model: @naming, url: url, method: method, local: local) do |f| %>
+<%= form_with(model: @naming, url: url, method: method, local: local,
+              id: "naming_form") do |f| %>
 
   <%= f.submit(button_name, class: "btn btn-default center-block mt-5") %>
 
