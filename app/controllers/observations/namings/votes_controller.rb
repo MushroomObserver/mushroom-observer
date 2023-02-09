@@ -33,7 +33,11 @@ module Observations::Namings
       pass_query_params
       naming = Naming.find(params[:naming_id].to_s)
       observation = naming.observation
-      observation.change_vote(naming, param_lookup([:vote, :value]))
+      value_str = param_lookup([:vote, :value])
+      value = Vote.validate_value(value_str)
+      raise("Bad value.") unless value
+
+      observation.change_vote(naming, value)
       redirect_with_query(observation_path(id: observation.id))
     end
 
