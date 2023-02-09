@@ -60,7 +60,7 @@ eyes = content_tag(:div,
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->
-<%= render(partial: "observations/namings/votes/modal_ajax_progress",
+<%= render(partial: "shared/modal_ajax_progress",
            locals: { naming: @naming }) %>
 
 <% # initializes module with translations for js messages
