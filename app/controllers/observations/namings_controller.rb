@@ -18,8 +18,9 @@ module Observations
       respond_to do |format|
         format.html
         format.json do
-          render(partial: "observations/namings/form",
-                 locals: { action: :create, show_reasons: true })
+          render(inline: "<p>Fruity!</p>")
+          # render(partial: "observations/namings/form",
+          #        locals: { action: :create, show_reasons: true })
         end
       end
     end

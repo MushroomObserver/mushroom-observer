@@ -109,6 +109,7 @@ module ObservationsHelper
     }
   end
 
+  # the "propose_naming_button" is turned into a modal trigger by JS
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
     buttons << link_with_query(:show_namings_propose_new_name.t,
