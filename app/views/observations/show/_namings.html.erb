@@ -63,6 +63,10 @@ eyes = content_tag(:div,
 <%= render(partial: "observations/namings/votes/modal_ajax_progress",
            locals: { naming: @naming }) %>
 
+<!--AJAX PROPOSE NAMING FORM-->
+<%= render(partial: "observations/namings/modal_form",
+           locals: { naming: @naming }) %>
+
 <% # initializes module with translations for js messages
 inject_javascript_at_end %(
   VoteByAjaxModule({
