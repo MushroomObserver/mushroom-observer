@@ -20,9 +20,9 @@ module Observations
 
       respond_to do |format|
         format.html
-        format.js {
+        format.js do
           render(layout: false)
-        }
+        end
       end
     end
 

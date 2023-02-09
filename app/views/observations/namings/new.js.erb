@@ -1,1 +1,6 @@
-$("#modal_propose_naming_body").html("<%= j render(partial: 'observations/namings/form', locals: { action: :create, show_reasons: true }) %>");
+$('body').append('<%= j render(partial: "observations/namings/modal") %>');
+$('#modal_propose_naming').modal('show');
+
+$('#modal_propose_naming').on('hidden.bs.modal', function () {
+  $(this).remove();
+});
