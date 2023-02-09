@@ -180,6 +180,7 @@ module ObservationsHelper
       content_tag(:button, h(percent),
                   class: "vote-percent btn btn-link",
                   data: { toggle: "modal",
+                          id: naming.id.to_s,
                           target: "#show_votes_#{naming.id}" })
     else
       link_with_query(h(percent),

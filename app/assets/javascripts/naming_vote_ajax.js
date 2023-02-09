@@ -33,26 +33,26 @@ function VoteByAjaxModule(translations) {
         }
 
         // bootstrap modal printed in layout already, just activate it
-        $('#naming_ajax_progress_caption').append(
+        $('#naming_ajax_progress_caption').empty().append(
           $("<span>").text(translations.show_namings_saving + "... "),
           $("<span class='spinner-right mx-2'></span>")
         );
         $("#naming_ajax_progress").modal('show');
 
         $.ajax("/ajax/vote/naming/" + naming_id, {
-          data: {value: value, authenticity_token: csrf_token()},
+          data: { value: value, authenticity_token: csrf_token() },
           dataType: "text",
           async: true,
           complete: function (request) {
             _haveVotesChanged = false;
-            $('#naming_ajax_progress').modal('hide');
             $('#naming_ajax_progress_caption').empty();
+            $('#naming_ajax_progress').modal('hide');
             if (request.status == 200) {
-              var html     = $(request.responseText);
-              var title    = html.children().eq(0);
-              var div      = html.children().eq(1).html();
-              var percent  = html.children().eq(2).html();
-              var num_vot  = html.children().eq(3).html();
+              var html = $(request.responseText);
+              var title = html.children().eq(0);
+              var div = html.children().eq(1).html();
+              var percent = html.children().eq(2).html();
+              var num_vot = html.children().eq(3).html();
               // update the obs title, votes table, votes and percentage
               document.title = title.attr("title");
               $("#title").html(title.html());
@@ -65,8 +65,8 @@ function VoteByAjaxModule(translations) {
               save_vote_buttons().hide();
             } else {
               change_vote_selects().each(function () {
-               _this.val(_this.data("old_value"))
-                       .attr("disabled", null);
+                _this.val(_this.data("old_value"))
+                  .attr("disabled", null);
               });
               alert(request.responseText);
             }
