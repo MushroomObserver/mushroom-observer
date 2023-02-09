@@ -1,0 +1,15 @@
+// What to do on ajax create
+
+$(document).ready(function() {
+  // Are we on show_obs, or obs_needing_ids?
+  const observation_namings = $("#observation_namings")
+  const namings_table = $("#namings_table");
+
+  if (observation_namings.length()) {
+    // FIXME: harmonize this with votes/ajax_response
+    // reset title of obs if necessary
+    observation_namings.prepend('<%= j render(partial: "observations/namings/table", locals: { observation: @params.observation }, layout: false) %>');
+  } else {
+    // send a success message for the lightbox
+  }
+});

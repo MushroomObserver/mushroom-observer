@@ -6,7 +6,6 @@ $('#modal_propose_naming').on('hidden.bs.modal', function () {
 
 // attach all the bindings on shown
 $('#modal_propose_naming').on('shown.bs.modal', function() {
-  // new MOAutocompleter({ input_id: "naming_name" });
   const naming_input = $("#naming_name");
   const naming_form = $("#naming_form");
   const namings_table = $("#namings_table");
@@ -22,9 +21,9 @@ $('#modal_propose_naming').on('shown.bs.modal', function() {
   $('#naming_name').focus();
 
   naming_form.on("ajax:success", (event) => {
-    const [_data, _status, xhr] = event.detail;
-    namings_table.remove();
-    observation_namings.prepend(xhr.responseText);
+    // const [_data, _status, xhr] = event.detail;
+    // namings_table.remove();
+    // observation_namings.prepend(xhr.responseText);
     this_modal.modal('hide');
   });
 
