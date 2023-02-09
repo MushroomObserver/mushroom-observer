@@ -189,7 +189,7 @@ module ObservationsHelper
 
     if can_do_ajax?
       content_tag(:button, h(percent),
-                  class: "vote-percent btn btn-link",
+                  class: "vote-percent btn btn-link px-0",
                   data: { toggle: "modal",
                           id: naming.id.to_s,
                           target: "#show_votes_#{naming.id}" })
