@@ -110,18 +110,10 @@ module ObservationsHelper
   end
 
   # the "propose_naming_button" is turned into a modal trigger by JS
-  # removing the q param from the link 2023-02-08
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
-    buttons << link_to(:show_namings_propose_new_name.t,
-                       new_observation_naming_path(
-                         observation_id: observation.id,
-                         q: get_query_param
-                       ),
-                       { remote: true,
-                         class: "btn btn-default propose-naming-button",
-                         id: "propose_naming_button",
-                         data: { obs: observation.id.to_s } })
+    buttons << render(partial: "observations/namings/propose_button",
+                      locals: { observation: observation }, layout: false)
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
