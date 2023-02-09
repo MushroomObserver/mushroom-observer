@@ -65,7 +65,7 @@ eyes = content_tag(:div,
 
 <!--AJAX PROPOSE NAMING FORM-->
 <%= render(partial: "observations/namings/modal_form",
-           locals: { naming: @naming }) %>
+           locals: { observation: @observation }) %>
 
 <% # initializes module with translations for js messages
 inject_javascript_at_end %(
