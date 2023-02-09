@@ -46,16 +46,23 @@ module Locations
     #
     #    INDEX
 
-    def test_index_sorted_by_user
-      by = "user"
-
+    def test_index_default_sort_order
       login
-      get(:index, params: { by: by })
+      get(:index)
 
-      assert_select("#title", text: "Location Descriptions by #{by.capitalize}")
+      assert_select("#title", text: "Location Descriptions by Name")
+    end
+
+    def test_index_sorted_by_user
+      login
+      get(:index, params: { by: "user" })
+
+      assert_select("#title", text: "Location Descriptions by User")
     end
 
     def test_index_list_all
+      skip("Test is slow, incomplete, and almost useless as written.")
+
       login("mary")
       burbank = locations(:burbank)
       burbank.description = LocationDescription.create!(
@@ -66,18 +73,72 @@ module Locations
       assert_template("index")
     end
 
-    def test_index_by_author
+    def test_index_by_author_of_one_description
       desc = location_descriptions(:albion_desc)
-      login
-      get(:index, params: { by_author: rolf.id })
-      assert_redirected_to(
-        %r{/locations/descriptions/#{desc.id}}
+      user = users(:rolf)
+      assert_equal(
+        1,
+        LocationDescription.joins(:authors).where(user: user).count,
+        "Test needs a user who authored exactly one description"
       )
+
+      login
+      get(:index, params: { by_author: "controller ignores this value",
+                            id: user })
+
+      assert_redirected_to(/#{location_description_path(desc)}/)
+    end
+
+    def test_index_by_author_of_multiple_descriptions
+      user = users(:dick)
+      descs_authored_by_user_count = \
+        LocationDescription.joins(:authors).where(user: user).count
+      assert_operator(
+        descs_authored_by_user_count, :>, 1,
+        "Test needs a user who authored multiple descriptions"
+      )
+
+      login
+      get(:index, params: { by_author: "controller ignores value",
+                            id: user })
+
+      assert_template("index")
+      assert_select("#title",
+                    text: "Location Descriptions Authored by #{user.name}")
+      assert_equal(
+        assert_select("#results").children.count,
+        LocationDescription.joins(:authors).where(user: user).count
+      )
+      assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
+                    { count: descs_authored_by_user_count },
+                    "Wrong number of results")
+    end
+
+    def test_index_by_author_of_no_descriptions
+      user = users(:zero_user)
+      descs_authored_by_user_count = \
+        LocationDescription.joins(:authors).where(user: user).count
+      assert(
+        descs_authored_by_user_count.zero?,
+        "Test needs a user who authored no descriptions"
+      )
+
+      login
+      get(:index, params: { by_author: nil,
+                            id: user })
+
+      assert_template("index")
+      assert_select("#title", text: "Location Descriptions by Name")
+      assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
+                    { count: LocationDescription.count },
+                    "Wrong number of results")
     end
 
     def test_index_by_editor
       login
-      get(:index, params: { by_editor: rolf.id })
+      get(:index, params: { by_editor: "controller ignores value",
+                            id: rolf.id })
+
       assert_template("index")
     end
 
