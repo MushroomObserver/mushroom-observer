@@ -4,4 +4,4 @@ var modal_body = $("#modal_propose_naming_body");
 
 // replace the form, should show
 $("#naming_form").remove();
-modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: :create, show_reasons: true, local: true }) %>')
+modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: :create, show_reasons: true, local: false }) %>')
