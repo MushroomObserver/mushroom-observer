@@ -813,9 +813,10 @@ class ApplicationController < ActionController::Base
 
   # For AJAX requests to regular controllers:
   # Put flash messages into the response headers
+  # Don't process requests through AjaxController, just regular controllers
   # https://stackoverflow.com/a/18678966/3357635
   def flash_to_headers
-    return unless request.xhr?
+    return unless request.xhr? && !request.path.starts_with?("/ajax")
 
     response.headers["X-Message"] = flash_message
     response.headers["X-Message-Type"] = flash_type.to_s
