@@ -25,7 +25,6 @@ $('#modal_propose_naming').on('shown.bs.modal', function() {
     // namings_table.remove();
     // observation_namings.prepend(xhr.responseText);
     // Don't hide it here, you or it will disappear when form has flash errors
-    this_modal.modal('hide');
   });
 
   naming_form.on("ajax:error", () => {

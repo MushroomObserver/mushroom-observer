@@ -1,21 +1,7 @@
 // What to do if create doesn't save
 
 var modal_body = $("#modal_propose_naming_body");
-var modal_flash = $('<div id="modal_flash"></div>');
-modal_body.prepend(modal_flash);
-
-var show_ajax_message = function(msg, type) {
-  modal_flash.html('<div class="flash_'+type+'">'+msg+'</div>');
-};
-
-$( document ).ajaxComplete(function(event, request) {
-  var msg = request.getResponseHeader('X-Message');
-  var type = request.getResponseHeader('X-Message-Type');
-  show_ajax_message(msg, type); //use whatever popup, notification or whatever plugin you want
-});
 
 // replace the form, should show
 $("#naming_form").remove();
 modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: :create, show_reasons: true, local: true }) %>')
-
-alert("FLASH");
