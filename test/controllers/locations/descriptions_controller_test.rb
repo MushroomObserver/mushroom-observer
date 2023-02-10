@@ -70,19 +70,6 @@ module Locations
       assert_select("#title", text: "Location Description Index")
     end
 
-    def test_index_list_all
-      skip("Test is slow, incomplete, and almost useless as written.")
-
-      login("mary")
-      burbank = locations(:burbank)
-      burbank.description = LocationDescription.create!(
-        location_id: burbank.id,
-        source_type: "public"
-      )
-      get(:index)
-      assert_template("index")
-    end
-
     def test_index_by_author_of_one_description
       desc = location_descriptions(:albion_desc)
       user = users(:rolf)
