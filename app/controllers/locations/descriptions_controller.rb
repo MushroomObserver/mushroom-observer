@@ -35,9 +35,13 @@ module Locations
     def list_all
       return list_query_results if %w[by id q].intersect?(params.keys)
 
-      sorted_by = params[:by].present? ? params[:by].to_s : :name
+      sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
       query = create_query(:LocationDescription, :all, by: sorted_by)
       show_selected_location_descriptions(query)
+    end
+
+    def default_sort_order
+      ::Query::LocationDescriptionBase.default_order
     end
 
     # Displays a list of selected locations, based on current Query.
