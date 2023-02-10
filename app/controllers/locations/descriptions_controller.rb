@@ -35,6 +35,8 @@ module Locations
 
     # Displays a list of all location_descriptions.
     def list_location_descriptions
+      return index_location_description if %w[by id q].intersect?(params.keys)
+
       sorted_by = params[:by].present? ? params[:by].to_s : :name
       query = create_query(:LocationDescription, :all, by: sorted_by)
       show_selected_location_descriptions(query)
