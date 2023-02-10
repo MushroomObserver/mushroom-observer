@@ -25,17 +25,15 @@ module Locations
     # Used by ApplicationController to dispatch #index to a private method
     @index_subaction_param_keys = [:by_author, :by_editor].freeze
 
-    ############################################################################
-
-    private # private methods used by #index
+    private # private methods used by #index  ##################################
 
     def default_index_subaction
-      list_location_descriptions
+      list_all
     end
 
     # Displays a list of all location_descriptions.
-    def list_location_descriptions
-      return index_location_description if %w[by id q].intersect?(params.keys)
+    def list_all
+      return list_query_results if %w[by id q].intersect?(params.keys)
 
       sorted_by = params[:by].present? ? params[:by].to_s : :name
       query = create_query(:LocationDescription, :all, by: sorted_by)
@@ -43,7 +41,7 @@ module Locations
     end
 
     # Displays a list of selected locations, based on current Query.
-    def index_location_description
+    def list_query_results
       query = find_or_create_query(:LocationDescription, by: params[:by])
       show_selected_location_descriptions(query, id: params[:id].to_s,
                                                  always_index: true)
