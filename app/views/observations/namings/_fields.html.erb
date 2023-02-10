@@ -57,7 +57,7 @@ locals = {
           <%= f_v.label(:value, :form_naming_confidence.t + ":") %><br>
           <%= f_v.select(:value,
                          options_for_select(Vote.confidence_menu, vote&.value),
-                         { include_blank: (action == :create) } ,
+                         { include_blank: (action == :create) },
                          class: "form-control",
                          data: { autofocus: focus_on_vote }) %>
         </div>
@@ -66,21 +66,26 @@ locals = {
       <%= f_n.fields_for(:reasons) do |f_r| %>
         <% reasons.values.sort_by(&:order).each do |r| %>
           <div class="form-group form-inline m-0">
-            <label>
+            <%= f_r.label("#{r.num}_check",
+                          { data: {
+                              toggle: "collapse",
+                              target: "#reasons_#{r.num}_notes"
+                            },
+                            aria: {
+                              expanded: "false",
+                              controls: "reasons_#{r.num}_notes"
+                            } }) do %>
               <%= f_r.check_box(
                         :check,
                         { index: r.num,
                           checked: r.used?,
-                          data: {
-                            role: "collapser",
-                            target: "#naming_reasons_#{r.num}_notes"
-                          },
                           class: "" },
                         "1") %>
               <%= r.label.t %>
-            </label>
+            <% end  # label %>
           </div>
-          <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
+          <div class="form-group mb-3 <%= "collapse" if !r.used? %>"
+               id="reasons_<%= r.num %>_notes">
             <%= f_r.text_area(:notes,
                               index: r.num, rows: 3, value: r.notes,
                               class: "form-control") %>
@@ -95,21 +100,8 @@ locals = {
 <%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
 <% inject_javascript_at_end %(
   jQuery(document).ready(function() {
-    function collapse_reason() {
-      var this2 = jQuery(this);
-      var target = jQuery(this2.attr("data-target")).parent();
-      var old_state = target.hasClass("collapse");
-      var new_state = !this2.is(':checked');
-      if (old_state && !new_state) {
-        target.removeClass("collapse");
-      } else if (!old_state && new_state) {
-        target.addClass("collapse");
-      }
-    }
-    jQuery('[data-role="collapser"]').each(collapse_reason)
-                                     .change(collapse_reason);
-    jQuery('.collapse').on('shown.bs.collapse', function () {
-      $(this).focus();
+    jQuery(document).on('shown.bs.collapse', '.collapse', function () {
+      $(this).first('textarea').focus();
     });
   });
 ) %>
