@@ -20,6 +20,7 @@ $('#modal_propose_naming').on('shown.bs.modal', function() {
 
   $('#naming_name').focus();
 
+  // Success now handled in create.js.erb or flash.js.erb
   naming_form.on("ajax:success", (event) => {
     // const [_data, _status, xhr] = event.detail;
     // namings_table.remove();
@@ -27,8 +28,10 @@ $('#modal_propose_naming').on('shown.bs.modal', function() {
     // Don't hide it here, you or it will disappear when form has flash errors
   });
 
+  // Form errors are still ajax success, handled in flash.js.erb
+  // This is for an ajax error, should not happen.
   naming_form.on("ajax:error", () => {
-    naming_form.append($("<p>Error</p>"));
+    naming_form.append($("<h4>Error</h4>"));
   });
 });
 

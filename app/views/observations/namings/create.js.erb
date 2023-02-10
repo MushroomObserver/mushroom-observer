@@ -2,7 +2,6 @@
 
 var observation_namings = $("#observation_namings")
 $("#namings_table").remove();
-$("#modal_propose_naming").modal('hide');
 
 // Are we on show_obs, or obs_needing_ids?
 if (observation_namings.length) {
@@ -22,3 +21,6 @@ if (observation_namings.length) {
 } else {
   // send a success message for the lightbox
 }
+
+// Finally, remove the modal
+$("#modal_propose_naming").modal('hide');
