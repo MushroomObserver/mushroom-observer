@@ -44,6 +44,16 @@ module Names
       assert_template("names/descriptions/index")
     end
 
+    def test_index_with_id
+      desc = name_descriptions(:suillus_desc)
+
+      login
+      get(:index, params: { id: desc.id })
+
+      assert_template(:index)
+      assert_select("#title", text: "Name Description Index")
+    end
+
     def test_index_by_author_bad_user_id
       bad_user_id = 666
       assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
