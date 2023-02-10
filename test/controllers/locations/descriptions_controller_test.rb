@@ -60,6 +60,16 @@ module Locations
       assert_select("#title", text: "Location Descriptions by User")
     end
 
+    def test_index_with_id
+      desc = location_descriptions(:albion_desc)
+
+      login
+      get(:index, params: { id: desc.id })
+
+      assert_template(:index)
+      assert_select("#title", text: "Location Description Index")
+    end
+
     def test_index_list_all
       skip("Test is slow, incomplete, and almost useless as written.")
 
@@ -99,7 +109,7 @@ module Locations
       )
 
       login
-      get(:index, params: { by_author: "controller ignores value",
+      get(:index, params: { by_author: "controller ignores this value",
                             id: user })
 
       assert_template("index")
@@ -116,19 +126,13 @@ module Locations
 
     def test_index_by_author_of_no_descriptions
       user = users(:zero_user)
-      descs_authored_by_user_count = \
-        LocationDescription.joins(:authors).where(user: user).count
-      assert(
-        descs_authored_by_user_count.zero?,
-        "Test needs a user who authored no descriptions"
-      )
 
       login
       get(:index, params: { by_author: nil,
                             id: user })
 
       assert_template("index")
-      assert_select("#title", text: "Location Descriptions by Name")
+      assert_select("#title", text: "Location Description Index")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: LocationDescription.count },
                     "Wrong number of results")
