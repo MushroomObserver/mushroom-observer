@@ -108,9 +108,12 @@ module Observations
     def create_ajax
       if rough_draft && can_save?
         save_changes
-        # send back a refreshed namings partial with the new naming
+        # create.js sends back a refreshed namings partial with the new naming
       else
-        # Handle error response (incl naming reasons!) and re-render form
+        # flash.js handles error response and re-renders form
+        flash_object_errors(@params.naming) if @params.name_missing?
+        @params.add_reasons(param_lookup([:naming, :reasons]))
+        render("flash") and return
       end
     end
 
