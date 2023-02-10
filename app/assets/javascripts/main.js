@@ -73,21 +73,4 @@ jQuery(document).ready(function () {
     // must pass the button itself as second param
     jQuery(modal_target_id).modal("toggle", button);
   });
-
-
-  var show_ajax_message = function (msg, type) {
-    if ($("#modal_flash").length) {
-      var container = $("#modal_flash");
-    } else {
-      var container = $("#flash_notices");
-    }
-    container.html('<div class="flash_' + type + '">' + msg + '</div>');
-  };
-
-  $(document).ajaxComplete(function (event, request) {
-    var msg = request.getResponseHeader('X-Message');
-    var type = request.getResponseHeader('X-Message-Type');
-    show_ajax_message(msg, type); //use whatever popup, notification or whatever plugin you want
-  });
-
 });

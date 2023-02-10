@@ -113,7 +113,7 @@ module Observations
         # flash.js handles error response and re-renders form
         flash_object_errors(@params.naming) if @params.name_missing?
         @params.add_reasons(param_lookup([:naming, :reasons]))
-        render("flash") and return
+        render("form_reload") and return
       end
     end
 
