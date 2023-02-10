@@ -27,16 +27,15 @@ module Names
     def test_index_default_sort_order
       login
       get(:index)
-      assert_template("names/descriptions/index")
+
+      assert_select("#title", text: "Name Descriptions by Name")
     end
 
     def test_index_sorted_by_user
-      by = "user"
-
       login
-      get(:index, params: { by: by })
+      get(:index, params: { by: "user" })
 
-      assert_select("#title", text: "Name Descriptions by #{by.capitalize}")
+      assert_select("#title", text: "Name Descriptions by User")
     end
 
     def test_index_by_author
