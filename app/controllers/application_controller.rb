@@ -115,6 +115,10 @@ class ApplicationController < ActionController::Base
   # before_action :extra_gc
   # after_action  :extra_gc
 
+  # This only fires if request is AJAX. Encodes flash messages in response
+  # headers and discards them immediately, since page is not refreshed
+  after_action :flash_to_headers
+
   # Make show_name_helper available to nested partials
   helper :show_name
 
@@ -807,6 +811,32 @@ class ApplicationController < ActionController::Base
     result
   end
 
+  # For AJAX requests to regular controllers:
+  # Put flash messages into the response headers
+  # https://stackoverflow.com/a/18678966/3357635
+  def flash_to_headers
+    return unless request.xhr?
+
+    response.headers["X-Message"] = flash_message
+    response.headers["X-Message-Type"] = flash_type.to_s
+
+    flash.discard # don't want the flash to appear when you reload page
+  end
+
+  private
+
+  def flash_message
+    [:error, :warning, :notice].each do |type|
+      return flash[type] if flash[type].present?
+    end
+  end
+
+  def flash_type
+    [:error, :warning, :notice].each do |type|
+      return type if flash[type].present?
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Name validation
@@ -1119,8 +1149,6 @@ class ApplicationController < ActionController::Base
     flash_error(:advanced_search_bad_q_error.t)
     redirect_to(search_advanced_path)
   end
-
-  private ##########
 
   def map_past_bys(args)
     args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
