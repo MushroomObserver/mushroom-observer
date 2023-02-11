@@ -86,8 +86,16 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(Location)
   end
 
+  def test_basic_location_description_get_request
+    do_basic_get_request_for_model(LocationDescription, public: true)
+  end
+
   def test_basic_name_get_request
     do_basic_get_request_for_model(Name)
+  end
+
+  def test_basic_name_description_get_request
+    do_basic_get_request_for_model(NameDescription, public: true)
   end
 
   def test_basic_observation_get_request
@@ -110,13 +118,14 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(User)
   end
 
-  def do_basic_get_request_for_model(model)
+  def do_basic_get_request_for_model(model, *args)
+    expected_object = args.empty? ? model.first : model.where(*args).first
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
       response_formats.each do |format|
         get(model.table_name.to_sym, params: { detail: detail, format: format })
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
-        assert_objs_equal(model.first, @api.results.first)
+        assert_objs_equal(expected_object, @api.results.first)
       end
     end
   end
