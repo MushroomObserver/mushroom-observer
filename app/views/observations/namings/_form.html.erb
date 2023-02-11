@@ -1,7 +1,20 @@
 <%
 # Fields must be separate because they're included in the obs form too.
-button_name = (action == :create) ? :CREATE.l : :SAVE_EDITS.l
-method = (action == :create) ? :post : :patch
+case action
+when :create
+  button_name = :CREATE.l
+  method = :post
+  url = observation_namings_path(observation_id: @observation.id,
+                                  approved_name: @params.what,
+                                  q: get_query_param)
+else
+  button_name = :SAVE_EDITS.l
+  method = :patch
+  url = naming_path(id: @params.naming.id,
+                    approved_name: @params.what,
+                    q: get_query_param)
+end
+
 %>
 
 <%= form_with(model: @naming, url: url, method: method) do |f| %>

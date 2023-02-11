@@ -1098,7 +1098,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model = nil, update = !browser.bot?)
+  def find_query(model = nil, update: !browser.bot?)
     model = model.to_s if model
     q = dealphabetize_q_param
 
@@ -1136,7 +1136,7 @@ class ApplicationController < ActionController::Base
   # a new query based on the existing one but with modified arguments.
   # If it does not exist, resturn default query.
   def existing_updated_or_default_query(model, args)
-    result = find_query(model, false)
+    result = find_query(model, update: false)
     if result
       # If existing query needs updates, we need to create a new query,
       # otherwise the modifications won't persist.
@@ -1865,15 +1865,6 @@ class ApplicationController < ActionController::Base
     request.format = "xml"
     respond_to do |format|
       format.xml { render(args) }
-    end
-  end
-
-  # Bad place for this, but need proper refactor to have a good place.
-  def gather_users_votes(obs, user)
-    obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
     end
   end
 
