@@ -80,6 +80,7 @@ module Name::Validation
   end
 
   def check_user
-    errors.add(:user, :validate_name_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_name_user_missing.t) \
+      if !user_id && !User.current
   end
 end
