@@ -16,7 +16,6 @@
 //= require suggestions
 //= require thumbnail_map
 //= require naming_vote_ajax
-//= require naming_propose_ajax
 //= require pivotal
 //= require lightbox
 //= require image_exif_modal_ajax
