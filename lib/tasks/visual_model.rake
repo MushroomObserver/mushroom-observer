@@ -88,10 +88,15 @@ def add_image(model, id, name)
     visual_groups: { visual_model_id: model.id }
   )
   if vgi.nil?
+    Rails.logger.info { "Adding image #{id} to #{name}" }
     VisualGroupImage.create(visual_group: group,
                             image_id: id,
                             included: true)
   else
+    old_name = vgi.visual_group.name
+    Rails.logger.info do
+      "Moving image #{id} from #{old_name} to #{name}"
+    end
     vgi.visual_group = group
     vgi.included = true
     vgi.save
