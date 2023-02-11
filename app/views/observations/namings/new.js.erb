@@ -6,11 +6,11 @@ $('#modal_propose_naming').on('hidden.bs.modal', function () {
 
 // attach all the bindings on shown
 $('#modal_propose_naming').on('shown.bs.modal', function() {
-  const naming_input = $("#naming_name");
-  const naming_form = $("#naming_form");
-  const namings_table = $("#namings_table");
-  const observation_namings = $("#observation_namings");
-  const this_modal = $(this);
+  var naming_input = $("#naming_name");
+  var naming_form = $("#naming_form");
+  var namings_table = $("#namings_table");
+  var observation_namings = $("#observation_namings");
+  var this_modal = $(this);
 
   new MOAutocompleter(jQuery.extend({
     input_elem: naming_input,
@@ -18,7 +18,7 @@ $('#modal_propose_naming').on('shown.bs.modal', function() {
     collapse: 1
   }));
 
-  $('#naming_name').focus();
+  naming_input.focus();
 
   // Success now handled in create.js.erb or flash.js.erb
   naming_form.on("ajax:success", (event) => {

@@ -9,3 +9,14 @@ $("#modal_flash").html("<%= j render(partial: 'layouts/app/flash_notices') if fl
 // replace the form, should show
 $("#naming_form").remove();
 modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: :create, show_reasons: true, local: false }) %>')
+
+// re-bind autocomplete to naming_input
+var naming_input = $("#naming_name");
+
+new MOAutocompleter(jQuery.extend({
+  input_elem: naming_input,
+  ajax_url: "/ajax/auto_complete/name/@",
+  collapse: 1
+}));
+
+naming_input.focus();
