@@ -1375,6 +1375,7 @@
   create_name_duplicate_identifier: is used by another Name
 
   # naming/create
+  create_naming: Propose a Name
   create_naming_title: "Propose Name for Observation #[id]"
   create_new_naming_warn: Sorry, someone else has given this a positive vote, so we had to create a new Naming to accomodate your changes."
 
@@ -1420,7 +1421,7 @@
   propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
   propagate_lifeform_apply: Apply
 
-  # observer/edit_naming
+  # observations/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
 
   # observations/edit
@@ -1530,7 +1531,7 @@
   name_error_field_start: "[field] must not start with '[start]'."
   name_error_field_end: "[field] must not end with '[end]'."
 
-  # observer/_form_naming
+  # observations/_form_naming
   form_naming_confidence: Confidence
   form_naming_valid_synonyms: Valid synonyms are
   form_naming_deprecated: The name '[name]' is deprecated.
@@ -1544,7 +1545,7 @@
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
-  # observer/_form_observations
+  # observations/_form_observations
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
@@ -1583,7 +1584,7 @@
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
 
-  # observer/_form_species_list
+  # observations/_form_species_list
   form_species_lists_title: Title
   form_species_lists_species_to_add: Select Species to Add
   form_species_lists_write_in_species: "Write-In Species: (enter a name on each line)"
@@ -1596,7 +1597,7 @@
   form_species_lists_multiple_names_help: In each case, select the intended name.  The number after each name is how many observations are currently using that name.
   form_species_lists_project_help: Check any projects you wish to attach this species list to.  Any observations you create for this species list will also automatically be attached to these projects, too.  (But not pre-existing observations.)
 
-  # observer/_form_synonyms
+  # observations/_form_synonyms
   form_synonyms_names: Names
   form_synonyms_names_help: List the names you want to be synonymized with [name].
   form_synonyms_current_synonyms: Current Synonyms
@@ -1666,7 +1667,7 @@
   image_show_make_default: Make this the default size
   image_show_transform_note: Image is being processed. This may take several seconds.
 
-  # observation/list_observations
+  # observations/list_observations
   list_observations_location_all: All Locations
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
@@ -1677,7 +1678,7 @@
   list_observations_add_to_list: Add To / Remove From Species List
   list_observations_download_as_csv: Download Observations
 
-  # location/list_place_names (list_locations)
+  # locations/list_place_names (list_locations)
   list_place_names_known: Known Locations
   list_place_names_known_order: "(by name)"
   list_place_names_map: Map Locations
@@ -1687,7 +1688,7 @@
   list_place_names_undef: Undefined Locations
   list_place_names_undef_order: "(by frequency)"
 
-  # location/list_countries
+  # locations/list_countries
   list_countries: Country List
   list_countries_known: Countries With Observations
   list_countries_title: Countries and Other Localities
@@ -2094,7 +2095,7 @@
   inherit_classification_parent_lower_rank: Parent must be higher rank than [rank].
   show_name_num_notifications: "*Number of users interested in this name:* [num]"
 
-  # observer/_show_namings
+  # observations/_show_namings
   show_namings_proposed_name: "[:NAMING]"
   show_namings_proposed_names: "[:NAMINGS]"
   show_namings_no_names_yet: No names have been proposed yet.
@@ -2114,7 +2115,7 @@
   show_namings_please_login: Please login to propose your own names and vote on existing names.
   show_namings_saving: Saving
 
-  # observer/show_observation
+  # observations/show_observation
   show_observation_title: "[:OBSERVATION]: [name]"
   show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
@@ -2156,7 +2157,7 @@
   show_observation_related_taxa: Related taxa
   map_observation_title: "Map of Observation #[ID]"
 
-  # observer/suggestions
+  # observations/suggestions
   suggestions_title: Confident Suggestions
   suggestions_title_others: Wild Guesses
   suggestions_already_proposed: already proposed
@@ -2173,12 +2174,12 @@
   suggestions_processing_results: Processing results
   suggestions_error: Something went wrong, sorry!
 
-  # location/show_past_location
+  # locations/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
   show_past_location_other_versions: Other Versions
   show_past_location_no_version: No version specified
 
-  # location/show_past_location_description
+  # locations/show_past_location_description
   show_past_location_description_title: "[:VERSION] [num]: [name]"
 
   # names/versions/show
@@ -2196,7 +2197,7 @@
   # info/site_stats
   show_site_stats_title: Site Statistics
 
-  # observer/_show_votes
+  # observations/_show_votes
   show_votes_title: Show Votes for [name]
   show_votes_users: "[:Users]"
   show_votes_vote: "[:Vote]"
