@@ -83,7 +83,7 @@ module ThumbnailHelper
 
   def caption_image_links(image_id)
     orig_url = Image.url(:original, image_id)
-    original_image_link(orig_url) + " | " + image_exif_link(image_id)
+    "#{original_image_link(orig_url)} | #{image_exif_link(image_id)}"
   end
 
   def caption_propose_naming_link(obs_data)
