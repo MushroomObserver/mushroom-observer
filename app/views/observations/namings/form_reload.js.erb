@@ -2,9 +2,9 @@
 
 var modal_body = $("#modal_propose_naming_body");
 
-// maybe we actually just want the notices, flash_get_notices
-// FIXME: Template adds another #flash_notices div
-$("#modal_flash").html("<%= j render(partial: 'layouts/app/flash_notices') if flash_notices? %>");
+// replace the flash notices in the modal
+$("#modal_flash").remove();
+modal_body.prepend("<%= j render(partial: 'layouts/app/flash_notices', locals: { id: 'modal_flash' }) if flash_notices? %>");
 
 // replace the form, should show
 $("#naming_form").remove();
