@@ -37,10 +37,7 @@ module Observations
       @observation = @params.observation
       @reasons = @params.reasons
 
-      respond_to do |format|
-        format.html { create_post }
-        format.js { create_ajax }
-      end
+      create_post
     end
 
     def edit
@@ -97,23 +94,17 @@ module Observations
     def create_post
       if rough_draft && can_save?
         save_changes
-        default_redirect(@params.observation, :show)
+        respond_to do |format|
+          format.html { default_redirect(@params.observation, :show) }
+          format.js
+        end
       else # If anything failed reload the form.
         flash_object_errors(@params.naming) if @params.name_missing?
         @params.add_reasons(param_lookup([:naming, :reasons]))
-        render(action: :new) and return
-      end
-    end
-
-    def create_ajax
-      if rough_draft && can_save?
-        save_changes
-        # create.js sends back a refreshed namings partial with the new naming
-      else
-        # flash.js handles error response and re-renders form
-        flash_object_errors(@params.naming) if @params.name_missing?
-        @params.add_reasons(param_lookup([:naming, :reasons]))
-        render("form_reload") and return
+        respond_to do |format|
+          format.html { render(action: :new) and return }
+          format.js { render("form_reload") and return }
+        end
       end
     end
 
