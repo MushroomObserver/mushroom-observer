@@ -120,17 +120,15 @@ module ObservationsHelper
     }
   end
 
+  # the "propose_naming_button" is turned into a modal trigger by JS
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
-    buttons << link_with_query(:show_namings_propose_new_name.t,
-                               new_observation_naming_path(
-                                 observation_id: observation.id
-                               ),
-                               { class: "btn btn-default" })
+    buttons << render(partial: "observations/namings/propose_button",
+                      locals: { observation: observation }, layout: false)
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
-                           class: "btn btn-default" })
+                           class: "btn btn-default mt-2" })
     end
     buttons.safe_join(tag.br)
   end
