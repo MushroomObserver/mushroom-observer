@@ -184,6 +184,7 @@ module ObservationsHelper
      content_tag(:span, consensus_votes)].safe_join
   end
 
+  # Makes a link to naming_vote_path for no-js
   def pct_html(naming)
     percent = naming.vote_percent.round.to_s + "%"
 
