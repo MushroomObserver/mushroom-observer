@@ -69,15 +69,13 @@ module Names::Synonyms
 
     def init_params_for_new
       # These parameters aren't always provided.
-      params[:proposed]    ||= {}
-      params[:comment]     ||= {}
       params[:chosen_name] ||= {}
       params[:is]          ||= {}
     end
 
     def init_ivars_for_new
-      @what             = params[:proposed][:name].to_s.strip_squeeze
-      @comment          = params[:comment][:comment].to_s.strip_squeeze
+      @what             = params[:proposed_name].to_s.strip_squeeze
+      @comment          = params[:comment_comment].to_s.strip_squeeze
       @list_members     = nil
       @new_names        = []
       @synonym_name_ids = []
