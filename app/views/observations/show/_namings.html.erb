@@ -31,15 +31,6 @@ eyes = content_tag(:div,
 
 </div><!--#observation_namings-->
 
-<!--VOTE POPUPS-->
-<% # this query needs to be in modal
-namings_with_votes = observation.namings.select { |naming|
-                        naming.votes&.length&.positive? }
-namings_with_votes.each do |naming| %>
-  <%= render(partial: "observations/namings/votes/modal_community_votes",
-             locals: { naming: naming }) %>
-<% end %>
-
 <!--AJAX SAVING VOTE MESSAGE-->
 <%= render(partial: "shared/modal_ajax_progress") %>
 
