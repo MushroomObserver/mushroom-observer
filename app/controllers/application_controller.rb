@@ -115,6 +115,14 @@ class ApplicationController < ActionController::Base
   # before_action :extra_gc
   # after_action  :extra_gc
 
+  # This discards MO "flash" messages immediately after regular controller
+  # AJAX requests, since the browser page is not reloaded and they'd
+  # confusingly reappear on the next page load, otherwise.
+  # It's intended for ajax form submissions that may need to display messages
+  # after the call, when reloading a form for example.
+  # (It doesn't apply to the AjaxController methods, including autocomplete.)
+  after_action :flash_clear_after_ajax_call
+
   # Make show_name_helper available to nested partials
   helper :show_name
 
@@ -696,6 +704,10 @@ class ApplicationController < ActionController::Base
   #
   #  :section: Error handling
   #
+  #  NOTE: MO doesn't use built-in Rails `flash`, i.e. session[:flash].
+  #        We get and set our own session[:notice]. This means the Rails methods
+  #        `flash` and `flash_hash` don't return any of our messages.
+  #
   #  This is somewhat non-intuitive, so it's worth describing exactly what
   #  happens.  There are two fundamentally different cases:
   #
@@ -805,6 +817,15 @@ class ApplicationController < ActionController::Base
     result = obj.valid?
     flash_object_errors(obj) unless result
     result
+  end
+
+  # For AJAX requests to regular controllers:
+  # https://stackoverflow.com/a/18678966/3357635
+  def flash_clear_after_ajax_call
+    return unless !request.path.starts_with?("/ajax") && request.xhr?
+
+    # don't want the flash to appear when you reload page
+    flash_clear
   end
 
   ##############################################################################
@@ -1120,8 +1141,6 @@ class ApplicationController < ActionController::Base
     redirect_to(search_advanced_path)
   end
 
-  private ##########
-
   def map_past_bys(args)
     args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
   end
@@ -1204,8 +1223,6 @@ class ApplicationController < ActionController::Base
     params && params[:q] &&
       !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
-
-  public ##########
 
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
