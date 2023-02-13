@@ -39,29 +39,29 @@ function VoteByAjaxModule(translations) {
         );
         $("#naming_ajax_progress").modal('show');
 
-        $.ajax("/votes/" + naming_id, {
-          type: 'PATCH',
-          data: { vote: { value: value }, authenticity_token: csrf_token() },
-          dataType: "script",
-          async: true,
-          complete: function (request) {
-            _haveVotesChanged = false;
-            $('#naming_ajax_progress_caption').empty();
-            $('#naming_ajax_progress').modal('hide');
-            if (request.status == 200) {
-              attach_bindings();
-              if (typeof SuggestionModule !== "undefined")
-                attach_suggestion_bindings();
-              save_vote_buttons().hide();
-            } else {
-              change_vote_selects().each(function () {
-                _this.val(_this.data("old_value"))
-                  .attr("disabled", null);
-              });
-              alert(request.responseText);
-            }
-          }
-        });
+        // $.ajax("/votes/" + naming_id, {
+        //   type: 'PATCH',
+        //   data: { vote: { value: value }, authenticity_token: csrf_token() },
+        //   dataType: "script",
+        //   async: true,
+        //   complete: function (request) {
+        //     _haveVotesChanged = false;
+        //     $('#naming_ajax_progress_caption').empty();
+        //     $('#naming_ajax_progress').modal('hide');
+        //     if (request.status == 200) {
+        //       attach_bindings();
+        //       if (typeof SuggestionModule !== "undefined")
+        //         attach_suggestion_bindings();
+        //       save_vote_buttons().hide();
+        //     } else {
+        //       change_vote_selects().each(function () {
+        //         _this.val(_this.data("old_value"))
+        //           .attr("disabled", null);
+        //       });
+        //       alert(request.responseText);
+        //     }
+        //   }
+        // });
       });
 
       // Save initial value in case of error, when we'll need to revert.

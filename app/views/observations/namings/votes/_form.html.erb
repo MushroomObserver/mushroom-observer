@@ -13,7 +13,8 @@ end
               do |f| %>
   <%= f.select(:value, menu, {},
                { class: "form-control w-100",
-                 data: { role: "change_vote", id: naming.id } }) %>
+                 data: { role: "change_vote", id: naming.id },
+                 onchange: 'this.form.submit();' }) %>
   <%= f.submit(:show_namings_cast.l, class: "btn btn-default w-100",
                data: { role: "save_vote" }) %>
 <% end %>
