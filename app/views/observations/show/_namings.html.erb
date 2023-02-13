@@ -3,8 +3,6 @@ logged_in = @user&.verified
 do_suggestions = logged_in && observation.thumb_image_id.present? &&
                   (@user.admin ||
                    MO.image_model_beta_testers.include?(@user.id))
-namings_with_votes = observation.namings.select { |naming|
-                        naming.votes&.length&.positive? }
 buttons = observation_naming_buttons(observation, do_suggestions)
 help = logged_in ? :show_namings_consensus_help.t : :show_namings_please_login.t
 eye  = content_tag(:div,
@@ -34,10 +32,12 @@ eyes = content_tag(:div,
 </div><!--#observation_namings-->
 
 <!--VOTE POPUPS-->
-<% namings_with_votes.each do |naming|
-  @naming = naming %>
+<% # this query needs to be in modal
+namings_with_votes = observation.namings.select { |naming|
+                        naming.votes&.length&.positive? }
+namings_with_votes.each do |naming| %>
   <%= render(partial: "observations/namings/votes/modal_community_votes",
-             locals: { naming: @naming }) %>
+             locals: { naming: naming }) %>
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->
