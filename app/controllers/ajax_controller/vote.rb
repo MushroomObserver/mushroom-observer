@@ -10,26 +10,12 @@ module AjaxController::Vote
   def vote
     @user = session_user!
     case @type
-    when "naming"
-      cast_naming_vote(@id, @value)
     when "image"
       cast_image_vote(@id, @value)
     end
   end
 
   private
-
-  def cast_naming_vote(id, value_str)
-    @naming = Naming.includes(
-      observation: { namings: :votes }
-    ).find_by(id: id)
-    value = Vote.validate_value(value_str)
-    raise("Bad value.") unless value
-
-    @naming.change_vote(value, @user)
-    @observation = @naming.observation
-    render(partial: "observations/namings/votes/ajax_response")
-  end
 
   def cast_image_vote(id, value)
     image = Image.find(id)
