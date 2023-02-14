@@ -10,9 +10,9 @@ modal_body.prepend("<%= j render(partial: 'layouts/app/flash_notices', locals: {
 $("#naming_form").remove();
 modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: @action, show_reasons: true, local: false }) %>')
 
-// re-bind autocomplete to naming_input
+// re-bind autocomplete to naming_name from shared/form_name_autocomplete
 var naming_input = $("#naming_name");
 
-AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse('naming_name')
+AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse(naming_input)
 
 naming_input.focus();
