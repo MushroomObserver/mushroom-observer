@@ -1,4 +1,4 @@
-// What to do if create doesn't save
+// What to do if create or update doesn't save
 
 var modal_body = $("#modal_naming_body");
 
@@ -8,7 +8,7 @@ modal_body.prepend("<%= j render(partial: 'layouts/app/flash_notices', locals: {
 
 // replace the form, should show
 $("#naming_form").remove();
-modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: :create, show_reasons: true, local: false }) %>')
+modal_body.append('<%= j render(partial: "observations/namings/form", locals: { action: @action, show_reasons: true, local: false }) %>')
 
 // re-bind autocomplete to naming_input
 var naming_input = $("#naming_name");
