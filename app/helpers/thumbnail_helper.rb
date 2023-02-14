@@ -82,12 +82,14 @@ module ThumbnailHelper
   end
 
   # Disabled because interpolation produces unsafe html
-  # rubocop:disable Style/StringConcatenation
   def caption_image_links(image_id)
     orig_url = Image.url(:original, image_id)
-    original_image_link(orig_url) + " | " + image_exif_link(image_id)
+    links = []
+    links << original_image_link(orig_url)
+    links << " | "
+    links << image_exif_link(image_id)
+    safe_join(links)
   end
-  # rubocop:enable Style/StringConcatenation
 
   def caption_propose_naming_link(obs_data)
     link_to(
@@ -109,7 +111,7 @@ module ThumbnailHelper
 
   def image_exif_link(image_id)
     content_tag(:button, :image_show_exif.t,
-                { class: "btn btn-link lightbox_link",
+                { class: "btn btn-link px-0 lightbox_link",
                   data: {
                     toggle: "modal",
                     target: "#image_exif_modal",
