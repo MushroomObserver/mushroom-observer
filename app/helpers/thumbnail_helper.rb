@@ -82,7 +82,11 @@ module ThumbnailHelper
 
   def caption_image_links(image_id)
     orig_url = Image.url(:original, image_id)
-    original_image_link(orig_url) + " | " + image_exif_link(image_id)
+    links = []
+    links << original_image_link(orig_url)
+    links << " | "
+    links << image_exif_link(image_id)
+    safe_join(links)
   end
 
   def caption_propose_naming_link(id)
@@ -114,9 +118,13 @@ module ThumbnailHelper
   end
 
   def image_exif_link(image_id)
-    "<button type='button' class='btn btn-link lightbox_link' \
-    data-toggle='modal' data-target='#image_exif_modal' \
-    data-image='#{image_id}'>#{:image_show_exif.t}</button>"
+    content_tag(:button, :image_show_exif.t,
+                { class: "btn btn-link px-0 lightbox_link",
+                  data: {
+                    toggle: "modal",
+                    target: "#image_exif_modal",
+                    image: image_id
+                  } })
   end
 
   # Grab the copyright_text for an Image.
