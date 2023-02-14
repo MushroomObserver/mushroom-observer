@@ -12,6 +12,10 @@ function VoteByAjaxModule(translations) {
       return $("[data-role='change_vote']");
     };
 
+    var naming_vote_forms = function () {
+      return $(".naming-vote-form");
+    };
+
     var attach_bindings = function () {
       change_vote_selects().on("change", function (event) {
         var _this = $(this);
@@ -37,31 +41,11 @@ function VoteByAjaxModule(translations) {
           $("<span>").text(translations.show_namings_saving + "... "),
           $("<span class='spinner-right mx-2'></span>")
         );
-        $("#naming_ajax_progress").modal('show');
+        $("#naming_ajax_progress").modal({ backdrop: 'static', keyboard: false });
 
-        // $.ajax("/votes/" + naming_id, {
-        //   type: 'PATCH',
-        //   data: { vote: { value: value }, authenticity_token: csrf_token() },
-        //   dataType: "script",
-        //   async: true,
-        //   complete: function (request) {
-        //     _haveVotesChanged = false;
-        //     $('#naming_ajax_progress_caption').empty();
-        //     $('#naming_ajax_progress').modal('hide');
-        //     if (request.status == 200) {
-        //       attach_bindings();
-        //       if (typeof SuggestionModule !== "undefined")
-        //         attach_suggestion_bindings();
-        //       save_vote_buttons().hide();
-        //     } else {
-        //       change_vote_selects().each(function () {
-        //         _this.val(_this.data("old_value"))
-        //           .attr("disabled", null);
-        //       });
-        //       alert(request.responseText);
-        //     }
-        //   }
-        // });
+        // fire special rails-ujs submit event, requires js element
+        var nativeFormEl = $(this).parent()[0];
+        Rails.fire(nativeFormEl, 'submit');
       });
 
       // Save initial value in case of error, when we'll need to revert.
