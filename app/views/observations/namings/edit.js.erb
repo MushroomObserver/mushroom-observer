@@ -12,11 +12,7 @@ $('#modal_naming').on('shown.bs.modal', function() {
   var observation_namings = $("#observation_namings");
   var this_modal = $(this);
 
-  new MOAutocompleter(jQuery.extend({
-    input_elem: naming_input,
-    ajax_url: "/ajax/auto_complete/name/@",
-    collapse: 1
-  }));
+  AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse('naming_name')
 
   naming_input.focus();
 

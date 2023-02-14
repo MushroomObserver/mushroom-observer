@@ -13,10 +13,6 @@ modal_body.append('<%= j render(partial: "observations/namings/form", locals: { 
 // re-bind autocomplete to naming_input
 var naming_input = $("#naming_name");
 
-new MOAutocompleter(jQuery.extend({
-  input_elem: naming_input,
-  ajax_url: "/ajax/auto_complete/name/@",
-  collapse: 1
-}));
+AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse('naming_name')
 
 naming_input.focus();
