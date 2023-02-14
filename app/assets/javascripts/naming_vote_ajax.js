@@ -1,6 +1,3 @@
-// TODO: Try submitting the form directly (on change to select) and handle
-// response in VotesController#update
-// https://medium.com/@ryanflach/automatically-submitting-a-rails-form-54b9f917a69c
 function VoteByAjaxModule(translations) {
   $(document).ready(function () {
 
