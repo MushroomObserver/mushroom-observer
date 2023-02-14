@@ -1,0 +1,38 @@
+$('body').append('<%= j render(partial: "observations/namings/modal") %>');
+
+$('#modal_propose_naming').on('hidden.bs.modal', function () {
+  $(this).remove();
+});
+
+// attach all the bindings on shown
+$('#modal_propose_naming').on('shown.bs.modal', function() {
+  var naming_input = $("#naming_name");
+  var naming_form = $("#naming_form");
+  var namings_table = $("#namings_table");
+  var observation_namings = $("#observation_namings");
+  var this_modal = $(this);
+
+  new MOAutocompleter(jQuery.extend({
+    input_elem: naming_input,
+    ajax_url: "/ajax/auto_complete/name/@",
+    collapse: 1
+  }));
+
+  naming_input.focus();
+
+  // Success now handled in create.js.erb or flash.js.erb
+  naming_form.on("ajax:success", (event) => {
+    // const [_data, _status, xhr] = event.detail;
+    // namings_table.remove();
+    // observation_namings.prepend(xhr.responseText);
+    // Don't hide it here, you or it will disappear when form has flash errors
+  });
+
+  // Form errors are still ajax success, handled in flash.js.erb
+  // This is for an ajax error, should not happen.
+  naming_form.on("ajax:error", () => {
+    naming_form.append($("<h4>Error</h4>"));
+  });
+});
+
+$('#modal_propose_naming').modal('show');
