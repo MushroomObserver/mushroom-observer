@@ -2,10 +2,9 @@
 
 # View Helpers for GlossaryTerms
 module UserStatsHelper
-  def links(show_user)
+  def user_stats_links(show_user)
     # NOTE: Second arg is controller name - plural for normalized.
-    # Normalized controller links need hash of index params
-    # as the last argument.
+    # Normalized controller links last arg must be hash of index params.
     links = {}
     [
       [:comments, "/comments", :index, { by_user: show_user.id }],
@@ -27,14 +26,14 @@ module UserStatsHelper
       [:species_lists, "/species_lists", :index, { by_user: show_user.id }],
       [:life_list, "/checklists", :show, {}]
     ].each do |key, controller, action, params|
-      if [key].intersect?([:location_description_authors,
-                           :name_description_authors])
-        links[key] = url_for(controller: controller, action: action,
-                             params: params)
-      else
-        links[key] = url_for(controller: controller, action: action,
-                             params: params.merge({ id: show_user.id }))
+      unless [key].intersect?([:location_description_authors,
+                               :name_description_authors])
+        params[:id] = show_user.id
       end
+
+      links[key] = url_for(controller: controller, action: action,
+                           params: params)
     end
+    links
   end
 end
