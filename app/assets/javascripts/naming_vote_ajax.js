@@ -43,7 +43,8 @@ function VoteByAjaxModule(translations) {
         );
         $("#naming_ajax_progress").modal({ backdrop: 'static', keyboard: false });
 
-        // fire special rails-ujs submit event, requires js element
+        // fire the special rails-ujs submit event for remote submit
+        // requires a native js (not jQuery) element
         var nativeFormEl = $(this).parent()[0];
         Rails.fire(nativeFormEl, 'submit');
       });
