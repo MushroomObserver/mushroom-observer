@@ -1,34 +1,3 @@
 $('body').append('<%= j render(partial: "observations/namings/modal", locals: { action: :update, title: :edit_naming_title.t(id: @observation.id) }) %>');
 
-$('#modal_naming').on('hidden.bs.modal', function () {
-  $(this).remove();
-});
-
-// attach all the bindings on shown
-$('#modal_naming').on('shown.bs.modal', function() {
-  var naming_input = $("#naming_name");
-  var naming_form = $("#naming_form");
-  var namings_table = $("#namings_table");
-  var observation_namings = $("#observation_namings");
-  var this_modal = $(this);
-
-  AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse('naming_name')
-
-  naming_input.focus();
-
-  // Success now handled in update.js.erb or form_reload.js.erb
-  naming_form.on("ajax:success", (event) => {
-    // const [_data, _status, xhr] = event.detail;
-    // namings_table.remove();
-    // observation_namings.prepend(xhr.responseText);
-    // Don't hide it here, you or it will disappear when form has flash errors
-  });
-
-  // Form errors are still ajax success, handled in flash.js.erb
-  // This is for an ajax error, should not happen.
-  naming_form.on("ajax:error", () => {
-    naming_form.append($("<h4>Error</h4>"));
-  });
-});
-
-$('#modal_naming').modal('show');
+<%= render(partial: "observations/namings/form_bindings", format: :js) %>
