@@ -87,6 +87,9 @@ class UsersControllerTest < FunctionalTestCase
     assert_select(
       "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
     )
+    assert_select(
+      "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
+    )
   end
 
 
