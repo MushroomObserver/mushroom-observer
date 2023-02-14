@@ -1,4 +1,4 @@
-$('body').append('<%= j render(partial: "observations/namings/modal", locals: { action: :create, title: :create_naming_title.t(id: @observation.id) }) %>');
+$('body').append('<%= j render(partial: "observations/namings/modal", locals: { action: :create, title: :edit_naming_title.t(id: @observation.id) }) %>');
 
 $('#modal_naming').on('hidden.bs.modal', function () {
   $(this).remove();
