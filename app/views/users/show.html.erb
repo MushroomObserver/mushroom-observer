@@ -12,7 +12,7 @@
     [ :comments_for, "/comments", :index, { for_user: @show_user.id } ],
     [ :images, "/images", :index, { by_user: @show_user.id } ],
     [ :location_description_authors, "/locations/descriptions",
-      :index, { by_user: @show_user.id } ],
+      :index, { by_author: @show_user.id } ],
     [ :location_description_editors, "/locations/descriptions",
       :index, { by_editor: @show_user.id } ],
     [ :locations, "/locations", :index, { by_user: @show_user.id } ],
