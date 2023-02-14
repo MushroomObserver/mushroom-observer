@@ -748,6 +748,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
   match("/images/:id", to: "observations/images#update", via: [:put, :patch])
 
+  resources :observation_views, only: :update
+
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 

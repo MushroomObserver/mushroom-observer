@@ -72,13 +72,12 @@ module ThumbnailHelper
 
   def image_observation_data(html, obs_data, link_type)
     if link_type == :naming || obs_data[:obs].vote_cache <= 0
-      html << caption_propose_naming_link(obs_data)
+      html << caption_propose_naming_link(obs_data[:id])
+      html << caption_mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",
                    locals: { observation: obs_data[:obs] })
-    # render(partial: "observations/namings/form",
-    #        locals: { action: :create, url: url, show_reasons: true })
   end
 
   def caption_image_links(image_id)
@@ -86,12 +85,22 @@ module ThumbnailHelper
     original_image_link(orig_url) + " | " + image_exif_link(image_id)
   end
 
-  def caption_propose_naming_link(obs_data)
+  def caption_propose_naming_link(id)
     link_to(
       :create_naming.t,
-      new_observation_naming_path(observation_id: obs_data[:id]),
+      new_observation_naming_path(observation_id: id),
       { class: "btn btn-primary my-3 mr-3 d-inline-block",
-        target: "_blank", rel: "noopener" }
+        remote: true }
+    )
+  end
+
+  def caption_mark_as_reviewed_toggle(id)
+    button_to(
+      :mark_as_reviewed.t,
+      observation_view_path(id: id, reviewed: 1),
+      { class: "btn btn-primary my-3 mr-3 d-inline-block",
+        id: "mark_as_reviewed_#{id}",
+        method: :put, remote: true }
     )
   end
 

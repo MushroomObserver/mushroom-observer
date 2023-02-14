@@ -1,0 +1,7 @@
+// What to do when receiving a request to mark obs as reviewed/not
+
+var button = $("#mark_as_reviewed_<%= j @obs_id %>");
+var form = button.parent();
+
+button.text("<%= j :mark_as_unreviewed.t %>")
+form.attr("action", "<%= j observation_view_path(id: @obs_id, reviewed: 0) %>")
