@@ -27,8 +27,13 @@
     [ :species_lists, "/species_lists", :index, { by_user: @show_user.id } ],
     [ :life_list, "/checklists", :show, {} ]
   ].each do |key, controller, action, params|
-    links[key] = url_for(controller: controller, action: action,
-                         params: params.merge({ id: id }))
+    if key == :location_description_authors
+      links[key] = url_for(controller: controller, action: action,
+                           params: params)
+    else
+      links[key] = url_for(controller: controller, action: action,
+                           params: params.merge({ id: id }))
+    end
   end
 
   tabs = [
