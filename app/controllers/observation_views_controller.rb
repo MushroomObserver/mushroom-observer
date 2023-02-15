@@ -6,14 +6,14 @@ class ObservationViewsController < ApplicationController
   # endpoint to mark an observation as 'reviewed' by the current user
   def update
     pass_query_params
-    # basic sanitizing of the param
-    reviewed = params[:reviewed] == 1
-    @obs_id = params[:id].to_s # needed in js response
+    # basic sanitizing of the param. ivar needed in js response
+    @reviewed = params[:reviewed] == 1
+    @obs_id = params[:id].to_s
     ov = ObservationView.find_by(observation_id: @obs_id,
                                  user_id: @user.id.to_s)
     return unless ov
 
-    ov.update(reviewed: reviewed)
+    ov.update(reviewed: @reviewed)
     respond_to do |format|
       format.js
     end
