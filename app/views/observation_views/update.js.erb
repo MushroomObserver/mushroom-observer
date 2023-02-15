@@ -6,5 +6,5 @@ var form = button.parent();
 if(<%= j @reviewed %> == 1) {
   label.text("<%= j :marked_as_reviewed.t %>").addClass("active");
 } else {
-  button.text("<%= j :mark_as_reviewed.t %>").removeClass("active");
+  label.text("<%= j :mark_as_reviewed.t %>").removeClass("active");
 }

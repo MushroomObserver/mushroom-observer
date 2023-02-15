@@ -111,8 +111,11 @@ module ThumbnailHelper
               method: :put, local: false) do |f|
       content_tag(:div, class: "d-inline form-group form-inline") do
         f.label(:reviewed) do
-          concat(f.check_box(:reviewed, { checked: "1", class: "mr-3",
-                                          onchange: "this.form.submit();" }))
+          concat(
+            f.check_box(:reviewed,
+                        { checked: "1", class: "mr-3",
+                          onchange: "Rails.fire(this.closest('form'), 'submit')" })
+          )
           concat(:mark_as_reviewed.t)
         end
       end
