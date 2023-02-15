@@ -99,22 +99,17 @@ module ThumbnailHelper
   end
 
   def caption_mark_as_reviewed_toggle(id)
-    # button_to(
-    #   :mark_as_reviewed.t,
-    #   observation_view_path(id: id, reviewed: 1),
-    #   { class: "btn btn-primary my-3 mr-3 d-inline-block",
-    #     id: "mark_as_reviewed_#{id}",
-    #     method: :put, remote: true }
-    # )
     form_with(url: observation_view_path(id: id),
               class: "d-inline-block ml-4",
               method: :put, local: false) do |f|
       content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label(:reviewed) do
+        f.label("mark_as_reviewed_#{id}") do
           concat(
-            f.check_box(:reviewed,
-                        { checked: "1", class: "mr-3",
-                          onchange: "Rails.fire(this.closest('form'), 'submit')" })
+            f.check_box(
+              :reviewed,
+              { checked: "1", class: "mr-3", id: "mark_as_reviewed_#{id}",
+                onchange: "Rails.fire(this.closest('form'), 'submit')" }
+            )
           )
           concat(:mark_as_reviewed.t)
         end

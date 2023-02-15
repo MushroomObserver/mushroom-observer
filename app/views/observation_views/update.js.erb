@@ -1,10 +1,12 @@
 // What to do when receiving a request to mark obs as reviewed/not
 
-var label = $("#mark_as_reviewed_<%= j @obs_id %>").parent();
-var form = button.parent();
+var checkbox = $("#mark_as_reviewed_<%= j @obs_id %>");
+var label = checkbox.closest('label');
 
 if(<%= j @reviewed %> == 1) {
-  label.text("<%= j :marked_as_reviewed.t %>").addClass("active");
+  // label.html("<%= j :marked_as_reviewed.t %>").prepend(checkbox);
+  console.log("reviewed");
 } else {
-  label.text("<%= j :mark_as_reviewed.t %>").removeClass("active");
+  // label.html("<%= j :mark_as_reviewed.t %>").prepend(checkbox);
+  console.log("not reviewed");
 }
