@@ -3,10 +3,10 @@
 var checkbox = $("#mark_as_reviewed_<%= j @obs_id %>");
 var label = checkbox.closest('label');
 
-if(<%= j @reviewed %> == 1) {
-  // label.html("<%= j :marked_as_reviewed.t %>").prepend(checkbox);
-  console.log("reviewed");
-} else {
-  // label.html("<%= j :mark_as_reviewed.t %>").prepend(checkbox);
-  console.log("not reviewed");
+if("<%= @reviewed %>" == "true") {
+  label.html("<%= j :marked_as_reviewed.t %>").prepend(checkbox);
+  // console.log("reviewed <%= @reviewed %>");
+} else if("<%= @reviewed %>" == "false"){
+  label.html("<%= j :mark_as_reviewed.t %>").prepend(checkbox);
+  // console.log("not reviewed <%= @reviewed %>");
 }
