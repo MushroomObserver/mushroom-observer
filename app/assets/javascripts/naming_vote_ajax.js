@@ -32,7 +32,7 @@ function VoteByAjaxModule(translations) {
           });
         }
 
-        // bootstrap modal printed in layout already, just activate it
+        // progress modal printed in layout already, just activate it
         $('#naming_ajax_progress_caption').empty().append(
           $("<span>").text(translations.show_namings_saving + "... "),
           $("<span class='spinner-right mx-2'></span>")

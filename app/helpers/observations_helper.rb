@@ -182,20 +182,14 @@ module ObservationsHelper
      content_tag(:span, consensus_votes)].safe_join
   end
 
+  # Makes a link to naming_vote_path for no-js.
+  # The controller will render a modal if js request
   def pct_html(naming)
     percent = naming.vote_percent.round.to_s + "%"
 
-    if can_do_ajax?
-      content_tag(:button, h(percent),
-                  class: "vote-percent btn btn-link px-0",
-                  data: { toggle: "modal",
-                          id: naming.id.to_s,
-                          target: "#show_votes_#{naming.id}" })
-    else
-      link_with_query(h(percent),
-                      naming_vote_path(naming_id: naming.id),
-                      { class: "vote-percent" })
-    end
+    link_with_query(h(percent),
+                    naming_vote_path(naming_id: naming.id),
+                    { class: "vote-percent", remote: true })
   end
 
   def num_votes_html(naming)
