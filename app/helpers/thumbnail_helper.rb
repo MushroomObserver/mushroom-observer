@@ -99,13 +99,21 @@ module ThumbnailHelper
   end
 
   def caption_mark_as_reviewed_toggle(id)
-    button_to(
-      :mark_as_reviewed.t,
-      observation_view_path(id: id, reviewed: 1),
-      { class: "btn btn-primary my-3 mr-3 d-inline-block",
-        id: "mark_as_reviewed_#{id}",
-        method: :put, remote: true }
-    )
+    # button_to(
+    #   :mark_as_reviewed.t,
+    #   observation_view_path(id: id, reviewed: 1),
+    #   { class: "btn btn-primary my-3 mr-3 d-inline-block",
+    #     id: "mark_as_reviewed_#{id}",
+    #     method: :put, remote: true }
+    # )
+    form_with(url: observation_view_path(id: id, reviewed: 1),
+              class: "d-inline ml-auto") do |f|
+      content_tag(:div, class: "form-group mb-1 form-inline") do
+        f.label(:reviewed, :mark_as_reviewed.t) do
+          f.check_box(:reviewed, checked: false, onchange: "this.form.submit()")
+        end
+      end
+    end
   end
 
   def caption_obs_title(obs_data)
