@@ -66,10 +66,21 @@ module Locations
       assert_template("index")
     end
 
-    def test_location_descriptions_by_author
+    def test_by_author_of_one_description
       desc = location_descriptions(:albion_desc)
       login
       get(:index, params: { by_author: rolf.id })
+      assert_redirected_to(
+        %r{/locations/descriptions/#{desc.id}}
+      )
+    end
+
+    def test_by_author_of_one_description_different_user_logged_in
+      desc = location_descriptions(:albion_desc)
+
+      login("dick")
+      get(:index, params: { by_author: rolf.id })
+
       assert_redirected_to(
         %r{/locations/descriptions/#{desc.id}}
       )
