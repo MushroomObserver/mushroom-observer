@@ -1,8 +1,11 @@
 <%
 # Vote Form:
 # a tiny form within a naming row for voting on this naming only
+# fire the special rails-ujs submit event for remote submit
+# requires a native js (not jQuery) element, form is parent of select
 
 menu = Vote.confidence_menu
+can_vote = check_permission(naming)
 if !can_vote || !@vote || @vote.value == 0
   menu = [Vote.no_opinion] + menu
 end
@@ -14,6 +17,7 @@ end
               do |f| %>
   <%= f.select(:value, menu, {},
                { class: "form-control w-100",
+                 onchange: "Rails.fire(this.closest('form'), 'submit')",
                  data: { role: "change_vote", id: naming.id } }) %>
   <%= f.submit(:show_namings_cast.l, class: "btn btn-default w-100",
                data: { role: "save_vote" }) %>
