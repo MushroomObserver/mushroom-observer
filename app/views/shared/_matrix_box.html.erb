@@ -7,7 +7,7 @@ columns ||= "col-xs-12 col-sm-6 col-md-4"
 %>
 
 <% if presenter %>
-  <li class="matrix-box <%= columns %>">
+  <li class="matrix-box <%= columns %>" id="box_<%= object.id %>">
     <%= panel_block(inner_class: "rss-box-details") do %>
       <div class="thumbnail-container">
         <%= presenter.thumbnail %>

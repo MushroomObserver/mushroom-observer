@@ -1,7 +1,8 @@
 // What to do on ajax create
 
-var observation_namings = $("#observation_namings")
+var observation_namings = $("#observation_namings");
 $("#namings_table").remove();
+var title_str = "<%= show_obs_title(obs: @observation) %>";
 
 // Are we on show_obs, or obs_needing_ids?
 if (observation_namings.length) {
@@ -19,7 +20,13 @@ if (observation_namings.length) {
     show_namings_saving: '<%= j :show_namings_saving.l %>'
   })
 } else {
-  // send a success message for the lightbox
+  // update the caption title in the lightbox
+  var caption_what = $("#observation_what_<%= j @observation.id %>");
+  caption_what.html(title_str);
+  // update the matrix box title in the page
+  var matrix_what = $("#box_<%= j @observation.id %>").find(".rss-what h5");
+  matrix_what.html("<%= @observation.unique_format_name.t %>");
+  // it would be nice to put something in the modal
 }
 
 // Finally, remove the modal
