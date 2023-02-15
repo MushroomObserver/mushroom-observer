@@ -77,8 +77,6 @@ module ThumbnailHelper
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",
                    locals: { observation: obs_data[:obs] })
-    # render(partial: "observations/namings/form",
-    #        locals: { action: :create, url: url, show_reasons: true })
   end
 
   # Disabled because interpolation produces unsafe html
@@ -102,7 +100,7 @@ module ThumbnailHelper
 
   def caption_obs_title(obs_data)
     content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
-                id: "observation_what_#{obs_data[:id]}")
+                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
   end
 
   def original_image_link(orig_url)
