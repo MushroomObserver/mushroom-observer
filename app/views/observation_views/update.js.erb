@@ -1,12 +1,16 @@
 // What to do when receiving a request to mark obs as reviewed/not
 
+// javascript issue: these could be duplicate IDs, one in lightbox
+// the one on page updates
 var checkbox = $("#mark_as_reviewed_<%= j @obs_id %>");
 var label = checkbox.closest('label');
 
 if("<%= @reviewed %>" == "true") {
-  label.html("<%= j :marked_as_reviewed.t %>").prepend(checkbox);
+  label.html("<%= j :marked_as_reviewed.t %>").append(checkbox)
+  checkbox.attr('checked', true);
   // console.log("reviewed <%= @reviewed %>");
 } else if("<%= @reviewed %>" == "false"){
-  label.html("<%= j :mark_as_reviewed.t %>").prepend(checkbox);
+  label.html("<%= j :mark_as_reviewed.t %>").append(checkbox)
+  checkbox.attr('checked', false);
   // console.log("not reviewed <%= @reviewed %>");
 }
