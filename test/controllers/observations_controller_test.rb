@@ -1096,14 +1096,14 @@ class ObservationsControllerTest < FunctionalTestCase
                  "Expected not to find a create link for #{types}.")
     end
 
-    items.each do |id, can_edit|
+    items.each do |type_id, can_edit|
       if can_edit
-        assert(response.body.match(%r{href="/#{types}/#{id}/edit}),
-               "Expected to find an edit link for #{type} #{id}.")
+        assert(response.body.match(%r{href="/#{types}/#{type_id}/edit}),
+               "Expected to find an edit link for #{type} #{type_id}.")
       else
         assert_not(
-          response.body.match(%r{href="/#{types}/#{id}/edit}),
-          "Expected not to find an edit link for #{type} #{id}."
+          response.body.match(%r{href="/#{types}/#{type_id}/edit}),
+          "Expected not to find an edit link for #{type} #{type_id}."
         )
       end
     end
