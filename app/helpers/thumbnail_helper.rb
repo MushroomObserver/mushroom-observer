@@ -95,25 +95,25 @@ module ThumbnailHelper
       :create_naming.t,
       new_observation_naming_path(observation_id: id,
                                   q: get_query_param),
-      { class: "btn btn-primary my-3 mr-3 d-inline-block",
+      { class: "btn btn-primary my-3 mr-5 d-inline-block",
         remote: true }
     )
   end
 
   def caption_mark_as_reviewed_toggle(id)
     form_with(url: observation_view_path(id: id),
-              class: "d-inline-block ml-4",
+              class: "d-inline-block",
               method: :put, local: false) do |f|
       content_tag(:div, class: "d-inline form-group form-inline") do
         f.label("mark_as_reviewed_#{id}") do
+          concat(:mark_as_reviewed.t)
           concat(
             f.check_box(
               :reviewed,
-              { checked: "1", class: "mr-3", id: "mark_as_reviewed_#{id}",
+              { checked: "1", class: "mx-3", id: "mark_as_reviewed_#{id}",
                 onchange: "Rails.fire(this.closest('form'), 'submit')" }
             )
           )
-          concat(:mark_as_reviewed.t)
         end
       end
     end
