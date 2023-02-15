@@ -15,6 +15,12 @@ columns ||= "col-xs-12 col-sm-6 col-md-4"
       </div><!-- .thumbnail-container -->
       <div class="rss-what">
         <h5><%= presenter.what %></h5>
+        <% if identify && object.consensus_naming %>
+          <%= content_tag(:div, class: "my-3") do
+            render(partial: "observations/namings/votes/form",
+                   locals: { naming: object.consensus_naming })
+          end %>
+        <% end %>
       </div><!-- .rss-what -->
       <div class="rss-where">
         <small><%= presenter.where %></small>
