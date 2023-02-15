@@ -1382,6 +1382,8 @@
 
   # observations/identify
   obs_needing_id: Observations Needing Identification
+  mark_as_reviewed: Mark as reviewed
+  marked_as_reviewed: Marked as reviewed
 
   # observer/create_observation
   create_observation_title: "[:create_object(type=:observation)]"

@@ -1,12 +1,10 @@
 // What to do when receiving a request to mark obs as reviewed/not
 
-var button = $("#mark_as_reviewed_<%= j @obs_id %>");
+var label = $("#mark_as_reviewed_<%= j @obs_id %>").parent();
 var form = button.parent();
 
 if(<%= j @reviewed %> == 1) {
-  button.text("<%= j :mark_as_unreviewed.t %>").addClass("active");
-  form.attr("action", "<%= j observation_view_path(id: @obs_id, reviewed: 0) %>");
+  label.text("<%= j :marked_as_reviewed.t %>").addClass("active");
 } else {
   button.text("<%= j :mark_as_reviewed.t %>").removeClass("active");
-  form.attr("action", "<%= j observation_view_path(id: @obs_id, reviewed: 1) %>");
 }

@@ -106,11 +106,14 @@ module ThumbnailHelper
     #     id: "mark_as_reviewed_#{id}",
     #     method: :put, remote: true }
     # )
-    form_with(url: observation_view_path(id: id, reviewed: 1),
-              class: "d-inline ml-auto") do |f|
-      content_tag(:div, class: "form-group mb-1 form-inline") do
-        f.label(:reviewed, :mark_as_reviewed.t) do
-          f.check_box(:reviewed, checked: false, onchange: "this.form.submit()")
+    form_with(url: observation_view_path(id: id),
+              class: "d-inline-block ml-4",
+              method: :put, local: false) do |f|
+      content_tag(:div, class: "d-inline form-group form-inline") do
+        f.label(:reviewed) do
+          concat(f.check_box(:reviewed, { checked: "1", class: "mr-3",
+                                          onchange: "this.form.submit();" }))
+          concat(:mark_as_reviewed.t)
         end
       end
     end
