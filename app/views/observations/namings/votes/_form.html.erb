@@ -12,7 +12,7 @@ end
 %>
 
 <%= form_with(model: @vote, url: naming_vote_path(naming_id: naming.id),
-              method: :patch, local: false, id: "cast_vote_#{naming.id}",
+              method: :patch, local: false, id: "naming_vote_#{naming.id}",
               class: "naming-vote-form") \
               do |f| %>
   <%= f.select(:value, menu, {},
