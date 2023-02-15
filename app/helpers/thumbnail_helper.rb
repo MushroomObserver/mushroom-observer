@@ -92,7 +92,8 @@ module ThumbnailHelper
   def caption_propose_naming_link(id)
     link_to(
       :create_naming.t,
-      new_observation_naming_path(observation_id: id),
+      new_observation_naming_path(observation_id: id,
+                                  q: get_query_param),
       { class: "btn btn-primary my-3 mr-3 d-inline-block",
         remote: true }
     )
