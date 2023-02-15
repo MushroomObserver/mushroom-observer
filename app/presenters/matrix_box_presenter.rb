@@ -11,12 +11,12 @@ class MatrixBoxPresenter
     :where,     # location of object or target
     :time       # when object or target was last modified
 
-  def initialize(object, view, link_type = :target)
+  def initialize(object, view, link_type = :target, link_method = :get)
     case object
     when Image
       image_to_presenter(object, view)
     when Observation
-      observation_to_presenter(object, view, link_type)
+      observation_to_presenter(object, view, link_type, link_method)
     when RssLog
       rss_log_to_presenter(object, view)
     when User
@@ -82,7 +82,7 @@ class MatrixBoxPresenter
   end
 
   # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view, link_type)
+  def observation_to_presenter(observation, view, link_type, link_method)
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
@@ -102,7 +102,7 @@ class MatrixBoxPresenter
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
                      link: obs_or_naming_link(observation, link_type),
-                     link_type: link_type,
+                     link_type: link_type, link_method: link_method,
                      obs_data: obs_data_hash(observation))
   end
 

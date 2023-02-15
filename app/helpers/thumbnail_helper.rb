@@ -56,8 +56,9 @@ module ThumbnailHelper
     when :patch
       patch_button(name: "", path: link, class: "image-link ab-fab")
     when :delete
-      destroy_button(name: "", target: link,
-                     class: "image-link ab-fab")
+      destroy_button(name: "", target: link, class: "image-link ab-fab")
+    when :remote
+      link_with_query("", link, class: "image-link ab-fab", remote: true)
     end
   end
 

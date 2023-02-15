@@ -5,13 +5,13 @@ if ($("#observation_namings").length) {
   // alert("Wowie");
   <%= render(partial: "observations/namings/update_page", format: :js) %>
 } else {
-  var title_str = "<%= show_obs_title(obs: @observation) %>";
+  var obs_id = '<%= @observation.id %>';
   // update the caption title in the lightbox
-  var caption_what = $("#observation_what_<%= j @observation.id %>");
-  caption_what.html(title_str);
+  var caption_what = $("#observation_what_" + obs_id);
+  caption_what.html('<%= show_obs_title(obs: @observation) %>');
   // update the matrix box title in the page
-  var matrix_what = $("#box_<%= j @observation.id %>").find(".rss-what h5");
-  matrix_what.html("<%= @observation.unique_format_name.t %>");
+  var matrix_what = $("#box_" + obs_id).find(".rss-what h5");
+  matrix_what.html('<%= link_to(@observation.unique_format_name.t, observation_path(@observation.id, q: get_query_param)) %>');
   // it would be nice to put something in the modal
 }
 

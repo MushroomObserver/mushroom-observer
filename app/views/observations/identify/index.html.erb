@@ -13,7 +13,7 @@
 <%= paginate_block(@pages) do %>
   <ul class="row list-unstyled mt-3">
     <%= render(partial: "shared/matrix_box",
-               locals: { link_type: :naming },
+               locals: { link_type: :naming, link_method: :remote },
                layout: "shared/matrix_table",
                collection: @objects,
                as: :object) %>

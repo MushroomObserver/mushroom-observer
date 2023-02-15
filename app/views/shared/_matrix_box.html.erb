@@ -1,7 +1,7 @@
 <%
 # Requires local variable object: RssLog, Observation, Image, etc. instance.
 link_type ||= nil
-presenter = MatrixBoxPresenter.new(object, @view, link_type)
+presenter = MatrixBoxPresenter.new(object, @view, link_type, link_method)
 columns ||= "col-xs-12 col-sm-6 col-md-4"
 %>
 
