@@ -7,6 +7,9 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
+<!--NAME AUTOCOMPLETE INSTANCE FOR REUSE IN MODALS-->
+<%= render(partial: "shared/form_name_autocomplete") %>
+
 <%= paginate_block(@pages) do %>
   <ul class="row list-unstyled mt-3">
     <%= render(partial: "shared/matrix_box",
