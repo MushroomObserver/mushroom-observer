@@ -519,7 +519,7 @@ class Observation < AbstractModel
 
     @old_last_viewed_by ||= {}
     @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(self, User.current)
+    ObservationView.update_view_stats(id, User.current_id)
   end
 
   def last_viewed_by(user)

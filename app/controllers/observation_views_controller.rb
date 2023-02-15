@@ -10,9 +10,7 @@ class ObservationViewsController < ApplicationController
     # checked is a string!
     @reviewed = params[:reviewed] == "1"
     @obs_id = params[:id].to_s
-    ov = ObservationView.find_by(observation_id: @obs_id,
-                                 user_id: @user.id.to_s)
-    return unless ov
+    ov = ObservationView.update_view_stats(@obs_id, User.current_id)
 
     ov.update(reviewed: @reviewed)
     respond_to do |format|
