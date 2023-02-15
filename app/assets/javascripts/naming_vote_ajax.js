@@ -23,11 +23,6 @@ function VoteByAjaxModule(translations) {
           $("<span class='spinner-right mx-2'></span>")
         );
         $("#naming_ajax_progress").modal({ backdrop: 'static', keyboard: false });
-
-        // fire the special rails-ujs submit event for remote submit
-        // requires a native js (not jQuery) element, form is parent of select
-        var nativeFormEl = $(this).parent()[0];
-        Rails.fire(nativeFormEl, 'submit');
       });
     };
 
