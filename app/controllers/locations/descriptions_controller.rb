@@ -52,8 +52,12 @@ module Locations
     end
 
     # Display list of location_descriptions that a given user is author on.
-    def by_author
-      user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    def location_descriptions_by_author
+      user = if params[:by_author]
+               find_or_goto_index(User, params[:by_author].to_s)
+             else
+               @user
+             end
       return unless user
 
       query = create_query(:LocationDescription, :by_author, user: user)

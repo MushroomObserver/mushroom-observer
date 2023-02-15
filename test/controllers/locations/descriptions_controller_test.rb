@@ -111,9 +111,18 @@ module Locations
                     "Wrong number of results")
     end
 
-    def test_index_by_author_of_no_descriptions
-      user = users(:zero_user)
+    def test_by_author_of_one_description_different_user_logged_in
+      desc = location_descriptions(:albion_desc)
 
+      login("dick")
+      get(:index, params: { by_author: rolf.id })
+
+      assert_redirected_to(
+        %r{/locations/descriptions/#{desc.id}}
+      )
+    end
+
+    def test_location_descriptions_by_editor
       login
       get(:index, params: { by_author: nil,
                             id: user })
