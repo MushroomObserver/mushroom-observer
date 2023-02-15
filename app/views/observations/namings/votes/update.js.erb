@@ -1,0 +1,8 @@
+var observation_namings = $("#observation_namings");
+$("#namings_table").remove();
+
+var title = '<%= content_tag(:div, show_obs_title(obs: @observation), title: show_obs_title(obs: @observation).strip_html.html_safe) %>';
+
+document.title = $(title).attr('title');
+$("#title").html(title);
+observation_namings.prepend('<%= j render(partial: "observations/namings/table", locals: { observation: @observation }, layout: false) %>');

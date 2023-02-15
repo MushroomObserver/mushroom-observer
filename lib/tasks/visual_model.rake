@@ -23,7 +23,7 @@ def report_usage
 end
 
 def build_from_file(model_name, name_list)
-  model = VisualModel.new(name: model_name)
+  model = VisualModel.find_or_create_by(name: model_name)
   if model.save
     File.open(name_list) do |file|
       file.readlines.each do |line|
@@ -38,14 +38,37 @@ def build_from_file(model_name, name_list)
 end
 
 def process_line(model, line)
-  line.split(",").each do |raw_name|
-    name = raw_name.strip
-    next if name == ""
+  line.split(",").each do |raw_cmd|
+    cmd = raw_cmd.strip
+    next if cmd == ""
 
-    Rails.logger.info { "Adding VisualGroup for '#{name}'" }
-    errors = create_visual_group(model, name)
-    Rails.logger.error(errors.full_messages) if errors
+    id, label = parse_cmd(cmd)
+    if id.nil?
+      add_visual_group(model, label)
+    else
+      add_image(model, id, label)
+    end
   end
+end
+
+def parse_cmd(cmd)
+  first_space = cmd.index(" ")
+  return [nil, cmd] if first_space.nil?
+
+  id = begin
+         Integer(cmd[..first_space - 1])
+       rescue StandardError
+         nil
+       end
+  return [nil, cmd] if id.nil?
+
+  [id, cmd[first_space + 1..]]
+end
+
+def add_visual_group(model, name)
+  Rails.logger.info { "Adding VisualGroup for '#{name}'" }
+  errors = create_visual_group(model, name)
+  Rails.logger.error(errors.full_messages) if errors
 end
 
 def create_visual_group(model, name)
@@ -55,5 +78,27 @@ def create_visual_group(model, name)
     nil
   else
     group.errors
+  end
+end
+
+def add_image(model, id, name)
+  group = VisualGroup.find_or_create_by(visual_model: model, name: name)
+  vgi = VisualGroupImage.joins(:visual_group).find_by(
+    image_id: id,
+    visual_groups: { visual_model_id: model.id }
+  )
+  if vgi.nil?
+    Rails.logger.info { "Adding image #{id} to #{name}" }
+    VisualGroupImage.create(visual_group: group,
+                            image_id: id,
+                            included: true)
+  else
+    old_name = vgi.visual_group.name
+    Rails.logger.info do
+      "Moving image #{id} from #{old_name} to #{name}"
+    end
+    vgi.visual_group = group
+    vgi.included = true
+    vgi.save
   end
 end

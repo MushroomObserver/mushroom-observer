@@ -56,22 +56,21 @@ jQuery(document).ready(function () {
   });
 
   // BS3 Matrix box image thumbnail lightbox button show/hide/position.
-  jQuery('body').on("mouseenter mouseleave", '[data-toggle="expand-icon"]', function (e){
+  jQuery('body').on("mouseenter mouseleave", '[data-toggle="expand-icon"]', function (e) {
     var btn = jQuery(this).find('.theater-btn');
-    if( e.type == "mouseleave")
-        return btn.hide();
+    if (e.type == "mouseleave")
+      return btn.hide();
     var img = jQuery(this).find('img');
     btn.css('right', img.position().left).show();
   });
 
   // very precise binding for dynamically generated lightbox links
   // they are not there on page load, only when lightbox activated
-  jQuery('body').on('click', '#lightbox .lb-dataContainer button.lightbox_link', function(e) {
+  jQuery('body').on('click', '#lightbox .lb-dataContainer button.lightbox_link', function (e) {
     e.stopPropagation();
     var button = jQuery(e.target),
-        modal_target_id = button.data("target");
+      modal_target_id = button.data("target");
     // must pass the button itself as second param
     jQuery(modal_target_id).modal("toggle", button);
   });
-
 });

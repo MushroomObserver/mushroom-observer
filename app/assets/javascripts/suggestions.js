@@ -45,7 +45,7 @@ function SuggestionModule(ids, url, text) {
                 window.location.href = url;
             } else {
               progress.html(text.suggestions_error);
-              window.setTimeout(() => {
+              window.setTimeout(function () {
                 resetModal();
               }, 1000);
             }

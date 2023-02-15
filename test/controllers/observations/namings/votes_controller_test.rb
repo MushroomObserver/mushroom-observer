@@ -165,5 +165,34 @@ module Observations::Namings
         end
       end
     end
+
+    def test_ajax_vote
+      naming = namings(:minimal_unknown_naming)
+      assert_nil(naming.users_vote(dick))
+
+      get(:update, xhr: true,
+                   params: { naming_id: naming.id, vote: { value: 3 } })
+      assert_redirected_to(new_account_login_path)
+
+      login("dick")
+      get(:update, xhr: true,
+                   params: { naming_id: naming.id, vote: { value: 3 } })
+
+      assert_equal(3, naming.reload.users_vote(dick).value)
+
+      get(:update, xhr: true,
+                   params: { naming_id: naming.id, vote: { value: 0 } })
+      assert_nil(naming.reload.users_vote(dick))
+
+      assert_raises(RuntimeError) do
+        get(:update, xhr: true,
+                     params: { naming_id: naming.id, vote: { value: 99 } })
+      end
+
+      assert_raises(ActiveRecord::RecordNotFound) do
+        get(:update, xhr: true,
+                     params: { naming_id: 99, vote: { value: 0 } })
+      end
+    end
   end
 end

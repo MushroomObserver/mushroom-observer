@@ -39,26 +39,16 @@ function VoteByAjaxModule(translations) {
         );
         $("#naming_ajax_progress").modal('show');
 
-        $.ajax("/ajax/vote/naming/" + naming_id, {
-          data: { value: value, authenticity_token: csrf_token() },
-          dataType: "text",
+        $.ajax("/votes/" + naming_id, {
+          type: 'PATCH',
+          data: { vote: { value: value }, authenticity_token: csrf_token() },
+          dataType: "script",
           async: true,
           complete: function (request) {
             _haveVotesChanged = false;
             $('#naming_ajax_progress_caption').empty();
             $('#naming_ajax_progress').modal('hide');
             if (request.status == 200) {
-              var html = $(request.responseText);
-              var title = html.children().eq(0);
-              var div = html.children().eq(1).html();
-              var percent = html.children().eq(2).html();
-              var num_vot = html.children().eq(3).html();
-              // update the obs title, votes table, votes and percentage
-              document.title = title.attr("title");
-              $("#title").html(title.html());
-              $("#show_votes_" + naming_id + "_frame").html(div);
-              $(".vote-percent[data-id='" + naming_id + "']").html(percent);
-              $(".vote-number[data-id='" + naming_id + "']").html(num_vot);
               attach_bindings();
               if (typeof SuggestionModule !== "undefined")
                 attach_suggestion_bindings();
