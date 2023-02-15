@@ -92,7 +92,6 @@ class UsersControllerTest < FunctionalTestCase
     )
   end
 
-
   #   ---------------
   #    admin actions
   #   ---------------
