@@ -1,8 +1,22 @@
+// This handles successful change of vote via a `select` in the namings table
+$('#naming_ajax_progress_caption').empty();
+$('#naming_ajax_progress').modal('hide');
+
 var observation_namings = $("#observation_namings");
 $("#namings_table").remove();
 
 var title = '<%= content_tag(:div, show_obs_title(obs: @observation), title: show_obs_title(obs: @observation).strip_html.html_safe) %>';
 
+// Replace document title and page title element
 document.title = $(title).attr('title');
 $("#title").html(title);
+
+// Replace the namings table
 observation_namings.prepend('<%= j render(partial: "observations/namings/table", locals: { observation: @observation }, layout: false) %>');
+
+// Re-attach our bindings to the table
+VoteByAjaxModule({
+  show_namings_lose_changes: '<%= j :show_namings_lose_changes.l.gsub("\n", " ") %>',
+  show_namings_saving: '<%= j :show_namings_saving.l %>'
+})
+
