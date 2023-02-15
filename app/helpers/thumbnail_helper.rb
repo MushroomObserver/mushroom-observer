@@ -120,7 +120,7 @@ module ThumbnailHelper
 
   def caption_obs_title(obs_data)
     content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
-                id: "observation_what_#{obs_data[:id]}")
+                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
   end
 
   def original_image_link(orig_url)
