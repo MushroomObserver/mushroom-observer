@@ -16,6 +16,10 @@ module UserStatsHelper
     links
   end
 
+  #########################################################
+
+  private
+
   # NOTE: Second arg is controller name
   # Last arg is a hash of index params.
   def user_stats_links_table(user)
