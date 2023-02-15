@@ -3,10 +3,8 @@ logged_in = @user&.verified
 do_suggestions = logged_in && observation.thumb_image_id.present? &&
                   (@user.admin ||
                    MO.image_model_beta_testers.include?(@user.id))
-namings = observation.namings.sort_by(&:created_at)
 namings_with_votes = observation.namings.select { |naming|
                         naming.votes&.length&.positive? }
-header = observation_naming_header_row(observation, logged_in)
 buttons = observation_naming_buttons(observation, do_suggestions)
 help = logged_in ? :show_namings_consensus_help.t : :show_namings_please_login.t
 eye  = content_tag(:div,
@@ -19,30 +17,13 @@ eyes = content_tag(:div,
 
 <div id="observation_namings">
 
-  <!--TABLE OF NAMES -->
-  <div class="namings-table">
-    <div class="container-fluid">
-      <header class="row">
-        <div class="col col-xs-12 col-sm-3"><%= header[:heading] %></div>
-        <div class="col col-sm-3 hidden-xs"><%= header[:user_name] %></div>
-        <div class="col col-sm-2 hidden-xs"><%= header[:consensus_vote] %></div>
-        <div class="col col-sm-3 hidden-xs"><%= header[:your_vote] %></div>
-        <div class="col col-sm-1 hidden-xs"></div>
-      </header>
-    </div>
-
-    <div class="container-fluid panel panel-default">
-      <% namings.each do |naming| %>
-        <%= render(partial: "observations/namings/row",
-                    locals: { naming: naming, observation: observation,
-                              logged_in: logged_in }) %>
-      <% end # each naming %>
-    </div>
-  </div>
+  <!--TABLE OF NAMES / REFRESHED BY AJAX -->
+  <%= render(partial: "observations/namings/table",
+             locals: { observation: observation }) %>
   <!--/TABLE OF NAMES -->
 
   <!--HELP TEXT AND EYES -->
-  <div class="float-sm-right my-2 ml-3"><%= buttons %></div>
+  <div class="float-sm-right text-right my-2 ml-3"><%= buttons %></div>
   <div class="help-block container-text my-2"><%= help %></div>
   <div class="row hidden-xs">
     <div class="col-xs-6"><%= eye %></div>
@@ -60,8 +41,7 @@ eyes = content_tag(:div,
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->
-<%= render(partial: "observations/namings/votes/modal_ajax_progress",
-           locals: { naming: @naming }) %>
+<%= render(partial: "shared/modal_ajax_progress") %>
 
 <% # initializes module with translations for js messages
 inject_javascript_at_end %(

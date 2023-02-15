@@ -28,13 +28,24 @@ module Observations::Namings
     # value to -1 (owner of naming is not allowed to do this).
     # Linked from: (show_observation)
     # Inputs: params[]
-    # Redirects to show_observation.
+    # HTML requests: Redirects to show_observation.
+    # JS requests: Updates the naming table (and potentially the obs title) via
+    # update.js.erb and naming_vote_ajax.js, which handles <select> bindings
     def update
       pass_query_params
-      naming = Naming.find(params[:naming_id].to_s)
-      observation = naming.observation
-      observation.change_vote(naming, param_lookup([:vote, :value]))
-      redirect_with_query(observation_path(id: observation.id))
+      @naming = Naming.find(params[:naming_id].to_s)
+      @observation = @naming.observation
+      value_str = param_lookup([:vote, :value])
+      value = Vote.validate_value(value_str)
+      raise("Bad value.") unless value
+
+      @observation.change_vote(@naming, value)
+      respond_to do |format|
+        format.html do
+          redirect_with_query(observation_path(id: @observation.id))
+        end
+        format.js
+      end
     end
 
     # This was a new POST method for show_observation that updated all votes

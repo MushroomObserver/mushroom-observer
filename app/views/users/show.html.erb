@@ -3,34 +3,7 @@
   name = @show_user.unique_text_name
   @title = :show_user_title.t(user: name)
   @container = :full
-
-  # NOTE: Second arg is controller name - plural for normalized.
-  # Normalized controller links need hash of index params as the last argument.
-  links = {}
-  [
-    [ :comments, "/comments", :index, { by_user: @show_user.id } ],
-    [ :comments_for, "/comments", :index, { for_user: @show_user.id } ],
-    [ :images, "/images", :index, { by_user: @show_user.id } ],
-    [ :location_description_authors, "/locations/descriptions",
-      :index, { by_user: @show_user.id } ],
-    [ :location_description_editors, "/locations/descriptions",
-      :index, { by_editor: @show_user.id } ],
-    [ :locations, "/locations", :index, { by_user: @show_user.id } ],
-    [ :locations_versions, "/locations", :index, { by_editor: @show_user.id } ],
-    [ :name_description_authors, "/names/descriptions",
-      :index, { by_user: @show_user.id } ],
-    [ :name_description_editors, "/names/descriptions",
-      :index, { by_editor: @show_user.id } ],
-    [ :names, "/names", :index, { by_user: @show_user.id } ],
-    [ :names_versions, "/names", :index, { by_editor: @show_user.id } ],
-    [ :observations, "/observations", :index, { user: @show_user.id } ],
-    [ :species_lists, "/species_lists", :index, { by_user: @show_user.id } ],
-    [ :life_list, "/checklists", :show, {} ]
-  ].each do |key, controller, action, params|
-    links[key] = url_for(controller: controller, action: action,
-                         params: params.merge({ id: id }))
-  end
-
+  links = user_stats_links(@show_user)
   tabs = [
     link_to(:show_user_contributors.t, contributors_path)
   ]

@@ -115,6 +115,14 @@ class ApplicationController < ActionController::Base
   # before_action :extra_gc
   # after_action  :extra_gc
 
+  # This discards MO "flash" messages immediately after regular controller
+  # AJAX requests, since the browser page is not reloaded and they'd
+  # confusingly reappear on the next page load, otherwise.
+  # It's intended for ajax form submissions that may need to display messages
+  # after the call, when reloading a form for example.
+  # (It doesn't apply to the AjaxController methods, including autocomplete.)
+  after_action :flash_clear_after_ajax_call
+
   # Make show_name_helper available to nested partials
   helper :show_name
 
@@ -696,6 +704,10 @@ class ApplicationController < ActionController::Base
   #
   #  :section: Error handling
   #
+  #  NOTE: MO doesn't use built-in Rails `flash`, i.e. session[:flash].
+  #        We get and set our own session[:notice]. This means the Rails methods
+  #        `flash` and `flash_hash` don't return any of our messages.
+  #
   #  This is somewhat non-intuitive, so it's worth describing exactly what
   #  happens.  There are two fundamentally different cases:
   #
@@ -805,6 +817,15 @@ class ApplicationController < ActionController::Base
     result = obj.valid?
     flash_object_errors(obj) unless result
     result
+  end
+
+  # For AJAX requests to regular controllers:
+  # https://stackoverflow.com/a/18678966/3357635
+  def flash_clear_after_ajax_call
+    return unless !request.path.starts_with?("/ajax") && request.xhr?
+
+    # don't want the flash to appear when you reload page
+    flash_clear
   end
 
   ##############################################################################
@@ -1098,7 +1119,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model = nil, update = !browser.bot?)
+  def find_query(model = nil, update: !browser.bot?)
     model = model.to_s if model
     q = dealphabetize_q_param
 
@@ -1120,8 +1141,6 @@ class ApplicationController < ActionController::Base
     redirect_to(search_advanced_path)
   end
 
-  private ##########
-
   def map_past_bys(args)
     args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
   end
@@ -1136,7 +1155,7 @@ class ApplicationController < ActionController::Base
   # a new query based on the existing one but with modified arguments.
   # If it does not exist, resturn default query.
   def existing_updated_or_default_query(model, args)
-    result = find_query(model, false)
+    result = find_query(model, update: false)
     if result
       # If existing query needs updates, we need to create a new query,
       # otherwise the modifications won't persist.
@@ -1204,8 +1223,6 @@ class ApplicationController < ActionController::Base
     params && params[:q] &&
       !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
-
-  public ##########
 
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
@@ -1871,15 +1888,6 @@ class ApplicationController < ActionController::Base
     request.format = "xml"
     respond_to do |format|
       format.xml { render(args) }
-    end
-  end
-
-  # Bad place for this, but need proper refactor to have a good place.
-  def gather_users_votes(obs, user)
-    obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
     end
   end
 

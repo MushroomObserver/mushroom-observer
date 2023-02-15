@@ -10,37 +10,12 @@ module AjaxController::Vote
   def vote
     @user = session_user!
     case @type
-    when "naming"
-      cast_naming_vote(@id, @value)
     when "image"
       cast_image_vote(@id, @value)
     end
   end
 
   private
-
-  def cast_naming_vote(id, value_str)
-    @naming = Naming.includes(
-      observation: { namings: :votes }
-    ).find_by(id: id)
-    value = Vote.validate_value(value_str)
-    raise("Bad value.") unless value
-
-    @naming.change_vote(value, @user)
-    @observation = @naming.observation
-    @votes = gather_users_votes(@observation, @user)
-    # Send four things: Recalculated show_obs_title,
-    # refreshed votes table, the new vote %, and the new num_votes
-    render(inline: %(<div>
-      <%= content_tag(:div, show_obs_title(obs: @observation),
-            title: show_obs_title(obs: @observation).strip_html.html_safe) %>
-      <%= content_tag(:div, render(partial: 'observations/namings/votes/table',
-            locals: { do_cancel: false, observation: @observation,
-                      naming: @naming })) %>
-      <%= content_tag(:span, "#{@naming.reload.vote_percent.round}%") %>
-      <%= content_tag(:span, "#{@naming.reload.votes.length}") %>
-    </div>))
-  end
 
   def cast_image_vote(id, value)
     image = Image.find(id)
