@@ -1,0 +1,14 @@
+var observation_namings = $("#observation_namings");
+$("#namings_table").remove();
+
+var title = '<%= content_tag(:div, show_obs_title(obs: @observation), title: show_obs_title(obs: @observation).strip_html.html_safe) %>';
+
+document.title = $(title).attr('title');
+$("#title").html(title);
+observation_namings.prepend('<%= j render(partial: "observations/namings/table", locals: { observation: @observation }, layout: false) %>');
+
+// Need to redo bindings for entire table and hide cast vote buttons
+VoteByAjaxModule({
+  show_namings_lose_changes: '<%= j :show_namings_lose_changes.l.gsub("\n", " ") %>',
+  show_namings_saving: '<%= j :show_namings_saving.l %>'
+})
