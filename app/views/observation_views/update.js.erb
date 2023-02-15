@@ -2,15 +2,30 @@
 
 // javascript issue: these could be duplicate IDs, one in lightbox
 // the one on page updates
-var checkbox = $("#mark_as_reviewed_<%= j @obs_id %>");
-var label = checkbox.closest('label');
+var checkbox1 = $("#caption_reviewed_<%= j @obs_id %>");
+var label1 = checkbox1.closest('label');
+var checkbox2 = $("#box_reviewed_<%= j @obs_id %>");
+var label2 = checkbox2.closest('label');
 
+// keep both checkboxes in sync
 if("<%= @reviewed %>" == "true") {
-  label.html("<%= j :marked_as_reviewed.t %>").append(checkbox)
-  checkbox.attr('checked', true);
+  if(checkbox1.length) {
+    label1.html("<%= j :marked_as_reviewed.t %>").append(checkbox1)
+    checkbox1.attr('checked', true);
+  }
+  if(checkbox2.length) {
+    label2.html("<%= j :marked_as_reviewed.t %>").append(checkbox2)
+    checkbox2.attr('checked', true);
+  }
   // console.log("reviewed <%= @reviewed %>");
 } else if("<%= @reviewed %>" == "false"){
-  label.html("<%= j :mark_as_reviewed.t %>").append(checkbox)
-  checkbox.attr('checked', false);
+  if(checkbox1.length) {
+    label1.html("<%= j :mark_as_reviewed.t %>").append(checkbox1)
+    checkbox1.attr('checked', false);
+  }
+  if(checkbox2.length) {
+    label2.html("<%= j :mark_as_reviewed.t %>").append(checkbox2)
+    checkbox2.attr('checked', false);
+  }
   // console.log("not reviewed <%= @reviewed %>");
 }

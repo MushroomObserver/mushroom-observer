@@ -100,17 +100,23 @@ module ThumbnailHelper
     )
   end
 
-  def caption_mark_as_reviewed_toggle(id)
+  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed")
+    # The matrix box checkbox updates if the caption checkbox changes.
+    # But keeping the caption checkbox in sync with the matrix box checkbox
+    # is blocked because the caption is not created. Updating it would only work
+    # with some additions to the lightbox JS, to update the checked state on
+    # show, and cost an extra db lookup. Not worth it IMO.
+    # - Nimmo 20230215
     form_with(url: observation_view_path(id: id),
               class: "d-inline-block",
               method: :put, local: false) do |f|
       content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label("mark_as_reviewed_#{id}") do
+        f.label("#{selector}_#{id}") do
           concat(:mark_as_reviewed.t)
           concat(
             f.check_box(
               :reviewed,
-              { checked: "1", class: "mx-3", id: "mark_as_reviewed_#{id}",
+              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
                 onchange: "Rails.fire(this.closest('form'), 'submit')" }
             )
           )

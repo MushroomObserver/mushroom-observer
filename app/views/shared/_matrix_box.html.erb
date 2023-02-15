@@ -39,7 +39,7 @@ columns ||= "col-xs-12 col-sm-6 col-md-4"
         <small><%= presenter.fancy_time %></small>
         <% if identify %>
           <%= content_tag(:div, class: "mt-3") do
-            caption_mark_as_reviewed_toggle(object.id)
+            caption_mark_as_reviewed_toggle(object.id, "box_reviewed")
           end %>
         <% end %>
       </div><!-- .rss-fancy-time -->
