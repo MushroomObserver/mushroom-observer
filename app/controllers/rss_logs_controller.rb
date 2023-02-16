@@ -73,7 +73,7 @@ class RssLogsController < ApplicationController
       glossary_term: :user,
       location: :user,
       name: :user,
-      observation: [:location, :name, :namings, :user,
+      observation: [:location, :name, :user,
                     @user ? { thumb_image: :image_votes } : :thumb_image],
       project: :user,
       species_list: [:location, :user]
