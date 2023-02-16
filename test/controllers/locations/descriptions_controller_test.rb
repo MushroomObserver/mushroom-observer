@@ -85,6 +85,18 @@ module Locations
       assert_redirected_to(/#{location_description_path(desc)}/)
     end
 
+    # Prevent reversion of error. See PR #1358
+    def test_index_by_author_of_one_description_different_user_logged_in
+      desc = location_descriptions(:albion_desc)
+
+      login("dick")
+      get(:index, params: { by_author: rolf.id })
+
+      assert_redirected_to(
+        %r{/locations/descriptions/#{desc.id}}
+      )
+    end
+
     def test_index_by_author_of_multiple_descriptions
       user = users(:dick)
       descs_authored_by_user_count = \
@@ -107,17 +119,6 @@ module Locations
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_authored_by_user_count },
                     "Wrong number of results")
-    end
-
-    def test_index_by_author_of_one_description_different_user_logged_in
-      desc = location_descriptions(:albion_desc)
-
-      login("dick")
-      get(:index, params: { by_author: rolf.id })
-
-      assert_redirected_to(
-        %r{/locations/descriptions/#{desc.id}}
-      )
     end
 
     def test_index_by_author_of_no_descriptions
