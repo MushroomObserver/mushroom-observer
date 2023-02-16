@@ -109,7 +109,7 @@ module Locations
                     "Wrong number of results")
     end
 
-    def test_by_author_of_one_description_different_user_logged_in
+    def test_index_by_author_of_one_description_different_user_logged_in
       desc = location_descriptions(:albion_desc)
 
       login("dick")
@@ -120,7 +120,7 @@ module Locations
       )
     end
 
-    def test_location_descriptions_by_editor
+    def test_index_by_editor
       user = users(:dick)
 
       login
