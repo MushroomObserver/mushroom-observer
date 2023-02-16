@@ -31,9 +31,6 @@ eyes = content_tag(:div,
 
 </div><!--#observation_namings-->
 
-<!--AJAX SAVING VOTE MESSAGE-->
-<%= render(partial: "shared/modal_ajax_progress") %>
-
 <% # initializes module with translations for js messages
 inject_javascript_at_end %(
   VoteByAjaxModule({

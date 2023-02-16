@@ -190,8 +190,7 @@ module ObservationsHelper
     link_with_query(h(percent),
                     naming_vote_path(naming_id: naming.id),
                     { class: "vote-percent btn btn-link px-0",
-                      remote: true,
-                      onclick: "alert(this);" })
+                      remote: true })
   end
 
   def num_votes_html(naming)
