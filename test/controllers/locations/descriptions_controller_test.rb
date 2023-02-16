@@ -80,8 +80,7 @@ module Locations
       )
 
       login
-      get(:index, params: { by_author: "controller ignores this value",
-                            id: user })
+      get(:index, params: { by_author: user.id })
 
       assert_redirected_to(/#{location_description_path(desc)}/)
     end
@@ -96,8 +95,7 @@ module Locations
       )
 
       login
-      get(:index, params: { by_author: "controller ignores this value",
-                            id: user })
+      get(:index, params: { by_author: user.id })
 
       assert_template("index")
       assert_select("#title",
@@ -123,8 +121,10 @@ module Locations
     end
 
     def test_location_descriptions_by_editor
+      user = users(:dick)
+
       login
-      get(:index, params: { by_author: nil,
+      get(:index, params: { by_editor: nil,
                             id: user })
 
       assert_template("index")
