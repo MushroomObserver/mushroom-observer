@@ -131,6 +131,17 @@ module Locations
       assert_template("index")
     end
 
+    def test_index_by_author_bad_user_id
+      bad_user_id = images(:in_situ_image).id
+      assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+      login
+      get(:index, params: { by_author: bad_user_id })
+
+      assert_flash_error("id ##{bad_user_id}")
+      assert_redirected_to(location_descriptions_path)
+    end
+
     def test_index_by_editor
       user = users(:dick)
 
