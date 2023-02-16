@@ -74,6 +74,25 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   #   ---------------
+  #    show
+  #   ---------------
+
+  def test_show
+    user = users(:rolf)
+
+    login
+    get(:show, params: { id: user.id })
+
+    assert_template(:show)
+    assert_select(
+      "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
+    )
+    assert_select(
+      "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
+    )
+  end
+
+  #   ---------------
   #    admin actions
   #   ---------------
 
