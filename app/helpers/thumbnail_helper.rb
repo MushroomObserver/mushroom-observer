@@ -23,7 +23,9 @@ module ThumbnailHelper
       theater_on_click: false,
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
-      notes: ""
+      notes: "",
+      link_type: :target,
+      obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
   end
@@ -54,9 +56,93 @@ module ThumbnailHelper
     when :patch
       patch_button(name: "", path: link, class: "image-link ab-fab")
     when :delete
-      destroy_button(name: "", target: link,
-                     class: "image-link ab-fab")
+      destroy_button(name: "", target: link, class: "image-link ab-fab")
+    when :remote
+      link_with_query("", link, class: "image-link ab-fab", remote: true)
     end
+  end
+
+  def image_caption_html(image_id, obs_data, link_type)
+    html = []
+    if obs_data[:id].present?
+      html = image_observation_data(html, obs_data, link_type)
+    end
+    html << caption_image_links(image_id)
+    safe_join(html)
+  end
+
+  def image_observation_data(html, obs_data, link_type)
+    if link_type == :naming || obs_data[:obs].vote_cache <= 0
+      html << caption_propose_naming_link(obs_data[:id])
+      html << caption_mark_as_reviewed_toggle(obs_data[:id])
+    end
+    html << caption_obs_title(obs_data)
+    html << render(partial: "observations/show/observation",
+                   locals: { observation: obs_data[:obs] })
+  end
+
+  def caption_image_links(image_id)
+    orig_url = Image.url(:original, image_id)
+    links = []
+    links << original_image_link(orig_url)
+    links << " | "
+    links << image_exif_link(image_id)
+    safe_join(links)
+  end
+
+  def caption_propose_naming_link(id)
+    link_to(
+      :create_naming.t,
+      new_observation_naming_path(observation_id: id,
+                                  q: get_query_param),
+      { class: "btn btn-primary my-3 mr-5 d-inline-block",
+        remote: true }
+    )
+  end
+
+  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed")
+    # The matrix box checkbox updates if the caption checkbox changes.
+    # But keeping the caption checkbox in sync with the matrix box checkbox
+    # is blocked because the caption is not created. Updating it would only work
+    # with some additions to the lightbox JS, to update the checked state on
+    # show, and cost an extra db lookup. Not worth it IMO.
+    # - Nimmo 20230215
+    form_with(url: observation_view_path(id: id),
+              class: "d-inline-block",
+              method: :put, local: false) do |f|
+      content_tag(:div, class: "d-inline form-group form-inline") do
+        f.label("#{selector}_#{id}") do
+          concat(:mark_as_reviewed.t)
+          concat(
+            f.check_box(
+              :reviewed,
+              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
+                onchange: "Rails.fire(this.closest('form'), 'submit')" }
+            )
+          )
+        end
+      end
+    end
+  end
+
+  def caption_obs_title(obs_data)
+    content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
+                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
+  end
+
+  def original_image_link(orig_url)
+    link_to(:image_show_original.t, orig_url,
+            { class: "lightbox_link", target: "_blank", rel: "noopener" })
+  end
+
+  def image_exif_link(image_id)
+    content_tag(:button, :image_show_exif.t,
+                { class: "btn btn-link px-0 lightbox_link",
+                  data: {
+                    toggle: "modal",
+                    target: "#image_exif_modal",
+                    image: image_id
+                  } })
   end
 
   # Grab the copyright_text for an Image.

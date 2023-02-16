@@ -1,26 +1,18 @@
 // What to do on ajax create
 
-var observation_namings = $("#observation_namings")
-$("#namings_table").remove();
-
 // Are we on show_obs, or obs_needing_ids?
-if (observation_namings.length) {
-  // alert("Wowie");
-  // reset title of obs if necessary
-  var title = '<%= content_tag(:div, show_obs_title(obs: @observation), title: show_obs_title(obs: @observation).strip_html.html_safe) %>';
-
-  document.title = $(title).attr('title');
-  $("#title").html(title);
-
-  observation_namings.prepend('<%= j render(partial: "observations/namings/table", locals: { observation: @observation.reload }, layout: false) %>');
-  // Need to redo bindings for entire table and hide cast vote buttons
-  VoteByAjaxModule({
-    show_namings_lose_changes: '<%= j :show_namings_lose_changes.l.gsub("\n", " ") %>',
-    show_namings_saving: '<%= j :show_namings_saving.l %>'
-  })
+if ($("#observation_namings").length) {
+  <%= render(partial: "observations/namings/update_page", format: :js) %>
 } else {
-  // send a success message for the lightbox
+  var obs_id = '<%= @observation.id %>';
+  // update the caption title in the lightbox
+  var caption_what = $("#observation_what_" + obs_id);
+  caption_what.html('<%= show_obs_title(obs: @observation) %>');
+  // update the matrix box title in the page
+  var matrix_what = $("#box_" + obs_id).find(".rss-what h5");
+  matrix_what.html('<%= link_to(@observation.unique_format_name.t, observation_path(@observation.id, q: get_query_param)) %>');
+  // it would be nice to put something in the modal
 }
 
 // Finally, remove the modal
-$("#modal_propose_naming").modal('hide');
+$("#modal_naming").modal('hide');

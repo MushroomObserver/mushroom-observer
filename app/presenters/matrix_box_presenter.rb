@@ -11,12 +11,12 @@ class MatrixBoxPresenter
     :where,     # location of object or target
     :time       # when object or target was last modified
 
-  def initialize(object, view)
+  def initialize(object, view, link_type = :target, link_method = :get)
     case object
     when Image
       image_to_presenter(object, view)
     when Observation
-      observation_to_presenter(object, view)
+      observation_to_presenter(object, view, link_type, link_method)
     when RssLog
       rss_log_to_presenter(object, view)
     when User
@@ -50,7 +50,8 @@ class MatrixBoxPresenter
       if target&.respond_to?(:thumb_image) && target&.thumb_image
         view.thumbnail(target.thumb_image,
                        link: { controller: target.show_controller,
-                               action: target.show_action, id: target.id })
+                               action: target.show_action, id: target.id },
+                       obs_data: obs_data_hash(target))
       end
     return unless (temp = rss_log.detail)
 
@@ -81,7 +82,7 @@ class MatrixBoxPresenter
   end
 
   # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view)
+  def observation_to_presenter(observation, view, link_type, link_method)
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
@@ -96,11 +97,13 @@ class MatrixBoxPresenter
     end
     return unless observation.thumb_image
 
+    # This allows an obs box to link to a naming form, or show_obs
+    # Thumbnail can likewise have a "propose a name" link
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: "/observations",
-                             action: :show,
-                             id: observation.id })
+                     link: obs_or_naming_link(observation, link_type),
+                     link_type: link_type, link_method: link_method,
+                     obs_data: obs_data_hash(observation))
   end
 
   # Grabs all the information needed for view from User instance.
@@ -128,5 +131,21 @@ class MatrixBoxPresenter
 
   def fancy_time
     time&.fancy_time
+  end
+
+  def obs_or_naming_link(observation, link_type)
+    if link_type == :naming
+      { controller: "/observations/namings", action: :new,
+        observation_id: observation.id }
+    else
+      { controller: "/observations", action: :show,
+        id: observation.id }
+    end
+  end
+
+  def obs_data_hash(observation)
+    return {} unless observation&.respond_to?(:is_collection_location)
+
+    { id: observation.id, obs: observation }
   end
 end

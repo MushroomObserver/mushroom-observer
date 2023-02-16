@@ -262,8 +262,27 @@ class Observation < AbstractModel
   scope :without_confident_name, lambda {
     without_name.or(where(vote_cache: ..0))
   }
-  scope :needs_identification, lambda {
-    without_confident_name.order(created_at: :desc)
+  scope :with_vote_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    joins(:votes).where(user_id: user_id)
+  }
+  scope :without_vote_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    where.not(id: Vote.where(user_id: user_id).select(:observation_id).distinct)
+  }
+  scope :reviewed_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    joins(:observation_views).
+      where(observation_views: { user_id: user_id, reviewed: 1 })
+  }
+  scope :not_reviewed_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
+              select(:observation_id).distinct)
+  }
+  scope :needs_identification, lambda { |user|
+    without_confident_name.without_vote_by_user(user).
+      not_reviewed_by_user(user).distinct
   }
   # scope :of_name(name, **args)
   #
@@ -500,7 +519,7 @@ class Observation < AbstractModel
 
     @old_last_viewed_by ||= {}
     @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(self, User.current)
+    ObservationView.update_view_stats(id, User.current_id)
   end
 
   def last_viewed_by(user)
