@@ -120,6 +120,16 @@ module Locations
       )
     end
 
+    def test_index_by_author_of_no_descriptions
+      user = users(:zero_user)
+
+      login
+      get(:index, params: { by_author: user.id })
+
+      assert_flash_text("No matching location descriptions found.")
+      assert_template("index")
+    end
+
     def test_index_by_editor
       user = users(:dick)
 
