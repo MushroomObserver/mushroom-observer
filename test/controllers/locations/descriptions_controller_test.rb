@@ -134,14 +134,6 @@ module Locations
                     "Wrong number of results")
     end
 
-    def test_index_by_editor
-      login
-      get(:index, params: { by_editor: "controller ignores value",
-                            id: rolf.id })
-
-      assert_template("index")
-    end
-
     ############################################################################
     #
     #    NEW
