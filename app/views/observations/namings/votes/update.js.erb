@@ -1,3 +1,7 @@
-// What to do on ajax update
+// This handles successful change of vote via a `select` in the namings table
 
-<%= render(partial: "observations/namings/update_page", format: :js) %>
+// Are we on show_obs, or obs_needing_ids?
+if ($("#observation_namings").length) {
+  <%= render(partial: "observations/namings/update_page", format: :js) %>
+} else {
+}
