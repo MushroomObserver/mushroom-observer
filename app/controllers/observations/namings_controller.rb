@@ -80,7 +80,12 @@ module Observations
       if destroy_if_we_can(naming)
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
-      default_redirect(naming.observation)
+      respond_to do |format|
+        format.html { default_redirect(naming.observation) }
+        format.js do
+          @observation = naming.observation
+        end
+      end
     end
 
     private
