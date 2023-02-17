@@ -1,4 +1,6 @@
-// Update page with results of update or create naming
+// Update page with results of update or create naming or vote
+$('#naming_ajax_progress_caption').html('<%= j safe_spinner %>');
+$('#naming_ajax_progress').modal('hide');
 $("#namings_table").remove();
 
 // reset title of obs if necessary
