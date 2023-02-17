@@ -65,7 +65,10 @@ module Locations
 
     # Display list of location_descriptions that a given user is editor on.
     def by_editor
-      user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_editor].to_s,
+        index_path: location_descriptions_path
+      )
       return unless user
 
       query = create_query(:LocationDescription, :by_editor, user: user)

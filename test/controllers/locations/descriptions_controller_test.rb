@@ -142,18 +142,64 @@ module Locations
       assert_redirected_to(location_descriptions_path)
     end
 
-    def test_index_by_editor
-      user = users(:dick)
+    def test_index_by_editor_of_one_description
+      user = users(:mary)
+      # This ersatz factory is a work-around for the problem documented here:
+      # https://www.pivotaltracker.com/story/show/184501787
+      desc = location_descriptions(:albion_desc)
+      desc.editors = [user]
+      desc.save
 
       login
-      get(:index, params: { by_editor: nil,
-                            id: user })
+      get(:index, params: { by_editor: user })
+
+      assert_redirected_to(
+        %r{/locations/descriptions/#{desc.id}}
+      )
+    end
+
+    def test_index_by_editor_of_multiple_descriptions
+      user = users(:mary)
+      # This ersatz factory is a work-around for the problem documented here:
+      # https://www.pivotaltracker.com/story/show/184501787
+      [location_descriptions(:albion_desc),
+       location_descriptions(:no_mushrooms_location_desc)].each do |desc|
+        desc.editors = [user]
+        desc.save
+      end
+      descs_edited_by_user_count = \
+        LocationDescriptionEditor.where(user: user).count
+
+      login
+      get(:index, params: { by_editor: user.id })
 
       assert_template("index")
-      assert_select("#title", text: "Location Description Index")
+      assert_select("#title",
+                    text: "Location Descriptions Edited by #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
-                    { count: LocationDescription.count },
+                    { count: descs_edited_by_user_count },
                     "Wrong number of results")
+    end
+
+    def test_index_by_editor_of_no_descriptions
+      user = users(:zero_user)
+
+      login
+      get(:index, params: { by_editor: user.id })
+
+      assert_flash_text("No matching location descriptions found.")
+      assert_template("index")
+    end
+
+    def test_index_by_editor_bad_user_id
+      bad_user_id = images(:in_situ_image).id
+      assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+      login
+      get(:index, params: { by_editor: bad_user_id })
+
+      assert_flash_error("id ##{bad_user_id}")
+      assert_redirected_to(location_descriptions_path)
     end
 
     ############################################################################
