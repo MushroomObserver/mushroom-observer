@@ -141,8 +141,7 @@ module ObservationsHelper
     if check_permission(naming)
       edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
                                   class: "edit_naming_link_#{naming.id}")
-      delete_link = destroy_button(target: naming, remote: true,
-                                   onclick: "MOEvents.whirly();")
+      delete_link = destroy_button(target: naming, remote: true)
       proposer_links = [tag.br,
                         "[", edit_link, " | ", delete_link, "]"].safe_join
     else
