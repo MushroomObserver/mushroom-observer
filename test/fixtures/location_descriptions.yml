@@ -16,6 +16,10 @@ albion_desc:
   public: 1
   admin_groups: reviewers
   authors: rolf
+  # NOTE: The following line makes description.editor and
+  # description.location_description_editor return different results.
+  # I can make them both return nil, but that breaks >= 1 test.
+  # jdc 2023-02-16
   editors:
   reader_groups: all_users
   writer_groups: all_users
