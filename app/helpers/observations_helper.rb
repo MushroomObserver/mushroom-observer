@@ -141,7 +141,7 @@ module ObservationsHelper
     if check_permission(naming)
       edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
                                   class: "edit_naming_link_#{naming.id}",
-                                  remote: true)
+                                  remote: true, onclick: "MOEvents.whirly();")
       delete_link = destroy_button(target: naming, remote: true)
       proposer_links = [tag.br,
                         "[", edit_link, " | ", delete_link, "]"].safe_join
@@ -190,7 +190,9 @@ module ObservationsHelper
 
     link_with_query(h(percent),
                     naming_vote_path(naming_id: naming.id),
-                    { class: "vote-percent", remote: true })
+                    { class: "vote-percent btn btn-link px-0",
+                      onclick: "MOEvents.whirly();",
+                      remote: true })
   end
 
   def num_votes_html(naming)

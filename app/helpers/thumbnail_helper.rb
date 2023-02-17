@@ -72,7 +72,8 @@ module ThumbnailHelper
   end
 
   def image_observation_data(html, obs_data, link_type)
-    if link_type == :naming || obs_data[:obs].vote_cache.to_f <= 0
+    if link_type == :naming ||
+       (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
       html << caption_propose_naming_link(obs_data[:id])
       html << caption_mark_as_reviewed_toggle(obs_data[:id])
     end
