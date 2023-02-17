@@ -13,12 +13,15 @@ module Observations::Namings
     def show
       pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
+      respond_to do |format|
+        format.html
+        format.js
+      end
     end
 
-    # NOTE: MOST VOTES CAST NEVER HIT THIS CONTROLLER! THEY GO BY AJAX.
+    # NOTE: AJAX VOTES NOW HIT THIS CONTROLLER, not the AjaxController.
     # Changes in the state of the Vote selects handled by naming_vote_ajax.js
-    # and sent to the AjaxController::Vote module at the path
-    # "/ajax/vote/naming/" + naming_id, which changes naming votes directly.
+    # and send a js request to this action, which changes naming votes directly.
 
     # This action is linked from the show_obs naming table.
     # Each naming row in Show Observation has a form: a select for Votes, and

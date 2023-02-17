@@ -11,6 +11,7 @@
 //= require image_export
 //= require validate_file_input_fields
 //= require main
+//= require mo_events
 //= require multi_image_upload
 //= require observation_form_map
 //= require suggestions
