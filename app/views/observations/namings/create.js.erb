@@ -2,7 +2,6 @@
 
 // Are we on show_obs, or obs_needing_ids?
 if ($("#observation_namings").length) {
-  // alert("Wowie");
   <%= render(partial: "observations/namings/update_page", format: :js) %>
 } else {
   // send a success message for the lightbox

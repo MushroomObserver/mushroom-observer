@@ -325,7 +325,7 @@ class AmateurTest < IntegrationTestCase
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
-      open_form("form#cast_vote_#{naming.id}") do |form|
+      open_form("form#naming_vote_#{naming.id}") do |form|
         form.assert_value("vote_value", /no opinion/i)
         form.select("vote_value", /call it that/i)
         form.assert_value("vote_value", "3.0")
@@ -338,7 +338,7 @@ class AmateurTest < IntegrationTestCase
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
-      open_form("form#cast_vote_#{naming.id}") do |form|
+      open_form("form#naming_vote_#{naming.id}") do |form|
         form.select("vote_value", /as if!/i)
         form.submit(:show_namings_cast.l)
       end
