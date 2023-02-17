@@ -204,8 +204,7 @@ module ObservationsHelper
     [content_tag(:small, "#{:show_namings_your_vote.t}: ",
                  class: "visible-xs-block"),
      render(partial: "observations/namings/votes/form",
-            locals: { naming: naming,
-                      can_vote: check_permission(naming) })].safe_join
+            locals: { naming: naming })].safe_join
   end
 
   def eyes_html(observation, naming)
