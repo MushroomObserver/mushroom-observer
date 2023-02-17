@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_26_160800) do
+ActiveRecord::Schema.define(version: 2023_02_15_221813) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -431,6 +431,7 @@ ActiveRecord::Schema.define(version: 2022_12_26_160800) do
     t.integer "user_id"
     t.float "vote_cache", default: 0.0
     t.text "reasons"
+    t.index ["observation_id"], name: "index_namings_on_observation_id"
   end
 
   create_table "observation_collection_numbers", charset: "utf8mb3", force: :cascade do |t|
