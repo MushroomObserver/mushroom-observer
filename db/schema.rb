@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_15_221813) do
+ActiveRecord::Schema.define(version: 2023_02_17_081246) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -455,6 +455,7 @@ ActiveRecord::Schema.define(version: 2023_02_15_221813) do
     t.integer "observation_id"
     t.integer "user_id"
     t.datetime "last_view"
+    t.boolean "reviewed"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|
