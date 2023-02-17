@@ -14,7 +14,7 @@
   # Lightbox stuff. obs_data comes from the matrix_box presenter,
   # link_type from view (for naming links)
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-  lightbox_url = (User.image_size == "full_size") ? full_url : huge_url
+  lightbox_url = (User.current&.image_size == "full_size") ? full_url : huge_url
   caption = image_caption_html(image_id, obs_data, link_type)
 
   # Show original name?

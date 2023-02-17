@@ -55,4 +55,15 @@
   <%= f.number_field(:layout_count, class: "form-control", min: 1) %>
 </div>
 
+<div class="form-group mt-3 form-inline">
+  <%= f.label(:image_size, :prefs_image_size.t) %>
+  <%= f.select(:image_size,
+               options_for_select(
+                 User.image_sizes.filter_map { |key, value|
+                   [key.titleize, User.image_sizes.key(value)] if (value >= 3)
+                 }, @user.image_size
+               ),
+               {}, { class: "form-control" }) %>
+</div>
+
 <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>

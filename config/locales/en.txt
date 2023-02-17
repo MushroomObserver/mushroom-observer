@@ -1836,7 +1836,7 @@
   prefs_thumbnail_small: "[:image_show_small]"
   prefs_thumbnail_large: "[:image_show_large]"
   prefs_thumbnail_maps: View thumbnail map on Observation page?
-  prefs_image_size: Image size
+  prefs_image_size: Image size for "lightbox"
   prefs_image_size_help: Size shown when you click on an image.
   prefs_image_small: "[:image_show_small] (320 x 320)"
   prefs_image_medium: "[:image_show_medium] (640 x 640)"
