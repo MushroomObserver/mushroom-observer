@@ -1,6 +1,8 @@
 var observation_namings = $("#observation_namings");
 $("#namings_table").remove();
 
+$("#naming_ajax_progress").modal('hide');
+
 var title = '<%= content_tag(:div, show_obs_title(obs: @observation), title: show_obs_title(obs: @observation).strip_html.html_safe) %>';
 
 document.title = $(title).attr('title');
