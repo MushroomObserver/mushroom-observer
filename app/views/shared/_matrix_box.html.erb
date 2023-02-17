@@ -5,10 +5,11 @@ link_method ||= nil
 identify ||= nil
 presenter = MatrixBoxPresenter.new(object, @view, link_type, link_method)
 columns ||= "col-xs-12 col-sm-6 col-md-4"
+object_id = object&.id.present? ? object.id : "no_ID"
 %>
 
 <% if presenter %>
-  <li class="matrix-box <%= columns %>" id="box_<%= object.id %>">
+  <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
     <%= panel_block(inner_class: "rss-box-details") do %>
       <div class="thumbnail-container">
         <%= presenter.thumbnail %>
