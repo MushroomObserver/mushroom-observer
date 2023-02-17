@@ -60,7 +60,9 @@
   <%= f.select(:image_size,
                options_for_select(
                  User.image_sizes.filter_map { |key, value|
-                   [key.titleize, User.image_sizes.key(value)] if (value >= 3)
+                   if value > User.image_sizes[:small]
+                     ["image_show_#{key}".to_sym.l, key]
+                   end
                  }, @user.image_size
                ),
                {}, { class: "form-control" }) %>
