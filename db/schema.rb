@@ -671,7 +671,7 @@ ActiveRecord::Schema.define(version: 2023_02_17_081246) do
     t.boolean "email_locations_admin", default: false
     t.boolean "email_names_admin", default: false
     t.integer "thumbnail_size", default: 1
-    t.integer "image_size", default: 3
+    t.integer "image_size", default: 5
     t.string "default_rss_type", limit: 40, default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
