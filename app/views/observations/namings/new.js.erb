@@ -1,5 +1,7 @@
 $('body').append('<%= j render(partial: "observations/namings/modal") %>');
 
+$("#naming_ajax_progress").modal('hide');
+
 $('#modal_propose_naming').on('hidden.bs.modal', function () {
   $(this).remove();
 });
