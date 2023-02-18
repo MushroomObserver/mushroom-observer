@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_15_221813) do
+ActiveRecord::Schema.define(version: 2023_02_17_081246) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -671,7 +671,7 @@ ActiveRecord::Schema.define(version: 2023_02_15_221813) do
     t.boolean "email_locations_admin", default: false
     t.boolean "email_names_admin", default: false
     t.integer "thumbnail_size", default: 1
-    t.integer "image_size", default: 3
+    t.integer "image_size", default: 5
     t.string "default_rss_type", limit: 40, default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1

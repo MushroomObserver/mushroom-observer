@@ -236,6 +236,7 @@ class AccountTest < CapybaraIntegrationTestCase
              from: "user_hide_authors")
       select("Postal (New York, USA)", from: "user_location_format")
       select("Agaricus", from: "user_theme")
+      select("Full Size", from: "user_image_size")
       assert_select("user_locale",
                     with_options: %w[Ελληνικά English Français Español])
       select("Ελληνικά", from: "user_locale")
