@@ -267,8 +267,7 @@ class CommentsController < ApplicationController
       respond_to do |format|
         format.html { render(:new) and return }
         format.js do
-          @action = :create
-          render("form_reload") and return
+          render("form_reload", locals: { action: :create }) and return
         end
       end
     end
@@ -304,6 +303,11 @@ class CommentsController < ApplicationController
     @target = comment_target
     return unless allowed_to_see!(@target)
     return unless check_permission_or_redirect!(@comment, @target)
+
+    respond_to do |format|
+      format.js
+      format.html
+    end
   end
 
   def update
@@ -314,10 +318,23 @@ class CommentsController < ApplicationController
                   check_permission_or_redirect!(@comment, @target)
 
     @comment.attributes = permitted_comment_params if params[:comment]
-    return unless comment_updated?
 
-    redirect_with_query(controller: @target.show_controller,
-                        action: @target.show_action, id: @target.id)
+    unless comment_updated?
+      respond_to do |format|
+        format.js do
+          render(partial: "form_reload", locals: { action: :update })
+        end
+        format.html { render(:edit) and return }
+      end
+    end
+
+    respond_to do |format|
+      format.js
+      format.html do
+        redirect_with_query(controller: @target.show_controller,
+                            action: @target.show_action, id: @target.id)
+      end
+    end
   end
 
   # Callback to destroy a comment.
