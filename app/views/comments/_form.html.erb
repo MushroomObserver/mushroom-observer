@@ -12,8 +12,6 @@ end
 <!--[form:comment]-->
 <%= form_with(model: @comment, url: url, id: "comment_form",
               local: local) do |f| %>
-  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
-
   <div class="form-group mt-3">
     <%= f.label(:summary, :form_comments_summary.t + ":") %>
     <%= f.text_field(:summary, size: 80, data: { autofocus: true },
@@ -27,6 +25,5 @@ end
   </div>
 
   <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
-  <hr align="center" width="90%" />
 <% end %>
 <!--[eoform:comment]-->
