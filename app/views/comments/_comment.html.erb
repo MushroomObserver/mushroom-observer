@@ -3,7 +3,7 @@
   user = comment.user
 %>
 
-<div class="list-group comment">
+<div class="list-group comment" id="comment_<%= comment.id %>">
   <div class="list-group-item default">
 
     <% if user.image_id %>
@@ -32,8 +32,10 @@
       <% if check_permission(comment) %>
         <span class="text-nowrap">
           [<%= link_with_query(:EDIT.t, edit_comment_path(comment.id),
-                               class: "edit_comment_link_#{comment.id}") %> |
-          <%= destroy_button(name: :comment_show_destroy.t, target: comment) %>]
+                               class: "edit_comment_link_#{comment.id}",
+                               remote: true) %> |
+          <%= destroy_button(name: :comment_show_destroy.t, target: comment,
+                             remote: true) %>]
         </span>
       <% end %>
       <div class="pull-right text-nowrap small my-0 mx-3">

@@ -347,15 +347,20 @@ class CommentsController < ApplicationController
 
     @target = @comment.target
     if !check_permission!(@comment)
-      # all cases redirect to object show page
+      # all html requests redirect to object show page
     elsif !@comment.destroy
       flash_error(:runtime_form_comments_destroy_failed.t(id: params[:id]))
     else
       @comment.log_destroy
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
-    redirect_with_query(controller: @target.show_controller,
-                        action: @target.show_action, id: @target.id)
+    respond_to do |format|
+      format.js
+      format.html do
+        redirect_with_query(controller: @target.show_controller,
+                            action: @target.show_action, id: @target.id)
+      end
+    end
   end
 
   private

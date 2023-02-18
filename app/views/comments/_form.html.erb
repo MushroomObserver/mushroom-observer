@@ -1,5 +1,15 @@
+<%
+case action
+when :create
+  url = comments_path(target: @comment.target_id,
+                      type: @comment.target_type, q: get_query_param)
+when :update
+  url = comment_path(id: @comment.id, q: get_query_param)
+end
+%>
 <!--[form:comment]-->
-<%= form_with(model: @comment, url: url, id: "comment_form") do |f| %>
+<%= form_with(model: @comment, url: url, id: "comment_form",
+              local: local) do |f| %>
   <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
 
   <div class="form-group mt-3">

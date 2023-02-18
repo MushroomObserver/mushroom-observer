@@ -1,0 +1,1 @@
+$('body').append('<%= j render(partial: "comments/modal", locals: { action: :create, title: :comment_add_title.t(name: @target.unique_format_name) }) %>');
