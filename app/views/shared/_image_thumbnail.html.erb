@@ -14,6 +14,13 @@
   # Lightbox stuff. obs_data comes from the matrix_box presenter,
   # link_type from view (for naming links)
   lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
+  p_map = {
+    "medium" => medium_url,
+    "large" => large_url,
+    "huge" => huge_url,
+    "full_size" => full_url
+  }
+  lightbox_url = (usize = User.current&.image_size) ? p_map[usize] : huge_url
   caption = image_caption_html(image_id, obs_data, link_type)
 
   # Show original name?
@@ -33,7 +40,7 @@
                       data: { toggle: "tooltip", placement: "bottom" }) %>
         <%= image_link %>
       </div>
-      <%= link_to("", huge_url,
+      <%= link_to("", lightbox_url,
                   class: "glyphicon glyphicon-fullscreen theater-btn",
                   data: { lightbox: lightbox_id, title: caption }) %>
       <div class="mt-3">
