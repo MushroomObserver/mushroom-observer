@@ -1,5 +1,5 @@
 <%
-# called from xxx/show
+# called from comments_for_object
 # Bootstrap modal for comment, has the form.
 %>
 
@@ -9,8 +9,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <%= content_tag(:h4, title,
-                        class:"modal-title",
+        <%= content_tag(:h4, title, class:"modal-title",
                         id: "modal_header_comment") %>
       </div>
       <div class="modal-body" id="modal_body_comment">

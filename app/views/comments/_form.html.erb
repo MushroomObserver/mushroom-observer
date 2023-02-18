@@ -1,9 +1,11 @@
 <%
 case action
 when :create
+  button = :comment_add_create.l
   url = comments_path(target: @comment.target_id,
                       type: @comment.target_type, q: get_query_param)
 when :update
+  button = :SAVE_EDITS.l
   url = comment_path(id: @comment.id, q: get_query_param)
 end
 %>
