@@ -11,7 +11,7 @@ module Observations
       old_query = find_or_create_query(:Observation)
       new_query = Query.lookup_and_save(old_query.model, old_query.flavor,
                                         old_query.params.merge(needs_id: true))
-      show_index_of_objects(new_query)
+      show_index_of_objects(new_query, { matrix: true })
     end
   end
 end

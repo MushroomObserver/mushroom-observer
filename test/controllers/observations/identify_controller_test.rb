@@ -12,10 +12,17 @@ module Observations
       mary.update(layout_count: obs_count + 1)
 
       get(:index)
-      # it's not using her layout count. maybe i hardcoded it.
       assert_no_flash
-      # assert_select(".matrix-box", obs_count)
+      assert_select(".matrix-box", obs_count)
       assert_response(:success)
+
+      # make a query, and test that the obs scope filters appropriately
+
+      # mark some observations as reviewed and check the new obs_count
+      # On the site, this happens via JS, so directly update the obs
+
+      # vote on an unconfident naming and check the new obs_count
+      # On the site, this happens via JS, so directly update the naming vote
     end
   end
 end
