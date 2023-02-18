@@ -12,7 +12,8 @@
   <%= link_with_query(:show_comments_add_comment.t,
                       new_comment_path(target: object.id,
                                        type: object.class.name),
-                      class: "btn btn-default pull-right") if controls %>
+                      class: "btn btn-default pull-right",
+                      remote: true) if controls %>
 
   <% if comments.empty? %>
     <div class="list-group comment">
