@@ -1,0 +1,8 @@
+// Bindings for both new.js.erb and edit.js.erb
+$("#mo_ajax_progress").modal('hide');
+
+$('#modal_comment').on('hidden.bs.modal', function () {
+  $(this).remove();
+});
+
+$('#modal_comment').modal('show');
