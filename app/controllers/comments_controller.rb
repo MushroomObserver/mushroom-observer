@@ -236,6 +236,13 @@ class CommentsController < ApplicationController
                   allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def create
@@ -257,13 +264,25 @@ class CommentsController < ApplicationController
   def save_comment_or_flash_errors_and_redirect!
     unless @comment.save
       flash_object_errors(@comment)
-      render(:new) and return
+      respond_to do |format|
+        format.html { render(:new) and return }
+        format.js do
+          @action = :create
+          render("form_reload") and return
+        end
+      end
     end
 
     @comment.log_create
     flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
-    redirect_with_query(controller: @target.show_controller,
-                        action: @target.show_action, id: @target.id)
+
+    respond_to do |format|
+      format.html do
+        redirect_with_query(controller: @target.show_controller,
+                            action: @target.show_action, id: @target.id)
+      end
+      format.js
+    end
   end
 
   public
