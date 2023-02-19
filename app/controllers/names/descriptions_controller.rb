@@ -42,11 +42,11 @@ module Names
     private # private methods used by #index
 
     def default_index_subaction
-      list_name_descriptions
+      list_all
     end
 
     # Display list of all (correctly-spelled) name_descriptions in the database.
-    def list_name_descriptions
+    def list_all
       sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
       query = create_query(:NameDescription, :all, by: sorted_by)
       show_selected_name_descriptions(query)
@@ -57,7 +57,7 @@ module Names
       ::Query::NameDescriptionBase.default_order
     end
 
-    def index_name_description
+    def list_query_results
       query = find_or_create_query(:NameDescription, by: params[:by])
       show_selected_name_descriptions(query, id: params[:id].to_s,
                                              always_index: true)
