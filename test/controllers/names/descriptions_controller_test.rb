@@ -102,7 +102,7 @@ module Names
     end
 
     def test_index_by_author_bad_user_id
-      bad_user_id = 666
+      bad_user_id = images(:in_situ_image).id
       assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
       login
@@ -110,6 +110,23 @@ module Names
 
       assert_flash_error("id ##{bad_user_id}")
       assert_redirected_to(name_descriptions_path)
+    end
+
+    def test_index_by_editor_of_one_description
+      desc = name_descriptions(:coprinus_desc)
+      user = desc.editors.first
+      assert_equal(
+        1,
+        NameDescriptionEditor.where(user: user).count,
+        "Test needs a user who edited exactly one description"
+      )
+
+      login
+      get(:index, params: { by_editor: user })
+
+      assert_redirected_to(
+        %r{/names/descriptions/#{desc.id}}
+      )
     end
 
     def test_index_by_editor
