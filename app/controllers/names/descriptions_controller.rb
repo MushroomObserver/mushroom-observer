@@ -47,20 +47,22 @@ module Names
 
     # Display list of all (correctly-spelled) name_descriptions in the database.
     def list_all
+      return list_query_results if %w[by id q].intersect?(params.keys)
+
       sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
       query = create_query(:NameDescription, :all, by: sorted_by)
       show_selected_name_descriptions(query)
     end
 
-    # Display list of names in last index/search query.
-    def default_sort_order
-      ::Query::NameDescriptionBase.default_order
-    end
-
+    # Display list of name descriptions in last index/search query.
     def list_query_results
       query = find_or_create_query(:NameDescription, by: params[:by])
       show_selected_name_descriptions(query, id: params[:id].to_s,
                                              always_index: true)
+    end
+
+    def default_sort_order
+      ::Query::NameDescriptionBase.default_order
     end
 
     # Display list of name_descriptions that a given user is author on.
