@@ -75,6 +75,7 @@ module ThumbnailHelper
     if link_type == :naming ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
       html << caption_propose_naming_link(obs_data[:id])
+      html << content_tag(:div, "", class: "mx-4 d-inline-block")
       html << caption_mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
@@ -91,28 +92,31 @@ module ThumbnailHelper
     safe_join(links)
   end
 
-  def caption_propose_naming_link(id)
+  def caption_propose_naming_link(id, btn_class = "btn-primary my-3")
     link_to(
       :create_naming.t,
       new_observation_naming_path(observation_id: id,
                                   q: get_query_param),
-      { class: "btn btn-primary my-3 mr-5 d-inline-block",
+      { class: "btn #{btn_class} d-inline-block",
         remote: true }
     )
   end
 
-  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed")
-    # The matrix box checkbox updates if the caption checkbox changes.
-    # But keeping the caption checkbox in sync with the matrix box checkbox
-    # is blocked because the caption is not created. Updating it would only work
-    # with some additions to the lightbox JS, to update the checked state on
-    # show, and cost an extra db lookup. Not worth it IMO.
-    # - Nimmo 20230215
+  # NOTE: There are potentially two of these toggles for the same obs, on
+  # the obs_needing_ids index. Ideally, they'd be in sync. In reality:
+  # The matrix_box checkbox will update if the caption checkbox changes.
+  # But keeping the caption checkbox in sync with the matrix box checkbox
+  # is blocked because the caption is not created. Updating it would only work
+  # with some additions to the lightbox JS, to keep track of the checked
+  # state on show, and cost an extra db lookup. Not worth it, IMO.
+  # - Nimmo 20230215
+  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+                                      label_class = "")
     form_with(url: observation_view_path(id: id),
               class: "d-inline-block",
               method: :put, local: false) do |f|
       content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label("#{selector}_#{id}") do
+        f.label("#{selector}_#{id}", class: label_class) do
           concat(:mark_as_reviewed.t)
           concat(
             f.check_box(
