@@ -150,6 +150,16 @@ module Names
                     "Wrong number of results")
     end
 
+    def test_index_by_editor_of_no_descriptions
+      user = users(:zero_user)
+
+      login
+      get(:index, params: { by_editor: user.id })
+
+      assert_flash_text("No matching name descriptions found.")
+      assert_template("index")
+    end
+
     def test_index_by_editor
       login
       get(:index, params: { by_editor: rolf.id })
