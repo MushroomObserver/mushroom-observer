@@ -61,7 +61,7 @@ module Names
       user = desc.user
       assert_equal(
         1,
-        NameDescription.joins(:authors).where(user: user).count,
+        NameDescriptionAuthor.where(user: user).count,
         "Test needs a user who authored exactly one description"
       )
 
