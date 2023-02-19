@@ -72,27 +72,21 @@ module Names
     end
 
     def test_index_by_author_of_multiple_descriptions
-      skip "Fails, copied from Locations"
-      user = users(:dick)
+      user = users(:katrina)
       descs_authored_by_user_count = \
-        LocationDescription.joins(:authors).where(user: user).count
+        NameDescriptionAuthor.where(user: user).count
       assert_operator(
         descs_authored_by_user_count, :>, 1,
         "Test needs a user who authored multiple descriptions"
       )
 
       login
-      get(:index, params: { by_author: "controller ignores this value",
-                            id: user })
+      get(:index, params: { by_author: user })
 
       assert_template("index")
       assert_select("#title",
-                    text: "Location Descriptions Authored by #{user.name}")
-      assert_equal(
-        assert_select("#results").children.count,
-        LocationDescription.joins(:authors).where(user: user).count
-      )
-      assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
+        text: "Name Descriptions Authored by #{user.name}")
+      assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_authored_by_user_count },
                     "Wrong number of results")
     end
