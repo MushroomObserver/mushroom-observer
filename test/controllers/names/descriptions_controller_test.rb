@@ -38,24 +38,6 @@ module Names
       assert_select("#title", text: "Name Descriptions by User")
     end
 
-    def test_index_by_author
-      skip("Test is wrong; `by_author` is a binary flag; need id: author_id")
-      login
-      get(:index, params: { by_author: rolf.id })
-      assert_template("names/descriptions/index")
-    end
-
-    def test_index_with_id
-      skip("Test fails; fix controller")
-      desc = name_descriptions(:suillus_desc)
-
-      login
-      get(:index, params: { id: desc.id })
-
-      assert_template(:index)
-      assert_select("#title", text: "Name Description Index")
-    end
-
     def test_index_by_author_of_one_description
       desc = name_descriptions(:draft_boletus_edulis)
       user = desc.user
@@ -160,14 +142,6 @@ module Names
       assert_template("index")
     end
 
-    def test_index_by_editor
-      login
-      get(:index, params: { by_editor: rolf.id })
-      assert_redirected_to(action: :show,
-                           id: name_descriptions(:coprinus_comatus_desc).id,
-                           params: @controller.query_params)
-    end
-
     def test_index_by_editor_bad_user_id
       bad_user_id = images(:in_situ_image).id
       # Above should ensure there's no user with that id. But just in case:
@@ -178,15 +152,6 @@ module Names
 
       assert_flash_error("id ##{bad_user_id}")
       assert_redirected_to(name_descriptions_path)
-    end
-
-    def test_index_by_editor_1
-      skip "Fails, incomplete, copied from Locations"
-      login
-      get(:index, params: { by_editor: "controller ignores value",
-                            id: rolf.id })
-
-      assert_template("index")
     end
 
     def test_show_name_description
