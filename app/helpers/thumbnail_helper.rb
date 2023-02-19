@@ -89,7 +89,7 @@ module ThumbnailHelper
   def visual_group_status_link(visual_group, image_id, state, link)
     link_text = visual_group_status_text(link)
     state_text = visual_group_status_text(state)
-    return content_tag(:span, link_text) if link_text == state_text
+    return content_tag(:b, link_text) if link_text == state_text
 
     put_button(name: link_text,
                path: image_vote_path(id: image_id, vote: 1),
