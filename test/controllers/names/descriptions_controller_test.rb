@@ -169,7 +169,8 @@ module Names
     end
 
     def test_index_by_editor_bad_user_id
-      bad_user_id = 666
+      bad_user_id = images(:in_situ_image).id
+      # Above should ensure there's no user with that id. But just in case:
       assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
       login
