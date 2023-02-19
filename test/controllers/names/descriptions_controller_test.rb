@@ -129,6 +129,27 @@ module Names
       )
     end
 
+    def test_index_by_editor_of_multiple_descriptions
+      user = users(:mary)
+      [name_descriptions(:agaricus_desc),
+       name_descriptions(:suillus_desc)].each do |desc|
+        desc.editors = [user]
+        desc.save
+      end
+      descs_edited_by_user_count = \
+        NameDescriptionEditor.where(user: user).count
+
+      login
+      get(:index, params: { by_editor: user.id })
+
+      assert_template("index")
+      assert_select("#title",
+                    text: "Name Descriptions Edited by #{user.name}")
+      assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
+                    { count: descs_edited_by_user_count },
+                    "Wrong number of results")
+    end
+
     def test_index_by_editor
       login
       get(:index, params: { by_editor: rolf.id })
