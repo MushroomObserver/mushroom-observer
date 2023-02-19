@@ -75,7 +75,7 @@ module ThumbnailHelper
     if link_type == :naming ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
       html << caption_propose_naming_link(obs_data[:id])
-      html << content_tag(:div, "", class: "mx-4 d-inline-block")
+      html << content_tag(:span, "&nbsp;", class: "mx-2")
       html << caption_mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
@@ -93,13 +93,10 @@ module ThumbnailHelper
   end
 
   def caption_propose_naming_link(id, btn_class = "btn-primary my-3")
-    link_to(
-      :create_naming.t,
-      new_observation_naming_path(observation_id: id,
-                                  q: get_query_param),
-      { class: "btn #{btn_class} d-inline-block",
-        remote: true }
-    )
+    render(partial: "observations/namings/propose_button",
+           locals: { obs_id: id, text: :create_naming.t,
+                     btn_class: "#{btn_class} d-inline-block" },
+           layout: false)
   end
 
   # NOTE: There are potentially two of these toggles for the same obs, on
