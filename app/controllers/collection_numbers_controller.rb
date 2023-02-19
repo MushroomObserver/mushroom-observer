@@ -76,11 +76,11 @@ class CollectionNumbersController < ApplicationController
   private
 
   def default_index_subaction
-    list_collection_numbers
+    list_all
   end
 
   # Show list of collection_numbers.
-  def list_collection_numbers
+  def list_all
     store_location
     query = find_or_create_query(:CollectionNumber, by: params[:by])
     return show_selected_collection_numbers(query) if params[:id].blank?
@@ -101,6 +101,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # Display list of CollectionNumbers for an Observation
   def observation_id
     store_location
     query = create_query(:CollectionNumber, :for_observation,
