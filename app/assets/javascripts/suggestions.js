@@ -7,9 +7,9 @@ function SuggestionModule(ids, url, text) {
 
     button.on('click', function (event) {
       button.attr("disabled", "disabled");
-      var progress = $("#naming_ajax_progress_caption")
+      var progress = $("#mo_ajax_progress_caption")
         .html(text.suggestions_processing_images + "..." + whirly);
-      var progressModal = $("#naming_ajax_progress").modal("show");
+      var progressModal = $("#mo_ajax_progress").modal("show");
       var resetModal = function () {
         progress.empty();
         progressModal.modal("hide");
@@ -45,7 +45,7 @@ function SuggestionModule(ids, url, text) {
                 window.location.href = url;
             } else {
               progress.html(text.suggestions_error);
-              window.setTimeout(() => {
+              window.setTimeout(function () {
                 resetModal();
               }, 1000);
             }

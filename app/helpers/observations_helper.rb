@@ -120,17 +120,15 @@ module ObservationsHelper
     }
   end
 
+  # the "propose_naming_button" is turned into a modal trigger by JS
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
-    buttons << link_with_query(:show_namings_propose_new_name.t,
-                               new_observation_naming_path(
-                                 observation_id: observation.id
-                               ),
-                               { class: "btn btn-default" })
+    buttons << render(partial: "observations/namings/propose_button",
+                      locals: { observation: observation }, layout: false)
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
-                           class: "btn btn-default" })
+                           class: "btn btn-default mt-2" })
     end
     buttons.safe_join(tag.br)
   end
@@ -142,8 +140,9 @@ module ObservationsHelper
 
     if check_permission(naming)
       edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
-                                  class: "edit_naming_link_#{naming.id}")
-      delete_link = destroy_button(target: naming)
+                                  class: "edit_naming_link_#{naming.id}",
+                                  remote: true, onclick: "MOEvents.whirly();")
+      delete_link = destroy_button(target: naming, remote: true)
       proposer_links = [tag.br,
                         "[", edit_link, " | ", delete_link, "]"].safe_join
     else
@@ -184,20 +183,16 @@ module ObservationsHelper
      content_tag(:span, consensus_votes)].safe_join
   end
 
+  # Makes a link to naming_vote_path for no-js.
+  # The controller will render a modal if js request
   def pct_html(naming)
     percent = naming.vote_percent.round.to_s + "%"
 
-    if can_do_ajax?
-      content_tag(:button, h(percent),
-                  class: "vote-percent btn btn-link px-0",
-                  data: { toggle: "modal",
-                          id: naming.id.to_s,
-                          target: "#show_votes_#{naming.id}" })
-    else
-      link_with_query(h(percent),
-                      naming_vote_path(naming_id: naming.id),
-                      { class: "vote-percent" })
-    end
+    link_with_query(h(percent),
+                    naming_vote_path(naming_id: naming.id),
+                    { class: "vote-percent btn btn-link px-0",
+                      onclick: "MOEvents.whirly();",
+                      remote: true })
   end
 
   def num_votes_html(naming)
@@ -210,8 +205,7 @@ module ObservationsHelper
     [content_tag(:small, "#{:show_namings_your_vote.t}: ",
                  class: "visible-xs-block"),
      render(partial: "observations/namings/votes/form",
-            locals: { naming: naming,
-                      can_vote: check_permission(naming) })].safe_join
+            locals: { naming: naming })].safe_join
   end
 
   def eyes_html(observation, naming)

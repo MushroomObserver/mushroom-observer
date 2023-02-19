@@ -14,6 +14,16 @@ module Observations
         load_for_show_observation_or_goto_index(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
+
+      @observation = @params.observation
+      @reasons = @params.reasons
+
+      respond_to do |format|
+        format.html
+        format.js do
+          render(layout: false)
+        end
+      end
     end
 
     def create
@@ -23,6 +33,9 @@ module Observations
         load_for_show_observation_or_goto_index(params[:observation_id])
       fill_in_reference_for_suggestions(@params) if params[:naming].present?
       return unless @params.observation
+
+      @observation = @params.observation
+      @reasons = @params.reasons
 
       create_post
     end
@@ -39,6 +52,9 @@ module Observations
 
       @params.vote = naming.owners_vote
       @params.edit_init
+
+      @observation = @params.observation
+      @reasons = @params.reasons
     end
 
     def update
@@ -52,6 +68,9 @@ module Observations
       end
 
       @params.vote = naming.owners_vote
+
+      @observation = @params.observation
+      @reasons = @params.reasons
       edit_post
     end
 
@@ -61,7 +80,12 @@ module Observations
       if destroy_if_we_can(naming)
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
       end
-      default_redirect(naming.observation)
+      respond_to do |format|
+        format.html { default_redirect(naming.observation) }
+        format.js do
+          @observation = naming.observation
+        end
+      end
     end
 
     private
@@ -75,11 +99,20 @@ module Observations
     def create_post
       if rough_draft && can_save?
         save_changes
-        default_redirect(@params.observation, :show)
+        respond_to do |format|
+          format.html { default_redirect(@params.observation, :show) }
+          format.js
+        end
       else # If anything failed reload the form.
         flash_object_errors(@params.naming) if @params.name_missing?
         @params.add_reasons(param_lookup([:naming, :reasons]))
-        render(action: :new) and return
+        respond_to do |format|
+          format.html { render(action: :new) and return }
+          format.js do
+            @action = :create
+            render("form_reload") and return
+          end
+        end
       end
     end
 
@@ -140,10 +173,19 @@ module Observations
           unproposed_name(:runtime_edit_naming_someone_else) &&
           valid_use_of_imageless(@params.name, @params.observation))
         @params.need_new_naming? ? create_new_naming : change_naming
-        default_redirect(@params.observation)
+        respond_to do |format|
+          format.html { default_redirect(@params.observation) }
+          format.js
+        end
       else
         @params.add_reasons(param_lookup([:naming, :reasons]))
-        render(action: :edit) and return
+        respond_to do |format|
+          format.html { render(action: :edit) and return }
+          format.js do
+            @action = :update
+            render("form_reload") and return
+          end
+        end
       end
     end
 

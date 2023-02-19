@@ -613,13 +613,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Approve Name Synonyms: form and callback:
   get("names/:id/synonyms/approve/new", to: "names/synonyms/approve#new",
                                         as: "approve_name_synonym_form")
-  post("names/:id/synonyms", to: "names/synonyms/approve#create",
-                             as: "approve_name_synonym")
+  post("names/:id/synonyms/approve", to: "names/synonyms/approve#create",
+                                     as: "approve_name_synonym")
   # Deprecate Name Synonyms: form and callback:
   get("names/:id/synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
                                           as: "deprecate_name_synonym_form")
-  post("names/:id/synonyms", to: "names/synonyms/deprecate#create",
-                             as: "deprecate_name_synonym")
+  post("names/:id/synonyms/deprecate", to: "names/synonyms/deprecate#create",
+                                       as: "deprecate_name_synonym")
   # Name Trackers: form and callback:
   get("names/:id/trackers/new", to: "names/trackers#new",
                                 as: "new_name_tracker")

@@ -67,7 +67,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_select("div[class *='list-group comment']", count: comments.size)
+    assert_select(".comment", count: comments.size)
   end
 
   def test_show_comments_for_valid_target_without_comments

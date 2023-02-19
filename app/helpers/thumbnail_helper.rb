@@ -23,7 +23,9 @@ module ThumbnailHelper
       theater_on_click: false,
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
-      notes: ""
+      notes: "",
+      link_type: :target,
+      obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
   end
@@ -57,6 +59,64 @@ module ThumbnailHelper
       destroy_button(name: "", target: link,
                      class: "image-link ab-fab")
     end
+  end
+
+  def image_caption_html(image_id, obs_data, link_type)
+    html = []
+    if obs_data[:id].present?
+      html = image_observation_data(html, obs_data, link_type)
+    end
+    html << caption_image_links(image_id)
+    safe_join(html)
+  end
+
+  def image_observation_data(html, obs_data, link_type)
+    if link_type == :naming ||
+       (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
+      html << caption_propose_naming_link(obs_data)
+    end
+    html << caption_obs_title(obs_data)
+    html << render(partial: "observations/show/observation",
+                   locals: { observation: obs_data[:obs] })
+  end
+
+  # Disabled because interpolation produces unsafe html
+  def caption_image_links(image_id)
+    orig_url = Image.url(:original, image_id)
+    links = []
+    links << original_image_link(orig_url)
+    links << " | "
+    links << image_exif_link(image_id)
+    safe_join(links)
+  end
+
+  def caption_propose_naming_link(obs_data)
+    link_to(
+      :create_naming.t,
+      new_observation_naming_path(observation_id: obs_data[:id]),
+      { class: "btn btn-primary my-3 mr-3 d-inline-block",
+        target: "_blank", rel: "noopener" }
+    )
+  end
+
+  def caption_obs_title(obs_data)
+    content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
+                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
+  end
+
+  def original_image_link(orig_url)
+    link_to(:image_show_original.t, orig_url,
+            { class: "lightbox_link", target: "_blank", rel: "noopener" })
+  end
+
+  def image_exif_link(image_id)
+    content_tag(:button, :image_show_exif.t,
+                { class: "btn btn-link px-0 lightbox_link",
+                  data: {
+                    toggle: "modal",
+                    target: "#image_exif_modal",
+                    image: image_id
+                  } })
   end
 
   # Grab the copyright_text for an Image.

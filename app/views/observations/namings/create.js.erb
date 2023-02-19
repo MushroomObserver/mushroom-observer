@@ -1,0 +1,11 @@
+// What to do on ajax create
+
+// Are we on show_obs, or obs_needing_ids?
+if ($("#observation_namings").length) {
+  <%= render(partial: "observations/namings/update_page", format: :js) %>
+} else {
+  // send a success message for the lightbox
+}
+
+// Finally, remove the modal
+$("#modal_naming").modal('hide');

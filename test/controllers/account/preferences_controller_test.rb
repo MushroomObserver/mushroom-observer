@@ -30,6 +30,7 @@ module Account
       email_observations_consensus: "1",
       email_observations_naming: "1",
       hide_authors: "above_species",
+      image_size: "full_size",
       keep_filenames: "keep_but_hide",
       # license_id: licenses(:publicdomain).id.to_s,
       layout_count: "100",
@@ -65,6 +66,7 @@ module Account
       assert_input_value(:user_password_confirmation, "")
       assert_input_value(:user_thumbnail_maps, "1")
       assert_input_value(:user_view_owner_id, "1")
+      assert_input_value(:user_image_size, "medium")
       assert_input_value(:user_has_images, "")
       assert_input_value(:user_has_specimen, "")
       assert_input_value(:user_lichen, nil)
@@ -109,6 +111,7 @@ module Account
       assert_input_value(:user_email_observations_consensus, "1")
       assert_input_value(:user_email_observations_naming, "1")
       assert_input_value(:user_hide_authors, "above_species")
+      assert_input_value(:user_image_size, "full_size")
       assert_input_value(:user_keep_filenames, "keep_but_hide")
       assert_input_value(:user_license_id, licenses(:publicdomain).id.to_s)
       assert_input_value(:user_layout_count, "100")
@@ -162,6 +165,7 @@ module Account
       assert_equal("above_species", user.hide_authors)
       assert_equal("keep_but_hide", user.keep_filenames)
       assert_equal(100, user.layout_count)
+      assert_equal("full_size", user.image_size)
       assert_equal(licenses(:publicdomain), user.license)
       assert_equal("el", user.locale)
       assert_equal("scientific", user.location_format)

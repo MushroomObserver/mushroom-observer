@@ -99,7 +99,7 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
     login(user)
     visit(observation_path(obs.id))
     assert_difference("obs.collection_numbers.count", -1) do
-      page.find("#observation_collection_numbers").click_on("Remove")
+      page.find("#observation_collection_numbers_#{obs.id}").click_on("Remove")
     end
   end
 

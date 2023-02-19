@@ -33,7 +33,8 @@ body_class = whos_calling + theme_class
       <%= render(partial: "layouts/search_bar") %>
 
       <% if flash_notices? %>
-        <%= render(partial: "layouts/app/flash_notices") %>
+        <%= render(partial: "layouts/app/flash_notices",
+                   locals: { id: "flash_notices"}) %>
       <% end %>
       <% flash_clear %>
 
@@ -58,6 +59,9 @@ body_class = whos_calling + theme_class
 </div><!-- #main_container -->
 
 <%= render(partial: "shared/image_exif_modal") %>
+
+<!--AJAX PROGRESS WHIRLY -->
+<%= render(partial: "shared/modal_ajax_progress") %>
 
 <%= render(partial: "layouts/app/media_query_tests") %>
 

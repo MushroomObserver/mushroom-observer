@@ -1,0 +1,9 @@
+<%= link_to(:show_namings_propose_new_name.t,
+            new_observation_naming_path(
+              observation_id: observation.id,
+              q: get_query_param
+            ),
+            { remote: true, onclick: "MOEvents.whirly();",
+              class: "btn btn-default propose-naming-button",
+              id: "propose_naming_button",
+              data: { obs: observation.id.to_s } }) %>
