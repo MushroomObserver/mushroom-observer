@@ -12,7 +12,8 @@ class VisualGroupsController < ApplicationController
   def show
     @filter = params[:filter]
     @visual_group = VisualGroup.find(params[:id])
-    @vals = calc_show_vals(calc_layout_params["count"])
+    @vals = calc_show_vals
+    setup_pagination
   end
 
   # GET /visual_groups/new
@@ -28,7 +29,15 @@ class VisualGroupsController < ApplicationController
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""
     @status = status_from_params(params)
-    @vals = calc_edit_vals(calc_layout_params["count"])
+    @vals = calc_edit_vals
+    setup_pagination
+  end
+
+  def setup_pagination
+    @pages = MOPaginator.new(number_arg: :page, number: params[:page],
+                             num_per_page: calc_layout_params["count"])
+    @pages.num_total = @vals.length
+    @subset = @vals[@pages.from..@pages.to]
   end
 
   def status_from_params(params)
@@ -83,22 +92,20 @@ class VisualGroupsController < ApplicationController
     params.require(:visual_group).permit(:name, :approved, :description)
   end
 
-  def calc_show_vals(count)
+  def calc_show_vals
     if !@filter || @filter == ""
-      @visual_group.visual_group_images.where(included: true).
-        pluck(:image_id, :included)
-    else
-      vgi = VisualGroupImages.new(@filter, true, count)
-      vgi.vals
+      return @visual_group.visual_group_images.where(included: true).
+             pluck(:image_id, :included)
     end
+    VisualGroupImages.new(@filter, true).vals
   end
 
-  def calc_edit_vals(count)
+  def calc_edit_vals
     if @status != "needs_review"
       return @visual_group.visual_group_images.
              where(included: @status != "excluded").pluck(:image_id, :included)
     end
-    VisualGroupImages.new(@filter, nil, count).vals
+    VisualGroupImages.new(@filter, nil).vals
   end
 
   def save_visual_group
