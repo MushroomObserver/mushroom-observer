@@ -100,10 +100,10 @@ module ThumbnailHelper
   end
 
   # NOTE: There are potentially two of these toggles for the same obs, on
-  # the obs_needing_ids index. Ideally, they'd be in sync. In reality:
-  # Only the matrix_box checkbox will update if the caption checkbox changes.
-  # But updating the caption checkbox in sync with the matrix box checkbox
-  # is blocked because the caption is not created. Updating it would only work
+  # the obs_needing_ids index. Ideally, they'd be in sync. In reality, only
+  # the matrix_box (page) checkbox will update if the (lightbox) caption
+  # checkbox changes. Updating the lightbox checkbox to stay sync with the page
+  # is harder because the caption is not created. Updating it would only work
   # with some additions to the lightbox JS, to keep track of the checked
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
