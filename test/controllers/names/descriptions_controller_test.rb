@@ -57,20 +57,18 @@ module Names
     end
 
     def test_index_by_author_of_one_description
-      skip "Fails, copied from Locations"
-      desc = location_descriptions(:albion_desc)
-      user = users(:rolf)
+      desc = name_descriptions(:draft_boletus_edulis)
+      user = desc.user
       assert_equal(
         1,
-        LocationDescription.joins(:authors).where(user: user).count,
+        NameDescription.joins(:authors).where(user: user).count,
         "Test needs a user who authored exactly one description"
       )
 
       login
-      get(:index, params: { by_author: "controller ignores this value",
-                            id: user })
+      get(:index, params: { by_author: user })
 
-      assert_redirected_to(/#{location_description_path(desc)}/)
+      assert_redirected_to(/#{name_description_path(desc)}/)
     end
 
     def test_index_by_author_of_multiple_descriptions

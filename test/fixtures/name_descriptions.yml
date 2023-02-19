@@ -98,6 +98,7 @@ draft_agaricus_campestris:
   public: 0
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
+# NOTE: Do not make dick an author of another description. It would break tests.
 draft_boletus_edulis:
   <<: *DEFAULTS
   name: boletus_edulis
