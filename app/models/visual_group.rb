@@ -33,7 +33,7 @@ class VisualGroup < AbstractModel
   end
 
   def distinct_names
-    VisualGroup.connection.select_rows(VisualGroupNames.new(id).sql_query)
+    VisualGroup.connection.select_rows(VisualGroupNames.new(id, 10).sql_query)
   end
 
   def included_image_ids

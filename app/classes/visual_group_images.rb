@@ -13,16 +13,16 @@ class VisualGroupImages
     add_order_and_limit(count)
   end
 
-  def add_order_and_limit(count)
-    query.order(attribute(:observations, :vote_cache).desc)
-    query.take(count) unless count.nil?
-  end
-
   def vals
     VisualGroup.connection.select_rows(query.to_sql)
   end
 
   private
+
+  def add_order_and_limit(count)
+    query.order(attribute(:observations, :vote_cache).desc)
+    query.take(count) unless count.nil?
+  end
 
   def tables
     @tables ||= {
