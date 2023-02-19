@@ -97,11 +97,11 @@ class MatrixBoxPresenter
     end
     return unless observation.thumb_image
 
-    # This allows an obs box to link to a naming form, or show_obs
-    # Thumbnail can likewise have a "propose a name" link
+    # link_type allows an obs box to link to show_obs, or something else
+    # thumbnail_helper uses this to maybe add a "propose a name" link
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: obs_or_naming_link(observation, link_type),
+                     link: obs_or_other_link(observation, link_type),
                      link_type: link_type, link_method: link_method,
                      obs_data: obs_data_hash(observation))
   end
@@ -133,14 +133,9 @@ class MatrixBoxPresenter
     time&.fancy_time
   end
 
-  def obs_or_naming_link(observation, link_type)
-    if link_type == :naming
-      { controller: "/observations/namings", action: :new,
-        observation_id: observation.id }
-    else
-      { controller: "/observations", action: :show,
-        id: observation.id }
-    end
+  def obs_or_other_link(observation, _link_type)
+    { controller: "/observations", action: :show,
+      id: observation.id }
   end
 
   def obs_data_hash(observation)
