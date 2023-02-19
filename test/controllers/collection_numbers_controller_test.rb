@@ -3,13 +3,13 @@
 require("test_helper")
 
 class CollectionNumbersControllerTest < FunctionalTestCase
-  def test_collection_index
+  def test_index
     login
     get(:index)
     assert_template(:index)
   end
 
-  def test_observation_index_with_one_collection_number
+  def test_index_observation_id_with_one_collection_number
     obs = observations(:minimal_unknown_obs)
     assert_equal(1, obs.collection_numbers.count)
     login
@@ -18,7 +18,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_observation_index_with_multiple_collection_numbers
+  def test_index_observation_id_with_multiple_collection_numbers
     obs = observations(:detailed_unknown_obs)
     assert_operator(obs.collection_numbers.count, :>, 1)
     login
@@ -27,7 +27,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_observation_index_with_no_collection_numbers
+  def test_index_observation_id_with_no_hits
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
     login
@@ -36,7 +36,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/no matching collection numbers found/i)
   end
 
-  def test_pattern_search_str
+  def test_index_pattern_str_with_multiple_hits
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
     login
@@ -47,7 +47,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("#results tr", numbers.count)
   end
 
-  def test_pattern_id
+  def test_index_pattern_id_with_one_hit
     id = collection_numbers(:minimal_unknown_coll_num).id
 
     login
@@ -56,7 +56,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_redirected_to(collection_number_path(id))
   end
 
-  def test_collection_number_search_by_number
+  def test_index_pattern_number
     col = collection_numbers(:minimal_unknown_coll_num)
     number = col.number
     login
@@ -67,7 +67,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     )
   end
 
-  def test_collection_number_search_with_one_collection_number_index
+  def test_index_pattern_str_matching_with_one_collection_number_index
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
     login
