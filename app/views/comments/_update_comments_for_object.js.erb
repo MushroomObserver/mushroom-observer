@@ -1,0 +1,4 @@
+// This should render comments_for_object and hide the modal.
+// comments_for_object needs locals, create or update should provide.
+
+$("#comments_for_object").replaceWith('<%= j render(partial: "comments/comments_for_object", locals: { object: @target, controls: true, limit: nil }, layout: false) %>');

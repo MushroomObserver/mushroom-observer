@@ -17,7 +17,6 @@
   }
 }
 
-
 //
 // lightbox activator button
 // --------------------------------------------------
@@ -42,4 +41,14 @@
     border: 1px solid;
     text-decoration: none;
   }
+}
+
+//
+// user thumbnails for comments, etc
+// --------------------------------------------------
+
+.thumbnail-container-user {
+  max-width: 160px;
+  max-height: 160px;
+  position: relative;
 }
