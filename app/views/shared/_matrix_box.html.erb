@@ -46,8 +46,10 @@ object_id = object&.id.present? ? object.id : "no_ID"
         </div><!-- .rss-fancy-time -->
       </div><!-- .panel-body -->
       <% if identify %>
-        <%= content_tag(:div,
-              class: "panel-footer text-center position-relative") do
+        <%= content_tag(
+              :div,
+              class: "panel-footer panel-active text-center position-relative"
+            ) do
           caption_mark_as_reviewed_toggle(object_id, "box_reviewed",
                                           "stretched-link")
         end %>
