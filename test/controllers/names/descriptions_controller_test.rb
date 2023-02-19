@@ -92,18 +92,13 @@ module Names
     end
 
     def test_index_by_author_of_no_descriptions
-      skip "Fails, copied from Locations"
       user = users(:zero_user)
 
       login
-      get(:index, params: { by_author: nil,
-                            id: user })
+      get(:index, params: { by_author: user })
 
+      assert_flash_text("No matching name descriptions found.")
       assert_template("index")
-      assert_select("#title", text: "Location Description Index")
-      assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
-                    { count: LocationDescription.count },
-                    "Wrong number of results")
     end
 
     def test_index_by_author_bad_user_id
