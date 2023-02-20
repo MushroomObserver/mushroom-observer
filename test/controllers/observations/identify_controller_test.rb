@@ -47,8 +47,22 @@ module Observations
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 5)
 
-      # vote on an unconfident naming and check the new obs_count
-      # On the site, this happens via JS, but there should be a cast vote button
+      # Vote on the first unconfident naming and check the new obs_count
+      # On the site, this happens via JS, so we'll do it directly
+      new_cal_obs = Observation.needs_identification(users(:mary)).
+                    in_region("California, USA")
+      # Have to check for an actual naming, because some obs have no namings,
+      # and obs.name_id.present? doesn't necessarily mean there's a naming
+      not_confident = new_cal_obs.where(vote_cache: ..0)
+      with_naming = not_confident.each_with_index do |obs, i|
+        break i if obs.namings&.first&.id
+      end
+      vote_on_obs = not_confident[with_naming]
+      vote_on_obs.change_vote(vote_on_obs.namings.first, 1)
+
+      get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      assert_no_flash
+      assert_select(".matrix-box", cal_obs_count - 6)
     end
   end
 end
