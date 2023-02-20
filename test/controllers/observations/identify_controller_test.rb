@@ -22,7 +22,7 @@ module Observations
       # On the site, this happens via JS, so directly update the obs
 
       # vote on an unconfident naming and check the new obs_count
-      # On the site, this happens via JS, so directly update the naming vote
+      # On the site, this happens via JS, but there should be a cast vote button
     end
   end
 end
