@@ -22,6 +22,7 @@ adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
 )
+identify_page = controller.controller_name == "identify"
 
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
