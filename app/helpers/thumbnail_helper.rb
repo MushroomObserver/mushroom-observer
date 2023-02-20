@@ -113,7 +113,8 @@ module ThumbnailHelper
               class: "d-inline-block",
               method: :put, local: false) do |f|
       content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label("#{selector}_#{id}", class: label_class) do
+        f.label("#{selector}_#{id}",
+                class: "caption-reviewed-link #{label_class}") do
           concat(:mark_as_reviewed.t)
           concat(
             f.check_box(
