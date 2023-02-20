@@ -3,11 +3,12 @@
 class VisualGroupNames
   attr_accessor :query
 
-  def initialize(visual_group_id)
+  def initialize(visual_group_id, count = nil)
     self.query = tables[:observation_images]
     add_joins
     add_project
     add_conditions(visual_group_id)
+    add_order_and_limit(count)
   end
 
   def sql_query
@@ -15,6 +16,11 @@ class VisualGroupNames
   end
 
   private
+
+  def add_order_and_limit(count)
+    query.order(attribute(:names, :text_name).asc)
+    query.take(count) unless count.nil?
+  end
 
   def tables
     @tables ||= {

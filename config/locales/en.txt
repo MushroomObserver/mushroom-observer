@@ -2636,7 +2636,7 @@
   visual_group_count_included: "[count] Definitional Images"
   visual_group_count_needs_review: "[count] Images have been reviewed"
 
-  visual_group_includes_names: Includes images from these names
+  visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
   visual_group_index: "[:VISUAL_GROUP] Index"
