@@ -6,6 +6,6 @@ module HerbariaHelper
     User.joins(:herbarium_records).
       where(HerbariumRecord[:id].eq(herbarium.id)).
       select(User[:name], User[:login], User[:id].count).
-      group(User[:id]).order("COUNT(`users`.`id`) DESC").take(5)
+      group(User[:id]).order(User[:id].count.desc).take(5)
   end
 end
