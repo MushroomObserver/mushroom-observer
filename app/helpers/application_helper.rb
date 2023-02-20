@@ -234,7 +234,11 @@ module ApplicationHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent
-    "<span class='ml-10px'>&nbsp;</span>".html_safe
+    content_tag(:span, "&nbsp;".html_safe, class: "ml-10px")
+  end
+
+  def spacer
+    content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
   end
 
   def content_tag_if(condition, name, content_or_options_with_block = nil,
