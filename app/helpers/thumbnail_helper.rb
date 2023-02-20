@@ -75,7 +75,7 @@ module ThumbnailHelper
     if link_type == :naming ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
       html << caption_propose_naming_link(obs_data[:id])
-      html << content_tag(:span, "&nbsp;", class: "mx-2")
+      html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
       html << caption_mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
