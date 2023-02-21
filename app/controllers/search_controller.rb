@@ -24,7 +24,13 @@ class SearchController < ApplicationController
     session[:pattern] = pattern
     session[:search_type] = type
 
-    special_params = type == :herbarium ? { flavor: :all } : {}
+    special_params = if type == :herbarium
+                       { flavor: :all }
+                     elsif params[:needs_id] == "true"
+                       { needs_id: true }
+                     else
+                       {}
+                     end
 
     forward_pattern_search(type, pattern, special_params)
   end
@@ -63,6 +69,7 @@ class SearchController < ApplicationController
     end
   end
 
+  # In the case of "needs_id", this is added to the search path params
   def forward_pattern_search(type, pattern, special_params)
     case type
     when :google
@@ -71,7 +78,8 @@ class SearchController < ApplicationController
          :observation, :project, :species_list, :user
       redirect_to_search_or_index(
         pattern: pattern,
-        search_path: send("#{type.to_s.pluralize}_path", pattern: pattern),
+        search_path: send("#{type.to_s.pluralize}_path",
+                          params: { pattern: pattern }.merge(special_params)),
         index_path: send("#{type.to_s.pluralize}_path", special_params)
       )
     else
