@@ -27,6 +27,44 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Comments on #{target.id}")
   end
 
+  def test_index_target_with_comments
+    target = observations(:minimal_unknown_obs)
+    params = { type: target.class.name, target: target.id }
+    comments = Comment.where(target_type: target.class.name, target: target)
+
+    login
+    get(:index, params: params)
+    assert_select(".comment", count: comments.size)
+  end
+
+  def test_index_target_valid_target_without_comments
+    target = names(:conocybe_filaris)
+    params = { type: target.class.name, target: target.id }
+
+    login
+    get(:index, params: params)
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+  end
+
+  def test_index_target_invalid_target_type
+    target = api_keys(:rolfs_api_key)
+    params = { type: target.class.name, target: target.id }
+
+    login
+    get(:index, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                                         value: params[:type].to_s))
+  end
+
+  def test_index_target_for_non_model
+    params = { type: "Hacker", target: 666 }
+
+    login
+    get(:index, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                                         value: params[:type].to_s))
+  end
+
   def test_index_pattern_id
     id = comments(:fungi_comment).id
 
@@ -48,20 +86,13 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("#title").text.downcase == "comments matching '#{search_str}'"
   end
 
-  def test_show_comment
-    login
-    get(:show,
-        params: { id: comments(:minimal_unknown_obs_comment_1).id })
-    assert_template("show")
-  end
-
-  def test_show_comments_for_user
+  def test_index_for_user
     login
     get(:index, params: { for_user: rolf.id })
     assert_template("index")
   end
 
-  def test_show_comments_by_user
+  def test_index_by_user
     login
     get(:index, params: { by_user: rolf.id })
     assert_redirected_to(action: "show",
@@ -69,42 +100,11 @@ class CommentsControllerTest < FunctionalTestCase
                          params: @controller.query_params(QueryRecord.last))
   end
 
-  def test_show_comments_for_target_with_comments
-    target = observations(:minimal_unknown_obs)
-    params = { type: target.class.name, target: target.id }
-    comments = Comment.where(target_type: target.class.name, target: target)
-
+  def test_show_comment
     login
-    get(:index, params: params)
-    assert_select(".comment", count: comments.size)
-  end
-
-  def test_show_comments_for_valid_target_without_comments
-    target = names(:conocybe_filaris)
-    params = { type: target.class.name, target: target.id }
-
-    login
-    get(:index, params: params)
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
-  end
-
-  def test_show_comments_for_invalid_target_type
-    target = api_keys(:rolfs_api_key)
-    params = { type: target.class.name, target: target.id }
-
-    login
-    get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
-  end
-
-  def test_show_comments_for_non_model
-    params = { type: "Hacker", target: 666 }
-
-    login
-    get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    get(:show,
+        params: { id: comments(:minimal_unknown_obs_comment_1).id })
+    assert_template("show")
   end
 
   def test_add_comment
