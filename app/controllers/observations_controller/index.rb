@@ -124,7 +124,7 @@ module ObservationsController::Index
       @suggest_alternate_spellings = search.query.params[:pattern]
       if params[:needs_id]
         redirect_to({ controller: "/observations/identify", action: :index,
-                      q: get_query_param })
+                      q: get_query_param(search.query) })
       else
         show_selected_observations(
           search.query, no_hits_title: :title_for_observation_search.t
