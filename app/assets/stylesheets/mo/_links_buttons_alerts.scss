@@ -6,6 +6,10 @@ a:not(.btn):visited {
   color: $LINK_VISITED_FG_COLOR;
 }
 
+.navbar a:visited {
+  color: inherit;
+}
+
 //
 // alerts
 // --------------------------------------------------
