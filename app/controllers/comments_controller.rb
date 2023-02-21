@@ -38,18 +38,18 @@ class CommentsController < ApplicationController
   private
 
   def default_index_subaction
-    list_comments
+    list_all
   end
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def index_comment
+  def list_query_results
     query = find_or_create_query(:Comment, by: params[:by])
     show_selected_comments(query, id: params[:id].to_s, always_index: true)
   end
 
   # Show list of latest comments. (Linked from left panel.)
-  def list_comments
+  def list_all
     sorted_by = params[:by].present? ? params[:by].to_s : :created_at
     query = create_query(:Comment, :all, by: sorted_by)
     show_selected_comments(query)
