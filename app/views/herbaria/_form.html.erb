@@ -25,7 +25,7 @@
         </div>
         <% if button_name != :CREATE %>
           <%= help_block_with_arrow("up") do %>
-            <% top_users = herbarium_top_users(@herbarium)
+            <% top_users = herbarium_top_users(@herbarium.id)
                top_users.each do |name, login, count| %>
               <%= :edit_herbarium_user_records.t(
                     name: "#{name} (#{login})", num: count
