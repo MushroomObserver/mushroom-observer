@@ -18,15 +18,6 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Comments by #{by.capitalize}")
   end
 
-  def test_index_target
-    target = observations(:minimal_unknown_obs)
-
-    login
-    get(:index, params: { type: "Observation", target: target.id })
-
-    assert_select("#title", text: "Comments on #{target.id}")
-  end
-
   def test_index_target_with_comments
     target = observations(:minimal_unknown_obs)
     params = { type: target.class.name, target: target.id }
@@ -35,6 +26,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
+    assert_select("#title", text: "Comments on #{target.id}")
   end
 
   def test_index_target_valid_target_without_comments
