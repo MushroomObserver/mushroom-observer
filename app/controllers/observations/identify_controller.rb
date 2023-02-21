@@ -14,8 +14,8 @@ module Observations
                                         old_query.params.merge(needs_id: true))
       show_index_of_objects(new_query,
                             { matrix: true,
-                              include: [:name, :location, :user, :namings,
-                                        :rss_log, { name: :synonym },
+                              include: [:location, :user, :rss_log,
+                                        { name: :synonym },
                                         { namings: :name },
                                         { thumb_image: :image_votes }] })
     end
