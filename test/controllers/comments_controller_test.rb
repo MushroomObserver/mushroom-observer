@@ -18,6 +18,15 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Comments by #{by.capitalize}")
   end
 
+  def test_index_target
+    target = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { type: "Observation", target: target.id })
+
+    assert_select("#title", text: "Comments on #{target.id}")
+  end
+
   def test_index_pattern_id
     id = comments(:fungi_comment).id
 
