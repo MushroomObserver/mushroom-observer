@@ -3,7 +3,7 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
-  def test_list_comments
+  def test_index_list_all
     login
     get(:index)
     assert_template("index")
