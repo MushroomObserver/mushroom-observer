@@ -42,10 +42,8 @@ module ThumbnailHelper
 
   # NOTE: The local var `link` might be to #show_image as you'd expect,
   # or it may be a GET with params[:img_id] to the actions for #reuse_image
-  # or #remove_image ...or any other link. Firing a POST to those actions
-  # might require printing a Rails post_button and putting something like
-  # Bootstrap's .stretched-link class on the generated form input.
-  # However, the whole reuse_image page is currently a form - refactor?
+  # or #remove_image ...or any other link.
+  # These use .ab-fab instead of .stretched-link so .theater-btn is clickable
   def image_link_html(link = "", link_method = :get)
     case link_method
     when :get
