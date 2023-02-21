@@ -21,14 +21,14 @@
     "full_size" => full_url
   }
   lightbox_url = (usize = User.current&.image_size) ? p_map[usize] : huge_url
-  caption = image_caption_html(image_id, obs_data, link_type)
+  caption = image_caption_html(image_id, obs_data, identify)
 
   # Show original name?
   show_original_name = original && image && !image.original_name.blank? &&
     (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show")
 
   # FIXME: Pass a srcset attribute, or symbol, from context for true responsive
-  image_link = image_link_html(link, link_method)
+  image_link = image_link_html(link, :get)
 %>
 
 <div class="position-relative">

@@ -16,6 +16,7 @@ module ThumbnailHelper
     locals = {
       image: image,
       link: image_path(image_id),
+      link_type: :target, # or :remote
       link_method: :get,
       size: :small,
       votes: true,
@@ -24,7 +25,7 @@ module ThumbnailHelper
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
       notes: "",
-      link_type: :target,
+      identify: false,
       obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
@@ -62,17 +63,17 @@ module ThumbnailHelper
     end
   end
 
-  def image_caption_html(image_id, obs_data, link_type)
+  def image_caption_html(image_id, obs_data, identify)
     html = []
     if obs_data[:id].present?
-      html = image_observation_data(html, obs_data, link_type)
+      html = image_observation_data(html, obs_data, identify)
     end
     html << caption_image_links(image_id)
     safe_join(html)
   end
 
-  def image_observation_data(html, obs_data, link_type)
-    if link_type == :naming ||
+  def image_observation_data(html, obs_data, identify)
+    if identify ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
       html << caption_propose_naming_link(obs_data[:id])
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
