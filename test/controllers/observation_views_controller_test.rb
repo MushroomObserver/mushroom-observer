@@ -13,9 +13,8 @@ class ObservationViewsControllerTest < FunctionalTestCase
 
     # Have to create the o_v, none existing
     obs.take(5).pluck(:id).each do |id|
-      ObservationView.create({ observation_id: id,
-                               user_id: users(:mary).id,
-                               reviewed: true })
+      put(:update, params: { id: id, reviewed: "1" })
+      assert_redirected_to(identify_observations_path)
     end
 
     now_obs = Observation.needs_identification(users(:mary))

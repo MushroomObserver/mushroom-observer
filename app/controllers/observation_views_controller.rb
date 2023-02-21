@@ -9,12 +9,18 @@ class ObservationViewsController < ApplicationController
     # basic sanitizing of the param. ivars needed in js response
     # checked is a string!
     @reviewed = params[:reviewed] == "1"
-    @obs_id = params[:id].to_s
-    ov = ObservationView.update_view_stats(@obs_id, User.current_id)
+    return unless (obs = Observation.find(params[:id]))
 
+    # update_view_stats creates an o_v if it doesn't exist
+    @obs_id = obs.id # ivar used in the js template
+    ov = ObservationView.update_view_stats(@obs_id, User.current_id)
+    # now we can update it
     ov.update(reviewed: @reviewed)
     respond_to do |format|
       format.js
+      format.html do
+        return redirect_to(identify_observations_path)
+      end
     end
   end
 end
