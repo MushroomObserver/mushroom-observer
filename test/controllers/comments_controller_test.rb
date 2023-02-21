@@ -9,15 +9,6 @@ class CommentsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
-  def test_index_sorted_by_user
-    by = "user"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_select("#title", text: "Comments by #{by.capitalize}")
-  end
-
   def test_index_target_with_comments
     target = observations(:minimal_unknown_obs)
     params = { type: target.class.name, target: target.id }
@@ -90,6 +81,15 @@ class CommentsControllerTest < FunctionalTestCase
     assert_redirected_to(action: "show",
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
+  end
+
+  def test_index_by_non_default_sort_order
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Comments by #{by.capitalize}")
   end
 
   def test_show_comment
