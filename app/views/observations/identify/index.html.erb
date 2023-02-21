@@ -6,8 +6,9 @@
 
   flash_error(@error) if @error && @objects.empty?
 %>
+<%= content_tag(:div, :obs_needing_id_intro.t, class: "container-text") %>
 
-<!--NAME AUTOCOMPLETE INSTANCE FOR REUSE IN MODALS-->
+<!--NAME AUTOCOMPLETE INSTANCE FOR REUSE IN NAMING MODALS-->
 <%= render(partial: "shared/form_name_autocomplete") %>
 
 <% # initializes module with translations for js messages

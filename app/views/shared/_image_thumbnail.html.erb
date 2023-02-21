@@ -25,7 +25,8 @@
 
   # Show original name?
   show_original_name = original && image && !image.original_name.blank? &&
-    (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show")
+    (check_permission(image) ||
+     image.user && image.user.keep_filenames == "keep_and_show")
 %>
 
 <div class="position-relative">
