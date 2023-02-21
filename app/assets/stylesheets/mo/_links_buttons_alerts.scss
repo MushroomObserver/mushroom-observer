@@ -2,12 +2,15 @@
 // link, button, alert themed styles
 // --------------------------------------------------
 
-a:not(.btn):visited {
+a:not(.btn):not(.list-group-item):visited {
   color: $LINK_VISITED_FG_COLOR;
 }
 
-.navbar a:visited {
-  color: inherit;
+.navbar {
+  a,
+  a:visited {
+    color: $LINK_FG_COLOR !important;
+  }
 }
 
 //
