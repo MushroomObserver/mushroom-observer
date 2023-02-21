@@ -114,12 +114,22 @@ module ObservationsController::Index
       search.errors.each do |error|
         flash_error(error.to_s)
       end
-      render("index", location: observations_path)
+      if params[:needs_id]
+        redirect_to({ controller: "/observations/identify", action: :index,
+                      q: get_query_param })
+      else
+        render("index", location: observations_path)
+      end
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      show_selected_observations(
-        search.query, no_hits_title: :title_for_observation_search.t
-      )
+      if params[:needs_id]
+        redirect_to({ controller: "/observations/identify", action: :index,
+                      q: search.query })
+      else
+        show_selected_observations(
+          search.query, no_hits_title: :title_for_observation_search.t
+        )
+      end
     end
   end
 
