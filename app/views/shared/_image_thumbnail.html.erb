@@ -26,9 +26,6 @@
   # Show original name?
   show_original_name = original && image && !image.original_name.blank? &&
     (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show")
-
-  # FIXME: Pass a srcset attribute, or symbol, from context for true responsive
-  image_link = image_link_html(link, :get)
 %>
 
 <div class="position-relative">
@@ -38,7 +35,7 @@
         <%= image_tag(size_url, title: notes,
                       class: "img-fluid #{extra_classes}",
                       data: { toggle: "tooltip", placement: "bottom" }) %>
-        <%= image_link %>
+        <%= image_link_html(link, link_method) %>
       </div>
       <%= link_to("", lightbox_url,
                   class: "glyphicon glyphicon-fullscreen theater-btn",
