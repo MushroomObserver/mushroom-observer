@@ -496,6 +496,10 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: { error: "" } })
     assert_template(:index)
+
+    # Bad pattern from obs_needing_ids should render that index instead
+    get(:index, params: { pattern: { error: "" }, needs_id: true })
+    assert_redirected_to(identify_observations_path)
   end
 
   def test_observation_search_with_spelling_correction
