@@ -69,18 +69,54 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("#title").text.downcase == "comments matching '#{search_str}'"
   end
 
-  def test_index_for_user
-    login
-    get(:index, params: { for_user: rolf.id })
-    assert_template("index")
-  end
+  def test_index_by_user_who_created_one_comment
+    user = rolf
+    assert_equal(1, Comment.where(user: user).count)
 
-  def test_index_by_user
     login
     get(:index, params: { by_user: rolf.id })
+
     assert_redirected_to(action: "show",
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
+  end
+
+  def test_index_by_user_who_created_multiple_comments
+    user = rolf
+    another_comment_by_user= comments(:detailed_unknown_obs_comment)
+    another_comment_by_user.user = user
+    another_comment_by_user.save
+    comments_by_user_count = Comment.where(user: user).count
+    assert_operator(comments_by_user_count, :>, 1)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_select("#title", text: "Comments created by #{user.name}")
+    # All Rolf's Comments are Observations, so the results should have
+    # as many links to Observations as Rolf has Comments
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+}, # match links to observations
+      { count: comments_by_user_count },
+      "Wrong number of links to Observations in results"
+    )
+  end
+
+  def test_index_by_user_who_created_no_comments
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+  end
+
+  def test_index_for_user_one_comment
+    login
+    get(:index, params: { for_user: rolf.id })
+
+    assert_template("index")
   end
 
   def test_index_by_non_default_sort_order
