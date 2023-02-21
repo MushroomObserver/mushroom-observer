@@ -41,18 +41,24 @@ class CommentsController < ApplicationController
     list_all
   end
 
+  # Show list of latest comments. (Linked from left panel.)
+  def list_all
+    return list_query_results if params.key?(:by)
+
+    query = create_query(:Comment, :all, by: default_sort_order)
+    show_selected_comments(query)
+  end
+
+  def default_sort_order
+    ::Query::CommentBase.default_order
+  end
+
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
   def list_query_results
-    query = find_or_create_query(:Comment, by: params[:by])
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
+    query = find_or_create_query(:Comment, by: sorted_by)
     show_selected_comments(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Show list of latest comments. (Linked from left panel.)
-  def list_all
-    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
-    query = create_query(:Comment, :all, by: sorted_by)
-    show_selected_comments(query)
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
