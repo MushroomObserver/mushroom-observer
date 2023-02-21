@@ -81,10 +81,16 @@ class CollectionNumbersController < ApplicationController
 
   # Show list of collection_numbers.
   def list_all
-    store_location
-    query = find_or_create_query(:CollectionNumber, by: params[:by])
-    return show_selected_collection_numbers(query) if params[:id].blank?
+    return list_query_results if %w[by id q].intersect?(params.keys)
 
+    store_location
+    query = create_query(:CollectionNumber, :all)
+    show_selected_collection_numbers(query)
+  end
+
+  # Displays matrix of selected CollectionNumber's (based on current Query).
+  def list_query_results
+    query = find_or_create_query(:CollectionNumber, by: params[:by])
     show_selected_collection_numbers(query, id: params[:id].to_s,
                                             always_index: true)
   end
