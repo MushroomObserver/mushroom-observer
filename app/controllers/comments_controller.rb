@@ -63,7 +63,10 @@ class CommentsController < ApplicationController
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
   def by_user
-    user = find_or_goto_index(User, params[:by_user].to_s) || @user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: comments_path
+    )
     return unless user
 
     query = create_query(:Comment, :by_user, user: user)
