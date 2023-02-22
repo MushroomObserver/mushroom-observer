@@ -70,7 +70,8 @@ class CommentsController < ApplicationController
     show_selected_comments(query)
   end
 
-  # Shows comments for a given user, most recent first. (Linked from show_user.)
+  # Shows comments for a given user's Observations, most recent first.
+  # (Linked from show_user.)
   def for_user
     user = find_or_goto_index(User, params[:for_user].to_s) || @user
     return unless user

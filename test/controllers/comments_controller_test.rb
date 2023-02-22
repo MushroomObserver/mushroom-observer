@@ -112,11 +112,37 @@ class CommentsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_no_matches.l(types: "comments"))
   end
 
-  def test_index_for_user_one_comment
+  def test_index_for_user_who_received_multiple_comments
+    user = mary
+
     login
-    get(:index, params: { for_user: rolf.id })
+    get(:index, params: { for_user: user.id })
 
     assert_template("index")
+    assert_select("#title", text: "Comments for #{user.name}")
+  end
+
+  def test_index_for_user_who_received_one_comment
+    user = dick
+    # Change comment to be on one of Dick's Observations
+    comment = comments(:minimal_unknown_obs_comment_1)
+    target = observations(:owner_refuses_general_questions)
+    comment.target_id = target.id
+    comment.save
+
+    login
+    get(:index, params: { for_user: user.id })
+
+    assert_match(comment_path(comment), @response.redirect_url)
+  end
+
+  def test_index_for_user_who_received_no_comments
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { for_user: user.id })
+
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
   end
 
   def test_index_by_non_default_sort_order
