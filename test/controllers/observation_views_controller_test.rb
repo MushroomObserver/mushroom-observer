@@ -19,6 +19,6 @@ class ObservationViewsControllerTest < FunctionalTestCase
 
     now_obs = Observation.needs_identification(users(:mary))
     now_obs_count = now_obs.count
-    assert_equal(now_obs_count, obs_count - 5)
+    assert_equal(obs_count - 5, now_obs_count)
   end
 end
