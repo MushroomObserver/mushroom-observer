@@ -63,7 +63,8 @@ class RssLogsControllerTest < FunctionalTestCase
     comments_for_path = comments_path(for_user: User.current_id)
     assert_select(
       "a#nav_mobile_your_comments_link[href='#{comments_for_path}']",
-      true, "LH NavBar 'Commments for` link broken")
+      true, "LH NavBar 'Commments for` link broken"
+    )
   end
 
   def test_user_default_rss_log
