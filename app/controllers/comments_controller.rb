@@ -90,16 +90,17 @@ class CommentsController < ApplicationController
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def target
-    model = Comment.safe_model_from_name(params[:type])
-    if !model
-      flash_error(:runtime_invalid.t(type: '"type"',
-                                     value: params[:type].to_s))
-      redirect_back_or_default(action: :index)
-    elsif (target = find_or_goto_index(model, params[:target].to_s))
-      query = create_query(:Comment, :for_target, target: target.id,
-                                                  type: target.class.name)
-      show_selected_comments(query)
-    end
+    return no_model unless (model = Comment.safe_model_from_name(params[:type]))
+    return unless (target = find_or_goto_index(model, params[:target].to_s))
+
+    query = create_query(:Comment, :for_target, target: target.id,
+                                                type: target.class.name)
+    show_selected_comments(query)
+  end
+
+  def no_model
+    flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
+    redirect_back_or_default(action: :index)
   end
 
   # Display list of Comment's whose text matches a string pattern.
