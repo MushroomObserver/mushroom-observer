@@ -155,6 +155,16 @@ class CommentsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_no_matches.l(types: "comments"))
   end
 
+  def test_index_for_user_nonexistent_user
+    id = observations(:minimal_unknown_obs).id
+
+    login
+    get(:index, params: { for_user: id })
+
+    assert_flash_text(:runtime_object_not_found.l(type: "user", id: id))
+    assert_redirected_to(comments_path)
+  end
+
   def test_index_by_non_default_sort_order
     by = "user"
 
