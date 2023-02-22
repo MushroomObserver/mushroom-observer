@@ -146,7 +146,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: user.id })
 
-    assert_match(comment_path(comment), @response.redirect_url)
+    assert_match(comment_path(comment), redirect_to_url)
   end
 
   def test_index_for_user_who_received_no_comments
