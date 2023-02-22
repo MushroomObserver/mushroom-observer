@@ -3,6 +3,9 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
+  # Test of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
   def test_index_list_all
     login
     get(:index)
@@ -173,6 +176,8 @@ class CommentsControllerTest < FunctionalTestCase
 
     assert_select("#title", text: "Comments by #{by.capitalize}")
   end
+
+  #########################################################
 
   def test_show_comment
     login
