@@ -15,14 +15,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     }
   end
 
-  def test_herbarium_index
+  def test_index_herbarium_id
     login
     get(:index,
         params: { herbarium_id: herbaria(:nybg_herbarium).id })
     assert_template(:index)
   end
 
-  def test_index_with_non_default_sort
+  def test_index_by_non_default_sort_order
     by = "herbarium_name"
 
     login
@@ -31,21 +31,21 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Fungarium Records by Fungarium")
   end
 
-  def test_herbarium_with_no_herbarium_records_index
+  def test_index_herbarium_id_no_matching_records
     login
     get(:index, params: { herbarium_id: herbaria(:dick_herbarium).id })
     assert_template(:index)
     assert_flash_text(/No matching fungarium records found/)
   end
 
-  def test_observation_index
+  def test_index_observation_id
     login
     get(:index,
         params: { observation_id: observations(:coprinus_comatus_obs).id })
     assert_template(:index)
   end
 
-  def test_observation_with_no_herbarium_records_index
+  def test_index_observation_id_with_no_herbarium_records
     login
     obs = observations(:strobilurus_diminutivus_obs)
     get(:index, params: { observation_id: obs.id })
@@ -53,7 +53,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash_text(/No matching fungarium records found/)
   end
 
-  def test_herbarium_record_search
+  def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
     login
@@ -64,7 +64,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_select("#results tr", 2)
   end
 
-  def test_herbarium_record_search_with_one_herbarium_record_index
+  def test_index_pattern_with_one_matching_record
     login
     params = { pattern: herbarium_records(:interesting_unknown).id }
     get(:index, params: params)
@@ -72,7 +72,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_index_herbarium_record
+  def test_index_list_all
     login
     get(:index)
     assert_response(:success)
