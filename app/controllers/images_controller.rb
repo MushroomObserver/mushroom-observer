@@ -62,10 +62,15 @@ class ImagesController < ApplicationController
       return
     end
 
-    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:Image, :all, by: sorted_by)
     show_selected_images(query)
   end
+
+  def default_sort_order
+    ::Query::ImageBase.default_order
+  end
+
 
   # Display matrix of selected images, based on current Query.
   def list_query_results
