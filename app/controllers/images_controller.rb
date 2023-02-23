@@ -42,11 +42,11 @@ class ImagesController < ApplicationController
   private # private methods used by #index
 
   def default_index_subaction
-    list_images
+    list_all
   end
 
   # Display matrix of images, most recent first.
-  def list_images
+  def list_all
     if params[:page].to_s.to_i > 1000
       render(
         status: :too_many_requests,
@@ -66,7 +66,7 @@ class ImagesController < ApplicationController
   end
 
   # Display matrix of selected images, based on current Query.
-  def index_image
+  def list_query_results
     query = find_or_create_query(:Image, by: params[:by])
     show_selected_images(query, id: params[:id].to_s, always_index: true)
   end
