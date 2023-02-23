@@ -92,11 +92,11 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def default_index_subaction
-    list_herbarium_records
+    list_all
   end
 
   # Show list of herbarium_records.
-  def list_herbarium_records
+  def list_all
     store_location
     sorted_by = params[:by].present? ? params[:by].to_s : :name
     query = create_query(:HerbariumRecord, :all, by: sorted_by)
@@ -104,7 +104,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_herbarium_record
+  def list_query_results
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
     show_selected_herbarium_records(query, id: params[:id].to_s,
                                            always_index: true)
