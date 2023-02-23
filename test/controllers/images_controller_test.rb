@@ -47,17 +47,52 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(429)
   end
 
-  def test_index_advanced_search_1
+  def test_index_advanced_search_multiple_hits
+    obs = observations(:fungi_obs)
+    assert(obs.images.many?)
     query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  name: obs.text_name,
+                                  user: obs.user.name,
+                                  location: obs.where)
+    assert(query.results.many?)
 
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
+    assert_response(:success)
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
+    assert_select("#title", text: "Advanced Search")
+  end
+
+  def test_index_advanced_search_one_hit
+    image = images(:connected_coprinus_comatus_image)
+    query = Query.lookup_and_save(:Image, :advanced_search,
+                                  name: "Coprinus comatus")
+    assert(query.results.one?)
+
+    login
+    get(:index,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+
+    assert_response(:redirect)
+    assert_match(image_path(image), redirect_to_url)
+  end
+
+  def test_index_advanced_search_no_hits
+    query = Query.lookup_and_save(:Image, :advanced_search,
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma")
+    assert(query.results.count.zero?)
+
+    login
+    get(:index,
+        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+
+    assert_flash_text(:runtime_no_matches.l(type: :images.l))
     assert_template("index")
   end
 
