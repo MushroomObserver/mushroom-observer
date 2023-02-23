@@ -20,7 +20,6 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index)
     default_sorted_by = "sort_by_#{::Query::ImageBase.default_order}".to_sym.l
 
-
     assert_template("index")
     assert_template(partial: "_matrix_box")
     assert_select("#title", text: "Images by #{default_sorted_by}")
