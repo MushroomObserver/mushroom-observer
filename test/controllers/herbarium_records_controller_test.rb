@@ -42,8 +42,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
+
     login
     get(:index, params: { pattern: pattern })
+
     assert_response(:success)
     assert_template(:index)
     # In results, expect 1 row per herbarium_record
@@ -51,40 +53,55 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern_with_one_matching_record
+    record = herbarium_records(:interesting_unknown)
+
     login
-    params = { pattern: herbarium_records(:interesting_unknown).id }
-    get(:index, params: params)
-    assert_response(:redirect)
+    get(:index, params: { pattern: record.id })
+
+    assert_redirected_to(herbarium_record_path(record.id))
     assert_no_flash
   end
 
   def test_index_herbarium_id
+    herbarium = herbaria(:nybg_herbarium)
+
     login
-    get(:index,
-        params: { herbarium_id: herbaria(:nybg_herbarium).id })
+    get(:index, params: { herbarium_id: herbarium.id })
+
     assert_template(:index)
+    # In results, expect 1 row per herbarium_record
+    assert_select("#results tr",
+                  HerbariumRecord.where(herbarium: herbarium).count)
   end
 
   def test_index_herbarium_id_no_matching_records
+    herbarium = herbaria(:dick_herbarium)
+
     login
-    get(:index, params: { herbarium_id: herbaria(:dick_herbarium).id })
+    get(:index, params: { herbarium_id: herbarium.id })
+
     assert_template(:index)
-    assert_flash_text(/No matching fungarium records found/)
+    assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 
   def test_index_observation_id
+    obs = observations(:coprinus_comatus_obs)
+
     login
-    get(:index,
-        params: { observation_id: observations(:coprinus_comatus_obs).id })
+    get(:index, params: { observation_id: obs.id })
+
     assert_template(:index)
+    assert_select("#results tr", obs.herbarium_records.size)
   end
 
   def test_index_observation_id_with_no_herbarium_records
     login
+
     obs = observations(:strobilurus_diminutivus_obs)
     get(:index, params: { observation_id: obs.id })
+
     assert_template(:index)
-    assert_flash_text(/No matching fungarium records found/)
+    assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 
   #########################################################
