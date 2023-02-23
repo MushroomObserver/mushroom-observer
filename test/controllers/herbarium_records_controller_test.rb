@@ -62,7 +62,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_index_herbarium_id
+  def test_index_herbarium_id_with_multiple_records
     herbarium = herbaria(:nybg_herbarium)
 
     login
