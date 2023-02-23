@@ -5,6 +5,6 @@ if ($("#observation_namings").length) {
   <%= render(partial: "observations/namings/update_page", format: :js) %>
 } else {
   // update matrix box
-  $('#naming_ajax_progress_caption').html('<%= j safe_spinner %>');
-  $('#naming_ajax_progress').modal('hide');
+  $('#mo_ajax_progress_caption').html('<%= j safe_spinner %>');
+  $('#mo_ajax_progress').modal('hide');
 }
