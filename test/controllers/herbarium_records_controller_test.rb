@@ -20,11 +20,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   # other subactions in order of @index_subaction_param_keys
   def test_index
     login
+
     get(:index)
+
     assert_response(:success)
     assert_template(:index)
     # In results, expect 1 row per herbarium_record
-    assert_select("#results tr", HerbariumRecord.all.size)
+    assert_select("#results tr", HerbariumRecord.count,
+                  "Wrong number of Herbarium Records")
   end
 
   def test_index_by_non_default_sort_order
