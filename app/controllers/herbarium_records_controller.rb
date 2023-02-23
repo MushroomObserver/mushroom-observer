@@ -100,9 +100,13 @@ class HerbariumRecordsController < ApplicationController
     return list_query_results if %w[by id q].intersect?(params.keys)
 
     store_location
-    sorted_by = params[:by].present? ? params[:by].to_s : :name
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:HerbariumRecord, :all, by: sorted_by)
     show_selected_herbarium_records(query)
+  end
+
+  def default_sort_order
+    :name
   end
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
