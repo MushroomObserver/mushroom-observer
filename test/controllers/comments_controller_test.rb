@@ -6,10 +6,19 @@ class CommentsControllerTest < FunctionalTestCase
   # Test of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of @index_subaction_param_keys
-  def test_index_list_all
+  def test_index
     login
     get(:index)
     assert_template("index")
+  end
+
+  def test_index_by_non_default_sort_order
+    by = "user"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Comments by #{by.capitalize}")
   end
 
   def test_index_target_with_comments
@@ -166,15 +175,6 @@ class CommentsControllerTest < FunctionalTestCase
 
     assert_flash_text(:runtime_object_not_found.l(type: "user", id: id))
     assert_redirected_to(comments_path)
-  end
-
-  def test_index_by_non_default_sort_order
-    by = "user"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_select("#title", text: "Comments by #{by.capitalize}")
   end
 
   #########################################################
