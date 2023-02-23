@@ -120,30 +120,24 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern
-    # TODO: use single-request tests &/or add integration test.
-    # NOTE: partial dupllication of test_index_pattern_next
+  def test_index_pattern_text_multiple_hits
+    pattern = "USA"
+
     login
-    get(:index, params: { pattern: "Notes" })
+    get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_equal(:query_title_pattern_search.t(types: "Images",
-                                               pattern: "Notes"),
-                 @controller.instance_variable_get(:@title))
-
-    get(:index, params: { pattern: "Notes", page: 2 })
-
-    assert_template("index")
-    assert_equal(:query_title_pattern_search.t(types: "Images",
-                                               pattern: "Notes"),
-                 @controller.instance_variable_get(:@title))
+    assert_select("#title", text: "Images Matching ‘#{pattern}’")
   end
 
-  def test_index_pattern_next
-    login
-    get(:index, params: { pattern: "Notes" })
+  def test_index_pattern_text_no_hits
+    pattern = "nothingMatchesAxotl"
 
-    assert_template("index", partial: "_image")
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_template("index")
   end
 
   def test_index_pattern_image_id
