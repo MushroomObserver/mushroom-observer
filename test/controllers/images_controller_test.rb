@@ -112,12 +112,12 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern_image_id
-    img_id = images(:commercial_inquiry_image).id
+    image = images(:commercial_inquiry_image)
 
     login
-    get(:index, params: { pattern: img_id })
+    get(:index, params: { pattern: image.id })
 
-    assert_redirected_to(action: :show, id: img_id)
+    assert_redirected_to(image_path(image))
   end
 
   def test_index_by_user
