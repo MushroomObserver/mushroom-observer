@@ -34,7 +34,7 @@ class ImagesController < ApplicationController
     :advanced_search,
     :pattern,
     :by_user,
-    :for_project,
+    :for_project
   ].freeze
 
   #############################################
@@ -47,30 +47,33 @@ class ImagesController < ApplicationController
 
   # Display matrix of images, most recent first.
   def list_all
+    return render_too_many_results if too_many_results
     return list_query_results if params.include?(:by)
-
-    if params[:page].to_s.to_i > 1000
-      render(
-        status: :too_many_requests,
-        content_type: "text/plain",
-        plain: "Your queries are killing our server. " \
-               "There are much better ways to scrape the images " \
-               "from our site. " \
-               "Please contact the webmaster." \
-               "And please stop hammering our server!"
-      )
-      return
-    end
 
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:Image, :all, by: sorted_by)
     show_selected_images(query)
   end
 
+  def too_many_results
+    params[:page].to_s.to_i > 1000
+  end
+
+  def render_too_many_results
+    render(
+      status: :too_many_requests,
+      content_type: "text/plain",
+      plain: "Your queries are killing our server. " \
+             "There are much better ways to scrape the images " \
+             "from our site. " \
+             "Please contact the webmaster." \
+             "And please stop hammering our server!"
+    )
+  end
+
   def default_sort_order
     ::Query::ImageBase.default_order
   end
-
 
   # Display matrix of selected images, based on current Query.
   def list_query_results
