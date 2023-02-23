@@ -15,7 +15,7 @@ class HerbariumRecordsController < ApplicationController
   @index_subaction_param_keys = [
     :pattern,
     :herbarium_id,
-    :observation_id,
+    :observation_id
   ].freeze
 
   def show
