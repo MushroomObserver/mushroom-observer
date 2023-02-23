@@ -47,6 +47,8 @@ class ImagesController < ApplicationController
 
   # Display matrix of images, most recent first.
   def list_all
+    return list_query_results if params.include?(:by)
+
     if params[:page].to_s.to_i > 1000
       render(
         status: :too_many_requests,
