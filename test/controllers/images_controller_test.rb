@@ -3,42 +3,39 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
+  def check_index_sorted_by(sort_order)
+    login
+    get(:index, params: { by: sort_order })
+
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
+    assert_select("#title", text: "Images by #{sort_order.titleize}")
+  end
+
   # Tests of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of @index_subaction_param_keys
   def test_index
     login
     get(:index)
+    default_sorted_by = "sort_by_#{::Query::ImageBase.default_order}".to_sym.l
+
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
+    assert_select("#title", text: "Images by #{default_sorted_by}")
   end
 
   def test_index_with_non_default_sort
-    sort_order = "name"
-
-    login
-    get(:index, params: { by: sort_order })
-
-    assert_select("#title", text: "Images by Name")
+    check_index_sorted_by("name")
   end
 
   def test_index_sorted_by_user
-    sort_order = "user"
-
-    login
-    get(:index, params: { by: sort_order })
-
-    assert_select("#title", text: "Images by User")
+    check_index_sorted_by("user")
   end
 
   def test_index_sorted_by_copyright_holder
-    sort_order = "copyright_holder"
-
-    login
-    get(:index, params: { by: sort_order })
-
-    assert_select("#title", text: "Images by Copyright Holder")
+    check_index_sorted_by("copyright_holder")
   end
 
   def test_index_too_many_pages
