@@ -97,6 +97,8 @@ class HerbariumRecordsController < ApplicationController
 
   # Show list of herbarium_records.
   def list_all
+    return list_query_results if %w[by id q].intersect?(params.keys)
+
     store_location
     sorted_by = params[:by].present? ? params[:by].to_s : :name
     query = create_query(:HerbariumRecord, :all, by: sorted_by)
