@@ -15,11 +15,16 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     }
   end
 
-  def test_index_herbarium_id
+  # Test of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  def test_index_list_all
     login
-    get(:index,
-        params: { herbarium_id: herbaria(:nybg_herbarium).id })
+    get(:index)
+    assert_response(:success)
     assert_template(:index)
+    # In results, expect 1 row per herbarium_record
+    assert_select("#results tr", HerbariumRecord.all.size)
   end
 
   def test_index_by_non_default_sort_order
@@ -29,6 +34,32 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_select("#title", text: "Fungarium Records by Fungarium")
+  end
+
+  def test_index_pattern_with_multiple_matching_records
+    # Two herbarium_records match this pattern.
+    pattern = "Coprinus comatus"
+    login
+    get(:index, params: { pattern: pattern })
+    assert_response(:success)
+    assert_template(:index)
+    # In results, expect 1 row per herbarium_record
+    assert_select("#results tr", 2)
+  end
+
+  def test_index_pattern_with_one_matching_record
+    login
+    params = { pattern: herbarium_records(:interesting_unknown).id }
+    get(:index, params: params)
+    assert_response(:redirect)
+    assert_no_flash
+  end
+
+  def test_index_herbarium_id
+    login
+    get(:index,
+        params: { herbarium_id: herbaria(:nybg_herbarium).id })
+    assert_template(:index)
   end
 
   def test_index_herbarium_id_no_matching_records
@@ -53,33 +84,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash_text(/No matching fungarium records found/)
   end
 
-  def test_index_pattern_with_multiple_matching_records
-    # Two herbarium_records match this pattern.
-    pattern = "Coprinus comatus"
-    login
-    get(:index, params: { pattern: pattern })
-    assert_response(:success)
-    assert_template(:index)
-    # In results, expect 1 row per herbarium_record
-    assert_select("#results tr", 2)
-  end
-
-  def test_index_pattern_with_one_matching_record
-    login
-    params = { pattern: herbarium_records(:interesting_unknown).id }
-    get(:index, params: params)
-    assert_response(:redirect)
-    assert_no_flash
-  end
-
-  def test_index_list_all
-    login
-    get(:index)
-    assert_response(:success)
-    assert_template(:index)
-    # In results, expect 1 row per herbarium_record
-    assert_select("#results tr", HerbariumRecord.all.size)
-  end
+  #########################################################
 
   def test_show_herbarium_record_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
