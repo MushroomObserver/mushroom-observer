@@ -173,44 +173,23 @@ class LocationsControllerTest < FunctionalTestCase
   #
   #    INDEX
 
-  def test_list_locations
+  def test_index
     login
     get(:index)
+
     assert_template("index")
   end
 
-  def test_location_pattern_search_id
-    loc = locations(:salt_point)
+  def  test_index_with_non_default_sort
+    by = "num_views"
 
     login
-    get(:index, params: { pattern: loc.id.to_s })
-    assert_redirected_to(location_path(loc.id))
+    get(:index, params: { by: by })
+
+    assert_select("#title", text: "Locations by Popularity")
   end
 
-  def test_location_advanced_search
-    query = Query.lookup_and_save(:Location, :advanced_search,
-                                  location: "California")
-    login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
-    assert_template("index")
-  end
-
-  def test_advanced_search_error
-    query_without_conditions = Query.lookup_and_save(
-      :Location, :advanced_search
-    )
-
-    login
-    get(:index,
-        params: @controller.query_params(query_without_conditions).
-                            merge(advanced_search: true))
-
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
-
-  def test_location_bounding_box
+  def test_index_bounding_box
     north = south = east = west = 0
     delta = 0.001
     login
@@ -232,16 +211,30 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(-180, query.params[:west])
   end
 
-  def  test_index_with_non_default_sort
-    by = "num_views"
-
+  def test_index_advanced_search
+    query = Query.lookup_and_save(:Location, :advanced_search,
+                                  location: "California")
     login
-    get(:index, params: { by: by })
-
-    assert_select("#title", text: "Locations by Popularity")
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
+    assert_template("index")
   end
 
-  def test_pattern
+  def test_index_advanced_search_error
+    query_without_conditions = Query.lookup_and_save(
+      :Location, :advanced_search
+    )
+
+    login
+    get(:index,
+        params: @controller.query_params(query_without_conditions).
+                            merge(advanced_search: true))
+
+    assert_flash_error(:runtime_no_conditions.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  def test_index_pattern
     search_str = "California"
 
     login
@@ -250,19 +243,28 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Locations Matching ‘#{search_str}’")
   end
 
-  def test_list_by_country
+  def test_index_pattern_id
+    loc = locations(:salt_point)
+
+    login
+    get(:index, params: { pattern: loc.id.to_s })
+    assert_redirected_to(location_path(loc.id))
+  end
+
+  def test_index_country
     login
     get(:index, params: { country: "USA" })
     assert_template("index")
   end
 
-  def test_list_by_country_with_quote
+  def test_index_country_with_apostrophe
     login
     get(:index, params: { country: "Cote d'Ivoire" })
     assert_template("index")
   end
 
-  def test_list_by_country_regexp_ok
+  # TODO: one request/method
+  def test_index_country_regexp_ok
     login("mary")
 
     get(:index, params: { country: "USA" })
@@ -302,13 +304,13 @@ class LocationsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
-  def test_by_user
+  def test_index_by_user
     login
     get(:index, params: { by_user: rolf.id })
     assert_template("index")
   end
 
-  def test_by_user_bad_user_id
+  def test_index_by_user_bad_user_id
     bad_user_id = 666
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
@@ -319,13 +321,13 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
-  def test_by_editor
+  def test_index_by_editor
     login
     get(:index, params: { by_editor: rolf.id })
     assert_template("index")
   end
 
-  def test_by_editor_bad_user_id
+  def test_index_by_editor_bad_user_id
     bad_user_id = 666
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
