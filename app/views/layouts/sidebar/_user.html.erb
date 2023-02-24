@@ -7,7 +7,7 @@
   </span>
 </div>
 <%= link_to(:app_comments_for_you.t,
-            comments_path(by_user: @user.id),
+            comments_path(for_user: @user.id),
             { class: classes[:mobile_only],
               id: "nav_mobile_your_comments_link" }) %>
 <%= link_to(:app_your_observations.t,

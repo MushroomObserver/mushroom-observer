@@ -59,6 +59,12 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
     assert_match(/#{rss_logs(:observation_rss_log).observation.name.text_name}/,
                  css_select(".rss-what").text)
+
+    comments_for_path = comments_path(for_user: User.current_id)
+    assert_select(
+      "a#nav_mobile_your_comments_link[href='#{comments_for_path}']",
+      true, "LH NavBar 'Commments for` link broken"
+    )
   end
 
   def test_user_default_rss_log

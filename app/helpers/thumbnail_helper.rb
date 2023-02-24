@@ -16,6 +16,7 @@ module ThumbnailHelper
     locals = {
       image: image,
       link: image_path(image_id),
+      link_type: :target, # or :remote
       link_method: :get,
       size: :small,
       votes: true,
@@ -24,7 +25,7 @@ module ThumbnailHelper
       html_options: {}, # we don't want to always pass class: "img-fluid"
       extra_classes: "",
       notes: "",
-      link_type: :target,
+      identify: false,
       obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
@@ -41,10 +42,8 @@ module ThumbnailHelper
 
   # NOTE: The local var `link` might be to #show_image as you'd expect,
   # or it may be a GET with params[:img_id] to the actions for #reuse_image
-  # or #remove_image ...or any other link. Firing a POST to those actions
-  # might require printing a Rails post_button and putting something like
-  # Bootstrap's .stretched-link class on the generated form input.
-  # However, the whole reuse_image page is currently a form - refactor?
+  # or #remove_image ...or any other link.
+  # These use .ab-fab instead of .stretched-link so .theater-btn is clickable
   def image_link_html(link = "", link_method = :get)
     case link_method
     when :get
@@ -56,31 +55,33 @@ module ThumbnailHelper
     when :patch
       patch_button(name: "", path: link, class: "image-link ab-fab")
     when :delete
-      destroy_button(name: "", target: link,
-                     class: "image-link ab-fab")
+      destroy_button(name: "", target: link, class: "image-link ab-fab")
+    when :remote
+      link_with_query("", link, class: "image-link ab-fab", remote: true)
     end
   end
 
-  def image_caption_html(image_id, obs_data, link_type)
+  def image_caption_html(image_id, obs_data, identify)
     html = []
     if obs_data[:id].present?
-      html = image_observation_data(html, obs_data, link_type)
+      html = image_observation_data(html, obs_data, identify)
     end
     html << caption_image_links(image_id)
     safe_join(html)
   end
 
-  def image_observation_data(html, obs_data, link_type)
-    if link_type == :naming ||
+  def image_observation_data(html, obs_data, identify)
+    if identify ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
-      html << caption_propose_naming_link(obs_data)
+      html << caption_propose_naming_link(obs_data[:id])
+      html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
+      html << caption_mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",
                    locals: { observation: obs_data[:obs] })
   end
 
-  # Disabled because interpolation produces unsafe html
   def caption_image_links(image_id)
     orig_url = Image.url(:original, image_id)
     links = []
@@ -90,13 +91,40 @@ module ThumbnailHelper
     safe_join(links)
   end
 
-  def caption_propose_naming_link(obs_data)
-    link_to(
-      :create_naming.t,
-      new_observation_naming_path(observation_id: obs_data[:id]),
-      { class: "btn btn-primary my-3 mr-3 d-inline-block",
-        target: "_blank", rel: "noopener" }
-    )
+  def caption_propose_naming_link(id, btn_class = "btn-primary my-3")
+    render(partial: "observations/namings/propose_button",
+           locals: { obs_id: id, text: :create_naming.t,
+                     btn_class: "#{btn_class} d-inline-block" },
+           layout: false)
+  end
+
+  # NOTE: There are potentially two of these toggles for the same obs, on
+  # the obs_needing_ids index. Ideally, they'd be in sync. In reality, only
+  # the matrix_box (page) checkbox will update if the (lightbox) caption
+  # checkbox changes. Updating the lightbox checkbox to stay sync with the page
+  # is harder because the caption is not created. Updating it would only work
+  # with some additions to the lightbox JS, to keep track of the checked
+  # state on show, and cost an extra db lookup. Not worth it, IMO.
+  # - Nimmo 20230215
+  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+                                      label_class = "")
+    form_with(url: observation_view_path(id: id),
+              class: "d-inline-block",
+              method: :put, local: false) do |f|
+      content_tag(:div, class: "d-inline form-group form-inline") do
+        f.label("#{selector}_#{id}",
+                class: "caption-reviewed-link #{label_class}") do
+          concat(:mark_as_reviewed.t)
+          concat(
+            f.check_box(
+              :reviewed,
+              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
+                onchange: "Rails.fire(this.closest('form'), 'submit')" }
+            )
+          )
+        end
+      end
+    end
   end
 
   def caption_obs_title(obs_data)
@@ -149,7 +177,7 @@ module ThumbnailHelper
   def visual_group_status_link(visual_group, image_id, state, link)
     link_text = visual_group_status_text(link)
     state_text = visual_group_status_text(state)
-    return content_tag(:span, link_text) if link_text == state_text
+    return content_tag(:b, link_text) if link_text == state_text
 
     put_button(name: link_text,
                path: image_vote_path(id: image_id, vote: 1),

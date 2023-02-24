@@ -2,9 +2,10 @@
   <div class="visual_group_status_links_container mt-n2" id="visual_group_status_links_<%= image_id %>">
     <div class="text-center">
       <small>
-	<%= [visual_group_status_link(visual_group, image_id, status, nil),
-	     visual_group_status_link(visual_group, image_id, status, true),
-	     visual_group_status_link(visual_group, image_id, status, false)].safe_join("|") %>
+        <%= [visual_group_status_link(visual_group, image_id, status, nil),
+             visual_group_status_link(visual_group, image_id, status, true),
+             visual_group_status_link(visual_group, image_id, status, false)].safe_join("|") %><br>
+        <%= :image_reuse_id.t + ": " + link_to(image_id, image_path(id: image_id)) %>
       </small>
     </div><!-- .text-center -->
     <span class="hidden data_container" data-id="<%= image_id %>"</span>

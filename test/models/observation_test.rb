@@ -1090,9 +1090,9 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_needs_identification
-    assert_includes(Observation.needs_identification,
+    assert_includes(Observation.needs_identification(users(:rolf)),
                     observations(:fungi_obs))
-    assert_not_includes(Observation.needs_identification,
+    assert_not_includes(Observation.needs_identification(users(:rolf)),
                         observations(:peltigera_obs))
   end
 

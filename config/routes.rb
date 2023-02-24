@@ -732,6 +732,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("map", to: "observations/maps#index")
       post("print_labels", to: "observations/downloads#print_labels",
                            as: "print_labels_for")
+      get("identify", to: "observations/identify#index", as: "identify")
     end
   end
   # NOTE: the intentional "backwards" param specificity here:
@@ -746,6 +747,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # :new and :create, which are currently observation-specific
   get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
   match("/images/:id", to: "observations/images#update", via: [:put, :patch])
+
+  resources :observation_views, only: :update
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")

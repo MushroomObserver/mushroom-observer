@@ -26,6 +26,7 @@ if [ "$(git status -s | grep '^.[A-Z]')" != "" ]; then
     exit 1
 fi
 
+tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
 echo Getting latest code from github... && git pull && \
 echo Installing bundle... && bundle install && \
@@ -33,4 +34,6 @@ echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
 echo Reloading unicorn... && /etc/init.d/unicorn reload && \
+echo Tagging repo with $tag... && git tag $tag && \
+echo Pushing new tag... && git push --tags && \
 echo SUCCESS\!

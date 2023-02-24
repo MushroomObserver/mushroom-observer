@@ -22,38 +22,36 @@ adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
 )
+identify_page = controller.controller_name == "identify"
 
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
 <%= form_with(url: search_pattern_path, method: :get,
               class: "navbar-form navbar-left px-0",
-              id: "pattern_search_form") do |form| %>
+              id: "pattern_search_form") do |f| %>
 
-  <div class="form-group has-feedback has-search">
-    <span class="glyphicon glyphicon-search form-control-feedback"></span>
-    <%= fields_for :search do |search_form| %>
-      <%= search_form.text_field(:pattern,
-                        { value: session[:pattern],
-                          class: "form-control",
-                          placeholder: :app_find.t }) %>
-    <% end %>
-  </div><!--.form-group-->
+  <%= fields_for(:search) do |f_s| %>
+    <div class="form-group has-feedback has-search">
+      <span class="glyphicon glyphicon-search form-control-feedback"></span>
+        <%= f_s.text_field(:pattern, { value: session[:pattern],
+                                    class: "form-control",
+                                    placeholder: :app_find.t }) %>
+    </div><!--.form-group-->
 
-  <div class="form-group text-nowrap">
-    <%= fields_for :search do |search_form| %>
-      <%= search_form.select(
+    <div class="form-group text-nowrap">
+      <%= f_s.select(
             :type,
             options_for_select(options, session[:search_type] || :observation),
-            { }, { class: "form-control w-auto" }) %>
-    <% end %>
-  </div><!--.form-group-->
+            { }, { class: "form-control w-auto" }
+          ) %>
+    </div><!--.form-group-->
+  <% end %>
+
+  <%= hidden_field_tag(:needs_id, true) if identify_page %>
 
   <div class="form-group text-nowrap">
-    <%= fields_for :search do |search_form| %>
-      <%= search_form.submit(:app_search.l,
-                             class: "btn btn-default mr-2") %>
-    <% end %>
+    <%= f.submit(:app_search.l, class: "btn btn-default mr-2") %>
   </div><!--.form-group-->
 
 <% end %>

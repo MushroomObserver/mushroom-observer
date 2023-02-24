@@ -205,6 +205,21 @@ class LurkerTest < CapybaraIntegrationTestCase
            "Found these: #{labels.inspect}")
   end
 
+  def test_search_from_obs_needing_ids
+    login
+
+    visit("/observations/identify")
+    # Search for a location.
+    place = "Massachusetts"
+    fill_in("search_pattern", with: place)
+    click_button("Search")
+    assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
+    where_ats = find_all(".rss-where").map(&:text)
+    assert(where_ats.all? { |wa| wa.match(place) },
+           "Expected only obs from #{place}" \
+           "Found these: #{where_ats.inspect}")
+  end
+
   def test_search_next
     login
 

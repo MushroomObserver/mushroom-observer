@@ -1,35 +1,59 @@
 <%
 # Requires local variable object: RssLog, Observation, Image, etc. instance.
-link_type ||= nil
-presenter = MatrixBoxPresenter.new(object, @view, link_type)
+link_type ||= :target
+link_method ||= :get
+identify ||= false
+presenter = MatrixBoxPresenter.new(object, @view, link_type, link_method, identify)
 columns ||= "col-xs-12 col-sm-6 col-md-4"
+object_id = object&.id.present? ? object.id : "no_ID"
 %>
 
 <% if presenter %>
-  <li class="matrix-box <%= columns %>">
-    <%= panel_block(inner_class: "rss-box-details") do %>
-      <div class="thumbnail-container">
-        <%= presenter.thumbnail %>
-      </div><!-- .thumbnail-container -->
-      <div class="rss-what">
-        <h5><%= presenter.what %></h5>
-      </div><!-- .rss-what -->
-      <div class="rss-where">
-        <small><%= presenter.where %></small>
-      </div><!-- .rss-where -->
-      <div class="rss-what">
-        <small class="nowrap-ellipsis">
-          <% unless presenter.when.blank? %>
-            <%= presenter.when %>: <%= presenter.who %>
-          <% end %>
-        </small>
-      </div><!-- .rss-when -->
-      <div class="rss-detail">
-        <%= presenter.detail %>
-      </div><!-- .rss-detail -->
-      <div class="rss-what">
-        <small><%= presenter.fancy_time %></small>
-      </div><!-- .rss-fancy-time -->
-    <% end %>
+  <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
+    <div class="panel panel-default">
+      <div class="panel-body rss-box-details">
+        <div class="thumbnail-container">
+          <%= presenter.thumbnail %>
+        </div><!-- .thumbnail-container -->
+        <div class="rss-what">
+          <h5><%= presenter.what %></h5>
+          <%= if identify
+            if (object.name_id != 1) && (nam = object.consensus_naming)
+              content_tag(:div, class: "vote-select-container mb-3") do
+                render(partial: "observations/namings/votes/form",
+                       locals: { naming: nam })
+              end
+            else
+              caption_propose_naming_link(object_id, "btn-default mb-3")
+            end
+          end %>
+        </div><!-- .rss-what -->
+        <div class="rss-where">
+          <small><%= presenter.where %></small>
+        </div><!-- .rss-where -->
+        <div class="rss-what">
+          <small class="nowrap-ellipsis">
+            <% unless presenter.when.blank? %>
+              <%= presenter.when %>: <%= presenter.who %>
+            <% end %>
+          </small>
+        </div><!-- .rss-when -->
+        <div class="rss-detail">
+          <%= presenter.detail %>
+        </div><!-- .rss-detail -->
+        <div class="rss-what">
+          <small><%= presenter.fancy_time %></small>
+        </div><!-- .rss-fancy-time -->
+      </div><!-- .panel-body -->
+      <% if identify %>
+        <%= content_tag(
+              :div,
+              class: "panel-footer panel-active text-center position-relative"
+            ) do
+          caption_mark_as_reviewed_toggle(object_id, "box_reviewed",
+                                          "stretched-link")
+        end %>
+      <% end %>
+    </div><!-- .panel -->
   </li><!-- .matrix-box -->
 <% end %>
