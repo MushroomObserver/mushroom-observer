@@ -455,6 +455,7 @@ ActiveRecord::Schema.define(version: 2023_02_17_081246) do
     t.integer "observation_id"
     t.integer "user_id"
     t.datetime "last_view"
+    t.boolean "reviewed"
   end
 
   create_table "observations", id: { type: :integer, unsigned: true }, charset: "utf8mb3", force: :cascade do |t|

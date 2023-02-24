@@ -120,11 +120,14 @@ module ObservationsHelper
     }
   end
 
-  # the "propose_naming_button" is turned into a modal trigger by JS
+  # the "propose-naming-button" is remote: true to send js request
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
     buttons << render(partial: "observations/namings/propose_button",
-                      locals: { observation: observation }, layout: false)
+                      locals: { obs_id: observation.id,
+                                text: :show_namings_propose_new_name.t,
+                                btn_class: "btn-default" },
+                      layout: false)
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },

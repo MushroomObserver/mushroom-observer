@@ -11,12 +11,13 @@ class MatrixBoxPresenter
     :where,     # location of object or target
     :time       # when object or target was last modified
 
-  def initialize(object, view, link_type = :target)
+  def initialize(object, view, link_type = :target, link_method = :get,
+                 identify = nil)
     case object
     when Image
       image_to_presenter(object, view)
     when Observation
-      observation_to_presenter(object, view, link_type)
+      observation_to_presenter(object, view, link_type, link_method, identify)
     when RssLog
       rss_log_to_presenter(object, view)
     when User
@@ -82,7 +83,8 @@ class MatrixBoxPresenter
   end
 
   # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view, link_type)
+  def observation_to_presenter(observation, view, link_type, link_method,
+                               identify)
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
@@ -97,13 +99,13 @@ class MatrixBoxPresenter
     end
     return unless observation.thumb_image
 
-    # This allows an obs box to link to a naming form, or show_obs
-    # Thumbnail can likewise have a "propose a name" link
+    # link_type allows an obs box to link to show_obs, or something else
+    # thumbnail_helper uses identify to maybe add a "propose a name" link
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: obs_or_naming_link(observation, link_type),
-                     link_type: link_type,
-                     obs_data: obs_data_hash(observation))
+                     link: obs_or_other_link(observation),
+                     link_type: link_type, link_method: link_method,
+                     identify: identify, obs_data: obs_data_hash(observation))
   end
 
   # Grabs all the information needed for view from User instance.
@@ -133,14 +135,9 @@ class MatrixBoxPresenter
     time&.fancy_time
   end
 
-  def obs_or_naming_link(observation, link_type)
-    if link_type == :naming
-      { controller: "/observations/namings", action: :new,
-        observation_id: observation.id }
-    else
-      { controller: "/observations", action: :show,
-        id: observation.id }
-    end
+  def obs_or_other_link(observation)
+    { controller: "/observations", action: :show,
+      id: observation.id }
   end
 
   def obs_data_hash(observation)

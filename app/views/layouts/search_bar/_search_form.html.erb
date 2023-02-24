@@ -22,31 +22,36 @@ adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
 )
+identify_page = controller.controller_name == "identify"
 
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
-<%= form_with(scope: :search, url: search_pattern_path, method: :get,
+<%= form_with(url: search_pattern_path, method: :get,
               class: "navbar-form navbar-left px-0",
               id: "pattern_search_form") do |f| %>
 
-  <div class="form-group has-feedback has-search">
-    <span class="glyphicon glyphicon-search form-control-feedback"></span>
-      <%= f.text_field(:pattern, { value: session[:pattern],
-                                   class: "form-control",
-                                   placeholder: :app_find.t }) %>
-  </div><!--.form-group-->
+  <%= fields_for(:search) do |f_s| %>
+    <div class="form-group has-feedback has-search">
+      <span class="glyphicon glyphicon-search form-control-feedback"></span>
+        <%= f_s.text_field(:pattern, { value: session[:pattern],
+                                    class: "form-control",
+                                    placeholder: :app_find.t }) %>
+    </div><!--.form-group-->
 
-  <div class="form-group text-nowrap">
-      <%= f.select(
+    <div class="form-group text-nowrap">
+      <%= f_s.select(
             :type,
             options_for_select(options, session[:search_type] || :observation),
             { }, { class: "form-control w-auto" }
           ) %>
-  </div><!--.form-group-->
+    </div><!--.form-group-->
+  <% end %>
+
+  <%= hidden_field_tag(:needs_id, true) if identify_page %>
 
   <div class="form-group text-nowrap">
-      <%= f.submit(:app_search.l, class: "btn btn-default mr-2") %>
+    <%= f.submit(:app_search.l, class: "btn btn-default mr-2") %>
   </div><!--.form-group-->
 
 <% end %>
