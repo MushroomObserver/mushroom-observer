@@ -11,24 +11,85 @@ module ThumbnailHelper
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
   #
-  def thumbnail(image, args = {})
-    image_id = image.is_a?(Integer) ? image : image.id
+  def thumbnail(
+    image,
+    args = {
+      notes: "",
+      extra_classes: "",
+      size: "small",
+      data_sizes: {},
+      data: {}
+    }
+  )
+
+    image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+
+    img_class = "img-fluid lazy #{args[:extra_classes]}"
+    image_urls = thumbnail_urls(image_id)
+    data_sizes = args[:data_sizes] || thumbnail_srcset_sizes
+
+    # Account for possible data-confirm, etc
+    img_data = {
+      src: image_urls[:small],
+      srcset: thumbnail_srcset,
+      sizes: data_sizes
+    }.merge(args[:data])
+
+    html_options = {
+      alt: notes,
+      class: img_class,
+      data: img_data
+    }
+
+    lb_size = User.current&.image_size || "huge"
+
     locals = {
       image: image,
       link: image_path(image_id),
       link_type: :target, # or :remote
       link_method: :get,
-      size: :small,
+      sized_url: image_urls(image_id)[args[:size]],
+      html_options: html_options,
+      lightbox_url: image_urls(image_id)[lb_size],
       votes: true,
       original: false,
       theater_on_click: false,
-      html_options: {}, # we don't want to always pass class: "img-fluid"
-      extra_classes: "",
-      notes: "",
       identify: false,
       obs_data: {}
     }.merge(args)
     render(partial: "shared/image_thumbnail", locals: locals)
+  end
+
+  def thumbnail_urls(image_id)
+    {
+      "small" => Image.url(:small, image_id),
+      "medium" => Image.url(:medium, image_id),
+      "large" => Image.url(:large, image_id),
+      "huge" => Image.url(:huge, image_id),
+      "full_size" => Image.url(:full_size, image_id)
+    }
+  end
+
+  def lightbox_url(image_id)
+    lb_size = User.current&.image_size || "huge"
+    thumbnail_urls(image_id)[lb_size]
+  end
+
+  def thumbnail_srcset
+    [
+      "#{small_url} 320w",
+      "#{medium_url} 640w",
+      "#{large_url} 960w",
+      "#{huge_url} 1280w"
+    ].join(",")
+  end
+
+  def thumbnail_srcset_sizes
+    [
+      "(max-width: 575px) 100vw",
+      "(max-width: 991px) 50vw",
+      "(min-width: 992px) 30vw"
+    ].join(",")
   end
 
   def show_best_image(obs)

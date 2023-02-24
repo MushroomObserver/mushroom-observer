@@ -3,7 +3,7 @@
   # so we only have image_id.  It's still possible to render the image with
   # nothing but the image_id.  (But not votes, original name, etc.)
   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-  size_url   = Image.url(size, image_id)
+  sized_url   = Image.url(size, image_id)
   medium_url = Image.url(:medium, image_id)
   large_url  = Image.url(:large, image_id)
   huge_url   = Image.url(:huge, image_id)
@@ -33,9 +33,9 @@
   <div class="d-inline">
     <div data-toggle="expand-icon" class="text-center">
       <div class="click-container position-relative">
-        <%= image_tag(size_url, title: notes,
+        <%= image_tag(sized_url, title: notes,
                       class: "img-fluid lazy #{extra_classes}",
-                      data: { toggle: "tooltip", placement: "bottom" }) %>
+                      data: img_data) %>
         <%= image_link_html(link, link_method) %>
       </div>
       <%= link_to("", lightbox_url,
