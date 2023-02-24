@@ -5,7 +5,7 @@
 module LocationsHelper
   def country_link(country, count = nil)
     str = country + (count ? ": #{count}" : "")
-    link_to(str, location_countries_path(country: country))
+    link_to(str, locations_path(country: country))
   end
 
   # title of a link to Observations at a location, with observation count
