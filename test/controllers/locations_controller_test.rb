@@ -173,18 +173,22 @@ class LocationsControllerTest < FunctionalTestCase
   #
   #    INDEX
 
+  # Tests of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  # miscellaneous tests using get(:index)
   def test_index
     login
     get(:index)
 
-    assert_template("index")
+    assert_select("#title", text: "Location Index")
   end
 
-  def  test_index_with_non_default_sort
-    by = "num_views"
+  def test_index_with_non_default_sort
+    sort_order = "num_views"
 
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by: sort_order })
 
     assert_select("#title", text: "Locations by Popularity")
   end
@@ -217,7 +221,10 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))
+
+    assert_response(:success)
     assert_template("index")
+    assert_select("#title", text: "Advanced Search")
   end
 
   def test_index_advanced_search_error
@@ -252,15 +259,25 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_country
+    country = "USA"
+
     login
-    get(:index, params: { country: "USA" })
+    get(:index, params: { country: country })
+
     assert_template("index")
+    # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
+    # https://www.pivotaltracker.com/story/show/184554008
+    assert_select("#title", text: /^Locations Matching ‘#{country}.?’/)
   end
 
-  def test_index_country_with_apostrophe
+  def test_index_country_missing_country_with_apostrophe
+    country = "Cote d'Ivoire"
+
     login
-    get(:index, params: { country: "Cote d'Ivoire" })
+    get(:index, params: { country: country })
+
     assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
   end
 
   # TODO: one request/method
