@@ -1,6 +1,13 @@
 /**
  * This should be included on every page.
  */
+
+// Initialize Verlok LazyLoad
+var lazyLoadInstance = new LazyLoad({
+  elements_selector: ".lazy"
+  // ... more custom settings?
+});
+
 jQuery(document).ready(function () {
 
   // This works better than straight autofocus attribute in firefox.
@@ -73,4 +80,7 @@ jQuery(document).ready(function () {
     // must pass the button itself as second param
     jQuery(modal_target_id).modal("toggle", button);
   });
+
+  // Update lazy loads
+  lazyLoadInstance.update();
 });
