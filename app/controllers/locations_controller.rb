@@ -4,11 +4,11 @@ require("geocoder")
 
 #  :index
 #   params:
-#   :by_editor
-#   :by_user
-#   :country
-#   :index_location
-#   :pattern
+#   advanced_search:
+#   pattern:
+#   country:
+#   by_user:
+#   by_editor:
 #  :show,
 #  :new,
 #  :create,
