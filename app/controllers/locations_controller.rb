@@ -53,10 +53,43 @@ class LocationsController < ApplicationController
     index_location
   end
 
+  # Displays a list of all locations.
+  def list_locations
+    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
+    query = create_query(:Location, :all, by: sorted_by)
+    show_selected_locations(query, link_all_sorts: true)
+  end
+
   # Displays a list of selected locations, based on current Query.
-  def index_location
+  def list_query_results
     query = find_or_create_query(:Location, by: params[:by])
     show_selected_locations(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Displays matrix of advanced search results.
+  def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
+    query = find_query(:Location)
+    show_selected_locations(query, link_all_sorts: true)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to(search_advanced_path)
+  end
+
+  # Displays a list of locations matching a given string.
+  def pattern
+    pattern = params[:pattern].to_s
+    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
+    if loc
+      redirect_to(location_path(loc.id))
+    else
+      query = create_query(
+        :Location, :pattern_search,
+        pattern: Location.user_name(@user, pattern)
+      )
+      show_selected_locations(query, link_all_sorts: true)
+    end
   end
 
   # Displays a list of all locations whose country matches the id param.
@@ -64,13 +97,6 @@ class LocationsController < ApplicationController
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
-    show_selected_locations(query, link_all_sorts: true)
-  end
-
-  # Displays a list of all locations.
-  def list_locations
-    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
-    query = create_query(:Location, :all, by: sorted_by)
     show_selected_locations(query, link_all_sorts: true)
   end
 
@@ -96,32 +122,6 @@ class LocationsController < ApplicationController
 
     query = create_query(:Location, :by_editor, user: user)
     show_selected_locations(query)
-  end
-
-  # Displays a list of locations matching a given string.
-  def pattern
-    pattern = params[:pattern].to_s
-    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if loc
-      redirect_to(location_path(loc.id))
-    else
-      query = create_query(
-        :Location, :pattern_search,
-        pattern: Location.user_name(@user, pattern)
-      )
-      show_selected_locations(query, link_all_sorts: true)
-    end
-  end
-
-  # Displays matrix of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Location)
-    show_selected_locations(query, link_all_sorts: true)
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a list with 'list_locations' template.
