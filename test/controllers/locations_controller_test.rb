@@ -323,7 +323,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
   end
 
-  def test_index_by_user
+  def test_index_by_user_who_created_multiple_locations
     user = rolf
 
     login
@@ -336,6 +336,28 @@ class LocationsControllerTest < FunctionalTestCase
       { count: Location.where(user: user).count },
       "Wrong number of Locations"
     )
+  end
+
+  def test_index_by_user_who_created_one_location
+    user = roy
+    assert(Location.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_response(:redirect)
+    assert_match(location_path(Location.where(user: user).first),
+                 redirect_to_url)
+  end
+
+  def test_index_by_user_who_created_zero_locations
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
   end
 
   def test_index_by_user_bad_user_id
