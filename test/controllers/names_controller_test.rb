@@ -41,9 +41,18 @@ class NamesControllerTest < FunctionalTestCase
     Name.new_name(parse.params)
   end
 
-  def test_index_name
+  ##############################################################################
+  #
+  #    INDEX
+
+  # Tests of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  # miscellaneous tests using get(:index)
+  def test_index
     login
     get(:index)
+
     assert_template("index")
   end
 
@@ -56,107 +65,17 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("#title", text: "Names by Popularity")
   end
 
-  # observation_index
-  def test_names_with_observations
-    login
-    get(:index, params: { with_observations: true })
-    assert_template("index")
-  end
-
-  # observation_index
-  def test_names_with_observations_by_letter
-    login
-    get(:index, params: { with_observations: true, letter: "A" })
-    assert_template("index")
-  end
-
-  # authored_names
-  def test_names_with_descriptions
-    login
-    get(:index, params: { with_descriptions: true })
-    assert_match(/not the default/i, @response.body)
-    assert_template("index")
-  end
-
-  def test_names_by_user
-    login
-    get(:index, params: { by_user: rolf.id })
-    assert_template("index")
-  end
-
-  def test_names_by_user_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
-
-    login
-    get(:index, params: { by_user: bad_user_id })
-
-    assert_flash_error("id ##{bad_user_id}")
-    assert_redirected_to(names_path)
-  end
-
-  def test_names_by_editor
-    login
-    get(:index, params: { by_editor: rolf.id })
-    assert_template("index")
-  end
-
-  def test_names_by_editor_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
-
-    login
-    get(:index, params: { by_editor: bad_user_id })
-
-    assert_flash_error("id ##{bad_user_id}")
-    assert_redirected_to(names_path)
-  end
-
-  def test_names_needing_descriptions
-    login
-    get(:index, params: { need_descriptions: rolf.id })
-    assert_template("index")
-  end
-
-  def test_name_search
-    id = names(:agaricus).id
-    login
-    get(:index, params: { pattern: id })
-    assert_redirected_to(name_path(id))
-  end
-
-  def test_name_search_help
-    login
-    get(:index, params: { pattern: "help:me" })
-    assert_match(/unexpected term/i, @response.body)
-  end
-
-  def test_name_search_with_spelling_correction
-    login
-    get(:index, params: { pattern: "agaricis campestrus" })
-    assert_template("index")
-    assert_select("div.alert-warning", 1)
-    assert_select("a[href*='names/#{names(:agaricus_campestrus).id}']",
-                  text: names(:agaricus_campestrus).search_name)
-    assert_select("a[href*='names/#{names(:agaricus_campestras).id}']",
-                  text: names(:agaricus_campestras).search_name)
-    assert_select("a[href*='names/#{names(:agaricus_campestros).id}']",
-                  text: names(:agaricus_campestros).search_name)
-
-    get(:index, params: { pattern: "Agaricus" })
-    assert_template("index")
-    assert_select("div.alert-warning", 0)
-  end
-
   def test_advanced_search
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
+
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
+
     assert_template("index")
   end
 
@@ -168,8 +87,10 @@ class NamesControllerTest < FunctionalTestCase
                                   location: "Eastern Oklahoma")
     params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
+
     login
     get(:index, params: params)
+
     assert_redirected_to(search_advanced_path)
   end
 
@@ -185,6 +106,105 @@ class NamesControllerTest < FunctionalTestCase
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
+  end
+
+  def test_index_pattern
+    id = names(:agaricus).id
+
+    login
+    get(:index, params: { pattern: id })
+
+    assert_redirected_to(name_path(id))
+  end
+
+  def test_index_pattern_help
+    login
+    get(:index, params: { pattern: "help:me" })
+
+    assert_match(/unexpected term/i, @response.body)
+  end
+
+  def test_index_pattern_with_spelling_correction
+    login
+    get(:index, params: { pattern: "agaricis campestrus" })
+
+    assert_template("index")
+    assert_select("div.alert-warning", 1)
+    assert_select("a[href*='names/#{names(:agaricus_campestrus).id}']",
+                  text: names(:agaricus_campestrus).search_name)
+    assert_select("a[href*='names/#{names(:agaricus_campestras).id}']",
+                  text: names(:agaricus_campestras).search_name)
+    assert_select("a[href*='names/#{names(:agaricus_campestros).id}']",
+                  text: names(:agaricus_campestros).search_name)
+
+    get(:index, params: { pattern: "Agaricus" })
+    assert_template("index")
+    assert_select("div.alert-warning", 0)
+  end
+
+  def test_index_with_observations
+    login
+    get(:index, params: { with_observations: true })
+
+    assert_template("index")
+  end
+
+  def test_index_with_observations_by_letter
+    login
+    get(:index, params: { with_observations: true, letter: "A" })
+
+    assert_template("index")
+  end
+
+  def test_index_with_descriptions
+    login
+    get(:index, params: { with_descriptions: true })
+
+    assert_match(/not the default/i, @response.body)
+    assert_template("index")
+  end
+
+  def test_index_needing_descriptions
+    login
+    get(:index, params: { need_descriptions: rolf.id })
+
+    assert_template("index")
+  end
+
+  def test_index_by_user
+    login
+    get(:index, params: { by_user: rolf.id })
+
+    assert_template("index")
+  end
+
+  def test_index_by_user_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(names_path)
+  end
+
+  def test_index_by_editor
+    login
+
+    get(:index, params: { by_editor: rolf.id })
+    assert_template("index")
+  end
+
+  def test_index_by_editor_bad_user_id
+    bad_user_id = 666
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_editor: bad_user_id })
+
+    assert_flash_error("id ##{bad_user_id}")
+    assert_redirected_to(names_path)
   end
 
   ################################################
