@@ -181,7 +181,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_select("#title", text: "Location Index")
+    assert_select("#title", text: "Locations by Name")
   end
 
   def test_index_with_non_default_sort

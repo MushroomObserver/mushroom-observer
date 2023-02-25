@@ -50,14 +50,20 @@ class LocationsController < ApplicationController
   private # private methods used by #index
 
   def default_index_subaction
-    index_location
+    list_locations
   end
 
   # Displays a list of all locations.
   def list_locations
-    sorted_by = params[:by].present? ? params[:by].to_s : :created_at
+    return list_query_results if %w[by id q].intersect?(params.keys)
+
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:Location, :all, by: sorted_by)
     show_selected_locations(query, link_all_sorts: true)
+  end
+
+  def default_sort_order
+    ::Query::LocationBase.default_order
   end
 
   # Displays a list of selected locations, based on current Query.
