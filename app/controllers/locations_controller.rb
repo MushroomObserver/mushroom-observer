@@ -42,7 +42,7 @@ class LocationsController < ApplicationController
     :pattern,
     :country,
     :by_user,
-    :by_editor,
+    :by_editor
   ].freeze
 
   #############################################
