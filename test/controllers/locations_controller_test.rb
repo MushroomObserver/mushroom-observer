@@ -348,15 +348,48 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
-  def test_index_by_editor
+  def test_index_by_editor_of_multiple_locations
+    user = roy
+    locs_edited_by_user =  Location.joins(:versions).
+                                    where.not(user: user).
+                                    where(versions: { user_id: user.id })
+    assert(locs_edited_by_user.many?)
+
     login
-    get(:index, params: { by_editor: rolf.id })
+    get(:index, params: { by_editor: user.id })
+
+    assert_select("#title", text: "Locations Edited by #{user.name}")
+    assert_select("a:match('href',?)", %r{^/locations/\d+},
+                  { count: locs_edited_by_user.count },
+                  "Wrong number of results")
+  end
+
+  def test_index_by_editor_of_one_location
+    user = katrina
+    locs_edited_by_user =  Location.joins(:versions).
+                                    where.not(user: user).
+                                    where(versions: { user_id: user.id })
+    assert(locs_edited_by_user.one?)
+
+    login
+    get(:index, params: { by_editor: user.id })
+
+    assert_response(:redirect)
+    assert_match(location_path(locs_edited_by_user.first), redirect_to_url)
+  end
+
+  def test_index_by_editor_of_zero_locations
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_editor: user.id })
+
     assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
   end
 
   def test_index_by_editor_bad_user_i
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+    bad_user_id = observations(:minimal_unknown_obs)
 
     login
     get(:index, params: { by_editor: bad_user_id })
