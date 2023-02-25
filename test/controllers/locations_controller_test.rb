@@ -268,7 +268,7 @@ class LocationsControllerTest < FunctionalTestCase
     # https://www.pivotaltracker.com/story/show/184554008
     assert_select("#title", text: /^Locations Matching ‘#{country}.?’/)
     assert_select(
-      "#content a:match('href', ?)", /#{locations_path}\/\d+/,
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(Location[:name].matches("%#{country}")).count },
       "Wrong number of Locations"
     )
@@ -283,7 +283,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     assert_select("#title", text: /^Locations Matching ‘#{country}.?’/)
     assert_select(
-      "#content a:match('href', ?)", %r{^#{location_path(new_mexico)}},
+      "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true,
       "USA page should include New Mexico"
     )
@@ -291,12 +291,12 @@ class LocationsControllerTest < FunctionalTestCase
 
   def create_new_mexico_location
     Location.create!(name: "Santa Fe, New Mexico, USA",
-      north: 34.1865,
-      west: -116.924,
-      east: -116.88,
-      south: 34.1571,
-      notes: "Santa Fe",
-      user: mary)
+                     north: 34.1865,
+                     west: -116.924,
+                     east: -116.88,
+                     south: 34.1571,
+                     notes: "Santa Fe",
+                     user: mary)
   end
 
   def test_index_country_excludes_state_with_same_name_in_other_country
@@ -307,7 +307,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_select(
-      "#content a:match('href', ?)", %r{^#{location_path(new_mexico)}},
+      "#content a:match('href', ?)", /^#{location_path(new_mexico)}/,
       { count: 0 },
       "Mexico page should not include New Mexico, USA"
     )
@@ -332,7 +332,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_template("index")
     assert_select("#title", text: "Locations created by #{user.name}")
     assert_select(
-      "#content a:match('href', ?)", /#{locations_path}\/\d+/,
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(user: user).count },
       "Wrong number of Locations"
     )
@@ -372,9 +372,9 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_by_editor_of_multiple_locations
     user = roy
-    locs_edited_by_user =  Location.joins(:versions).
-                                    where.not(user: user).
-                                    where(versions: { user_id: user.id })
+    locs_edited_by_user = Location.joins(:versions).
+                          where.not(user: user).
+                          where(versions: { user_id: user.id })
     assert(locs_edited_by_user.many?)
 
     login
@@ -388,9 +388,9 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_by_editor_of_one_location
     user = katrina
-    locs_edited_by_user =  Location.joins(:versions).
-                                    where.not(user: user).
-                                    where(versions: { user_id: user.id })
+    locs_edited_by_user = Location.joins(:versions).
+                          where.not(user: user).
+                          where(versions: { user_id: user.id })
     assert(locs_edited_by_user.one?)
 
     login
