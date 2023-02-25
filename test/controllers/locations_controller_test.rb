@@ -324,14 +324,22 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_by_user
+    user = rolf
+
     login
-    get(:index, params: { by_user: rolf.id })
+    get(:index, params: { by_user: user.id })
+
     assert_template("index")
+    assert_select("#title", text: "Locations created by #{user.name}")
+    assert_select(
+      "#content a:match('href', ?)", /#{locations_path}\/\d+/,
+      { count: Location.where(user: user).count },
+      "Wrong number of Locations"
+    )
   end
 
   def test_index_by_user_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+    bad_user_id = observations(:minimal_unknown_obs)
 
     login
     get(:index, params: { by_user: bad_user_id })
