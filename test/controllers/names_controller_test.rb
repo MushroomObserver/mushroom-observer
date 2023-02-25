@@ -47,12 +47,6 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
-  def test_name_index
-    login
-    get(:index)
-    assert_template("index")
-  end
-
   def test_index_with_non_default_sort
     by = "num_views"
 
