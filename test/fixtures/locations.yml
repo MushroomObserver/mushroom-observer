@@ -239,12 +239,12 @@ east_lt_west_location:
 
 loc_edited_by_katrina:
   <<: *DEFAULTS
-  user: katrina
+  user: roy
 
 loc_1_edited_by_roy:
   <<: *DEFAULTS
-  user: roy
+  user: katrina
 
 loc_2_edited_by_roy:
   <<: *DEFAULTS
-  user: roy
+  user: katrina

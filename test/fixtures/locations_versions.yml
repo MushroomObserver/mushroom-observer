@@ -114,7 +114,7 @@ loc_edited_by_katrina_v1:
   <<: *DEFAULTS
   location_id: <%= ActiveRecord::FixtureSet.identify(:loc_edited_by_katrina) %>
   version: 1
-  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
+  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
 
 loc_edited_by_katrina_v2:
   <<: *DEFAULTS
@@ -126,7 +126,7 @@ loc_1_edited_by_roy_v1:
   <<: *DEFAULTS
   location_id: <%= ActiveRecord::FixtureSet.identify(:loc_1_edited_by_roy) %>
   version: 1
-  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
+  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
 
 loc_1_edited_by_roy_v2:
   <<: *DEFAULTS
@@ -138,7 +138,7 @@ loc_2_edited_by_roy_v1:
   <<: *DEFAULTS
   location_id: <%= ActiveRecord::FixtureSet.identify(:loc_2_edited_by_roy) %>
   version: 1
-  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
+  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
 
 loc_2_edited_by_roy_v2:
   <<: *DEFAULTS
