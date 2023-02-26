@@ -6,8 +6,6 @@ require("set")
 class NamesControllerTest < FunctionalTestCase
   include ObjectLinkHelper
 
-  WRONG_TITLE_ID_MESSAGE = "Wrong page or #title"
-
   # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # Has to be defined on class itself, include doesn't seem to work
   def self.report_email(email)
