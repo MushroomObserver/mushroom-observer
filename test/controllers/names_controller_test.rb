@@ -142,7 +142,22 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_select("#title", text: "Names Matching ‘#{pattern}’")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
+                    with_correct_spelling.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
+  def test_index_pattern_id
     id = names(:agaricus).id
 
     login
