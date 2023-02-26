@@ -68,6 +68,24 @@ class NamesControllerTest < FunctionalTestCase
                   "Wrong page or #title")
   end
 
+  def test_index_advanced_search_multiple_hits
+    search_string = "Suil"
+    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+
+    login
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
+
+    assert_response(:success)
+    assert_select("#title", text: "Advanced Search")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
+                    with_correct_spelling.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
   def test_advanced_search_no_hits
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
@@ -79,7 +97,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_template("index")
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or <title>text")
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
