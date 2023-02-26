@@ -65,7 +65,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("#title", text: "Names by Popularity")
   end
 
-  def test_advanced_search
+  def test_advanced_search_no_hits
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -76,8 +76,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_response(:success)
-    assert_select("#title", text: "Advanced Search")
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
   def test_advanced_search_with_deleted_query
