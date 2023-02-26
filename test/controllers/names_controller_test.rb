@@ -53,7 +53,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_template("index")
+    assert_select("#title", text: "Names by Name")
   end
 
   def test_index_with_non_default_sort
@@ -76,7 +76,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_template("index")
+    assert_response(:success)
+    assert_select("#title", text: "Advanced Search")
   end
 
   def test_advanced_search_with_deleted_query
@@ -124,11 +125,12 @@ class NamesControllerTest < FunctionalTestCase
     assert_match(/unexpected term/i, @response.body)
   end
 
+  # TODO: rewrite this as an integration test
   def test_index_pattern_with_spelling_correction
     login
     get(:index, params: { pattern: "agaricis campestrus" })
 
-    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :names.l))
     assert_select("div.alert-warning", 1)
     assert_select("a[href*='names/#{names(:agaricus_campestrus).id}']",
                   text: names(:agaricus_campestrus).search_name)
@@ -137,8 +139,12 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("a[href*='names/#{names(:agaricus_campestros).id}']",
                   text: names(:agaricus_campestros).search_name)
 
-    get(:index, params: { pattern: "Agaricus" })
-    assert_template("index")
+    pattern = "Agaricus"
+
+    get(:index, params: { pattern:  pattern})
+
+    assert_response(:success)
+    assert_select("#title", text: "Names Matching ‘#{pattern}’")
     assert_select("div.alert-warning", 0)
   end
 
@@ -146,40 +152,54 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { with_observations: true })
 
-    assert_template("index")
+    assert_response(:success)
+    assert_select("#title", text: "Names with Observations")
   end
 
   def test_index_with_observations_by_letter
     login
     get(:index, params: { with_observations: true, letter: "A" })
 
-    assert_template("index")
+    assert_response(:success)
+    assert_select("#title", { text: "Names with Observations" }, "Wrong page")
   end
 
   def test_index_with_descriptions
     login
     get(:index, params: { with_descriptions: true })
 
-    assert_match(/not the default/i, @response.body)
-    assert_template("index")
+    assert_response(:success)
+    assert_select("#title", text: "Names with Descriptions")
+    assert_select("#results", { text: /not the default/ },
+                  "Results should include non-default descriptions")
   end
 
+  # TODO: Why does need_descriptions have a value?
   def test_index_needing_descriptions
     login
     get(:index, params: { need_descriptions: rolf.id })
 
-    assert_template("index")
+    assert_response(:success)
+    assert_select("#title", text: "Selected Names")
   end
 
   def test_index_by_user
-    login
-    get(:index, params: { by_user: rolf.id })
+    user = dick
 
-    assert_template("index")
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_response(:success)
+    assert_select("#title", text: "Names created by #{user.name}")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.where(user: user, correct_spelling_id: nil).count },
+      "Wrong number of (correctly spelled) Names"
+    )
   end
 
   def test_index_by_user_bad_user_id
-    bad_user_id = 666
+    bad_user_id = observations(:minimal_unknown_obs)
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
@@ -189,6 +209,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(names_path)
   end
 
+  # TODO: Fix this.
+  # See LocationsControllerTest, locations.yml, locations_versions.yml
   def test_index_by_editor
     login
 
@@ -197,7 +219,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_by_editor_bad_user_id
-    bad_user_id = 666
+    bad_user_id = observations(:minimal_unknown_obs)
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
