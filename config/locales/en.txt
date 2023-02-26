@@ -1,6 +1,5 @@
 #
 #  Be sure to rake lang:update and restart your server if you modify this file.
-#
 ################################################################################
 #
 #  Rails Comments

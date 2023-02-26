@@ -6,6 +6,8 @@ require("set")
 class NamesControllerTest < FunctionalTestCase
   include ObjectLinkHelper
 
+  WRONG_TITLE_ID_MESSAGE = "Wrong page or #title"
+
   # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # Has to be defined on class itself, include doesn't seem to work
   def self.report_email(email)
@@ -53,7 +55,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_select("#title", text: "Names by Name")
+    assert_select("#title", { text: "Names by Name" }, "Wrong page or #title")
   end
 
   def test_index_with_non_default_sort
@@ -62,7 +64,8 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Names by Popularity")
+    assert_select("#title", { text: "Names by Popularity" },
+                  "Wrong page or #title")
   end
 
   def test_advanced_search_no_hits
@@ -144,7 +147,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { pattern:  pattern})
 
     assert_response(:success)
-    assert_select("#title", text: "Names Matching ‘#{pattern}’")
+    assert_select("#title", { text: "Names Matching ‘#{pattern}’" },
+                  "Wrong page or #title")
     assert_select("div.alert-warning", 0)
   end
 
@@ -153,7 +157,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true })
 
     assert_response(:success)
-    assert_select("#title", text: "Names with Observations")
+    assert_select("#title", { text: "Names with Observations" },
+                  "Wrong page or #title")
   end
 
   def test_index_with_observations_by_letter
@@ -161,7 +166,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true, letter: "A" })
 
     assert_response(:success)
-    assert_select("#title", { text: "Names with Observations" }, "Wrong page")
+    assert_select("#title", { text: "Names with Observations" },
+                  "Wrong page or #title")
   end
 
   def test_index_with_descriptions
@@ -169,7 +175,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_descriptions: true })
 
     assert_response(:success)
-    assert_select("#title", text: "Names with Descriptions")
+    assert_select("#title", { text: "Names with Descriptions" },
+                  "Wrong page or #title")
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
   end
@@ -180,7 +187,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { need_descriptions: rolf.id })
 
     assert_response(:success)
-    assert_select("#title", text: "Selected Names")
+    assert_select("#title", { text: "Selected Names" }, "Wrong page or #title")
   end
 
   def test_index_by_user
@@ -190,7 +197,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_response(:success)
-    assert_select("#title", text: "Names created by #{user.name}")
+    assert_select("#title", { text: "Names created by #{user.name}" },
+                  "Wrong page or #title")
     assert_select(
       "#content a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.where(user: user, correct_spelling_id: nil).count },
