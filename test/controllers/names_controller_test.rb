@@ -84,6 +84,19 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_advanced_search_one_hit
+    search_string = "Stereum hirsutum"
+    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+    assert(query.results.one?,
+           "Test needs a string that has exactly one hit")
+
+    login
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
+    assert_match(name_path(names(:stereum_hirsutum)), redirect_to_url,
+                 "Wrong page")
+  end
+
   def test_advanced_search_no_hits
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
