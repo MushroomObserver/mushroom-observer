@@ -189,7 +189,7 @@ class NamesControllerTest < FunctionalTestCase
 
     pattern = "Agaricus"
 
-    get(:index, params: { pattern:  pattern})
+    get(:index, params: { pattern: pattern })
 
     assert_response(:success)
     assert_select("#title", { text: "Names Matching ‘#{pattern}’" },
