@@ -234,6 +234,13 @@ class NamesControllerTest < FunctionalTestCase
                   "Wrong page or #title")
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
+    assert_select(
+      "#results a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.joins(:descriptions).
+                    with_correct_spelling. # website seems to behave this way
+                    distinct.count },
+      "Wrong number of (correctly spelled) Names"
+    )
   end
 
   # TODO: Why does need_descriptions have a value?
