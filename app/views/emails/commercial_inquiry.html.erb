@@ -5,7 +5,7 @@
 
 <%= form_tag(add_query_param(action: :commercial_inquiry, id: @image.id)) do %>
   <div>
-    <%= thumbnail(@image, size: :medium, border: 0, votes: true) %>
+    <%= thumbnail(@image, size: :medium, votes: true) %>
   </div>
   <div>
     <%= :commercial_inquiry_header.tp(user: @image.user.legal_name) %>
