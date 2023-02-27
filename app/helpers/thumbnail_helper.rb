@@ -15,48 +15,79 @@ module ThumbnailHelper
     image,
     args = {
       notes: "",
-      extra_classes: "",
-      size: "small",
-      data_sizes: {},
-      data: {}
+      extra_classes: ""
     }
   )
 
+    # Sometimes it's prohibitive to do the extra join to images table,
+    # so we only have image_id. It's still possible to render the image with
+    # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
 
-    img_class = "img-fluid lazy #{args[:extra_classes]}"
-    image_urls = thumbnail_urls(image_id)
-    data_sizes = args[:data_sizes] || thumbnail_srcset_sizes
+    args[:size] ||= "small"
+    args[:data] ||= {}
+    args[:data_sizes] ||= {}
+    args[:obs_data] ||= {}
+    args[:identify] ||= false
+    args[:link] ||= image_path(image_id)
+    args[:link_type] ||= :target # or :remote
+    args[:link_method] ||= :get
+    args[:votes] ||= true
 
-    # Account for possible data-confirm, etc
+    img_class = "img-fluid lazy #{args[:extra_classes]}"
+    img_urls = thumbnail_urls(image_id)
+    img_src = img_urls[args[:size]]
+    img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
+                                  img_urls[:large], img_urls[:huge])
+    img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
+
+    # <img> data attributes. Account for possible data-confirm, etc
     img_data = {
-      src: image_urls[:small],
-      srcset: thumbnail_srcset,
-      sizes: data_sizes
+      src: img_urls[:small],
+      srcset: img_srcset,
+      sizes: img_sizes
     }.merge(args[:data])
 
+    # <img> attributes
     html_options = {
-      alt: notes,
+      alt: args[:notes],
       class: img_class,
       data: img_data
     }
 
+    img_tag = image_tag(img_src, html_options)
+    # The stretched-link (link/button/form) covering the image
+    img_link = image_link_html(args[:link], args[:link_method])
+
+    show_original_name = args[:original] && image &&
+                         image.original_name.present? &&
+                         (check_permission(image) ||
+                          image.user &&
+                          image.user.keep_filenames == "keep_and_show")
+    img_filename = if show_original_name
+                     content_tag(:div,
+                                 image.original_name)
+                   else
+                     ""
+                   end
+
+    # The size src appearing in the lightbox is a user pref
     lb_size = User.current&.image_size || "huge"
+    lb_url = img_urls[lb_size]
+    lb_id = args[:is_set] ? "observation-set" : SecureRandom.uuid
+    lb_caption = image_caption_html(image_id, args[:obs_data], args[:identify])
+    lightbox_link = link_to("", lb_url,
+                            class: "glyphicon glyphicon-fullscreen theater-btn",
+                            data: { lightbox: lb_id, title: lb_caption })
 
     locals = {
       image: image,
-      link: image_path(image_id),
-      link_type: :target, # or :remote
-      link_method: :get,
-      sized_url: image_urls(image_id)[args[:size]],
-      html_options: html_options,
-      lightbox_url: image_urls(image_id)[lb_size],
-      votes: true,
-      original: false,
-      theater_on_click: false,
-      identify: false,
-      obs_data: {}
-    }.merge(args)
+      img_tag: img_tag,
+      img_link: img_link,
+      lightbox_link: lightbox_link,
+      votes: args[:votes],
+      img_filename: img_filename
+    }
     render(partial: "shared/image_thumbnail", locals: locals)
   end
 
@@ -75,7 +106,7 @@ module ThumbnailHelper
     thumbnail_urls(image_id)[lb_size]
   end
 
-  def thumbnail_srcset
+  def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
     [
       "#{small_url} 320w",
       "#{medium_url} 640w",
@@ -125,18 +156,18 @@ module ThumbnailHelper
   def image_caption_html(image_id, obs_data, identify)
     html = []
     if obs_data[:id].present?
-      html = image_observation_data(html, obs_data, identify)
+      html = image_observation_caption(html, obs_data, identify)
     end
     html << caption_image_links(image_id)
     safe_join(html)
   end
 
-  def image_observation_data(html, obs_data, identify)
+  def image_observation_caption(html, obs_data, identify)
     if identify ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
-      html << caption_propose_naming_link(obs_data[:id])
+      html << propose_naming_link(obs_data[:id])
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << caption_mark_as_reviewed_toggle(obs_data[:id])
+      html << mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",
@@ -152,7 +183,7 @@ module ThumbnailHelper
     safe_join(links)
   end
 
-  def caption_propose_naming_link(id, btn_class = "btn-primary my-3")
+  def propose_naming_link(id, btn_class = "btn-primary my-3")
     render(partial: "observations/namings/propose_button",
            locals: { obs_id: id, text: :create_naming.t,
                      btn_class: "#{btn_class} d-inline-block" },
@@ -167,25 +198,11 @@ module ThumbnailHelper
   # with some additions to the lightbox JS, to keep track of the checked
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
-  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                                      label_class = "")
-    form_with(url: observation_view_path(id: id),
-              class: "d-inline-block",
-              method: :put, local: false) do |f|
-      content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label("#{selector}_#{id}",
-                class: "caption-reviewed-link #{label_class}") do
-          concat(:mark_as_reviewed.t)
-          concat(
-            f.check_box(
-              :reviewed,
-              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
-                onchange: "Rails.fire(this.closest('form'), 'submit')" }
-            )
-          )
-        end
-      end
-    end
+  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+                              label_class = "")
+    render(partial: "observation_views/mark_as_reviewed",
+           locals: { id: id, selector: selector, label_class: label_class },
+           layout: false)
   end
 
   def caption_obs_title(obs_data)
