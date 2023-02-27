@@ -63,4 +63,26 @@ class NameControllerSupplementalTest < CapybaraIntegrationTestCase
     assert_nil(bad_name.synonym_id)
     assert_nil(good_name.synonym_id)
   end
+
+  def test_name_pattern_search_with_near_miss_corrected
+    near_miss_pattern = "agaricis campestrus"
+
+    login
+    visit("/")
+    fill_in("search_pattern", with: near_miss_pattern)
+    page.select("Names", from: :search_type)
+    click_button("Search")
+
+    assert_selector("#content div.alert-warning",
+                    text: "Maybe you meant one of the following names?")
+
+    corrected_pattern = "Agaricus"
+
+    fill_in("search_pattern", with: corrected_pattern)
+    page.select("Names", from: :search_type)
+    click_button("Search")
+
+    assert_no_selector("#content div.alert-warning")
+    assert_selector("#title", text: "Names Matching ‘#{corrected_pattern}’")
+  end
 end

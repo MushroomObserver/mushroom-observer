@@ -173,28 +173,20 @@ class NamesControllerTest < FunctionalTestCase
     assert_match(/unexpected term/i, @response.body)
   end
 
-  # TODO: rewrite this as an integration test
-  def test_index_pattern_with_spelling_correction
+  def test_index_pattern_near_miss
+    near_miss_pattern = "agaricis campestrus"
+    assert_empty(Name.with_correct_spelling.
+                      where(search_name: near_miss_pattern),
+                 "Test needs a pattern without a correctly spelled exact match")
+    near_misses = Name.with_correct_spelling.
+                  where(Name[:search_name] =~ /agaric.s campestr.s/)
     login
-    get(:index, params: { pattern: "agaricis campestrus" })
+    get(:index, params: { near_miss_pattern: })
 
-    assert_flash_text(:runtime_no_matches.l(type: :names.l))
-    assert_select("div.alert-warning", 1)
-    assert_select("a[href*='names/#{names(:agaricus_campestrus).id}']",
-                  text: names(:agaricus_campestrus).search_name)
-    assert_select("a[href*='names/#{names(:agaricus_campestras).id}']",
-                  text: names(:agaricus_campestras).search_name)
-    assert_select("a[href*='names/#{names(:agaricus_campestros).id}']",
-                  text: names(:agaricus_campestros).search_name)
-
-    pattern = "Agaricus"
-
-    get(:index, params: { pattern: pattern })
-
-    assert_response(:success)
-    assert_select("#title", { text: "Names Matching ‘#{pattern}’" },
-                  "Wrong page or #title")
-    assert_select("div.alert-warning", 0)
+    near_misses.each do |near_miss|
+      assert_select("#content a[href*='names/#{near_miss.id}']",
+                    text: near_miss.search_name)
+    end
   end
 
   def test_index_with_observations
