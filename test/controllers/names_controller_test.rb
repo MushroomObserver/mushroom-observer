@@ -196,15 +196,33 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select("#title", { text: "Names with Observations" },
                   "Wrong page or #title")
+    assert_select(
+      "#results a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.joins(:observations).
+                    with_correct_spelling. # website seems to behave this way
+                    distinct.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+
   end
 
   def test_index_with_observations_by_letter
+    letter = "A"
+    names = Name.joins(:observations).
+            with_correct_spelling. # website seems to behave this way
+            where(Observation[:text_name].matches("#{letter}%"))
+    assert(names.many?, "Test needs different letter")
+
     login
-    get(:index, params: { with_observations: true, letter: "A" })
+    get(:index, params: { with_observations: true, letter: letter })
 
     assert_response(:success)
     assert_select("#title", { text: "Names with Observations" },
                   "Wrong page or #title")
+    names.each do |name|
+      assert_select("#results a[href*='/names/#{name.id}']",
+                    text: name.search_name)
+    end
   end
 
   def test_index_with_descriptions
