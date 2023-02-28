@@ -5,7 +5,8 @@ identify ||= false
 presenter = MatrixBoxPresenter.new(object, @view)
 columns ||= "col-xs-12 col-sm-6 col-md-4"
 object_id = object&.id.present? ? object.id : "no_ID"
-
+locals = local_assigns.except(:columns, :object, :object_counter,
+                              :object_iteration)
 if presenter
 %>
   <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
@@ -14,8 +15,7 @@ if presenter
         <div class="thumbnail-container">
           <%= if presenter.image_data
             render(partial: "shared/image_thumbnail",
-                   locals: local_assigns.except(:columns, :object).
-                                         merge(presenter.image_data))
+                   locals: locals.merge(presenter.image_data))
           end %>
         </div><!-- .thumbnail-container -->
         <div class="rss-what">

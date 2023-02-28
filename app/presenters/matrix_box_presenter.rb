@@ -73,7 +73,7 @@ class MatrixBoxPresenter
   end
 
   # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view, _link_method, _identify)
+  def observation_to_presenter(observation, view)
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
