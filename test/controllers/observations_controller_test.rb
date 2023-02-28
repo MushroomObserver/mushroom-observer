@@ -178,6 +178,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # other subactions in order of @index_subaction_param_keys
   # miscellaneous tests using get(:index)
 
+  # TODO: One request/method
   def test_index_page_loads
     login
     get(:index)
@@ -222,130 +223,17 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Observations by #{by.capitalize}")
   end
 
-  def test_index_user_unknown_user
-    login
-    get(:index, params: { user: 1e6 })
-    assert_redirected_to(users_path)
-  end
-
-  def test_index_user_by_known_user
-    # Make sure fixtures are still okay
-    obs = observations(:coprinus_comatus_obs)
-    assert_nil(obs.rss_log_id)
-    assert_not_nil(obs.thumb_image_id)
-    user = rolf
-    assert(
-      user.layout_count >= rolf.observations.size,
-      "User must be able to display all rolf's Observations in a single page"
-    )
-
-    test_show_owner_id_noone_logged_in
-
-    login(user.login)
-    get(:index, params: { user: rolf.id })
-
-    assert_template(:index)
-    assert_match(
-      Image.url(:small, obs.thumb_image_id), @response.body,
-      "Observation thumbnail should display although this is not an rss_log"
-    )
-  end
-
-  def test_prev_and_next_observation
-    # Uses default observation query
-    o_chron = Observation.order(:created_at)
-    login
-    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
-    assert_redirected_to(action: :show, id: o_chron.third.id,
-                         params: @controller.query_params(QueryRecord.last))
-
-    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
-    assert_redirected_to(action: :show, id: o_chron.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
-  end
-
-  def test_prev_and_next_observation_with_fancy_query
-    n1 = names(:agaricus_campestras)
-    n2 = names(:agaricus_campestris)
-    n3 = names(:agaricus_campestros)
-    n4 = names(:agaricus_campestrus)
-
-    n2.transfer_synonym(n1)
-    n2.transfer_synonym(n3)
-    n2.transfer_synonym(n4)
-    n1.correct_spelling = n2
-    n1.save_without_our_callbacks
-
-    o1 = n1.observations.first
-    o2 = n2.observations.first
-    o3 = n3.observations.first
-    o4 = n4.observations.first
-
-    # When requesting non-synonym observations of n2, it should include n1,
-    # since an observation of n1 was clearly intended to be an observation of
-    # n2.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: false,
-                                  by: :name)
-    assert_equal(2, query.num_results)
-
-    # Likewise, when requesting *synonym* observations, neither n1 nor n2
-    # should be included.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: true,
-                                  exclude_original_names: true,
-                                  by: :name)
-    assert_equal(2, query.num_results)
-
-    # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: true,
-                                  by: :name)
-    assert_equal(4, query.num_results)
-    qp = @controller.query_params(query)
-
-    o_id = observations(:minimal_unknown_obs).id
-
-    login
-    get(:show, params: qp.merge({ id: o_id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o_id, params: qp)
-    assert_flash_text(/can.*t find.*results.*index/i)
-    get(:show, params: qp.merge({ id: o1.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({ id: o2.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({ id: o3.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o4.id, params: qp)
-    get(:show, params: qp.merge({ id: o4.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o4.id, params: qp)
-    assert_flash_text(/no more/i)
-
-    get(:show, params: qp.merge({ id: o4.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({ id: o3.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({ id: o2.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o1.id, params: qp)
-    get(:show, params: qp.merge({ id: o1.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o1.id, params: qp)
-    assert_flash_text(/no more/i)
-    get(:show, params: qp.merge({ id: o_id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o_id, params: qp)
-    assert_flash_text(/can.*t find.*results.*index/i)
-  end
-
   def test_index_advanced_search
     query = Query.lookup_and_save(:Observation, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
-    login
+
+                                  login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
+
     assert_template(:index)
   end
 
@@ -355,6 +243,7 @@ class ObservationsControllerTest < FunctionalTestCase
         params: { name: "Agaricus",
                   location: "California",
                   advanced_search: "1" })
+
     assert_response(:success)
     results = @controller.instance_variable_get(:@objects)
     assert_equal(4, results.length)
@@ -369,6 +258,7 @@ class ObservationsControllerTest < FunctionalTestCase
           location: "String in notes",
           advanced_search: "1"
         })
+
     assert_response(:success)
     results = @controller.instance_variable_get(:@objects)
     assert_equal(0, results.length)
@@ -383,6 +273,7 @@ class ObservationsControllerTest < FunctionalTestCase
         advanced_search: "1"
       }
     )
+
     assert_response(:success)
     results = @controller.instance_variable_get(:@objects)
     assert_equal(0, results.length)
@@ -402,6 +293,7 @@ class ObservationsControllerTest < FunctionalTestCase
           location: "String in notes",
           advanced_search: "1"
         })
+
     assert_response(:success)
     results = @controller.instance_variable_get(:@objects)
     assert_equal(0, results.length)
@@ -426,22 +318,27 @@ class ObservationsControllerTest < FunctionalTestCase
     ObservationsController.any_instance.stubs(:show_selected_observations).
       raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
+
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
+
     assert_redirected_to(search_advanced_path)
   end
 
   def test_index_pattern_search_help
     login
     get(:index, params: { pattern: "help:me" })
+
     assert_match(/unexpected term/i, @response.body)
   end
 
   def test_index_pattern1
-    login
     pattern = "Boletus edulis"
+
+    login
     get(:index, params: { pattern: pattern })
+
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -451,9 +348,11 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern2
-    login
     pattern = "Boletus edulis"
+
+    login
     get(:index, params: { pattern: pattern, page: 2 })
+
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -463,10 +362,11 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern_no_hits
+    pattern = "no hits"
+
     login
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
-    pattern = "no hits"
     get(:index, params: { pattern: pattern })
     assert_template(:index)
 
@@ -489,8 +389,10 @@ class ObservationsControllerTest < FunctionalTestCase
   # goes directly to that observation.
   def test_index_pattern_matching_id
     obs = observations(:minimal_unknown_obs)
+
     login
     get(:index, params: { pattern: obs.id })
+
     assert_redirected_to(%r{/#{obs.id}})
   end
 
@@ -499,21 +401,24 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_index_pattern_bad_pattern
     login
     get(:index, params: { pattern: { error: "" } })
+
     assert_template(:index)
 
     # Bad pattern from obs_needing_ids should render that index instead
     get(:index, params: { pattern: { error: "" }, needs_id: true })
+
     assert_redirected_to(identify_observations_path)
   end
 
   def test_index_pattern_with_spelling_correction
     # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
-    login("rolf")
     Name.find_or_create_name_and_parents("Coprinus comatus").each(&:save!)
     names = Name.suggest_alternate_spellings("Coprinus comatis")
     assert_not_equal([], names.map(&:search_name))
 
+    login("rolf")
     get(:index, params: { pattern: "coprinis comatis" })
+
     assert_template(:index)
     assert_equal("coprinis comatis", assigns(:suggest_alternate_spellings))
     assert_select("div.alert-warning", 1)
@@ -521,7 +426,62 @@ class ObservationsControllerTest < FunctionalTestCase
                   text: names(:coprinus_comatus).search_name)
 
     get(:index, params: { pattern: "Coprinus comatus" })
+
     assert_response(:redirect)
+  end
+
+  # TODO: Test :look_alikes
+
+  # TODO: Test :related_taxa
+
+  def test_index_name
+    name = names(:fungi)
+    ids = Observation.where(name: name).map(&:id)
+    assert(ids.length.positive?, "Test needs ifferent fixture for 'name'")
+
+    params = { name: name }
+    login("zero") # Has no observations
+    get(:index, params: params)
+
+    assert_response(:success)
+    ids.each do |id|
+      assert_select(
+        "a:match('href', ?)", %r{^/#{id}}, true,
+        "Observations of Name should link to each Observation of Name"
+      )
+    end
+  end
+
+  def test_index_user_unknown_user
+    user = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { user: user })
+
+    assert_redirected_to(users_path)
+  end
+
+  def test_index_user_by_known_user
+    # Make sure fixtures are still okay
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.rss_log_id)
+    assert_not_nil(obs.thumb_image_id)
+    user = rolf
+    assert(
+      user.layout_count >= rolf.observations.size,
+      "User must be able to display all rolf's Observations in a single page"
+    )
+
+    test_show_owner_id_noone_logged_in
+
+    login(user.login)
+    get(:index, params: { user: rolf.id })
+
+    assert_template(:index)
+    assert_match(
+      Image.url(:small, obs.thumb_image_id), @response.body,
+      "Observation thumbnail should display although this is not an rss_log"
+    )
   end
 
   def test_index_location_with_observations
@@ -578,44 +538,33 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?
   # Created in response to a bug seen in the wild
-  def test_index_page2
-    login
+  def test_index_where_page2
     params = { place_name: "Burbank", page: 2 }
+
+    login
     get(:index, params: params)
+
     assert_template(:index)
   end
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?
   # Created in response to a bug seen in the wild
   def test_index_where_search_pattern
-    login
     params = { place_name: "Burbank" }
+
+    login
     get(:index, params: params)
+
     assert_template("shared/_matrix_box")
   end
 
-  def test_index_name
-    name = names(:fungi)
-    ids = Observation.where(name: name).map(&:id)
-    assert(ids.length.positive?, "Test needs ifferent fixture for 'name'")
-
-    params = { name: name }
-    login("zero") # Has no observations
-    get(:index, params: params)
-
-    assert_response(:success)
-    ids.each do |id|
-      assert_select(
-        "a:match('href', ?)", %r{^/#{id}}, true,
-        "Observations of Name should link to each Observation of Name"
-      )
-    end
-  end
+  # TODO: Test :project
 
   # Prove that lichen content_filter works on observations
   def test_index_with_lichen_filter
     login(users(:lichenologist).name)
     get(:index)
+
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.count.positive?)
@@ -624,6 +573,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login(users(:antilichenologist).name)
     get(:index)
+
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.count.positive?)
@@ -644,6 +594,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login(user.name)
     get(:index)
+
     results = @controller.instance_variable_get(:@objects).sort_by(&:id)
     assert_obj_arrays_equal(observations_in_region, results)
   end
@@ -1115,6 +1066,92 @@ class ObservationsControllerTest < FunctionalTestCase
         )
       end
     end
+  end
+
+  def test_prev_and_next_observation
+    # Uses default observation query
+    o_chron = Observation.order(:created_at)
+    login
+    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
+    assert_redirected_to(action: :show, id: o_chron.third.id,
+                         params: @controller.query_params(QueryRecord.last))
+
+    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
+    assert_redirected_to(action: :show, id: o_chron.fifth.id,
+                         params: @controller.query_params(QueryRecord.last))
+  end
+
+  def test_prev_and_next_observation_with_fancy_query
+    n1 = names(:agaricus_campestras)
+    n2 = names(:agaricus_campestris)
+    n3 = names(:agaricus_campestros)
+    n4 = names(:agaricus_campestrus)
+
+    n2.transfer_synonym(n1)
+    n2.transfer_synonym(n3)
+    n2.transfer_synonym(n4)
+    n1.correct_spelling = n2
+    n1.save_without_our_callbacks
+
+    o1 = n1.observations.first
+    o2 = n2.observations.first
+    o3 = n3.observations.first
+    o4 = n4.observations.first
+
+    # When requesting non-synonym observations of n2, it should include n1,
+    # since an observation of n1 was clearly intended to be an observation of
+    # n2.
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: false,
+                                  by: :name)
+    assert_equal(2, query.num_results)
+
+    # Likewise, when requesting *synonym* observations, neither n1 nor n2
+    # should be included.
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  exclude_original_names: true,
+                                  by: :name)
+    assert_equal(2, query.num_results)
+
+    # But for our prev/next test, lets do the all-inclusive query.
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  by: :name)
+    assert_equal(4, query.num_results)
+    qp = @controller.query_params(query)
+
+    o_id = observations(:minimal_unknown_obs).id
+
+    login
+    get(:show, params: qp.merge({ id: o_id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o_id, params: qp)
+    assert_flash_text(/can.*t find.*results.*index/i)
+    get(:show, params: qp.merge({ id: o1.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o2.id, params: qp)
+    get(:show, params: qp.merge({ id: o2.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o3.id, params: qp)
+    get(:show, params: qp.merge({ id: o3.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o4.id, params: qp)
+    get(:show, params: qp.merge({ id: o4.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o4.id, params: qp)
+    assert_flash_text(/no more/i)
+
+    get(:show, params: qp.merge({ id: o4.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o3.id, params: qp)
+    get(:show, params: qp.merge({ id: o3.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o2.id, params: qp)
+    get(:show, params: qp.merge({ id: o2.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o1.id, params: qp)
+    get(:show, params: qp.merge({ id: o1.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o1.id, params: qp)
+    assert_flash_text(/no more/i)
+    get(:show, params: qp.merge({ id: o_id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o_id, params: qp)
+    assert_flash_text(/can.*t find.*results.*index/i)
   end
 
   ##############################################################################
