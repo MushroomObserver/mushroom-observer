@@ -5,7 +5,7 @@
 # in the initialize method, we make sure that if we call any method that is
 # not defined in the presenter, it passes it on to the model object.
 class BasePresenter < SimpleDelegator
-  def initialize(model, view)
+  def initialize(model, view, _args = {})
     @view = view
     super(model)
   end

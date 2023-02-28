@@ -11,13 +11,12 @@ class ThumbnailPresenter < BasePresenter
     :img_filename   # original image filename (maybe none)
 
   def initialize(image, view, args = {})
+    super
+
     # Sometimes it's prohibitive to do the extra join to images table,
     # so we only have image_id. It's still possible to render the image with
     # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-
-    # make view methods available to presenter methods
-    @view = view
 
     default_args = {
       size: :small,
@@ -40,23 +39,23 @@ class ThumbnailPresenter < BasePresenter
     # Store these urls once
     img_urls = thumbnail_urls(image_id)
     img_src = img_urls[args[:size]]
-    img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
-                                  img_urls[:large], img_urls[:huge])
-    img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
+    # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
+    #                               img_urls[:large], img_urls[:huge])
+    # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
     img_class = "img-fluid lazy #{args[:extra_classes]}"
 
     # <img> data attributes. Account for possible data-confirm, etc
-    img_data = {
-      src: img_urls[:small],
-      srcset: img_srcset,
-      sizes: img_sizes
-    }.merge(args[:data])
+    # img_data = {
+    #   src: img_urls[:small],
+    #   srcset: img_srcset,
+    #   sizes: img_sizes
+    # }.merge(args[:data])
 
     # <img> attributes
     html_options = {
       alt: args[:notes],
-      class: img_class,
-      data: img_data
+      class: img_class
+      # data: img_data
     }
 
     # The size src appearing in the lightbox is a user pref
@@ -84,22 +83,22 @@ class ThumbnailPresenter < BasePresenter
     }
   end
 
-  def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
-    [
-      "#{small_url} 320w",
-      "#{medium_url} 640w",
-      "#{large_url} 960w",
-      "#{huge_url} 1280w"
-    ].join(",")
-  end
+  # def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
+  #   [
+  #     "#{small_url} 320w",
+  #     "#{medium_url} 640w",
+  #     "#{large_url} 960w",
+  #     "#{huge_url} 1280w"
+  #   ].join(",")
+  # end
 
-  def thumbnail_srcset_sizes
-    [
-      "(max-width: 575px) 100vw",
-      "(max-width: 991px) 50vw",
-      "(min-width: 992px) 30vw"
-    ].join(",")
-  end
+  # def thumbnail_srcset_sizes
+  #   [
+  #     "(max-width: 575px) 100vw",
+  #     "(max-width: 991px) 50vw",
+  #     "(min-width: 992px) 30vw"
+  #   ].join(",")
+  # end
 
   # NOTE: The local var `link` might be to #show_image as you'd expect,
   # or it may be a GET with params[:img_id] to the actions for #reuse_image
