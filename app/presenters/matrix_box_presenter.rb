@@ -11,8 +11,8 @@ class MatrixBoxPresenter
     :where,     # location of object or target
     :time       # when object or target was last modified
 
-  def initialize(object, view, link_type = :target, link_method = :get,
-                 identify = nil)
+  def initialize(object, view,
+                 link_type: :target, link_method: :get, identify: nil)
     case object
     when Image
       image_to_presenter(object, view)
