@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Gather details for items in matrix-style ndex pages.
-class ThumbnailPresenter
+class ThumbnailPresenter < BasePresenter
   attr_accessor \
     :image,         # image instance or id
     :img_tag,       # thumbnail image tag
@@ -34,11 +34,6 @@ class ThumbnailPresenter
     args = default_args.merge(args)
 
     args_to_presenter(image, image_id, args)
-  end
-
-  # h is a convention for view_context
-  def h
-    @view
   end
 
   def args_to_presenter(image, image_id, args)
