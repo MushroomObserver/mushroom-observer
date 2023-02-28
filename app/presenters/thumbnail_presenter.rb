@@ -59,8 +59,8 @@ class ThumbnailPresenter < BasePresenter
       # data: img_data
     }
 
-    # The size src appearing in the lightbox is a user pref
-    lb_size = User.current&.image_size || "huge"
+    # The src size appearing in the lightbox is a user pref
+    lb_size = User.current&.image_size&.to_sym || :huge
     lb_url = img_urls[lb_size]
     lb_id = args[:is_set] ? "observation-set" : SecureRandom.uuid
     lb_caption = image_caption_html(image_id, args[:obs_data], args[:identify])
