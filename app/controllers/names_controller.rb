@@ -40,6 +40,8 @@ class NamesController < ApplicationController
 
   # Display list of all (correctly-spelled) names in the database.
   def list_names
+    return list_query_results if %w[by id q].intersect?(params.keys)
+
     sorted_by = params[:by].present? ? params[:by].to_s : :name
     query = create_query(:Name, :all, by: sorted_by)
     show_selected_names(query)
