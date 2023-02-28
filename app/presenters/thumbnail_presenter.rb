@@ -28,7 +28,8 @@ class ThumbnailPresenter < BasePresenter
       identify: false,
       link: h.image_path(image_id),
       link_method: :get,
-      votes: true
+      votes: true,
+      is_set: true
     }
     args = default_args.merge(args)
 
@@ -100,10 +101,10 @@ class ThumbnailPresenter < BasePresenter
   #   ].join(",")
   # end
 
-  # NOTE: The local var `link` might be to #show_image as you'd expect,
-  # or it may be a GET with params[:img_id] to the actions for #reuse_image
-  # or #remove_image ...or any other link.
-  # These use .ab-fab instead of .stretched-link so .theater-btn is clickable
+  # NOTE: The local `img_link_html` might be a link to #show_obs or #show_image,
+  # but it may also be a button/input (with params[:img_id]) sending to
+  # #reuse_image or #remove_image ...or any other clickable element. Elements
+  # use .ab-fab instead of .stretched-link to keep .theater-btn clickable
   def image_link_html(link, link_method)
     case link_method
     when :get
