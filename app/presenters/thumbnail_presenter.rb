@@ -46,17 +46,17 @@ class ThumbnailPresenter < BasePresenter
     img_class = "img-fluid lazy #{args[:extra_classes]}"
 
     # <img> data attributes. Account for possible data-confirm, etc
-    # img_data = {
-    #   src: img_urls[:small],
-    #   srcset: img_srcset,
-    #   sizes: img_sizes
-    # }.merge(args[:data])
+    img_data = {
+      src: img_src
+      #   srcset: img_srcset,
+      #   sizes: img_sizes
+    }.merge(args[:data])
 
     # <img> attributes
     html_options = {
       alt: args[:notes],
-      class: img_class
-      # data: img_data
+      class: img_class,
+      data: img_data
     }
 
     # The src size appearing in the lightbox is a user pref
@@ -66,7 +66,7 @@ class ThumbnailPresenter < BasePresenter
     lb_caption = image_caption_html(image_id, args[:obs_data], args[:identify])
 
     self.image = image || nil
-    self.img_tag = h.image_tag(img_src, html_options)
+    self.img_tag = h.image_tag("placeholder.svg", html_options)
     self.img_link_html = image_link_html(args[:image_link], args[:link_method])
     self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
     self.votes = args[:votes]
