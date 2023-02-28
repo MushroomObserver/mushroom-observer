@@ -68,7 +68,6 @@ class NamesController < ApplicationController
     redirect_to(search_advanced_path)
   end
 
-  # Display list of names that have observations.
   # Display list of names that match a string.
   def pattern
     pattern = params[:pattern].to_s
@@ -89,6 +88,7 @@ class NamesController < ApplicationController
     end
   end
 
+  # Display list of names that have observations.
   def with_observations
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
