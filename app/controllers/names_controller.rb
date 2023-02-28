@@ -42,9 +42,13 @@ class NamesController < ApplicationController
   def list_names
     return list_query_results if %w[by id q].intersect?(params.keys)
 
-    sorted_by = params[:by].present? ? params[:by].to_s : :name
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:Name, :all, by: sorted_by)
     show_selected_names(query)
+  end
+
+  def default_sort_order
+    ::Query::NameBase.default_order
   end
 
   # Display list of names in last index/search query.
