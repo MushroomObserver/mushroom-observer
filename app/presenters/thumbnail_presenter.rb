@@ -34,7 +34,8 @@ class ThumbnailPresenter
   end
 
   def args_to_presenter(image, image_id, view, args)
-    # Store these urls once
+    # Store these urls once]
+    binding.break
     img_urls = thumbnail_urls(image_id)
     img_src = img_urls[args[:size]]
     img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
@@ -74,11 +75,11 @@ class ThumbnailPresenter
   # get these once, since it's computed
   def thumbnail_urls(image_id)
     {
-      "small" => Image.url(:small, image_id),
-      "medium" => Image.url(:medium, image_id),
-      "large" => Image.url(:large, image_id),
-      "huge" => Image.url(:huge, image_id),
-      "full_size" => Image.url(:full_size, image_id)
+      small: Image.url(:small, image_id),
+      medium: Image.url(:medium, image_id),
+      large: Image.url(:large, image_id),
+      huge: Image.url(:huge, image_id),
+      full_size: Image.url(:full_size, image_id)
     }
   end
 
@@ -177,17 +178,17 @@ class ThumbnailPresenter
   end
 
   def img_orig_name(args, image, view)
-    if show_original_name(args, image)
+    if show_original_name(args, image, view)
       view.content_tag(:div, image.original_name)
     else
       ""
     end
   end
 
-  def show_original_name(args, image)
+  def show_original_name(args, image, view)
     args[:original] && image &&
       image.original_name.present? &&
-      (check_permission(image) ||
+      (view.check_permission(image) ||
        image.user &&
        image.user.keep_filenames == "keep_and_show")
   end
