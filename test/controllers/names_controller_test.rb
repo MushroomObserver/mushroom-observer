@@ -257,7 +257,7 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_by_user
+  def test_index_by_user_who_created_multiple_names
     user = dick
 
     login
