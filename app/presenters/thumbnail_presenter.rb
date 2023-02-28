@@ -4,7 +4,10 @@
 class ThumbnailPresenter < BasePresenter
   attr_accessor \
     :image,         # image instance or id
-    :img_tag,       # thumbnail image tag
+    :proportion,    # proportion of sizer, to size things correctly pre-lazyload
+    :width,         # image container width (to be removed soon)
+    :img_tag,       # thumbnail image tag with placeholder (src is lazy-loaded)
+    :noscript_img, # thumbnail image tag with real src (when no lazy-load)
     :img_link_html, # stretched-link (link/button/form)
     :lightbox_link, # what the lightbox link passes to lightbox (incl. caption)
     :votes,         # show votes? boolean
@@ -43,7 +46,8 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid lazy #{args[:extra_classes]}"
+    img_class = "img-fluid lazy position-absolute object-fit-cover " \
+                "#{args[:extra_classes]}"
 
     # <img> data attributes. Account for possible data-confirm, etc
     img_data = {
@@ -59,6 +63,16 @@ class ThumbnailPresenter < BasePresenter
       data: img_data
     }
 
+    # For lazy load content sizing: set img width and height,
+    # using proportional padding-bottom. Max is 3:1 h/w for thumbnail
+    # NOTE: requires image, or defaults to 1:1. Be sure it works in all cases
+    img_width = image.width ? BigDecimal(image.width) : 100
+    img_height = image.height ? BigDecimal(image.height) : 100
+    img_proportion = BigDecimal(img_height / img_width)
+    # img_proportion = "200" if img_proportion.to_i > 200 # default for tall
+    # get rid of container_width if going to full-matrix-box-width images
+    container_width = img_width > img_height ? 320 : 320 / img_proportion
+
     # The src size appearing in the lightbox is a user pref
     lb_size = User.current&.image_size&.to_sym || :huge
     lb_url = img_urls[lb_size]
@@ -66,10 +80,13 @@ class ThumbnailPresenter < BasePresenter
     lb_caption = image_caption_html(image_id, args[:obs_data], args[:identify])
 
     self.image = image || nil
+    self.proportion = (img_proportion * 100).to_f.truncate(1)
+    self.width = container_width
     self.img_tag = h.image_tag("placeholder.svg", html_options)
+    self.noscript_img = noscript_img_tag(img_src, html_options)
     self.img_link_html = image_link_html(args[:image_link], args[:link_method])
     self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
-    self.votes = args[:votes]
+    self.votes = vote_section_html(args, image)
     self.img_filename = img_orig_name(args, image)
   end
 
@@ -90,6 +107,12 @@ class ThumbnailPresenter < BasePresenter
   #   ].join(",")
   # end
 
+  def noscript_img_tag(img_src, html_options)
+    h.content_tag(:noscript) do
+      h.image_tag(img_src, html_options)
+    end
+  end
+
   # NOTE: The local `img_link_html` might be a link to #show_obs or #show_image,
   # but it may also be a button/input (with params[:img_id]) sending to
   # #reuse_image or #remove_image ...or any other clickable element. Elements
@@ -97,18 +120,22 @@ class ThumbnailPresenter < BasePresenter
   def image_link_html(link, link_method)
     case link_method
     when :get
-      h.link_with_query("", link, class: "image-link ab-fab")
+      h.link_with_query("", link, class: image_link_classes)
     when :post
-      h.post_button(name: "", path: link, class: "image-link ab-fab")
+      h.post_button(name: "", path: link, class: image_link_classes)
     when :put
-      h.put_button(name: "", path: link, class: "image-link ab-fab")
+      h.put_button(name: "", path: link, class: image_link_classes)
     when :patch
-      h.patch_button(name: "", path: link, class: "image-link ab-fab")
+      h.patch_button(name: "", path: link, class: image_link_classes)
     when :delete
-      h.destroy_button(name: "", target: link, class: "image-link ab-fab")
+      h.destroy_button(name: "", target: link, class: image_link_classes)
     when :remote
-      h.link_with_query("", link, class: "image-link ab-fab", remote: true)
+      h.link_with_query("", link, class: image_link_classes, remote: true)
     end
+  end
+
+  def image_link_classes
+    "image-link stretched-link"
   end
 
   def image_caption_html(image_id, obs_data, identify)
@@ -162,14 +189,26 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def lb_link(lb_url, lb_id, lb_caption)
-    h.link_to("", lb_url,
-              class: "glyphicon glyphicon-fullscreen theater-btn",
+    icon = h.content_tag(:i, "", class: "glyphicon glyphicon-fullscreen")
+    h.link_to(icon, lb_url,
+              class: "theater-btn",
               data: { lightbox: lb_id, title: lb_caption })
+  end
+
+  def vote_section_html(args, image)
+    if args[:votes] && image && User.current
+      h.content_tag(:div, "", class: "vote-section") do
+        h.render(partial: "shared/image_vote_links",
+                 locals: { image: image })
+      end
+    else
+      ""
+    end
   end
 
   def img_orig_name(args, image)
     if show_original_name(args, image)
-      h.content_tag(:div, image.original_name)
+      h.content_tag(:div, image.original_name, class: "mt-3")
     else
       ""
     end

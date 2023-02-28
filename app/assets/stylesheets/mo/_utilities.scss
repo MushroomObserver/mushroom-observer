@@ -96,6 +96,16 @@
   vertical-align: text-top !important;
 }
 
+.object-fit-cover {
+  @extend .w-100, .h-100;
+  object-fit: cover;
+}
+
+.object-fit-contain {
+  @extend .w-100, .h-100;
+  object-fit: contain;
+}
+
 .text-larger {
   font-size: larger !important;
 }
@@ -333,6 +343,10 @@
   padding-top: 10px !important;
 }
 
+.pt-2 {
+  padding-top: 0.5rem !important;
+}
+
 .pt-3 {
   padding-top: 1rem !important;
 }
@@ -434,6 +448,70 @@
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+.top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: auto;
+}
+
+.top-left {
+  position: absolute;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  left: 0;
+}
+
+.bottom-right {
+  position: absolute;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: auto;
+}
+
+.bottom-left {
+  position: absolute;
+  top: auto;
+  right: auto;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-bottom {
+  position: absolute;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-top {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+}
+
+.ab-left {
+  position: absolute;
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 0;
+}
+
+.ab-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
 }
 
 .click-container {
