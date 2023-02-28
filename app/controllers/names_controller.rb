@@ -75,16 +75,20 @@ class NamesController < ApplicationController
        (name = Name.safe_find(pattern))
       redirect_to(name_path(name.id))
     else
-      search = PatternSearch::Name.new(pattern)
-      if search.errors.any?
-        search.errors.each do |error|
-          flash_error(error.to_s)
-        end
-        render("names/index")
-      else
-        @suggest_alternate_spellings = search.query.params[:pattern]
-        show_selected_names(search.query)
+      show_non_id_pattern_results(pattern)
+    end
+  end
+
+  def show_non_id_pattern_results(pattern)
+    search = PatternSearch::Name.new(pattern)
+    if search.errors.any?
+      search.errors.each do |error|
+        flash_error(error.to_s)
       end
+      render("names/index")
+    else
+      @suggest_alternate_spellings = search.query.params[:pattern]
+      show_selected_names(search.query)
     end
   end
 

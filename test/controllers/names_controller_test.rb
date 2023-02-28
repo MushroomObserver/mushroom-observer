@@ -219,11 +219,10 @@ class NamesControllerTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).
-                    with_correct_spelling. # website seems to behave this way
+                    with_correct_spelling.
                     distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
-
   end
 
   def test_index_with_observations_by_letter
