@@ -37,8 +37,8 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def args_to_presenter(image, image_id, args)
-    # Store these urls once
-    img_urls = thumbnail_urls(image_id)
+    # Store these urls once, since they are computed
+    img_urls = Image.all_urls(image_id)
     img_src = img_urls[args[:size]]
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
@@ -71,18 +71,6 @@ class ThumbnailPresenter < BasePresenter
     self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
     self.votes = args[:votes]
     self.img_filename = img_orig_name(args, image)
-  end
-
-  # get these once, since it's computed
-  def thumbnail_urls(image_id)
-    {
-      thumbnail: Image.url(:thumbnail, image_id),
-      small: Image.url(:small, image_id),
-      medium: Image.url(:medium, image_id),
-      large: Image.url(:large, image_id),
-      huge: Image.url(:huge, image_id),
-      full_size: Image.url(:full_size, image_id)
-    }
   end
 
   # def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
