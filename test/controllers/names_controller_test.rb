@@ -309,13 +309,44 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(names_path)
   end
 
-  # TODO: Fix this.
-  # See LocationsControllerTest, locations.yml, locations_versions.yml
-  def test_index_by_editor
-    login
+  def test_index_by_editor_of_multiple_names
+    user = dick
+    make_dick_editor_of_addtional_name
+    names_edited_by_user = Name.joins(:versions).
+                           where.not(user: user).
+                           where(versions: { user_id: user.id })
+    assert(names_edited_by_user.many?)
 
-    get(:index, params: { by_editor: rolf.id })
-    assert_template("index")
+    login
+    get(:index, params: { by_editor: user })
+
+    assert_select("#title", text: "Names Edited by #{user.name}")
+    assert_select("a:match('href',?)", %r{^/names/\d+},
+                  { count: names_edited_by_user.count },
+                  "Wrong number of results")
+  end
+
+  # A hack to make dick an editor of this name
+  # He is the creator of the name and of a version
+  # Changing the creator to rolf makes dick look like an editor
+  def make_dick_editor_of_addtional_name
+    name = names(:boletus_edulis)
+    name.user = users(:rolf)
+    name.save
+  end
+
+  def test_index_by_editor_of_one_name
+    user = dick
+    names_edited_by_user = Name.joins(:versions).
+                           where.not(user: user).
+                           where(versions: { user_id: user.id })
+    assert(names_edited_by_user.one?)
+
+    login
+    get(:index, params: { by_editor: user.id })
+
+    assert_response(:redirect)
+    assert_match(name_path(names_edited_by_user.first), redirect_to_url)
   end
 
   def test_index_by_editor_bad_user_id
