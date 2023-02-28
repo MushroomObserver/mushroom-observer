@@ -273,6 +273,31 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_by_user_who_created_one_name
+    user = roy
+    assert(Name.where(user: user).none?)
+    name = names(:boletus_edulis)
+    name.user = user
+    name.save
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_response(:redirect)
+    assert_match(name_path(Name.where(user: user).first),
+                 redirect_to_url)
+  end
+
+  def test_index_by_user_who_created_zero_locations
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :names.l))
+  end
+
   def test_index_by_user_bad_user_id
     bad_user_id = observations(:minimal_unknown_obs)
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
