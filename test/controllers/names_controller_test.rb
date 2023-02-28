@@ -66,6 +66,26 @@ class NamesControllerTest < FunctionalTestCase
                   "Wrong page or #title")
   end
 
+  def test_index_with_saved_query
+    user = dick
+    query = Query.lookup_and_save(:Observation, :by_user, user: user)
+    q = query.id.alphabetize
+
+    login
+    get(:index, params: { q: q })
+
+    assert_select("#title",
+                  { text: "Names with Observations created by #{user.name}" },
+                  "Wrong page or #title")
+
+    assert_select(
+      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.joins(:observations).with_correct_spelling.
+               where(observations: { user: user }).distinct.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
   def test_index_advanced_search_multiple_hits
     search_string = "Suil"
     query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
