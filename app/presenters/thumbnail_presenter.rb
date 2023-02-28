@@ -26,7 +26,7 @@ class ThumbnailPresenter < BasePresenter
       extra_classes: "",
       obs_data: {}, # used in lightbox caption
       identify: false,
-      link: h.image_path(image_id),
+      image_link: h.image_path(image_id),
       link_method: :get,
       votes: true,
       is_set: true
@@ -67,7 +67,7 @@ class ThumbnailPresenter < BasePresenter
 
     self.image = image || nil
     self.img_tag = h.image_tag(img_src, html_options)
-    self.img_link_html = image_link_html(args[:link], args[:link_method])
+    self.img_link_html = image_link_html(args[:image_link], args[:link_method])
     self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
     self.votes = args[:votes]
     self.img_filename = img_orig_name(args, image)
@@ -76,6 +76,7 @@ class ThumbnailPresenter < BasePresenter
   # get these once, since it's computed
   def thumbnail_urls(image_id)
     {
+      thumbnail: Image.url(:thumbnail, image_id),
       small: Image.url(:small, image_id),
       medium: Image.url(:medium, image_id),
       large: Image.url(:large, image_id),
