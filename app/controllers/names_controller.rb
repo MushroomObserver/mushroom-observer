@@ -38,12 +38,6 @@ class NamesController < ApplicationController
     list_names
   end
 
-  # Display list of names in last index/search query.
-  def index_name
-    query = find_or_create_query(:Name, by: params[:by])
-    show_selected_names(query, id: params[:id].to_s, always_index: true)
-  end
-
   # Display list of all (correctly-spelled) names in the database.
   def list_names
     sorted_by = params[:by].present? ? params[:by].to_s : :name
@@ -51,7 +45,44 @@ class NamesController < ApplicationController
     show_selected_names(query)
   end
 
+  # Display list of names in last index/search query.
+  def list_query_results
+    query = find_or_create_query(:Name, by: params[:by])
+    show_selected_names(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Displays list of advanced search results.
+  def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
+    query = find_query(:Name)
+    show_selected_names(query)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to(search_advanced_path)
+  end
+
   # Display list of names that have observations.
+  # Display list of names that match a string.
+  def pattern
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) &&
+       (name = Name.safe_find(pattern))
+      redirect_to(name_path(name.id))
+    else
+      search = PatternSearch::Name.new(pattern)
+      if search.errors.any?
+        search.errors.each do |error|
+          flash_error(error.to_s)
+        end
+        render("names/index")
+      else
+        @suggest_alternate_spellings = search.query.params[:pattern]
+        show_selected_names(search.query)
+      end
+    end
+  end
+
   def with_observations
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
@@ -61,6 +92,14 @@ class NamesController < ApplicationController
   def with_descriptions
     query = create_query(:Name, :with_descriptions)
     show_selected_names(query)
+  end
+
+  # Display list of the most popular 100 names that don't have descriptions.
+  # NOTE: all this extra info and help will be lost if user re-sorts.
+  def need_descriptions
+    @help = :needed_descriptions_help
+    query = Name.descriptions_needed
+    show_selected_names(query, num_per_page: 100)
   end
 
   # Display list of names that a given user is author on.
@@ -88,45 +127,6 @@ class NamesController < ApplicationController
 
     query = create_query(:Name, :by_editor, user: user)
     show_selected_names(query)
-  end
-
-  # Display list of the most popular 100 names that don't have descriptions.
-  # NOTE: all this extra info and help will be lost if user re-sorts.
-  def need_descriptions
-    @help = :needed_descriptions_help
-    query = Name.descriptions_needed
-    show_selected_names(query, num_per_page: 100)
-  end
-
-  # Display list of names that match a string.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (name = Name.safe_find(pattern))
-      redirect_to(name_path(name.id))
-    else
-      search = PatternSearch::Name.new(pattern)
-      if search.errors.any?
-        search.errors.each do |error|
-          flash_error(error.to_s)
-        end
-        render("names/index")
-      else
-        @suggest_alternate_spellings = search.query.params[:pattern]
-        show_selected_names(search.query)
-      end
-    end
-  end
-
-  # Displays list of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Name)
-    show_selected_names(query)
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a list with 'index' template.
