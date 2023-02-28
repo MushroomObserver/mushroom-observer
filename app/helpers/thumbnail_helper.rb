@@ -73,9 +73,9 @@ module ThumbnailHelper
   def image_observation_data(html, obs_data, identify)
     if identify ||
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
-      html << caption_propose_naming_link(obs_data[:id])
+      html << propose_naming_link(obs_data[:id])
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << caption_mark_as_reviewed_toggle(obs_data[:id])
+      html << mark_as_reviewed_toggle(obs_data[:id])
     end
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",
@@ -91,7 +91,7 @@ module ThumbnailHelper
     safe_join(links)
   end
 
-  def caption_propose_naming_link(id, btn_class = "btn-primary my-3")
+  def propose_naming_link(id, btn_class = "btn-primary my-3")
     render(partial: "observations/namings/propose_button",
            locals: { obs_id: id, text: :create_naming.t,
                      btn_class: "#{btn_class} d-inline-block" },
@@ -106,25 +106,11 @@ module ThumbnailHelper
   # with some additions to the lightbox JS, to keep track of the checked
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
-  def caption_mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                                      label_class = "")
-    form_with(url: observation_view_path(id: id),
-              class: "d-inline-block",
-              method: :put, local: false) do |f|
-      content_tag(:div, class: "d-inline form-group form-inline") do
-        f.label("#{selector}_#{id}",
-                class: "caption-reviewed-link #{label_class}") do
-          concat(:mark_as_reviewed.t)
-          concat(
-            f.check_box(
-              :reviewed,
-              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
-                onchange: "Rails.fire(this.closest('form'), 'submit')" }
-            )
-          )
-        end
-      end
-    end
+  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+                              label_class = "")
+    render(partial: "observation_views/mark_as_reviewed",
+           locals: { id: id, selector: selector, label_class: label_class },
+           layout: false)
   end
 
   def caption_obs_title(obs_data)

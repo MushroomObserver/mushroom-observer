@@ -27,7 +27,7 @@ object_id = object&.id.present? ? object.id : "no_ID"
                        locals: { naming: nam })
               end
             else
-              caption_propose_naming_link(object_id, "btn-default mb-3")
+              propose_naming_link(object_id, "btn-default mb-3")
             end
           end %>
         </div><!-- .rss-what -->
@@ -53,8 +53,7 @@ object_id = object&.id.present? ? object.id : "no_ID"
               :div,
               class: "panel-footer panel-active text-center position-relative"
             ) do
-          caption_mark_as_reviewed_toggle(object_id, "box_reviewed",
-                                          "stretched-link")
+          mark_as_reviewed_toggle(object_id, "box_reviewed", "stretched-link")
         end %>
       <% end %>
     </div><!-- .panel -->
