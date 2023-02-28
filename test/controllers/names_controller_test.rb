@@ -237,19 +237,24 @@ class NamesControllerTest < FunctionalTestCase
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:descriptions).
-                    with_correct_spelling. # website seems to behave this way
+                    with_correct_spelling.
                     distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
   end
 
-  # TODO: Why does need_descriptions have a value?
   def test_index_needing_descriptions
     login
-    get(:index, params: { need_descriptions: rolf.id })
+    get(:index, params: { need_descriptions: true })
 
     assert_response(:success)
     assert_select("#title", { text: "Selected Names" }, "Wrong page or #title")
+    assert_select(
+      "#results a:match('href', ?)", %r{#{names_path}/\d+},
+      # need length; count & size return a hash; description_needed is grouped
+      { count: Name.description_needed.length },
+      "Wrong number of (correctly spelled) Names"
+    )
   end
 
   def test_index_by_user
