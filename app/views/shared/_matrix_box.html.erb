@@ -1,22 +1,22 @@
 <%
 # Requires local variable object: RssLog, Observation, Image, etc. instance.
-link_type ||= :target
 link_method ||= :get
 identify ||= false
-presenter = MatrixBoxPresenter.new(object, @view,
-                                   link_type: link_type,
-                                   link_method: link_method,
-                                   identify: identify)
+presenter = MatrixBoxPresenter.new(object, @view)
 columns ||= "col-xs-12 col-sm-6 col-md-4"
 object_id = object&.id.present? ? object.id : "no_ID"
+locals = local_assigns.except(:columns, :object, :object_counter,
+                              :object_iteration)
+if presenter
 %>
-
-<% if presenter %>
   <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
     <div class="panel panel-default">
       <div class="panel-body rss-box-details">
         <div class="thumbnail-container">
-          <%= presenter.thumbnail %>
+          <%= if presenter.image_data
+            render(partial: "shared/image_thumbnail",
+                   locals: locals.merge(presenter.image_data))
+          end %>
         </div><!-- .thumbnail-container -->
         <div class="rss-what">
           <h5><%= presenter.what %></h5>
