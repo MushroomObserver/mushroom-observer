@@ -11,13 +11,12 @@ class ThumbnailPresenter < BasePresenter
     :img_filename   # original image filename (maybe none)
 
   def initialize(image, view, args = {})
+    super
+
     # Sometimes it's prohibitive to do the extra join to images table,
     # so we only have image_id. It's still possible to render the image with
     # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-
-    # make view methods available to presenter methods
-    @view = view
 
     default_args = {
       size: :small,
@@ -27,9 +26,10 @@ class ThumbnailPresenter < BasePresenter
       extra_classes: "",
       obs_data: {}, # used in lightbox caption
       identify: false,
-      link: h.image_path(image_id),
+      image_link: h.image_path(image_id),
       link_method: :get,
-      votes: true
+      votes: true,
+      is_set: true
     }
     args = default_args.merge(args)
 
@@ -37,74 +37,63 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def args_to_presenter(image, image_id, args)
-    # Store these urls once]
-    img_urls = thumbnail_urls(image_id)
+    # Store these urls once, since they are computed
+    img_urls = Image.all_urls(image_id)
     img_src = img_urls[args[:size]]
-    img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
-                                  img_urls[:large], img_urls[:huge])
-    img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
+    # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
+    #                               img_urls[:large], img_urls[:huge])
+    # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
     img_class = "img-fluid lazy #{args[:extra_classes]}"
 
     # <img> data attributes. Account for possible data-confirm, etc
-    img_data = {
-      src: img_urls[:small],
-      srcset: img_srcset,
-      sizes: img_sizes
-    }.merge(args[:data])
+    # img_data = {
+    #   src: img_urls[:small],
+    #   srcset: img_srcset,
+    #   sizes: img_sizes
+    # }.merge(args[:data])
 
     # <img> attributes
     html_options = {
       alt: args[:notes],
-      class: img_class,
-      data: img_data
+      class: img_class
+      # data: img_data
     }
 
-    # The size src appearing in the lightbox is a user pref
-    lb_size = User.current&.image_size || "huge"
+    # The src size appearing in the lightbox is a user pref
+    lb_size = User.current&.image_size&.to_sym || :huge
     lb_url = img_urls[lb_size]
     lb_id = args[:is_set] ? "observation-set" : SecureRandom.uuid
     lb_caption = image_caption_html(image_id, args[:obs_data], args[:identify])
 
     self.image = image || nil
     self.img_tag = h.image_tag(img_src, html_options)
-    self.img_link_html = image_link_html(args[:link], args[:link_method])
+    self.img_link_html = image_link_html(args[:image_link], args[:link_method])
     self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
     self.votes = args[:votes]
     self.img_filename = img_orig_name(args, image)
   end
 
-  # get these once, since it's computed
-  def thumbnail_urls(image_id)
-    {
-      small: Image.url(:small, image_id),
-      medium: Image.url(:medium, image_id),
-      large: Image.url(:large, image_id),
-      huge: Image.url(:huge, image_id),
-      full_size: Image.url(:full_size, image_id)
-    }
-  end
+  # def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
+  #   [
+  #     "#{small_url} 320w",
+  #     "#{medium_url} 640w",
+  #     "#{large_url} 960w",
+  #     "#{huge_url} 1280w"
+  #   ].join(",")
+  # end
 
-  def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
-    [
-      "#{small_url} 320w",
-      "#{medium_url} 640w",
-      "#{large_url} 960w",
-      "#{huge_url} 1280w"
-    ].join(",")
-  end
+  # def thumbnail_srcset_sizes
+  #   [
+  #     "(max-width: 575px) 100vw",
+  #     "(max-width: 991px) 50vw",
+  #     "(min-width: 992px) 30vw"
+  #   ].join(",")
+  # end
 
-  def thumbnail_srcset_sizes
-    [
-      "(max-width: 575px) 100vw",
-      "(max-width: 991px) 50vw",
-      "(min-width: 992px) 30vw"
-    ].join(",")
-  end
-
-  # NOTE: The local var `link` might be to #show_image as you'd expect,
-  # or it may be a GET with params[:img_id] to the actions for #reuse_image
-  # or #remove_image ...or any other link.
-  # These use .ab-fab instead of .stretched-link so .theater-btn is clickable
+  # NOTE: The local `img_link_html` might be a link to #show_obs or #show_image,
+  # but it may also be a button/input (with params[:img_id]) sending to
+  # #reuse_image or #remove_image ...or any other clickable element. Elements
+  # use .ab-fab instead of .stretched-link to keep .theater-btn clickable
   def image_link_html(link, link_method)
     case link_method
     when :get

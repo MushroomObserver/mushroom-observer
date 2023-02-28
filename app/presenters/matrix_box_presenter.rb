@@ -12,7 +12,7 @@ class MatrixBoxPresenter < BasePresenter
     :time        # when object or target was last modified
 
   def initialize(object, view)
-    @view = view
+    super
 
     case object
     when Image

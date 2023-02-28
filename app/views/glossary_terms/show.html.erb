@@ -19,7 +19,7 @@
       <%= @glossary_term.description.tpl %>
     </div>
     <div class="col-sm-4">
-      <%= thumbnail(@glossary_term.thumb_image, votes: true, size: :medium) %>
+      <%= thumbnail(@glossary_term.thumb_image, size: :medium, votes: true) %>
     </div>
   <% else %>
     <div class="col-sm-8">
