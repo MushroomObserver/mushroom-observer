@@ -33,15 +33,9 @@ class MatrixBoxPresenter
     self.who  = view.user_link(target.user) if target&.user
     self.what =
       if target
-        view.link_with_query(name,
-                             controller: target.show_controller,
-                             action: target.show_action,
-                             id: target.id)
+        view.link_with_query(name, target.show_link_args)
       else
-        view.link_with_query(name,
-                             controller: :rss_logs,
-                             action: :show,
-                             id: rss_log.id)
+        view.link_with_query(name, rss_log.show_link_args)
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
@@ -50,8 +44,7 @@ class MatrixBoxPresenter
     self.thumbnail =
       if target&.respond_to?(:thumb_image) && target&.thumb_image
         view.thumbnail(target.thumb_image,
-                       link: { controller: target.show_controller,
-                               action: target.show_action, id: target.id },
+                       link: target.show_link_args,
                        obs_data: obs_data_hash(target))
       end
     return unless (temp = rss_log.detail)
@@ -72,14 +65,8 @@ class MatrixBoxPresenter
                   nil
                 end
     self.who  = view.user_link(image.user)
-    self.what = view.link_with_query(name,
-                                     controller: image.show_controller,
-                                     action: image.show_action,
-                                     id: image.id)
-    self.thumbnail = view.thumbnail(image,
-                                    link: { controller: image.show_controller,
-                                            action: image.show_action,
-                                            id: image.id })
+    self.what = view.link_with_query(name, image.show_link_args)
+    self.thumbnail = view.thumbnail(image, link: image.show_link_args)
   end
 
   # Grabs all the information needed for view from Observation instance.
@@ -88,9 +75,7 @@ class MatrixBoxPresenter
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
-    self.what  = view.link_with_query(name, controller: "/observations",
-                                            action: :show,
-                                            id: observation.id)
+    self.what  = view.link_with_query(name, observation.show_link_args)
     self.where = view.location_link(observation.place_name,
                                     observation.location)
     if observation.rss_log
@@ -118,17 +103,12 @@ class MatrixBoxPresenter
                    #{:list_users_contribution.t}: #{user.contribution}<br/>
                    #{:Observations.t}: #{user.observations.count}".html_safe
     # rubocop:enable Rails/OutputSafety
-    self.what  = view.link_with_query(name, controller: user.show_controller,
-                                            action: user.show_action,
-                                            id: user.id)
+    self.what  = view.link_with_query(name, user.show_link_args)
     self.where = view.location_link(nil, user.location) if user.location
     return unless user.image_id
 
     self.thumbnail =
-      view.thumbnail(user.image_id,
-                     link: { controller: user.show_controller,
-                             action: user.show_action,
-                             id: user.id }, votes: false)
+      view.thumbnail(user.image_id, link: user.show_link_args, votes: false)
   end
 
   def fancy_time
@@ -136,8 +116,7 @@ class MatrixBoxPresenter
   end
 
   def obs_or_other_link(observation)
-    { controller: "/observations", action: :show,
-      id: observation.id }
+    observation.show_link_args
   end
 
   def obs_data_hash(observation)
