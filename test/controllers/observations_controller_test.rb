@@ -206,12 +206,17 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_index_with_id
+    obs = observations(:agaricus_campestris_obs)
+
     login
-    # Test again, this time specifying page number via an observation id.
-    get(:index,
-        params: { id: observations(:agaricus_campestris_obs).id })
+    get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
+    assert_select("#title", text: "Observation Index")
+    assert_select(
+      "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
+      "Index should open at the page that includes #{obs.unique_text_name}"
+    )
   end
 
   def test_index_advanced_search
