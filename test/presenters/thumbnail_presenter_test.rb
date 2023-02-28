@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require("test_helper")
 
 # test the presenter for image thumbnails
