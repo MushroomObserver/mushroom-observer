@@ -3,7 +3,10 @@
 link_type ||= :target
 link_method ||= :get
 identify ||= false
-presenter = MatrixBoxPresenter.new(object, @view, link_type, link_method, identify)
+presenter = MatrixBoxPresenter.new(object, @view,
+                                   link_type: link_type,
+                                   link_method: link_method,
+                                   identify: identify)
 columns ||= "col-xs-12 col-sm-6 col-md-4"
 object_id = object&.id.present? ? object.id : "no_ID"
 %>
