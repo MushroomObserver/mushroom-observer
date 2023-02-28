@@ -178,49 +178,40 @@ class ObservationsControllerTest < FunctionalTestCase
   # other subactions in order of @index_subaction_param_keys
   # miscellaneous tests using get(:index)
 
-  # TODO: One request/method
-  def test_index_page_loads
+  def test_index
     login
     get(:index)
+
     assert_template("shared/_matrix_box")
-
-    # Test again, this time specifying page number via an observation id.
-    get(:index,
-        params: { id: observations(:agaricus_campestris_obs).id })
-    assert_template("shared/_matrix_box")
-
-    get(:index,
-        params: { project: projects(:bolete_project).id })
-    assert_template("shared/_matrix_box")
-
-    get(:index, params: { by: "name" })
-    assert_template("shared/_matrix_box")
-
-    get(:index,
-        params: { name: names(:boletus_edulis).text_name })
-    assert_template("shared/_matrix_box")
-
-    get(:index,
-        params: { look_alikes: "1",
-                  name: names(:tremella_mesenterica).text_name })
-    assert_template(:index)
-
-    get(:index,
-        params: { related_taxa: "1",
-                  name: names(:tremella_mesenterica).text_name })
-    assert_template(:index)
-
-    get(:index, params: { user: rolf.id })
-    assert_template("shared/_matrix_box")
+    assert_select("#title", text: "Observation Index")
   end
 
-  def test_index_with_non_default_sort
+  def test_index_sorted_by_name
+    by = "name"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_template("shared/_matrix_box")
+    assert_select("#title", text: "Observations by #{by.capitalize}")
+  end
+
+  def test_index_sorted_by_user
     by = "user"
 
     login
     get(:index, params: { by: by })
 
     assert_select("#title", text: "Observations by #{by.capitalize}")
+  end
+
+  def test_index_with_id
+    login
+    # Test again, this time specifying page number via an observation id.
+    get(:index,
+        params: { id: observations(:agaricus_campestris_obs).id })
+
+    assert_template("shared/_matrix_box")
   end
 
   def test_index_advanced_search
@@ -230,7 +221,7 @@ class ObservationsControllerTest < FunctionalTestCase
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
 
-                                  login
+    login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
@@ -431,19 +422,36 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # TODO: Test :look_alikes
+  def test_index_look_alikes
+    login
+    get(:index,
+        params: { look_alikes: "1",
+                  name: names(:tremella_mesenterica).text_name })
+
+    assert_template(:index)
+  end
 
   # TODO: Test :related_taxa
+  def test_index_related_taxa
+    login
+    get(:index,
+        params: { related_taxa: "1",
+                  name: names(:tremella_mesenterica).text_name })
+
+    assert_template(:index)
+  end
 
   def test_index_name
     name = names(:fungi)
     ids = Observation.where(name: name).map(&:id)
-    assert(ids.length.positive?, "Test needs ifferent fixture for 'name'")
-
+    assert(ids.length.positive?, "Test needs different fixture for 'name'")
     params = { name: name }
+
     login("zero") # Has no observations
     get(:index, params: params)
 
     assert_response(:success)
+    assert_template("shared/_matrix_box")
     ids.each do |id|
       assert_select(
         "a:match('href', ?)", %r{^/#{id}}, true,
@@ -478,6 +486,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { user: rolf.id })
 
     assert_template(:index)
+    assert_template("shared/_matrix_box")
     assert_match(
       Image.url(:small, obs.thumb_image_id), @response.body,
       "Observation thumbnail should display although this is not an rss_log"
@@ -559,6 +568,13 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # TODO: Test :project
+  def test_index_project
+    login
+    get(:index,
+        params: { project: projects(:bolete_project).id })
+
+    assert_template("shared/_matrix_box")
+  end
 
   # Prove that lichen content_filter works on observations
   def test_index_with_lichen_filter
