@@ -3,21 +3,20 @@
 # Gather details for items in matrix-style ndex pages.
 class MatrixBoxPresenter
   attr_accessor \
-    :thumbnail, # thumbnail image tag
-    :detail,    # string with extra details
-    :when,      # when object or target was created
-    :who,       # owner of object or target
-    :what,      # link to object or target
-    :where,     # location of object or target
-    :time       # when object or target was last modified
+    :image_data, # thumbnail image tag
+    :detail,     # string with extra details
+    :when,       # when object or target was created
+    :who,        # owner of object or target
+    :what,       # link to object or target
+    :where,      # location of object or target
+    :time        # when object or target was last modified
 
-  def initialize(object, view,
-                 link_type: :target, link_method: :get, identify: nil)
+  def initialize(object, view)
     case object
     when Image
       image_to_presenter(object, view)
     when Observation
-      observation_to_presenter(object, view, link_type, link_method, identify)
+      observation_to_presenter(object, view)
     when RssLog
       rss_log_to_presenter(object, view)
     when User
@@ -41,12 +40,13 @@ class MatrixBoxPresenter
                  if target&.respond_to?(:location)
     self.time = rss_log.updated_at
 
-    self.thumbnail =
-      if target&.respond_to?(:thumb_image) && target&.thumb_image
-        view.thumbnail(target.thumb_image,
-                       link: target.show_link_args,
-                       obs_data: obs_data_hash(target))
-      end
+    if target&.respond_to?(:thumb_image) && target&.thumb_image
+      self.image_data = {
+        image: target.thumb_image,
+        image_link: target.show_link_args,
+        obs_data: obs_data_hash(target)
+      }
+    end
     return unless (temp = rss_log.detail)
 
     temp = target.source_credit.tpl if target.respond_to?(:source_credit) &&
@@ -66,12 +66,14 @@ class MatrixBoxPresenter
                 end
     self.who  = view.user_link(image.user)
     self.what = view.link_with_query(name, image.show_link_args)
-    self.thumbnail = view.thumbnail(image, link: image.show_link_args)
+    self.image_data = {
+      image: image,
+      image_link: image.show_link_args
+    }
   end
 
   # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view, link_type, link_method,
-                               identify)
+  def observation_to_presenter(observation, view, _link_method, _identify)
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
@@ -86,11 +88,11 @@ class MatrixBoxPresenter
 
     # link_type allows an obs box to link to show_obs, or something else
     # thumbnail_helper uses identify to maybe add a "propose a name" link
-    self.thumbnail =
-      view.thumbnail(observation.thumb_image,
-                     link: obs_or_other_link(observation),
-                     link_type: link_type, link_method: link_method,
-                     identify: identify, obs_data: obs_data_hash(observation))
+    self.image_data = {
+      image: observation.thumb_image,
+      image_link: obs_or_other_link(observation),
+      obs_data: obs_data_hash(observation)
+    }
   end
 
   # Grabs all the information needed for view from User instance.
@@ -107,8 +109,11 @@ class MatrixBoxPresenter
     self.where = view.location_link(nil, user.location) if user.location
     return unless user.image_id
 
-    self.thumbnail =
-      view.thumbnail(user.image_id, link: user.show_link_args, votes: false)
+    self.image_data = {
+      image: user.image_id,
+      image_link: user.show_link_args,
+      votes: false
+    }
   end
 
   def fancy_time

@@ -1,21 +1,21 @@
 <%
-presenter = ThumbnailPresenter.new(image, args)
+presenter = ThumbnailPresenter.new(image, @view, local_assigns.except(:image))
 %>
 
 <div class="position-relative">
   <div class="d-inline">
     <div data-toggle="expand-icon" class="text-center">
       <div class="click-container position-relative">
-        <%= img_tag %>
-        <%= img_link %>
+        <%= presenter.img_tag %>
+        <%= presenter.img_link_html %>
       </div>
-      <%= lightbox_link %>
+      <%= presenter.lightbox_link %>
       <div class="mt-3">
-        <% if User.current and votes and image %>
+        <% if User.current and presenter.votes and presenter.image %>
           <%= render(partial: "shared/image_vote_links",
                      locals: { image: image }) %>
         <% end %>
-        <%= img_filename %>
+        <%= presenter.img_filename %>
       </div>
     </div>
   </div>
