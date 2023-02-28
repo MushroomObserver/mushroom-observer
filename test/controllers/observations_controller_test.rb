@@ -173,6 +173,10 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   ######## Index ################################################
+  # Tests of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  # miscellaneous tests using get(:index)
 
   def test_index_page_loads
     login
@@ -218,13 +222,13 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Observations by #{by.capitalize}")
   end
 
-  def test_observations_by_unknown_user
+  def test_index_user_unknown_user
     login
     get(:index, params: { user: 1e6 })
     assert_redirected_to(users_path)
   end
 
-  def test_observations_by_known_user
+  def test_index_user_by_known_user
     # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
     assert_nil(obs.rss_log_id)
@@ -333,7 +337,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_flash_text(/can.*t find.*results.*index/i)
   end
 
-  def test_advanced_search
+  def test_index_advanced_search
     query = Query.lookup_and_save(:Observation, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -345,7 +349,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_advanced_search2
+  def test_index_advanced_search2
     login
     get(:index,
         params: { name: "Agaricus",
@@ -356,7 +360,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(4, results.length)
   end
 
-  def test_advanced_search3
+  def test_index_advanced_search3
     login
     # Fail to include notes.
     get(:index,
@@ -418,7 +422,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # Prove that if advanced_search provokes exception,
   # it returns to advanced search form.
-  def test_advanced_search_error
+  def test_index_advanced_search_error
     ObservationsController.any_instance.stubs(:show_selected_observations).
       raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
@@ -428,13 +432,13 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_observation_search_help
+  def test_index_pattern_search_help
     login
     get(:index, params: { pattern: "help:me" })
     assert_match(/unexpected term/i, @response.body)
   end
 
-  def test_observation_search1
+  def test_index_pattern1
     login
     pattern = "Boletus edulis"
     get(:index, params: { pattern: pattern })
@@ -446,7 +450,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_observation_search2
+  def test_index_pattern2
     login
     pattern = "Boletus edulis"
     get(:index, params: { pattern: pattern, page: 2 })
@@ -458,7 +462,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_observation_search_no_hits
+  def test_index_pattern_no_hits
     login
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
@@ -483,7 +487,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # Prove that when pattern is the id of a real observation,
   # goes directly to that observation.
-  def test_observation_search_matching_id
+  def test_index_pattern_matching_id
     obs = observations(:minimal_unknown_obs)
     login
     get(:index, params: { pattern: obs.id })
@@ -492,7 +496,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # Prove that when the pattern causes an error,
   # MO just displays an observation list
-  def test_observation_search_bad_pattern
+  def test_index_pattern_bad_pattern
     login
     get(:index, params: { pattern: { error: "" } })
     assert_template(:index)
@@ -502,7 +506,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(identify_observations_path)
   end
 
-  def test_observation_search_with_spelling_correction
+  def test_index_pattern_with_spelling_correction
     # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
     login("rolf")
     Name.find_or_create_name_and_parents("Coprinus comatus").each(&:save!)
@@ -520,7 +524,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_index_at_location_with_observations
+  def test_index_location_with_observations
     location = locations(:obs_default_location)
     params = { location: location.id }
 
@@ -530,7 +534,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("#title", text: "Observations from #{location.name}")
   end
 
-  def test_index_at_location_without_observations
+  def test_index_location_without_observations
     location = locations(:unused_location)
     params = { location: location }
     flash_matcher = Regexp.new(
@@ -546,7 +550,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_index_at_location_with_nonexistent_location
+  def test_index_location_with_nonexistent_location
     location = "non-existent"
     params = { location: location }
     flash_matcher = Regexp.new(
@@ -562,7 +566,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
-  def test_index_at_where
+  def test_index_where
     location = locations(:obs_default_location)
     params = { where: location.name }
 
@@ -574,7 +578,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?
   # Created in response to a bug seen in the wild
-  def test_where_search_next_page
+  def test_index_page2
     login
     params = { place_name: "Burbank", page: 2 }
     get(:index, params: params)
@@ -583,14 +587,14 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?
   # Created in response to a bug seen in the wild
-  def test_where_search_pattern
+  def test_index_where_search_pattern
     login
     params = { place_name: "Burbank" }
     get(:index, params: params)
     assert_template("shared/_matrix_box")
   end
 
-  def test_observations_of_name
+  def test_index_name
     name = names(:fungi)
     ids = Observation.where(name: name).map(&:id)
     assert(ids.length.positive?, "Test needs ifferent fixture for 'name'")
@@ -609,7 +613,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # Prove that lichen content_filter works on observations
-  def test_observations_with_lichen_filter
+  def test_index_with_lichen_filter
     login(users(:lichenologist).name)
     get(:index)
     results = @controller.instance_variable_get(:@objects)
@@ -627,7 +631,7 @@ class ObservationsControllerTest < FunctionalTestCase
            "No results should be lichens")
   end
 
-  def test_observations_with_region_filter
+  def test_index_with_region_filter
     observations_in_region = Observation.where(
       Observation[:where].matches("%California, USA")
     ).order(:id).to_a
