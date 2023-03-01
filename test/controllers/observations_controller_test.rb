@@ -219,7 +219,44 @@ class ObservationsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_advanced_search
+  def test_index_advanced_search_name_and_location_multiple_hits
+    name = "Agaricus"
+    location = "California"
+    expected_hits = Observation.where(Observation[:text_name] =~ name).
+                    where(Observation[:where] =~ location).
+                    count
+
+    login
+    get(:index,
+        params: { name: name, location: location,
+                  advanced_search: "1" })
+
+    assert_response(:success)
+    assert_select("#title", text: "Advanced Search")
+    assert_select(
+      "#results .rss-what a:match('href', ?)", %r{^/\d},
+      { count: expected_hits },
+      "Wrong number of results"
+    )
+  end
+
+  def test_index_advanced_search_name_one_hit
+    obs = observations(:strobilurus_diminutivus_obs)
+    search_string = obs.text_name
+    query = Query.lookup_and_save(:Observation, :advanced_search,
+                                  name: search_string)
+    assert(query.results.one?,
+           "Test needs a string that has exactly one hit")
+
+    login
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
+
+    assert_match(/#{obs.id}/, redirect_to_url,
+                 "Advanced Search with 1 hit should show the hit")
+  end
+
+  def test_index_advanced_search_no_hits
     query = Query.lookup_and_save(:Observation, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -231,34 +268,33 @@ class ObservationsControllerTest < FunctionalTestCase
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
     assert_template(:index)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or <title>text")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
   end
 
-  def test_index_advanced_search2
+  def test_index_advanced_search_notes1
     login
-    get(:index,
-        params: { name: "Agaricus",
-                  location: "California",
-                  advanced_search: "1" })
-
-    assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(4, results.length)
-  end
-
-  def test_index_advanced_search3
-    login
-    # Fail to include notes.
     get(:index,
         params: {
           name: "Fungi",
           location: "String in notes",
+          # Deliberately omit search_location_notes: 1
           advanced_search: "1"
         })
 
     assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(0, results.length)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or <title>text")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_select(
+      "#results a", false,
+      "There should be no results when string is missing from notes, " \
+      "and search_location_notes param is missing")
+  end
 
+  def test_index_advanced_search_notes2
+    login
     # Include notes, but notes don't have string yet!
     get(
       :index,
@@ -271,9 +307,16 @@ class ObservationsControllerTest < FunctionalTestCase
     )
 
     assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(0, results.length)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or <title>text")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_select(
+      "#results a", false,
+      "There should be no results when string is missing from notes, " \
+      "even if search_location_notes param is true")
+  end
 
+  def test_index_advanced_search_notes3
     # Add string to notes, make sure it is actually added.
     login("rolf")
     loc = locations(:burbank)
@@ -282,18 +325,37 @@ class ObservationsControllerTest < FunctionalTestCase
     loc.reload
     assert(loc.notes.to_s.include?("String in notes"))
 
+    login
     # Forget to include notes again.
     get(:index,
         params: {
           name: "Fungi",
           location: "String in notes",
+          # Deliberately omit search_location_notes: 1
           advanced_search: "1"
         })
 
     assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(0, results.length)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or <title>text")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_select(
+      "#results a", false,
+      "There should be no results when notes include search string, " \
+      "if search_location_notes param is missing"
+    )
+  end
 
+  def test_index_advanced_search_notes4
+    # Add string to notes, make sure it is actually added.
+    login("rolf")
+    loc = locations(:burbank)
+    loc.notes = "blah blah blahString in notesblah blah blah"
+    loc.save
+    loc.reload
+    assert(loc.notes.to_s.include?("String in notes"))
+
+    login
     # Now it should finally find the three unknowns at Burbank because Burbank
     # has the magic string in its notes, and we're looking for it.
     get(:index,
@@ -308,8 +370,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(3, results.length)
   end
 
-  # Prove that if advanced_search provokes exception,
-  # it returns to advanced search form.
   def test_index_advanced_search_error
     ObservationsController.any_instance.stubs(:show_selected_observations).
       raises(RuntimeError)
@@ -319,7 +379,10 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_redirected_to(search_advanced_path)
+    assert_redirected_to(
+      search_advanced_path,
+      "Advanced Search should reload form if it throws an error"
+    )
   end
 
   def test_index_pattern_search_help
