@@ -385,6 +385,22 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_match(/unexpected term/i, @response.body)
   end
 
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_title_id("Observations Matching ‘#{pattern}’")
+    assert_select(
+      "#results a:match('href', ?)", %r{/\d+},
+      { text: /#{pattern}/i,
+        count: Observation.where(Observation[:text_name] =~ /#{pattern}/i).
+               count },
+      "Wrong number of results displayed"
+    )
+  end
+
   def test_index_pattern1
     pattern = "Boletus edulis"
 
@@ -396,17 +412,14 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_index_pattern_page32
+  def test_index_pattern_page2
     pattern = "Boletus edulis"
 
     login
     get(:index, params: { pattern: pattern, page: 2 })
 
     assert_template(:index)
-    assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get(:@title)
-    )
+    assert_title_id("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
@@ -414,49 +427,51 @@ class ObservationsControllerTest < FunctionalTestCase
     pattern = "no hits"
 
     login
-    # When there are no hits, no title is displayed, there's no rh tabset, and
-    # html <title> contents are the action name
     get(:index, params: { pattern: pattern })
-    assert_template(:index)
 
-    # Change 2022/07 : Now setting @title explicitly for refactored indexes
-    # assert_empty(@controller.instance_variable_get("@title"))
-    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
-    assert_equal(
-      :title_for_observation_search.t,
-      @controller.instance_variable_get(:@title),
+    assert_template(:index)
+    assert_empty(css_select('[id="right_tabs"]').text,
+                 "RH tabset should be empty when search has no hits")
+    assert_select(
+      "title",
+      { text: "#{:app_title.l}: #{:title_for_observation_search.l}" },
       "metadata <title> tag incorrect"
     )
-
-    # If pattern is id of a real Observation, go directly to that Observation.
-    obs = Observation.first
-    get(:index, params: { pattern: obs.id })
-    assert_redirected_to(action: :show, id: Observation.first.id)
+    assert_title_id(:title_for_observation_search.l)
   end
 
-  # Prove that when pattern is the id of a real observation,
-  # goes directly to that observation.
-  def test_index_pattern_matching_id
-    obs = observations(:minimal_unknown_obs)
+  def test_index_pattern_one_hit
+    obs = observations(:two_img_obs)
 
     login
     get(:index, params: { pattern: obs.id })
 
-    assert_redirected_to(%r{/#{obs.id}})
+    assert_match(/#{obs.id}/, redirect_to_url,
+                 "Search with 1 hit should show the hit")
   end
 
-  # Prove that when the pattern causes an error,
-  # MO just displays an observation list
   def test_index_pattern_bad_pattern
+    pattern = { error: "" }
+
     login
-    get(:index, params: { pattern: { error: "" } })
+    get(:index, params: { pattern: pattern })
 
     assert_template(:index)
+    assert_flash_error
+    assert_title_id("")
+    assert_select("#results", { text: "" }, "There should be no results")
+  end
 
-    # Bad pattern from obs_needing_ids should render that index instead
-    get(:index, params: { pattern: { error: "" }, needs_id: true })
+  def test_index_pattern_bad_pattern_from_needs_id
+    pattern = { error: "" }
 
-    assert_redirected_to(identify_observations_path)
+    login
+    get(:index, params: { pattern: pattern, needs_id: true })
+
+    assert_redirected_to(
+      identify_observations_path,
+      "Bad pattern in search from obs_needing_ids should render " \
+      "obs_needing_ids")
   end
 
   def test_index_pattern_with_spelling_correction
@@ -558,7 +573,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-   assert_title_id("Observations from #{location.name}")
+    assert_title_id("Observations from #{location.name}")
   end
 
   def test_index_location_without_observations
