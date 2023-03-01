@@ -24,10 +24,8 @@
       <div class="form-group form-inline">
         <%= content_tag(:p, class: "font-weight-bold") { :PROJECTS.t + ":" } %>
         <%= content_tag(:p, class: "help-block") { :form_images_project_help.t } %>
-        <div class="text-nowrap">
-          <%= render(partial: "observations/images/form/project",
-                     collection: @projects) %>
-        </div>
+        <%= render(partial: "observations/images/form/project",
+                   collection: @projects) %>
       </div>
     <% end %>
 
