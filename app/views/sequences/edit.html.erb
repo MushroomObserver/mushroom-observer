@@ -10,16 +10,25 @@
   @container = :wide
 %>
 
-<%= render(partial: "observation_title",
-           locals: { observation: @sequence.observation }) %>
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <%= render(partial: "observation_title",
+               locals: { observation: @sequence.observation }) %>
+    <%= render(partial: "form",
+               locals: { action: :update, button_name: :UPDATE }) %>
 
-<%= render(partial: "form",
-           method: :patch,
-           locals: { url: add_query_param(action: :update, back: @back) } ) %>
+    <div class="small">
+      <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
+      <%= user_link(@sequence.user) %>
+    </div>
 
-<div class="small">
-  <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
-  <%= user_link(@sequence.user) %>
-</div>
+    <%= show_object_footer(@sequence) %>
+  </div>
 
-<%= show_object_footer(@sequence) %>
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: @object, columns: "col-xs-12" }) %>
+    </ul>
+  </div>
+</div><!--.row-->
