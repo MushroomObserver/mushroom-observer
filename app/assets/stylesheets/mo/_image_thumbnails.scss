@@ -72,7 +72,7 @@ svg.placeholder {
 
 .vote-section {
   @extend .ab-bottom, .text-center;
-  padding: 0.25em;
+  padding: 0.5em 0.25em;
 
   a {
     color: white;
@@ -82,6 +82,12 @@ svg.placeholder {
       color: $text-color;
       text-decoration: none;
     }
+  }
+}
+
+.matrix-box {
+  .vote-buttons {
+    font-size: 0.875em;
   }
 }
 
