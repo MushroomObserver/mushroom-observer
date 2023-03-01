@@ -28,7 +28,7 @@ module ThumbnailHelper
 
     thumbnail(obs.thumb_image,
               link: observation_path(id: obs.id),
-              size: :thumbnail,
+              size: :small,
               votes: true) + image_copyright(obs.thumb_image)
   end
 
@@ -61,7 +61,8 @@ module ThumbnailHelper
            else
              image.copyright_holder.to_s.t
            end
-    image.license.copyright_text(image.year, link)
+    content_tag(:div, image.license.copyright_text(image.year, link),
+                class: "mt-2 small")
   end
 
   # Create an image link vote, where vote param is vote number ie: 3
