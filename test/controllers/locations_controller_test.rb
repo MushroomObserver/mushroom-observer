@@ -266,7 +266,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
     # https://www.pivotaltracker.com/story/show/184554008
-    assert_select("#title", text: /^Locations Matching ‘#{country}.?’/)
+    assert_title_id(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(Location[:name].matches("%#{country}")).count },
@@ -281,7 +281,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_select("#title", text: /^Locations Matching ‘#{country}.?’/)
+    assert_title_id(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true,

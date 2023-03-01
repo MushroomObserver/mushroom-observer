@@ -440,7 +440,11 @@ module GeneralExtensions
   ##############################################################################
 
   def assert_title_id(expect)
-    assert_equal(css_select("#title").text, expect, "Wrong page or title")
+    if expect.is_a?(Regexp)
+      assert_match(expect, css_select("#title").text, "Wrong page or title")
+    else
+      assert_equal(expect, css_select("#title").text, "Wrong page or title")
+    end
   end
 
   ##############################################################################
