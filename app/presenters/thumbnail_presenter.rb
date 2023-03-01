@@ -68,8 +68,8 @@ class ThumbnailPresenter < BasePresenter
     # For lazy load content sizing: set img width and height,
     # using proportional padding-bottom. Max is 3:1 h/w for thumbnail
     # NOTE: requires image, or defaults to 1:1. Be sure it works in all cases
-    img_width = image.width ? BigDecimal(image.width) : 100
-    img_height = image.height ? BigDecimal(image.height) : 100
+    img_width = image&.width ? BigDecimal(image&.width) : 100
+    img_height = image&.height ? BigDecimal(image&.height) : 100
     img_proportion = BigDecimal(img_height / img_width)
     # img_proportion = "200" if img_proportion.to_i > 200 # default for tall
 
@@ -211,7 +211,7 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def img_orig_name(args, image)
-    if show_original_name(args, image)
+    if image && show_original_name(args, image)
       h.content_tag(:div, image.original_name, class: "mt-3")
     else
       ""
