@@ -70,16 +70,16 @@ class SequencesController < ApplicationController
     # Observation.id is passed as a query param (rather than route :id param)
     # in order to give :id param a consistent meaning (the sequence id)
     # in this controller and in order to avoid an extra, non-standard route
-    return if params[:obs_id].blank?
+    return if params[:observation_id].blank?
 
-    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
+    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
     return unless @observation
 
     @sequence = Sequence.new
   end
 
   def create
-    @observation = find_or_goto_index(Observation, params[:obs_id].to_s)
+    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
     return unless @observation
 
     build_sequence

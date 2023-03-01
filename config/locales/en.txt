@@ -2336,7 +2336,7 @@
   # sequence/form_sequence
   form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp;ITS\n&nbsp;&nbsp;multi-locus\n&nbsp;&nbsp;LSU large subunit ribosomal RNA gene, partial sequence"
   form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
-  form_sequence_bases_format: "<a href=[help_url]>FASTA or Bare Sequence format</a>"
+  form_sequence_bases_format: "FASTA or Bare Sequence format"
   form_sequence_archive_help: On-line, public database with [:sequence] data for this [:OBSERVATION].
   form_sequence_accession: "[:ACCESSION] number/code"
   form_sequence_accession_help: "Examples:\n&nbsp;&nbsp;KT968655\n&nbsp;&nbsp;UDB024324"
