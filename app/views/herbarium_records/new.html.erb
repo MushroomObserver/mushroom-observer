@@ -11,7 +11,7 @@
                     id: "all_nonpersonal_herbaria_link")
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+  @container = :full
 %>
 
 <div class="row">
@@ -24,8 +24,8 @@
   <div class="col-xs-12 col-sm-5">
     <ul class="row list-unstyled">
       <%= render(partial: "shared/matrix_box",
-                locals: { object: @observation.rss_log,
-                          columns: "col-xs-12" }) %>
+                 locals: { object: @observation.rss_log || @observation,
+                           columns: "col-xs-12" }) %>
     </ul>
   </div>
 </div><!--.row-->
