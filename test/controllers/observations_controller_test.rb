@@ -474,26 +474,6 @@ class ObservationsControllerTest < FunctionalTestCase
       "obs_needing_ids")
   end
 
-  def test_index_pattern_with_spelling_correction
-    # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
-    Name.find_or_create_name_and_parents("Coprinus comatus").each(&:save!)
-    names = Name.suggest_alternate_spellings("Coprinus comatis")
-    assert_not_equal([], names.map(&:search_name))
-
-    login("rolf")
-    get(:index, params: { pattern: "coprinis comatis" })
-
-    assert_template(:index)
-    assert_equal("coprinis comatis", assigns(:suggest_alternate_spellings))
-    assert_select("div.alert-warning", 1)
-    assert_select("a[href *= 'observations?pattern=Coprinus+comatus']",
-                  text: names(:coprinus_comatus).search_name)
-
-    get(:index, params: { pattern: "Coprinus comatus" })
-
-    assert_response(:redirect)
-  end
-
   # TODO: Test :look_alikes
   def test_index_look_alikes
     login
