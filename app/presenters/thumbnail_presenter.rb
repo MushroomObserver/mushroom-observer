@@ -97,18 +97,22 @@ class ThumbnailPresenter < BasePresenter
   def image_link_html(link, link_method)
     case link_method
     when :get
-      h.link_with_query("", link, class: "image-link ab-fab")
+      h.link_with_query("", link, class: image_link_classes)
     when :post
-      h.post_button(name: "", path: link, class: "image-link ab-fab")
+      h.post_button(name: "", path: link, class: image_link_classes)
     when :put
-      h.put_button(name: "", path: link, class: "image-link ab-fab")
+      h.put_button(name: "", path: link, class: image_link_classes)
     when :patch
-      h.patch_button(name: "", path: link, class: "image-link ab-fab")
+      h.patch_button(name: "", path: link, class: image_link_classes)
     when :delete
-      h.destroy_button(name: "", target: link, class: "image-link ab-fab")
+      h.destroy_button(name: "", target: link, class: image_link_classes)
     when :remote
-      h.link_with_query("", link, class: "image-link ab-fab", remote: true)
+      h.link_with_query("", link, class: image_link_classes, remote: true)
     end
+  end
+
+  def image_link_classes
+    "image-link ab-fab"
   end
 
   def image_caption_html(image_id, obs_data, identify)
