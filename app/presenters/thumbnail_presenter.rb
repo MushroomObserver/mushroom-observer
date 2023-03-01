@@ -16,6 +16,8 @@ class ThumbnailPresenter < BasePresenter
   def initialize(image, view, args = {})
     super
 
+    # TODO: pass a matrix_box arg so we know whether to constrain width or not.
+
     # Sometimes it's prohibitive to do the extra join to images table,
     # so we only have image_id. It's still possible to render the image with
     # nothing but the image_id. (But not votes, original name, etc.)
@@ -46,7 +48,7 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid lazy position-absolute object-fit-cover " \
+    img_class = "img-fluid lazy ab-fab object-fit-cover " \
                 "#{args[:extra_classes]}"
 
     # <img> data attributes. Account for possible data-confirm, etc
@@ -70,8 +72,10 @@ class ThumbnailPresenter < BasePresenter
     img_height = image.height ? BigDecimal(image.height) : 100
     img_proportion = BigDecimal(img_height / img_width)
     # img_proportion = "200" if img_proportion.to_i > 200 # default for tall
-    # get rid of container_width if going to full-matrix-box-width images
-    container_width = img_width > img_height ? 320 : 320 / img_proportion
+
+    # NOTE: get rid of these two if switching to full-width images
+    size = Image.all_sizes_index[args[:size]]
+    container_width = img_width > img_height ? size : size / img_proportion
 
     # The src size appearing in the lightbox is a user pref
     lb_size = User.current&.image_size&.to_sym || :huge
