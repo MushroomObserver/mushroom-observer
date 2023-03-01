@@ -50,14 +50,14 @@ module Locations
       login
       get(:index)
 
-      assert_select("#title", text: "Location Descriptions by Name")
+      assert_title_id("Location Descriptions by Name")
     end
 
     def test_index_sorted_by_user
       login
       get(:index, params: { by: "user" })
 
-      assert_select("#title", text: "Location Descriptions by User")
+      assert_title_id("Location Descriptions by User")
     end
 
     def test_index_with_id
@@ -67,7 +67,7 @@ module Locations
       get(:index, params: { id: desc.id })
 
       assert_template(:index)
-      assert_select("#title", text: "Location Description Index")
+      assert_title_id("Location Description Index")
     end
 
     def test_index_by_author_of_one_description

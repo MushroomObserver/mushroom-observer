@@ -181,7 +181,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_select("#title", text: "Locations by Name")
+    assert_title_id("Locations by Name")
   end
 
   def test_index_with_non_default_sort
@@ -190,7 +190,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: sort_order })
 
-    assert_select("#title", text: "Locations by Popularity")
+    assert_title_id("Locations by Popularity")
   end
 
   def test_index_bounding_box
@@ -224,7 +224,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_template("index")
-    assert_select("#title", text: "Advanced Search")
+    assert_title_id("Advanced Search")
   end
 
   def test_index_advanced_search_error
@@ -247,7 +247,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: search_str })
 
-    assert_select("#title", text: "Locations Matching ‘#{search_str}’")
+    assert_title_id("Locations Matching ‘#{search_str}’")
   end
 
   def test_index_pattern_id
@@ -330,7 +330,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_select("#title", text: "Locations created by #{user.name}")
+    assert_title_id("Locations created by #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(user: user).count },
@@ -380,7 +380,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_select("#title", text: "Locations Edited by #{user.name}")
+    assert_title_id("Locations Edited by #{user.name}")
     assert_select("a:match('href',?)", %r{^/locations/\d+},
                   { count: locs_edited_by_user.count },
                   "Wrong number of results")

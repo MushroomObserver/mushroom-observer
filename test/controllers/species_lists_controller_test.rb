@@ -106,7 +106,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template(:index)
-    assert_select("#title", text: "Species Lists by Date")
+    assert_title_id("Species Lists by Date")
   end
 
   def test_index_sorted_by_user
@@ -115,7 +115,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Species Lists by #{by.capitalize}")
+    assert_title_id("Species Lists by #{by.capitalize}")
   end
 
   def test_index_by_past_bys
@@ -204,7 +204,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Species Lists by Title")
+    assert_title_id("Species Lists by Title")
   end
 
   def test_index_with_id_and_sort_by_title
@@ -214,7 +214,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id, by: by })
 
-    assert_select("#title", text: "Species Lists by Title")
+    assert_title_id("Species Lists by Title")
   end
 
   def test_index_with_id
@@ -223,7 +223,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id })
 
-    assert_select("#title", text: "Species Lists by Date")
+    assert_title_id("Species Lists by Date")
   end
 
   def test_index_of_user

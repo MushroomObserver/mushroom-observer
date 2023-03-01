@@ -175,7 +175,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_select("#title", text: "Observation Index")
+    assert_title_id("Observation Index")
   end
 
   def test_index_sorted_by_name
@@ -185,7 +185,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_template("shared/_matrix_box")
-    assert_select("#title", text: "Observations by #{by.capitalize}")
+    assert_title_id("Observations by #{by.capitalize}")
   end
 
   def test_index_sorted_by_user
@@ -194,7 +194,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Observations by #{by.capitalize}")
+   assert_title_id("Observations by #{by.capitalize}")
   end
 
   def test_index_with_id
@@ -204,7 +204,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-    assert_select("#title", text: "Observation Index")
+   assert_title_id("Observation Index")
     assert_select(
       "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
       "Index should open at the page that includes #{obs.unique_text_name}"
@@ -224,7 +224,7 @@ class ObservationsControllerTest < FunctionalTestCase
                   advanced_search: "1" })
 
     assert_response(:success)
-    assert_select("#title", text: "Advanced Search")
+   assert_title_id("Advanced Search")
     assert_select(
       "#results .rss-what a:match('href', ?)", %r{^/\d},
       { count: expected_hits },
@@ -392,15 +392,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template(:index)
-    assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get(:@title)
-    )
-    assert_select(
-      "#title",
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      "Wrong page or title"
-    )
+    assert_title_id("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
@@ -566,7 +558,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_select("#title", text: "Observations from #{location.name}")
+   assert_title_id("Observations from #{location.name}")
   end
 
   def test_index_location_without_observations
@@ -608,7 +600,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_select("#title", text: "Observations from ‘#{location.name}’")
+   assert_title_id("Observations from ‘#{location.name}’")
   end
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?

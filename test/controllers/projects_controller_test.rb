@@ -74,7 +74,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_select("#title", text: "Projects by Title")
+    assert_title_id("Projects by Title")
     assert_template("index")
   end
 
@@ -96,7 +96,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { by: "updated_at" })
 
     assert_template("index")
-    assert_select("#title", text: "Projects by Time Last Modified")
+    assert_title_id("Projects by Time Last Modified")
   end
 
   def test_add_project
