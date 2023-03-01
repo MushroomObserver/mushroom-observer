@@ -85,7 +85,7 @@ class ThumbnailPresenter < BasePresenter
 
     self.image = image || nil
     self.proportion = (img_proportion * 100).to_f.truncate(1)
-    self.width = container_width.to_f.truncate(1)
+    self.width = container_width.to_f.truncate(0)
     self.img_tag = h.image_tag("placeholder.svg", html_options)
     self.noscript_img = noscript_img_tag(img_src, html_options)
     self.img_link_html = image_link_html(args[:image_link], args[:link_method])
