@@ -1,7 +1,9 @@
 <%= fields_for(:project) do |f_p| %>
-  <%= f_p.label("id_#{project.id}", link_to_object(project)) %>
-  <%= f_p.check_box("id_#{project.id}",
-                    checked: @project_checks[project.id],
-                    disabled: @image.user != @user && !project.is_member?(@user),
-                    class: "form-control") %>
+  <div class="text-nowrap">
+    <%= f_p.check_box("id_#{project.id}",
+                      checked: @project_checks[project.id],
+                      disabled: @image.user != @user && !project.is_member?(@user),
+                      class: "form-control") %>
+    <%= f_p.label("id_#{project.id}", link_to_object(project)) %>
+  </div>
 <% end %>
