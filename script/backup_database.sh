@@ -28,8 +28,10 @@ chmod 640 $snapshot_file
 
 # Transfer snapshot to image server and abort if this fails.
 dest=$remote_host:$backup_dir/$backup_file
-scp $snapshot_file $dest || \
-  echo "Failed to transfer $snapshot_file to $dest!" && exit 1
+if ! scp $snapshot_file $dest; then
+  echo "Failed to transfer $snapshot_file to $dest!"
+  exit 1
+fi
 
 # Get listing of snapshots currently on the image server.
 # (Make extra certain that these are actually files in the backup dir!!)
