@@ -91,7 +91,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
-    params = { obs_id: obs.id, q: q }
+    params = { observation_id: obs.id, q: q }
 
     login("zero") # This user has no Observations
     get(:new, params: params)
@@ -100,8 +100,8 @@ class SequencesControllerTest < FunctionalTestCase
                     "A user should be able to get form to add Sequence " \
                     "to someone else's Observation")
     assert_select(
-      "form[action^='#{sequences_path(params: { obs_id: obs.id })}']", true,
-      "Sequence form has missing/incorrect `obs_id`` query param"
+      "form[action^='#{sequences_path(params: { observation_id: obs.id })}']", true,
+      "Sequence form has missing/incorrect `observation_id`` query param"
     )
     assert_select(
       "form[action*='q=#{q}']", true,
@@ -112,7 +112,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_new_login_required
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs = observations(:minimal_unknown_obs)
-    params = { obs_id: obs.id }
+    params = { observation_id: obs.id }
 
     # Prove method requires login
     get(:new, params: params)
@@ -126,7 +126,7 @@ class SequencesControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = ITS_BASES
     params = {
-      obs_id: obs.id,
+      observation_id: obs.id,
       sequence: { locus: locus,
                   bases: bases }
     }
@@ -155,7 +155,7 @@ class SequencesControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"
     params = {
-      obs_id: obs.id,
+      observation_id: obs.id,
       sequence: { locus: locus,
                   bases: bases }
     }
@@ -182,7 +182,7 @@ class SequencesControllerTest < FunctionalTestCase
     archive =   "GenBank"
     accession = "KY366491.1"
     params = {
-      obs_id: obs.id,
+      observation_id: obs.id,
       sequence: { locus: locus,
                   archive: archive,
                   accession: accession }
@@ -204,7 +204,7 @@ class SequencesControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = ITS_BASES
     params = {
-      obs_id: obs.id,
+      observation_id: obs.id,
       sequence: { locus: locus,
                   bases: bases }
     }
@@ -215,7 +215,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_no_locus
     # Prove that locus is required.
     obs = observations(:coprinus_comatus_obs)
-    params = { obs_id: obs.id,
+    params = { observation_id: obs.id,
                sequence: { locus: "",
                            bases: "actgct" } }
     login(obs.user.login)
@@ -228,7 +228,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_no_bases_or_equivalent
     # Prove that bases or archive+accession required.
     obs = observations(:coprinus_comatus_obs)
-    params = { obs_id: obs.id,
+    params = { observation_id: obs.id,
                sequence: { locus: "ITS" } }
     login(obs.user.login)
 
@@ -240,7 +240,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_archive_without_accession
     # Prove that accession required if archive present.
     obs = observations(:coprinus_comatus_obs)
-    params = { obs_id: obs.id,
+    params = { observation_id: obs.id,
                sequence: { locus: "ITS", archive: "GenBank" } }
     login(obs.user.login)
 
@@ -251,7 +251,7 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_create_accession_without_archive
     obs = observations(:coprinus_comatus_obs)
-    params = { obs_id: obs.id,
+    params = { observation_id: obs.id,
                sequence: { locus: "ITS", accession: "KY133294.1" } }
     login(obs.user.login)
 
@@ -264,7 +264,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
-    params = { obs_id: obs.id,
+    params = { observation_id: obs.id,
                sequence: { locus: "ITS", bases: "atgc" },
                q: q }
 
