@@ -322,6 +322,15 @@ class Image < AbstractModel
     [160, 320, 640, 960, 1280, 1e10]
   end
 
+  # Return a hash of all image sizes as pixels (Integer) indexed by Symbol.
+  def self.all_sizes_index
+    indexed = {}
+    all_sizes.each_with_index do |s, i|
+      indexed[s] = all_sizes_in_pixels[i]
+    end
+    indexed
+  end
+
   # Return an Array of all the extensions of all the image types we explicitly
   # support.
   def self.all_extensions
