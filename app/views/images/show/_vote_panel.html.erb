@@ -53,31 +53,31 @@
         </div>
       <% end %>
       <!-- /YOUR_VOTE -->
+    </div><!-- .panel-body -->
 
-      <!-- VOTE_TABLE -->
-      <div id="show_votes_container">
-        <% if @votes.any? %>
-          <table id="show_votes_table" class="table table-striped mt-3 mb-0">
-            <thead>
+    <!-- VOTE_TABLE -->
+    <div id="show_votes_container">
+      <% if @votes.any? %>
+        <table id="show_votes_table" class="table table-striped mt-3 mb-0">
+          <thead>
+            <tr>
+              <th><%= :USER.t %></th>
+              <th><%= :VOTE.t %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @votes.each do |vote| %>
               <tr>
-                <th><%= :USER.t %></th>
-                <th><%= :VOTE.t %></th>
+                <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
+                <td><%= :"image_vote_short_#{vote.value}".t %></td>
               </tr>
-            </thead>
-            <tbody>
-              <% @votes.each do |vote| %>
-                <tr>
-                  <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
-                  <td><%= :"image_vote_short_#{vote.value}".t %></td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        <% end %>
-      </div>
-      <!-- /VOTE_TABLE -->
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div><!-- #show_votes_container -->
+    <!-- /VOTE_TABLE -->
 
-    </div>
-  </div>
-</div>
+  </div><!-- .panel -->
+</div><!-- #quality_vote_container -->
 <!-- /VOTE_PANEL -->
