@@ -33,7 +33,8 @@
     <ul class="row list-unstyled">
       <% @herbarium_record.observations.each do |obs| %>
         <%= render(partial: "shared/matrix_box",
-                  locals: { object: obs.rss_log, columns: "col-xs-12" }) %>
+                   locals: { object: obs.rss_log || obs,
+                             columns: "col-xs-12" }) %>
       <% end %>
     </ul>
   </div>
