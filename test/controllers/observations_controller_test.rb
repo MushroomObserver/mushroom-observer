@@ -127,14 +127,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
 
-  # NOTE: This tests a deleted route, test should be deleted too.
-  # def test_show_obs
-  #   obs = observations(:fungi_obs)
-  #   login
-  #   get(:show, params: { id: obs.id })
-  #   assert_redirected_to(action: :show, id: obs.id)
-  # end
-
   def test_show_obs_view_stats
     obs = observations(:minimal_unknown_obs)
     assert_empty(ObservationView.where(observation: obs))
@@ -389,6 +381,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "help:me" })
 
+    assert_flash_error
     assert_match(/unexpected term/i, @response.body)
   end
 
@@ -403,10 +396,15 @@ class ObservationsControllerTest < FunctionalTestCase
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
       @controller.instance_variable_get(:@title)
     )
+    assert_select(
+      "#title",
+      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      "Wrong page or title"
+    )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_index_pattern2
+  def test_index_pattern_page32
     pattern = "Boletus edulis"
 
     login
