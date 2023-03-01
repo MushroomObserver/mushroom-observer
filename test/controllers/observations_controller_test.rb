@@ -206,7 +206,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_select("#title", text: "Observation Index")
     assert_select(
-      "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
+      "#results .rss-what a[href ^= '/#{obs.id}']",
+      { text: obs.unique_text_name },
       "Index should open at the page that includes #{obs.unique_text_name}"
     )
   end
@@ -392,30 +393,37 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template(:index)
-    assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get(:@title)
-    )
-    assert_select(
-      "#title",
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      "Wrong page or title"
-    )
+    assert_select("#title", { text: "Observations Matching ‘#{pattern}’" },
+                  "Wrong page or title")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_index_pattern_page32
+  def test_index_pattern_page2
     pattern = "Boletus edulis"
 
     login
     get(:index, params: { pattern: pattern, page: 2 })
 
     assert_template(:index)
-    assert_equal(
+    assert_title(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get(:@title)
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+  end
+
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+    expected_hits = Observation.where(
+      Observation[:text_name] =~ /#{pattern}/i
+    ).count
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_title_id("Observations Matching ‘#{pattern}’")
+    assert_select("#results a:match('href', ?)", %r{^/\d+},
+                  { text: /\S+/,
+                    count: expected_hits })
   end
 
   def test_index_pattern_no_hits
