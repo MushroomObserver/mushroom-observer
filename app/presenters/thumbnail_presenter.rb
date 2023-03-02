@@ -28,7 +28,7 @@ class ThumbnailPresenter < BasePresenter
       notes: "",
       data: {},
       data_sizes: {},
-      extra_classes: "",
+      extra_classes: false,
       obs_data: {}, # used in lightbox caption
       identify: false,
       image_link: h.image_path(image_id),
@@ -48,8 +48,8 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid lazy ab-fab object-fit-cover " \
-                "#{args[:extra_classes]}"
+    img_class = "img-fluid lazy ab-fab object-fit-cover"
+    img_class += " #{args[:extra_classes]}" if args[:extra_classes]
 
     # <img> data attributes. Account for possible data-confirm, etc
     img_data = {
@@ -64,6 +64,9 @@ class ThumbnailPresenter < BasePresenter
       class: img_class,
       data: img_data
     }
+
+    noscript_html_options = html_options.dup
+    noscript_html_options[:class] = "#{img_class} img-noscript"
 
     # For lazy load content sizing: set img width and height,
     # using proportional padding-bottom. Max is 3:1 h/w for thumbnail
@@ -87,7 +90,7 @@ class ThumbnailPresenter < BasePresenter
     self.proportion = (img_proportion * 100).to_f.truncate(1)
     self.width = container_width.to_f.truncate(0)
     self.img_tag = h.image_tag("placeholder.svg", html_options)
-    self.noscript_img = noscript_img_tag(img_src, html_options)
+    self.noscript_img = noscript_img_tag(img_src, noscript_html_options)
     self.img_link_html = image_link_html(args[:image_link], args[:link_method])
     self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
     self.votes = vote_section_html(args, image)

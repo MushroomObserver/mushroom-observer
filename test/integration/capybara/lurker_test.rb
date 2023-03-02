@@ -25,7 +25,7 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Click on the first image.
     go_back_after do
-      first("#content .show_images img").sibling("a.image-link").click
+      first("#content .show_images .image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation
@@ -153,7 +153,7 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Check out images
     # Observation has at least 2 images
-    image_count = all("#content .show_images img").count
+    image_count = all("#content .show_images img:not(.img-noscript)").count
     assert(image_count == 2,
            "expected 2 Images in Observation, got #{image_count}")
   end
