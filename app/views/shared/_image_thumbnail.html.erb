@@ -7,10 +7,10 @@ presenter = ThumbnailPresenter.new(image, @view, local_assigns.except(:image))
   <div class="image-lazy-sizer overflow-hidden"
        style="padding-bottom: <%= presenter.proportion %>%;">
     <%= presenter.img_tag %>
-    <%= presenter.noscript_img %>
+    <%= presenter.noscript_img_tag %>
   </div>
-  <%= presenter.img_link_html %>
+  <%= presenter.stretched_link %>
   <%= presenter.lightbox_link %>
-  <%= presenter.votes %>
+  <%= presenter.vote_section %>
 </div>
-<%= presenter.img_filename %>
+<%= presenter.image_filename %>
