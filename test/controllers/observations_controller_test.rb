@@ -224,7 +224,7 @@ class ObservationsControllerTest < FunctionalTestCase
                   advanced_search: "1" })
 
     assert_response(:success)
-   assert_title_id("Advanced Search")
+    assert_title_id("Advanced Search")
     assert_select(
       "#results .rss-what a:match('href', ?)", %r{^/\d},
       { count: expected_hits },
@@ -476,12 +476,43 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # TODO: Test :look_alikes
   def test_index_look_alikes
+    obs = observations(:owner_only_favorite_ne_consensus)
+    name = obs.name
+    look_alikes = Observation.joins(:namings).
+                  where(namings: { name: name }).
+                  where.not(name: name).count
+    assert(look_alikes > 1, "Test needs different fixture")
+
     login
-    get(:index,
-        params: { look_alikes: "1",
-                  name: names(:tremella_mesenterica).text_name })
+    get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_template(:index)
+    assert_title_id("Observations by Confidence Level")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { count: look_alikes },
+      "Wrong number of results displayed"
+    )
+  end
+
+  def test_index_look_alikes_no_hits
+    obs = observations(:strobilurus_diminutivus_obs)
+    name = obs.name
+    look_alikes = Observation.joins(:namings).
+                  where(namings: { name: name }).
+                  where.not(name: name).count
+    assert(look_alikes.zero?, "Test needs different fixture")
+
+    login
+    get(:index, params: { look_alikes: "1", name: name.id })
+
+    assert_template(:index)
+    assert_title_id("")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { count: look_alikes },
+      "Wrong number of results displayed"
+    )
   end
 
   # TODO: Test :related_taxa
