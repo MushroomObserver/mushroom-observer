@@ -6,18 +6,34 @@ namespace :visual_model do
     Rails.logger = Logger.new($stdout)
     model_name = ENV.fetch("MODEL_NAME", nil)
     name_list = ENV.fetch("NAME_LIST", nil)
-    report_usage unless model_name && name_list && File.file?(name_list)
+    report_create_usage unless model_name && name_list && File.file?(name_list)
     build_from_file(model_name, name_list)
+  end
+
+  desc "Export VisualGroup"
+  task(create: :environment) do
+    Rails.logger = Logger.new($stdout)
+    model_name = ENV.fetch("MODEL_NAME", nil)
+    group_names = ENV.fetch("GROUP_NAMES", nil)
+    report_export_usage unless model_name
+    export_model(model_name, group_names)
   end
 end
 
-def report_usage
+# visual_model:create support
+
+def report_create_usage
   Rails.logger.error(
-    "\nThis task expects the MODEL_NAME and NAME_LIST to provided\n" \
+    "\nThis task expects the MODEL_NAME and NAME_LIST to be given\n" \
     "through environment variables, and for the value of NAME_LIST\n" \
-    "to be an existing file.\n\n" \
-    "Example usage:\n" \
-    "MODEL_NAME=MyModel NAME_LIST=./name_list rails visual_model:create"
+    "to be an existing file.\n" \
+    "\nExample usage:\n" \
+    "MODEL_NAME=MyModel NAME_LIST=./name_list rails visual_model:create\n" \
+    "\nExample lines from NAME_LIST:\n" \
+    "Agaricus campestris\n" \
+    "Agaricus bisporus, Agaricus xanthodermus\n" \
+    "1234 Agaricus bernardi\n" \
+    "-2345 Agaricus abruptibulbus\n"
   )
   exit
 end
@@ -81,8 +97,9 @@ def create_visual_group(model, name)
   end
 end
 
-def add_image(model, id, name)
+def add_image(model, raw_id, name)
   group = VisualGroup.find_or_create_by(visual_model: model, name: name)
+  id = raw_id.abs
   vgi = VisualGroupImage.joins(:visual_group).find_by(
     image_id: id,
     visual_groups: { visual_model_id: model.id }
@@ -91,14 +108,60 @@ def add_image(model, id, name)
     Rails.logger.info { "Adding image #{id} to #{name}" }
     VisualGroupImage.create(visual_group: group,
                             image_id: id,
-                            included: true)
+                            included: raw_id.positive?)
   else
     old_name = vgi.visual_group.name
     Rails.logger.info do
       "Moving image #{id} from #{old_name} to #{name}"
     end
     vgi.visual_group = group
-    vgi.included = true
+    vgi.included = raw_id.positive?
     vgi.save
+  end
+end
+
+# visual_model:export support
+
+def report_export_usage
+  Rails.logger.error(
+    "\nThis task expects the MODEL_NAME to be given through an\n" \
+    "environment variable.  GROUP_NAMES can be given to limit the export.\n" \
+    "\nExample usage:\n" \
+    "MODEL_NAME=MyModel GROUP_NAMES='Microscopy, Text' " \
+    "rails visual_model:export"
+  )
+  exit
+end
+
+def export_model(model_name, group_names)
+  model = VisualModel.find_by(name: model_name)
+  if model
+    if group_names.nil?
+      export_all_groups(model)
+    else
+      export_group_names(model, group_names)
+    end
+  else
+    Rails.logger.error("Unable to find the VisualModel #{model_name}")
+  end
+end
+
+def export_all_groups(model)
+  model.visual_groups.each do |group|
+    export_group(group)
+  end
+end
+
+def export_group_names(model, group_names)
+  group_names.split(",").each do |name|
+    name = name.strip
+    next if name == ""
+
+    group = model.visual_groups.where(name: name)
+    if group
+      export_group(group)
+    else
+      Rails.logger.error("Unable to find the VisualGroup #{name}")
+    end
   end
 end
