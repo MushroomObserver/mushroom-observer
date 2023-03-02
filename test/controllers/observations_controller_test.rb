@@ -474,7 +474,6 @@ class ObservationsControllerTest < FunctionalTestCase
       "obs_needing_ids")
   end
 
-  # TODO: Test :look_alikes
   def test_index_look_alikes
     obs = observations(:owner_only_favorite_ne_consensus)
     name = obs.name
@@ -515,14 +514,26 @@ class ObservationsControllerTest < FunctionalTestCase
     )
   end
 
-  # TODO: Test :related_taxa
   def test_index_related_taxa
+    name = names(:tremella_mesenterica)
+    parent = name.parents.first
+    obss_of_related_taxa = \
+      Observation.where(
+        name: Name.where(Name[:text_name] =~ /#{parent.text_name} /).or(
+          Name.where(Name[:classification] =~ /: _#{parent.text_name}_/)
+        ).or(Name.where(id: parent.id))
+      )
+
     login
-    get(:index,
-        params: { related_taxa: "1",
-                  name: names(:tremella_mesenterica).text_name })
+    get(:index,  params: { related_taxa: "1", name: name.text_name })
 
     assert_template(:index)
+    assert_title_id("Observations by Confidence Level")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { count: obss_of_related_taxa.count },
+      "Wrong number of results displayed"
+    )
   end
 
   def test_index_name
