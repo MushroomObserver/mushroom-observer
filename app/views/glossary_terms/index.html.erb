@@ -1,27 +1,26 @@
 <%
-  @title = :glossary_term_index_title.t
+@title = :glossary_term_index_title.t
 
-  tabs = [
-    link_to(:create_glossary_term.t, new_glossary_term_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = [
+  link_to(:create_glossary_term.t, new_glossary_term_path)
+]
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :wide
 %>
 
-<%= :glossary_term_index_intro.tp %>
+<%= content_tag(:div, :glossary_term_index_intro.tp, class: "container-text") %>
 
-<table class="table table-striped">
+<div class="row">
   <% @glossary_terms.each do |term| %>
-    <tr>
-      <td class="">
-        <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
-        <%= term.description.tpl %>
-      </td>
-      <td>
-        <%= glossary_term_destroy_button(term) if in_admin_mode? %>
-        <%= if term&.thumb_image_id&.nonzero?
-          thumbnail(term.thumb_image, votes: true)
-        end %>
-      </td>
-    </tr>
+    <div class="col-xs-12 col-sm-9">
+      <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
+      <%= term.description.tpl %>
+    </div><!--.col-->
+    <div class="col-xs-12 col-sm-3">
+      <%= glossary_term_destroy_button(term) if in_admin_mode? %>
+      <%= if term&.thumb_image_id&.nonzero?
+        thumbnail(term.thumb_image, votes: true)
+      end %>
+    </div><!--.col-->
   <% end %>
-</table>
+</div><!--.row-->
