@@ -53,7 +53,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_title_id(herbarium.format_name, count: 1)
+    assert_title_id(herbarium.format_name)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -347,7 +347,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_title_id(:edit_herbarium_title.l, count: 1)
+    assert_title_id(:edit_herbarium_title.l)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -364,7 +364,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_title_id(:edit_herbarium_title.l, count: 1)
+    assert_title_id(:edit_herbarium_title.l)
   end
 
   def test_edit_with_curators_by_admin
@@ -373,7 +373,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_title_id(:edit_herbarium_title.l, count: 1)
+    assert_title_id(:edit_herbarium_title.l)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
