@@ -710,8 +710,10 @@ end
   end
 
   # Prove that lichen content_filter works on observations
-  def test_index_with_lichen_filter
-    login(users(:lichenologist).name)
+  def test_index_with_lichen_filter_only_lichens
+    user = users(:lichenologist)
+
+    login(user.name)
     get(:index)
 
     results = @controller.instance_variable_get(:@objects)
@@ -719,8 +721,12 @@ end
     assert(results.count.positive?)
     assert(results.all? { |result| result.lifeform.include?("lichen") },
            "All results should be lichen-ish")
+  end
 
-    login(users(:antilichenologist).name)
+  def test_index_with_lichen_filter_hide_lichens
+    user = users(:lichenologist)
+
+    login(user.name)
     get(:index)
 
     results = @controller.instance_variable_get(:@objects)
