@@ -8,12 +8,6 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   def index
-    # Index should be paged with alpha and number tabs
-    # See https://www.pivotaltracker.com/story/show/167657202
-    # Glossary should be query-able
-    # See https://www.pivotaltracker.com/story/show/167809123
-    # includes = @user ? { thumb_image: :image_votes } : :thumb_image
-    # @glossary_terms = GlossaryTerm.includes(includes).order(:name)
     filter_index? ? index_filtered : index_full
   end
 
