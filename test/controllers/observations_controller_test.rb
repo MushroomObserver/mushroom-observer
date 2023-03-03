@@ -175,7 +175,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_title_id("Observation Index")
+    assert_title_id("Observations by Date")
   end
 
   def test_index_sorted_by_name
@@ -223,7 +223,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_template("shared/_matrix_box")
-    assert_title_id("Observation Index")
+    assert_title_id("Observations by Date")
   end
 
   def test_index__useless_param_page2
@@ -233,7 +233,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_template(:index)
-    assert_title_id("Observation Index")
+    assert_title_id("Observations by Date")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
