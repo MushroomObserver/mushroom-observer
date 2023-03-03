@@ -26,9 +26,13 @@ module ObservationsController::Index
 
   # Displays matrix of all Observation's, sorted by date.
   def list_all
-    sorted_by = params[:by].present? ? params[:by].to_s : :date
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:Observation, :all, by: sorted_by)
     show_selected_observations(query)
+  end
+
+  def default_sort_order
+    ::Query::ObservationBase.default_order
   end
 
   # Displays matrix of Observations with the given name proposed but not
