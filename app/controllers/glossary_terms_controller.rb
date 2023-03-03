@@ -12,8 +12,9 @@ class GlossaryTermsController < ApplicationController
     # See https://www.pivotaltracker.com/story/show/167657202
     # Glossary should be query-able
     # See https://www.pivotaltracker.com/story/show/167809123
-    includes = @user ? { thumb_image: :image_votes } : :thumb_image
-    @glossary_terms = GlossaryTerm.includes(includes).order(:name)
+    # includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    # @glossary_terms = GlossaryTerm.includes(includes).order(:name)
+    filter_index? ? index_filtered : index_full
   end
 
   def show
@@ -79,6 +80,47 @@ class GlossaryTermsController < ApplicationController
   ##############################################################################
 
   private
+
+  # --------- index private methods
+
+  # should index be filtered?
+  def filter_index?
+    params[:q] || params[:by]
+  end
+
+  def index_filtered
+    query = find_or_create_query(:GlossaryTerm, by: params[:by])
+    show_selected_articles(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
+  end
+
+  def index_full
+    query = create_query(
+      :GlossaryTerm,
+      :all,
+      by: :name
+    )
+    show_selected_glossary_terms(query)
+  end
+
+  # Show selected list of glossary_terms.
+  def show_selected_glossary_terms(query, args = {})
+    includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    args = {
+      action: :index,
+      letters: "glossary_terms.name",
+      num_per_page: 50,
+      include: includes
+    }.merge(args)
+    @links ||= []
+
+    show_index_of_objects(query, args)
+  end
+
+  # --------- show, create, edit private methods
 
   def find_glossary_term!
     @glossary_term = find_or_goto_index(GlossaryTerm,
