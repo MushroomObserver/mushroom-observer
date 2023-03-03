@@ -689,13 +689,24 @@ end
                   "Wrong page or display is missing a link to Prev page")
   end
 
-  # TODO: Test :project
   def test_index_project
-    login
-    get(:index,
-        params: { project: projects(:bolete_project).id })
+    project = projects(:bolete_project)
 
-    assert_template("shared/_matrix_box")
+    login
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_title_id("Observations attached to #{project.title}")
+  end
+
+  def test_index_project_without_observations
+    project = projects(:empty_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_title_id("")
   end
 
   # Prove that lichen content_filter works on observations
