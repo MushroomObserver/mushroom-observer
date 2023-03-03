@@ -35,11 +35,11 @@ class NamesController < ApplicationController
   private # private methods used by #index
 
   def default_index_subaction
-    list_names
+    list_all
   end
 
   # Display list of all (correctly-spelled) names in the database.
-  def list_names
+  def list_all
     return list_query_results if %w[by id q].intersect?(params.keys)
 
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
