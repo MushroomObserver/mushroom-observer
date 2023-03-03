@@ -724,7 +724,7 @@ end
   end
 
   def test_index_with_lichen_filter_hide_lichens
-    user = users(:lichenologist)
+    user = users(:antilichenologist)
 
     login(user.name)
     get(:index)
