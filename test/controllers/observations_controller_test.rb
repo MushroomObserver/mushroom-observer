@@ -211,6 +211,29 @@ class ObservationsControllerTest < FunctionalTestCase
     )
   end
 
+  # Created in response to a bug seen in the wild
+  # place_name isn't a param for Observation#index
+  # but is an API param and a param for Observation#create
+  def test_index_useless_param
+    params = { place_name: "Burbank" }
+
+    login
+    get(:index, params: params)
+
+    assert_template("shared/_matrix_box")
+    assert_title_id("Observation Index")
+  end
+
+  def test_index__useless_param_page2
+    params = { place_name: "Burbank", page: 2 }
+
+    login
+    get(:index, params: params)
+
+    assert_template(:index)
+    assert_title_id("Observation Index")
+  end
+
   def test_index_advanced_search_name_and_location_multiple_hits
     name = "Agaricus"
     location = "California"
@@ -648,26 +671,13 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_title_id("Observations from ‘#{location.name}’")
   end
 
-  # NIMMO NOTE: Is the param  `place_name` or `where`?
-  # Created in response to a bug seen in the wild
   def test_index_where_page2
-    params = { place_name: "Burbank", page: 2 }
+    location = locations(:obs_default_location)
 
     login
-    get(:index, params: params)
+    get(:index, params: { where: location.name, page: 2 })
 
-    assert_template(:index)
-  end
-
-  # NIMMO NOTE: Is the param  `place_name` or `where`?
-  # Created in response to a bug seen in the wild
-  def test_index_where_search_pattern
-    params = { place_name: "Burbank" }
-
-    login
-    get(:index, params: params)
-
-    assert_template("shared/_matrix_box")
+    assert_title_id("Observations from ‘#{location.name}’")
   end
 
   # TODO: Test :project
