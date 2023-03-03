@@ -555,15 +555,6 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_user_unknown_user
-    user = observations(:minimal_unknown_obs)
-
-    login
-    get(:index, params: { user: user })
-
-    assert_redirected_to(users_path)
-  end
-
   def test_index_user_by_known_user
     # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
@@ -571,21 +562,39 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_not_nil(obs.thumb_image_id)
     user = rolf
     assert(
-      user.layout_count >= rolf.observations.size,
+      user.layout_count >= user.observations.size,
       "User must be able to display all rolf's Observations in a single page"
     )
 
     test_show_owner_id_noone_logged_in
 
     login(user.login)
-    get(:index, params: { user: rolf.id })
+    get(:index, params: { user: user.id })
 
     assert_template(:index)
     assert_template("shared/_matrix_box")
-    assert_match(
-      Image.url(:small, obs.thumb_image_id), @response.body,
+    assert_title_id("Observations created by #{user.name}")
+    assert_select(
+      "#results img[src = '#{Image.url(:small, obs.thumb_image_id)}']",
+      true,
       "Observation thumbnail should display although this is not an rss_log"
     )
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { text: /\S+/, # ignore links in buttons
+        count: Observation.where(user: user).count },
+      "Wrong number of results displayed"
+    )
+  end
+
+  def test_index_user_unknown_user
+    user = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { user: user })
+
+    assert_equal(users_url, redirect_to_url, "Wrong page")
+    assert_flash_text(:runtime_object_not_found.l(type: :user.l, id: user.id))
   end
 
   def test_index_location_with_observations
