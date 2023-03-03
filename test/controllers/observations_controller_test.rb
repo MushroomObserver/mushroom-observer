@@ -641,12 +641,11 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_index_where
     location = locations(:obs_default_location)
-    params = { where: location.name }
 
     login
-    get(:index, params: params)
+    get(:index, params: { where: location.name })
 
-   assert_title_id("Observations from ‘#{location.name}’")
+    assert_title_id("Observations from ‘#{location.name}’")
   end
 
   # NIMMO NOTE: Is the param  `place_name` or `where`?
