@@ -2,14 +2,20 @@
 
 # see observations_controller.rb
 module ObservationsController::Index
+  private
+
   # #index - defined in Application Controller
   #
   # index subactions:
   # methods called by #index via a dispatch table in ObservationController
 
+  def default_index_subaction
+    list_query_results
+  end
+
   # Displays matrix of selected Observations (based on current Query).
   # NOTE: Why are all the :id params converted .to_s below?
-  def index_observation
+  def list_query_results
     query = find_or_create_query(:Observation, by: params[:by])
     show_selected_observations(
       query, id: params[:id].to_s, always_index: true
@@ -17,7 +23,7 @@ module ObservationsController::Index
   end
 
   # Displays matrix of all Observation's, sorted by date.
-  def list_observations
+  def list_all
     sorted_by = params[:by].present? ? params[:by].to_s : :date
     query = create_query(:Observation, :all, by: sorted_by)
     show_selected_observations(query)
@@ -51,6 +57,14 @@ module ObservationsController::Index
                          include_subtaxa: true,
                          by: :confidence)
     show_selected_observations(query)
+  end
+
+  # TODO: Consider moving this to Name
+  def parents(name_str)
+    names = Name.where(id: name_str).to_a
+    names = Name.where(search_name: name_str).to_a if names.empty?
+    names = Name.where(text_name: name_str).to_a if names.empty?
+    names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
   # Displays matrix of User's Observations, by date.
@@ -143,7 +157,15 @@ module ObservationsController::Index
     redirect_to(search_advanced_path)
   end
 
-  ###########################################################################
+  def create_advanced_search_query(params)
+    search = {}
+    search[:name] = params[:name] if params[:name].present?
+    search[:location] = params[:location] if params[:location].present?
+    search[:user] = params[:user] if params[:user].present?
+    search[:content] = params[:content] if params[:content].present?
+    search[:search_location_notes] = params[:search_location_notes].present?
+    create_query(:Observation, :advanced_search, search)
+  end
 
   # Show selected search results as a matrix with "index" template.
   def show_selected_observations(query, args = {})
@@ -159,29 +181,6 @@ module ObservationsController::Index
     @query = query
 
     show_index_of_objects(query, args)
-  end
-
-  private
-
-  def default_index_subaction
-    index_observation
-  end
-
-  def create_advanced_search_query(params)
-    search = {}
-    search[:name] = params[:name] if params[:name].present?
-    search[:location] = params[:location] if params[:location].present?
-    search[:user] = params[:user] if params[:user].present?
-    search[:content] = params[:content] if params[:content].present?
-    search[:search_location_notes] = params[:search_location_notes].present?
-    create_query(:Observation, :advanced_search, search)
-  end
-
-  def parents(name_str)
-    names = Name.where(id: name_str).to_a
-    names = Name.where(search_name: name_str).to_a if names.empty?
-    names = Name.where(text_name: name_str).to_a if names.empty?
-    names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
   def define_index_args(query, args)
