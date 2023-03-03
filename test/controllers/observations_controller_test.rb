@@ -204,11 +204,13 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-   assert_title_id("Observation Index")
+    assert_title_id("Observation Index")
     assert_select(
       "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
       "Index should open at the page that includes #{obs.unique_text_name}"
     )
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
   end
 
   # Created in response to a bug seen in the wild
@@ -232,6 +234,8 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_template(:index)
     assert_title_id("Observation Index")
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
   end
 
   def test_index_advanced_search_name_and_location_multiple_hits
@@ -444,7 +448,9 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
     assert_title_id("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
-  end
+    assert_select("#results a", { text: "« Prev" },
+      "Wrong page or display is missing a link to Prev page")
+end
 
   def test_index_pattern_no_hits
     pattern = "no hits"
@@ -678,6 +684,9 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { where: location.name, page: 2 })
 
     assert_title_id("Observations from ‘#{location.name}’")
+    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
   end
 
   # TODO: Test :project
