@@ -8,7 +8,7 @@
 #
 #  Makes a new snapshot of the database on the image server:
 #
-#    /data/images/mo/backup/database-YYYYMMDD.gz
+#    /data/images/backup/database-YYYYMMDD.gz
 #
 ################################################################################
 set -e
