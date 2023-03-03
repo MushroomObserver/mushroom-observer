@@ -226,7 +226,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_title_id("Observations by Date")
   end
 
-  def test_index__useless_param_page2
+  def test_index_useless_param_page2
     params = { place_name: "Burbank", page: 2 }
 
     login
@@ -428,6 +428,17 @@ class ObservationsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_pattern_needs_id_with_filter
+    pattern = "Briceland"
+
+    login
+    get(:index, params: { pattern: pattern, needs_id: true })
+
+    assert_title_id("")
+    assert_match(/^#{identify_observations_url}/, redirect_to_url,
+                 "Wrong page. Should redirect to #{:obs_needing_id.l}")
+  end
+
   def test_index_pattern1
     pattern = "Boletus edulis"
 
@@ -449,8 +460,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_title_id("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
-      "Wrong page or display is missing a link to Prev page")
-end
+                  "Wrong page or display is missing a link to Prev page")
+  end
 
   def test_index_pattern_no_hits
     pattern = "no hits"
