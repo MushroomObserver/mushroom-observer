@@ -71,14 +71,15 @@ module ThumbnailHelper
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
+
     if current_vote == vote
       return content_tag(:span, image_vote_as_short_string(vote))
     end
 
-    put_button(name: vote_text,
-               path: image_vote_path(id: image.id, vote: vote),
+    put_button(name: vote_text, remote: true,
+               path: image_vote_path(id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
-               data: { role: "image_vote", id: image.id, val: vote })
+               data: { role: "image_vote", id: image.id, value: vote })
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)
