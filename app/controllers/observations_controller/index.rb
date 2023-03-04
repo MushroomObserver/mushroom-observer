@@ -121,32 +121,32 @@ class ObservationsController
          (observation = Observation.safe_find(pattern))
         redirect_to(permanent_observation_path(observation.id))
       else
-        render_observation_search_results(pattern)
+        render_pattern_search_results(pattern)
       end
     end
 
-    def render_observation_search_results(pattern)
+    def render_pattern_search_results(pattern)
       search = PatternSearch::Observation.new(pattern)
-      if search.errors.any?
-        search.errors.each do |error|
-          flash_error(error.to_s)
-        end
-        if params[:needs_id]
-          redirect_to({ controller: "/observations/identify", action: :index,
-                        q: get_query_param })
-        else
-          render("index", location: observations_path)
-        end
+      return render_pattern_search_results_error(search) if search.errors.any?
+
+      @suggest_alternate_spellings = search.query.params[:pattern]
+      if params[:needs_id]
+        redirect_to(
+          identify_observations_path(q: get_query_param(search.query))
+        )
       else
-        @suggest_alternate_spellings = search.query.params[:pattern]
-        if params[:needs_id]
-          redirect_to({ controller: "/observations/identify", action: :index,
-                        q: get_query_param(search.query) })
-        else
-          show_selected_observations(
-            search.query, no_hits_title: :title_for_observation_search.t
-          )
-        end
+        show_selected_observations(
+          search.query, no_hits_title: :title_for_observation_search.t
+        )
+      end
+    end
+
+    def render_pattern_search_results_error(search)
+      search.errors.each { |error| flash_error(error.to_s) }
+      if params[:needs_id]
+        redirect_to(identify_observations_path(q: get_query_param))
+      else
+        render("index", location: observations_path)
       end
     end
 
@@ -167,11 +167,15 @@ class ObservationsController
 
     def create_advanced_search_query(params)
       search = {}
-      search[:name] = params[:name] if params[:name].present?
-      search[:location] = params[:location] if params[:location].present?
-      search[:user] = params[:user] if params[:user].present?
-      search[:content] = params[:content] if params[:content].present?
-      search[:search_location_notes] = params[:search_location_notes].present?
+      [
+        :name,
+        :location,
+        :user,
+        :content,
+        :search_location_notes
+      ].each do |key|
+        search[key] = params[key] if params[key].present?
+      end
       create_query(:Observation, :advanced_search, search)
     end
 
