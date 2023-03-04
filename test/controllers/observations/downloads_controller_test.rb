@@ -22,7 +22,7 @@ module Observations
       get(:new, params: { q: query.id.alphabetize })
       assert_no_flash
       assert_response(:success)
-      assert_match(/observations\/downloads\?q=/, @response.body) # make sure fundis id in there!
+      assert_match(%r{observations/downloads\?q=}, @response.body)
 
       post(
         :create,
