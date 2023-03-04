@@ -5,7 +5,10 @@ module Observations
     before_action :login_required
     before_action :disable_link_prefetching
 
-    def new; end
+    def new
+      @query = find_or_create_query(:Observation, by: params[:by])
+      query_params_set(@query)
+    end
 
     def create
       @query = find_or_create_query(:Observation, by: params[:by])
