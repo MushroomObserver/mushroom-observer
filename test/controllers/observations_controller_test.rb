@@ -194,7 +194,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-   assert_title_id("Observations by #{by.capitalize}")
+    assert_title_id("Observations by #{by.capitalize}")
   end
 
   def test_index_with_id
@@ -309,7 +309,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select(
       "#results a", false,
       "There should be no results when string is missing from notes, " \
-      "and search_location_notes param is missing")
+      "and search_location_notes param is missing"
+    )
   end
 
   def test_index_advanced_search_notes2
@@ -332,7 +333,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select(
       "#results a", false,
       "There should be no results when string is missing from notes, " \
-      "even if search_location_notes param is true")
+      "even if search_location_notes param is true"
+    )
   end
 
   def test_index_advanced_search_notes3
@@ -511,7 +513,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(
       identify_observations_path,
       "Bad pattern in search from obs_needing_ids should render " \
-      "obs_needing_ids")
+      "obs_needing_ids"
+    )
   end
 
   def test_index_look_alikes
@@ -565,7 +568,7 @@ class ObservationsControllerTest < FunctionalTestCase
       )
 
     login
-    get(:index,  params: { related_taxa: "1", name: name.text_name })
+    get(:index, params: { related_taxa: "1", name: name.text_name })
 
     assert_template(:index)
     assert_title_id("Observations by Confidence Level")
