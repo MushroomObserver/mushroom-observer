@@ -152,17 +152,23 @@ class ObservationsController
 
     # Displays matrix of advanced search results.
     def advanced_search
-      if params[:name] || params[:location] || params[:user] || params[:content]
-        query = create_advanced_search_query(params)
-      else
-        return if handle_advanced_search_invalid_q_param?
+      query = advanced_search_query
+      return unless query
 
-        query = find_query(:Observation)
-      end
       show_selected_observations(query)
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
+    end
+
+    def advanced_search_query
+      if params[:name] || params[:location] || params[:user] || params[:content]
+        create_advanced_search_query(params)
+      elsif handle_advanced_search_invalid_q_param?
+        nil
+      else
+        find_query(:Observation)
+      end
     end
 
     def create_advanced_search_query(params)
