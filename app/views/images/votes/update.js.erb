@@ -1,0 +1,18 @@
+var $show_votes_container = $('#show_votes_container');
+var $quality_vote_container = $('#quality_vote_container');
+
+// @id and @image are sent by the controller
+var $image_vote_links = $("#image_vote_links_<%= @id %>");
+var $updatedLinks = $('<%= render(partial: "shared/image_vote_links", locals: { image: @image }) %>');
+
+$image_vote_links.html($updatedLinks.find(".image-vote-links").first().html());
+
+var newVotePercentage = $image_vote_links.parent().find('span.data_container').data('percentage');
+$("#vote_meter_bar_<%= @id %>").css('width', newVotePercentage + "%")
+
+if ($show_votes_container && $quality_vote_container) {
+  // load = jQuery ajax shorthand method, not the old .on("load").
+  // updates side bar if on actual image page.
+  $show_votes_container.load(window.location + " #show_votes_table");
+  $quality_vote_container.load(window.location + " #quality_vote_content");
+}

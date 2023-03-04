@@ -12,10 +12,19 @@ module Images
       return unless image
 
       image.change_vote(@user, params[:value])
-      if params[:next]
-        redirect_to_next_object(:next, Image, params[:id].to_s)
-      else
-        redirect_with_query(image_path(id: params[:id]))
+
+      respond_to do |format|
+        format.html do
+          if params[:next]
+            redirect_to_next_object(:next, Image, params[:id].to_s)
+          else
+            redirect_with_query(image_path(id: params[:id]))
+          end
+        end
+        format.js do
+          @id = params[:id]
+          @image = image
+        end
       end
     end
   end
