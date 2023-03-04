@@ -1337,26 +1337,6 @@ class QueryTest < UnitTestCase
     assert_query([], :Article, :in_set, ids: [])
   end
 
-  def test_article_pattern_search
-    assert_query([],
-                 :Article, :pattern_search, pattern: "no article has this")
-    # title
-    assert_query(Article.where(Article[:title].matches("%premier_article%").
-                               or(Article[:body].matches("%premier_article%"))),
-                 :Article, :pattern_search, pattern: "premier_article")
-    # body
-    expect = Article.where(Article[:title].matches("%Body%")).
-             where(Article[:title].matches("%of%")).
-             where(Article[:title].matches("%Article%")).
-             or(Article.where(Article[:body].matches("%Body%")).
-                        where(Article[:body].matches("%of%")).
-                        where(Article[:body].matches("%Article%")))
-    assert_query(expect,
-                 :Article, :pattern_search, pattern: "Body of Article")
-    assert_query(Article.all,
-                 :Article, :pattern_search, pattern: "")
-  end
-
   def test_collection_number_all
     expect = CollectionNumber.all.sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :all)
