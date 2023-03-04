@@ -8,7 +8,9 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   def index
-    filter_index? ? index_filtered : index_full
+    return patterned_index if params[:pattern].present?
+
+    index_full
   end
 
   def show
@@ -77,26 +79,22 @@ class GlossaryTermsController < ApplicationController
 
   # --------- index private methods
 
-  # should index be filtered?
-  def filter_index?
-    params[:q] || params[:by]
-  end
-
-  def index_filtered
-    query = find_or_create_query(:GlossaryTerm, by: params[:by])
-    show_selected_articles(
-      query,
-      id: params[:id].to_s,
-      always_index: true
-    )
+  def patterned_index
+    pattern = params[:pattern].to_s
+    # If it matches the term ID
+    if pattern.match?(/^\d+$/) &&
+       (glossary_term = GlossaryTerm.safe_find(pattern))
+      render(:show, params: { id: glossary_term.id },
+                    location: glossary_term_path(glossary_term.id)) and return
+    else
+      show_selected_glossary_terms(
+        create_query(:GlossaryTerm, :pattern_search, pattern: pattern)
+      )
+    end
   end
 
   def index_full
-    query = create_query(
-      :GlossaryTerm,
-      :all,
-      by: :name
-    )
+    query = create_query(:GlossaryTerm, :all, by: :name)
     show_selected_glossary_terms(query)
   end
 

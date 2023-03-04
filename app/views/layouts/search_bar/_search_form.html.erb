@@ -1,8 +1,8 @@
 <%
 options = [
   [:COMMENTS.l, :comment],
+  [:GLOSSARY.l, :glossary_term],
   [:HERBARIA.l, :herbarium],
-  # [:GLOSSARY_TERMS.l, :glossary_term],
   # Temporarily disabled for performance reasons. 2021-09-12 JDC
   # [:IMAGES.l, :image],
   [:LOCATIONS.l, :location],
@@ -36,8 +36,8 @@ identify_page = controller.controller_name == "identify"
     <div class="form-group has-feedback has-search">
       <span class="glyphicon glyphicon-search form-control-feedback"></span>
         <%= f_s.text_field(:pattern, { value: session[:pattern],
-                                    class: "form-control",
-                                    placeholder: :app_find.t }) %>
+                                       class: "form-control",
+                                       placeholder: :app_find.t }) %>
     </div><!--.form-group-->
 
     <div class="form-group text-nowrap">
