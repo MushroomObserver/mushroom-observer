@@ -1,9 +1,8 @@
 // What to do on ajax image vote update
-alert("Whoa!");
 
 // @id and @image are sent by the controller
 var $image_vote_links = $("#image_vote_links_<%= @id %>"),
-    $updatedLinks = $('<%= render(partial: "shared/image_vote_links", locals: { image: @image }) %>');
+    $updatedLinks = $("<%= j render(partial: 'shared/image_vote_links', locals: { image: @image }) %>");
 
 $image_vote_links.html($updatedLinks.find(".image-vote-links").first().html());
 
@@ -19,7 +18,5 @@ if ($show_votes_container.length && $quality_vote_container.length) {
   // updates side bar if on actual image page.
   $show_votes_container.load(window.location + " #show_votes_table");
   $quality_vote_container.load(window.location + " #quality_vote_content");
-} else {
-  alert("Yo");
 }
 

@@ -10,7 +10,6 @@ module Images
       return unless @image
 
       value = params[:value]
-      binding.break
       raise("Bad value.") if value != "0" && !Image.validate_vote(value)
 
       @value = value == "0" ? nil : Image.validate_vote(value)
@@ -28,7 +27,6 @@ module Images
         end
         format.js do
           render(layout: false)
-          puts(">>>>>>>>>>>>>>>>>HAPPENING<<<<<<<<<<<<<<<<<<<")
         end
       end
     end
