@@ -24,6 +24,36 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_by_letter
+    login
+    term = glossary_terms(:plane_glossary_term)
+    get(:index, params: { letter: "P" })
+    assert_template("index")
+    assert_select(
+      "a[href *= '#{glossary_term_path(term.id)}']", true,
+      "Glossary Index at `P` missing link to #{term.unique_text_name})"
+    )
+  end
+
+  def test_glossary_term_search
+    login
+    conic = glossary_terms(:conic_glossary_term)
+    convex = glossary_terms(:convex_glossary_term)
+
+    get(:index, params: { pattern: "conic" })
+    qr = QueryRecord.last.id.alphabetize
+    assert_redirected_to(glossary_term_path(conic.id, params: { q: qr }))
+
+    get(:index, params: { pattern: "con" })
+    assert_template("index")
+    assert_select(
+      "a[href*='glossary_terms/#{conic.id}']", text: conic.name
+    )
+    assert_select(
+      "a[href*='glossary_terms/#{convex.id}']", text: convex.name
+    )
+  end
+
   # ***** show *****
   def test_show
     term = glossary_terms(:square_glossary_term)

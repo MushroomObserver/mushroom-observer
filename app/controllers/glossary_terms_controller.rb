@@ -8,12 +8,9 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   def index
-    # Index should be paged with alpha and number tabs
-    # See https://www.pivotaltracker.com/story/show/167657202
-    # Glossary should be query-able
-    # See https://www.pivotaltracker.com/story/show/167809123
-    includes = @user ? { thumb_image: :image_votes } : :thumb_image
-    @glossary_terms = GlossaryTerm.includes(includes).order(:name)
+    return patterned_index if params[:pattern].present?
+
+    index_full
   end
 
   def show
@@ -79,6 +76,43 @@ class GlossaryTermsController < ApplicationController
   ##############################################################################
 
   private
+
+  # --------- index private methods
+
+  def patterned_index
+    pattern = params[:pattern].to_s
+    # If it matches the term ID
+    if pattern.match?(/^\d+$/) &&
+       (glossary_term = GlossaryTerm.safe_find(pattern))
+      render(:show, params: { id: glossary_term.id },
+                    location: glossary_term_path(glossary_term.id)) and return
+    else
+      show_selected_glossary_terms(
+        create_query(:GlossaryTerm, :pattern_search, pattern: pattern)
+      )
+    end
+  end
+
+  def index_full
+    query = create_query(:GlossaryTerm, :all, by: :name)
+    show_selected_glossary_terms(query)
+  end
+
+  # Show selected list of glossary_terms.
+  def show_selected_glossary_terms(query, args = {})
+    includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    args = {
+      action: :index,
+      letters: "glossary_terms.name",
+      num_per_page: 50,
+      include: includes
+    }.merge(args)
+    @links ||= []
+
+    show_index_of_objects(query, args)
+  end
+
+  # --------- show, create, edit private methods
 
   def find_glossary_term!
     @glossary_term = find_or_goto_index(GlossaryTerm,
