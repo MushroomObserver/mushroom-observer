@@ -18,12 +18,12 @@ class SequencerTest < CapybaraIntegrationTestCase
     visit(observation_path(obs))
     click_on("Add Sequence")
     fill_in("sequence[locus]", with: "New locus")
-    click_on("Submit")
+    click_on("Add")
     assert_equal(sequence_original_count, Sequence.count,
                  "Sequence without Bases should not have been created")
 
     fill_in("sequence[bases]", with: "catcatcat")
-    click_on("Submit")
+    click_on("Add")
     assert_equal(sequence_original_count + 1, Sequence.count,
                  "Sequence should have been created")
 
@@ -32,7 +32,7 @@ class SequencerTest < CapybaraIntegrationTestCase
     find("#observation_sequences_#{obs.id}").click_link("Edit")
     fill_in("sequence[locus]", with: new_locus)
     fill_in("sequence[bases]", with: "gag gag gag")
-    click_on("Submit")
+    click_on("Update")
     assert_equal(new_locus, new_sequence.reload.locus,
                  "Sequence should have been updated")
 

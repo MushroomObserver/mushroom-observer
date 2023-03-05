@@ -1032,7 +1032,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs2.id,
                     [[obs2.herbarium_records.first.id, false]],
                     false)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
@@ -1042,7 +1042,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs3.id,
                     obs3.herbarium_records.map { |x| [x.id, false] },
                     false)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs3.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     # Roy is a curator at NY, so can add herbarium records, and modify existing
@@ -1062,7 +1062,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs2.id,
                     [[obs2.herbarium_records.first.id, true]],
                     true)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
@@ -1072,7 +1072,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs3.id,
                     obs3.herbarium_records.map { |x| [x.id, x.can_edit?(roy)] },
                     true)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs3.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     # Dick owns all of the sequences, is on obs3's project, and has a personal
@@ -1091,7 +1091,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs2.id,
                     [[obs2.herbarium_records.first.id, false]],
                     true)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
@@ -1101,7 +1101,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs3.id,
                     obs3.herbarium_records.map { |x| [x.id, false] },
                     true)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs3.id)}']",
                   { count: 1 },
                   "Observation page missing an Add Sequence link")
 
@@ -1121,7 +1121,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records, obs2.id,
                     [[obs2.herbarium_records.first.id, true]],
                     true)
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
@@ -1132,7 +1132,7 @@ class ObservationsControllerTest < FunctionalTestCase
       obs3.herbarium_records.map { |x| [x.id, x.can_edit?(rolf)] },
       true
     )
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs3.id)}']",
                   { count: 1 },
                   "Observation page missing an Add Sequence link")
 
@@ -1155,7 +1155,7 @@ class ObservationsControllerTest < FunctionalTestCase
       [[obs2.herbarium_records.first.id, false]],
       true
     )
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
@@ -1169,7 +1169,7 @@ class ObservationsControllerTest < FunctionalTestCase
       obs3.herbarium_records.map { |x| [x.id, x.can_edit?(mary)] },
       true
     )
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs3.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     # Make sure admins can do everything.
@@ -1191,7 +1191,7 @@ class ObservationsControllerTest < FunctionalTestCase
       [[obs2.herbarium_records.first.id, true]],
       true
     )
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs2.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs2.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
 
     get(:show, params: { id: obs3.id })
@@ -1205,7 +1205,7 @@ class ObservationsControllerTest < FunctionalTestCase
       obs3.herbarium_records.map { |x| [x.id, true] },
       true
     )
-    assert_select("a[href ^= '#{new_sequence_path(obs_id: obs3.id)}']",
+    assert_select("a[href ^= '#{new_sequence_path(observation_id: obs3.id)}']",
                   { count: 1 }, "Observation page missing an Add Sequence link")
   end
 

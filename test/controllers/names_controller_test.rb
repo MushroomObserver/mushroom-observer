@@ -452,7 +452,7 @@ class NamesControllerTest < FunctionalTestCase
   def test_pagination_letter
     # Now try a letter.
     query_params = pagination_query_params
-    l_names = Name.where("text_name LIKE 'L%'").
+    l_names = Name.where(Name[:text_name].matches("L%")).
               order("text_name, author").to_a
     login
     get(:test_index, params: { num_per_page: l_names.size,
@@ -477,7 +477,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_pagination_letter_with_page
     query_params = pagination_query_params
-    l_names = Name.where("text_name LIKE 'L%'").
+    l_names = Name.where(Name[:text_name].matches("L%")).
               order("text_name, author").to_a
     # Do it again, but make page size exactly one too small.
     l_names.pop
@@ -503,7 +503,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_pagination_letter_with_page_2
     query_params = pagination_query_params
-    l_names = Name.where("text_name LIKE 'L%'").
+    l_names = Name.where(Name[:text_name].matches("L%")).
               order("text_name, author").to_a
     last_name = l_names.pop
     # Check second page.

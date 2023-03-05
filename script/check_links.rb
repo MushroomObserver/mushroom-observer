@@ -5,7 +5,7 @@ require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 require(File.expand_path("../app/extensions/extensions.rb", __dir__))
 
-abort(<<"HELP") if ARGV.length != 2
+abort(<<HELP) if ARGV.length != 2
 
   USAGE::
 

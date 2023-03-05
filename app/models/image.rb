@@ -364,6 +364,22 @@ class Image < AbstractModel
     image_url(size, id, args).url
   end
 
+  def all_urls
+    hash = {}
+    Image.all_sizes.each do |size|
+      hash[size] = image_url(size).url
+    end
+    hash
+  end
+
+  def self.all_urls(id, args = {})
+    hash = {}
+    all_sizes.each do |size|
+      hash[size] = image_url(size, id, args).url
+    end
+    hash
+  end
+
   def local_file_name(size)
     image_url(size).file_name(MO.local_image_files)
   end

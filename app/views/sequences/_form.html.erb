@@ -1,79 +1,70 @@
-<%= form_with(model: @sequence, url: url) do |form| %>
+<%
+url_params = { action: action, q: get_query_param }
+url_params = url_params.merge(
+  { observation_id: @observation.id }) if action == :create
+if action == :update && @back.present?
+  url_params = url_params.merge({ back: @back })
+end
+%>
+
+<%= form_with(model: @sequence, url: url_params,
+              id: "sequence_form") do |f| %>
   <%# locus %>
-  <div class="row mt-3">
-    <div class="form-group col-xs-12 col-md-6">
-      <%= form.label(:locus, "#{:LOCUS.t}:") %>
-      <span class="help-note">(<%= :required.t %>)</span>
-        <%# style stops area from changing size on reload %>
-        <%= form.text_area(:locus, rows: 1, class:"form-control", style:"width: 100%;" ) %>
-    </div>
-    <div class="col-xs-12 col-sm-6">
-      <%= help_block_with_arrow("left", id: "sequence_locus_help") do %>
-        <%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
-      <% end %>
-    </div>
-  </div><!--.row-->
+  <div class="form-group mt-3">
+    <%= f.label(:locus, "#{:LOCUS.t}:") %>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
+    <%# w-100 stops area from changing size on reload %>
+    <%= f.text_area(:locus, rows: 1, class:"form-control w-100" ) %>
+    <%= help_block_with_arrow("up", id: "sequence_locus_help",
+                              class: "mt-3") do
+      :form_sequence_locus_help.t(locus_width: Sequence.locus_width)
+    end %>
+  </div><!--.form-group-->
 
   <%# bases %>
-  <div class="row mt-3">
-    <div class="form-group">
-      <span class="col-md-6">
-        <%= form.label(:sequence_bases, "#{:BASES.t}:") %>
-        <span class="help-note">
-        (<%= :form_sequence_bases_or_deposit_required.t %>)
-        </span>
-      </span>
-      <span class="col-md-6">
-        <%= url = WebSequenceArchive.blast_format_help
-            :form_sequence_bases_format.t(help_url: url) %>
-      </span>
-      <div class="col-md-9 text-monospace">
-        <%= form.text_area(:bases, size: "80x3", class:"form-control") %>
-      </div>
-      <div class="col-md-3">
-      </div>
-    </div>
-  </div><!--.row-->
+  <div class="form-group mt-3">
+    <%= f.label(:bases, "#{:BASES.t}:") %>
+    <%= content_tag(:span,
+          "(#{:form_sequence_bases_or_deposit_required.t})",
+          class: "help-note") %>
+    <%= link_to("(#{:form_sequence_bases_format.t})",
+                WebSequenceArchive.blast_format_help,
+                class: "d-inline-block float-right") %>
+    <%= f.text_area(:bases, size: "80x5",
+                    class:"form-control text-monospace") %>
+  </div><!--.form-group-->
 
   <%# deposit info %>
-  <div class="row mt-3 form-group">
-    <div class="col-xs-12">
-      <%= form.label(:sequence_nothing, "#{:DEPOSIT.t}:") %>
-      <span class="help-note">(<%= :form_sequence_valid_deposit.t %>)</span>
-    </div>
-    <div class="col-xs-1">
-    </div>
-    <div class="col-xs-5 col-md-2">
-      <%= form.label(:sequence_archive, :ARCHIVE.t) %>
-      <%= form.select(:archive, archive_dropdown,
-                      { include_blank: true }, { class: "form-control" }) %>
-    </div>
-    <div class="col-xs-6 col-md-3">
-      <span class="font-weight-bold"><%= :form_sequence_accession.t %></span>
-      <%= form.text_field(:accession, class: "form-control") %>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <%= help_block_with_arrow("left", id: "sequence_accession_help") do %>
-        <%= :form_sequence_accession_help.t %>
-      <% end %>
-    </div>
-  </div><!--.row-->
+  <div>
+    <%= content_tag(:strong, "#{:DEPOSIT.t}:") %>
+    <%= content_tag(:span, "(#{:form_sequence_valid_deposit.t})",
+                    class: "help-note") %>
+  </div>
+  <div class="form-group form-inline mt-3 ml-5">
+    <%= f.label(:archive, "#{:ARCHIVE.t}: ") %>
+    <%= f.select(:archive, archive_dropdown, { include_blank: true },
+                 { class: "form-control" }) %>
+  </div><!--.form-group-->
+  <div class="form-group form-inline mt-3 ml-5">
+    <%= f.label(:accession, "#{:form_sequence_accession.t}: ") %>
+    <%= f.text_field(:accession, class: "form-control") %>
+    <%= help_block_with_arrow("up", id: "sequence_accession_help",
+                              class: "mt-3") do
+      :form_sequence_accession_help.t
+    end %>
+  </div><!--.form-group-->
 
   <%# notes %>
-  <div class="row mt-3">
-    <div class="form-group col-xs-12 col-md-6">
-      <%= form.label(:sequence_notes, "#{:NOTES.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%= form.text_area(:notes, rows: 3, class: "form-control") %>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <%= help_block_with_arrow("left", id: "textile_help") do %>
-        <%= :field_textile_link.t %>
-      <% end %>
-    </div>
-  </div><!--.row-->
+  <div class="form-group mt-3">
+    <%= f.label(:notes, "#{:NOTES.t}:") %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= f.text_area(:notes, rows: 3, class: "form-control") %>
+    <%= help_block_with_arrow("up", id: "textile_help", class: "mt-3") do %>
+      <%= :field_textile_link.t %>
+    <% end %>
+  </div>
 
-  <div class="form-group row">
-    <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
+  <div class="form-group">
+    <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
   </div><!--.row-->
 <% end %>

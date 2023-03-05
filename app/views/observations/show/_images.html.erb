@@ -29,14 +29,12 @@
                 sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id}.
                 each do |image| %>
       <div class="list-group-item">
-        <%= thumbnail(image,
-                      link: { controller: image.show_controller,
-                              action: image.show_action,
-                              id: image.id,
-                              obs: observation.id },
-                      votes: true,
-                      original: true,
-                      is_set: true) %>
+        <%= thumbnail(
+              image,
+              image_link: image.show_link_args.merge({ obs: observation.id }),
+              original: true,
+              is_set: true,
+              votes: true) %>
         <%=
           notes = []
           if image.copyright_holder != observation.user.legal_name
