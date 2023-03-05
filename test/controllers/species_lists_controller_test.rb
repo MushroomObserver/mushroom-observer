@@ -101,7 +101,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_index_default_sort_order
+  def test_index
     login
     get(:index)
 
@@ -109,7 +109,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_title_id("Species Lists by Date")
   end
 
-  def test_index_sorted_by_user
+  def test_index_non_default_sort_order
     by = "user"
 
     login
@@ -124,6 +124,56 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:success)
     get(:index, params: { by: :created })
     assert_response(:success)
+  end
+
+  def test_index_sorted_by_title
+    by = "title"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_title_id("Species Lists by Title")
+  end
+
+  def test_index_with_id_and_sorted_by_title
+    list = species_lists(:unknown_species_list)
+    by = "title"
+
+    login
+    get(:index, params: { id: list.id, by: by })
+
+    assert_title_id("Species Lists by Title")
+  end
+
+  def test_index_with_id
+    list = species_lists(:unknown_species_list)
+
+    login
+    get(:index, params: { id: list.id })
+
+    assert_title_id("Species Lists by Date")
+  end
+
+  def test_index_pattern
+    login
+    spl = species_lists(:unknown_species_list)
+    get(:index, params: { pattern: spl.id.to_s })
+    assert_redirected_to(species_list_path(spl.id))
+
+    get(:index, params: { pattern: "mysteries" })
+    assert_response(:redirect)
+  end
+
+  def test_index_by_user
+    login
+    get(:index, params: { by_user: rolf.id })
+    assert_template(:index)
+  end
+
+  def test_index_for_project
+    login
+    get(:index, params: { for_project: projects(:bolete_project).id })
+    assert_template(:index)
   end
 
   def test_show_species_list
@@ -196,56 +246,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:success)
     delete(:destroy, params: { id: spl.id })
     assert_flash_success
-  end
-
-  def test_index_sort_by_title
-    by = "title"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_title_id("Species Lists by Title")
-  end
-
-  def test_index_with_id_and_sort_by_title
-    list = species_lists(:unknown_species_list)
-    by = "title"
-
-    login
-    get(:index, params: { id: list.id, by: by })
-
-    assert_title_id("Species Lists by Title")
-  end
-
-  def test_index_with_id
-    list = species_lists(:unknown_species_list)
-
-    login
-    get(:index, params: { id: list.id })
-
-    assert_title_id("Species Lists by Date")
-  end
-
-  def test_index_of_user
-    login
-    get(:index, params: { by_user: rolf.id })
-    assert_template(:index)
-  end
-
-  def test_index_for_project
-    login
-    get(:index, params: { for_project: projects(:bolete_project).id })
-    assert_template(:index)
-  end
-
-  def test_index_pattern_search
-    login
-    spl = species_lists(:unknown_species_list)
-    get(:index, params: { pattern: spl.id.to_s })
-    assert_redirected_to(species_list_path(spl.id))
-
-    get(:index, params: { pattern: "mysteries" })
-    assert_response(:redirect)
   end
 
   def test_show_flow
