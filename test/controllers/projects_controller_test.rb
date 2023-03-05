@@ -87,16 +87,33 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_title_id("Projects by Time Last Modified")
   end
 
-  def test_index_pattern
+  def test_index_pattern_search_multiple_hits
+    pattern = "Project"
+
     login
-    p_id = projects(:bolete_project).id
-    # try searching by project title. Note that search saves a query record
+    get(:index, params: { pattern: "Project" })
+
+    assert_title_id("Projects Matching ‘#{pattern}’")
+  end
+
+  def test_index_pattern_search_by_name_one_hit
+    project = projects(:bolete_project)
+
+    login
     get(:index, params: { pattern: "Bolete Project" })
+
     q = QueryRecord.last.id.alphabetize
-    assert_redirected_to(project_path(p_id, q: q))
-    # try searching by project_id
-    get(:index, params: { pattern: p_id.to_s })
-    assert_template("show")
+    assert_redirected_to(project_path(project.id, q: q))
+  end
+
+  def test_index_pattern_search_by_id
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { pattern: project.id.to_s })
+
+    assert_response(:success)
+    assert_title_id("Project: #{project.title}")
   end
 
   def test_add_project
