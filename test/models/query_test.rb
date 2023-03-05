@@ -1337,26 +1337,6 @@ class QueryTest < UnitTestCase
     assert_query([], :Article, :in_set, ids: [])
   end
 
-  def test_article_pattern_search
-    assert_query([],
-                 :Article, :pattern_search, pattern: "no article has this")
-    # title
-    assert_query(Article.where(Article[:title].matches("%premier_article%").
-                               or(Article[:body].matches("%premier_article%"))),
-                 :Article, :pattern_search, pattern: "premier_article")
-    # body
-    expect = Article.where(Article[:title].matches("%Body%")).
-             where(Article[:title].matches("%of%")).
-             where(Article[:title].matches("%Article%")).
-             or(Article.where(Article[:body].matches("%Body%")).
-                        where(Article[:body].matches("%of%")).
-                        where(Article[:body].matches("%Article%")))
-    assert_query(expect,
-                 :Article, :pattern_search, pattern: "Body of Article")
-    assert_query(Article.all,
-                 :Article, :pattern_search, pattern: "")
-  end
-
   def test_collection_number_all
     expect = CollectionNumber.all.sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :all)
@@ -1440,6 +1420,37 @@ class QueryTest < UnitTestCase
                  :ExternalLink, :all, external_sites: site)
     assert_query(site.external_links.sort_by(&:url),
                  :ExternalLink, :all, url: "iNaturalist")
+  end
+
+  def test_glossary_term_all
+    expect = GlossaryTerm.all.sort_by(&:name)
+    assert_query(expect, :GlossaryTerm, :all)
+  end
+
+  def test_glossary_term_pattern_search
+    assert_query([], :GlossaryTerm, :pattern_search,
+                 pattern: "no glossary term has this")
+    # name
+    assert_query(
+      GlossaryTerm.
+        where(GlossaryTerm[:name].matches("%conic_glossary_term%").
+        or(GlossaryTerm[:description].matches("%conic_glossary_term%"))),
+      :GlossaryTerm, :pattern_search, pattern: "conic_glossary_term"
+    )
+    # description
+    expect =
+      GlossaryTerm.where(GlossaryTerm[:name].matches("%Description%")).
+      where(GlossaryTerm[:name].matches("%of%")).
+      where(GlossaryTerm[:name].matches("%Term%")).
+      or(
+        GlossaryTerm.where(GlossaryTerm[:description].matches("%Description%")).
+        where(GlossaryTerm[:description].matches("%of%")).
+        where(GlossaryTerm[:description].matches("%Term%"))
+      )
+    assert_query(expect,
+                 :GlossaryTerm, :pattern_search, pattern: "Description of Term")
+    assert_query(GlossaryTerm.all,
+                 :GlossaryTerm, :pattern_search, pattern: "")
   end
 
   def test_herbarium_all
