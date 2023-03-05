@@ -108,8 +108,10 @@ module GlossaryTerms
       # login("rolf")
 
       get(:remove, params: { id: glossary_term.id.to_s })
-      assert_equal(glossary_term.images.length,
-                   assert_select("img.image-to-remove").length)
+      assert_equal(
+        glossary_term.images.length,
+        assert_select("img.image-to-remove:not(.img-noscript)").length
+      )
       put(:detach, params: params)
       assert_flash_success
       assert_redirected_to(glossary_term_path(glossary_term.id))

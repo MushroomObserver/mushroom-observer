@@ -1,4 +1,89 @@
 //
+// image interactions - theater and votes
+// --------------------------------------------------
+
+svg.placeholder {
+  rect {
+    fill: rgba($LIST_BG_COLOR, 0.3) !important;
+  }
+}
+
+.image-sizer {
+  max-width: 100%;
+}
+
+//
+// user thumbnails for comments, etc
+// --------------------------------------------------
+
+.user-image-sizer {
+  max-width: 160px;
+  max-height: 160px;
+  position: relative;
+}
+
+//
+// lightbox activator and vote links
+// --------------------------------------------------
+
+.vote-section,
+.theater-btn {
+  z-index: 2;
+  opacity: 0;
+  background: rgba(0,0,0, 0.8);
+  // border-radius: $border-radius-sm;
+  color: white;
+  transition: opacity 0.3s ease-out;
+}
+
+.theater-btn {
+  @extend .top-right, .text-center, .mr-2, .mt-2;
+  padding: 0.125em;
+
+  &:hover {
+    color: rgba(white, 0.75);
+  }
+
+  i {
+    height: 2.4rem;
+    width: 2.4rem;
+    font-size: 2.1rem;
+    vertical-align: bottom;
+  }
+}
+
+.vote-section {
+  @extend .ab-bottom, .text-center;
+  padding: 0.5em 0.25em;
+
+  a {
+    color: white;
+
+    &:hover,
+    &:focus {
+      color: $text-color;
+      text-decoration: none;
+    }
+  }
+}
+
+.matrix-box {
+  .vote-buttons {
+    font-size: 0.875em;
+  }
+}
+
+.image-sizer:hover,
+.image-sizer:focus {
+  .vote-section,
+  .theater-btn {
+    opacity: 1;
+    text-decoration: none;
+  }
+}
+
+
+//
 // image vote meter bar
 // --------------------------------------------------
 
@@ -15,40 +100,4 @@
     line-height: 5px;
     color: #FFF;
   }
-}
-
-//
-// lightbox activator button
-// --------------------------------------------------
-
-.theater-btn {
-  position: absolute;
-  background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.59);
-  color: black;
-  padding: 5px;
-  top: 0px;
-  border: 1px solid;
-  text-decoration: none;
-  display: none;
-  font-size: 18px;
-
-  &:hover,
-  &:focus {
-    background: black;
-    color: white;
-    padding: 5px;
-    top: 0px;
-    border: 1px solid;
-    text-decoration: none;
-  }
-}
-
-//
-// user thumbnails for comments, etc
-// --------------------------------------------------
-
-.thumbnail-container-user {
-  max-width: 160px;
-  max-height: 160px;
-  position: relative;
 }
