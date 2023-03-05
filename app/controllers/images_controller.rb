@@ -217,7 +217,6 @@ class ImagesController < ApplicationController
     # because that's the only time the "obs" param will be set (with obs id).
     set_image_query_params
     cast_user_vote!
-    @votes = find_list_of_votes!
 
     # Update view stats on image we're actually showing.
     update_view_stats(@image)
@@ -278,14 +277,6 @@ class ImagesController < ApplicationController
     query = find_or_create_query(Image)
     query.current = @image
     @image = query.current if query.index(@image) && (query = query.next)
-  end
-
-  def find_list_of_votes!
-    @image.image_votes.sort_by do |v|
-      (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
-    rescue StandardError
-      "?"
-    end
   end
 
   public

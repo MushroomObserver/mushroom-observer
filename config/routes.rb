@@ -31,8 +31,7 @@ ACTIONS = {
     old_translation: {},
     pivotal: {},
     test: {},
-    visual_group_status: {},
-    vote: {}
+    visual_group_status: {}
   },
   api: {
     api_keys: {},
@@ -460,8 +459,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
     end
+    put("/vote", to: "images/votes#update", as: "vote")
   end
-  put("/images/:id/vote", to: "images/votes#update", as: "image_vote")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
