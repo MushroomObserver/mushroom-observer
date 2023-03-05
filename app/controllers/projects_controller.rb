@@ -151,10 +151,15 @@ class ProjectsController < ApplicationController
 
   # Show list of latest projects.  (Linked from left panel.)
   def list_all
-    sorted_by = params[:by].present? ? params[:by].to_s : :title
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = create_query(:Project, :all, by: sorted_by)
     show_selected_projects(query)
   end
+
+  def default_sort_order
+    ::Query::ProjectBase.default_order
+  end
+
 
   # Show list of selected projects, based on current Query.
   def list_query_results
