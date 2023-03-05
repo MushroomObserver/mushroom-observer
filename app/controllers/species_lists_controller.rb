@@ -122,18 +122,24 @@ class SpeciesListsController < ApplicationController
   #  :section: Index
 
   def default_index_subaction
-    list_species_lists
+    list_all
   end
 
   # Display list of all species_lists, sorted by date.
-  def list_species_lists
-    if params_include_by_but_neither_id_nor_q? && params[:by] != "title"
-      return index_species_list
+  def list_all
+    if params_include_by_but_neither_id_nor_q? &&
+       params[:by] != default_sort_order
+      return list_query_results
     end
 
-    sorted_by = params[:by] == "title" ? :title : :date
+    sorted_by = \
+      params[:by] == default_sort_order ? default_sort_order.to_sym : :date
     query = create_query(:SpeciesList, :all, by: sorted_by)
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
+  end
+
+  def default_sort_order
+    ::Query::SpeciesListBase.default_order
   end
 
   def params_include_by_but_neither_id_nor_q?
@@ -142,7 +148,7 @@ class SpeciesListsController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
-  def index_species_list
+  def list_query_results
     query = find_or_create_query(:SpeciesList, by: params[:by])
     show_selected_species_lists(query, id: params[:id].to_s,
                                        always_index: true)
