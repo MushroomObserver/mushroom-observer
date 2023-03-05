@@ -7,7 +7,7 @@ DEFAULTS: &DEFAULTS
   version: 1
   user: rolf
   name: $LABEL
-  description: Description of $LABEL
+  description: Description of Term $LABEL
 
 conic_glossary_term:
   <<: *DEFAULTS

@@ -148,29 +148,29 @@ ROBOTS_HEADER = <<~"TXT".freeze
 TXT
 # The rest of #write_robots_file must follow immediately
 # after the rules for allowed crawlers/user agents.
-ROBOTS_FOOTER = <<"TXT"
+ROBOTS_FOOTER = <<TXT
 TXT
 
-SITEMAP_ROOT_HEADER = <<~"XML"
+SITEMAP_ROOT_HEADER = <<~XML
   <?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 XML
-SITEMAP_ROOT_FOOTER = <<~"XML"
+SITEMAP_ROOT_FOOTER = <<~XML
   </sitemapindex>
 XML
 
-SITEMAP_LEAF_HEADER = <<~"XML"
+SITEMAP_LEAF_HEADER = <<~XML
   <?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 XML
-SITEMAP_LEAF_FOOTER = <<~"XML"
+SITEMAP_LEAF_FOOTER = <<~XML
   </urlset>
 XML
 
-INDEX_HEADER = <<~"HTML"
+INDEX_HEADER = <<~HTML
   <html><head></head><body>
 HTML
-INDEX_FOOTER = <<~"HTML"
+INDEX_FOOTER = <<~HTML
   </body></html>
 HTML
 

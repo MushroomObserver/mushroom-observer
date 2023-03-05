@@ -38,7 +38,7 @@ require("#{app_root}/app/classes/ip_stats.rb")
 require("fileutils")
 require("time")
 
-abort(<<"HELP") if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
+abort(<<HELP) if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
 
   USAGE::
 
