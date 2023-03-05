@@ -1,3 +1,7 @@
+<%
+votes = find_list_of_votes(@image)
+%>
+
 <!-- VOTE_PANEL -->
 <div id="image_vote_content" class="panel panel-default">
 
@@ -55,7 +59,7 @@
 
   <!-- VOTE_TABLE -->
   <div id="show_votes_container">
-    <% if @votes.any? %>
+    <% if votes.any? %>
       <table id="show_votes_table" class="table table-striped mt-3 mb-0">
         <thead>
           <tr>
@@ -64,7 +68,7 @@
           </tr>
         </thead>
         <tbody>
-          <% @votes.each do |vote| %>
+          <% votes.each do |vote| %>
             <tr>
               <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
               <td><%= :"image_vote_short_#{vote.value}".t %></td>
