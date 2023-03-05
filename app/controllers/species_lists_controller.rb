@@ -150,7 +150,10 @@ class SpeciesListsController < ApplicationController
 
   # Display list of user's species_lists, sorted by date.
   def by_user
-    user = params[:id] ? find_or_goto_index(User, params[:by_user].to_s) : @user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: species_lists_path
+    )
     return unless user
 
     query = create_query(:SpeciesList, :by_user, user: user)

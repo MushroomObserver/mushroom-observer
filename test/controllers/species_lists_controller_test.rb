@@ -218,6 +218,16 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_title_id("Species Lists created by #{user.name}")
   end
 
+  def test_index_by_user_with_no_species_lists
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user })
+
+    assert_response(:success)
+    assert_title_id("")
+  end
+
   def test_index_for_project
     project = projects(:bolete_project)
 
