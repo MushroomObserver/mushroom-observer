@@ -32,8 +32,7 @@ ACTIONS = {
     old_translation: {},
     pivotal: {},
     test: {},
-    visual_group_status: {},
-    vote: {}
+    visual_group_status: {}
   },
   api: {
     api_keys: {},

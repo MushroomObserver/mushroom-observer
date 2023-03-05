@@ -88,7 +88,7 @@ module ThumbnailHelper
     return content_tag(:b, link_text) if link_text == state_text
 
     put_button(name: link_text,
-               path: image_vote_path(id: image_id, vote: 1),
+               path: image_vote_path(image_id: image_id, vote: 1),
                title: link_text,
                data: { role: "visual_group_status",
                        imgid: image_id,
