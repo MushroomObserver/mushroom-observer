@@ -78,7 +78,16 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
-  def test_index_pattern_search
+  def test_index_with_non_default_sort
+    login
+
+    get(:index, params: { by: "updated_at" })
+
+    assert_template("index")
+    assert_title_id("Projects by Time Last Modified")
+  end
+
+  def test_index_pattern
     login
     p_id = projects(:bolete_project).id
     # try searching by project title. Note that search saves a query record
@@ -88,15 +97,6 @@ class ProjectsControllerTest < FunctionalTestCase
     # try searching by project_id
     get(:index, params: { pattern: p_id.to_s })
     assert_template("show")
-  end
-
-  def test_index_with_non_default_sort
-    login
-
-    get(:index, params: { by: "updated_at" })
-
-    assert_template("index")
-    assert_title_id("Projects by Time Last Modified")
   end
 
   def test_add_project
