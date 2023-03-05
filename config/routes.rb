@@ -21,7 +21,6 @@ ACTIONS = {
     api_key: {},
     auto_complete: {},
     create_image_object: {},
-    exif: {},
     export: {},
     external_link: {},
     geocode: {},
@@ -458,6 +457,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :images, only: [:index, :show, :destroy] do
     member do
       put("transform", to: "images/transformations#update", as: "transform")
+      get("exif", to: "images/exif#show", as: "exif")
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end

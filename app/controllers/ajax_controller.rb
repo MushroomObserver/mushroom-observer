@@ -37,7 +37,6 @@ class AjaxController < ApplicationController
   include OldTranslation
   include ExternalLink
   include Export
-  include EXIF
   include AutoComplete
   include APIKey
 

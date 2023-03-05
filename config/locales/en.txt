@@ -1674,6 +1674,9 @@
   image_show_make_default: Make this the default size
   image_show_transform_note: Image is being processed. This may take several seconds.
 
+  # images/exif/show
+  exif_data_for_image: "EXIF Data for Image [image]"
+
   # observations/list_observations
   list_observations_location_all: All Locations
   list_observations_location_define: Define This Location
