@@ -137,12 +137,13 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def caption_image_links(image_id)
-    orig_url = Image.url(:original, image_id)
     links = []
-    links << original_image_link(orig_url)
+    links << original_image_link(image_id)
     links << " | "
     links << image_exif_link(image_id)
-    h.safe_join(links)
+    h.content_tag(:div, class: "caption-image-links my-3") do
+      h.safe_join(links)
+    end
   end
 
   def caption_obs_title(obs_data)
@@ -150,8 +151,8 @@ class ThumbnailPresenter < BasePresenter
                   class: "obs-what", id: "observation_what_#{obs_data[:id]}")
   end
 
-  def original_image_link(orig_url)
-    h.link_to(:image_show_original.t, orig_url,
+  def original_image_link(image_id)
+    h.link_to(:image_show_original.t, Image.url(:original, image_id),
               { class: "lightbox_link", target: "_blank", rel: "noopener" })
   end
 
