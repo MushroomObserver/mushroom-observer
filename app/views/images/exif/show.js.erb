@@ -1,1 +1,5 @@
-$('body').append('<%= j render(partial: "images/exif/modal", locals: { title: :exif_data_for_image.t(image: @image.id) }) %>');
+$('body').append('<%= j render(partial: "images/exif/modal", locals: { image: @image, status: @status, data: @data }) %>');
+
+$('#modal_image_exif').on('hidden.bs.modal', function () {
+  $(this).remove();
+});

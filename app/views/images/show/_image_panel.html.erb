@@ -21,10 +21,9 @@
       <% end %>
       <%= link_to(:image_show_original.t,
                   Image.url(:original, @image.id)) %> |
-      <button
-        type="button" class="btn btn-link"
-        data-toggle="modal" data-target="#image_exif_modal"
-        data-image="<%= @image.id %>"><%= :image_show_exif.t %></button>
+      <%= link_to(:image_show_exif.t, exif_image_path(@image.id),
+                  { remote: true, onclick: "MOEvents.whirly();" }) %>
+
     </div><!--.text-center-->
   </div><!--.panel-heading-->
   <div class="panel-body">

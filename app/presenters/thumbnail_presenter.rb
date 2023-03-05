@@ -156,13 +156,9 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def image_exif_link(image_id)
-    h.content_tag(:button, :image_show_exif.t,
-                  { class: "btn btn-link px-0 lightbox_link",
-                    data: {
-                      toggle: "modal",
-                      target: "#image_exif_modal",
-                      image: image_id
-                    } })
+    h.link_to(:image_show_exif.t, exif_image_path(image_id),
+              { class: "lightbox_link",
+                remote: true, onclick: "MOEvents.whirly();" })
   end
 
   def lb_link(lb_url, lb_id, lb_caption)
