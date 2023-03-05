@@ -228,6 +228,20 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_title_id("")
   end
 
+  def test_index_for_user_who_does_not_exist
+    user = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { by_user: user })
+
+    assert_response(:redirect)
+    assert_redirected_to(species_lists_path)
+    assert_title_id("")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: :user, id: user.id)
+    )
+  end
+
   def test_index_for_project
     project = projects(:bolete_project)
 
@@ -258,7 +272,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(projects_path)
     assert_title_id("")
     assert_flash_text(
-      :runtime_object_not_found.l(type: :project, id: project.id))
+      :runtime_object_not_found.l(type: :project, id: project.id)
+    )
   end
 
   def test_show_species_list
