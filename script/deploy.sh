@@ -28,7 +28,9 @@ fi
 
 tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
+echo Stash local changes... && git stash && \
 echo Getting latest code from github... && git pull && \
+echo Reapply local changes... && git stash pop && \
 echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && rake lang:update && \
