@@ -24,17 +24,8 @@ class SpeciesListsController < ApplicationController
   @index_subaction_param_keys = [
     :pattern,
     :by_user,
-    :for_project,
+    :for_project
   ].freeze
-
-=begin
-  @index_subaction_dispatch_table = {
-    pattern: :pattern,
-    by_user: :by_user,
-    for_project: :for_project,
-    by: :by_title_or_selected_by_query
-  }.freeze
-=end
 
   def show
     store_location
@@ -52,16 +43,14 @@ class SpeciesListsController < ApplicationController
     init_ivars_for_show
   end
 
-  # rubocop:disable Naming/MemoizedInstanceVariableName
   def new
     @species_list = SpeciesList.new
     init_name_vars_for_create
     init_member_vars_for_create
     init_project_vars_for_create
     init_name_vars_for_clone(params[:clone]) if params[:clone].present?
-    @checklist ||= calc_checklist
+    @checklist ||= calc_checklist # rubocop:disable Naming/MemoizedInstanceVariableName
   end
-  # rubocop:enable Naming/MemoizedInstanceVariableName
 
   def edit
     return unless (@species_list = find_species_list!)
@@ -132,10 +121,12 @@ class SpeciesListsController < ApplicationController
       return list_query_results
     end
 
-    sorted_by = \
-      params[:by] == default_sort_order ? default_sort_order.to_sym : :date
-    query = create_query(:SpeciesList, :all, by: sorted_by)
+    query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
+  end
+
+  def sorted_by_default_or_date
+    params[:by] == default_sort_order ? default_sort_order.to_sym : :date
   end
 
   def default_sort_order
@@ -210,8 +201,7 @@ class SpeciesListsController < ApplicationController
 
     # Paginate by letter if sorting by user.
     args[:letters] =
-      if query.params[:by] == "user" ||
-         query.params[:by] == "reverse_user"
+      if [query.params[:by]].intersect?(%w[user reverse_user])
         "users.login"
       else
         # Can always paginate by title letter.
