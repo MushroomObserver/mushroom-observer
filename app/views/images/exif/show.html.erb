@@ -1,0 +1,16 @@
+<%
+@title = :exif_data_for_image.t(image: @image.id)
+tabs = [
+  link_with_query(:cancel_and_show.t(type: :image), @image.show_link_args)
+]
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :text
+%>
+
+<%=
+if @status
+  render(partial: "images/exif/data", locals: { data: @data })
+else
+  render(plain: @result, status: :internal_server_error)
+end
+%>

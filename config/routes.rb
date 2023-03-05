@@ -21,7 +21,6 @@ ACTIONS = {
     api_key: {},
     auto_complete: {},
     create_image_object: {},
-    exif: {},
     export: {},
     external_link: {},
     geocode: {},
@@ -32,8 +31,7 @@ ACTIONS = {
     old_translation: {},
     pivotal: {},
     test: {},
-    visual_group_status: {},
-    vote: {}
+    visual_group_status: {}
   },
   api: {
     api_keys: {},
@@ -459,9 +457,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :images, only: [:index, :show, :destroy] do
     member do
       put("transform", to: "images/transformations#update", as: "transform")
+      get("exif", to: "images/exif#show", as: "exif")
     end
+    put("/vote", to: "images/votes#update", as: "vote")
   end
-  put("/images/:id/vote", to: "images/votes#update", as: "image_vote")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")

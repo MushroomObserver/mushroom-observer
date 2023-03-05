@@ -3658,7 +3658,7 @@ class NameTest < UnitTestCase
       author: "Blah & de Blah",
       display_name: "__Whoosia whatsitii__ Blah & de Blah",
       deprecated: true,
-      rank: "Species",
+      rank: "Species"
     }
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)

@@ -5,9 +5,9 @@
 //= require jstz
 //= require autocomplete
 //= require box_resizer
+//= require lazyload_verlok
 //= require csrf_token
 //= require external_link
-//= require image_vote_ajax
 //= require image_export
 //= require validate_file_input_fields
 //= require main
@@ -19,7 +19,6 @@
 //= require naming_vote_ajax
 //= require pivotal
 //= require lightbox
-//= require image_exif_modal_ajax
 
 lightbox.option({
   'fadeDuration': 0,

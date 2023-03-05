@@ -1,6 +1,7 @@
 /**
  * This should be included on every page.
  */
+
 jQuery(document).ready(function () {
 
   // This works better than straight autofocus attribute in firefox.
@@ -55,15 +56,6 @@ jQuery(document).ready(function () {
     })
   });
 
-  // BS3 Matrix box image thumbnail lightbox button show/hide/position.
-  jQuery('body').on("mouseenter mouseleave", '[data-toggle="expand-icon"]', function (e) {
-    var btn = jQuery(this).find('.theater-btn');
-    if (e.type == "mouseleave")
-      return btn.hide();
-    var img = jQuery(this).find('img');
-    btn.css('right', img.position().left).show();
-  });
-
   // very precise binding for dynamically generated lightbox links
   // they are not there on page load, only when lightbox activated
   jQuery('body').on('click', '#lightbox .lb-dataContainer button.lightbox_link', function (e) {
@@ -73,4 +65,13 @@ jQuery(document).ready(function () {
     // must pass the button itself as second param
     jQuery(modal_target_id).modal("toggle", button);
   });
+
+  // Initialize Verlok LazyLoad
+  var lazyLoadInstance = new LazyLoad({
+    elements_selector: ".lazy"
+    // ... more custom settings?
+  });
+
+  // Update lazy loads
+  lazyLoadInstance.update();
 });
