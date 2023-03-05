@@ -146,20 +146,20 @@ class ProjectsController < ApplicationController
 
   ############ Index private methods
   def default_index_subaction
-    list_projects
-  end
-
-  # Show list of selected projects, based on current Query.
-  def index_project
-    query = find_or_create_query(:Project, by: params[:by])
-    show_selected_projects(query, id: params[:id].to_s, always_index: true)
+    list_all
   end
 
   # Show list of latest projects.  (Linked from left panel.)
-  def list_projects
+  def list_all
     sorted_by = params[:by].present? ? params[:by].to_s : :title
     query = create_query(:Project, :all, by: sorted_by)
     show_selected_projects(query)
+  end
+
+  # Show list of selected projects, based on current Query.
+  def list_query_results
+    query = find_or_create_query(:Project, by: params[:by])
+    show_selected_projects(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display list of Project's whose title or notes match a string pattern.
