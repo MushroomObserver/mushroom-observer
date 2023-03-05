@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Images::ExifController
+# Images::EXIFController
 module Images
-  class ExifController < ApplicationController
+  class EXIFController < ApplicationController
     require "English"
     require("open3")
 
@@ -13,15 +13,16 @@ module Images
     # Linked from lightbox and show_image
     # Get EXIF header of image, return as HTML table.
     def show
-      image = Image.find(@id)
-      hide_gps = image.observations.any?(&:gps_hidden)
-      if image.transferred
+      @image = Image.find(params[:id])
+      hide_gps = @image.observations.any?(&:gps_hidden)
+
+      if @image.transferred
         cmd = Shellwords.escape("script/exiftool_remote")
-        url = Shellwords.escape(image.original_url)
+        url = Shellwords.escape(@image.original_url)
         @result, @status = Open3.capture2e(cmd, url)
       else
         cmd  = Shellwords.escape("exiftool")
-        file = Shellwords.escape(image.local_file_name("orig"))
+        file = Shellwords.escape(@image.local_file_name("orig"))
         @result, @status = Open3.capture2e(cmd, file)
       end
 

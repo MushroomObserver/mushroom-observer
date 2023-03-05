@@ -156,7 +156,7 @@ class ThumbnailPresenter < BasePresenter
   end
 
   def image_exif_link(image_id)
-    h.link_to(:image_show_exif.t, exif_image_path(image_id),
+    h.link_to(:image_show_exif.t, h.exif_image_path(image_id),
               { class: "lightbox_link",
                 remote: true, onclick: "MOEvents.whirly();" })
   end
