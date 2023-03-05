@@ -64,6 +64,16 @@ module ThumbnailHelper
     image.license.copyright_text(image.year, link)
   end
 
+  def original_image_link(image_id, classes)
+    link_to(:image_show_original.t, Image.url(:original, image_id),
+            { class: classes, target: "_blank", rel: "noopener" })
+  end
+
+  def image_exif_link(image_id, classes)
+    link_to(:image_show_exif.t, exif_image_path(image_id),
+            { class: classes, remote: true, onclick: "MOEvents.whirly();" })
+  end
+
   # Create an image link vote, where vote param is vote number ie: 3
   # Returns a form input button if the user has NOT voted this way
   # JS is listening to any element with [data-role="image_vote"],

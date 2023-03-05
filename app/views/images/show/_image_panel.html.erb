@@ -19,10 +19,8 @@
                                                   q: get_query_param,
                                                   size: @size)) %> |
       <% end %>
-      <%= link_to(:image_show_original.t,
-                  Image.url(:original, @image.id)) %> |
-      <%= link_to(:image_show_exif.t, exif_image_path(@image.id),
-                  { remote: true, onclick: "MOEvents.whirly();" }) %>
+      <%= original_image_link(@image.id, "") %> |
+      <%= image_exif_link(@image.id, "") %>
 
     </div><!--.text-center-->
   </div><!--.panel-heading-->

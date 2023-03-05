@@ -143,23 +143,12 @@ class ThumbnailPresenter < BasePresenter
 
   def caption_image_links(image_id)
     links = []
-    links << original_image_link(image_id)
+    links << h.original_image_link(image_id, "lightbox_link")
     links << " | "
-    links << image_exif_link(image_id)
+    links << h.image_exif_link(image_id, "lightbox_link")
     h.content_tag(:div, class: "caption-image-links my-3") do
       h.safe_join(links)
     end
-  end
-
-  def original_image_link(image_id)
-    h.link_to(:image_show_original.t, Image.url(:original, image_id),
-              { class: "lightbox_link", target: "_blank", rel: "noopener" })
-  end
-
-  def image_exif_link(image_id)
-    h.link_to(:image_show_exif.t, h.exif_image_path(image_id),
-              { class: "lightbox_link",
-                remote: true, onclick: "MOEvents.whirly();" })
   end
 
   def lb_link(lb_url, lb_id, lb_caption)
