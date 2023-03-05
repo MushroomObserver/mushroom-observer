@@ -5,7 +5,7 @@ module Images
     before_action :login_required
 
     def update
-      @id = params[:id]
+      @id = params[:image_id]
       @image = find_or_goto_index(Image, @id)
       return unless @image
 

@@ -77,9 +77,9 @@ module ThumbnailHelper
     end
 
     put_button(name: vote_text, remote: true,
-               path: image_vote_path(id: image.id, value: vote),
+               path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
-               data: { role: "image_vote", id: image.id, value: vote })
+               data: { role: "image_vote", image_id: image.id, value: vote })
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)

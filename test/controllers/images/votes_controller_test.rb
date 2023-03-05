@@ -12,7 +12,7 @@ module Images
       login(user.login)
 
       assert_difference("ImageVote.count", 1, "Failed to cast vote") do
-        put(:update, params: { id: image.id, value: value })
+        put(:update, params: { image_id: image.id, value: value })
       end
       assert_redirected_to(image_path(image.id))
       vote = ImageVote.last
@@ -27,7 +27,7 @@ module Images
       login(user.login)
 
       assert_difference("ImageVote.count", 1, "Failed to cast vote") do
-        put(:update, params: { id: image.id, value: value, next: true })
+        put(:update, params: { image_id: image.id, value: value, next: true })
       end
       assert_redirected_to(
         image_path(id: image.id, q: QueryRecord.last.id.alphabetize)
@@ -41,28 +41,29 @@ module Images
     def test_image_vote
       image = images(:in_situ_image)
       assert_nil(image.users_vote(dick))
-      put(:update, params: { id: images(:in_situ_image).id, value: 3 })
+      put(:update, params: { image_id: image.id, value: 3 })
 
       login("dick")
       assert_nil(image.users_vote(dick))
-      put(:update, params: { id: images(:in_situ_image).id, value: 3 })
+      put(:update, params: { image_id: image.id, value: 3 })
       assert_equal(3, image.reload.users_vote(dick))
 
-      put(:update, params: { id: images(:in_situ_image).id, value: 0 })
+      put(:update, params: { image_id: image.id, value: 0 })
       assert_nil(image.reload.users_vote(dick))
 
-      put(:update, params: { id: images(:in_situ_image).id, value: 99 })
+      put(:update, params: { image_id: image.id, value: 99 })
       assert_response(:error)
-      put(:update, params: { id: 99, value: 0 })
+      put(:update, params: { image_id: 99, value: 0 })
       assert_response(:error)
     end
 
     def test_image_vote_renders_partial
       # Arrange
       login("dick")
+      img_id = images(:in_situ_image).id
 
       # Act
-      put(:update, params: { id: images(:in_situ_image).id, value: 3 })
+      put(:update, params: { image_id: img_id, value: 3 })
 
       # Assert
       assert_template(layout: nil)
@@ -74,29 +75,31 @@ module Images
     def test_image_vote_renders_correct_links
       # Arrange
       login("dick")
+      img_id = images(:in_situ_image).id
 
       # Act
-      put(:update, params: { id: images(:in_situ_image).id, value: 3 })
+      put(:update, params: { image_id: img_id, value: 3 })
       assert_select(
-        "form[action='/images/#{images(:in_situ_image).id}/vote?vote=0']"
+        "form[action='/images/#{img_id}/vote?vote=0']"
       )
       assert_select(
-        "form[action='/images/#{images(:in_situ_image).id}/vote?vote=1']"
+        "form[action='/images/#{img_id}/vote?vote=1']"
       )
       assert_select(
-        "form[action='/images/#{images(:in_situ_image).id}/vote?vote=2']"
+        "form[action='/images/#{img_id}/vote?vote=2']"
       )
       assert_select(
-        "form[action='/images/#{images(:in_situ_image).id}/vote?vote=4']"
+        "form[action='/images/#{img_id}/vote?vote=4']"
       )
     end
 
     def test_image_vote_renders_correct_data_attributes
       # Arrange
       login("dick")
+      img_id = images(:in_situ_image).id
 
       # Act
-      put(:update, params: { id: images(:in_situ_image).id, value: 3 })
+      put(:update, params: { image_id: img_id, value: 3 })
 
       # should show four vote links as dick already voted
       assert_select("[data-role='image_vote']", 4)
