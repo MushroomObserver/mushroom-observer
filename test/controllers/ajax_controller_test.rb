@@ -241,80 +241,6 @@ class AjaxControllerTest < FunctionalTestCase
     assert_match(/Post Comment/, @response.body)
   end
 
-  def test_image_vote
-    image = images(:in_situ_image)
-    assert_nil(image.users_vote(dick))
-    bad_ajax_request(:vote,
-                     type: :image, id: images(:in_situ_image).id, value: 3)
-
-    login("dick")
-    assert_nil(image.users_vote(dick))
-    good_ajax_request(:vote,
-                      type: :image, id: images(:in_situ_image).id, value: 3)
-    assert_equal(3, image.reload.users_vote(dick))
-
-    good_ajax_request(:vote,
-                      type: :image, id: images(:in_situ_image).id, value: 0)
-    assert_nil(image.reload.users_vote(dick))
-
-    bad_ajax_request(:vote,
-                     type: :image, id: images(:in_situ_image).id, value: 99)
-    bad_ajax_request(:vote,
-                     type: :image, id: 99, value: 0)
-  end
-
-  def test_image_vote_renders_partial
-    # #Arrange
-    login("dick")
-
-    # Act
-    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id,
-                             value: 3)
-
-    # Assert
-    assert_template(layout: nil)
-    assert_template(layout: false)
-    assert_template(partial: "shared/_image_vote_links")
-  end
-
-  # They're not links, they're forms. `button_to`
-  def test_image_vote_renders_correct_links
-    # #Arrange
-    login("dick")
-
-    # Act
-    good_ajax_request(:vote,
-                      type: :image, id: images(:in_situ_image).id, value: 3)
-    assert_select(
-      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=0']"
-    )
-    assert_select(
-      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=1']"
-    )
-    assert_select(
-      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=2']"
-    )
-    assert_select(
-      "form[action='/images/#{images(:in_situ_image).id}/vote?vote=4']"
-    )
-  end
-
-  def test_image_vote_renders_correct_data_attributes
-    # #Arrange
-    login("dick")
-
-    # Act
-    good_ajax_request(:vote,
-                      type: :image,
-                      id: images(:in_situ_image).id,
-                      value: 3)
-
-    # should show four vote links as dick already voted
-    assert_select("[data-role='image_vote']", 4)
-    # should show four vote links as dick already voted
-    assert_select("[data-val]", 4)
-  end
-
   def test_old_translation
     str = TranslationString::Version.find(1)
     bad_ajax_request(:old_translation, id: 0)
@@ -484,37 +410,6 @@ class AjaxControllerTest < FunctionalTestCase
     assert_raises(RuntimeError) do
       @controller.send(:check_link_permission!, *args)
     end
-  end
-
-  def test_exif_gps_hidden
-    image = images(:in_situ_image)
-    image.update_attribute(:transferred, false)
-
-    fixture = "#{MO.root}/test/images/geotagged.jpg"
-    file = image.local_file_name("orig")
-    path = file.sub(%r{/[^/]*$}, "")
-    FileUtils.mkdir_p(path) unless File.directory?(path)
-    FileUtils.cp(fixture, file)
-
-    get(:exif, params: { id: image.id })
-    assert_match(/latitude|longitude/i, @response.body)
-
-    image.observations.first.update_attribute(:gps_hidden, true)
-    get(:exif, params: { id: image.id })
-    assert_no_match(/latitude|longitude/i, @response.body)
-  end
-
-  def test_exif_parser
-    fixture = "#{MO.root}/test/images/geotagged.jpg"
-    result, _status = Open3.capture2e("exiftool", fixture)
-    unstripped = @controller.test_parse_exif_data(result, false)
-    assert_not_empty(unstripped.select do |key, _val|
-                       key.match(/latitude|longitude|gps/i)
-                     end)
-    stripped = @controller.test_parse_exif_data(result, true)
-    assert_empty(stripped.select do |key, _val|
-                   key.match(/latitude|longitude|gps/i)
-                 end)
   end
 
   def test_name_primer

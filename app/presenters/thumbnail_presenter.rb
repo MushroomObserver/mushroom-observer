@@ -177,33 +177,19 @@ class ThumbnailPresenter < BasePresenter
                      locals: { observation: obs_data[:obs] })
   end
 
-  def caption_image_links(image_id)
-    orig_url = Image.url(:original, image_id)
-    links = []
-    links << original_image_link(orig_url)
-    links << " | "
-    links << image_exif_link(image_id)
-    h.safe_join(links)
-  end
-
   def caption_obs_title(obs_data)
     h.content_tag(:h4, h.show_obs_title(obs: obs_data[:obs]),
                   class: "obs-what", id: "observation_what_#{obs_data[:id]}")
   end
 
-  def original_image_link(orig_url)
-    h.link_to(:image_show_original.t, orig_url,
-              { class: "lightbox_link", target: "_blank", rel: "noopener" })
-  end
-
-  def image_exif_link(image_id)
-    h.content_tag(:button, :image_show_exif.t,
-                  { class: "btn btn-link px-0 lightbox_link",
-                    data: {
-                      toggle: "modal",
-                      target: "#image_exif_modal",
-                      image: image_id
-                    } })
+  def caption_image_links(image_id)
+    links = []
+    links << h.original_image_link(image_id, "lightbox_link")
+    links << " | "
+    links << h.image_exif_link(image_id, "lightbox_link")
+    h.content_tag(:div, class: "caption-image-links my-3") do
+      h.safe_join(links)
+    end
   end
 
   def lb_link(lb_url, lb_id, lb_caption)
