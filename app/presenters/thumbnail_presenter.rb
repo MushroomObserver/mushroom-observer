@@ -136,6 +136,11 @@ class ThumbnailPresenter < BasePresenter
                      locals: { observation: obs_data[:obs] })
   end
 
+  def caption_obs_title(obs_data)
+    h.content_tag(:h4, h.show_obs_title(obs: obs_data[:obs]),
+                  class: "obs-what", id: "observation_what_#{obs_data[:id]}")
+  end
+
   def caption_image_links(image_id)
     links = []
     links << original_image_link(image_id)
@@ -144,11 +149,6 @@ class ThumbnailPresenter < BasePresenter
     h.content_tag(:div, class: "caption-image-links my-3") do
       h.safe_join(links)
     end
-  end
-
-  def caption_obs_title(obs_data)
-    h.content_tag(:h4, h.show_obs_title(obs: obs_data[:obs]),
-                  class: "obs-what", id: "observation_what_#{obs_data[:id]}")
   end
 
   def original_image_link(image_id)
