@@ -24,7 +24,9 @@
       </div>
     <% end %>
 
-    <%= render(partial: "images/show/vote_panel") %>
+    <div id="image_votes_container"><!--Note: id used by ajax-->
+      <%= render(partial: "images/show/vote_panel") %>
+    </div><!-- #image_votes_container -->
 
   </div><!--.col-lg-4-->
 </div><!--.row-->

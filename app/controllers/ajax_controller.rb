@@ -30,7 +30,6 @@
 #  vote::             Change vote on proposed name or image.
 #
 class AjaxController < ApplicationController
-  include Vote
   include VisualGroupStatus
   include UploadImage
   include Primers
