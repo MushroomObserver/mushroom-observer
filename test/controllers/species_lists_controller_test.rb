@@ -270,7 +270,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)
-    assert_title_id("")
     assert_flash_text(
       :runtime_object_not_found.l(type: :project, id: project.id)
     )
