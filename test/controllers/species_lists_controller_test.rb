@@ -227,6 +227,30 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_title_id("Species Lists attached to #{project.title}")
   end
 
+  def test_index_for_project_with_no_lists
+    project = projects(:empty_project)
+
+    login
+    get(:index, params: { for_project: project.id })
+
+    assert_response(:success)
+    assert_title_id("")
+    assert_flash_text(:runtime_no_matches.l(types: :species_lists))
+  end
+
+  def test_index_for_project_that_does_not_exist
+    project = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { for_project: project.id })
+
+    assert_response(:redirect)
+    assert_redirected_to(projects_path)
+    assert_title_id("")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: :project, id: project.id))
+  end
+
   def test_show_species_list
     sl_id = species_lists(:first_species_list).id
 
