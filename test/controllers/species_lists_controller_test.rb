@@ -107,9 +107,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_template(:index)
     assert_title_id("Species Lists by Date")
+    assert_select(
+      "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
+      { count: SpeciesList.count },
+      "Wrong number of results"
+    )
   end
 
-  def test_index_non_default_sort_order
+  def test_index_sorted_by_user
     by = "user"
 
     login
@@ -118,12 +123,24 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_title_id("Species Lists by #{by.capitalize}")
   end
 
-  def test_index_by_past_bys
+  def test_index_sorted_by_time_modifed
+    by = "modified"
+
     login
-    get(:index, params: { by: :modified })
+    get(:index, params: { by: by })
+
     assert_response(:success)
-    get(:index, params: { by: :created })
+    assert_title_id("Species Lists by Time Last Modified")
+  end
+
+  def test_index_sorted_by_date_created
+    by = "created"
+
+    login
+    get(:index, params: { by: by })
+
     assert_response(:success)
+    assert_title_id("Species Lists by Date Created")
   end
 
   def test_index_sorted_by_title
@@ -154,26 +171,60 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_title_id("Species Lists by Date")
   end
 
-  def test_index_pattern
-    login
-    spl = species_lists(:unknown_species_list)
-    get(:index, params: { pattern: spl.id.to_s })
-    assert_redirected_to(species_list_path(spl.id))
+  def test_index_pattern_multiple_hits
+    pattern = "query"
 
-    get(:index, params: { pattern: "mysteries" })
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:success)
+    assert_title_id("Species Lists Matching ‘#{pattern}’")
+    assert_select(
+      "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
+      { count: SpeciesList.where(SpeciesList[:title] =~ pattern).count },
+      "Wrong number of results"
+    )
+  end
+
+  def test_index_pattern_id
+    spl = species_lists(:unknown_species_list)
+
+    login
+    get(:index, params: { pattern: spl.id })
+
+    assert_redirected_to(species_list_path(spl.id))
+  end
+
+  def test_index_pattern_one_hit
+    pattern = "mysteries"
+
+    login
+    get(:index, params: { pattern: pattern })
+
     assert_response(:redirect)
+    assert_match(
+      species_list_path(species_lists(:unknown_species_list)),
+      redirect_to_url,
+      "Wrong page"
+    )
   end
 
   def test_index_by_user
+    user = rolf
+
     login
-    get(:index, params: { by_user: rolf.id })
-    assert_template(:index)
+    get(:index, params: { by_user: user })
+
+    assert_title_id("Species Lists created by #{user.name}")
   end
 
   def test_index_for_project
+    project = projects(:bolete_project)
+
     login
-    get(:index, params: { for_project: projects(:bolete_project).id })
-    assert_template(:index)
+    get(:index, params: { for_project: project.id })
+
+    assert_title_id("Species Lists attached to #{project.title}")
   end
 
   def test_show_species_list
