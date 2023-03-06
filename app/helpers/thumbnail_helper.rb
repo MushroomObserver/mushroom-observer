@@ -75,6 +75,86 @@ module ThumbnailHelper
             { class: classes, remote: true, onclick: "MOEvents.whirly();" })
   end
 
+  # NOTE: `stretched_link` might be a link to #show_obs or #show_image,
+  # but it may also be a button/input (with params[:img_id]) sending to
+  # #reuse_image or #remove_image ...or any other clickable element. Elements
+  # use .ab-fab instead of .stretched-link to keep .theater-btn clickable
+  def image_stretched_link(path, link_method)
+    case link_method
+    when :get
+      link_with_query("", path, class: stretched_link_classes)
+    when :post
+      post_button(name: "", path: path, class: stretched_link_classes)
+    when :put
+      put_button(name: "", path: path, class: stretched_link_classes)
+    when :patch
+      patch_button(name: "", path: path, class: stretched_link_classes)
+    when :delete
+      destroy_button(name: "", target: path, class: stretched_link_classes)
+    when :remote
+      link_with_query("", path, class: stretched_link_classes, remote: true)
+    end
+  end
+
+  def stretched_link_classes
+    "image-link stretched-link"
+  end
+
+  def lightbox_link(lightbox_data)
+    icon = content_tag(:i, "", class: "glyphicon glyphicon-fullscreen")
+    caption = lightbox_caption_html(lightbox_data)
+
+    link_to(icon, lightbox_data[:url],
+            class: "theater-btn",
+            data: { lightbox: lightbox_data[:id], title: caption })
+  end
+
+  def lightbox_caption_html(lightbox_data)
+    obs_data = lightbox_data[:obs_data]
+    html = []
+    if obs_data[:id].present?
+      html = image_observation_caption(html, obs_data, lightbox_data[:identify])
+    end
+    html << caption_image_links(lightbox_data[:image_id])
+    safe_join(html)
+  end
+
+  def image_observation_caption(html, obs_data, identify)
+    if identify ||
+       (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
+      html << propose_naming_link(obs_data[:id])
+      html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
+      html << mark_as_reviewed_toggle(obs_data[:id])
+    end
+    html << caption_obs_title(obs_data)
+    html << render(partial: "observations/show/observation",
+                   locals: { observation: obs_data[:obs] })
+  end
+
+  def caption_obs_title(obs_data)
+    content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
+                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
+  end
+
+  def caption_image_links(image_id)
+    links = []
+    links << original_image_link(image_id, "lightbox_link")
+    links << " | "
+    links << image_exif_link(image_id, "lightbox_link")
+    content_tag(:div, class: "caption-image-links my-3") do
+      safe_join(links)
+    end
+  end
+
+  def vote_section_html(votes, image)
+    return "" unless votes && image && User.current
+
+    content_tag(:div, "", class: "vote-section") do
+      render(partial: "shared/image_vote_links",
+             locals: { image: image })
+    end
+  end
+
   # Create an image link vote, where vote param is vote number ie: 3
   # Returns a form input button if the user has NOT voted this way
   # JS is listening to any element with [data-role="image_vote"],
@@ -91,6 +171,20 @@ module ThumbnailHelper
                path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
                data: { role: "image_vote", image_id: image.id, value: vote })
+  end
+
+  def image_original_name(original, image)
+    return "" unless image && show_original_name(original, image)
+
+    content_tag(:div, image.original_name, class: "mt-3")
+  end
+
+  def show_original_name(original, image)
+    original && image &&
+      image.original_name.present? &&
+      (check_permission(image) ||
+       image.user &&
+       image.user.keep_filenames == "keep_and_show")
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)
