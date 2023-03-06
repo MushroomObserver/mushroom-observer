@@ -6,7 +6,7 @@ class ThumbnailPresenter < BasePresenter
     :image,            # image instance or id
     :proportion,       # sizer proportion, to size img correctly pre-lazyload
     :width,            # image container width (to be removed soon)
-    :img_lazy_tag,     # thumbnail image tag with placeholder (src lazy-loaded)
+    :img_tag_lazy,     # thumbnail image tag with placeholder (src lazy-loaded)
     :img_tag,          # thumbnail image tag with real src (when no lazy-load)
     :stretched_link,   # image overlay stretched-link (may be link/button/form)
     :lightbox_link,    # contains data passed to lightbox (incl. caption)
