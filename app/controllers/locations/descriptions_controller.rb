@@ -32,9 +32,9 @@ module Locations
     ].freeze
 
     @index_subaction_dispatch_table = {
-      by: :list_query_results,
-      q: :list_query_results,
-      id: :list_query_results
+      by: :index_query_results,
+      q: :index_query_results,
+      id: :index_query_results
     }.freeze
 
     private # private methods used by #index  ##################################
@@ -54,7 +54,7 @@ module Locations
     end
 
     # Displays a list of selected locations, based on current Query.
-    def list_query_results
+    def index_query_results
       query = find_or_create_query(:LocationDescription, by: params[:by])
       show_selected_location_descriptions(query, id: params[:id].to_s,
                                                  always_index: true)

@@ -48,8 +48,8 @@ class ObservationsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :list_query_results,
-    q: :list_query_results,
-    id: :list_query_results
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
 end

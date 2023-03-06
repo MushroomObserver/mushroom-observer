@@ -14,7 +14,7 @@ class ProjectsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :list_query_results
+    by: :index_query_results
   }.freeze
 
   # Display project by itself.
@@ -167,7 +167,7 @@ class ProjectsController < ApplicationController
   end
 
   # Show list of selected projects, based on current Query.
-  def list_query_results
+  def index_query_results
     query = find_or_create_query(:Project, by: params[:by])
     show_selected_projects(query, id: params[:id].to_s, always_index: true)
   end

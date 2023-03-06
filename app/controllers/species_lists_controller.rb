@@ -136,7 +136,7 @@ class SpeciesListsController < ApplicationController
 
   # choose another subaction when params[:by].present?
   def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : list_query_results
+    params[:by] == "title" ? species_lists_by_title : index_query_results
   end
 
   # Display list of all species_lists, sorted by title.
@@ -147,7 +147,7 @@ class SpeciesListsController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
-  def list_query_results
+  def index_query_results
     query = find_or_create_query(:SpeciesList, by: params[:by])
     show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
   end

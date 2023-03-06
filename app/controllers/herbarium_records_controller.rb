@@ -22,9 +22,9 @@ class HerbariumRecordsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :list_query_results,
-    q: :list_query_results,
-    id: :list_query_results
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
 
   def show
@@ -116,7 +116,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def list_query_results
+  def index_query_results
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
     show_selected_herbarium_records(query, id: params[:id].to_s,
                                            always_index: true)

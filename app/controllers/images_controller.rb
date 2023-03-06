@@ -39,7 +39,7 @@ class ImagesController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :list_query_results
+    by: :index_query_results
   }.freeze
 
   #############################################
@@ -53,7 +53,7 @@ class ImagesController < ApplicationController
   # Display matrix of images, most recent first.
   def list_all
     return render_too_many_results if too_many_results
-    return list_query_results if params.include?(:by)
+    return index_query_results if params.include?(:by)
 
     query = create_query(:Image, :all, by: default_sort_order)
     show_selected_images(query)
@@ -80,7 +80,7 @@ class ImagesController < ApplicationController
   end
 
   # Display matrix of selected images, based on current Query.
-  def list_query_results
+  def index_query_results
     query = find_or_create_query(:Image, by: params[:by])
     show_selected_images(query, id: params[:id].to_s, always_index: true)
   end

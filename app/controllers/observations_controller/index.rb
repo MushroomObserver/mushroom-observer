@@ -26,7 +26,7 @@ class ObservationsController
 
     # Displays matrix of selected Observations (based on current Query).
     # NOTE: Why are all the :id params converted .to_s below?
-    def list_query_results
+    def index_query_results
       query = find_or_create_query(:Observation, by: params[:by])
       show_selected_observations(
         query, id: params[:id].to_s, always_index: true

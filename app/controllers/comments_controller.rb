@@ -35,7 +35,7 @@ class CommentsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    by: :list_query_results
+    by: :index_query_results
   }.freeze
 
   ###########################################################
@@ -58,7 +58,7 @@ class CommentsController < ApplicationController
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def list_query_results
+  def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = find_or_create_query(:Comment, by: sorted_by)
     show_selected_comments(query, id: params[:id].to_s, always_index: true)
