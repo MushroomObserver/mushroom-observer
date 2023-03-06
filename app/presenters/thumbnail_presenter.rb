@@ -61,18 +61,18 @@ class ThumbnailPresenter < BasePresenter
     }.merge(args[:data])
 
     # <img> attributes
-    html_options = {
+    html_options_lazy = {
       alt: args[:notes],
       class: "#{img_class} lazy",
       data: img_data
     }
 
-    noscript_html_options = html_options.dup
-    noscript_html_options[:class] = "#{img_class} img-noscript"
+    html_options_noscript = html_options_lazy.dup
+    html_options_noscript[:class] = "#{img_class} img-noscript"
 
     self.image = image || nil
-    self.img_lazy_tag = h.image_tag("placeholder.svg", html_options)
-    self.img_tag = h.image_tag(img_src, noscript_html_options)
+    self.img_tag_lazy = h.image_tag("placeholder.svg", html_options_lazy)
+    self.img_tag = h.image_tag(img_src, html_options_noscript)
     self.stretched_link = image_link_html(args[:image_link], args[:link_method])
     self.vote_section = vote_section_html(args, image)
     self.image_filename = image_orig_name(args, image)
