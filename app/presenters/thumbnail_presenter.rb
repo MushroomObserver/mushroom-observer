@@ -6,8 +6,8 @@ class ThumbnailPresenter < BasePresenter
     :image,            # image instance or id
     :proportion,       # sizer proportion, to size img correctly pre-lazyload
     :width,            # image container width (to be removed soon)
-    :img_tag,          # thumbnail image tag with placeholder (src lazy-loaded)
-    :noscript_img_tag, # thumbnail image tag with real src (when no lazy-load)
+    :img_lazy_tag,     # thumbnail image tag with placeholder (src lazy-loaded)
+    :img_tag,          # thumbnail image tag with real src (when no lazy-load)
     :stretched_link,   # image overlay stretched-link (may be link/button/form)
     :lightbox_link,    # contains data passed to lightbox (incl. caption)
     :vote_section,     # show votes? boolean
@@ -50,7 +50,7 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid lazy ab-fab object-fit-cover"
+    img_class = "img-fluid ab-fab object-fit-cover"
     img_class += " #{args[:extra_classes]}" if args[:extra_classes]
 
     # <img> data attributes. Account for possible data-confirm, etc
@@ -63,7 +63,7 @@ class ThumbnailPresenter < BasePresenter
     # <img> attributes
     html_options = {
       alt: args[:notes],
-      class: img_class,
+      class: "#{img_class} lazy",
       data: img_data
     }
 
@@ -71,8 +71,8 @@ class ThumbnailPresenter < BasePresenter
     noscript_html_options[:class] = "#{img_class} img-noscript"
 
     self.image = image || nil
-    self.img_tag = h.image_tag("placeholder.svg", html_options)
-    self.noscript_img_tag = noscript_img(img_src, noscript_html_options)
+    self.img_lazy_tag = h.image_tag("placeholder.svg", html_options)
+    self.img_tag = h.image_tag(img_src, noscript_html_options)
     self.stretched_link = image_link_html(args[:image_link], args[:link_method])
     self.vote_section = vote_section_html(args, image)
     self.image_filename = image_orig_name(args, image)
@@ -124,12 +124,6 @@ class ThumbnailPresenter < BasePresenter
   #     "(min-width: 992px) 30vw"
   #   ].join(",")
   # end
-
-  def noscript_img(img_src, html_options)
-    h.content_tag(:noscript) do
-      h.image_tag(img_src, html_options)
-    end
-  end
 
   # NOTE: `stretched_link` might be a link to #show_obs or #show_image,
   # but it may also be a button/input (with params[:img_id]) sending to
