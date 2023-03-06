@@ -36,14 +36,23 @@ class LocationsController < ApplicationController
   #
   # index::
 
-  # ApplicationController uses this table to dispatch #index to a private method
+  # ApplicationController uses this to dispatch #index to a private method
   @index_subaction_param_keys = [
     :advanced_search,
     :pattern,
     :country,
     :by_user,
-    :by_editor
+    :by_editor,
+    :by,
+    :q,
+    :id
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results,
+    q: :list_query_results,
+    id: :list_query_results
+  }.freeze
 
   #############################################
 
@@ -55,10 +64,7 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations.
   def list_locations
-    return list_query_results if %w[by id q].intersect?(params.keys)
-
-    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = create_query(:Location, :all, by: sorted_by)
+    query = create_query(:Location, :all, by: default_sort_order)
     show_selected_locations(query, link_all_sorts: true)
   end
 

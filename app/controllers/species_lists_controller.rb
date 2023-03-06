@@ -21,11 +21,17 @@ class SpeciesListsController < ApplicationController
     :update
   ]
 
+  # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,
     :by_user,
-    :for_project
+    :for_project,
+    :by
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :by_title_or_selected_by_query
+  }.freeze
 
   def show
     store_location
@@ -116,11 +122,6 @@ class SpeciesListsController < ApplicationController
 
   # Display list of all species_lists, sorted by date.
   def list_all
-    if params_include_by_but_neither_id_nor_q? &&
-       params[:by] != default_sort_order
-      return list_query_results
-    end
-
     query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
   end
@@ -133,16 +134,22 @@ class SpeciesListsController < ApplicationController
     ::Query::SpeciesListBase.default_order
   end
 
-  def params_include_by_but_neither_id_nor_q?
-    params[:by].present? && params[:id].blank? && params[:q].blank?
+  # choose another subaction when params[:by].present?
+  def by_title_or_selected_by_query
+    params[:by] == "title" ? species_lists_by_title : list_query_results
+  end
+
+  # Display list of all species_lists, sorted by title.
+  def species_lists_by_title
+    query = create_query(:SpeciesList, :all, by: :title)
+    show_selected_species_lists(query)
   end
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
   def list_query_results
     query = find_or_create_query(:SpeciesList, by: params[:by])
-    show_selected_species_lists(query, id: params[:id].to_s,
-                                       always_index: true)
+    show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display list of user's species_lists, sorted by date.

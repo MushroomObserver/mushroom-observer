@@ -7,8 +7,15 @@ class ProjectsController < ApplicationController
   before_action :disable_link_prefetching, except: [:edit, :show]
 
   # index::
-  # ApplicationController uses this table to dispatch #index to a private method
-  @index_subaction_param_keys = [:pattern].freeze
+  # ApplicationController uses this to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern,
+    :by
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results
+  }.freeze
 
   # Display project by itself.
   # Linked from: observations/show, list_projects
@@ -151,10 +158,7 @@ class ProjectsController < ApplicationController
 
   # Show list of latest projects.  (Linked from left panel.)
   def list_all
-    return list_query_results if %w[by].intersect?(params.keys)
-
-    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = create_query(:Project, :all, by: sorted_by)
+    query = create_query(:Project, :all, by: default_sort_order)
     show_selected_projects(query)
   end
 

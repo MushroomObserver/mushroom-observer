@@ -41,6 +41,15 @@ class ObservationsController < ApplicationController
     :user,
     :location,
     :where,
-    :project
+    :project,
+    :by,
+    :q,
+    :id
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results,
+    q: :list_query_results,
+    id: :list_query_results
+  }.freeze
 end

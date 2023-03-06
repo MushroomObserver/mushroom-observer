@@ -15,8 +15,17 @@ class HerbariumRecordsController < ApplicationController
   @index_subaction_param_keys = [
     :pattern,
     :herbarium_id,
-    :observation_id
+    :observation_id,
+    :by,
+    :q,
+    :id
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results,
+    q: :list_query_results,
+    id: :list_query_results
+  }.freeze
 
   def show
     case params[:flow]
@@ -97,11 +106,8 @@ class HerbariumRecordsController < ApplicationController
 
   # Show list of herbarium_records.
   def list_all
-    return list_query_results if %w[by id q].intersect?(params.keys)
-
     store_location
-    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = create_query(:HerbariumRecord, :all, by: sorted_by)
+    query = create_query(:HerbariumRecord, :all, by: default_sort_order)
     show_selected_herbarium_records(query)
   end
 

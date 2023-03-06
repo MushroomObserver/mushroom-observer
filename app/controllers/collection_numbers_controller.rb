@@ -10,7 +10,20 @@ class CollectionNumbersController < ApplicationController
     :show, :new, :create, :edit, :update
   ]
 
-  @index_subaction_param_keys = [:pattern, :observation_id].freeze
+  # Used by ApplicationController to dispatch #index to a private method
+  @index_subaction_param_keys = [
+    :pattern,
+    :observation_id,
+    :by,
+    :q,
+    :id
+  ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results,
+    q: :list_query_results,
+    id: :list_query_results
+  }.freeze
 
   def show
     case params[:flow]
@@ -81,8 +94,6 @@ class CollectionNumbersController < ApplicationController
 
   # Show list of collection_numbers.
   def list_all
-    return list_query_results if %w[by id q].intersect?(params.keys)
-
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)

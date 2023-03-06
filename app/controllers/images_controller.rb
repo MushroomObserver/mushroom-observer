@@ -34,8 +34,13 @@ class ImagesController < ApplicationController
     :advanced_search,
     :pattern,
     :by_user,
-    :for_project
+    :for_project,
+    :by
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results
+  }.freeze
 
   #############################################
 
@@ -50,8 +55,7 @@ class ImagesController < ApplicationController
     return render_too_many_results if too_many_results
     return list_query_results if params.include?(:by)
 
-    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = create_query(:Image, :all, by: sorted_by)
+    query = create_query(:Image, :all, by: default_sort_order)
     show_selected_images(query)
   end
 

@@ -30,8 +30,13 @@ class CommentsController < ApplicationController
     :target,
     :pattern,
     :by_user,
-    :for_user
+    :for_user,
+    :by
   ].freeze
+
+  @index_subaction_dispatch_table = {
+    by: :list_query_results
+  }.freeze
 
   ###########################################################
 
@@ -43,8 +48,6 @@ class CommentsController < ApplicationController
 
   # Show list of latest comments. (Linked from left panel.)
   def list_all
-    return list_query_results if params.key?(:by)
-
     query = create_query(:Comment, :all, by: default_sort_order)
     show_selected_comments(query)
   end
@@ -76,7 +79,6 @@ class CommentsController < ApplicationController
   # Shows comments for a given user's Observations, most recent first.
   # (Linked from show_user.)
   def for_user
-    # user = find_or_goto_index(User, params[:for_user].to_s) || @user
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:for_user].to_s,
       index_path: comments_path
@@ -106,8 +108,7 @@ class CommentsController < ApplicationController
   # Display list of Comment's whose text matches a string pattern.
   def pattern
     pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (comment = Comment.safe_find(pattern))
+    if pattern.match?(/^\d+$/) && (comment = Comment.safe_find(pattern))
       redirect_to(action: :show, id: comment.id)
     else
       query = create_query(:Comment, :pattern_search, pattern: pattern)
@@ -137,10 +138,6 @@ class CommentsController < ApplicationController
     if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")
       args[:letters] = "users.login"
-      # Paginate by letter if sorting by summary.
-      # elsif (query.params[:by] == "summary") or
-      #    (query.params[:by] == "reverse_summary")
-      #   args[:letters] = 'comments.summary'
     end
 
     @full_detail = (query.flavor == :for_target)

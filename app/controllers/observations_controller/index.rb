@@ -11,29 +11,26 @@ class ObservationsController
     # methods called by #index via a dispatch table in ObservationController
 
     def default_index_subaction
-      list_query_results
-    end
-
-    # Displays matrix of selected Observations (based on current Query).
-    # NOTE: Why are all the :id params converted .to_s below?
-    def list_query_results
-      return list_all unless %w[by id q].intersect?(params.keys)
-
-      query = find_or_create_query(:Observation, by: params[:by])
-      show_selected_observations(
-        query, id: params[:id].to_s, always_index: true
-      )
+      list_all
     end
 
     # Displays matrix of all Observation's, sorted by date.
     def list_all
-      sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-      query = create_query(:Observation, :all, by: sorted_by)
+      query = create_query(:Observation, :all, by: default_sort_order)
       show_selected_observations(query)
     end
 
     def default_sort_order
       ::Query::ObservationBase.default_order
+    end
+
+    # Displays matrix of selected Observations (based on current Query).
+    # NOTE: Why are all the :id params converted .to_s below?
+    def list_query_results
+      query = find_or_create_query(:Observation, by: params[:by])
+      show_selected_observations(
+        query, id: params[:id].to_s, always_index: true
+      )
     end
 
     # Displays matrix of Observations with the given name proposed but not
