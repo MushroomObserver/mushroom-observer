@@ -36,7 +36,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_title_id("Fungarium Records by Fungarium")
+    assert_displayed_title("Fungarium Records by Fungarium")
   end
 
   def test_index_pattern_with_multiple_matching_records

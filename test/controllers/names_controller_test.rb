@@ -95,7 +95,7 @@ class NamesControllerTest < FunctionalTestCase
         params: @controller.query_params(query).merge(advanced_search: true))
 
     assert_response(:success)
-    assert_title_id("Advanced Search")
+    assert_displayed_title("Advanced Search")
     assert_select(
       "#content a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
@@ -168,7 +168,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_title_id("Names Matching ‘#{pattern}’")
+    assert_displayed_title("Names Matching ‘#{pattern}’")
     assert_select(
       "#content a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
@@ -339,7 +339,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user })
 
-    assert_title_id("Names Edited by #{user.name}")
+    assert_displayed_title("Names Edited by #{user.name}")
     assert_select("a:match('href',?)", %r{^/names/\d+},
                   { count: names_edited_by_user.count },
                   "Wrong number of results")

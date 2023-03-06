@@ -9,7 +9,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_title_id("Images by #{sort_order.titleize}")
+    assert_displayed_title("Images by #{sort_order.titleize}")
   end
 
   # Tests of index, with tests arranged as follows:
@@ -22,7 +22,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_title_id("Images by #{default_sorted_by}")
+    assert_displayed_title("Images by #{default_sorted_by}")
   end
 
   def test_index_with_non_default_sort
@@ -62,7 +62,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_title_id("Advanced Search")
+    assert_displayed_title("Advanced Search")
   end
 
   def test_index_advanced_search_one_hit
@@ -126,7 +126,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_title_id("Images Matching ‘#{pattern}’")
+    assert_displayed_title("Images Matching ‘#{pattern}’")
   end
 
   def test_index_pattern_text_no_hits

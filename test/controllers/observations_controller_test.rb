@@ -175,7 +175,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_title_id("Observations by Date")
+    assert_displayed_title("Observations by Date")
   end
 
   def test_index_sorted_by_name
@@ -185,7 +185,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_template("shared/_matrix_box")
-    assert_title_id("Observations by #{by.capitalize}")
+    assert_displayed_title("Observations by #{by.capitalize}")
   end
 
   def test_index_sorted_by_user
@@ -194,7 +194,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_title_id("Observations by #{by.capitalize}")
+    assert_displayed_title("Observations by #{by.capitalize}")
   end
 
   def test_index_with_id
@@ -204,7 +204,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-    assert_title_id("Observation Index")
+    assert_displayed_title("Observation Index")
     assert_select(
       "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
       "Index should open at the page that includes #{obs.unique_text_name}"
@@ -223,7 +223,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_template("shared/_matrix_box")
-    assert_title_id("Observations by Date")
+    assert_displayed_title("Observations by Date")
   end
 
   def test_index_useless_param_page2
@@ -233,7 +233,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_template(:index)
-    assert_title_id("Observations by Date")
+    assert_displayed_title("Observations by Date")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -251,7 +251,7 @@ class ObservationsControllerTest < FunctionalTestCase
                   advanced_search: "1" })
 
     assert_response(:success)
-    assert_title_id("Advanced Search")
+    assert_displayed_title("Advanced Search")
     assert_select(
       "#results .rss-what a:match('href', ?)", %r{^/\d},
       { count: expected_hits },
@@ -420,7 +420,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_title_id("Observations Matching ‘#{pattern}’")
+    assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_select(
       "#results a:match('href', ?)", %r{/\d+},
       { text: /#{pattern}/i,
@@ -436,7 +436,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern, needs_id: true })
 
-    assert_title_id("")
+    assert_displayed_title("")
     assert_match(/^#{identify_observations_url}/, redirect_to_url,
                  "Wrong page. Should redirect to #{:obs_needing_id.l}")
   end
@@ -448,7 +448,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template(:index)
-    assert_title_id("Observations Matching ‘#{pattern}’")
+    assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
@@ -459,7 +459,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern, page: 2 })
 
     assert_template(:index)
-    assert_title_id("Observations Matching ‘#{pattern}’")
+    assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
@@ -479,7 +479,7 @@ class ObservationsControllerTest < FunctionalTestCase
       { text: "#{:app_title.l}: #{:title_for_observation_search.l}" },
       "metadata <title> tag incorrect"
     )
-    assert_title_id(:title_for_observation_search.l)
+    assert_displayed_title(:title_for_observation_search.l)
   end
 
   def test_index_pattern_one_hit
@@ -500,7 +500,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_template(:index)
     assert_flash_error
-    assert_title_id("")
+    assert_displayed_title("")
     assert_select("#results", { text: "" }, "There should be no results")
   end
 
@@ -529,7 +529,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_template(:index)
-    assert_title_id("Observations by Confidence Level")
+    assert_displayed_title("Observations by Confidence Level")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
       { count: look_alikes },
@@ -549,7 +549,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_template(:index)
-    assert_title_id("")
+    assert_displayed_title("")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
       { count: look_alikes },
@@ -571,7 +571,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { related_taxa: "1", name: name.text_name })
 
     assert_template(:index)
-    assert_title_id("Observations by Confidence Level")
+    assert_displayed_title("Observations by Confidence Level")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
       { count: obss_of_related_taxa.count },
@@ -616,7 +616,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_template(:index)
     assert_template("shared/_matrix_box")
-    assert_title_id("Observations created by #{user.name}")
+    assert_displayed_title("Observations created by #{user.name}")
     assert_select(
       "#results img[src = '#{Image.url(:small, obs.thumb_image_id)}']",
       true,
@@ -647,7 +647,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_title_id("Observations from #{location.name}")
+    assert_displayed_title("Observations from #{location.name}")
   end
 
   def test_index_location_without_observations
@@ -688,7 +688,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { where: location.name })
 
-    assert_title_id("Observations from ‘#{location.name}’")
+    assert_displayed_title("Observations from ‘#{location.name}’")
   end
 
   def test_index_where_page2
@@ -697,7 +697,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { where: location.name, page: 2 })
 
-    assert_title_id("Observations from ‘#{location.name}’")
+    assert_displayed_title("Observations from ‘#{location.name}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
@@ -710,7 +710,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_title_id("Observations attached to #{project.title}")
+    assert_displayed_title("Observations attached to #{project.title}")
   end
 
   def test_index_project_without_observations
@@ -720,7 +720,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_title_id("")
+    assert_displayed_title("")
   end
 
   # Prove that lichen content_filter works on observations

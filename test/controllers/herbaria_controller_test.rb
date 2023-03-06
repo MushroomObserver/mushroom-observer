@@ -53,7 +53,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_title_id(herbarium.format_name)
+    assert_displayed_title(herbarium.format_name)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -67,7 +67,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
-    assert_title_id(herbarium.format_name)
+    assert_displayed_title(herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
                     "Show Herbarium page is missing a destroy herbarium button")
@@ -247,7 +247,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { flavor: :nonpersonal })
 
-    assert_title_id(:query_title_nonpersonal.l)
+    assert_displayed_title(:query_title_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -347,7 +347,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_title_id(:edit_herbarium_title.l)
+    assert_displayed_title(:edit_herbarium_title.l)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -364,7 +364,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_title_id(:edit_herbarium_title.l)
+    assert_displayed_title(:edit_herbarium_title.l)
   end
 
   def test_edit_with_curators_by_admin
@@ -373,7 +373,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_title_id(:edit_herbarium_title.l)
+    assert_displayed_title(:edit_herbarium_title.l)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------

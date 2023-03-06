@@ -18,7 +18,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_title_id("Comments by #{by.capitalize}")
+    assert_displayed_title("Comments by #{by.capitalize}")
   end
 
   def test_index_target_with_comments
@@ -29,7 +29,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
-    assert_title_id("Comments on #{target.id}")
+    assert_displayed_title("Comments on #{target.id}")
   end
 
   def test_index_target_valid_target_without_comments
@@ -105,7 +105,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_title_id("Comments created by #{user.name}")
+    assert_displayed_title("Comments created by #{user.name}")
     # All Rolf's Comments are Observations, so the results should have
     # as many links to Observations as Rolf has Comments
     assert_select(
@@ -141,7 +141,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { for_user: user.id })
 
     assert_template("index")
-    assert_title_id("Comments for #{user.name}")
+    assert_displayed_title("Comments for #{user.name}")
   end
 
   def test_index_for_user_who_received_one_comment

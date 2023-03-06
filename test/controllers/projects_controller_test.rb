@@ -74,7 +74,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_title_id("Projects by Title")
+    assert_displayed_title("Projects by Title")
     assert_template("index")
   end
 
@@ -84,7 +84,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { by: "updated_at" })
 
     assert_template("index")
-    assert_title_id("Projects by Time Last Modified")
+    assert_displayed_title("Projects by Time Last Modified")
   end
 
   def test_index_pattern_search_multiple_hits
@@ -93,7 +93,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Project" })
 
-    assert_title_id("Projects Matching ‘#{pattern}’")
+    assert_displayed_title("Projects Matching ‘#{pattern}’")
   end
 
   def test_index_pattern_search_by_name_one_hit
@@ -113,7 +113,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: project.id.to_s })
 
     assert_response(:success)
-    assert_title_id("Project: #{project.title}")
+    assert_displayed_title("Project: #{project.title}")
   end
 
   def test_add_project

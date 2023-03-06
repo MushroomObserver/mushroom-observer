@@ -8,7 +8,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template(:index)
-    assert_title_id("Collection Number Index")
+    assert_displayed_title("Collection Number Index")
   end
 
   def test_index_with_query

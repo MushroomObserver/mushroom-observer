@@ -106,7 +106,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template(:index)
-    assert_title_id("Species Lists by Date")
+    assert_displayed_title("Species Lists by Date")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.count },
@@ -120,7 +120,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_title_id("Species Lists by #{by.capitalize}")
+    assert_displayed_title("Species Lists by #{by.capitalize}")
   end
 
   def test_index_sorted_by_time_modifed
@@ -130,7 +130,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_response(:success)
-    assert_title_id("Species Lists by Time Last Modified")
+    assert_displayed_title("Species Lists by Time Last Modified")
   end
 
   def test_index_sorted_by_date_created
@@ -140,7 +140,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_response(:success)
-    assert_title_id("Species Lists by Date Created")
+    assert_displayed_title("Species Lists by Date Created")
   end
 
   def test_index_sorted_by_title
@@ -149,7 +149,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_title_id("Species Lists by Title")
+    assert_displayed_title("Species Lists by Title")
   end
 
   def test_index_with_id_and_sorted_by_title
@@ -159,7 +159,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id, by: by })
 
-    assert_title_id("Species Lists by Title")
+    assert_displayed_title("Species Lists by Title")
   end
 
   def test_index_with_id
@@ -168,7 +168,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id })
 
-    assert_title_id("Species Lists by Date")
+    assert_displayed_title("Species Lists by Date")
   end
 
   def test_index_pattern_multiple_hits
@@ -178,7 +178,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_title_id("Species Lists Matching ‘#{pattern}’")
+    assert_displayed_title("Species Lists Matching ‘#{pattern}’")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.where(SpeciesList[:title] =~ pattern).count },
@@ -215,7 +215,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user })
 
-    assert_title_id("Species Lists created by #{user.name}")
+    assert_displayed_title("Species Lists created by #{user.name}")
   end
 
   def test_index_by_user_with_no_species_lists
@@ -225,7 +225,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_response(:success)
-    assert_title_id("")
+    assert_displayed_title("")
   end
 
   def test_index_for_user_who_does_not_exist
@@ -236,7 +236,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_response(:redirect)
     assert_redirected_to(species_lists_path)
-    assert_title_id("")
+    assert_displayed_title("")
     assert_flash_text(
       :runtime_object_not_found.l(type: :user, id: user.id)
     )
@@ -248,7 +248,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_project: project.id })
 
-    assert_title_id("Species Lists attached to #{project.title}")
+    assert_displayed_title("Species Lists attached to #{project.title}")
   end
 
   def test_index_for_project_with_no_lists
@@ -258,7 +258,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { for_project: project.id })
 
     assert_response(:success)
-    assert_title_id("")
+    assert_displayed_title("")
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 

@@ -439,7 +439,7 @@ module GeneralExtensions
   #
   ##############################################################################
 
-  def assert_title_id(expect)
+  def assert_displayed_title(expect)
     if expect.is_a?(Regexp)
       assert_match(expect, css_select("#title").text, "Wrong page or title")
     else

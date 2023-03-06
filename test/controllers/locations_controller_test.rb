@@ -181,7 +181,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_title_id("Locations by Name")
+    assert_displayed_title("Locations by Name")
   end
 
   def test_index_with_non_default_sort
@@ -190,7 +190,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: sort_order })
 
-    assert_title_id("Locations by Popularity")
+    assert_displayed_title("Locations by Popularity")
   end
 
   def test_index_bounding_box
@@ -224,7 +224,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_template("index")
-    assert_title_id("Advanced Search")
+    assert_displayed_title("Advanced Search")
   end
 
   def test_index_advanced_search_error
@@ -247,7 +247,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: search_str })
 
-    assert_title_id("Locations Matching ‘#{search_str}’")
+    assert_displayed_title("Locations Matching ‘#{search_str}’")
   end
 
   def test_index_pattern_id
@@ -266,7 +266,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
     # https://www.pivotaltracker.com/story/show/184554008
-    assert_title_id(/^Locations Matching ‘#{country}.?’/)
+    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(Location[:name].matches("%#{country}")).count },
@@ -281,7 +281,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_title_id(/^Locations Matching ‘#{country}.?’/)
+    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true,
@@ -330,7 +330,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_title_id("Locations created by #{user.name}")
+    assert_displayed_title("Locations created by #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(user: user).count },
@@ -380,7 +380,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_title_id("Locations Edited by #{user.name}")
+    assert_displayed_title("Locations Edited by #{user.name}")
     assert_select("a:match('href',?)", %r{^/locations/\d+},
                   { count: locs_edited_by_user.count },
                   "Wrong number of results")

@@ -28,14 +28,14 @@ module Names
       login
       get(:index)
 
-      assert_title_id("Name Descriptions by Name")
+      assert_displayed_title("Name Descriptions by Name")
     end
 
     def test_index_sorted_by_user
       login
       get(:index, params: { by: "user" })
 
-      assert_title_id("Name Descriptions by User")
+      assert_displayed_title("Name Descriptions by User")
     end
 
     def test_index_by_author_of_one_description
