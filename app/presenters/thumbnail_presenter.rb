@@ -31,7 +31,7 @@ class ThumbnailPresenter < BasePresenter
       extra_classes: false,
       obs_data: {}, # used in lightbox caption
       identify: false,
-      image_link: h.image_path(image_id),
+      image_link: h.image_path(image_id), # to ImagesController#show
       link_method: :get,
       votes: true,
       is_set: true
