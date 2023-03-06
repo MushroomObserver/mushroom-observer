@@ -67,8 +67,12 @@ class ThumbnailPresenter < BasePresenter
       data: img_data
     }
 
-    html_options_noscript = html_options_lazy.dup
-    html_options_noscript[:class] = "#{img_class} img-noscript"
+    html_options_noscript = {
+      alt: args[:notes],
+      class: "#{img_class} img-noscript"
+      #   srcset: img_srcset,
+      #   sizes: img_sizes
+    }
 
     self.image = image || nil
     self.img_tag_lazy = h.image_tag("placeholder.svg", html_options_lazy)
