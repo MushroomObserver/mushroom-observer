@@ -101,7 +101,7 @@ end
 def adjust_image(model, raw_id, name)
   group = VisualGroup.find_or_create_by(visual_model: model, name: name)
   vgi = VisualGroupImage.joins(:visual_group).find_by(
-    image_id: id.abs,
+    image_id: raw_id.abs,
     visual_groups: { visual_model_id: model.id }
   )
   if vgi.nil?
@@ -169,7 +169,7 @@ def export_group_names(model, group_names, file)
     name = name.strip
     next if name == ""
 
-    group = model.visual_groups.where(name: name)
+    group = model.visual_groups.find_by(name: name)
     if group
       export_group(group, file)
     else
