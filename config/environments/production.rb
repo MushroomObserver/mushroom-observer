@@ -10,10 +10,6 @@ MushroomObserver::Application.configure do
   config.domain      = "mushroomobserver.org"
   config.http_domain = "https://mushroomobserver.org"
 
-  # ActionDispatch::HostAuthorization
-  # Accept requests from mo and any subdomain.
-  config.hosts << ".mushroomobserver.org"
-
   # List of alternate server domains.
   # We redirect from each of these to the real one.
   config.bad_domains = ["www.#{config.domain}"]
