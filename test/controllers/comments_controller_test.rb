@@ -95,22 +95,20 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_by_user_who_created_multiple_comments
     user = rolf
-    another_comment_by_user= comments(:detailed_unknown_obs_comment)
+    another_comment_by_user = comments(:detailed_unknown_obs_comment)
     another_comment_by_user.user = user
     another_comment_by_user.save
-    comments_by_user_count = Comment.where(user: user).count
-    assert_operator(comments_by_user_count, :>, 1)
+    assert(Comment.where(user: user).many?)
 
     login
     get(:index, params: { by_user: user.id })
 
-    assert_template("index")
     assert_displayed_title("Comments created by #{user.name}")
     # All Rolf's Comments are Observations, so the results should have
     # as many links to Observations as Rolf has Comments
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+}, # match links to observations
-      { count: comments_by_user_count },
+      { count: Comment.where(user: user).count },
       "Wrong number of links to Observations in results"
     )
   end

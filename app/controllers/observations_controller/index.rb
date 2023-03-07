@@ -63,7 +63,6 @@ class ObservationsController
       show_selected_observations(query)
     end
 
-    # TODO: Consider moving this to Name
     def parents(name_str)
       names = Name.where(id: name_str).to_a
       names = Name.where(search_name: name_str).to_a if names.empty?
