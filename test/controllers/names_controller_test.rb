@@ -53,7 +53,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_select("#title", { text: "Names by Name" }, "Wrong page or #title")
+    assert_displayed_title("Names by Name")
   end
 
   def test_index_with_non_default_sort
@@ -62,8 +62,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", { text: "Names by Popularity" },
-                  "Wrong page or #title")
+    assert_displayed_title("Names by Popularity")
   end
 
   def test_index_with_saved_query
@@ -74,10 +73,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: q })
 
-    assert_select("#title",
-                  { text: "Names with Observations created by #{user.name}" },
-                  "Wrong page or #title")
-
+    assert_displayed_title("Names with Observations created by #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).with_correct_spelling.
@@ -214,8 +210,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true })
 
     assert_response(:success)
-    assert_select("#title", { text: "Names with Observations" },
-                  "Wrong page or #title")
+    assert_displayed_title("Names with Observations")
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).
@@ -236,8 +231,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_select("#title", { text: "Names with Observations" },
-                  "Wrong page or #title")
+    assert_displayed_title("Names with Observations")
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}']",
                     text: name.search_name)
@@ -249,8 +243,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_descriptions: true })
 
     assert_response(:success)
-    assert_select("#title", { text: "Names with Descriptions" },
-                  "Wrong page or #title")
+    assert_displayed_title("Names with Descriptions")
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
     assert_select(
@@ -267,7 +260,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { need_descriptions: true })
 
     assert_response(:success)
-    assert_select("#title", { text: "Selected Names" }, "Wrong page or #title")
+    assert_displayed_title("Selected Names")
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
@@ -283,8 +276,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_response(:success)
-    assert_select("#title", { text: "Names created by #{user.name}" },
-                  "Wrong page or #title")
+    assert_displayed_title("Names created by #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.where(user: user, correct_spelling_id: nil).count },

@@ -264,8 +264,9 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_pattern_text
+  def test_index_pattern_text
     pattern = "Personal Herbarium"
+
     login
     get(:index, params: { pattern: pattern })
 
@@ -288,7 +289,7 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_pattern_integer
+  def test_index_pattern_integer
     login
     get(:index, params: { pattern: nybg.id })
 
@@ -298,7 +299,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_reverse_records
+  def test_index_reverse_records
     login
     get(:index, params: { by: "reverse_records" })
 

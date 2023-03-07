@@ -109,8 +109,7 @@ module Locations
       get(:index, params: { by_author: user.id })
 
       assert_template("index")
-      assert_select("#title",
-                    text: "Location Descriptions Authored by #{user.name}")
+      assert_displayed_title("Location Descriptions Authored by #{user.name}")
       assert_equal(
         assert_select("#results").children.count,
         LocationDescription.joins(:authors).where(user: user).count
@@ -175,8 +174,7 @@ module Locations
       get(:index, params: { by_editor: user.id })
 
       assert_template("index")
-      assert_select("#title",
-                    text: "Location Descriptions Edited by #{user.name}")
+      assert_displayed_title("Location Descriptions Edited by #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_edited_by_user_count },
                     "Wrong number of results")
