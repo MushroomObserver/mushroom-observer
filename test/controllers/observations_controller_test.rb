@@ -232,7 +232,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_template(:index)
     assert_displayed_title("Observations by Date")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
@@ -286,9 +285,9 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_template(:index)
     assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or <title>text")
+                  "Wrong page or metadata <title>")
+    assert_displayed_title("")
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
   end
 
@@ -447,7 +446,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_template(:index)
     assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
@@ -458,7 +456,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern, page: 2 })
 
-    assert_template(:index)
     assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
@@ -471,14 +468,8 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_template(:index)
     assert_empty(css_select('[id="right_tabs"]').text,
                  "RH tabset should be empty when search has no hits")
-    assert_select(
-      "title",
-      { text: "#{:app_title.l}: #{:title_for_observation_search.l}" },
-      "metadata <title> tag incorrect"
-    )
     assert_displayed_title(:title_for_observation_search.l)
   end
 
@@ -498,7 +489,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_template(:index)
+    assert_response(:success)
     assert_flash_error
     assert_displayed_title("")
     assert_select("#results", { text: "" }, "There should be no results")
@@ -528,7 +519,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { look_alikes: "1", name: name.id })
 
-    assert_template(:index)
     assert_displayed_title("Observations by Confidence Level")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
@@ -548,7 +538,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { look_alikes: "1", name: name.id })
 
-    assert_template(:index)
+    assert_response(:success)
     assert_displayed_title("")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
@@ -570,7 +560,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { related_taxa: "1", name: name.text_name })
 
-    assert_template(:index)
     assert_displayed_title("Observations by Confidence Level")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
@@ -614,8 +603,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login(user.login)
     get(:index, params: { user: user.id })
 
-    assert_template(:index)
-    assert_template("shared/_matrix_box")
     assert_displayed_title("Observations created by #{user.name}")
     assert_select(
       "#results img[src = '#{Image.url(:small, obs.thumb_image_id)}']",
@@ -662,8 +649,9 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
+    assert_response(:success)
     assert_flash(flash_matcher)
-    assert_template(:index)
+    assert_displayed_title("")
   end
 
   def test_index_location_with_nonexistent_location

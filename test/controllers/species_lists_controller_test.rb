@@ -105,7 +105,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_template(:index)
     assert_displayed_title("Species Lists by Date")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},

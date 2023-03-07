@@ -7,17 +7,18 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_template(:index)
     assert_displayed_title("Collection Number Index")
   end
 
   def test_index_with_query
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
+
     login
     get(:index, params: { q: query.record.id.alphabetize })
+
     assert_response(:success)
-    assert_template(:index)
+    assert_displayed_title("Collection Number Index")
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", query.num_results)
   end
@@ -30,7 +31,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_template(:index)
+    assert_displayed_title("Collection Numbers by Date")
     assert(
       collection_number_links.first[:href].
         start_with?(collection_number_path(last_number.id)),
@@ -46,12 +47,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation_id: obs.id })
 
-    assert_template(:index)
     assert_no_flash
-    assert_select(
-      "#title",
-      text: "Collection Numbers attached to #{obs.unique_format_name.t}".
-            strip_html)
+    assert_displayed_title(
+      "Collection Numbers attached to #{obs.unique_format_name.t}".
+      strip_html
+    )
   end
 
   def test_index_observation_id_with_multiple_collection_numbers
@@ -61,12 +61,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation_id: obs.id })
 
-    assert_template(:index)
     assert_no_flash
-    assert_select(
-      "#title",
-      text: "Collection Numbers attached to #{obs.unique_format_name.t}".
-            strip_html)
+    assert_displayed_title(
+      "Collection Numbers attached to #{obs.unique_format_name.t}".strip_html
+    )
   end
 
   def test_index_observation_id_with_no_hits
@@ -76,7 +74,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation_id: obs.id })
 
-    assert_template(:index)
+    assert_displayed_title("List Collection Numbers")
     assert_flash_text(/no matching collection numbers found/i)
   end
 
@@ -95,14 +93,16 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern_str_matching_multiple_collection_numbers
-    numbers = CollectionNumber.where("name like '%singer%'")
-    assert_operator(numbers.count, :>, 1)
+    pattern = "Singer"
+    numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
+    assert(numbers.many?,
+           "Test needs a pattern matching many collection numbers")
 
     login
-    get(:index, params: { pattern: "Singer" })
+    get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_template(:index)
+    assert_displayed_title("Collection Numbers Matching ‘#{pattern}’")
     # Results should have 2 links per collection_number
     # a show link, and (because logged in user created the numbers)
     # an edit link

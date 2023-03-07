@@ -66,7 +66,6 @@ module Locations
       login
       get(:index, params: { id: desc.id })
 
-      assert_template(:index)
       assert_displayed_title("Location Description Index")
     end
 
