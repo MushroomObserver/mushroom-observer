@@ -39,16 +39,10 @@
       f.select(:locale, locales, {}, { class: "form-control" }) %><br/>
 </div>
 
-<div class="form-group mb-1 form-inline">
-  <%= f.check_box(:thumbnail_maps, class: "form-control") %>
-  <%= f.label(:thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
-</div>
-
-<div class="form-group mb-1 form-inline">
-  <%= f.check_box(:view_owner_id, class: "form-control") %>
-  <%= add_context_help(f.label(:view_owner_id, :prefs_view_owner_id.t),
-                                :prefs_view_owner_id_help.t) %>
-</div>
+<%= render(partial: "account/preferences/checkbox",
+           locals: { form: f, field: :thumbnail_maps }) %>
+<%= render(partial: "account/preferences/checkbox",
+           locals: { form: f, field: :view_owner_id }) %>
 
 <div class="form-group mt-3 form-inline">
   <%= f.label(:layout_count, :prefs_layout_count.t + ":") %>

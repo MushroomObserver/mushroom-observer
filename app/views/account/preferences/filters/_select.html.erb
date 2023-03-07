@@ -1,13 +1,15 @@
 <%# Render a pulldown menu for two-valued boolean content filter %>
+<% options =
+    [ [ :prefs_filter_off.t, filter.off_val ] ] +
+    filter.prefs_vals.map do |val|
+      [ :"prefs_filters_#{filter.sym}_#{val}".t, val ]
+    end
+%>
+
 <%= content_tag(:div, class: "form-inline") do %>
   <%= form.label(:"#{filter.sym}",
                  :"prefs_filters_#{filter.sym}".t) %>:
-  <%= options =
-        [ [ :prefs_filter_off.t, filter.off_val ] ] +
-        filter.prefs_vals.map do |val|
-          [ :"prefs_filters_#{filter.sym}_#{val}".t, val ]
-        end
-      form.select(filter.sym, options,
+  <%= form.select(filter.sym, options,
                   { selected: @user.content_filter[filter.sym] },
                   { class: "form-control" }) %>
 <% end %>

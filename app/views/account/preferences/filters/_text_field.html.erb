@@ -1,5 +1,5 @@
 <%# Render a textfield and label for a content filter %>
-<%= content_tag(:div, class: "form-inline") do %>
+<%= content_tag(:div, class: "form-group form-inline") do %>
   <%= form.label(:"#{filter.sym}",
                  :"prefs_filters_#{filter.sym}".t) %>:<br/>
   <span class="help-note"><%= :"prefs_filters_#{filter.sym}_help".t %></span><br/>
