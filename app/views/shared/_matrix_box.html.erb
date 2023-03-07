@@ -16,7 +16,7 @@ if presenter
         <%= if presenter.image_data
           content_tag(:div, class: "thumbnail-container") do
             render(partial: "shared/image_thumbnail",
-                  locals: locals.merge(presenter.image_data))
+                   locals: locals.merge(presenter.image_data))
           end
         end %>
 
@@ -38,7 +38,9 @@ if presenter
         <% unless presenter.when.blank? %>
           <div class="rss-what">
             <%= content_tag(:small, class: "nowrap-ellipsis") do
-              "#{presenter.when}: #{user_link(presenter.who)}"
+              concat(presenter.when)
+              concat(": ")
+              concat(user_link(presenter.who))
             end %>
           </div><!-- .rss-when -->
         <% end %>
