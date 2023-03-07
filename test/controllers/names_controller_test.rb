@@ -318,13 +318,15 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_by_user_bad_user_id
-    bad_user_id = observations(:minimal_unknown_obs)
+    bad_user_id = observations(:minimal_unknown_obs).id
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_error("id ##{bad_user_id}")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
     assert_redirected_to(names_path)
   end
 
@@ -369,13 +371,15 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_by_editor_bad_user_id
-    bad_user_id = observations(:minimal_unknown_obs)
+    bad_user_id = observations(:minimal_unknown_obs).id
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
     get(:index, params: { by_editor: bad_user_id })
 
-    assert_flash_error("id ##{bad_user_id}")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
     assert_redirected_to(names_path)
   end
 
