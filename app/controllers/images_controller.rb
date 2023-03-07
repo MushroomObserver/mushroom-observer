@@ -67,11 +67,13 @@ class ImagesController < ApplicationController
     render(
       status: :too_many_requests,
       content_type: "text/plain",
-      plain: "Your queries are killing our server. " \
-             "There are much better ways to scrape the images " \
-             "from our site. " \
-             "Please contact the webmaster." \
-             "And please stop hammering our server!"
+      plain: <<-TOO_MANY_RESULTS.squish
+        Your queries are killing our server.
+        There are much better ways to scrape the images
+        from our site.
+        Please contact the webmaster.
+        And please stop hammering our server!
+      TOO_MANY_RESULTS
     )
   end
 
