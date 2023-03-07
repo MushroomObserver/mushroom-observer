@@ -16,7 +16,7 @@ module ImageVotesHelper
   # JS is listening to any element with [data-role="image_vote"],
   # Even though this is not an <a> tag, but an <input>, it's ok.
   def image_vote_link(image, vote)
-    current_vote = image.users_vote(@user)
+    current_vote = image.users_vote(User.current)
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
 
     if current_vote == vote

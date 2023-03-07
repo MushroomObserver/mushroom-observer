@@ -12,36 +12,51 @@ if presenter
   <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
     <div class="panel panel-default">
       <div class="panel-body rss-box-details">
-        <div class="thumbnail-container">
-          <%= if presenter.image_data
+
+        <%= if presenter.image_data
+          content_tag(:div, class: "thumbnail-container") do
             render(partial: "shared/image_thumbnail",
-                   locals: locals.merge(presenter.image_data))
-          end %>
-        </div><!-- .thumbnail-container -->
+                  locals: locals.merge(presenter.image_data))
+          end
+        end %>
+
         <div class="rss-what pt-2">
-          <h5><%= link_with_query(presenter.name,
-                                  presenter.what.show_link_args) %></h5>
+          <%= content_tag(:h5) do
+                link_with_query(presenter.name, presenter.what.show_link_args)
+              end %>
           <%= vote_or_propose_ui(identify, object) %>
         </div><!-- .rss-what -->
-        <div class="rss-where">
-          <small><%= location_link(presenter.place_name,
-                                   presenter.where) %></small>
-        </div><!-- .rss-where -->
-        <div class="rss-what">
-          <small class="nowrap-ellipsis">
-            <% unless presenter.when.blank? %>
-              <%= presenter.when %>: <%= user_link(presenter.who) %>
-            <% end %>
-          </small>
-        </div><!-- .rss-when -->
-        <div class="rss-detail">
-          <%= presenter.detail %>
-        </div><!-- .rss-detail -->
+
+        <% if presenter.where %>
+          <div class="rss-where">
+            <%= content_tag(:small) do
+              location_link(presenter.place_name, presenter.where)
+            end %>
+          </div><!-- .rss-where -->
+        <% end %>
+
+        <% unless presenter.when.blank? %>
+          <div class="rss-what">
+            <%= content_tag(:small, class: "nowrap-ellipsis") do
+              "#{presenter.when}: #{user_link(presenter.who)}"
+            end %>
+          </div><!-- .rss-when -->
+        <% end %>
+
+        <% unless presenter.detail.blank? %>
+          <div class="rss-detail">
+            <%= presenter.detail %>
+          </div><!-- .rss-detail -->
+        <% end %>
+
         <div class="rss-what">
           <small><%= presenter.fancy_time %></small>
         </div><!-- .rss-fancy-time -->
+
       </div><!-- .panel-body -->
+
       <%= identify_footer(identify, object_id) %>
+
     </div><!-- .panel -->
   </li><!-- .matrix-box -->
 <% end %>
