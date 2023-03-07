@@ -112,7 +112,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def default_sort_order
-    :name
+    ::Query::HerbariumBase.default_order
   end
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
