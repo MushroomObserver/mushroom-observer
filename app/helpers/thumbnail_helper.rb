@@ -32,28 +32,6 @@ module ThumbnailHelper
               votes: true) + image_copyright(obs.thumb_image)
   end
 
-  def propose_naming_link(id, btn_class = "btn-primary my-3")
-    render(partial: "observations/namings/propose_button",
-           locals: { obs_id: id, text: :create_naming.t,
-                     btn_class: "#{btn_class} d-inline-block" },
-           layout: false)
-  end
-
-  # NOTE: There are potentially two of these toggles for the same obs, on
-  # the obs_needing_ids index. Ideally, they'd be in sync. In reality, only
-  # the matrix_box (page) checkbox will update if the (lightbox) caption
-  # checkbox changes. Updating the lightbox checkbox to stay sync with the page
-  # is harder because the caption is not created. Updating it would only work
-  # with some additions to the lightbox JS, to keep track of the checked
-  # state on show, and cost an extra db lookup. Not worth it, IMO.
-  # - Nimmo 20230215
-  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                              label_class = "")
-    render(partial: "observation_views/mark_as_reviewed",
-           locals: { id: id, selector: selector, label_class: label_class },
-           layout: false)
-  end
-
   # Grab the copyright_text for an Image.
   def image_copyright(image)
     link = if image.copyright_holder == image.user.legal_name
@@ -98,79 +76,6 @@ module ThumbnailHelper
 
   def stretched_link_classes
     "image-link stretched-link"
-  end
-
-  def lightbox_link(lightbox_data)
-    icon = content_tag(:i, "", class: "glyphicon glyphicon-fullscreen")
-    caption = lightbox_caption_html(lightbox_data)
-
-    link_to(icon, lightbox_data[:url],
-            class: "theater-btn",
-            data: { lightbox: lightbox_data[:id], title: caption })
-  end
-
-  def lightbox_caption_html(lightbox_data)
-    obs_data = lightbox_data[:obs_data]
-    html = []
-    if obs_data[:id].present?
-      html = image_observation_caption(html, obs_data, lightbox_data[:identify])
-    end
-    html << caption_image_links(lightbox_data[:image_id])
-    safe_join(html)
-  end
-
-  def image_observation_caption(html, obs_data, identify)
-    if identify ||
-       (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
-      html << propose_naming_link(obs_data[:id])
-      html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << mark_as_reviewed_toggle(obs_data[:id])
-    end
-    html << caption_obs_title(obs_data)
-    html << render(partial: "observations/show/observation",
-                   locals: { observation: obs_data[:obs], caption: true })
-  end
-
-  def caption_obs_title(obs_data)
-    content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
-                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
-  end
-
-  def caption_image_links(image_id)
-    links = []
-    links << original_image_link(image_id, "lightbox_link")
-    links << " | "
-    links << image_exif_link(image_id, "lightbox_link")
-    content_tag(:div, class: "caption-image-links my-3") do
-      safe_join(links)
-    end
-  end
-
-  def vote_section_html(votes, image)
-    return "" unless votes && image && User.current
-
-    content_tag(:div, "", class: "vote-section") do
-      render(partial: "shared/image_vote_links",
-             locals: { image: image })
-    end
-  end
-
-  # Create an image link vote, where vote param is vote number ie: 3
-  # Returns a form input button if the user has NOT voted this way
-  # JS is listening to any element with [data-role="image_vote"],
-  # Even though this is not an <a> tag, but an <input>, it's ok.
-  def image_vote_link(image, vote)
-    current_vote = image.users_vote(@user)
-    vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
-
-    if current_vote == vote
-      return content_tag(:span, image_vote_as_short_string(vote))
-    end
-
-    put_button(name: vote_text, remote: true,
-               path: image_vote_path(image_id: image.id, value: vote),
-               title: image_vote_as_help_string(vote),
-               data: { role: "image_vote", image_id: image.id, value: vote })
   end
 
   def image_original_name(original, image)

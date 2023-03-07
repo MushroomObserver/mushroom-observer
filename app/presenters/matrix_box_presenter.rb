@@ -3,12 +3,14 @@
 # Gather details for items in matrix-style ndex pages.
 class MatrixBoxPresenter < BasePresenter
   attr_accessor \
-    :image_data, # thumbnail image tag
-    :detail,     # string with extra details
+    :image_data, # data passed to thumbnail_presenter
     :when,       # when object or target was created
     :who,        # owner of object or target
+    :name,       # name of object or target
     :what,       # link to object or target
-    :where,      # location of object or target
+    :place_name, # place name of location
+    :where,      # location (object) of object or target
+    :detail,     # string with extra details
     :time        # when object or target was last modified
 
   def initialize(object, view)
@@ -29,17 +31,18 @@ class MatrixBoxPresenter < BasePresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log)
     target = rss_log.target
-    name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     self.when = target.when&.web_date if target.respond_to?(:when)
-    self.who  = h.user_link(target.user) if target&.user
-    self.what =
-      if target
-        h.link_with_query(name, target.show_link_args)
-      else
-        h.link_with_query(name, rss_log.show_link_args)
-      end
-    self.where = h.location_link(target.place_name, target.location) \
-                 if target&.respond_to?(:location)
+    self.who  = target.user if target&.user
+    self.name = if target
+                  target.unique_format_name.t
+                else
+                  rss_log.unique_format_name.t
+                end
+    self.what = target || rss_log
+    if target&.respond_to?(:location)
+      self.place_name = target.place_name
+      self.where = target.location
+    end
     self.time = rss_log.updated_at
 
     if target&.respond_to?(:thumb_image) && target&.thumb_image
@@ -60,14 +63,14 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image)
-    name = image.unique_format_name.t
     self.when = begin
                   image.when.web_date
                 rescue StandardError
                   nil
                 end
-    self.who  = h.user_link(image.user)
-    self.what = h.link_with_query(name, image.show_link_args)
+    self.who  = image.user
+    self.name = image.unique_format_name.t
+    self.what = image
     self.image_data = {
       image: image,
       image_link: image.show_link_args
@@ -76,20 +79,18 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation)
-    name = observation.unique_format_name.t
-    self.when  = observation.when.web_date
-    self.who   = h.user_link(observation.user) if observation.user
-    self.what  = h.link_with_query(name, observation.show_link_args)
-    self.where = h.location_link(observation.place_name,
-                                 observation.location)
+    self.when       = observation.when.web_date
+    self.who        = observation.user if observation.user
+    self.name       = observation.unique_format_name.t
+    self.what       = observation
+    self.place_name = observation.place_name
+    self.where      = observation.location
     if observation.rss_log
       self.detail = observation.rss_log.detail
       self.time = observation.rss_log.updated_at
     end
     return unless observation.thumb_image
 
-    # link_type allows an obs box to link to show_obs, or something else
-    # thumbnail_helper uses identify to maybe add a "propose a name" link
     self.image_data = {
       image: observation.thumb_image,
       image_link: obs_or_other_link(observation),
@@ -99,7 +100,6 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user)
-    name = user.unique_text_name
     # rubocop:disable Rails/OutputSafety
     # The results of .t and web_date are guaranteed to be safe, and both
     # user.contribution and observations.count are just numbers.
@@ -107,8 +107,10 @@ class MatrixBoxPresenter < BasePresenter
                    #{:list_users_contribution.t}: #{user.contribution}<br/>
                    #{:Observations.t}: #{user.observations.count}".html_safe
     # rubocop:enable Rails/OutputSafety
-    self.what  = h.link_with_query(name, user.show_link_args)
-    self.where = h.location_link(nil, user.location) if user.location
+    self.name = user.unique_text_name
+    self.what = user
+    self.place_name = nil
+    self.where = user.location if user.location
     return unless user.image_id
 
     self.image_data = {
@@ -122,6 +124,7 @@ class MatrixBoxPresenter < BasePresenter
     time&.fancy_time
   end
 
+  # pass another arg to allow image stretched-link to link to obs, or other obj
   def obs_or_other_link(observation)
     observation.show_link_args
   end
