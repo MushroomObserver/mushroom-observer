@@ -145,15 +145,15 @@ module Names
 
       params = {
         id: page_name.id,
-        synonym: {
-          members: "Lepiota rachodes var. rachodes\r\n" \
-                      "Lepiota rhacodes var. rhacodes"
-        },
+        synonym_members: [
+          "Lepiota rachodes var. rachodes",
+          "Lepiota rhacodes var. rhacodes"
+        ].join("\r\n"),
         approved_names: [
           "Lepiota rachodes var. rachodes",
           "Lepiota rhacodes var. rhacodes"
         ].join("\r\n"),
-        deprecate_all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
