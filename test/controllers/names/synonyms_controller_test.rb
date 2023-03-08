@@ -105,7 +105,7 @@ module Names
       login("rolf")
       put(:update, params: params)
       assert_template("names/synonyms/edit")
-      assert_template("names/synonyms/_form")
+      assert_template("names/synonyms/_fields_proposed")
       assert_nil(selected_name.reload.synonym_id)
       assert_not(selected_name.deprecated)
     end
@@ -339,7 +339,7 @@ module Names
       login("rolf")
       put(:update, params: params)
       assert_template("names/synonyms/edit")
-      assert_template("names/synonyms/_form")
+      assert_template("names/synonyms/_fields_proposed")
 
       assert_not(add_name.reload.deprecated)
       assert_equal(add_version, add_name.version)
@@ -462,7 +462,7 @@ module Names
       login("rolf")
       put(:update, params: params)
       assert_template("names/synonyms/edit")
-      assert_template("names/synonyms/_form")
+      assert_template("names/synonyms/_fields_proposed")
 
       assert_not(add_name.reload.deprecated)
       assert_not_nil(add_synonym = add_name.synonym)

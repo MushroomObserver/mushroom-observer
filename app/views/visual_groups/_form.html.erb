@@ -27,10 +27,7 @@
       <%= form.text_area(:description, cols: 60, rows: 10) %>
     </div>
 
-    <div class="form-group">
-      <%= form.label :approved %>
-      <%= form.check_box :approved %>
-    </div>
+    <%= check_box_with_label(form: form, field: :approved) %>
   </div>
 
   <div class="actions">
