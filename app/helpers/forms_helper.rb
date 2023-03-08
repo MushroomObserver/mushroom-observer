@@ -42,8 +42,7 @@ module FormsHelper
   # NOTE: Only need to set `checked` if state not inferrable from db field name
   # (i.e. a model attribute of the form_with(@model))
   def check_box_with_label(**args)
-    opts = args[:checked].present? ? { checked: args[:checked] } : {}
-    opts = args[:value].present? ? opts.merge({ value: args[:value] }) : opts
+    opts = args.except(:form, :field, :text)
 
     content_tag(:div, class: "checkbox #{args[:class]}") do
       args[:form].label(args[:field]) do
