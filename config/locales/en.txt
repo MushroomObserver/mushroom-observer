@@ -1860,7 +1860,8 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_owner_id: [prefs_view_owner_id_help]
+  # fix: this should point to prefs_view_owner_id_help
+  prefs_view_owner_id: View Observer's preferred ID for Observation (in addition to consensus ID)
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
 
   prefs_content_filters: Content Filters
@@ -1899,9 +1900,11 @@
   prefs_email_please_notify: Please notify me when...
   prefs_email_general: General Email
   prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
-  prefs_email_general_feature: [prefs_email_general_features].
+  # fix: singular should point to plural
+  prefs_email_general_feature: new features come out.
   prefs_email_general_features: new features come out.
-  prefs_email_general_question: [prefs_email_general_questions].
+  # fix: singular should point to plural
+  prefs_email_general_question: someone wants to send me a question about my observations, etc.
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
   prefs_email_comments: "[:Comment] Email"
   prefs_email_comments_all: anyone comments on anything.
