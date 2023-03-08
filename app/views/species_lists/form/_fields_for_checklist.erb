@@ -5,8 +5,9 @@
   <p>
     <% @checklist.sort_by(&:first).each do |name, id| %>
       <%= fields_for(:checklist_data) do |fcd| %>
-      <%= fcd.check_box(id, checked: @checklist_names[id]) %>
-      <%= fcd.label(id, name.t) %>
+        <%= check_box_with_label(form: fcd, field: id,
+                                 checked: @checklist_names[id],
+                                 text: name.t) %>
       <% end %>
       <br/>
     <% end %>

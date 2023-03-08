@@ -6,12 +6,8 @@
     </p>
     <p>
       <% @projects.each do |project| %>
-        <%= f_p.check_box("id_#{project.id}",
-                          checked: @project_checks[project.id],
-                          disabled: @species_list.user_id != @user.id &&
-                            !project.is_member?(@user)) %>
-        <%= f_p.label("id_#{project.id}", link_to_object(project)) %>
-        <br/>
+        <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
+                                 text: link_to_object(project)) %>
       <% end %>
     </p>
   </div>
