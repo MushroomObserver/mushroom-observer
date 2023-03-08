@@ -4,76 +4,56 @@
   <%= :prefs_email_prefs.t %>
 </h5>
 
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :no_emails }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_html }) %>
+<%= prefs_check_box_with_label(form: f, field: :no_emails) %>
+<%= prefs_check_box_with_label(form: f, field: :email_html) %>
 
 <div class="mt-4">
   <%= :prefs_email_comments.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
 </div>
 
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_comments_owner }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_comments_response }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_comments_all }) %>
+<%= prefs_check_box_with_label(form: f, field: :email_comments_owner) %>
+<%= prefs_check_box_with_label(form: f, field: :email_comments_response) %>
+<%= prefs_check_box_with_label(form: f, field: :email_comments_all) %>
 
 <div class="mt-4">
   <%= :prefs_email_observations.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
 </div>
 
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_observations_consensus }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_observations_naming }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_observations_all }) %>
+<%= prefs_check_box_with_label(form: f, field: :email_observations_consensus) %>
+<%= prefs_check_box_with_label(form: f, field: :email_observations_naming) %>
+<%= prefs_check_box_with_label(form: f, field: :email_observations_all) %>
 
 <div class="mt-4">
   <%= :prefs_email_names.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
 </div>
 
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_names_admin }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_names_author }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_names_editor }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_names_reviewer }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_names_all }) %>
+<%= prefs_check_box_with_label(form: f, field: :email_names_admin) %>
+<%= prefs_check_box_with_label(form: f, field: :email_names_author) %>
+<%= prefs_check_box_with_label(form: f, field: :email_names_editor) %>
+<%= prefs_check_box_with_label(form: f, field: :email_names_reviewer) %>
+<%= prefs_check_box_with_label(form: f, field: :email_names_all) %>
 
 <div class="mt-4">
   <%= :prefs_email_locations.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
 </div>
 
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_locations_admin }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_locations_author }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_locations_editor }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_locations_all }) %>
+<%= prefs_check_box_with_label(form: f, field: :email_locations_admin) %>
+<%= prefs_check_box_with_label(form: f, field: :email_locations_author) %>
+<%= prefs_check_box_with_label(form: f, field: :email_locations_editor) %>
+<%= prefs_check_box_with_label(form: f, field: :email_locations_all) %>
 
 <div class="mt-4">
   <%= :prefs_email_general.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
 </div>
 
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_general_feature }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_general_commercial }) %>
-<%= render(partial: "account/preferences/checkbox",
-           locals: { form: f, field: :email_general_question }) %>
+<%= prefs_check_box_with_label(form: f, field: :email_general_feature) %>
+<%= prefs_check_box_with_label(form: f, field: :email_general_commercial) %>
+<%= prefs_check_box_with_label(form: f, field: :email_general_question) %>
 
 <div class="help-block mt-4">
   <%= :prefs_email_note.tp %>

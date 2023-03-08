@@ -1,9 +1,0 @@
-<%# Render a checkbox and label for a single-valued email pref %>
-<%# local_assigns: form, field %>
-
-<%= content_tag(:div, class: "checkbox") do
-  form.label(field) do
-    concat(form.check_box(field))
-    concat(:"prefs_#{field}".t)
-  end
-end %>

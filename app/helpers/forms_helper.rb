@@ -37,4 +37,20 @@ module FormsHelper
       end
     end
   end
+
+  # Bootstrap checkbox: form, field, (label) text, class
+  def check_box_with_label(**args)
+    content_tag(:div, class: "checkbox #{args[:class]}") do
+      args[:form].label(args[:field]) do
+        concat(args[:form].check_box(args[:field]))
+        concat(args[:text])
+      end
+    end
+  end
+
+  # convenience for account prefs: auto-populates label text arg
+  def prefs_check_box_with_label(args)
+    args = args.merge({ text: :"prefs_#{args[:field]}".t })
+    check_box_with_label(**args)
+  end
 end
