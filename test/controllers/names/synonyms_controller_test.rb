@@ -35,8 +35,8 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.text_name },
-        deprecate: { all: "1" }
+        synonym_members: add_name.text_name,
+        deprecate_all: "1"
       }
       put_requires_login(:update, params)
       assert_redirected_to(name_path(selected_name.id))
@@ -73,8 +73,8 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.text_name },
-        deprecate: { all: "0" }
+        synonym_members: add_name.text_name,
+        deprecate_all: "0"
       }
       login("rolf")
       put(:update, params: params)
@@ -99,8 +99,8 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: "Lepiota rachodes var. rachodes" },
-        deprecate: { all: "1" }
+        synonym_members: "Lepiota rachodes var. rachodes",
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -119,9 +119,9 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: "Lepiota rachodes var. rachodes" },
+        synonym_members: "Lepiota rachodes var. rachodes",
         approved_names: "Lepiota rachodes var. rachodes",
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -153,7 +153,7 @@ module Names
           "Lepiota rachodes var. rachodes",
           "Lepiota rhacodes var. rhacodes"
         ].join("\r\n"),
-        deprecate: { all: "1" }
+        deprecate_all: "1" }
       }
       login("rolf")
       put(:update, params: params)
@@ -185,8 +185,8 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
-        deprecate: { all: "1" }
+        synonym_members: add_name.search_name,
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -235,9 +235,9 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
+        synonym_members: add_name.search_name,
         existing_synonyms: existing_synonyms,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -290,9 +290,9 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
+        synonym_members: add_name.search_name,
         existing_synonyms: existing_synonyms,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -333,8 +333,8 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
-        deprecate: { all: "1" }
+        synonym_members: add_name.search_name,
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -374,9 +374,9 @@ module Names
       synonym_ids = add_synonym.names.map(&:id).join("/")
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
+        synonym_members: add_name.search_name,
         approved_synonyms: synonym_ids,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -416,8 +416,8 @@ module Names
       synonym_names = add_synonym.names.map(&:search_name).join("\r\n")
       params = {
         id: selected_name.id,
-        synonym: { members: synonym_names },
-        deprecate: { all: "1" }
+        synonym_members: synonym_names,
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -456,8 +456,8 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
-        deprecate: { all: "1" }
+        synonym_members: add_name.search_name,
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -494,9 +494,9 @@ module Names
       synonym_ids = add_synonym.names.map(&:id).join("/")
       params = {
         id: selected_name.id,
-        synonym: { members: add_name.search_name },
+        synonym_members: add_name.search_name,
         approved_synonyms: synonym_ids,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -536,8 +536,8 @@ module Names
       synonym_names = add_synonym.names.map(&:search_name).join("\r\n")
       params = {
         id: selected_name.id,
-        synonym: { members: synonym_names },
-        deprecate: { all: "1" }
+        synonym_members: synonym_names,
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -585,9 +585,9 @@ module Names
       kept_version = kept_name.version
       params = {
         id: selected_name.id,
-        synonym: { members: "" },
+        synonym_members: "",
         existing_synonyms: existing_synonyms,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -635,9 +635,9 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: "" },
+        synonym_members: "",
         existing_synonyms: existing_synonyms,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -680,9 +680,9 @@ module Names
 
       params = {
         id: selected_name.id,
-        synonym: { members: "" },
+        synonym_members: "",
         existing_synonyms: existing_synonyms,
-        deprecate: { all: "1" }
+        deprecate_all: "1"
       }
       login("rolf")
       put(:update, params: params)
@@ -710,9 +710,9 @@ module Names
       end
       params = {
         id: name.id,
-        synonym: { members: "" },
+        synonym_members: "",
         existing_synonyms: existing_synonyms,
-        deprecate: { all: "" }
+        deprecate_all: ""
       }
 
       login("rolf")
