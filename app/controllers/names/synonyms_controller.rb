@@ -59,11 +59,12 @@ module Names
       sorter = NameSorter.new
       sorter.sort_names(list)
       sorter.append_approved_synonyms(params[:approved_synonyms])
+      sorter
     end
 
     def change_synonyms(sorter)
       # Are any names unrecognized (only unapproved names will still be
-      # unrecognized at this point) or ambiguous?
+      # unrecognized at this point) or ambiguous? If so, dump to logger
       if !sorter.only_single_names
         dump_sorter(sorter)
       # Has the user NOT had a chance to choose from among the synonyms of any

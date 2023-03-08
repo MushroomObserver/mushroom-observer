@@ -1,22 +1,20 @@
 <%# proposed synonyms %>
 
 <% if @proposed_synonyms && @proposed_synonyms != [] %>
-  <% if @existing_synonyms.count > 1 %>
-    <hr/>
-  <% end %>
-  <div class="form-group">
-    <%= content_tag(:div, "#{:form_synonyms_proposed_synonyms.t}:",
-                    class: "font-weight-bold my-3") %>
-    <%= content_tag(:p, :form_synonyms_proposed_synonyms_help.t,
-                    class: "help-block") %>
-    <% @proposed_synonyms.each do |n| %>
-      <% unless @existing_synonyms.member?(n) %>
-        <%= check_box_with_label(form: f,
-                                 field: :"proposed_synonyms_#{n.id}",
-                                 value: "1", checked: "checked",
-                                 text: link_to(n.display_name.t,
-                                               name_path(n.id))) %>
+  <%= fields_for(:proposed_synonyms) do |fps| %>
+    <div class="form-group">
+      <%= content_tag(:div, "#{:form_synonyms_proposed_synonyms.t}:",
+                      class: "font-weight-bold my-3") %>
+      <%= content_tag(:p, :form_synonyms_proposed_synonyms_help.t,
+                      class: "help-block") %>
+      <% @proposed_synonyms.each do |n| %>
+        <% unless @existing_synonyms.member?(n) %>
+          <%= check_box_with_label(form: fps, field: n.id,
+                                   value: "1", checked: "checked",
+                                   text: link_to(n.display_name.t,
+                                                 name_path(n.id))) %>
+        <% end %>
       <% end %>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 <% end %>
