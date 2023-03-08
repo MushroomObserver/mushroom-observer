@@ -19,13 +19,13 @@
 
   <div class="form-group form-inline mt-3">
     <b><%= :species_list_projects_which_objects.t %></b><br/>
-    <%= check_box_with_label(form: f_p, field: :objects_list,
+    <%= check_box_with_label(form: f, field: :objects_list,
                              value: 1, checked: @object_states[:list],
                              text: :species_list_projects_this_list.t) %>
-    <%= check_box_with_label(form: f_p, field: :objects_obs,
+    <%= check_box_with_label(form: f, field: :objects_obs,
                              value: 1, checked: @object_states[:obs],
                              text: :species_list_projects_observations.t) %>
-    <%= check_box_with_label(form: f_p, field: :objects_img,
+    <%= check_box_with_label(form: f, field: :objects_img,
                              value: 1, checked: @object_states[:img],
                              text: :species_list_projects_images.t) %>
   </div>
@@ -33,7 +33,7 @@
   <div class="form-group form-inline mt-3">
     <b><%= :species_list_projects_which_projects.t %></b><br/>
     <% @projects.sort_by(&:text_name).each do |proj| %>
-      <%= check_box_with_label(form: f_p, field: :"projects_#{proj.id}",
+      <%= check_box_with_label(form: f, field: :"projects_#{proj.id}",
                                value: 1, checked: @project_states[proj.id],
                                text: proj.title.t) %>
     <% end %>
