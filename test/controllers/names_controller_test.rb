@@ -75,7 +75,7 @@ class NamesControllerTest < FunctionalTestCase
 
     assert_displayed_title("Names with Observations created by #{user.name}")
     assert_select(
-      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.joins(:observations).with_correct_spelling.
                where(observations: { user: user }).distinct.count },
       "Wrong number of (correctly spelled) Names"
@@ -93,7 +93,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Advanced Search")
     assert_select(
-      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
