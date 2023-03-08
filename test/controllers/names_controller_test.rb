@@ -113,7 +113,7 @@ class NamesControllerTest < FunctionalTestCase
                  "Wrong page")
   end
 
-  def test_advanced_search_no_hits
+  def test_index_advanced_search_no_hits
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -129,7 +129,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
-  def test_advanced_search_with_deleted_query
+  def test_index_advanced_search_with_deleted_query
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -144,7 +144,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_advanced_search_error
+  def test_index_advanced_search_error
     query_without_conditions = Query.lookup_and_save(
       :Name, :advanced_search
     )
