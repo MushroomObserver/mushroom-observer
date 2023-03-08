@@ -38,7 +38,7 @@ module Names::Synonyms
       params = {
         id: old_name.id,
         proposed_name: new_name.text_name,
-        comment_comment: "Don't like this name"
+        comment: "Don't like this name"
       }
       post_requires_login(:create, params)
       assert_redirected_to(name_path(old_name.id))
@@ -80,7 +80,7 @@ module Names::Synonyms
       params = {
         id: old_name.id,
         proposed_name: new_name.text_name,
-        comment_comment: ""
+        comment: ""
       }
       login("rolf")
       post(:create, params: params)
@@ -116,7 +116,7 @@ module Names::Synonyms
         id: old_name.id,
         proposed_name: new_name.text_name,
         chosen_name: { name_id: new_name.id },
-        comment_comment: "Don't like this name"
+        comment: "Don't like this name"
       }
       login("rolf")
       post(:create, params: params)
@@ -146,7 +146,7 @@ module Names::Synonyms
       params = {
         id: old_name.id,
         proposed_name: new_name_str,
-        comment_comment: "Don't like this name"
+        comment: "Don't like this name"
       }
       login("rolf")
       post(:create, params: params)
@@ -173,7 +173,7 @@ module Names::Synonyms
         id: old_name.id,
         proposed_name: new_name_str,
         approved_name: new_name_str,
-        comment_comment: "Don't like this name"
+        comment: "Don't like this name"
       }
       login("rolf")
       post(:create, params: params)
@@ -201,7 +201,7 @@ module Names::Synonyms
         id: name.id,
         proposed_name: name2.search_name,
         approved_name: name2.search_name,
-        comment_comment: ""
+        comment: ""
       }
 
       login("rolf")

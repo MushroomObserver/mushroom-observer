@@ -15,12 +15,12 @@
   <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
 
   <%= render(partial: "shared/form_name_feedback",
-            locals: { button_name: :name_deprecate_submit.l,
-                      what: @what,
-                      valid_names: @valid_names,
-                      suggest_corrections: @suggest_corrections,
-                      parent_deprecated: @parent_deprecated,
-                      names: @names }) if @what.present? %>
+             locals: { button_name: :SUBMIT.l,
+                       what: @what,
+                       valid_names: @valid_names,
+                       suggest_corrections: @suggest_corrections,
+                       parent_deprecated: @parent_deprecated,
+                       names: @names }) if @what.present? %>
 
   <div class="form-group form-inline">
     <%= f.label(:proposed_name, "#{:name_deprecate_preferred.t}:") %>
@@ -36,8 +36,8 @@
                            text: :form_names_misspelling.t) %>
 
   <div class="form-group form-inline">
-    <%= f.label(:comment_comment, "#{:name_deprecate_comments.t}:") %>
-    <%= f.text_area(:comment_comment, cols: 80, rows: 5, value: @comment) %>
+    <%= f.label(:comment, "#{:name_deprecate_comments.t}:") %>
+    <%= f.text_area(:comment, cols: 80, rows: 5, value: @comment) %>
   </div>
   <%= content_tag(:div, class: "help-note") do
     concat(:name_deprecate_comments_help.tp(

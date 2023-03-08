@@ -13,7 +13,17 @@
 
 <%= form_with(url: action, method: :put, id: "name_edit_synonym_form") do |f| %>
 
-  <%= render(partial: "fields", locals: { f: f }) %>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= render(partial: "fields_existing", locals: { f: f }) %>
+      <%= render(partial: "fields_proposed", locals: { f: f }) %>
+    </div><!--.col-->
+
+    <div class="col-sm-6">
+      <%= render(partial: "fields_members", locals: { f: f }) %>
+    </div><!--.col-->
+  </div><!--.row-->
+
   <%= f.submit(:name_change_synonyms_submit.l,
                class: "btn btn-default center-block") %>
 

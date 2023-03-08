@@ -48,8 +48,8 @@ module Names
     end
 
     def change_synonyms
-      list = params[:synonym][:members].strip_squeeze
-      @deprecate_all = (params[:deprecate][:all] == "1")
+      list = params[:synonym_members].strip_squeeze
+      @deprecate_all = (params[:deprecate_all] == "1")
 
       # Create any new names that have been approved.
       construct_approved_names(list, params[:approved_names], @deprecate_all)

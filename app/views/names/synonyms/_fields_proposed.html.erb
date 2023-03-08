@@ -1,0 +1,22 @@
+<%# proposed synonyms %>
+
+<% if @synonym_names && @synonym_names != [] %>
+  <% if names.count > 1 %>
+    <hr/>
+  <% end %>
+  <div class="form-group">
+    <%= content_tag(:div, "#{:form_synonyms_proposed_synonyms.t}:",
+                    class: "font-weight-bold my-3") %>
+    <%= content_tag(:p, :form_synonyms_proposed_synonyms_help.t,
+                    class: "help-block") %>
+    <% @synonym_names.each do |n| %>
+      <% unless names.member?(n) %>
+        <%= check_box_with_label(form: f,
+                                 field: :"proposed_synonyms_#{n.id}",
+                                 value: "1", checked: "checked",
+                                 text: link_to(n.display_name.t,
+                                               name_path(n.id))) %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
