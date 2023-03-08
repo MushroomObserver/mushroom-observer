@@ -577,7 +577,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_template("shared/_matrix_box")
+    assert_displayed_title("Observations by Confidence Level")
     ids.each do |id|
       assert_select(
         "a:match('href', ?)", %r{^/#{id}}, true,
@@ -719,7 +719,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     results = @controller.instance_variable_get(:@objects)
 
-    assert(results.count.positive?)
+    assert(results.many?)
     assert(results.all? { |result| result.lifeform.include?("lichen") },
            "All results should be lichen-ish")
   end
@@ -732,7 +732,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     results = @controller.instance_variable_get(:@objects)
 
-    assert(results.count.positive?)
+    assert(results.many?)
     assert(results.none? { |result| result.lifeform.include?(" lichen ") },
            "No results should be lichens")
   end
