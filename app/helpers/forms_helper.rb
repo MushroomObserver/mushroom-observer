@@ -38,11 +38,13 @@ module FormsHelper
     end
   end
 
-  # Bootstrap checkbox: form, field, (label) text, class
+  # Bootstrap checkbox: form, field, (label) text, class, checked
   def check_box_with_label(**args)
+    opts = args[:checked].present? ? { checked: args[:checked] } : {}
+
     content_tag(:div, class: "checkbox #{args[:class]}") do
       args[:form].label(args[:field]) do
-        concat(args[:form].check_box(args[:field]))
+        concat(args[:form].check_box(args[:field], opts))
         concat(args[:text])
       end
     end
