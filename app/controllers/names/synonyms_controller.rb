@@ -40,11 +40,12 @@ module Names
     end
 
     def init_ivars_for_edit
-      @list_members     = nil
-      @new_names        = nil
-      @synonym_name_ids = []
-      @synonym_names    = []
-      @deprecate_all    = true
+      @existing_synonyms = @name.synonyms
+      @list_members      = nil
+      @new_names         = nil
+      @synonym_name_ids  = []
+      @proposed_synonyms = []
+      @deprecate_all     = true
     end
 
     def change_synonyms
@@ -107,10 +108,10 @@ module Names
 
       end
 
-      @list_members     = sorter.all_line_strs.join("\r\n")
-      @new_names        = sorter.new_name_strs.uniq
-      @synonym_name_ids = sorter.all_synonyms.map(&:id)
-      @synonym_names    = @synonym_name_ids.filter_map do |id|
+      @list_members      = sorter.all_line_strs.join("\r\n")
+      @new_names         = sorter.new_name_strs.uniq
+      @synonym_name_ids  = sorter.all_synonyms.map(&:id)
+      @proposed_synonyms = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
       render(:edit, location: edit_name_synonyms_path)
