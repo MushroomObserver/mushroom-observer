@@ -56,11 +56,8 @@
   <%= f.submit(button_name, class: "btn btn-default center-block mt-3") %>
 
   <% if logging_optional %>
-    <div class="form-inline">
-      <%= check_box(:log_change, :checked, checked: "1",
-                    class: "form-control-xxx") %>
-      <%= label_tag(:log_change_checked, :form_observations_log_change.t) %>
-    </div>
+    <%= check_box_with_label(form: f, field: :log_change, checked: "checked",
+                             text: :form_observations_log_change.t) %>
   <% end %>
 
 <% end %><!--[/form:observation]-->

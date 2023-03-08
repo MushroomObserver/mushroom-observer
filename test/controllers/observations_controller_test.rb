@@ -2110,7 +2110,7 @@ class ObservationsControllerTest < FunctionalTestCase
           license_id: licenses(:ccwiki30).id
         }
       },
-      log_change: { checked: "1" }
+      log_change: "1"
     }
     put_requires_user(
       :update,
@@ -2147,7 +2147,7 @@ class ObservationsControllerTest < FunctionalTestCase
         notes: obs.notes,
         specimen: obs.specimen
       },
-      log_change: { checked: "0" }
+      log_change: "0"
     }
     put_requires_user(
       :update,
@@ -2178,7 +2178,7 @@ class ObservationsControllerTest < FunctionalTestCase
         specimen: new_specimen,
         thumb_image_id: "0"
       },
-      log_change: { checked: "1" }
+      log_change: "1"
     }
     put_requires_user(
       :update,
