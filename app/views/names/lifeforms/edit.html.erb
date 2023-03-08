@@ -5,7 +5,7 @@
     link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+  @container = :text_image
 
   action = { controller: "/names/lifeforms", action: :update,
             id: @name.id, q: get_query_param }
@@ -15,7 +15,7 @@
 
   <p><%= :edit_lifeform_help.t %></p>
 
-  <table class="table-lifeform table-striped">
+  <table class="table table-lifeform table-striped">
     <% Name.all_lifeforms.each do |word| %>
       <tr>
         <td>
