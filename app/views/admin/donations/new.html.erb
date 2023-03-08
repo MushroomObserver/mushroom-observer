@@ -23,10 +23,8 @@
       <%= f.text_field(:who, size: 50, class: "form-control") %>
     </div>
 
-    <div class="form-group form-inline">
-      <%= f.check_box(:anonymous, class: "form-control") %>
-      <%= f.label(:anonymous, :donate_anonymous.t) %>
-    </div>
+    <%= check_box_with_label(form: f, field: :anonymous,
+                             text: :donate_anonymous.t) %>
 
     <div class="form-group form-inline">
       <%= f.label(:email, :EMAIL.t + ":") %>
