@@ -11,7 +11,7 @@
 <% if new_record || admin || author || owner || root %>
 
   <div class="form-group">
-    <%= label_tag(:description_source, :form_description_source.t + ":") %>
+    <%= form.label(:source, :form_description_source.t + ":") %>
 
     <% need_help = false
     if root %>
@@ -43,30 +43,29 @@
     <%= form.hidden_field(:project_id) %>
 
     <% if need_help %>
-      <div class="help-block"><%= :form_description_source_help.tpl %></div>
+      <%= content_tag(:div, :form_description_source_help.tpl,
+                      class: "help-block") %>
     <% end %>
   </div>
 
-  <p>
-    <b><%= :form_description_permissions.t %>:</b>
-    <% args = { class: "form-control" }
-    if ["public", "foreign"].include?(type) && !root && !new_record
-      args[:disabled] = "disabled"
-    end %>
-    <div class="form-group form-inline">
-      <%= form.check_box(:public_write, args) %>
-      <%= label_tag(:description_source, :form_description_public_writable.t) %>
-      <br/>
-      <%= form.check_box(:public, args) %>
-      <%= label_tag(:description_source, :form_description_public_readable.t) %>
-      <p class="help-block"><%= :form_description_permissions_help.t %></p>
-    </div>
-  </p>
+  <% disabled = ["public", "foreign"].include?(type) && !root &&
+                                                        !new_record %>
+  <div class="form-group">
+    <%= content_tag(:b, "#{:form_description_permissions.t}:") %>
+    <%= check_box_with_label(form: form, field: :public_write,
+                             disabled: disabled,
+                             text: :form_description_public_writable.t) %>
+    <%= check_box_with_label(form: form, field: :public, disabled: disabled,
+                             text: :form_description_public_readable.t) %>
+    <%= content_tag(:p, :form_description_permissions_help.t,
+                    class:"help-block") %>
+  </div>
 
   <div class="form-group">
-    <%= label_tag(:description_license_id, :License.t + ":") %>
+    <%= form.label(:license_id, :License.t + ":") %>
     <%= form.select(:license_id, @licenses, {}, { class: "form-control" }) %>
-    <p class="help-block"><%= :form_description_license_help.t %></p>
+    <%= content_tag(:p, :form_description_license_help.t,
+                    class:"help-block") %>
   </div>
 
 <% end %>
