@@ -4,10 +4,10 @@ if action == :create
   button = :CREATE.l
   url = { controller: "/locations/descriptions", action: :create,
           id: @description.location_id }
-else
+elsif action == :update
   method = :put
   button = :UPDATE.l
-  action = { controller: "/locations/descriptions", action: :update,
+  url = { controller: "/locations/descriptions", action: :update,
              id: @description.id, q: get_query_param }
 end
 %>
