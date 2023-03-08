@@ -420,7 +420,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_select(
-      "#results a:match('href', ?)", %r{/\d+},
+      "#results a:match('href', ?)", %r{^/\d+},
       { text: /#{pattern}/i,
         count: Observation.where(Observation[:text_name] =~ /#{pattern}/i).
                count },
