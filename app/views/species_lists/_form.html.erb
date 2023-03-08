@@ -21,7 +21,7 @@
 
     <%= if !@deprecated_names.blank?
       hidden_field_tag(:approved_deprecated_names,
-                     @deprecated_names.map(&:id).join(" "))
+                       @deprecated_names.map(&:id).join(" "))
     end %>
 
     <div class="form-group mt-3">
@@ -29,12 +29,14 @@
         <%= f_l.label(:members, :form_species_lists_write_in_species.t) %>
         <%= f_l.text_area(:members, value: @list_members, rows: 8,
                           class: "form-control") %>
-        <% turn_into_name_auto_completer(:list_members, primer: Name.primer, token: "\n") %>
+        <% turn_into_name_auto_completer(:list_members, primer: Name.primer,
+                                         token: "\n") %>
       <% end %>
     </div>
 
     <div class="form-group mt-3">
-      <%= f.label(:title, :form_species_lists_title.t + ":") %> (<%= :required.t %>)
+      <%= f.label(:title,
+                  :form_species_lists_title.t + ":") %> (<%= :required.t %>)
       <%= f.text_field(:title, class: "form-control") %>
     </div>
 
