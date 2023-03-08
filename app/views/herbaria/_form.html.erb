@@ -5,112 +5,98 @@
   <%= f.hidden_field :back, value: @back %>
   <%= f.hidden_field :q, value: get_query_param %>
 
-  <div class="row form-group">
-    <div class="col-xs-12">
-      <%= f.label(:name, "#{:NAME.t}:") %>
-      <span class="help-note">(<%= :required.t %>)</span>
-      <%= f.text_field(:name, class: "form-control") %>
-    </div>
+  <div class="form-group">
+    <%= f.label(:name, "#{:NAME.t}:") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+    <%= f.text_field(:name, class: "form-control") %>
   </div>
 
   <% if in_admin_mode? %>
-    <div class="row form-group">
-      <div class="col-xs-12">
-        <div class="form-inline">
-          <%= f.label(:personal_user_name,
-                      :edit_herbarium_admin_make_personal.t) %>:
-          <%= f.text_field(:personal_user_name,
-                           class: "form-control-xxx") %>
-         <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
-        </div>
-        <% if button_name != :CREATE %>
-          <%= help_block_with_arrow("up") do %>
-            <% top_users = herbarium_top_users(@herbarium.id)
-               top_users.each do |name, login, count| %>
-              <%= :edit_herbarium_user_records.t(
-                    name: "#{name} (#{login})", num: count
-                  ) %><br/>
-            <% end %>
-            <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
-          <% end %>
-        <% end %>
+    <div class="form-group">
+      <div class="form-inline">
+        <%= f.label(:personal_user_name,
+                    :edit_herbarium_admin_make_personal.t) %>:
+        <%= f.text_field(:personal_user_name,
+                          class: "form-control-xxx") %>
+        <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
       </div>
+      <% if button_name != :CREATE %>
+        <%= help_block_with_arrow("up") do %>
+          <% top_users = herbarium_top_users(@herbarium.id)
+              top_users.each do |name, login, count| %>
+            <%= :edit_herbarium_user_records.t(
+                  name: "#{name} (#{login})", num: count
+                ) %><br/>
+          <% end %>
+          <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
+        <% end %>
+      <% end %>
     </div>
 
   <% else %>
     <% if @herbarium.personal_user_id == @user.id %>
-      <div class="row form-group">
-        <div class="col-xs-12 help-block">
+      <div class="form-group">
+        <div class="help-block">
           <%= :edit_herbarium_this_is_personal_herbarium.tp %>
         </div>
       </div>
     <% end %>
 
     <% if button_name == :CREATE || @herbarium.can_make_personal?(@user) %>
-      <div class="row form-group">
-        <div class="col-xs-12">
-          <div class="form-inline">
-            <%= f.check_box(:personal, class: "form-control-xxx") %>
-            <%= f.label(:personal, :create_herbarium_personal.t) %>
-          </div>
-          <%= help_block_with_arrow("up") do %>
-            <%= :create_herbarium_personal_help.t(
-                  name: @user.personal_herbarium_name
-                ) %>
-          <% end %>
+      <div class="form-group">
+        <div class="checkbox">
+          <%= f.label(:personal) do
+            concat(f.check_box(:personal))
+            concat(:create_herbarium_personal.t)
+          end %>
         </div>
+        <%= help_block_with_arrow("up") do %>
+          <%= :create_herbarium_personal_help.t(
+                name: @user.personal_herbarium_name
+              ) %>
+        <% end %>
       </div>
     <% end %>
   <% end %>
 
   <% if !@herbarium.personal_user_id %>
-    <div class="row form-group mb-n3">
-      <div class="col-xs-12">
-        <div class="form-inline">
-          <%= f.label(:code, "#{:create_herbarium_code.t}:") %>
-          <%= f.text_field(:code, size: 8, class: "form-control") %>
-          <span class="help-note">(<%= :optional.t %>)</span>
-        </div>
-        <%= help_block_with_arrow("up") do %>
-          <%= :create_herbarium_code_help.t %>
-        <% end %>
+    <div class="form-group mb-n3">
+      <div class="form-inline">
+        <%= f.label(:code, "#{:create_herbarium_code.t}:") %>
+        <%= f.text_field(:code, size: 8, class: "form-control") %>
+        <span class="help-note">(<%= :optional.t %>)</span>
       </div>
+      <%= help_block_with_arrow("up") do %>
+        <%= :create_herbarium_code_help.t %>
+      <% end %>
     </div>
   <% end %>
 
-  <div class="row form-group">
-    <div class="col-xs-12">
-      <%= f.label(:place_name, "#{:LOCATION.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%# workaround for auto completer; creates an id %>
-      <%= f.text_field(:place_name, class: "form-control") %>
-      <% turn_into_location_auto_completer(:herbarium_place_name) %>
-    </div>
+  <div class="form-group">
+    <%= f.label(:place_name, "#{:LOCATION.t}:") %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%# workaround for auto completer; creates an id %>
+    <%= f.text_field(:place_name, class: "form-control") %>
+    <% turn_into_location_auto_completer(:herbarium_place_name) %>
   </div>
 
-  <div class="row form-group">
-    <div class="col-xs-12">
-      <%= f.label(:herbarium_email, "#{:create_herbarium_email.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%= f.text_field(:email, class: "form-control") %>
-    </div>
+  <div class="form-group">
+    <%= f.label(:herbarium_email, "#{:create_herbarium_email.t}:") %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= f.text_field(:email, class: "form-control") %>
   </div>
 
-  <div class="row form-group">
-    <div class="col-xs-12">
-      <%= f.label(:herbarium_mailing_address,
-                  "#{:create_herbarium_mailing_address.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%= f.text_area(:mailing_address, rows: 5,  class: "form-control") %>
-    </div>
+  <div class="form-group">
+    <%= f.label(:herbarium_mailing_address,
+                "#{:create_herbarium_mailing_address.t}:") %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= f.text_area(:mailing_address, rows: 5,  class: "form-control") %>
   </div>
 
-  <div class="row form-group">
-    <div class="col-xs-12">
-      <%= f.label(:herbarium_description, "#{:NOTES.t}:") %>
-      <span class="help-note">(<%= :optional.t %>)</span>
-      <%= f.text_area(:description, rows: 10, class: "form-control") %>
-    </div>
+  <div class="form-group">
+    <%= f.label(:herbarium_description, "#{:NOTES.t}:") %>
+    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= f.text_area(:description, rows: 10, class: "form-control") %>
   </div>
 
   <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
