@@ -15,15 +15,11 @@
   </div><!-- .text-center -->
 
   <%= fields_for(:name_tracker) do |fnt| %>
-    <div class="mt-5">
-      <%= fnt.check_box(:note_template_enabled,
-                        class: "form-control-xxx") %>
-      <%= fnt.label(:note_template_enabled, :email_tracking_note.t) %>
-    </div>
+    <%= check_box_with_label(form: fnt, field: :note_template_enabled,
+                             class: "mt-5", text: :email_tracking_note.t) %>
 
-    <div class="help-note mt-2 mb-5">
-      <%= :email_tracking_note_help.t %>
-    </div>
+    <%= content_tag(:div, :email_tracking_note_help.t,
+                    class: "help-note mt-2 mb-5") %>
 
     <%= fnt.text_area(:note_template, cols: 80, rows: 16,
                       value: @note_template, data: { autofocus: true }) %><br/>
