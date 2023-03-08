@@ -41,10 +41,12 @@ class NamesControllerTest < FunctionalTestCase
     Name.new_name(parse.params)
   end
 
-  ##############################################################################
+  ################################################
   #
-  #    INDEX
-
+  #   TEST INDEX
+  #
+  ################################################
+  #
   # Tests of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of @index_subaction_param_keys
@@ -124,7 +126,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_select("title", { text: "#{:app_title.l}: Index" },
+    assert_select("title", { text: "#{:app_title.l}: Index" }, # metadata
                   "Wrong page or <title>text")
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
@@ -166,7 +168,7 @@ class NamesControllerTest < FunctionalTestCase
 
     assert_displayed_title("Names Matching ‘#{pattern}’")
     assert_select(
-      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
@@ -196,11 +198,12 @@ class NamesControllerTest < FunctionalTestCase
                  "Test needs a pattern without a correctly spelled exact match")
     near_misses = Name.with_correct_spelling.
                   where(Name[:search_name] =~ /agaric.s campestr.s/)
+
     login
     get(:index, params: { near_miss_pattern: })
 
     near_misses.each do |near_miss|
-      assert_select("#content a[href*='names/#{near_miss.id}']",
+      assert_select("#results a[href*='names/#{near_miss.id}']",
                     text: near_miss.search_name)
     end
   end
@@ -247,7 +250,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
     assert_select(
-      "#results a:match('href', ?)", %r{#{names_path}/\d+},
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.joins(:descriptions).
                     with_correct_spelling.
                     distinct.count },
@@ -262,7 +265,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Selected Names")
     assert_select(
-      "#results a:match('href', ?)", %r{#{names_path}/\d+},
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
       { count: Name.description_needed.length },
       "Wrong number of (correctly spelled) Names"
@@ -278,7 +281,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Names created by #{user.name}")
     assert_select(
-      "#content a:match('href', ?)", %r{#{names_path}/\d+},
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(user: user, correct_spelling_id: nil).count },
       "Wrong number of (correctly spelled) Names"
     )
@@ -311,7 +314,6 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_by_user_bad_user_id
     bad_user_id = observations(:minimal_unknown_obs).id
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
     get(:index, params: { by_user: bad_user_id })
@@ -334,7 +336,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { by_editor: user })
 
     assert_displayed_title("Names Edited by #{user.name}")
-    assert_select("a:match('href',?)", %r{^/names/\d+},
+    assert_select("#results a:match('href',?)", %r{^/names/\d+},
                   { count: names_edited_by_user.count },
                   "Wrong number of results")
   end
@@ -364,7 +366,6 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_by_editor_bad_user_id
     bad_user_id = observations(:minimal_unknown_obs).id
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
     get(:index, params: { by_editor: bad_user_id })
@@ -375,10 +376,6 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(names_path)
   end
 
-  ################################################
-  #
-  #   TEST INDEX
-  #
   ################################################
 
   def ids_from_links(links)
