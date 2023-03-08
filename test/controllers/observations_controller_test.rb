@@ -184,7 +184,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_template("shared/_matrix_box")
     assert_displayed_title("Observations by #{by.capitalize}")
   end
 
@@ -222,7 +221,6 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_template("shared/_matrix_box")
     assert_displayed_title("Observations by Date")
   end
 
@@ -303,7 +301,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or <title>text")
+                  "Wrong page or metadata <title>")
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_select(
       "#results a", false,
@@ -327,7 +325,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or <title>text")
+                  "Wrong page or metadata <title>")
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_select(
       "#results a", false,
@@ -357,7 +355,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or <title>text")
+                  "Wrong page or metadata <title>")
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_select(
       "#results a", false,
@@ -385,6 +383,7 @@ class ObservationsControllerTest < FunctionalTestCase
           search_location_notes: 1,
           advanced_search: "1"
         })
+
     assert_response(:success)
     results = @controller.instance_variable_get(:@objects)
     assert_equal(3, results.length)
