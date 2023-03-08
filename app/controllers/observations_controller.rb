@@ -31,7 +31,7 @@ class ObservationsController < ApplicationController
   ]
 
   # NOTE: Must be an ivar of ObservationController
-  # Defining it in index.rb does not work
+  # Defining them in index.rb does not work
   @index_subaction_param_keys = [
     :advanced_search, # Searches come 1st because they may have the other params
     :pattern,
