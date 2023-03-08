@@ -130,9 +130,6 @@ class NamesController < ApplicationController
     show_selected_names(query)
   end
 
-  # This no longer makes sense, but is being requested by robots.
-  alias names_by_author by_user
-
   # Display list of names that a given user is editor on.
   def by_editor
     user = find_obj_or_goto_index(
