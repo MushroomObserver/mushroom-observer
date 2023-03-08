@@ -44,12 +44,8 @@
 
     <% if button_name == :CREATE || @herbarium.can_make_personal?(@user) %>
       <div class="form-group">
-        <div class="checkbox">
-          <%= f.label(:personal) do
-            concat(f.check_box(:personal))
-            concat(:create_herbarium_personal.t)
-          end %>
-        </div>
+        <%= check_box_with_label(form: f, field: :personal,
+                                 text: :create_herbarium_personal.t) %>
         <%= help_block_with_arrow("up") do %>
           <%= :create_herbarium_personal_help.t(
                 name: @user.personal_herbarium_name
