@@ -1,4 +1,5 @@
 <%
+merges = description.parent.descriptions - [description]
 moves = description.parent.synonyms - [description.parent]
 moves.reject!(&:is_misspelling?)
 %>
@@ -18,8 +19,9 @@ moves.reject!(&:is_misspelling?)
       <% end %>
     </ul>
 
-    <%= check_box_tag(:delete, "1", description.is_admin?(@user)) %>
-      <%= :merge_descriptions_delete_after.t %>
+    <%= check_box_with_label(form: f, field: :delete, value: "1",
+                             checked: description.is_admin?(@user),
+                             text: :merge_descriptions_delete_after.t) %>
   <% end %>
 
   <% button = moves.any? ? :merge_descriptions_move.l : nil
