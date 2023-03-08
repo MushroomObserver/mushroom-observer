@@ -10,13 +10,10 @@
 
     <%= fields_for(:list) do |f_l| %>
       <% @lists.each do |list| %>
-        <div class="form-inline">
-          <%= f_l.check_box("id_#{list.id}",
-                            checked: @list_checks[list.id],
-                            disabled: !check_permission(list),
-                            class: "form-control-xxx") %>
-          <%= link_to_object(list) %>
-        </div>
+        <%= check_box_with_label(form: f_l, field: :"id_#{list.id}",
+                                 checked: @list_checks[list.id],
+                                 disabled: !check_permission(list),
+                                 text: link_to_object(list)) %>
       <% end %>
     <% end %>
 
