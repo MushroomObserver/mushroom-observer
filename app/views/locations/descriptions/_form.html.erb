@@ -1,5 +1,5 @@
 <%
-presenter = LocationDescriptionFormPresenter.new(action)
+presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
 %>
 
 <%= form_with(scope: :description, url: presenter.url, method: presenter.method,
@@ -7,7 +7,7 @@ presenter = LocationDescriptionFormPresenter.new(action)
 
   <%= f.submit(presenter.button, class: "btn btn-default center-block mt-3") %>
 
-  <%= render(partial: "shared/form_description", locals: { form: f }) %>
+  <%= render(partial: "shared/fields_for_description", locals: { form: f }) %>
 
   <hr/>
 
