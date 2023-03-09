@@ -4,52 +4,54 @@
 <!-- NOTES -->
 <div class="mt-3" id="observation_notes">
 
-  <%= content_tag(:span, "#{:NOTES.t} ", class: "font-weight-bold") %>
-  <% if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
-       part = Observation.other_notes_part %>
+  <%= content_tag(:p, "#{:NOTES.t} ", class: "font-weight-bold") %>
 
-    <div class="row">
-      <div class="col-xs-12 col-sm-6">
-        <div>
-          <textarea
-            class="form-control"
-            rows="10"
-            id=<%= @observation.notes_part_id(part) %>
-            name=<%= @observation.notes_part_name(part) %>
-          ><%= @observation.notes_part_value(part) %></textarea>
+  <% if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
+      part = Observation.other_notes_part %>
+
+    <%= f.fields_for(:notes) do |f_n| %>
+
+      <div class="row">
+        <div class="col-xs-12 col-sm-6">
+          <%= f_n.text_area(@observation.notes_normalized_key(part),
+                            value: @observation.notes_part_value(part),
+                            rows: 10, class: "form-control mb-3") %>
         </div>
-      </div>
-      <div class="col-xs-12 col-sm-6">
-        <%= help_block_with_arrow("left", id: "notes_help") do %>
-          <%= content_tag(:p, :form_observations_notes_help.t,
-                          class: "pt-0 mt-0") %>
-          <%= render(partial: "shared/textilize_help") %>
-        <% end # help_block_with_arrow %>
-      </div>
-    </div><!--.row-->
+        <div class="col-xs-12 col-sm-6">
+          <%= help_block_with_arrow("left", id: "notes_help") do %>
+            <%= content_tag(:p, :form_observations_notes_help.t,
+                            class: "pt-0 mt-0") %>
+            <%= render(partial: "shared/textilize_help") %>
+          <% end # help_block_with_arrow %>
+        </div>
+      </div><!--.row-->
+
+    <% end # f.fields_for(:notes) %>
 
   <% else %>
 
     (<%= :general_textile_link.t %>)
     <% @observation.form_notes_parts(@user).each do |part| %>
 
-      <div class="row">
-        <div class="col-xs-12 col-sm-6">
-          <div><%= "#{strip_tags(part.tl)}: "%></div>
-          <div>
-            <textarea
-              class="form-control"
-              rows="1"
-              id=<%= @observation.notes_part_id(part) %>
-              name=<%= @observation.notes_part_name(part) %>
-            ><%= @observation.notes_part_value(part) %></textarea>
+      <%= f.fields_for(:notes) do |f_n| %>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-6">
+            <%= f_n.label(@observation.notes_normalized_key(part),
+                          "#{strip_tags(part.tl)}: ") %>
+            <%= f_n.text_area(@observation.notes_normalized_key(part),
+                              value: @observation.notes_part_value(part),
+                              rows: 1, class: "form-control mb-3") %>
           </div>
-        </div>
-      </div><!--.row-->
+        </div><!--.row-->
+
+      <% end # f.fields_for(:notes) %>
 
     <% end # each do part %>
 
   <% end # if user_notes_part %>
+
+
 
 </div><!--#observation_notes-->
 <!-- /NOTES -->
