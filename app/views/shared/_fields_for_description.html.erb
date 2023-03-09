@@ -60,15 +60,16 @@
       <br/>
       <%= form.check_box(:public, args) %>
       <%= label_tag(:description_source, :form_description_public_readable.t) %>
-      <%= content_tag(:p, :form_description_permissions_help.t,
-                      class:"help-block") %>
     </div>
+    <%= content_tag(:p, :form_description_permissions_help.t,
+                    class:"help-block") %>
   </div>
 
   <div class="form-group">
     <%= label_tag(:description_license_id, :License.t + ":") %>
     <%= form.select(:license_id, @licenses, {}, { class: "form-control" }) %>
-    <p class="help-block"><%= :form_description_license_help.t %></p>
+    <%= content_tag(:p, :form_description_license_help.t,
+                    class:"help-block") %>
   </div>
 
 <% end %>
