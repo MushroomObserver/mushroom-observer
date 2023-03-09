@@ -10,7 +10,7 @@
       <% @existing_synonyms.each do |n| %>
         <% if n != @name %>
           <%= check_box_with_label(form: fes, field: n.id,
-                                   value: "1", checked: "checked",
+                                   value: "1", checked: "0",
                                    text: link_to(n.display_name.t,
                                                  name_path(n.id))) %>
         <% end %>
