@@ -1,54 +1,58 @@
-<!-- Appearance Settings of Account Preferences Form -->
+<%# Appearance Settings of Account Preferences Form %>
+
+<%
+hide_authors_opts = [
+  [:prefs_hide_authors_none.l, "none"],
+  [:prefs_hide_authors_above_species.l, "above_species"]
+]
+location_formats = [
+  [:prefs_location_format_postal.l, "postal"],
+  [:prefs_location_format_scientific.l, "scientific"]
+]
+themes = [[:theme_random.l, "NULL"]] + MO.themes.map { |t| [t.to_sym.l, t] }
+locales = Language.all.map do |lang|
+            name = lang.name
+            name += " (beta)" if lang.beta
+            [name, lang.locale]
+          end
+image_sizes = options_for_select(
+                 User.image_sizes.filter_map { |key, value|
+                   if value > User.image_sizes[:small]
+                     ["image_show_#{key}".to_sym.l, key]
+                   end
+                 }, @user.image_size
+               )
+%>
+
 <div class="form-group mt-3 font-weight-bold">
   <%= :prefs_appearance.t %>
 </div>
 
 <div class="form-group mb-1 form-inline">
   <%= f.label(:hide_authors, :prefs_hide_authors.t + ":") %>
-  <%= f.select(:hide_authors,
-                  [[:prefs_hide_authors_none.l, "none"],
-                  [:prefs_hide_authors_above_species.l, "above_species"]],
-                  {}, { class: "form-control" }) %><br/>
+  <%= f.select(:hide_authors, hide_authors_opts,
+               {}, { class: "form-control" }) %><br/>
 </div>
 
 <div class="form-group mb-1 form-inline">
   <%= f.label(:location_format, :prefs_location_format.t + ":") %>
-  <%= f.select(:location_format,
-                  [[:prefs_location_format_postal.l, "postal"],
-                  [:prefs_location_format_scientific.l, "scientific"]],
-                  {}, { class: "form-control" }) %><br/>
+  <%= f.select(:location_format, location_formats,
+               {}, { class: "form-control" }) %><br/>
 </div>
 
 <div class="form-group mb-1 form-inline">
   <%= f.label(:theme, :prefs_theme.t + ":") %>
-  <%= f.select(:theme,
-                  [
-                  [:theme_random.l, "NULL"]
-                  ] + MO.themes.map { |t| [t.to_sym.l, t] },
-                  {}, { class: "form-control mr-3" }) %>
+  <%= f.select(:theme, themes, {}, { class: "form-control mr-3" }) %>
   <%= link_to(:prefs_themes_about.t, theme_color_themes_path) %><br/>
 </div>
 
 <div class="form-group mb-1 form-inline">
   <%= f.label(:locale, :prefs_locale.t + ":") %>
-  <%= locales = Language.all.map do |lang|
-                  name = lang.name
-                  name += " (beta)" if lang.beta
-                  [name, lang.locale]
-                end
-      f.select(:locale, locales, {}, { class: "form-control" }) %><br/>
+  <%= f.select(:locale, locales, {}, { class: "form-control" }) %><br/>
 </div>
 
-<div class="form-group mb-1 form-inline">
-  <%= f.check_box(:thumbnail_maps, class: "form-control") %>
-  <%= f.label(:thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
-</div>
-
-<div class="form-group mb-1 form-inline">
-  <%= f.check_box(:view_owner_id, class: "form-control") %>
-  <%= add_context_help(f.label(:view_owner_id, :prefs_view_owner_id.t),
-                                :prefs_view_owner_id_help.t) %>
-</div>
+<%= prefs_check_box_with_label(form: f, field: :thumbnail_maps) %>
+<%= prefs_check_box_with_label(form: f, field: :view_owner_id) %>
 
 <div class="form-group mt-3 form-inline">
   <%= f.label(:layout_count, :prefs_layout_count.t + ":") %>
@@ -57,15 +61,7 @@
 
 <div class="form-group mt-3 form-inline">
   <%= f.label(:image_size, :prefs_image_size.t) %>
-  <%= f.select(:image_size,
-               options_for_select(
-                 User.image_sizes.filter_map { |key, value|
-                   if value > User.image_sizes[:small]
-                     ["image_show_#{key}".to_sym.l, key]
-                   end
-                 }, @user.image_size
-               ),
-               {}, { class: "form-control" }) %>
+  <%= f.select(:image_size, image_sizes, {}, { class: "form-control" }) %>
 </div>
 
 <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
