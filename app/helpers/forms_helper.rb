@@ -72,7 +72,7 @@ module FormsHelper
   end
 
   # Bootstrap inline text_field: form, field, (label) text, class, checked
-  def inline_text_field_with_label(**args)
+  def inline_label_text_field(**args)
     opts = args.except(:form, :field, :text, :class)
     opts[:class] = "form-control"
 
