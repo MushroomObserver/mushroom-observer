@@ -12,33 +12,35 @@
 
 <%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
 
-  <%= f.submit(:name_deprecate_submit.l,
-               class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
 
   <%= render(partial: "shared/form_name_feedback",
-            locals: { button_name: :name_deprecate_submit.l,
-                      what: @what,
-                      valid_names: @valid_names,
-                      suggest_corrections: @suggest_corrections,
-                      parent_deprecated: @parent_deprecated,
-                      names: @names }) if @what.present? %>
+             locals: { button_name: :SUBMIT.l,
+                       what: @what,
+                       valid_names: @valid_names,
+                       suggest_corrections: @suggest_corrections,
+                       parent_deprecated: @parent_deprecated,
+                       names: @names }) if @what.present? %>
 
-  <p><%= f.label(:proposed_name, :name_deprecate_preferred.t) %>:
-    <%= f.text_field(:proposed_name,
-                     value: @what, data: { autofocus: true }) %></p>
-  <div class="help-note">
-    <%= :name_deprecate_preferred_help.tp %>
-  </div>
+  <%= inline_label_text_field(form: f, field: :proposed_name,
+                              text: "#{:name_deprecate_preferred.t}:",
+                              value: @what, data: { autofocus: true }) %>
+  <%= content_tag(:div, :name_deprecate_preferred_help.tp,
+                  class: "help-note") %>
   <% turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
 
-  <p><%= f.check_box(:is_misspelling, checked: @misspelling) %>
-  <%= f.label(:is_misspelling, :form_names_misspelling.t) %></p>
+  <%= check_box_with_label(form: f, field: :is_misspelling,
+                           checked: @misspelling,
+                           text: :form_names_misspelling.t) %>
 
-  <p><%= f.label(:comment_comment, :name_deprecate_comments.t) %>:</label><br/>
-  <%= f.text_area(:comment_comment, cols: 80, rows: 5, value: @comment) %></p>
-  <div class="help-note">
-    <%= :name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")) %>
-    <%= :field_textile_link.tp %>
-  </div>
+  <%= inline_label_text_area(form: f, field: :comment,
+                             text: "#{:name_deprecate_comments.t}:",
+                             value: @comment, cols: 80, rows: 5) %>
+  <%= content_tag(:div, class: "help-note") do
+    concat(:name_deprecate_comments_help.tp(
+             name: @name.display_name.chomp(".")
+           ))
+    concat(:field_textile_link.tp)
+  end %>
 
 <% end %>

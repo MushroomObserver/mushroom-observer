@@ -29,7 +29,7 @@ class NameControllerSupplementalTest < CapybaraIntegrationTestCase
     # First deprecate bad_name.
     within("#right_tabs") { click_link(text: "Deprecate") }
     fill_in("proposed_name", with: good_name.text_name)
-    fill_in("comment_comment", with: "bad name")
+    fill_in("comment", with: "bad name")
     click_on("Submit")
 
     assert(bad_name.reload.deprecated)
@@ -42,8 +42,8 @@ class NameControllerSupplementalTest < CapybaraIntegrationTestCase
 
     # Then undo it and approve it.
     within("#right_tabs") { click_link(text: "Approve") }
-    page.uncheck("deprecate[others]")
-    fill_in("comment[comment]", with: "my bad")
+    page.uncheck("deprecate_others")
+    fill_in("comment", with: "my bad")
     click_on("Approve")
 
     assert_not(bad_name.reload.deprecated)

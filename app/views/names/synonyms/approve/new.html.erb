@@ -15,18 +15,20 @@
   <%= f.submit(:APPROVE.l, class: "btn btn-default center-block mt-3") %>
 
   <% if @approved_names %>
-    <p><%= check_box(:deprecate, :others, checked: "checked") %>
-    <label for="deprecate_others"><%= :name_approve_deprecate.t %>:</label><br/><br/>
+    <%= check_box_with_label(form: f, field: :deprecate_others,
+                             checked: "checked",
+                             text: :name_approve_deprecate.t) %>
     <% @approved_names.each do |n| %>
       <%= n.display_name.t %><br/>
     <% end %></p>
   <% end %>
-  <div class="help-note"><%= :name_approve_deprecate_help.tp %></div>
+  <%= content_tag(:div, :name_approve_deprecate_help.tp, class: "help-note") %>
 
-  <p><label for="comment_comment"><%= :name_approve_comments.t %>:</label><br/>
-  <%= text_area(:comment, :comment, cols: 80, rows: 5, data: {autofocus: true}) %></p>
-  <div class="help-note">
-    <%= :name_approve_comments_help.tp(name: @name.display_name) %>
-  </div>
+  <%= inline_label_text_area(form: f, field: :comment,
+                             text: "#{:name_approve_comments.t}:",
+                             cols: 80, rows: 5, data: { autofocus: true }) %>
+  <%= content_tag(:div,
+                  :name_approve_comments_help.tp(name: @name.display_name),
+                  class: "help-note") %>
 
 <% end %>

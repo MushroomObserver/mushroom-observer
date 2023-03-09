@@ -1763,7 +1763,6 @@
   name_deprecate_preferred: Preferred name
   name_deprecate_comment_summary: "[:Deprecated]"
   name_deprecate_comments: "[:Comments]"
-  name_deprecate_submit: "[:SUBMIT]"
   name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
   name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
