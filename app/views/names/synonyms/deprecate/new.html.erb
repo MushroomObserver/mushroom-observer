@@ -22,11 +22,9 @@
                        parent_deprecated: @parent_deprecated,
                        names: @names }) if @what.present? %>
 
-  <div class="form-group form-inline">
-    <%= f.label(:proposed_name, "#{:name_deprecate_preferred.t}:") %>
-    <%= f.text_field(:proposed_name,
-                     value: @what, data: { autofocus: true }) %>
-  </div>
+  <%= inline_label_text_field(form: f, field: :proposed_name,
+                              text: "#{:name_deprecate_preferred.t}:",
+                              value: @what, data: { autofocus: true }) %>
   <%= content_tag(:div, :name_deprecate_preferred_help.tp,
                   class: "help-note") %>
   <% turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
@@ -35,10 +33,9 @@
                            checked: @misspelling,
                            text: :form_names_misspelling.t) %>
 
-  <div class="form-group form-inline">
-    <%= f.label(:comment, "#{:name_deprecate_comments.t}:") %>
-    <%= f.text_area(:comment, cols: 80, rows: 5, value: @comment) %>
-  </div>
+  <%= inline_label_text_area(form: f, field: :comment,
+                             text: "#{:name_deprecate_comments.t}:",
+                             value: @comment, cols: 80, rows: 5) %>
   <%= content_tag(:div, class: "help-note") do
     concat(:name_deprecate_comments_help.tp(
              name: @name.display_name.chomp(".")

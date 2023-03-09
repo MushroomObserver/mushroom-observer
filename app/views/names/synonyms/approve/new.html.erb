@@ -24,11 +24,9 @@
   <% end %>
   <%= content_tag(:div, :name_approve_deprecate_help.tp, class: "help-note") %>
 
-  <div class="form-group form-inline">
-    <%= f.label(:comment, "#{:name_approve_comments.t}:") %>
-    <%= f.text_area(:comment, cols: 80, rows: 5,
-                    data: { autofocus: true }) %>
-  </div>
+  <%= inline_label_text_area(form: f, field: :comment,
+                             text: "#{:name_approve_comments.t}:",
+                             cols: 80, rows: 5, data: { autofocus: true }) %>
   <%= content_tag(:div,
                   :name_approve_comments_help.tp(name: @name.display_name),
                   class: "help-note") %>
