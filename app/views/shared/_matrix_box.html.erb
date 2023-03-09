@@ -27,7 +27,7 @@ if presenter
           <%= vote_or_propose_ui(identify, object) %>
         </div><!-- .rss-what -->
 
-        <% if presenter.where %>
+        <% if presenter.place_name %>
           <div class="rss-where">
             <%= content_tag(:small) do
               location_link(presenter.place_name, presenter.where)
