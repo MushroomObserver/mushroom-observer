@@ -8,7 +8,7 @@
 
 <%= content_tag(:div, class: "form-inline") do %>
   <%= form.label(:"#{filter.sym}",
-                 :"prefs_filters_#{filter.sym}".t) %>:
+                 :"prefs_filters_#{filter.sym}".t + ":") %>
   <%= form.select(filter.sym, options,
                   { selected: @user.content_filter[filter.sym] },
                   { class: "form-control" }) %>

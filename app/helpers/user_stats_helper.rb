@@ -3,17 +3,10 @@
 # Helpers for user view
 module UserStatsHelper
   def user_stats_links(user)
-    links = {}
-    user_stats_links_table(user).each do |key, controller, action, params|
-      unless [key].intersect?([:location_description_authors,
-                               :name_description_authors])
-        params[:id] = user.id
-      end
-
-      links[key] = url_for(controller: controller, action: action,
-                           params: params)
+    user_stats_links_table(user).each_with_object({}) do |row, links|
+      links[row[0]] = url_for(controller: row[1], action: row[2],
+                              params: row[3])
     end
-    links
   end
 
   #########################################################
@@ -41,7 +34,7 @@ module UserStatsHelper
       [:names_versions, "/names", :index, { by_editor: user.id }],
       [:observations, "/observations", :index, { user: user.id }],
       [:species_lists, "/species_lists", :index, { by_user: user.id }],
-      [:life_list, "/checklists", :show, {}]
+      [:life_list, "/checklists", :show, { id: user.id }]
     ]
   end
 end
