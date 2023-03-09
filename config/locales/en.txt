@@ -621,6 +621,9 @@
   # activate an API key
   ACTIVATE: Activate
   activate: activate
+  # apply changes
+  APPLY: Apply
+  apply: apply
   # approve a name
   APPROVE: Approve
   approve: approve
@@ -1859,8 +1862,8 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_owner_id: View Observer's Preferred ID?
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
+  prefs_view_owner_id: "[:prefs_view_owner_id_help]"
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
@@ -1899,7 +1902,9 @@
   prefs_email_general: General Email
   prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
   prefs_email_general_features: new features come out.
+  prefs_email_general_feature: "[:prefs_email_general_features]"
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
+  prefs_email_general_question: "[:prefs_email_general_questions]"
   prefs_email_comments: "[:Comment] Email"
   prefs_email_comments_all: anyone comments on anything.
   prefs_email_comments_owner: someone comments on my observations, names, etc.
