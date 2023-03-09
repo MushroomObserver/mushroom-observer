@@ -81,4 +81,15 @@ module FormsHelper
       concat(args[:form].text_field(args[:field], opts))
     end
   end
+
+  # Bootstrap inline text_area: form, field, (label) text, class, checked
+  def inline_label_text_area(**args)
+    opts = args.except(:form, :field, :text, :class)
+    opts[:class] = "form-control"
+
+    content_tag(:div, class: "form-group form-inline #{args[:class]}") do
+      concat(args[:form].label(args[:field], args[:text]))
+      concat(args[:form].text_area(args[:field], opts))
+    end
+  end
 end
