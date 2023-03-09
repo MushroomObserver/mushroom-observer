@@ -40,16 +40,17 @@ module Names
     end
 
     def init_ivars_for_edit
-      @list_members     = nil
-      @new_names        = nil
-      @synonym_name_ids = []
-      @synonym_names    = []
-      @deprecate_all    = true
+      @existing_synonyms = @name.synonyms
+      @list_members      = nil
+      @new_names         = nil
+      @synonym_name_ids  = []
+      @proposed_synonyms = []
+      @deprecate_all     = true
     end
 
     def change_synonyms
-      list = params[:synonym][:members].strip_squeeze
-      @deprecate_all = (params[:deprecate][:all] == "1")
+      list = params[:synonym_members].strip_squeeze
+      @deprecate_all = (params[:deprecate_all] == "1")
 
       # Create any new names that have been approved.
       construct_approved_names(list, params[:approved_names], @deprecate_all)
@@ -113,7 +114,7 @@ module Names
       @synonym_names    = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
-      render(:edit, location: edit_name_synonyms_path)
+      render(:edit, location: edit_name_synonyms_path(id))
     end
 
     # Helper used by change_synonyms.  Deprecates a single name.  Returns true
