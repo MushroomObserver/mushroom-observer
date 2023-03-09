@@ -40,7 +40,6 @@ module Names
     end
 
     def init_ivars_for_edit
-      @existing_synonyms = @name.synonyms
       @list_members      = nil
       @new_names         = nil
       @synonym_name_ids  = []
