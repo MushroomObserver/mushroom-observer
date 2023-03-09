@@ -43,7 +43,8 @@
     <%= form.hidden_field(:project_id) %>
 
     <% if need_help %>
-      <div class="help-block"><%= :form_description_source_help.tpl %></div>
+      <%= content_tag(:div, :form_description_source_help.tpl,
+                      class: "help-block") %>
     <% end %>
   </div>
 
