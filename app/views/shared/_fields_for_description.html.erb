@@ -10,8 +10,8 @@
 
 <% if new_record || admin || author || owner || root %>
 
-  <div class="form-group">
-    <%= label_tag(:description_source, :form_description_source.t + ":") %>
+  <div class="form-group mt-3">
+    <%= form.label(:description_source, :form_description_source.t + ":") %>
 
     <% need_help = false
     if root %>
