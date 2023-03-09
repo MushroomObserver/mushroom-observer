@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 # Gather data for location description form.
-class LocationDescriptionFormPresenter < BasePresenter
+class LocationDescriptionFormPresenter
   attr_accessor \
     :method, # form_with method
     :button, # submit button text
     :url # form_with url
 
   def initialize(action)
-    super
-
     case action
     when :create
       self.method = :post
