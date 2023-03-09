@@ -9,32 +9,22 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_with(url: admin_donations_path,
-              id: "admin_new_donations_form") do |form| %>
+<%= form_with(model: @donation, url: admin_donations_path,
+              id: "admin_new_donations_form") do |f| %>
 
-  <%= fields_for(:donation) do |f| %>
-    <div class="form-group form-inline">
-      <%= f.label(:amount, :confirm_amount.t + ":") %>
-      $<%= f.text_field(:amount, size: 7, class: "form-control") %>
-    </div>
+  <%= inline_label_text_field(form: f, field: :amount, size: 7,
+                              text: "#{:confirm_amount.t}:") %>
 
-    <div class="form-group form-inline">
-      <%= f.label(:who, :WHO.t + ":") %>
-      <%= f.text_field(:who, size: 50, class: "form-control") %>
-    </div>
+  <%= inline_label_text_field(form: f, field: :who, size: 50,
+                              text: "#{:WHO.t}:") %>
 
-    <div class="form-group form-inline">
-      <%= f.check_box(:anonymous, class: "form-control") %>
-      <%= f.label(:anonymous, :donate_anonymous.t) %>
-    </div>
+  <%= check_box_with_label(form: f, field: :anonymous,
+                            text: :donate_anonymous.t) %>
 
-    <div class="form-group form-inline">
-      <%= f.label(:email, :EMAIL.t + ":") %>
-      <%= f.text_field(:email, size: 50, class: "form-control") %>
-    </div>
-  <% end %>
+  <%= inline_label_text_field(form: f, field: :email, size: 50,
+                              text: "#{:EMAIL.t}:") %>
 
-  <%= form.submit(:create_donation_add.l,
-               class: "btn btn-default center-block") %>
+  <%= f.submit(:create_donation_add.l,
+                  class: "btn btn-default center-block") %>
 
 <% end %>
