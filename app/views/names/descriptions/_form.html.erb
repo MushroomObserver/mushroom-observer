@@ -3,11 +3,9 @@
               id: "name_description_form") do |f| %>
 
   <div class="container-text">
-    <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>
+    <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
 
-    <%= render(partial: "shared/form_description", locals: {form: f}) %>
-
-    <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>
+    <%= render(partial: "shared/fields_for_description", locals: {form: f}) %>
 
     <p><strong><%= :DESCRIPTION.t %>:</strong></p>
     <%= render(partial: "shared/textilize_help") %>
@@ -16,9 +14,8 @@
     <% NameDescription.all_note_fields.each do |field| %>
       <div class="form-group">
         <%= f.label(field, :"form_names_#{field}".t + ":") %>
-        <p class="help-block mt-0">
-          <%= :"form_names_#{field}_help".l(rank: rank) %>
-        </p>
+        <%= content_tag(:div, :"form_names_#{field}_help".l(rank: rank),
+                        class: "help-block mt-0") %>
         <%= f.text_area(field, rows: 10, class: "form-control") %>
       </div>
     <% end %>
