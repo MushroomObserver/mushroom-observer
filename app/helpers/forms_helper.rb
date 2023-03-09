@@ -77,7 +77,7 @@ module FormsHelper
     opts[:class] = "form-control"
 
     content_tag(:div, class: "form-group form-inline #{args[:class]}") do
-      concat(args[:form].label(args[:field], args[:text]))
+      concat(args[:form].label(args[:field], args[:text], class: "mr-3"))
       concat(args[:form].text_field(args[:field], opts))
     end
   end
@@ -88,7 +88,7 @@ module FormsHelper
     opts[:class] = "form-control"
 
     content_tag(:div, class: "form-group form-inline #{args[:class]}") do
-      concat(args[:form].label(args[:field], args[:text]))
+      concat(args[:form].label(args[:field], args[:text], class: "mr-3"))
       concat(args[:form].text_area(args[:field], opts))
     end
   end
