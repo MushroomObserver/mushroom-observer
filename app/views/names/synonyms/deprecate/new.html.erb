@@ -33,10 +33,9 @@
                            checked: @misspelling,
                            text: :form_names_misspelling.t) %>
 
-  <div class="form-group form-inline">
-    <%= f.label(:comment, "#{:name_deprecate_comments.t}:") %>
-    <%= f.text_area(:comment, cols: 80, rows: 5, value: @comment) %>
-  </div>
+  <%= inline_label_text_area(form: f, field: :comment,
+                             text: "#{:name_deprecate_comments.t}:",
+                             value: @comment, cols: 80, rows: 5) %>
   <%= content_tag(:div, class: "help-note") do
     concat(:name_deprecate_comments_help.tp(
              name: @name.display_name.chomp(".")
