@@ -90,6 +90,12 @@ class UsersControllerTest < FunctionalTestCase
     assert_select(
       "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
     )
+    assert_select(
+      "#content a:match('href', ?)",
+      /\?.*=(\d+).*&id=\1/, # some param=nnn followed by id with same value
+      false,
+      "Links should not repeat one param=value as id=value"
+    )
   end
 
   #   ---------------
