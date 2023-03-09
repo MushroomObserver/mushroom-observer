@@ -48,8 +48,8 @@
     <% end %>
   </div>
 
-  <p>
-    <b><%= :form_description_permissions.t %>:</b>
+  <div class="form-group">
+    <%= content_tag(:b, "#{:form_description_permissions.t}:") %>
     <% args = { class: "form-control" }
     if ["public", "foreign"].include?(type) && !root && !new_record
       args[:disabled] = "disabled"
@@ -62,7 +62,7 @@
       <%= label_tag(:description_source, :form_description_public_readable.t) %>
       <p class="help-block"><%= :form_description_permissions_help.t %></p>
     </div>
-  </p>
+  </div>
 
   <div class="form-group">
     <%= label_tag(:description_license_id, :License.t + ":") %>
