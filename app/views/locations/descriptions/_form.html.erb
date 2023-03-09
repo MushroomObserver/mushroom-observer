@@ -1,21 +1,11 @@
 <%
-if action == :create
-  method = :post
-  button = :CREATE.l
-  url = { controller: "/locations/descriptions", action: :create,
-          id: @description.location_id }
-elsif action == :update
-  method = :put
-  button = :UPDATE.l
-  url = { controller: "/locations/descriptions", action: :update,
-             id: @description.id, q: get_query_param }
-end
+presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
 %>
 
-<%= form_with(scope: :description, url: url, method: method,
+<%= form_with(scope: :description, url: presenter.url, method: presenter.method,
               id: "location_description_form") do |f| %>
 
-  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(presenter.button, class: "btn btn-default center-block mt-3") %>
 
   <%= render(partial: "shared/fields_for_description", locals: { form: f }) %>
 
@@ -24,15 +14,15 @@ end
   <% LocationDescription.all_note_fields.each do |field| %>
     <div class="form-group">
       <%= f.label(field, "form_locations_#{field}".to_sym.t + ":") %>
-      <%= f.text_area(field, rows: 10, class: "form-control") %>
       <%= content_tag(:div, "form_locations_#{field}_help".to_sym.l,
                       class: "help-block mt-0") %>
+      <%= f.text_area(field, rows: 10, class: "form-control") %>
     </div>
   <% end %>
 
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(presenter.button, class: "btn btn-default center-block mt-3") %>
 
   <% if (action == :update) && @merge %>
     <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>

@@ -1455,7 +1455,7 @@
   form_comments_comment: "[:Comment]"
   form_comments_summary: "[:Summary]"
 
-  # shared/_form_description
+  # shared/_fields_for_description
   form_description_source: "[:SOURCE]"
   form_description_source_public: Public [:app_title] Description
   form_description_source_foreign: From Another [:app_title] Server

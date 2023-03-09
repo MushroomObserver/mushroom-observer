@@ -38,11 +38,12 @@ module FormsHelper
     end
   end
 
-  # Bootstrap checkbox: form, field, (label) text, class, checked
+  # Bootstrap checkbox: form, field, (label) text, class,
+  # checkbox options: checked, value, disabled, data, etc.
   # NOTE: Only need to set `checked` if state not inferrable from db field name
   # (i.e. a model attribute of the form_with(@model))
   def check_box_with_label(**args)
-    opts = args.except(:form, :field, :text)
+    opts = args.except(:form, :field, :text, :class)
 
     content_tag(:div, class: "checkbox #{args[:class]}") do
       args[:form].label(args[:field]) do
@@ -56,5 +57,28 @@ module FormsHelper
   def prefs_check_box_with_label(args)
     args = args.merge({ text: :"prefs_#{args[:field]}".t })
     check_box_with_label(**args)
+  end
+
+  # Bootstrap radio: form, field, value, (label) text, class, checked
+  def radio_with_label(**args)
+    opts = args.except(:form, :field, :value, :text, :class)
+
+    content_tag(:div, class: "radio #{args[:class]}") do
+      args[:form].label(args[:field]) do
+        concat(args[:form].radio_button(args[:field], args[:value], opts))
+        concat(args[:text])
+      end
+    end
+  end
+
+  # Bootstrap inline text_field: form, field, (label) text, class, checked
+  def inline_text_field_with_label(**args)
+    opts = args.except(:form, :field, :text, :class)
+    opts[:class] = "form-control"
+
+    content_tag(:div, class: "form-group form-inline #{args[:class]}") do
+      concat(args[:form].label(args[:field], args[:text]))
+      concat(args[:form].text_field(args[:field], opts))
+    end
   end
 end
