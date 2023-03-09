@@ -10,7 +10,7 @@
   names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
   if names.any? %>
     <div class="alert-warning">
-      <div><%= :list_observations_suggestions.t %>:</div>
+      <%= content_tag(:p, "#{:list_observations_suggestions.t}:") %>
       <% names.sort_by(&:sort_name).each do |name| %>
         <div class="pl-3"><%=
           search = PatternSearch::Observation.new(name.text_name)

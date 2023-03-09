@@ -1,10 +1,9 @@
-<%
-# Notes section of create_observation form
-%>
+<%# Notes section of create_observation form %>
+
 <!-- NOTES -->
 <div class="mt-3" id="observation_notes">
 
-  <%= content_tag(:p, "#{:NOTES.t} ", class: "font-weight-bold") %>
+  <%= content_tag(:p, "#{:NOTES.t}:", class: "font-weight-bold") %>
 
   <% if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
       part = Observation.other_notes_part %>
