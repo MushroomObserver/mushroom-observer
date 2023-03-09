@@ -1,7 +1,5 @@
-<%
-# Where (location) section of create_observation form
-# including location autocomplete, map, lat/long/alt
-%>
+<%# Where (location) section of create_observation form
+    including location autocomplete, map, lat/long/alt %>
 
 <!-- WHERE_REASONS -->
 <% if @dubious_where_reasons.any? %>
@@ -54,12 +52,8 @@
 <!-- IS_COLLECTION_LOCATION -->
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <div class="form-inline mb-3">
-      <%= f.check_box(:is_collection_location,
-                      class: "form-control-xxx") %>
-      <%= f.label(:is_collection_location,
-                  :form_observations_is_collection_location.t) %>
-    </div>
+    <%= check_box_with_label(form: f, field: :is_collection_location,
+                             text: :form_observations_is_collection_location.t) %>
     <%= help_block_with_arrow("up", id: "is_collection_location_help") do %>
       <%= :form_observations_is_collection_location_help.t %>
     <% end  # help_block_with_arrow do %>
@@ -108,11 +102,8 @@
         </div>
       </div>
       <div class="col-xs-12 col-sm-12">
-        <div class="form-inline">
-          <%= f.check_box(:gps_hidden, class: "form-control-xxx") %>
-          <%= f.label(:gps_hidden,
-                      :form_observations_gps_hidden.t) %>
-        </div>
+        <%= check_box_with_label(form: f, field: :gps_hidden,
+                                 text: :form_observations_gps_hidden.t) %>
       </div>
     </div><!--.row-->
   </div>
