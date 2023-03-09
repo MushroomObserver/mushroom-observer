@@ -5,14 +5,31 @@
     link_to(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @container = :text_image
 
-  action = { controller: "/names/synonyms", action: :update, id: @name.id,
-             approved_names: @new_names, approved_synonyms: @synonym_name_ids }
+  url = { controller: "/names/synonyms", action: :update, id: @name.id,
+          approved_names: @new_names, approved_synonyms: @synonym_name_ids }
+
+  # this cannot be an ivar, somehow. Fails here if so:
+  # Names::SynonymsControllerTest#test_transfer_synonyms_n_1_nc line 303
+  current_synonyms = @name.synonyms
 %>
 
-<%= form_with(url: action, method: :put, id: "name_edit_synonym_form") do |f| %>
+<%= form_with(url: url, method: :put, id: "name_edit_synonym_form") do |f| %>
 
-  <%= render(partial: "form") %>
+  <div class="row">
+    <div class="col-sm-6">
+      <%= render(partial: "fields_existing",
+                 locals: { f: f, current_synonyms: current_synonyms }) %>
+      <%= render(partial: "fields_proposed",
+                 locals: { f: f, current_synonyms: current_synonyms }) %>
+    </div><!--.col-->
+
+    <div class="col-sm-6">
+      <%= render(partial: "fields_members", locals: { f: f }) %>
+    </div><!--.col-->
+  </div><!--.row-->
+
   <%= f.submit(:name_change_synonyms_submit.l,
                class: "btn btn-default center-block") %>
 
