@@ -3,12 +3,10 @@
 # Helpers for user view
 module UserStatsHelper
   def user_stats_links(user)
-    links = {}
-    user_stats_links_table(user).each do |key, controller, action, params|
-      links[key] = url_for(controller: controller, action: action,
-                           params: params)
+    user_stats_links_table(user).each_with_object({}) do |row, links|
+      links[row[0]] = url_for(controller: row[1], action: row[2],
+                              params: row[3])
     end
-    links
   end
 
   #########################################################
