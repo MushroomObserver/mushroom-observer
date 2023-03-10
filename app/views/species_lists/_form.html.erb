@@ -50,7 +50,8 @@
   </div>
   <% turn_into_year_auto_completer(:species_list_when_1i) %>
 
-  <%= dubious_location_alert(@dubious_where_reasons, button) %>
+  <%= render(partial: "shared/form_location_feedback",
+             locals: { button: button } ) %>
 
   <div class="form-group mt-3">
     <%= f.label(:place_name, :WHERE.t + ":") %> (<%= :required.t %>)

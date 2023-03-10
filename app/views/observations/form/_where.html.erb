@@ -2,7 +2,8 @@
     including location autocomplete, map, lat/long/alt %>
 
 <!-- WHERE_REASONS -->
-<%= dubious_location_alert(@dubious_where_reasons, button_name) %>
+<%= render(partial: "shared/form_location_feedback",
+           locals: { button: button_name } ) %>
 <!-- /WHERE_REASONS -->
 
 <!-- WHERE -->

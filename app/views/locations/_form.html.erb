@@ -3,7 +3,8 @@
 
   <% if !@location.locked || in_admin_mode? %>
 
-    <%= dubious_location_alert(@dubious_where_reasons, button.l) %>
+    <%= render(partial: "shared/form_location_feedback",
+               locals: { button: button.l} ) %>
 
     <div class="row">
       <div class="col-md-8 col-lg-6">
