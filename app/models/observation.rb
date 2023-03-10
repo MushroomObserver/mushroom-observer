@@ -748,7 +748,7 @@ class Observation < AbstractModel
     notes[other_notes_key] = val
   end
 
-  # id of view textarea for a Notes heading
+  # id of view textarea for a Notes heading. Used in tests
   def self.notes_part_id(part)
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end

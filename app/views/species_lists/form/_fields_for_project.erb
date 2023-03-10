@@ -1,7 +1,7 @@
 <%= fields_for(:project) do |f_p| %>
   <div class="form-group">
     <%= f.label(:project, "#{:PROJECTS.t}:") %>
-    <%= content_tag(:span, :form_species_lists_project_help.t
+    <%= content_tag(:span, :form_species_lists_project_help.t,
                     class: "help-note") %>
     <div class="form-group">
       <% @projects.each do |project| %>

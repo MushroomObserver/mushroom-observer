@@ -383,7 +383,7 @@ class SpeciesList < AbstractModel
   # Not currently persisted in the db, and is set up in the params hash as
   # params[member][notes], not params[species_list][member][notes]
 
-  # id of view textarea for a member notes heading
+  # id of view textarea for a member notes heading. Used in tests
   def self.notes_part_id(part)
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
