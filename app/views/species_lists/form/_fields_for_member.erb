@@ -8,12 +8,14 @@
   <div class="form-group mt-3">
     <%= f_m.label(:notes, :form_species_lists_member_notes.t + ":") %>
       (<%= :general_textile_link.t %>)
-    <% @species_list.form_notes_parts(@user).each do |part| %>
-      <%= f_m.label(@species_list.notes_normalized_key(part),
-                    "#{strip_tags(part.tl)}: ") %>
-      <%= f_m.text_area(@species_list.notes_normalized_key(part),
-                        value: @member_notes[part.to_sym],
-                        rows: 1, class: "form-control mb-3") %>
+    <%= f_m.fields_for(:notes) do |f_n| %>
+      <% @species_list.form_notes_parts(@user).each do |part| %>
+        <%= f_n.label(@species_list.notes_normalized_key(part),
+                      "#{strip_tags(part.tl)}: ") %>
+        <%= f_n.text_area(@species_list.notes_normalized_key(part),
+                          value: @member_notes[part.to_sym],
+                          rows: 1, class: "form-control mb-3") %>
+      <% end %>
     <% end %>
   </div>
 
