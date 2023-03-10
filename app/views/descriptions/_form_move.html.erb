@@ -1,12 +1,13 @@
 <%
+merges = description.parent.descriptions - [description]
 moves = description.parent.synonyms - [description.parent]
 moves.reject!(&:is_misspelling?)
 %>
 
 <%= form_with(url: action, id: "move_descriptions_form") do |f| %>
 
-  <h4><%= :merge_descriptions_move_header.t %>:</h4><!-- .text-larger -->
-  <p><span class="help-note"><%= :merge_descriptions_move_help.t %></span></p>
+  <%= content_tag(:h4, "#{:merge_descriptions_move_header.t}:") %>
+  <%= content_tag(:p, :merge_descriptions_move_help.t, class: "help-note") %>
 
   <% if moves.any? %>
     <ul type="none">
@@ -18,8 +19,9 @@ moves.reject!(&:is_misspelling?)
       <% end %>
     </ul>
 
-    <%= check_box_tag(:delete, "1", description.is_admin?(@user)) %>
-      <%= :merge_descriptions_delete_after.t %>
+    <%= check_box_with_label(form: f, field: :delete, value: "1",
+                             checked: description.is_admin?(@user),
+                             text: :merge_descriptions_delete_after.t) %>
   <% end %>
 
   <% button = moves.any? ? :merge_descriptions_move.l : nil
