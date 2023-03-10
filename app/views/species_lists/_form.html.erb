@@ -12,12 +12,12 @@
   end %>
 
   <%= if !@new_names.blank?
-    f.hidden_field(:approved_names, @new_names.join("\n"))
+    hidden_field_tag(:approved_names, @new_names.join("\n"))
   end %>
 
   <%= if !@deprecated_names.blank?
-    f.hidden_field(:approved_deprecated_names,
-                    @deprecated_names.map(&:id).join(" "))
+    hidden_field_tag(:approved_deprecated_names,
+                     @deprecated_names.map(&:id).join(" "))
   end %>
 
   <div class="form-group mt-3">
