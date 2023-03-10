@@ -69,7 +69,6 @@
 #  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
 #  notes_area_id_prefix     prefix for id of textarea for a Notes heading
-#  notes_part_name::        name of textarea for a Notes heading
 #  export_formatted::       notes (or any hash) to string with marked up
 #                           captions (keys)
 #  show_formatted::         notes (or any hash) to string with plain
@@ -130,9 +129,9 @@
 #  other_notes_key::        key used for general Observation notes
 #  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
-#  notes_part_name::        name of textarea for a Notes heading
 #  notes_part_value::       value for textarea for a Notes heading
 #  form_notes_parts::       note parts to display in create & edit form
+#  notes_normalized_key::   key (of the notes parts array)
 #  notes_export_formatted:: notes to string with marked up captions (keys)
 #  notes_show_formatted::   notes to string with plain captions (keys)
 #
@@ -748,7 +747,7 @@ class Observation < AbstractModel
     notes[other_notes_key] = val
   end
 
-  # id of view textarea for a Notes heading
+  # id of view textarea for a Notes heading. Used in tests
   def self.notes_part_id(part)
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
@@ -760,15 +759,6 @@ class Observation < AbstractModel
   # prefix for id of textarea
   def self.notes_area_id_prefix
     "observation_notes_"
-  end
-
-  # name of view textarea for a Notes heading
-  def self.notes_part_name(part)
-    "observation[notes][#{part.tr(" ", "_")}]"
-  end
-
-  def notes_part_name(part)
-    Observation.notes_part_name(part)
   end
 
   # value of notes part
