@@ -51,7 +51,6 @@
 #  ---
 #  notes_part_id::         id of view textarea for a member notes heading
 #  notes_area_id_prefix::  prefix for id of textarea
-#  notes_part_name::       name of view textarea for a member notes heading
 #
 #  == Instance methods
 #
@@ -66,7 +65,7 @@
 #  ---
 #  form_notes_parts::      Array of member note parts for create & edit form
 #  notes_part_id::         id of textarea for a member notes heading
-#  notes_part_name::       name of textarea for a member notes heading
+#  notes_normalized_key::  key (of the notes parts array)
 #  ---
 #  process_file_data::     Process uploaded file according to one of
 #                          the following two methods.
@@ -383,7 +382,7 @@ class SpeciesList < AbstractModel
   # Not currently persisted in the db, and is set up in the params hash as
   # params[member][notes], not params[species_list][member][notes]
 
-  # id of view textarea for a member notes heading
+  # id of view textarea for a member notes heading. Used in tests
   def self.notes_part_id(part)
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
@@ -397,18 +396,16 @@ class SpeciesList < AbstractModel
     "member_notes_"
   end
 
-  # name of view textarea for a member notes heading
-  def self.notes_part_name(part)
-    "member[notes][#{part.tr(" ", "_")}]"
-  end
-
-  def notes_part_name(part)
-    SpeciesList.notes_part_name(part)
-  end
-
   # Array of member note parts (Strings) to display in create & edit form
   def form_notes_parts(user)
     user.notes_template_parts << Observation.other_notes_part
+  end
+
+  # Change spaces to underscores in keys
+  #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
+  #   notes_normalized_key(:Other)         #=> :Other
+  def notes_normalized_key(part)
+    part.to_s.tr(" ", "_").to_sym
   end
 
   ##############################################################################

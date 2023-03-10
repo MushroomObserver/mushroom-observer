@@ -5,7 +5,7 @@
     link_to(:name_lister_title.t, new_species_list_name_lister_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+  @container = :text
 
   action = species_lists_path(approved_where: @place_name)
 %>

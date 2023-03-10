@@ -2,15 +2,8 @@
     including location autocomplete, map, lat/long/alt %>
 
 <!-- WHERE_REASONS -->
-<% if @dubious_where_reasons.any? %>
-  <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
-  <div class="alert alert-warning container-text" id="location_messages">
-    <%= @dubious_where_reasons.safe_join(safe_br) %>
-    <p class="help-block">
-      <%= :form_observations_dubious_help.t(button: button_name) %>
-    </p>
-  </div><!--.container-text-->
-<% end # if @dubious_where_reasons.any? %>
+<%= render(partial: "shared/form_location_feedback",
+           locals: { button: button_name } ) %>
 <!-- /WHERE_REASONS -->
 
 <!-- WHERE -->
