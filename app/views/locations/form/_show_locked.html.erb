@@ -9,7 +9,7 @@
       <%= content_tag(:b, :show_location_highest.t) %>: <%= @location.high %> m<br/>
       <%= content_tag(:b, :show_location_lowest.t) %>: <%= @location.low %> m<br/>
     <% end %>
-    <div class="help-block"><%= :show_location_locked.tp %></div>
+    <%= content_tag(:div, :show_location_locked.t, class: "help-block") %>
     <%= hidden_field(:location, :display_name, value: @display_name) %>
     <%= hidden_field(:location, :north) %>
     <%= hidden_field(:location, :south) %>

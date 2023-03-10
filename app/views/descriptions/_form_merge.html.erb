@@ -6,8 +6,8 @@ moves.reject!(&:is_misspelling?)
 
 <%= form_with(url: action, id: "merge_descriptions_form") do |f| %>
 
-  <h4><%= :merge_descriptions_merge_header.t %>:</h4><!-- .text-larger -->
-  <p><span class="help-note"><%= :merge_descriptions_merge_help.t %></span></p>
+  <%= content_tag(:h4, "#{:merge_descriptions_merge_header.t}:") %>
+  <%= content_tag(:p, :merge_descriptions_merge_help.t, class: "help-note") %>
 
   <ul type="none">
     <% merges.each do |desc| %>
