@@ -5,7 +5,7 @@
     link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+  @container = :text_image
   action = { controller: "/names/lifeforms/propagate", action: :update,
              id: @name.id, q: get_query_param }
 %>
@@ -13,15 +13,15 @@
 <%= form_with(url: action, id: "propagate_name_lifeform_form") do |f| %>
 
   <p><b><%= :ADD.t %>:</b> <%= :propagate_lifeform_add.t %></p>
-  <table class="table-lifeform table-striped">
+  <table class="table table-lifeform table-striped">
     <% Name.all_lifeforms.
             select { |word| @name.lifeform.include?(" #{word} ") }.
             each do |word| %>
       <tr>
         <td>
-          <%= check_box_tag("add_#{word}", "1", false,
-                            class: "form-control-xxx") %>
-          <%= label_tag("add_#{word}", :"lifeform_#{word}".t) %>
+          <%= check_box_with_label(form: f, field: :"add_#{word}",
+                                   value: "1", checked: false,
+                                   text: :"lifeform_#{word}".t) %>
         </td>
         <td class="container-text">
           <%= :"lifeform_help_#{word}".t %>
@@ -32,15 +32,15 @@
   <br/>
 
   <p><b><%= :REMOVE.t %>:</b> <%= :propagate_lifeform_remove.t %></p>
-  <table class="table-lifeform table-striped">
+  <table class="table table-lifeform table-striped">
     <% Name.all_lifeforms.
             reject { |word| @name.lifeform.include?(" #{word} ") }.
             each do |word| %>
       <tr>
         <td>
-          <%= check_box_tag("remove_#{word}", "1", false,
-                            class: "form-control-xxx") %>
-          <%= label_tag("remove_#{word}", :"lifeform_#{word}".t) %>
+          <%= check_box_with_label(form: f, field: :"remove_#{word}",
+                                   value: "1", checked: false,
+                                   text: :"lifeform_#{word}".t) %>
         </td>
         <td class="container-text">
           <%= :"lifeform_help_#{word}".t %>
@@ -49,7 +49,6 @@
     <% end %>
   </table>
 
-  <%= f.submit(:propagate_lifeform_apply.t,
-               class: "btn btn-default center-block mt-3") %>
+  <%= f.submit(:APPLY.t, class: "btn btn-default center-block mt-3") %>
 
 <% end %>
