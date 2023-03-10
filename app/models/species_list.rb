@@ -411,6 +411,13 @@ class SpeciesList < AbstractModel
     user.notes_template_parts << Observation.other_notes_part
   end
 
+  # Change spaces to underscores in keys
+  #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
+  #   notes_normalized_key(:Other)         #=> :Other
+  def notes_normalized_key(part)
+    part.to_s.tr(" ", "_").to_sym
+  end
+
   ##############################################################################
   #
   #  :section: Projects

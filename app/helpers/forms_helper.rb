@@ -38,6 +38,19 @@ module FormsHelper
     end
   end
 
+  def dubious_location_alert(reasons, button)
+    return unless reasons&.any?
+
+    content_tag(:div, class: "alert alert-warning my-3",
+                      id: "dubious_location_messages") do
+      capture(content_tag(:div,
+                          reasons.safe_join(safe_br)))
+      capture(content_tag(:span,
+                          :form_observations_dubious_help.t(button: button),
+                          class: "help-note"))
+    end
+  end
+
   # Bootstrap checkbox: form, field, (label) text, class,
   # checkbox options: checked, value, disabled, data, etc.
   # NOTE: Only need to set `checked` if state not inferrable from db field name
