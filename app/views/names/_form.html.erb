@@ -17,7 +17,7 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
   <% if !@name.locked || in_admin_mode? %>
     <div class="form-group mt-3">
       <%= inline_label_text_field(form: f, field: :icn_id,
-                                  text: "#{:form_names_icn_id.t}:"
+                                  text: "#{:form_names_icn_id.t}:",
                                   size: 8) %>
       <%= content_tag(:p, :form_names_identifier_help.t, class: "help-block") %>
     </div>
