@@ -11,13 +11,13 @@
     </div>
   <% end %>
 
-  <div class="field">
-    <%= form.label :name %>
-    <%= form.text_field :name %>
+  <div class="form-group field">
+    <%= form.label(:name) %>
+    <%= form.text_field(:name, class: "form-control") %>
     <%= :VISUAL_MODEL.t %>
   </div>
 
   <div class="actions">
-    <%= form.submit %>
+    <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
   </div>
 <% end %>

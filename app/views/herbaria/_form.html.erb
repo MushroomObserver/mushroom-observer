@@ -7,38 +7,32 @@
 
   <div class="form-group">
     <%= f.label(:name, "#{:NAME.t}:") %>
-    <span class="help-note">(<%= :required.t %>)</span>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
     <%= f.text_field(:name, class: "form-control") %>
   </div>
 
   <% if in_admin_mode? %>
-    <div class="form-group">
-      <div class="form-inline">
-        <%= f.label(:personal_user_name,
-                    :edit_herbarium_admin_make_personal.t) %>:
-        <%= f.text_field(:personal_user_name,
-                          class: "form-control-xxx") %>
-        <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
-      </div>
-      <% if button_name != :CREATE %>
-        <%= help_block_with_arrow("up") do %>
-          <% top_users = herbarium_top_users(@herbarium.id)
-              top_users.each do |name, login, count| %>
-            <%= :edit_herbarium_user_records.t(
-                  name: "#{name} (#{login})", num: count
-                ) %><br/>
-          <% end %>
-          <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
+    <%= inline_label_text_field(form: f, field: :personal_user_name,
+                                text: :edit_herbarium_admin_make_personal.t) %>
+    <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
+
+    <% if button_name != :CREATE %>
+      <%= help_block_with_arrow("up") do %>
+        <% top_users = herbarium_top_users(@herbarium.id)
+            top_users.each do |name, login, count| %>
+          <%= :edit_herbarium_user_records.t(
+                name: "#{name} (#{login})", num: count
+              ) %><br/>
         <% end %>
+        <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
       <% end %>
-    </div>
+    <% end %>
 
   <% else %>
     <% if @herbarium.personal_user_id == @user.id %>
       <div class="form-group">
-        <div class="help-block">
-          <%= :edit_herbarium_this_is_personal_herbarium.tp %>
-        </div>
+        <%= content_tag(:div, :edit_herbarium_this_is_personal_herbarium.tp,
+                        class: "help-block") %>
       </div>
     <% end %>
 
@@ -56,11 +50,11 @@
   <% end %>
 
   <% if !@herbarium.personal_user_id %>
-    <div class="form-group mb-n3">
+    <div class="form-group">
       <div class="form-inline">
-        <%= f.label(:code, "#{:create_herbarium_code.t}:") %>
-        <%= f.text_field(:code, size: 8, class: "form-control") %>
-        <span class="help-note">(<%= :optional.t %>)</span>
+        <%= inline_label_text_field(form: f, field: :code, size: 8,
+                                    text: "#{:create_herbarium_code.t}:") %>
+        <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
       </div>
       <%= help_block_with_arrow("up") do %>
         <%= :create_herbarium_code_help.t %>
@@ -70,28 +64,28 @@
 
   <div class="form-group">
     <%= f.label(:place_name, "#{:LOCATION.t}:") %>
-    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
     <%# workaround for auto completer; creates an id %>
     <%= f.text_field(:place_name, class: "form-control") %>
-    <% turn_into_location_auto_completer(:herbarium_place_name) %>
   </div>
+  <% turn_into_location_auto_completer(:herbarium_place_name) %>
 
   <div class="form-group">
     <%= f.label(:herbarium_email, "#{:create_herbarium_email.t}:") %>
-    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
     <%= f.text_field(:email, class: "form-control") %>
   </div>
 
   <div class="form-group">
     <%= f.label(:herbarium_mailing_address,
                 "#{:create_herbarium_mailing_address.t}:") %>
-    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
     <%= f.text_area(:mailing_address, rows: 5,  class: "form-control") %>
   </div>
 
   <div class="form-group">
     <%= f.label(:herbarium_description, "#{:NOTES.t}:") %>
-    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
     <%= f.text_area(:description, rows: 10, class: "form-control") %>
   </div>
 
