@@ -3,15 +3,17 @@
 # Gather details for items in matrix-style ndex pages.
 class ThumbnailPresenter < BasePresenter
   attr_accessor \
-    :image,            # image instance or id
-    :proportion,       # sizer proportion, to size img correctly pre-lazyload
-    :width,            # image container width (to be removed soon)
-    :img_tag,          # thumbnail image tag with placeholder (src lazy-loaded)
-    :noscript_img_tag, # thumbnail image tag with real src (when no lazy-load)
-    :stretched_link,   # image overlay stretched-link (may be link/button/form)
-    :lightbox_link,    # contains data passed to lightbox (incl. caption)
-    :vote_section,     # show votes? boolean
-    :image_filename    # original image filename (maybe none)
+    :image,             # image instance or id
+    :img_src,           # img src for noscript image
+    :proportion,        # sizer proportion, to size img correctly pre-lazyload
+    :width,             # image container width (to be removed soon)
+    :options_lazy,      # html_options for placeholder (src lazy-loaded)
+    :options_noscript,  # html_options for noscript (when no lazy-load)
+    :image_link,        # image stretched-link url (may be link/button/form)
+    :image_link_method, # needed for helper
+    :lightbox_data,     # contains data passed to lightbox (incl. caption)
+    :votes,             # show votes? boolean
+    :original           # show original image filename? (boolean)
 
   def initialize(image, view, args = {})
     super
@@ -31,9 +33,10 @@ class ThumbnailPresenter < BasePresenter
       extra_classes: false,
       obs_data: {}, # used in lightbox caption
       identify: false,
-      image_link: h.image_path(image_id),
+      image_link: h.image_path(image_id), # to ImagesController#show
       link_method: :get,
       votes: true,
+      original: false,
       is_set: true
     }
     args = default_args.merge(args)
@@ -50,7 +53,7 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid lazy ab-fab object-fit-cover"
+    img_class = "img-fluid ab-fab object-fit-cover"
     img_class += " #{args[:extra_classes]}" if args[:extra_classes]
 
     # <img> data attributes. Account for possible data-confirm, etc
@@ -61,21 +64,27 @@ class ThumbnailPresenter < BasePresenter
     }.merge(args[:data])
 
     # <img> attributes
-    html_options = {
+    html_options_lazy = {
       alt: args[:notes],
-      class: img_class,
+      class: "#{img_class} lazy",
       data: img_data
     }
 
-    noscript_html_options = html_options.dup
-    noscript_html_options[:class] = "#{img_class} img-noscript"
+    html_options_noscript = {
+      alt: args[:notes],
+      class: "#{img_class} img-noscript"
+      #   srcset: img_srcset,
+      #   sizes: img_sizes
+    }
 
     self.image = image || nil
-    self.img_tag = h.image_tag("placeholder.svg", html_options)
-    self.noscript_img_tag = noscript_img(img_src, noscript_html_options)
-    self.stretched_link = image_link_html(args[:image_link], args[:link_method])
-    self.vote_section = vote_section_html(args, image)
-    self.image_filename = image_orig_name(args, image)
+    self.img_src = img_src
+    self.options_lazy = html_options_lazy
+    self.options_noscript = html_options_noscript
+    self.image_link = args[:image_link]
+    self.image_link_method = args[:link_method]
+    self.votes = args[:votes]
+    self.original = args[:original]
   end
 
   def sizing_info_to_presenter(image, args)
@@ -100,12 +109,14 @@ class ThumbnailPresenter < BasePresenter
   def lightbox_args_to_presenter(image_id, img_urls, args)
     # The src size appearing in the lightbox is a user pref
     lb_size = User.current&.image_size&.to_sym || :huge
-    lb_url = img_urls[lb_size]
-    lb_id = args[:is_set] ? "observation-set" : SecureRandom.uuid
-    lb_caption = lightbox_caption_html(image_id,
-                                       args[:obs_data], args[:identify])
 
-    self.lightbox_link = lb_link(lb_url, lb_id, lb_caption)
+    self.lightbox_data = {
+      url: img_urls[lb_size],
+      id: args[:is_set] ? "observation-set" : SecureRandom.uuid,
+      image_id: image_id,
+      obs_data: args[:obs_data],
+      identify: args[:identify]
+    }
   end
 
   # def thumbnail_srcset(small_url, medium_url, large_url, huge_url)
@@ -124,101 +135,4 @@ class ThumbnailPresenter < BasePresenter
   #     "(min-width: 992px) 30vw"
   #   ].join(",")
   # end
-
-  def noscript_img(img_src, html_options)
-    h.content_tag(:noscript) do
-      h.image_tag(img_src, html_options)
-    end
-  end
-
-  # NOTE: `stretched_link` might be a link to #show_obs or #show_image,
-  # but it may also be a button/input (with params[:img_id]) sending to
-  # #reuse_image or #remove_image ...or any other clickable element. Elements
-  # use .ab-fab instead of .stretched-link to keep .theater-btn clickable
-  def image_link_html(path, link_method)
-    case link_method
-    when :get
-      h.link_with_query("", path, class: image_link_classes)
-    when :post
-      h.post_button(name: "", path: path, class: image_link_classes)
-    when :put
-      h.put_button(name: "", path: path, class: image_link_classes)
-    when :patch
-      h.patch_button(name: "", path: path, class: image_link_classes)
-    when :delete
-      h.destroy_button(name: "", target: path, class: image_link_classes)
-    when :remote
-      h.link_with_query("", path, class: image_link_classes, remote: true)
-    end
-  end
-
-  def image_link_classes
-    "image-link stretched-link"
-  end
-
-  def lightbox_caption_html(image_id, obs_data, identify)
-    html = []
-    if obs_data[:id].present?
-      html = image_observation_caption(html, obs_data, identify)
-    end
-    html << caption_image_links(image_id)
-    h.safe_join(html)
-  end
-
-  def image_observation_caption(html, obs_data, identify)
-    if identify ||
-       (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
-      html << h.propose_naming_link(obs_data[:id])
-      html << h.content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << h.mark_as_reviewed_toggle(obs_data[:id])
-    end
-    html << caption_obs_title(obs_data)
-    html << h.render(partial: "observations/show/observation",
-                     locals: { observation: obs_data[:obs] })
-  end
-
-  def caption_obs_title(obs_data)
-    h.content_tag(:h4, h.show_obs_title(obs: obs_data[:obs]),
-                  class: "obs-what", id: "observation_what_#{obs_data[:id]}")
-  end
-
-  def caption_image_links(image_id)
-    links = []
-    links << h.original_image_link(image_id, "lightbox_link")
-    links << " | "
-    links << h.image_exif_link(image_id, "lightbox_link")
-    h.content_tag(:div, class: "caption-image-links my-3") do
-      h.safe_join(links)
-    end
-  end
-
-  def lb_link(lb_url, lb_id, lb_caption)
-    icon = h.content_tag(:i, "", class: "glyphicon glyphicon-fullscreen")
-    h.link_to(icon, lb_url,
-              class: "theater-btn",
-              data: { lightbox: lb_id, title: lb_caption })
-  end
-
-  def vote_section_html(args, image)
-    return "" unless args[:votes] && image && User.current
-
-    h.content_tag(:div, "", class: "vote-section") do
-      h.render(partial: "shared/image_vote_links",
-               locals: { image: image })
-    end
-  end
-
-  def image_orig_name(args, image)
-    return "" unless image && show_original_name(args, image)
-
-    h.content_tag(:div, image.original_name, class: "mt-3")
-  end
-
-  def show_original_name(args, image)
-    args[:original] && image &&
-      image.original_name.present? &&
-      (h.check_permission(image) ||
-       image.user &&
-       image.user.keep_filenames == "keep_and_show")
-  end
 end

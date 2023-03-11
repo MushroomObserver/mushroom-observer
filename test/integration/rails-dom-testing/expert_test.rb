@@ -96,7 +96,8 @@ class ExpertTest < IntegrationTestCase
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
     assert_equal(albion, obs.last.location)
-    assert_equal(member_notes, obs.last.notes[Observation.other_notes_key])
+    assert_equal(member_notes,
+                 obs.last.notes[Observation.other_notes_key].strip)
     assert_true(obs.last.is_collection_location)
     assert_true(obs.last.specimen)
 
@@ -157,7 +158,8 @@ class ExpertTest < IntegrationTestCase
     assert_nil(obs.last.location)
     assert_equal(new_location, obs.last.where)
     assert_nil(obs.last.location)
-    assert_equal(new_member_notes, obs.last.notes[Observation.other_notes_key])
+    assert_equal(new_member_notes,
+                 obs.last.notes[Observation.other_notes_key].strip)
     assert_false(obs.last.is_collection_location)
     assert_false(obs.last.specimen)
 

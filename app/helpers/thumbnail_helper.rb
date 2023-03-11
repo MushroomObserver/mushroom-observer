@@ -32,28 +32,6 @@ module ThumbnailHelper
               votes: true) + image_copyright(obs.thumb_image)
   end
 
-  def propose_naming_link(id, btn_class = "btn-primary my-3")
-    render(partial: "observations/namings/propose_button",
-           locals: { obs_id: id, text: :create_naming.t,
-                     btn_class: "#{btn_class} d-inline-block" },
-           layout: false)
-  end
-
-  # NOTE: There are potentially two of these toggles for the same obs, on
-  # the obs_needing_ids index. Ideally, they'd be in sync. In reality, only
-  # the matrix_box (page) checkbox will update if the (lightbox) caption
-  # checkbox changes. Updating the lightbox checkbox to stay sync with the page
-  # is harder because the caption is not created. Updating it would only work
-  # with some additions to the lightbox JS, to keep track of the checked
-  # state on show, and cost an extra db lookup. Not worth it, IMO.
-  # - Nimmo 20230215
-  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                              label_class = "")
-    render(partial: "observation_views/mark_as_reviewed",
-           locals: { id: id, selector: selector, label_class: label_class },
-           layout: false)
-  end
-
   # Grab the copyright_text for an Image.
   def image_copyright(image)
     link = if image.copyright_holder == image.user.legal_name
@@ -75,22 +53,43 @@ module ThumbnailHelper
             { class: classes, remote: true, onclick: "MOEvents.whirly();" })
   end
 
-  # Create an image link vote, where vote param is vote number ie: 3
-  # Returns a form input button if the user has NOT voted this way
-  # JS is listening to any element with [data-role="image_vote"],
-  # Even though this is not an <a> tag, but an <input>, it's ok.
-  def image_vote_link(image, vote)
-    current_vote = image.users_vote(@user)
-    vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
-
-    if current_vote == vote
-      return content_tag(:span, image_vote_as_short_string(vote))
+  # NOTE: `stretched_link` might be a link to #show_obs or #show_image,
+  # but it may also be a button/input (with params[:img_id]) sending to
+  # #reuse_image or #remove_image ...or any other clickable element. Elements
+  # use .ab-fab instead of .stretched-link to keep .theater-btn clickable
+  def image_stretched_link(path, link_method)
+    case link_method
+    when :get
+      link_with_query("", path, class: stretched_link_classes)
+    when :post
+      post_button(name: "", path: path, class: stretched_link_classes)
+    when :put
+      put_button(name: "", path: path, class: stretched_link_classes)
+    when :patch
+      patch_button(name: "", path: path, class: stretched_link_classes)
+    when :delete
+      destroy_button(name: "", target: path, class: stretched_link_classes)
+    when :remote
+      link_with_query("", path, class: stretched_link_classes, remote: true)
     end
+  end
 
-    put_button(name: vote_text, remote: true,
-               path: image_vote_path(image_id: image.id, value: vote),
-               title: image_vote_as_help_string(vote),
-               data: { role: "image_vote", image_id: image.id, value: vote })
+  def stretched_link_classes
+    "image-link stretched-link"
+  end
+
+  def image_original_name(original, image)
+    return "" unless image && show_original_name(original, image)
+
+    content_tag(:div, image.original_name, class: "mt-3")
+  end
+
+  def show_original_name(original, image)
+    original && image &&
+      image.original_name.present? &&
+      (check_permission(image) ||
+       image.user &&
+       image.user.keep_filenames == "keep_and_show")
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)

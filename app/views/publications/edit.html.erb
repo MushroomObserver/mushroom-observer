@@ -8,7 +8,4 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(@publication, action: :update) do |form| %>
-  <%= render(partial: "form", locals: {form: form}) %>
-  <%= form.submit(:SAVE.t, class: "btn btn-default center-block mt-3") %>
-<% end %>
+<%= render(partial: "form", locals: { action: :update }) %>

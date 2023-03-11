@@ -8,7 +8,7 @@
                     new_species_list_upload_path(@species_list.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+  @container = :text
 
   action = species_list_path(@species_list, approved_where: @place_name)
 %>

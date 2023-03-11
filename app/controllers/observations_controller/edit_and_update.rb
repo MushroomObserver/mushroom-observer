@@ -13,7 +13,7 @@ module ObservationsController::EditAndUpdate
   #   params[:id]                       observation id
   #   params[:observation][...]         observation args
   #   params[:image][n][...]            image args
-  #   params[:log_change][:checked]     log change in RSS feed?
+  #   params[:log_change]               log change in RSS feed?
   #
   # Outputs:
   #   @observation                      populated object
@@ -137,7 +137,7 @@ module ObservationsController::EditAndUpdate
     if save_observation(@observation)
       id = @observation.id
       flash_notice(:runtime_edit_observation_success.t(id: id))
-      touch = (param_lookup([:log_change, :checked]) == "1")
+      touch = params[:log_change] == "1"
       @observation.log(:log_observation_updated, touch: touch)
     else
       @any_errors = true

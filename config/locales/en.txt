@@ -621,6 +621,9 @@
   # activate an API key
   ACTIVATE: Activate
   activate: activate
+  # apply changes
+  APPLY: Apply
+  apply: apply
   # approve a name
   APPROVE: Approve
   approve: approve
@@ -1422,11 +1425,9 @@
   edit_name_fill_in_classification_for_genus_first: You need to fill in a classification for the genus first.
   edit_lifeform_title: Edit Lifeform of [name]
   edit_lifeform_help: Check boxes of all categories which apply to this taxon.
-  edit_lifeform_save: "[:SAVE]"
   propagate_lifeform_title: Propagate Lifeform to Subtaxa of [name]
   propagate_lifeform_add: Check boxes of categories to add to all subtaxa.
   propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
-  propagate_lifeform_apply: Apply
 
   # observations/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
@@ -1454,7 +1455,7 @@
   form_comments_comment: "[:Comment]"
   form_comments_summary: "[:Summary]"
 
-  # shared/_form_description
+  # shared/_fields_for_description
   form_description_source: "[:SOURCE]"
   form_description_source_public: Public [:app_title] Description
   form_description_source_foreign: From Another [:app_title] Server
@@ -1763,7 +1764,6 @@
   name_deprecate_preferred: Preferred name
   name_deprecate_comment_summary: "[:Deprecated]"
   name_deprecate_comments: "[:Comments]"
-  name_deprecate_submit: "[:SUBMIT]"
   name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
   name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
@@ -1860,8 +1860,8 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_owner_id: View Observer's Preferred ID?
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
+  prefs_view_owner_id: "[:prefs_view_owner_id_help]"
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
@@ -1900,7 +1900,9 @@
   prefs_email_general: General Email
   prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
   prefs_email_general_features: new features come out.
+  prefs_email_general_feature: "[:prefs_email_general_features]"
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
+  prefs_email_general_question: "[:prefs_email_general_questions]"
   prefs_email_comments: "[:Comment] Email"
   prefs_email_comments_all: anyone comments on anything.
   prefs_email_comments_owner: someone comments on my observations, names, etc.

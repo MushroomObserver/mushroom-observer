@@ -1,9 +1,10 @@
 // form elements and inputs
 
-input[type=checkbox] {
-  // fixes alignment issue in firefox; bootstrap applies this only to IE9:
-  // margin-top: 1px \9;
-  margin-top: 1px;
+.checkbox,
+.radio {
+  label {
+    font-weight: $btn-font-weight;
+  }
 }
 
 input.has-error,

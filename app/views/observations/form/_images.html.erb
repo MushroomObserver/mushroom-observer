@@ -1,11 +1,11 @@
+<%# Images (already attached) section of create_observation form %>
 <%
-# Images (already attached) section of create_observation form
 good_image_ids_str = @good_images.map { |img| img.id }.join(" ")
 %>
 
 <div class="" id="observation_images">
 
-  <p class="font-weight-bold">Images:</p>
+  <%= content_tag(:p, "#{:IMAGES.t}:", class: "font-weight-bold") %>
 
   <% @good_images.each do |image| %>
 

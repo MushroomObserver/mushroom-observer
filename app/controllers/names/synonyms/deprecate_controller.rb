@@ -75,7 +75,7 @@ module Names::Synonyms
 
     def init_ivars_for_new
       @what             = params[:proposed_name].to_s.strip_squeeze
-      @comment          = params[:comment_comment].to_s.strip_squeeze
+      @comment          = params[:comment].to_s.strip_squeeze
       @list_members     = nil
       @new_names        = []
       @synonym_name_ids = []
