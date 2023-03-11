@@ -90,6 +90,7 @@ module FormsHelper
     opts = args.except(:form, :field, :label, :class, :inline)
     opts[:class] = "form-control"
 
+    args[:class] ||= ""
     args[:class] += " form-inline" if args[:inline] == true
 
     content_tag(:div, class: "form-group #{args[:class]}") do
@@ -103,6 +104,7 @@ module FormsHelper
     opts = args.except(:form, :field, :label, :class, :inline)
     opts[:class] = "form-control"
 
+    args[:class] ||= ""
     args[:class] += " form-inline" if args[:inline] == true
 
     content_tag(:div, class: "form-group #{args[:class]}") do

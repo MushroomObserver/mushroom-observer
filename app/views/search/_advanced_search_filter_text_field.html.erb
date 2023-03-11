@@ -1,4 +1,5 @@
 <%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
-<%= text_field_tag(:"content_filter_#{filter.sym}",
-                   @filter_defaults[filter.sym]) %><br/>
+<%= f.text_field(:"#{filter.sym}",
+                 value: @filter_defaults[filter.sym],
+                 class: "form-control") %><br/>
 <br/>

@@ -9,17 +9,17 @@ moves.reject!(&:is_misspelling?)
   <%= content_tag(:h4, "#{:merge_descriptions_merge_header.t}:") %>
   <%= content_tag(:p, :merge_descriptions_merge_help.t, class: "help-note") %>
 
-  <ul type="none">
+  <div class="form-group">
     <% merges.each do |desc| %>
-      <li><%= radio_with_label(form: f, field: :target, value: desc.id,
+      <%= radio_with_label(form: f, field: :target, value: desc.id,
                                label: description_title(desc),
                                checked: merges.length == 1 &&
-                                        moves.length == 0) %></li>
+                                        moves.length == 0) %>
     <% end
     if merges.empty? %>
-      <li><%= :merge_descriptions_no_others.t %></li>
+      <%= content_tag(:p, :merge_descriptions_no_others.t) %>
     <% end %>
-  </ul>
+  </div>
 
   <% if merges.any? %>
     <%= check_box_with_label(form: f, field: :delete, value: "1",

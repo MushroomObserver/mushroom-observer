@@ -48,7 +48,7 @@ if valid_names
         <%= :form_naming_valid_synonyms.t %>:<br/><%
       end %><%
       valid_names.each do |n| %>
-          <%= indent + radio_button(:chosen_name, :name_id, n.id) %>
+          <%= radio_button(:chosen_name, :name_id, n.id, class: "ml-4") %>
           <%= n.display_name.t %><br/><%
       end %>
       </span><%
@@ -79,15 +79,17 @@ elsif names&.length &.> 1
 
   <div class="alert alert-danger" id="name_messages">
     <span class="Data">
-      <%= :form_naming_multiple_names.t(name: what) %>:<br/><%
-      names.each do |n| %>
-        <%= indent + radio_button(:chosen_name, :name_id, n.id) %>
-        <%= n.display_name.t %> (<%= n.observations.size %>)<br/><%
-      end %>
+      <%= :form_naming_multiple_names.t(name: what) %>:<br/>
+      <% names.each do |n| %>
+        <%= radio_with_label(form: f, field: :chosen_name,
+                              value: :name_id, checked: n.id,
+                              label: n.display_name.t,
+                              class: "ml-4") %>
+        (<%= n.observations.size %>)<br/>
+      <% end %>
     </span>
-    <span class="help-note">
-      <%= :form_naming_multiple_names_help.t %>
-    </span><br/>
+    <%= content_tag(:div, :form_naming_multiple_names_help.t,
+                    class: "help-note") %>
   </div><!--.alert--><%
 
 end %>

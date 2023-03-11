@@ -3,7 +3,8 @@
 
   <%= submit_button(form: f, button: button.l, center: true) %>
 
-  <%= if !(partial = render(partial: "shared/form_list_feedback")).blank?
+  <%= if !(partial = render(partial: "shared/form_list_feedback",
+                            locals: { f: f })).blank?
     content_tag(:div, partial)
   end %>
 

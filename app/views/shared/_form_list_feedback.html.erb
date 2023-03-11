@@ -27,10 +27,13 @@
         approved_names = name.approved_synonyms %>
         <%= name.display_name.t %><br/>
         <% if approved_names != [] %>
-          <% approved_names.each do |other_name| %>
-            <%= indent + radio_button("chosen_approved_names", name.id,
-                                      other_name.id) %>
-            <%= other_name.display_name.t %><br/>
+          <%= fields_for(:chosen) do |f_c| %>
+            <% approved_names.each do |other_name| %>
+              <%= radio_with_label(form: f_c, field: :approved_names,
+                                  value: name.id, checked: other_name.id,
+                                  label: other_name.display_name.t,
+                                  class: "ml-4") %>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
@@ -42,18 +45,20 @@
   <div class="Errors" id="ambiguous_names">
     <p>
       <b><%= :form_species_lists_multiple_names.t %>:</b><br/>
-      <span class="help-note">
-        <%= :form_species_lists_multiple_names_help.t %>
-      </span>
+      <%= content_tag(:span, :form_species_lists_multiple_names_help.t,
+                      class: "help-note") %>
     </p>
     <p class="Data">
       <% @multiple_names.each do |name| %>
         <%= name.display_name.t %><br/>
-        <% name.other_authors.each do |other_name| %>
-          <%= indent + radio_button("chosen_multiple_names", name.id,
-                                    other_name.id) %>
-          <%= other_name.display_name.t %>
+        <%= fields_for(:chosen) do |f_c| %>
+          <% name.other_authors.each do |other_name| %>
+            <%= radio_with_label(form: f_c, field: :multiple_names,
+                                value: name.id, checked: other_name.id,
+                                label: other_name.display_name.t,
+                                class: "ml-4") %>
             (<%= other_name.observations.count %>)<br/>
+          <% end %>
         <% end %>
       <% end %>
     </p>

@@ -1,62 +1,67 @@
 <%
   @title = :app_advanced_search.t
+  models = [
+    [:OBSERVATIONS.l, :observation],
+    # temporarily disabled for performance
+    # 2021-09-12 JDC
+    # [:IMAGES.l, :image],
+    [:LOCATIONS.l, :location],
+    [:NAMES.l, :name],
+  ]
 %>
 
 <p class="help-block"><%= :advanced_search_caveat.t %></p>
 
-<%= form_tag(action: :advanced, method: :get) do %>
-  <p>
-    <%= submit_tag(:advanced_search_submit.l,
-                    class: "btn btn-default center-block") %>
-  </p>
+<%= form_with(scope: :search, url: { action: :advanced },
+              method: :get) do |f| %>
+
+  <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
 
   <div class="form-group">
-    <%= label_tag(:search_model, :advanced_search_result_type.t + ":") %>
-    <span class="help"><%= :advanced_search_result_type_help.t %></span><br/>
-    <%= select(:search, :model, [
-                                  [:OBSERVATIONS.l, :observation],
-                                  # temporarily disabled for performance
-                                  # 2021-09-12 JDC
-                                  # [:IMAGES.l, :image],
-                                  [:LOCATIONS.l, :location],
-                                  [:NAMES.l, :name],
-                                ]) %>
+    <%= f.label(:model, :advanced_search_result_type.t + ":") %>
+    <%= content_tag(:span, :advanced_search_result_type_help.t,
+                    class: "help") %><br/>
+    <%= f.select(:model, models, class: "form-control") %>
   </div>
 
   <div class="form-group">
-    <%= label_tag(:search_name, :NAME.t + ":") %>
-    <span class="help"><%= :advanced_search_name_help.t %></span>
-    <%= text_field(:search, :name, class: "form-control") %>
+    <%= f.label(:name, :NAME.t + ":") %>
+    <%= content_tag(:span, :advanced_search_name_help.t, class: "help") %>
+    <%= f.text_field(:name, class: "form-control") %>
     <% turn_into_name_auto_completer(:search_name, primer: Name.primer,
                                       token: " OR ") %>
   </div>
 
   <div class="form-group">
-    <%= label_tag(:search_user, :OBSERVER.t + ":") %>
-    <span class="help"><%= :advanced_search_observer_help.t %></span>
-    <%= text_field(:search, :user, class: "form-control") %>
+    <%= f.label(:user, :OBSERVER.t + ":") %>
+    <%= content_tag(:span, :advanced_search_observer_help.t,
+                    class: "help") %>
+    <%= f.text_field(:user, class: "form-control") %>
     <% turn_into_user_auto_completer(:search_user, primer: User.primer,
                                       token: " OR ") %>
   </div>
 
   <div class="form-group">
-    <%= label_tag(:search_location, :LOCATION.t + ":") %>
-    <span class="help"><%= :advanced_search_location_help.t %></span>
-    <%= text_field(:search, :location, class: "form-control") %>
+    <%= f.label(:location, :LOCATION.t + ":") %>
+    <%= content_tag(:span, :advanced_search_location_help.t,
+                    class: "help") %>
+    <%= f.text_field(:location, class: "form-control") %>
     <% turn_into_location_auto_completer(:search_location,
                                           primer: Location.primer,
                                           token: " OR ") %>
   </div>
 
   <div class="form-group">
-    <%= label_tag(:search_content, :advanced_search_content.t + ":") %>
-    <span class="help"><%= :advanced_search_content_help.t %></span>
-    <%= text_field(:search, :content, class: "form-control") %>
-    <p class="help-block"><%= :advanced_search_content_notes.t %></p>
+    <%= f.label(:content, :advanced_search_content.t + ":") %>
+    <%= content_tag(:span, :advanced_search_content_help.t,
+                    class: "help") %>
+    <%= f.text_field(:content, class: "form-control") %>
+    <%= content_tag(:p, :advanced_search_content_notes.t,
+                    class: "help-block") %>
   </div>
 
-  <%= render partial: "advanced_search_filters" %>
+  <%= render(partial: "advanced_search_filters", locals: { f: f }) %>
 
-  <%= submit_tag(:advanced_search_submit.l,
-                 class: "btn btn-default center-block") %>
+  <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
+
 <% end %>

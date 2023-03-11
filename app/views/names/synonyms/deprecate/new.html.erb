@@ -8,6 +8,15 @@
 
   action = { controller: "/names/synonyms/deprecate", action: :create,
              id: @name.id, approved_name: @what }
+
+  feedback_locals = {
+    button_name: :SUBMIT.l,
+    what: @what,
+    valid_names: @valid_names,
+    suggest_corrections: @suggest_corrections,
+    parent_deprecated: @parent_deprecated,
+    names: @names
+  }
 %>
 
 <%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
@@ -15,12 +24,7 @@
   <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
   <%= render(partial: "shared/form_name_feedback",
-             locals: { button_name: :SUBMIT.l,
-                       what: @what,
-                       valid_names: @valid_names,
-                       suggest_corrections: @suggest_corrections,
-                       parent_deprecated: @parent_deprecated,
-                       names: @names }) if @what.present? %>
+             locals: feedback_locals.merge({ f: f })) if @what.present? %>
 
   <%= text_field_with_label(form: f, field: :proposed_name, inline: true,
                             label: "#{:name_deprecate_preferred.t}:",
