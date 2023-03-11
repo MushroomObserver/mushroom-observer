@@ -37,7 +37,8 @@ filename_values = [
 
 <div class="form-group mt-3">
   <%= f.label(:license_id, :License.t + ":") %>
-  <%= content_tag(:span, "(#{:prefs_license_note.t})", class: "help-note") %>
+  <%= content_tag(:span, ["(", :prefs_license_note.t, ")"].safe_join,
+                  class: "help-note") %>
   <br/>
   <%= f.select(:license_id, @licenses, {},
                 { class: "form-control d-inline-block w-auto mr-3" }) %>
