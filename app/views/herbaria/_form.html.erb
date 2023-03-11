@@ -1,6 +1,6 @@
 <%= form_with(model: @herbarium, id: "herbarium_form") do |f| %>
 
-  <%= f.submit(button_name.t, class: %w[btn btn-default center-block mt-3]) %>
+  <%= submit_button(form: f, button: button_name.t, center: true) %>
 
   <%= f.hidden_field :back, value: @back %>
   <%= f.hidden_field :q, value: get_query_param %>
@@ -12,8 +12,8 @@
   </div>
 
   <% if in_admin_mode? %>
-    <%= inline_label_text_field(form: f, field: :personal_user_name,
-                                text: :edit_herbarium_admin_make_personal.t) %>
+    <%= text_field_with_label(form: f, field: :personal_user_name, inline: true,
+                              label: :edit_herbarium_admin_make_personal.t) %>
     <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
 
     <% if button_name != :CREATE %>
@@ -39,7 +39,7 @@
     <% if button_name == :CREATE || @herbarium.can_make_personal?(@user) %>
       <div class="form-group">
         <%= check_box_with_label(form: f, field: :personal,
-                                 text: :create_herbarium_personal.t) %>
+                                 label: :create_herbarium_personal.t) %>
         <%= help_block_with_arrow("up") do %>
           <%= :create_herbarium_personal_help.t(
                 name: @user.personal_herbarium_name
@@ -52,8 +52,8 @@
   <% if !@herbarium.personal_user_id %>
     <div class="form-group">
       <div class="form-inline">
-        <%= inline_label_text_field(form: f, field: :code, size: 8,
-                                    text: "#{:create_herbarium_code.t}:") %>
+        <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
+                                  label: "#{:create_herbarium_code.t}:") %>
         <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
       </div>
       <%= help_block_with_arrow("up") do %>
@@ -89,6 +89,6 @@
     <%= f.text_area(:description, rows: 10, class: "form-control") %>
   </div>
 
-  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: button_name.t, center: true) %>
 
 <% end %>

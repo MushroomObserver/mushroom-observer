@@ -16,7 +16,7 @@
 <div class="form-group">
   <%= check_box_with_label(form: f, field: :deprecate_all, value: "1",
                            checked: @deprecate_all && "checked",
-                           text: :form_synonyms_deprecate_synonyms.t) %>
+                           label: :form_synonyms_deprecate_synonyms.t) %>
   <%= content_tag(:p, :form_synonyms_deprecate_synonyms_help.t,
                   class: "help-block") %>
 </div>

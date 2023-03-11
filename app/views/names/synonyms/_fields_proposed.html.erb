@@ -11,7 +11,7 @@
         <% unless current_synonyms.member?(n) %>
           <%= check_box_with_label(form: fps, field: n.id,
                                    value: "1", checked: "0",
-                                   text: link_to(n.display_name.t,
+                                   label: link_to(n.display_name.t,
                                                  name_path(n.id))) %>
         <% end %>
       <% end %>

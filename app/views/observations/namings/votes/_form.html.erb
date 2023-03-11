@@ -14,12 +14,16 @@ end
 <%= form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
               local: false, id: "naming_vote_#{naming.id}",
               class: "naming-vote-form") do |f| %>
+
   <%= fields_for(:vote) do |fv| %>
+
     <%= fv.select(:value, menu, {},
                   { class: "form-control w-100",
                     onchange: "Rails.fire(this.closest('form'), 'submit')",
                     data: { role: "change_vote", id: naming.id } }) %>
   <% end %>
-  <%= f.submit(:show_namings_cast.l, class: "btn btn-default w-100",
-               data: { role: "save_vote" }) %>
+
+  <%= submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+                    data: { role: "save_vote" }) %>
+
 <% end %>

@@ -1,7 +1,7 @@
 <%= form_with(url: action, method: :put,
               id: "description_permissions_form") do |f| %>
 
-  <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block my-3") %>
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
   <table class="w-100 table-striped table-description-permissions">
     <thead>
@@ -109,6 +109,6 @@
     </tbody>
   </table>
 
-  <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
 <% end %>

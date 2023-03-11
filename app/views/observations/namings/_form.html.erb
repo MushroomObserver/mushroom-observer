@@ -20,10 +20,10 @@ end
 <%= form_with(model: @naming, url: url, method: method, local: local,
               id: "naming_form") do |f| %>
 
-  <%= f.submit(button_name, class: "btn btn-default center-block mt-5") %>
+  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/namings/fields",
-             locals: { action: action, button_name: button_name,
+             locals: { f: f, action: action, button_name: button_name,
                        show_reasons: true }) %>
 
 <% end # form %>

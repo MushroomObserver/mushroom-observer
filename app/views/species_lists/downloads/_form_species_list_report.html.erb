@@ -5,21 +5,19 @@
 
   <p><%= :download_observations_format.t %>:</p>
 
-  <ul type="none">
-    <li>
-      <%= radio_button_tag(:type, :txt, @type == "txt") %>
-      <%= :species_list_show_save_as_txt.t %>
-    </li>
-    <li>
-      <%= radio_button_tag(:type, :rtf, @type == "rtf") %>
-      <%= :species_list_show_save_as_rtf.t %>
-    </li>
-    <li>
-      <%= radio_button_tag(:type, :csv, @type == "csv") %>
-      <%= :species_list_show_save_as_csv.t %>
-    </li>
-  </ul>
+  <div class="form-group">
+    <%= radio_with_label(form: f, field: :type, value: :txt,
+                          checked: @type == "txt",
+                          label: :species_list_show_save_as_txt.t) %>
+    <%= radio_with_label(form: f, field: :type, value: :rtf,
+                          checked: @type == "rtf",
+                          label: :species_list_show_save_as_rtf.t) %>
+    <%= radio_with_label(form: f, field: :type, value: :csv,
+                          checked: @type == "csv",
+                          label: :species_list_show_save_as_csv.t) %>
+  </div>
 
-  <%= f.submit(:species_list_report_button.l, class: "btn btn-default") %>
+  <%= submit_button(form: f, button: :species_list_report_button.l,
+                    center: true) %>
 
 <% end %>

@@ -9,26 +9,27 @@ moves.reject!(&:is_misspelling?)
   <%= content_tag(:h4, "#{:merge_descriptions_merge_header.t}:") %>
   <%= content_tag(:p, :merge_descriptions_merge_help.t, class: "help-note") %>
 
-  <ul type="none">
+  <div class="form-group">
     <% merges.each do |desc| %>
-      <li><%= radio_button_tag(:target, desc.id,
-                                merges.length == 1 && moves.length == 0) %>
-          <%= description_title(desc) %></li>
+      <%= radio_with_label(form: f, field: :target, value: desc.id,
+                               label: description_title(desc),
+                               checked: merges.length == 1 &&
+                                        moves.length == 0) %>
     <% end
     if merges.empty? %>
-      <li><%= :merge_descriptions_no_others.t %></li>
+      <%= content_tag(:p, :merge_descriptions_no_others.t) %>
     <% end %>
-  </ul>
+  </div>
 
   <% if merges.any? %>
     <%= check_box_with_label(form: f, field: :delete, value: "1",
                              checked: description.is_admin?(@user),
-                             text: :merge_descriptions_delete_after.t) %>
+                             label: :merge_descriptions_delete_after.t) %>
   <% end %>
 
   <% button = merges.any? ? :merge_descriptions_merge.l : nil
   if button %>
-    <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+    <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
   <% end %>
 
 <% end %>

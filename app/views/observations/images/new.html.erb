@@ -19,8 +19,7 @@
 
   <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
 
-  <%= f.submit(:image_add_upload.l,
-               class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :image_add_upload.l, center: true) %>
 
   <%= render(partial: "observations/images/form/fields_for_upload") %>
 
@@ -28,10 +27,10 @@
              locals: { f: f, leave_out_original_file_name: true }) %>
 
   <% if @projects.any? %>
-    <%= render(partial: "observations/images/form/project", 
+    <%= render(partial: "observations/images/form/project",
                collection: @projects) %>
   <% end %>
 
-  <%= f.submit(:image_add_upload.l,
-               class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :image_add_upload.l, center: true) %>
+
 <% end %>

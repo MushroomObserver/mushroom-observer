@@ -15,6 +15,6 @@
     <%= f.text_field(:group_name, { value: "", class: "form-control" }) %>
   </div>
 
-  <%= f.submit(:ADD.t, class: "btn btn-default mt-3 center-block") %>
+  <%= submit_button(form: f, button: :ADD.t, center: true) %>
 
 <% end %>

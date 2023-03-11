@@ -2,10 +2,9 @@
 # Note this uses a specialized matrix box here, not using the general partial.
 %>
 
-<%= form_with(url: form_action, method: :put) do |form| %>
+<%= form_with(url: form_action, method: :put) do |f| %>
 
-  <%= form.submit(:image_remove_remove.l,
-                  class: "btn btn-default d-block mx-auto my-3") %>
+  <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
   <ul class="row list-unstyled mt-3">
 
@@ -32,8 +31,7 @@
 
   </ul>
 
-  <%= form.submit(:image_remove_remove.l,
-                  class: "btn btn-default d-block mx-auto my-3") %>
+  <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
 <% end %>
 

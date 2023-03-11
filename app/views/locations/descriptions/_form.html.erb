@@ -5,7 +5,7 @@ presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
 <%= form_with(scope: :description, url: presenter.url, method: presenter.method,
               id: "location_description_form") do |f| %>
 
-  <%= f.submit(presenter.button, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: presenter.button, center: true) %>
 
   <%= render(partial: "shared/fields_for_description", locals: { f: f }) %>
 
@@ -22,7 +22,7 @@ presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
 
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= f.submit(presenter.button, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: presenter.button, center: true) %>
 
   <% if (action == :update) && @merge %>
     <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>

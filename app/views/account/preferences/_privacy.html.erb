@@ -12,7 +12,7 @@ end
 filename_values = [
   [:prefs_keep_image_filenames_toss.l, "toss"],
   [:prefs_keep_image_filenames_keep_but_hide.l, "keep_but_hide"],
-  [:prefs_keep_image_filenames_keep_and_show.l, "keep_and_show"]
+  [:prefs_keep_image_filenames_keep_and_show.l, "keep_and_show"],
 ]
 %>
 
@@ -37,9 +37,11 @@ filename_values = [
 
 <div class="form-group mt-3">
   <%= f.label(:license_id, :License.t + ":") %>
-  <span class="help-note">(<%= :prefs_license_note.t %>)</span><br/>
+  <%= content_tag(:span, ["(", :prefs_license_note.t, ")"].safe_join,
+                  class: "help-note") %>
+  <br/>
   <%= f.select(:license_id, @licenses, {},
                 { class: "form-control d-inline-block w-auto mr-3" }) %>
 </div>
 
-<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

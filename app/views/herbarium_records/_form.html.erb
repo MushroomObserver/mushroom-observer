@@ -10,7 +10,7 @@ end
 <%= form_with(model: @herbarium_record, url: url_params,
               id: "herbarium_record_form") do |f| %>
 
-  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: button_name.t, center: true) %>
 
   <% if @herbarium_record.observations.count > 1 %>
     <div class="alert alert-warning">
@@ -20,7 +20,7 @@ end
 
   <div class="form-group">
     <%= f.label(:herbarium_name, :NAME.t + ":") %>
-    <span class="help-note">(<%= :required.t %>)</span>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note ml-3") %>
     <%= f.text_field(:herbarium_name, class: "form-control") %>
     <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
   </div>
@@ -28,7 +28,7 @@ end
   <div class="form-group">
     <%= f.label(:initial_det,
                 "#{:herbarium_record_initial_det.t}:".html_safe) %>
-    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= content_tag(:span, "(#{:optional.t})", class: "help-note ml-3") %>
     <%= f.text_field(:initial_det, class:"form-control") %>
   </div>
 
@@ -36,7 +36,7 @@ end
     <%= f.label(:accession_number,
                 "#{:herbarium_record_accession_number.t}:".html_safe) %>
     <%= f.text_field(:accession_number, class:"form-control") %>
-    <span class="help-note">(<%= :required.t %>)</span>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
   </div>
 
   <%= help_block_with_arrow("up") do %>
@@ -45,10 +45,10 @@ end
 
   <div class="form-group">
     <%= f.label(:notes, :NOTES.t + ":") %>
-    <span class="help-note">(<%= :optional.t %>)</span>
+    <%= content_tag(:span, "(#{:optional.t})", class: "help-note ml-3") %>
     <%= f.text_area(:notes, class: "form-control", rows: 6) %>
   </div>
 
-  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: button_name.t, center: true) %>
 
 <% end %>

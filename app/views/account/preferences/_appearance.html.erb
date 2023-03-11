@@ -64,4 +64,4 @@ image_sizes = options_for_select(
   <%= f.select(:image_size, image_sizes, {}, { class: "form-control" }) %>
 </div>
 
-<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
