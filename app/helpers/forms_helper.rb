@@ -45,7 +45,7 @@ module FormsHelper
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
-    form.submit(button, opts)
+    args[:form].submit(args[:button], opts)
   end
 
   # Bootstrap checkbox: form, field, (label) text, class,
