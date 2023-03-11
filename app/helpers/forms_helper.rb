@@ -38,6 +38,13 @@ module FormsHelper
     end
   end
 
+  def center_form_submit(**args)
+    opts = args.except(:form, :button, :class)
+    opts[:class] = "btn btn-default center-block my-3 #{args[:class]}"
+
+    form.submit(button.t, opts)
+  end
+
   # Bootstrap checkbox: form, field, (label) text, class,
   # checkbox options: checked, value, disabled, data, etc.
   # NOTE: Only need to set `checked` if state not inferrable from db field name
