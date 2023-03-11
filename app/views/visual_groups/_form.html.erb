@@ -17,23 +17,23 @@
 
   <div>
     <div class="form-group">
-      <%= form.label :name %>
-      <%= form.text_field(:name, size: 40) %>
-      <%= :VISUAL_GROUP.t %>
+      <%= form.label(:name) %>
+      <div class="form-inline">
+        <%= form.text_field(:name, size: 40, class: "form-control") %>
+        <%= content_tag(:span, :VISUAL_GROUP.t, class: "ml-3") %>
+      </div>
     </div>
 
     <div class="form-group">
-      <%= form.label :description %><br>
-      <%= form.text_area(:description, cols: 60, rows: 10) %>
+      <%= form.label(:description) %><br>
+      <%= form.text_area(:description, cols: 60, rows: 10,
+                         class: "form-control") %>
     </div>
 
-    <div class="form-group">
-      <%= form.label :approved %>
-      <%= form.check_box :approved %>
-    </div>
+    <%= check_box_with_label(form: form, field: :approved, text: :APPROVED.t) %>
   </div>
 
   <div class="actions">
-    <%= form.submit %>
+    <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
   </div>
 <% end %>

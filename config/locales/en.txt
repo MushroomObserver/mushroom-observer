@@ -1425,11 +1425,9 @@
   edit_name_fill_in_classification_for_genus_first: You need to fill in a classification for the genus first.
   edit_lifeform_title: Edit Lifeform of [name]
   edit_lifeform_help: Check boxes of all categories which apply to this taxon.
-  edit_lifeform_save: "[:SAVE]"
   propagate_lifeform_title: Propagate Lifeform to Subtaxa of [name]
   propagate_lifeform_add: Check boxes of categories to add to all subtaxa.
   propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
-  propagate_lifeform_apply: Apply
 
   # observations/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
