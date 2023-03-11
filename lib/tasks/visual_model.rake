@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 namespace :visual_model do
-  desc "Create a VisualModel from a list of names"
-  task(create: :environment) do
+  desc "Update a VisualModel from a list of updates"
+  task(update: :environment) do
     Rails.logger = Logger.new($stdout)
     model_name = ENV.fetch("MODEL_NAME", nil)
-    name_list = ENV.fetch("NAME_LIST", nil)
-    report_create_usage unless model_name && name_list && File.file?(name_list)
-    build_from_file(model_name, name_list)
+    update_list = ENV.fetch("UPDATE_LIST", nil)
+    unless model_name && update_list && File.file?(update_list)
+      report_update_usage
+    end
+    build_from_file(model_name, update_list)
   end
 
   desc "Export VisualGroup"
@@ -21,16 +23,16 @@ namespace :visual_model do
   end
 end
 
-# visual_model:create support
+# visual_model:update support
 
-def report_create_usage
+def report_update_usage
   Rails.logger.error(
-    "\nThis task expects the MODEL_NAME and NAME_LIST to be given\n" \
-    "through environment variables, and for the value of NAME_LIST\n" \
+    "\nThis task expects the MODEL_NAME and UPDATE_LIST to be given\n" \
+    "through environment variables, and for the value of UPDATE_LIST\n" \
     "to be an existing file.\n" \
     "\nExample usage:\n" \
-    "MODEL_NAME=MyModel NAME_LIST=./name_list rails visual_model:create\n" \
-    "\nExample lines from NAME_LIST:\n" \
+    "MODEL_NAME=MyModel UPDATE_LIST=./update_list rails visual_model:update\n" \
+    "\nExample lines from UPDATE_LIST:\n" \
     "Aseroe rubra # Add all images for a species to visual group\n" \
     "Bovista pila, Cyathus olla # Multiple species/visual groups\n" \
     "1234 Lepista nuda # Include specific image\n" \
@@ -39,10 +41,10 @@ def report_create_usage
   exit
 end
 
-def build_from_file(model_name, name_list)
+def build_from_file(model_name, update_list)
   model = VisualModel.find_or_create_by(name: model_name)
   if model.save
-    File.open(name_list) do |file|
+    File.open(update_list) do |file|
       file.readlines.each do |line|
         process_line(model, line)
       end
@@ -133,12 +135,12 @@ end
 
 def report_export_usage
   Rails.logger.error(
-    "\nThis task expects the MODEL_NAME and the OUTPUT_FILE to be given\n" \
-    "  through environment variables.  GROUP_NAMES can be given to limit\n" \
-    "  the export.\n" \
+    "\nThis task expects the MODEL_NAME and the OUTPUT_FILE to be given\n  " \
+    "through environment variables.  GROUP_NAMES can be given to limit\n  " \
+    "the export.\n" \
     "\nExample usage:\n" \
-    "MODEL_NAME=MyModel OUTPUT_FILE=./output_list GROUP_NAMES='Microscopy, Text'" \
-    " rails visual_model:export"
+    "MODEL_NAME=MyModel OUTPUT_FILE=./output_list " \
+    "GROUP_NAMES='Microscopy, Text' rails visual_model:export"
   )
   exit
 end
