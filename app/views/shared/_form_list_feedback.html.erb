@@ -6,7 +6,7 @@
         <%= :form_list_feedback_missing_names_help.t %>
       </span>
     </p>
-    <p class="Data">
+    <p>
       <% @new_names.each do |n| %>
       <br/><%= indent + h(n) %>
       <% end %>
@@ -22,7 +22,7 @@
         <%= :form_species_lists_deprecated_help.t %>
       </span>
     </p>
-    <p class="Data">
+    <p>
       <% @deprecated_names.each do |name|
         approved_names = name.approved_synonyms %>
         <%= name.display_name.t %><br/>
@@ -48,7 +48,7 @@
       <%= content_tag(:span, :form_species_lists_multiple_names_help.t,
                       class: "help-note") %>
     </p>
-    <p class="Data">
+    <p>
       <% @multiple_names.each do |name| %>
         <%= name.display_name.t %><br/>
         <%= fields_for(:chosen_multiple_names) do |f_c| %>

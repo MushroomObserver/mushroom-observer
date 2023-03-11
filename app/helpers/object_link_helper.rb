@@ -16,7 +16,7 @@ module ObjectLinkHelper
   def where_string(where, count = nil)
     result = where.t
     result += " (#{count})" if count
-    content_tag(:span, result, class: "Data")
+    content_tag(:span, result)
   end
 
   # Wrap location name in link to show_location / observations/index.

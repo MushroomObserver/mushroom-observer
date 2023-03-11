@@ -19,7 +19,7 @@ if valid_names
   flash_warning(:form_observations_there_is_a_problem_with_name.t) %>
 
   <div class="alert alert-warning" id="name_messages">
-    <span class="Data"><%=
+    <span><%=
     if suggest_corrections || names.blank?
       :form_naming_not_recognized.t(name: what)
     elsif parent_deprecated
@@ -43,7 +43,7 @@ if valid_names
                                              name: what) %>
         </span><br/><%
       end %>
-      <span class="Data"><%
+      <span><%
       if !suggest_corrections && !parent_deprecated %>
         <%= :form_naming_valid_synonyms.t %>:<br/><%
       end %>
@@ -69,7 +69,7 @@ elsif names&.length == 0
   flash_error(:form_observations_there_is_a_problem_with_name.t) %>
 
   <div class="alert alert-danger" id="name_messages">
-    <span class="Data">
+    <span>
       <%= :form_naming_not_recognized.t(name: what) %>
     </span><br/>
     <span class="help-note">
@@ -82,18 +82,16 @@ elsif names&.length &.> 1
   flash_error(:form_observations_there_is_a_problem_with_name.t) %>
 
   <div class="alert alert-danger" id="name_messages">
-    <span class="Data">
-      <%= :form_naming_multiple_names.t(name: what) %>:<br/>
-      <%= fields_for(:chosen_name) do |f_c| %>
-        <% names.each do |n| %>
-          <%= radio_with_label(form: f, field: :name_id,
-                                value: n.id,
-                                label: n.display_name.t,
-                                class: "ml-4") %>
-          (<%= n.observations.size %>)<br/>
-        <% end %>
+    <%= :form_naming_multiple_names.t(name: what) %>:<br/>
+    <%= fields_for(:chosen_name) do |f_c| %>
+      <% names.each do |n| %>
+        <%= radio_with_label(form: f, field: :name_id,
+                              value: n.id,
+                              label: n.display_name.t,
+                              class: "ml-4") %>
+        (<%= n.observations.size %>)<br/>
       <% end %>
-    </span>
+    <% end %>
     <%= content_tag(:div, :form_naming_multiple_names_help.t,
                     class: "help-note") %>
   </div><!--.alert--><%
