@@ -11,14 +11,14 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
 
   <% if in_admin_mode? %>
     <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
-                             text: :form_names_locked.t) %>
+                             label: :form_names_locked.t) %>
   <% end %>
 
   <% if !@name.locked || in_admin_mode? %>
     <div class="form-group mt-3">
-      <%= inline_label_text_field(form: f, field: :icn_id,
-                                  text: "#{:form_names_icn_id.t}:",
-                                  size: 8) %>
+      <%= text_field_with_label(form: f, field: :icn_id,
+                                label: "#{:form_names_icn_id.t}:",
+                                size: 8, inline: true) %>
       <%= content_tag(:p, :form_names_identifier_help.t, class: "help-block") %>
     </div>
 
@@ -35,16 +35,16 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
     </div>
 
     <div class="form-group pt-3">
-      <%= inline_label_text_field(form: f, field: :text_name,
-                                  text: "#{:form_names_text_name.t}:",
-                                  value: @name_string,
-                                  data: { autofocus: true }) %>
+      <%= text_field_with_label(form: f, field: :text_name,
+                                label: "#{:form_names_text_name.t}:",
+                                value: @name_string, inline: true,
+                                data: { autofocus: true }) %>
       <%= content_tag(:p, :form_names_text_name_help.t, class: "help-block") %>
     </div>
 
     <div class="form-group mt-3">
-      <%= inline_label_text_field(form: f, field: :author,
-                                  text: "#{:Authority.t}:") %>
+      <%= text_field_with_label(form: f, field: :author,
+                                label: "#{:Authority.t}:", inline: true) %>
       <%= content_tag(:p, :form_names_author_help.t, class: "help-block") %>
     </div>
 
@@ -65,8 +65,8 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
   <% end %>
 
   <div class="form-group mt-3">
-    <%= inline_label_text_field(form: f, field: :citation,
-                                text: "#{:Citation.t}:") %>
+    <%= text_field_with_label(form: f, field: :citation,
+                              label: "#{:Citation.t}:", inline: true) %>
     <%= content_tag(:p, class: "help-block") do
       concat(:form_names_citation_help.t)
       concat(:form_names_citation_textilize_note.t)
@@ -77,10 +77,11 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
     <div class="my-4 mx-0">
       <%= check_box_with_label(form: f, field: :misspelling,
                                checked: @misspelling,
-                               text: :form_names_misspelling.t) %>
-      <%= inline_label_text_field(form: f,
-            field: :correct_spelling, value: @correct_spelling,
-            text: "#{:form_names_misspelling_it_should_be.t}:") %>
+                               label: :form_names_misspelling.t) %>
+      <%= text_field_with_label(
+            form: f, field: :correct_spelling, value: @correct_spelling,
+            label: "#{:form_names_misspelling_it_should_be.t}:", inline: true
+          ) %>
       <%= content_tag(:p, :form_names_misspelling_note.t,
                       class: "help-block") %>
       <% turn_into_name_auto_completer(:name_correct_spelling,

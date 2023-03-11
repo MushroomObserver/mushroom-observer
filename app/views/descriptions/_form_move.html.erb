@@ -13,15 +13,16 @@ moves.reject!(&:is_misspelling?)
     <ul type="none">
       <% moves.sort_by.each do |name|
         [ (a.deprecated ? 1 : 0), a.sort_name, a.id ] %>
-        <li><%= radio_button_tag(:target, name.id,
-                  merges.length == 0 && moves.length == 1) %>
-            <%= name.display_name.t %></li>
+        <li><%= radio_with_label(form: f, field: :target, value: name.id,
+                                 label: name.display_name.t,
+                                 checked: merges.length == 0 &&
+                                          moves.length == 1) %></li>
       <% end %>
     </ul>
 
     <%= check_box_with_label(form: f, field: :delete, value: "1",
                              checked: description.is_admin?(@user),
-                             text: :merge_descriptions_delete_after.t) %>
+                             label: :merge_descriptions_delete_after.t) %>
   <% end %>
 
   <% button = moves.any? ? :merge_descriptions_move.l : nil

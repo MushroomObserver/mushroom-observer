@@ -20,7 +20,7 @@
   </div>
 
   <%= check_box_with_label(form: f, field: :remember_me, checked: @remember,
-                           class: "mt-3", text: :login_remember_me.t) %>
+                           class: "mt-3", label: :login_remember_me.t) %>
 
   <%= submit_button(form: f, button: :login_login.l, center: true) %>
 

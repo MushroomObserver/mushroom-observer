@@ -16,7 +16,7 @@
 
   <%= fields_for(:name_tracker) do |fnt| %>
     <%= check_box_with_label(form: fnt, field: :note_template_enabled,
-                             class: "mt-5", text: :email_tracking_note.t) %>
+                             class: "mt-5", label: :email_tracking_note.t) %>
 
     <%= content_tag(:div, :email_tracking_note_help.t,
                     class: "help-note mt-2 mb-5") %>

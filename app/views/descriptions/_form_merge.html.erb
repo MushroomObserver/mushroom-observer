@@ -11,9 +11,10 @@ moves.reject!(&:is_misspelling?)
 
   <ul type="none">
     <% merges.each do |desc| %>
-      <li><%= radio_button_tag(:target, desc.id,
-                                merges.length == 1 && moves.length == 0) %>
-          <%= description_title(desc) %></li>
+      <li><%= radio_with_label(form: f, field: :target, value: desc.id,
+                               label: description_title(desc),
+                               checked: merges.length == 1 &&
+                                        moves.length == 0) %></li>
     <% end
     if merges.empty? %>
       <li><%= :merge_descriptions_no_others.t %></li>
@@ -23,7 +24,7 @@ moves.reject!(&:is_misspelling?)
   <% if merges.any? %>
     <%= check_box_with_label(form: f, field: :delete, value: "1",
                              checked: description.is_admin?(@user),
-                             text: :merge_descriptions_delete_after.t) %>
+                             label: :merge_descriptions_delete_after.t) %>
   <% end %>
 
   <% button = merges.any? ? :merge_descriptions_merge.l : nil

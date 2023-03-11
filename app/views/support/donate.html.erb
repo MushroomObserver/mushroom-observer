@@ -28,28 +28,29 @@ javascript_include "donate"
     <% amounts.each do |a| %>
       <div class="col-xs-3">
         <%= radio_with_label(form: f, field: :amount, value: a,
-                             text: "$#{a.to_i}") %>
+                             label: "$#{a.to_i}") %>
       </div>
     <% end %>
   </div>
 
   <%= radio_with_label(form: f, field: :amount, value: "other",
-                       text: "#{:donate_other.t}: ",
+                       label: "#{:donate_other.t}: ",
                        class: "d-inline-block") %>
-  <%= inline_label_text_field(form: f, field: :other_amount, size: 7,
-                              text: "$ ", class: "d-inline-block ml-4") %>
+  <%= text_field_with_label(form: f, field: :other_amount, size: 7,
+                            label: "$ ", class: "d-inline-block ml-4",
+                            inline: true) %>
 
   <%= check_box_with_label(form: f, field: :recurring,
-                           text: :donate_recurring.t) %>
+                           label: :donate_recurring.t) %>
 
-  <%= inline_label_text_field(form: f, field: :who, size: 30,
-                              text: :donate_who.t) %>
+  <%= text_field_with_label(form: f, field: :who, size: 30,
+                            label: :donate_who.t, inline: true) %>
 
   <%= check_box_with_label(form: f, field: :anonymous,
-                           text: :donate_anonymous.t) %>
+                           label: :donate_anonymous.t) %>
 
-  <%= inline_label_text_field(form: f, field: :email, size: 30,
-                              text: :donate_email.t) %>
+  <%= text_field_with_label(form: f, field: :email, size: 30,
+                            label: :donate_email.t, inline: true) %>
 
   <%= submit_button(form: f, button: :donate_confirm.t, center: true) %>
 

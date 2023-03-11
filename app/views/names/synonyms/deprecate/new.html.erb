@@ -22,20 +22,20 @@
                        parent_deprecated: @parent_deprecated,
                        names: @names }) if @what.present? %>
 
-  <%= inline_label_text_field(form: f, field: :proposed_name,
-                              text: "#{:name_deprecate_preferred.t}:",
-                              value: @what, data: { autofocus: true }) %>
+  <%= text_field_with_label(form: f, field: :proposed_name, inline: true,
+                            label: "#{:name_deprecate_preferred.t}:",
+                            value: @what, data: { autofocus: true }) %>
   <%= content_tag(:div, :name_deprecate_preferred_help.tp,
                   class: "help-note") %>
   <% turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
 
   <%= check_box_with_label(form: f, field: :is_misspelling,
                            checked: @misspelling,
-                           text: :form_names_misspelling.t) %>
+                           label: :form_names_misspelling.t) %>
 
-  <%= inline_label_text_area(form: f, field: :comment,
-                             text: "#{:name_deprecate_comments.t}:",
-                             value: @comment, cols: 80, rows: 5) %>
+  <%= text_area_with_label(form: f, field: :comment, inline: true,
+                           label: "#{:name_deprecate_comments.t}:",
+                           value: @comment, cols: 80, rows: 5) %>
   <%= content_tag(:div, class: "help-note") do
     concat(:name_deprecate_comments_help.tp(
              name: @name.display_name.chomp(".")

@@ -17,7 +17,7 @@ button = (action == :create) ? :CREATE.t : :SAVE.t
   </div>
 
   <%= check_box_with_label(form: f, field: :peer_reviewed,
-                          text: :publication_peer_reviewed.t) %>
+                           label: :publication_peer_reviewed.t) %>
 
   <div class="form-group mt-3">
     <%= f.label(:how_helped, :publication_how_helped.t) %>
@@ -25,7 +25,7 @@ button = (action == :create) ? :CREATE.t : :SAVE.t
   </div>
 
   <%= check_box_with_label(form: f, field: :mo_mentioned,
-                          text: :publication_mo_mentioned.t) %>
+                           label: :publication_mo_mentioned.t) %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

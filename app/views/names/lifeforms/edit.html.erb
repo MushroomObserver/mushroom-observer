@@ -22,7 +22,7 @@
           <%= checked = @name.lifeform.include?(" #{word} ")
           check_box_with_label(form: f, field: word, value: "1",
                                checked: checked, class: "mt-2",
-                               text: :"lifeform_#{word}".t) %>
+                               label: :"lifeform_#{word}".t) %>
         </td>
         <td class="container-text">
           <%= :"lifeform_help_#{word}".t %>
