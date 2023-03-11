@@ -15,71 +15,102 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     }
   end
 
-  def test_herbarium_index
+  # Test of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  def test_index
     login
-    get(:index,
-        params: { herbarium_id: herbaria(:nybg_herbarium).id })
-    assert_template(:index)
+    get(:index)
+
+    assert_response(:success)
+    assert_displayed_title("Fungarium Records by Name")
+    # In results, expect 1 row per herbarium_record
+    assert_select("#results tr", HerbariumRecord.count,
+                  "Wrong number of Herbarium Records")
   end
 
-  def test_index_sort_by_user
-    by = "user"
+  def test_index_by_non_default_sort_order
+    by = "herbarium_name"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Fungarium Records by #{by.capitalize}")
+    assert_displayed_title("Fungarium Records by Fungarium")
   end
 
-  def test_herbarium_with_no_herbarium_records_index
-    login
-    get(:index, params: { herbarium_id: herbaria(:dick_herbarium).id })
-    assert_template(:index)
-    assert_flash_text(/No matching fungarium records found/)
-  end
-
-  def test_observation_index
-    login
-    get(:index,
-        params: { observation_id: observations(:coprinus_comatus_obs).id })
-    assert_template(:index)
-  end
-
-  def test_observation_with_no_herbarium_records_index
-    login
-    obs = observations(:strobilurus_diminutivus_obs)
-    get(:index, params: { observation_id: obs.id })
-    assert_template(:index)
-    assert_flash_text(/No matching fungarium records found/)
-  end
-
-  def test_herbarium_record_search
+  def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
+
     login
     get(:index, params: { pattern: pattern })
+
     assert_response(:success)
-    assert_template(:index)
+    assert_displayed_title("Fungarium Records Matching ‘#{pattern}’")
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", 2)
   end
 
-  def test_herbarium_record_search_with_one_herbarium_record_index
+  def test_index_pattern_with_one_matching_record
+    record = herbarium_records(:interesting_unknown)
+
     login
-    params = { pattern: herbarium_records(:interesting_unknown).id }
-    get(:index, params: params)
-    assert_response(:redirect)
+    get(:index, params: { pattern: record.id })
+
+    assert_redirected_to(herbarium_record_path(record.id))
     assert_no_flash
   end
 
-  def test_index_herbarium_record
+  def test_index_herbarium_id_with_multiple_records
+    herbarium = herbaria(:nybg_herbarium)
+
     login
-    get(:index)
-    assert_response(:success)
-    assert_template(:index)
+    get(:index, params: { herbarium_id: herbarium.id })
+
+    assert_displayed_title(
+      :query_title_in_herbarium.l(types: :HERBARIUM_RECORDS.l,
+                                  herbarium: herbarium.name)
+    )
     # In results, expect 1 row per herbarium_record
-    assert_select("#results tr", HerbariumRecord.all.size)
+    assert_select("#results tr",
+                  HerbariumRecord.where(herbarium: herbarium).count)
   end
+
+  def test_index_herbarium_id_no_matching_records
+    herbarium = herbaria(:dick_herbarium)
+
+    login
+    get(:index, params: { herbarium_id: herbarium.id })
+
+    assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
+    assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
+  end
+
+  def test_index_observation_id
+    obs = observations(:coprinus_comatus_obs)
+
+    login
+    get(:index, params: { observation_id: obs.id })
+
+    assert_displayed_title(
+      :query_title_for_observation.l(types: :HERBARIUM_RECORDS.l,
+                                     observation: obs.unique_text_name)
+    )
+    #  "Fungarium Records attached to ‘#{obs.unique_text_name}’")
+    assert_select("#results tr", obs.herbarium_records.size)
+  end
+
+  def test_index_observation_id_with_no_herbarium_records
+    login
+
+    obs = observations(:strobilurus_diminutivus_obs)
+    get(:index, params: { observation_id: obs.id })
+
+    assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
+    assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
+  end
+
+  #########################################################
 
   def test_show_herbarium_record_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)

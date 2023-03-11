@@ -4,19 +4,14 @@
 # rubocop:disable Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
-  # except: [
-  #   :index_herbarium_record,
-  #   :list_herbarium_records,
-  #   :herbarium_record_search,
-  #   :herbarium_index,
-  #   :observation_index,
-  #   :show_herbarium_record,
-  #   :next_herbarium_record,
-  #   :prev_herbarium_record
-  # ]
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
+  # index
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,
     :herbarium_id,
@@ -27,20 +22,10 @@ class HerbariumRecordsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    pattern: :herbarium_record_search,
-    herbarium_id: :herbarium_index,
-    observation_id: :observation_index,
-    by: :index_herbarium_record,
-    q: :index_herbarium_record,
-    id: :index_herbarium_record
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
-
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
 
   def show
     case params[:flow]
@@ -105,10 +90,6 @@ class HerbariumRecordsController < ApplicationController
 
   private
 
-  def default_index_subaction
-    list_herbarium_records
-  end
-
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
@@ -119,22 +100,30 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
 
+  def default_index_subaction
+    list_all
+  end
+
+  # Show list of herbarium_records.
+  def list_all
+    store_location
+    query = create_query(:HerbariumRecord, :all, by: default_sort_order)
+    show_selected_herbarium_records(query)
+  end
+
+  def default_sort_order
+    ::Query::HerbariumBase.default_order
+  end
+
   # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_herbarium_record
+  def index_query_results
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
     show_selected_herbarium_records(query, id: params[:id].to_s,
                                            always_index: true)
   end
 
-  # Show list of herbarium_records.
-  def list_herbarium_records
-    store_location
-    query = create_query(:HerbariumRecord, :all, by: :herbarium_label)
-    show_selected_herbarium_records(query)
-  end
-
   # Display list of HerbariumRecords whose text matches a string pattern.
-  def herbarium_record_search
+  def pattern
     pattern = params[:pattern].to_s
     if pattern.match?(/^\d+$/) &&
        (herbarium_record = HerbariumRecord.safe_find(pattern))
@@ -145,7 +134,7 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
-  def herbarium_index
+  def herbarium_id
     store_location
     query = create_query(:HerbariumRecord, :in_herbarium,
                          herbarium: params[:herbarium_id].to_s,
@@ -153,7 +142,7 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  def observation_index
+  def observation_id
     store_location
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:observation_id].to_s,

@@ -173,44 +173,27 @@ class LocationsControllerTest < FunctionalTestCase
   #
   #    INDEX
 
-  def test_list_locations
+  # Tests of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  # miscellaneous tests using get(:index)
+  def test_index
     login
     get(:index)
-    assert_template("index")
+
+    assert_displayed_title("Locations by Name")
   end
 
-  def test_location_pattern_search_id
-    loc = locations(:salt_point)
+  def test_index_with_non_default_sort
+    sort_order = "num_views"
 
     login
-    get(:index, params: { pattern: loc.id.to_s })
-    assert_redirected_to(location_path(loc.id))
+    get(:index, params: { by: sort_order })
+
+    assert_displayed_title("Locations by Popularity")
   end
 
-  def test_location_advanced_search
-    query = Query.lookup_and_save(:Location, :advanced_search,
-                                  location: "California")
-    login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
-    assert_template("index")
-  end
-
-  def test_advanced_search_error
-    query_without_conditions = Query.lookup_and_save(
-      :Location, :advanced_search
-    )
-
-    login
-    get(:index,
-        params: @controller.query_params(query_without_conditions).
-                            merge(advanced_search: true))
-
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
-
-  def test_location_bounding_box
+  def test_index_bounding_box
     north = south = east = west = 0
     delta = 0.001
     login
@@ -232,107 +215,212 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(-180, query.params[:west])
   end
 
-  def test_index_sort_by_user
-    by = "user"
-
+  def test_index_advanced_search
+    query = Query.lookup_and_save(:Location, :advanced_search,
+                                  location: "California")
     login
-    get(:index, params: { by: by })
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
 
-    assert_select("#title", text: "Locations by #{by.capitalize}")
+    assert_response(:success)
+    assert_template("index")
+    assert_displayed_title("Advanced Search")
   end
 
-  def test_pattern
+  def test_index_advanced_search_error
+    query_without_conditions = Query.lookup_and_save(
+      :Location, :advanced_search
+    )
+
+    login
+    get(:index,
+        params: @controller.query_params(query_without_conditions).
+                            merge(advanced_search: true))
+
+    assert_flash_error(:runtime_no_conditions.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  def test_index_pattern
     search_str = "California"
 
     login
     get(:index, params: { pattern: search_str })
 
-    assert_select("#title", text: "Locations Matching ‘#{search_str}’")
+    assert_displayed_title("Locations Matching ‘#{search_str}’")
   end
 
-  def test_list_by_country
+  def test_index_pattern_id
+    loc = locations(:salt_point)
+
     login
-    get(:index, params: { country: "USA" })
-    assert_template("index")
+    get(:index, params: { pattern: loc.id.to_s })
+    assert_redirected_to(location_path(loc.id))
   end
 
-  def test_list_by_country_with_quote
+  def test_index_country
+    country = "USA"
+
     login
-    get(:index, params: { country: "Cote d'Ivoire" })
-    assert_template("index")
-  end
+    get(:index, params: { country: country })
 
-  def test_list_by_country_regexp_ok
-    login("mary")
-
-    get(:index, params: { country: "USA" })
-    usa_loc_array = assigns(:objects)
-    loc_usa = Location.create!(name: "Santa Fe, New Mexico, USA",
-                               north: 34.1865,
-                               west: -116.924,
-                               east: -116.88,
-                               south: 34.1571,
-                               notes: "Santa Fe",
-                               user: @mary)
-    get(:index, params: { country: "USA" })
-    assert_obj_arrays_equal(usa_loc_array << loc_usa, assigns(:objects), :sort)
-
-    get(:index, params: { country: "Mexico" })
-    assert_obj_arrays_equal([], assigns(:objects))
-
-    loc_mex1 = Location.create!(
-      name: "Somewhere, Chihuahua, Mexico",
-      north: 28.7729082,
-      west: -106.1671059,
-      east: -105.9612896,
-      south: 28.5586774,
-      notes: "somewhere Mexico",
-      user: @mary
+    # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
+    # https://www.pivotaltracker.com/story/show/184554008
+    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: Location.where(Location[:name].matches("%#{country}")).count },
+      "Wrong number of Locations"
     )
-    loc_mex2 = Location.create!(
-      name: "Oaxaca, Oaxaca, Mexico",
-      north: 17.1332939,
-      west: -96.7806765,
-      east: -96.6907866,
-      south: 17.0293023,
-      notes: "somewhere else in Mexico or this test will not work",
-      user: @mary
-    )
-    get(:index, params: { country: "Mexico" })
-    assert_obj_arrays_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
-  def test_by_user
+  def test_index_country_includes_state_named_after_other_country
+    country = "USA"
+    new_mexico = create_new_mexico_location
+
     login
-    get(:index, params: { by_user: rolf.id })
-    assert_template("index")
+    get(:index, params: { country: country })
+
+    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_select(
+      "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
+      true,
+      "USA page should include New Mexico"
+    )
   end
 
-  def test_by_user_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+  def create_new_mexico_location
+    Location.create!(name: "Santa Fe, New Mexico, USA",
+                     north: 34.1865,
+                     west: -116.924,
+                     east: -116.88,
+                     south: 34.1571,
+                     notes: "Santa Fe",
+                     user: mary)
+  end
+
+  def test_index_country_excludes_state_with_same_name_in_other_country
+    country = "Mexico"
+    new_mexico = create_new_mexico_location
+
+    login
+    get(:index, params: { country: country })
+
+    assert_select(
+      "#content a:match('href', ?)", /^#{location_path(new_mexico)}/,
+      { count: 0 },
+      "Mexico page should not include New Mexico, USA"
+    )
+  end
+
+  def test_index_country_missing_country_with_apostrophe
+    country = "Cote d'Ivoire"
+
+    login
+    get(:index, params: { country: country })
+
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+  end
+
+  def test_index_by_user_who_created_multiple_locations
+    user = rolf
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_displayed_title("Locations created by #{user.name}")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: Location.where(user: user).count },
+      "Wrong number of Locations"
+    )
+  end
+
+  def test_index_by_user_who_created_one_location
+    user = roy
+    assert(Location.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_response(:redirect)
+    assert_match(location_path(Location.where(user: user).first),
+                 redirect_to_url)
+  end
+
+  def test_index_by_user_who_created_zero_locations
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+  end
+
+  def test_index_by_user_bad_user_id
+    bad_user_id = observations(:minimal_unknown_obs).id
 
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_error("id ##{bad_user_id}")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
     assert_redirected_to(locations_path)
   end
 
-  def test_by_editor
+  def test_index_by_editor_of_multiple_locations
+    user = roy
+    locs_edited_by_user = Location.joins(:versions).
+                          where.not(user: user).
+                          where(versions: { user_id: user.id })
+    assert(locs_edited_by_user.many?)
+
     login
-    get(:index, params: { by_editor: rolf.id })
-    assert_template("index")
+    get(:index, params: { by_editor: user.id })
+
+    assert_displayed_title("Locations Edited by #{user.name}")
+    assert_select("a:match('href',?)", %r{^/locations/\d+},
+                  { count: locs_edited_by_user.count },
+                  "Wrong number of results")
   end
 
-  def test_by_editor_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+  def test_index_by_editor_of_one_location
+    user = katrina
+    locs_edited_by_user = Location.joins(:versions).
+                          where.not(user: user).
+                          where(versions: { user_id: user.id })
+    assert(locs_edited_by_user.one?)
+
+    login
+    get(:index, params: { by_editor: user.id })
+
+    assert_response(:redirect)
+    assert_match(location_path(locs_edited_by_user.first), redirect_to_url)
+  end
+
+  def test_index_by_editor_of_zero_locations
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_editor: user.id })
+
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+  end
+
+  def test_index_by_editor_bad_user_i
+    bad_user_id = observations(:minimal_unknown_obs).id
 
     login
     get(:index, params: { by_editor: bad_user_id })
 
-    assert_flash_error("id ##{bad_user_id}")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
     assert_redirected_to(locations_path)
   end
 

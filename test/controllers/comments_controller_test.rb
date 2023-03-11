@@ -3,19 +3,61 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
-  def test_list_comments
+  # Test of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  def test_index
     login
     get(:index)
     assert_template("index")
   end
 
-  def test_index_sort_by_user
+  def test_index_by_non_default_sort_order
     by = "user"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Comments by #{by.capitalize}")
+    assert_displayed_title("Comments by #{by.capitalize}")
+  end
+
+  def test_index_target_with_comments
+    target = observations(:minimal_unknown_obs)
+    params = { type: target.class.name, target: target.id }
+    comments = Comment.where(target_type: target.class.name, target: target)
+
+    login
+    get(:index, params: params)
+    assert_select(".comment", count: comments.size)
+    assert_displayed_title("Comments on #{target.id}")
+  end
+
+  def test_index_target_valid_target_without_comments
+    target = names(:conocybe_filaris)
+    params = { type: target.class.name, target: target.id }
+
+    login
+    get(:index, params: params)
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+  end
+
+  def test_index_target_invalid_target_type
+    target = api_keys(:rolfs_api_key)
+    params = { type: target.class.name, target: target.id }
+
+    login
+    get(:index, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                                         value: params[:type].to_s))
+  end
+
+  def test_index_target_for_non_model
+    params = { type: "Hacker", target: 666 }
+
+    login
+    get(:index, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                                         value: params[:type].to_s))
   end
 
   def test_index_pattern_id
@@ -39,63 +81,107 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("#title").text.downcase == "comments matching '#{search_str}'"
   end
 
-  def test_show_comment
-    login
-    get(:show,
-        params: { id: comments(:minimal_unknown_obs_comment_1).id })
-    assert_template("show")
-  end
+  def test_index_by_user_who_created_one_comment
+    user = rolf
+    assert_equal(1, Comment.where(user: user).count)
 
-  def test_show_comments_for_user
-    login
-    get(:index, params: { for_user: rolf.id })
-    assert_template("index")
-  end
-
-  def test_show_comments_by_user
     login
     get(:index, params: { by_user: rolf.id })
+
     assert_redirected_to(action: "show",
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
   end
 
-  def test_show_comments_for_target_with_comments
-    target = observations(:minimal_unknown_obs)
-    params = { type: target.class.name, target: target.id }
-    comments = Comment.where(target_type: target.class.name, target: target)
+  def test_index_by_user_who_created_multiple_comments
+    user = rolf
+    another_comment_by_user = comments(:detailed_unknown_obs_comment)
+    another_comment_by_user.user = user
+    another_comment_by_user.save
+    assert(Comment.where(user: user).many?)
 
     login
-    get(:index, params: params)
-    assert_select(".comment", count: comments.size)
+    get(:index, params: { by_user: user.id })
+
+    assert_displayed_title("Comments created by #{user.name}")
+    # All Rolf's Comments are Observations, so the results should have
+    # as many links to Observations as Rolf has Comments
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+}, # match links to observations
+      { count: Comment.where(user: user).count },
+      "Wrong number of links to Observations in results"
+    )
   end
 
-  def test_show_comments_for_valid_target_without_comments
-    target = names(:conocybe_filaris)
-    params = { type: target.class.name, target: target.id }
+  def test_index_by_user_who_created_no_comments
+    user = users(:zero_user)
 
     login
-    get(:index, params: params)
+    get(:index, params: { by_user: user.id })
+
     assert_flash_text(:runtime_no_matches.l(types: "comments"))
   end
 
-  def test_show_comments_for_invalid_target_type
-    target = api_keys(:rolfs_api_key)
-    params = { type: target.class.name, target: target.id }
+  def test_index_by_user_nonexistent_user
+    id = observations(:minimal_unknown_obs).id
 
     login
-    get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    get(:index, params: { by_user: id })
+
+    assert_flash_text(:runtime_object_not_found.l(type: "user", id: id))
+    assert_redirected_to(comments_path)
   end
 
-  def test_show_comments_for_non_model
-    params = { type: "Hacker", target: 666 }
+  def test_index_for_user_who_received_multiple_comments
+    user = mary
 
     login
-    get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    get(:index, params: { for_user: user.id })
+
+    assert_template("index")
+    assert_displayed_title("Comments for #{user.name}")
+  end
+
+  def test_index_for_user_who_received_one_comment
+    user = dick
+    # Change comment to be on one of Dick's Observations
+    comment = comments(:minimal_unknown_obs_comment_1)
+    target = observations(:owner_refuses_general_questions)
+    comment.target_id = target.id
+    comment.save
+
+    login
+    get(:index, params: { for_user: user.id })
+
+    assert_match(comment_path(comment), redirect_to_url)
+  end
+
+  def test_index_for_user_who_received_no_comments
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { for_user: user.id })
+
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+  end
+
+  def test_index_for_user_nonexistent_user
+    id = observations(:minimal_unknown_obs).id
+
+    login
+    get(:index, params: { for_user: id })
+
+    assert_flash_text(:runtime_object_not_found.l(type: "user", id: id))
+    assert_redirected_to(comments_path)
+  end
+
+  #########################################################
+
+  def test_show_comment
+    login
+    get(:show,
+        params: { id: comments(:minimal_unknown_obs_comment_1).id })
+    assert_template("show")
   end
 
   def test_add_comment

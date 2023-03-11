@@ -1,24 +1,15 @@
 # frozen_string_literal: true
 
-#   :index_location_description
-#   :list_location_descriptions
-#   :location_descriptions_by_author
-#   :location_descriptions_by_editor
-#   :show_location_description
-#   :next_location_description
-#   :prev_location_description
-#   :show_past_location_description
-#   :create_location_description
-#   :edit_location_description
-#   :destroy_location_description
-
 module Locations
   class DescriptionsController < ApplicationController
     include ::Descriptions
     include ::Locations::Descriptions::SharedPrivateMethods
 
+    # disable cop because index is defined in ApplicationController
+    # rubocop:disable Rails/LexicallyScopedActionFilter
     before_action :store_location, except: [:index, :destroy]
     before_action :pass_query_params, except: [:index]
+    # rubocop:enable Rails/LexicallyScopedActionFilter
     before_action :login_required
     before_action :disable_link_prefetching, except: [
       :new, :create, :edit, :update, :show
@@ -29,10 +20,9 @@ module Locations
 
     ############################################################################
     #
-    #  :section: Description Searches and Indexes
-    #
-    ############################################################################
+    #  Index
 
+    # Used by ApplicationController to dispatch #index to a private method
     @index_subaction_param_keys = [
       :by_author,
       :by_editor,
@@ -42,46 +32,40 @@ module Locations
     ].freeze
 
     @index_subaction_dispatch_table = {
-      by_author: :location_descriptions_by_author,
-      by_editor: :location_descriptions_by_editor,
-      by: :index_location_description,
-      q: :index_location_description,
-      id: :index_location_description
+      by: :index_query_results,
+      q: :index_query_results,
+      id: :index_query_results
     }.freeze
 
-    # Disable cop because method definition prevents a
-    # Rails/LexicallyScopedActionFilter offense
-    # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-    def index # rubocop:disable Lint/UselessMethodDefinition
-      super
-    end
-
-    private
+    private # private methods used by #index  ##################################
 
     def default_index_subaction
-      list_location_descriptions
+      list_all
+    end
+
+    # Displays a list of all location_descriptions.
+    def list_all
+      query = create_query(:LocationDescription, :all, by: default_sort_order)
+      show_selected_location_descriptions(query)
+    end
+
+    def default_sort_order
+      ::Query::LocationDescriptionBase.default_order
     end
 
     # Displays a list of selected locations, based on current Query.
-    def index_location_description
+    def index_query_results
       query = find_or_create_query(:LocationDescription, by: params[:by])
       show_selected_location_descriptions(query, id: params[:id].to_s,
                                                  always_index: true)
     end
 
-    # Displays a list of all location_descriptions.
-    def list_location_descriptions
-      query = create_query(:LocationDescription, :all, by: :name)
-      show_selected_location_descriptions(query)
-    end
-
     # Display list of location_descriptions that a given user is author on.
-    def location_descriptions_by_author
-      user = if params[:by_author]
-               find_or_goto_index(User, params[:by_author].to_s)
-             else
-               @user
-             end
+    def by_author
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_author].to_s,
+        index_path: location_descriptions_path
+      )
       return unless user
 
       query = create_query(:LocationDescription, :by_author, user: user)
@@ -89,8 +73,11 @@ module Locations
     end
 
     # Display list of location_descriptions that a given user is editor on.
-    def location_descriptions_by_editor
-      user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    def by_editor
+      user = find_obj_or_goto_index(
+        model: User, obj_id: params[:by_editor].to_s,
+        index_path: location_descriptions_path
+      )
       return unless user
 
       query = create_query(:LocationDescription, :by_editor, user: user)
@@ -122,11 +109,10 @@ module Locations
       show_index_of_objects(query, args)
     end
 
+    ############################################################################
+
     public
 
-    # --------------------------------------------------------------------------
-
-    # Show just a LocationDescription.
     def show
       return unless find_description!
 
@@ -156,7 +142,6 @@ module Locations
       initialize_description_source
     end
 
-    # Create new description.
     def create
       find_location
       find_licenses
@@ -202,6 +187,8 @@ module Locations
 
       check_delete_permission_flash_and_redirect
     end
+
+    ############################################################################
 
     private
 

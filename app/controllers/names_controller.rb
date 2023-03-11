@@ -1,46 +1,11 @@
 # frozen_string_literal: true
 
-#
-#  = Names Controller
-#
-#  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
-#
-#  index::                       (replace list_names::)
-#                                Alphabetical list of all names, used or not.
-#  params
-#  :by                           (replace ::index_name)
-#    index_name::                List of results of index/search.
-#  :with_observations            (replace ::observation_index)
-#    names_with_observations::   Alphabetical list of names people have seen.
-#  :with_descriptions            (replace ::authored_names)
-#    names_with_descriptions::   Alpha names with descriptions (with authors)
-#  :by_user                      (replace names_by_user:: ::names_by_author)
-#    names_by_user::             Alphabetical list of names created by user.
-#  :by_editor                    (replace names_by_editor::)
-#    names_by_editor::           Alphabetical list of names edited by user
-#  :pattern                      (replace name_search::)
-#    name_search::               Seach for string in name, notes, etc.
-#  :need_descriptions            (replace ::needed_descriptions)
-#    names_needing_descriptions::
-#
-#  show_name::                   Show info about name.
-#  show_past_name::              Show past versions of name info.
-#  prev_name::                   Show previous name in index.
-#  next_name::                   Show next name in index.
-#
-#  create_name::                 Create new name.
-#  edit_name::                   Edit name.
-#
-#    DELETE THIS
-#  bulk_name_edit::              Create/synonymize/deprecate a list of names.
-#
 class NamesController < ApplicationController
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index]
   before_action :pass_query_params, except: [:index]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :show,
@@ -49,11 +14,12 @@ class NamesController < ApplicationController
     :edit,
     :update
   ]
+
   ##############################################################################
   #
-  #  :section: Indexes and Searches
-  #
-  ##############################################################################
+  # index::
+
+  # ApplicationController uses this to dispatch #index to a private method
   @index_subaction_param_keys = [
     :advanced_search,
     :pattern,
@@ -68,110 +34,33 @@ class NamesController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    pattern: :name_search,
-    with_observations: :observation_index,
-    with_descriptions: :names_with_descriptions,
-    need_descriptions: :names_needing_descriptions,
-    by_user: :names_by_user,
-    by_editor: :names_by_editor,
-    by: :index_name,
-    q: :index_name,
-    id: :index_name
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
 
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
-
   ###################################
-  #  private index methods
 
-  private
+  private # private methods used by #index
 
   def default_index_subaction
-    list_names
-  end
-
-  # Display list of names in last index/search query.
-  def index_name
-    query = find_or_create_query(:Name, by: params[:by])
-    show_selected_names(query, id: params[:id].to_s, always_index: true)
+    list_all
   end
 
   # Display list of all (correctly-spelled) names in the database.
-  def list_names
-    query = create_query(:Name, :all, by: :name)
+  def list_all
+    query = create_query(:Name, :all, by: default_sort_order)
     show_selected_names(query)
   end
 
-  # Display list of names that have observations.
-  def observation_index
-    query = create_query(:Name, :with_observations)
-    show_selected_names(query)
+  def default_sort_order
+    ::Query::NameBase.default_order
   end
 
-  # Display list of names with descriptions that have authors.
-  def names_with_descriptions
-    query = create_query(:Name, :with_descriptions)
-    show_selected_names(query)
-  end
-
-  # Display list of names that a given user is author on.
-  def names_by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: names_path
-    )
-    return unless user
-
-    query = create_query(:Name, :by_user, user: user)
-    show_selected_names(query)
-  end
-
-  # This no longer makes sense, but is being requested by robots.
-  alias names_by_author names_by_user
-
-  # Display list of names that a given user is editor on.
-  def names_by_editor
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_editor].to_s,
-      index_path: names_path
-    )
-    return unless user
-
-    query = create_query(:Name, :by_editor, user: user)
-    show_selected_names(query)
-  end
-
-  # Display list of the most popular 100 names that don't have descriptions.
-  # NOTE: all this extra info and help will be lost if user re-sorts.
-  def names_needing_descriptions
-    @help = :needed_descriptions_help
-    query = Name.descriptions_needed
-    show_selected_names(query, num_per_page: 100)
-  end
-
-  # Display list of names that match a string.
-  def name_search
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (name = Name.safe_find(pattern))
-      redirect_to(name_path(name.id))
-    else
-      search = PatternSearch::Name.new(pattern)
-      if search.errors.any?
-        search.errors.each do |error|
-          flash_error(error.to_s)
-        end
-        render("names/index")
-      else
-        @suggest_alternate_spellings = search.query.params[:pattern]
-        show_selected_names(search.query)
-      end
-    end
+  # Display list of names in last index/search query.
+  def index_query_results
+    query = find_or_create_query(:Name, by: params[:by])
+    show_selected_names(query, id: params[:id].to_s, always_index: true)
   end
 
   # Displays list of advanced search results.
@@ -183,6 +72,74 @@ class NamesController < ApplicationController
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+  end
+
+  # Display list of names that match a string.
+  def pattern
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) &&
+       (name = Name.safe_find(pattern))
+      redirect_to(name_path(name.id))
+    else
+      show_non_id_pattern_results(pattern)
+    end
+  end
+
+  def show_non_id_pattern_results(pattern)
+    search = PatternSearch::Name.new(pattern)
+    if search.errors.any?
+      search.errors.each do |error|
+        flash_error(error.to_s)
+      end
+      render("names/index")
+    else
+      @suggest_alternate_spellings = search.query.params[:pattern]
+      show_selected_names(search.query)
+    end
+  end
+
+  # Display list of names that have observations.
+  def with_observations
+    query = create_query(:Name, :with_observations)
+    show_selected_names(query)
+  end
+
+  # Display list of names with descriptions that have authors.
+  def with_descriptions
+    query = create_query(:Name, :with_descriptions)
+    show_selected_names(query)
+  end
+
+  # Display list of the most popular 100 names that don't have descriptions.
+  # NOTE: all this extra info and help will be lost if user re-sorts.
+  def need_descriptions
+    @help = :needed_descriptions_help
+    query = Name.descriptions_needed
+    show_selected_names(query, num_per_page: 100)
+  end
+
+  # Display list of names that a given user is author on.
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: names_path
+    )
+    return unless user
+
+    query = create_query(:Name, :by_user, user: user)
+    show_selected_names(query)
+  end
+
+  # Display list of names that a given user is editor on.
+  def by_editor
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_editor].to_s,
+      index_path: names_path
+    )
+    return unless user
+
+    query = create_query(:Name, :by_editor, user: user)
+    show_selected_names(query)
   end
 
   # Show selected search results as a list with 'index' template.
@@ -227,6 +184,8 @@ class NamesController < ApplicationController
 
     args
   end
+
+  ###################################
 
   public
 

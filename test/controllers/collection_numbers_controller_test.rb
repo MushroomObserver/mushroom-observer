@@ -3,75 +3,88 @@
 require("test_helper")
 
 class CollectionNumbersControllerTest < FunctionalTestCase
-  def test_collection_index
+  def test_index
     login
     get(:index)
-    assert_template(:index)
+
+    assert_displayed_title("Collection Number Index")
   end
 
-  def test_observation_index_with_one_collection_number
-    obs = observations(:minimal_unknown_obs)
-    assert_equal(1, obs.collection_numbers.count)
-    login
-    get(:index, params: { observation_id: obs.id })
-    assert_template(:index)
-    assert_no_flash
-  end
+  def test_index_with_query
+    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
+    assert_operator(query.num_results, :>, 1)
 
-  def test_observation_index_with_multiple_collection_numbers
-    obs = observations(:detailed_unknown_obs)
-    assert_operator(obs.collection_numbers.count, :>, 1)
     login
-    get(:index, params: { observation_id: obs.id })
-    assert_template(:index)
-    assert_no_flash
-  end
+    get(:index, params: { q: query.record.id.alphabetize })
 
-  def test_observation_index_with_no_collection_numbers
-    obs = observations(:strobilurus_diminutivus_obs)
-    assert_empty(obs.collection_numbers)
-    login
-    get(:index, params: { observation_id: obs.id })
-    assert_template(:index)
-    assert_flash_text(/no matching collection numbers found/i)
-  end
-
-  def test_pattern_search_str
-    numbers = CollectionNumber.where("name like '%singer%'")
-    assert_operator(numbers.count, :>, 1)
-    login
-    get(:index, params: { pattern: "Singer" })
     assert_response(:success)
-    assert_template(:index)
+    assert_displayed_title("Collection Number Index")
     # In results, expect 1 row per collection_number.
-    assert_select("#results tr", numbers.count)
+    assert_select("#results tr", query.num_results)
   end
 
-  def test_pattern_id
-    id = collection_numbers(:minimal_unknown_coll_num).id
+  def test_index_with_id_and_sorted
+    last_number = CollectionNumber.last
+    params = { id: last_number.id, by: :reverse_date }
 
     login
-    get(:index, params: { pattern: id })
+    get(:index, params: params)
 
-    assert_redirected_to(collection_number_path(id))
-  end
-
-  def test_collection_number_search_by_number
-    col = collection_numbers(:minimal_unknown_coll_num)
-    number = col.number
-    login
-    get(:index, params: { pattern: number })
-    qr = QueryRecord.last.id.alphabetize
-    assert_redirected_to(
-      collection_number_path(col, params: { q: qr })
+    assert_response(:success)
+    assert_displayed_title("Collection Numbers by Date")
+    assert(
+      collection_number_links.first[:href].
+        start_with?(collection_number_path(last_number.id)),
+      "Index's 1st CollectionNumber link should be link to the " \
+      "last CollectionNumber"
     )
   end
 
-  def test_collection_number_search_with_one_collection_number_index
+  def test_index_observation_id_with_one_collection_number
+    obs = observations(:coprinus_comatus_obs)
+    assert_equal(1, obs.collection_numbers.count)
+
+    login
+    get(:index, params: { observation_id: obs.id })
+
+    assert_no_flash
+    assert_displayed_title(
+      "Collection Numbers attached to #{obs.unique_format_name.t}".
+      strip_html
+    )
+  end
+
+  def test_index_observation_id_with_multiple_collection_numbers
+    obs = observations(:detailed_unknown_obs)
+    assert_operator(obs.collection_numbers.count, :>, 1)
+
+    login
+    get(:index, params: { observation_id: obs.id })
+
+    assert_no_flash
+    assert_displayed_title(
+      "Collection Numbers attached to #{obs.unique_format_name.t}".strip_html
+    )
+  end
+
+  def test_index_observation_id_with_no_hits
+    obs = observations(:strobilurus_diminutivus_obs)
+    assert_empty(obs.collection_numbers)
+
+    login
+    get(:index, params: { observation_id: obs.id })
+
+    assert_displayed_title("List Collection Numbers")
+    assert_flash_text(/no matching collection numbers found/i)
+  end
+
+  def test_index_pattern_str_matching_one_collection_number
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
+
     login
     get(:index, params: { pattern: "neighbor" })
+
     qr = QueryRecord.last.id.alphabetize
     assert_redirected_to(
       collection_number_path(id: numbers.first.id, params: { q: qr })
@@ -79,15 +92,34 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_index_collection_number
-    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
-    assert_operator(query.num_results, :>, 1)
+  def test_index_pattern_str_matching_multiple_collection_numbers
+    pattern = "Singer"
+    numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
+    assert(numbers.many?,
+           "Test needs a pattern matching many collection numbers")
+
     login
-    get(:index, params: { q: query.record.id.alphabetize })
+    get(:index, params: { pattern: pattern })
+
     assert_response(:success)
-    assert_template(:index)
-    # In results, expect 1 row per collection_number.
-    assert_select("#results tr", query.num_results)
+    assert_displayed_title("Collection Numbers Matching ‘#{pattern}’")
+    # Results should have 2 links per collection_number
+    # a show link, and (because logged in user created the numbers)
+    # an edit link
+    assert_equal(numbers.count * 2, collection_number_links.count)
+  end
+
+  def test_index_pattern_number_matching_one_collection_number
+    number = collection_numbers(:minimal_unknown_coll_num).id
+
+    login
+    get(:index, params: { pattern: number })
+
+    assert_redirected_to(collection_number_path(number))
+  end
+
+  def collection_number_links
+    assert_select("a[href ^= '/collection_numbers/']")
   end
 
   def test_show_collection_number
