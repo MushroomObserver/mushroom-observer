@@ -28,7 +28,7 @@ moves.reject!(&:is_misspelling?)
 
   <% button = merges.any? ? :merge_descriptions_merge.l : nil
   if button %>
-    <%= centered_submit(form: f, button: :SUBMIT.l) %>
+    <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
   <% end %>
 
 <% end %>

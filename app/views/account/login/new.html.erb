@@ -22,7 +22,7 @@
   <%= check_box_with_label(form: f, field: :remember_me, checked: @remember,
                            class: "mt-3", text: :login_remember_me.t) %>
 
-  <%= centered_submit(form: f, button: :login_login.l) %>
+  <%= submit_button(form: f, button: :login_login.l, center: true) %>
 
   <div class="form-group mt-3">
     <%= :login_forgot_password.tp %>

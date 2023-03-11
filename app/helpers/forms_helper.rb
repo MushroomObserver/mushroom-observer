@@ -38,10 +38,12 @@ module FormsHelper
     end
   end
 
-  # <%= centered_submit(form: f, button: button.t) %>
-  def centered_submit(**args)
-    opts = args.except(:form, :button, :class)
-    opts[:class] = "btn btn-default center-block my-3 #{args[:class]}"
+  # <%= submit_button(form: f, button: button.t, center: true) %>
+  def submit_button(**args)
+    opts = args.except(:form, :button, :class, :center)
+    opts[:class] = "btn btn-default"
+    opts[:class] += " center-block my-3" if args[:center] == true
+    opts[:class] += " #{args[:class]}" if args[:class].present?
 
     form.submit(button, opts)
   end

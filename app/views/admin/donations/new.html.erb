@@ -24,6 +24,6 @@
   <%= inline_label_text_field(form: f, field: :email, size: 50,
                               text: "#{:EMAIL.t}:") %>
 
-  <%= centered_submit(form: f, button: :create_donation_add.l) %>
+  <%= submit_button(form: f, button: :create_donation_add.l, center: true) %>
 
 <% end %>

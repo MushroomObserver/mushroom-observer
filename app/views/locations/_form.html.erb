@@ -9,7 +9,7 @@
     <div class="row">
       <div class="col-md-8 col-lg-6">
 
-        <%= centered_submit(form: f, button: button.l) %>
+        <%= submit_button(form: f, button: button.l, center: true) %>
 
         <%= render(partial: "locations/form/admin_locked_field",
                    locals: { f: f }) %>

@@ -12,7 +12,7 @@
 
 <%= form_with(url: action, id: "name_approve_synonym_form") do |f| %>
 
-  <%= centered_submit(form: f, button: :APPROVE.l) %>
+  <%= submit_button(form: f, button: :APPROVE.l, center: true) %>
 
   <% if @approved_names %>
     <%= check_box_with_label(form: f, field: :deprecate_others,

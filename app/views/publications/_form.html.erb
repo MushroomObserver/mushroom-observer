@@ -27,6 +27,6 @@ button = (action == :create) ? :CREATE.t : :SAVE.t
   <%= check_box_with_label(form: f, field: :mo_mentioned,
                           text: :publication_mo_mentioned.t) %>
 
-  <%= centered_submit(form: f, button: button) %>
+  <%= submit_button(form: f, button: button, center: true) %>
 
 <% end %>

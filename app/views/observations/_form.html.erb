@@ -7,7 +7,7 @@
               multipart: true,
               id: "observation_form") do |f| %>
 
-  <%= centered_submit(form: f, button: button_name) %>
+  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/form/when", locals: { f: f }) %>
   <%= render(partial: "observations/form/where",
@@ -42,7 +42,7 @@
   <% ##########################################################################     %>
 
   <% if @projects.any? || @lists.any? %>
-    <%= centered_submit(form: f, button: button_name) %>
+    <%= submit_button(form: f, button: button_name, center: true) %>
   <% end %>
 
   <% if @projects.any? %>
@@ -53,7 +53,7 @@
     <%= render(partial: "observations/form/species_lists", locals: { f: f }) %>
   <% end %>
 
-  <%= centered_submit(form: f, button: button_name) %>
+  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <% if logging_optional %>
     <%= check_box_with_label(form: f, field: :log_change, checked: "checked",

@@ -16,7 +16,7 @@
   <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
     <%= form_with(model: @image, url: form_action, method: :put) do |f| %>
 
-      <%= centered_submit(form: f, button: :SAVE_EDITS.l) %>
+      <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
 
       <%= render(partial: "observations/images/form/fields_for_images",
                 locals: { f: f, leave_out_original_file_name: false }) %>

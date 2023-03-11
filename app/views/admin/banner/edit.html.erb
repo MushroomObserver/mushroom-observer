@@ -6,6 +6,6 @@
   <%= f.text_area(:val, value: @val, rows: 5, id: "val",
                   class: "form-control") %>
 
-  <%= centered_submit(form: f, button: :SUBMIT.l) %>
+  <%= submit_button(form: f, button: :SUBMIT.l, center: true) %>
 
 <% end %>

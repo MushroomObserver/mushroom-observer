@@ -20,7 +20,7 @@ end
 <%= form_with(model: @naming, url: url, method: method, local: local,
               id: "naming_form") do |f| %>
 
-  <%= centered_submit(form: f, button: button_name) %>
+  <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/namings/fields",
              locals: { action: action, button_name: button_name,

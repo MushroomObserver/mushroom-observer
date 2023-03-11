@@ -13,7 +13,7 @@
 <%= form_with(url: admin_donations_path,
               id: "admin_review_donations_form", method: :patch) do |f| %>
 
-  <%= centered_submit(form: f, button: :review_donations_update.l) %>
+  <%= submit_button(form: f, button: :review_donations_update.l, center: true) %>
 
   <div class="text-center">
     <table class="table-striped table-review-donations mb-3 mt-3">
@@ -40,5 +40,5 @@
     </table>
   </div><!-- .text-center -->
 
-  <%= centered_submit(form: f, button: :review_donations_update.l) %>
+  <%= submit_button(form: f, button: :review_donations_update.l, center: true) %>
 <% end %>

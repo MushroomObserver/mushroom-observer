@@ -1,7 +1,7 @@
 <%= form_with(model: @species_list, url: action,
               id: "species_list_form") do |f| %>
 
-  <%= centered_submit(form: f, button: button.l) %>
+  <%= submit_button(form: f, button: button.l, center: true) %>
 
   <%= if !(partial = render(partial: "shared/form_list_feedback")).blank?
     content_tag(:div, partial)
@@ -69,6 +69,6 @@
                locals: { f: f }) %>
   <% end %>
 
-  <%= centered_submit(form: f, button: button.l) %>
+  <%= submit_button(form: f, button: button.l, center: true) %>
 
 <% end %>

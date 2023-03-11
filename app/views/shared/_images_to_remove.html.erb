@@ -4,7 +4,7 @@
 
 <%= form_with(url: form_action, method: :put) do |f| %>
 
-  <%= centered_submit(form: f, button: :image_remove_remove.l) %>
+  <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
   <ul class="row list-unstyled mt-3">
 
@@ -31,7 +31,7 @@
 
   </ul>
 
-  <%= centered_submit(form: f, button: :image_remove_remove.l) %>
+  <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
 <% end %>
 
