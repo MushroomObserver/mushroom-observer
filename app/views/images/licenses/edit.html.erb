@@ -52,7 +52,7 @@
               </td>
             </tr>
           <% end %>
-            
+
         <% end %>
       </tbody>
 
@@ -60,6 +60,5 @@
 
   </table>
 
-  <%= f.submit(:image_updater_update.l,
-               class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: :image_updater_update.l) %>
 <% end %>

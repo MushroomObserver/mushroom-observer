@@ -1,6 +1,6 @@
 <%= form_with(model: @herbarium, id: "herbarium_form") do |f| %>
 
-  <%= f.submit(button_name.t, class: %w[btn btn-default center-block mt-3]) %>
+  <%= centered_submit(form: f, button: button_name.t) %>
 
   <%= f.hidden_field :back, value: @back %>
   <%= f.hidden_field :q, value: get_query_param %>
@@ -89,6 +89,6 @@
     <%= f.text_area(:description, rows: 10, class: "form-control") %>
   </div>
 
-  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button_name.t) %>
 
 <% end %>

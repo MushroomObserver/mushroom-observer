@@ -10,18 +10,20 @@ query = query_images_to_reuse(@all_users, @user)
 @objects = query.paginate(@pages, include: [:user, { observations: :name }])
 
 %>
-<%= form_with(url: form_action, method: :post) do |form|%>
+<%= form_with(url: form_action, method: :post) do |f| %>
+
   <div class="container-text">
     <div class="form-group form-inline">
-      <%= form.label(:img_id, "#{:image_reuse_id.t}:") %>
-      <%= form.text_field(:img_id,
+      <%= f.label(:img_id, "#{:image_reuse_id.t}:") %>
+      <%= f.text_field(:img_id,
                           { size: 8, data: { autofocus: true },
                             class: "form-control" }) %>
-      <%= form.submit(:image_reuse_reuse.l,
+      <%= f.submit(:image_reuse_reuse.l,
                       { class: "btn btn-default ml-3" }) %>
     </div>
 
-    <p class="help-block"><%= :image_reuse_id_help.tp %></p>
+    <%= content_tag(:div, :image_reuse_id_help.tp,
+                    class: "help-block form-group") %>
 
     <div class="form-group mt-3">
       <%= link_with_query((@all_users ? :image_reuse_just_yours.t :

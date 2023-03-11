@@ -7,7 +7,7 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
 <!--[form:name]-->
 <%= form_with(model: @name, url: add_query_param(action)) do |f| %>
 
-  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button) %>
 
   <% if in_admin_mode? %>
     <%= check_box_with_label(form: f, field: :locked, class: "mt-3",
@@ -94,7 +94,7 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
   <%= f.text_area(:notes, rows: 6, class: "form-control") %>
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button) %>
 
 <% end %>
 <!--[eoform:name]-->

@@ -1,6 +1,6 @@
 <%= form_with(model: @project, id: "project_form") do |f| %>
 
-  <%= f.submit(button, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button) %>
 
   <div class="form-group mt-3">
     <%= f.label(:title, :form_projects_title.t + ":") %>

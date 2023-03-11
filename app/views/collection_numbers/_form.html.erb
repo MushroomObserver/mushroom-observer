@@ -7,7 +7,7 @@ url_params = url_params.merge({ back: back }) if action == :update
 
 <%= form_with(model: @collection_number, url: url_params) do |f| %>
 
-  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button_name.t) %>
 
   <% if @collection_number.observations.count > 1 %>
     <div class="alert alert-warning mt-3">
@@ -17,16 +17,16 @@ url_params = url_params.merge({ back: back }) if action == :update
 
   <div class="form-group mt-3">
     <%= f.label(:name, "#{:collection_number_name.t}:".html_safe) %>
-    <span class="help-note">(<%= :required.t %>)</span>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
     <%= f.text_field(:name, class: "form-control") %>
   </div>
 
   <div class="form-group mt-3">
     <%= f.label(:number, "#{:collection_number_number.t}:".html_safe) %>
-    <span class="help-note">(<%= :required.t %>)</span>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
     <%= f.text_field(:number, class:"form-control") %>
   </div>
 
-  <%= f.submit(button_name.t, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button_name.t) %>
 
 <% end %>

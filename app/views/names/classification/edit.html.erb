@@ -22,7 +22,7 @@
                       rows: 10, class: "form-control",
                       data: { autofocus: true }) %>
 
-    <%= f.submit(:SAVE.t, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: :SAVE.t) %>
 
   <% end %>
 

@@ -38,11 +38,12 @@ module FormsHelper
     end
   end
 
-  def center_form_submit(**args)
+  # <%= centered_submit(form: f, button: button.t) %>
+  def centered_submit(**args)
     opts = args.except(:form, :button, :class)
     opts[:class] = "btn btn-default center-block my-3 #{args[:class]}"
 
-    form.submit(button.t, opts)
+    form.submit(button, opts)
   end
 
   # Bootstrap checkbox: form, field, (label) text, class,

@@ -51,8 +51,7 @@
 
   </table>
 
-  <%= f.submit(:account_api_keys_remove_button.l,
-               id: "remove_button",
-               class: "btn btn-default center-block") %>
+  <%= centered_submit(form: f, button: :account_api_keys_remove_button.l,
+                      id: "remove_button") %>
 
 <% end %>

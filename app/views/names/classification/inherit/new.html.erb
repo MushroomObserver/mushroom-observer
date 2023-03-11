@@ -27,7 +27,7 @@
     <%= text_field_tag(:parent, @parent_text_name,
                        class: "form-control", data: { autofocus: true }) %>
 
-    <%= f.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: :SUBMIT.t) %>
 
   <% end %>
 

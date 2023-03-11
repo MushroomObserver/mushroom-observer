@@ -46,7 +46,6 @@
                   class: "form-control") %>
   </div>
 
-  <%= f.submit(:signup_button.l,
-               class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: :signup_button.l) %>
 
 <% end %>

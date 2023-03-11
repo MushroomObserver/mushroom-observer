@@ -7,7 +7,7 @@
               multipart: true,
               id: "observation_form") do |f| %>
 
-  <%= f.submit(button_name, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button_name) %>
 
   <%= render(partial: "observations/form/when", locals: { f: f }) %>
   <%= render(partial: "observations/form/where",
@@ -42,7 +42,7 @@
   <% ##########################################################################     %>
 
   <% if @projects.any? || @lists.any? %>
-    <%= f.submit(button_name, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: button_name) %>
   <% end %>
 
   <% if @projects.any? %>
@@ -53,7 +53,7 @@
     <%= render(partial: "observations/form/species_lists", locals: { f: f }) %>
   <% end %>
 
-  <%= f.submit(button_name, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: button_name) %>
 
   <% if logging_optional %>
     <%= check_box_with_label(form: f, field: :log_change, checked: "checked",

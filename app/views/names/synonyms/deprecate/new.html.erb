@@ -12,7 +12,7 @@
 
 <%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
 
-  <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: :SUBMIT.l) %>
 
   <%= render(partial: "shared/form_name_feedback",
              locals: { button_name: :SUBMIT.l,

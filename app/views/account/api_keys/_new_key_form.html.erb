@@ -6,7 +6,7 @@
     <%= f.text_field(:notes, class: "form-control") %>
   </div>
 
-  <%= f.submit(:account_api_keys_create_button.l, id: "create_button",
-                class: "btn btn-default center-block mt-3") %>
+  <%= centered_submit(form: f, button: :account_api_keys_create_button.l,
+                      id: "create_button") %>
 
 <% end %>

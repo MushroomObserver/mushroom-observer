@@ -3,7 +3,7 @@
               id: "name_description_form") do |f| %>
 
   <div class="container-text">
-    <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: button.l) %>
 
     <%= render(partial: "shared/fields_for_description", locals: {f: f}) %>
 
@@ -20,7 +20,7 @@
       </div>
     <% end %>
 
-    <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: button.l) %>
   </div><!--.container-text-->
 
   <% if (button == :SAVE_EDITS) && @merge %>

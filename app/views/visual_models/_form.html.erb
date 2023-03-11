@@ -1,4 +1,4 @@
-<%= form_with(model: visual_model) do |form| %>
+<%= form_with(model: visual_model) do |f| %>
   <% if visual_model.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(visual_model.errors.count, "error") %> prohibited this visual_model from being saved:</h2>
@@ -12,12 +12,12 @@
   <% end %>
 
   <div class="form-group field">
-    <%= form.label(:name) %>
-    <%= form.text_field(:name, class: "form-control") %>
+    <%= f.label(:name) %>
+    <%= f.text_field(:name, class: "form-control") %>
     <%= :VISUAL_MODEL.t %>
   </div>
 
   <div class="actions">
-    <%= form.submit(:SUBMIT.t, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: :SUBMIT.t) %>
   </div>
 <% end %>

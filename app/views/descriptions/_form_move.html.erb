@@ -26,7 +26,7 @@ moves.reject!(&:is_misspelling?)
 
   <% button = moves.any? ? :merge_descriptions_move.l : nil
   if button %>
-    <%= f.submit(:SUBMIT.l, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: :SUBMIT.l) %>
   <% end %>
 
 <% end %>

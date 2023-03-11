@@ -7,8 +7,10 @@
     <%= f.label(:content, "Feature Email:") %>
     <%= f.text_area(:content, rows: 20, class: "form-control") %>
 
-    <%= f.submit(:SEND.l, class: "btn btn-default center-block mt-3") %>
+    <%= centered_submit(form: f, button: :SEND.l) %>
   <% end %>
 
-  <p>Users: <%= (@users.map { |u| u.login }).safe_join(", ") %></p>
+  <div class="form-group">
+    <%= "#{:USERS.l}:" + (@users.map { |u| u.login }).safe_join(", ") %>
+  </div>
 <% end %>
