@@ -27,10 +27,10 @@
         approved_names = name.approved_synonyms %>
         <%= name.display_name.t %><br/>
         <% if approved_names != [] %>
-          <%= fields_for(:chosen) do |f_c| %>
+          <%= fields_for(:chosen_approved_names) do |f_c| %>
             <% approved_names.each do |other_name| %>
-              <%= radio_with_label(form: f_c, field: :approved_names,
-                                  value: name.id, checked: other_name.id,
+              <%= radio_with_label(form: f_c, field: name.id,
+                                  value: other_name.id,
                                   label: other_name.display_name.t,
                                   class: "ml-4") %>
             <% end %>
@@ -51,10 +51,10 @@
     <p class="Data">
       <% @multiple_names.each do |name| %>
         <%= name.display_name.t %><br/>
-        <%= fields_for(:chosen) do |f_c| %>
+        <%= fields_for(:chosen_multiple_names) do |f_c| %>
           <% name.other_authors.each do |other_name| %>
-            <%= radio_with_label(form: f_c, field: :multiple_names,
-                                value: name.id, checked: other_name.id,
+            <%= radio_with_label(form: f_c, field: name.id,
+                                value: other_name.id,
                                 label: other_name.display_name.t,
                                 class: "ml-4") %>
             (<%= other_name.observations.count %>)<br/>

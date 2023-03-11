@@ -77,7 +77,7 @@ module Names::Classification
       assert_template("names/classification/inherit/new")
       assert_not_blank(assigns(:message))
       assert_not_empty(assigns(:options))
-      assert_select("span", text: "Agaricales")
+      assert_select("label", text: "Agaricales")
       assert_input_value("parent", "Agariclaes")
 
       # Test ambiguity: three names all accepted and with classifications.
