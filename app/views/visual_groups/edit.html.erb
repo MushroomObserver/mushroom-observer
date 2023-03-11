@@ -36,8 +36,7 @@
     <div class="form-group form-inline">
       <%= f.text_field(:filter, value: @filter, size: 60,
                        class: "form-control", id: "filter") %>
-      <%= f.submit(:edit_visual_group_update_filter.t,
-                   class: "btn btn-default") %>
+      <%= submit_button(form: f, button: :edit_visual_group_update_filter.t) %>
     </div>
 
   <% end %>

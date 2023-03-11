@@ -9,56 +9,64 @@
   <p><%= :download_observations_format.t %>:</p>
   <ul type="none">
     <li>
-      <%= radio_button_tag(:format, :raw, @format == "raw") %>
-      <%= :download_observations_raw.t %>
+      <%= radio_with_label(form: f, field: :format, value: :raw,
+                           checked: (@format == "raw") && "checked",
+                           text: :download_observations_raw.t) %>
     </li>
     <li>
-      <%= radio_button_tag(:format, :adolf, @format == "adolf") %>
-      <%= :download_observations_adolf.t %>
+      <%= radio_with_label(form: f, field: :format, value: :adolf,
+                           checked: (@format == "adolf") && "checked",
+                           text: :download_observations_adolf.t) %>
     </li>
     <li>
-      <%= radio_button_tag(:format, :darwin, @format == "darwin") %>
-      <%= :download_observations_darwin.t %>
+      <%= radio_with_label(form: f, field: :format, value: :darwin,
+                           checked: (@format == "darwin") && "checked",
+                           text: :download_observations_darwin.t) %>
       (<%= link_to(:download_observations_what_is_this.t,
                    "http://rs.tdwg.org/dwc/index.htm",
                    target: "_new") %>)
     </li>
     <li>
-      <%= radio_button_tag(:format, :symbiota, @format == "symbiota") %>
-      <%= :download_observations_symbiota.t %>
+      <%= radio_with_label(form: f, field: :format, value: :symbiota,
+                           checked: (@format == "symbiota") && "checked",
+                           text: :download_observations_symbiota.t) %>
     </li>
     <li>
-      <%= radio_button_tag(:format, :fundis, @format == "fundis") %>
-      <%= :download_observations_fundis.t %>
+      <%= radio_with_label(form: f, field: :format, value: :fundis,
+                           checked: (@format == "fundis") && "checked",
+                           text: :download_observations_fundis.t) %>
     </li>
   </ul>
 
   <p><%= :download_observations_encoding.t %>:</p>
   <ul type="none">
     <li>
-      <%= radio_button_tag(:encoding, "ASCII", @encoding == "ASCII") %>
-      <%= :download_observations_ascii.t %>
+      <%= radio_with_label(form: f, field: :encoding, value: "ASCII",
+                           checked: (@encoding == "ASCII") && "checked",
+                           text: :download_observations_ascii.t) %>
     </li>
     <li>
-      <%= radio_button_tag(:encoding, "WINDOWS-1252",
-                           @encoding == "WINDOWS-1252") %>
-      <%= :download_observations_windows.t %>
+      <%= radio_with_label(form: f, field: :encoding, value: "WINDOWS-1252",
+                           checked: (@encoding == "WINDOWS-1252") && "checked",
+                           text: :download_observations_windows.t) %>
     </li>
     <li>
-      <%= radio_button_tag(:encoding, "UTF-8", @encoding == "UTF-8") %>
-      <%= :download_observations_utf8.t %>
+      <%= radio_with_label(form: f, field: :encoding, value: "UTF-8",
+                           checked: (@encoding == "UTF-8") && "checked",
+                           text: :download_observations_utf8.t) %>
     </li>
     <li>
-      <%= radio_button_tag(:encoding, "UTF-16", @encoding == "UTF-16") %>
-      <%= :download_observations_utf16.t %>
+      <%= radio_with_label(form: f, field: :encoding, value: "UTF-16",
+                           checked: (@encoding == "UTF-16") && "checked",
+                           text: :download_observations_utf16.t) %>
     </li>
   </ul>
 
-  <%= f.submit(:DOWNLOAD.l, class: "btn btn-default") %>
-  <%= f.submit(:CANCEL.l, class: "btn btn-default") %>
+  <%= submit_button(form: f, button: :DOWNLOAD.l) %>
+  <%= submit_button(form: f, button: :CANCEL.l) %>
 
-  <p class="mt-5"><%= :download_observations_print_labels_header.t %>:</p>
-  <%= f.submit(:download_observations_print_labels.l,
-               class: "btn btn-default") %>
+  <%= content_tag(:p, "#{:download_observations_print_labels_header.t}:"
+                  class: "mt-5") %>
+  <%= submit_button(form: f, button: :download_observations_print_labels.l) %>
 
 <% end %>

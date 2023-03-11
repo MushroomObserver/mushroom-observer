@@ -39,8 +39,8 @@
   </div>
 
   <div class="text-center mt-3">
-    <%= f.submit(:UPDATE.l, class: "btn btn-default") %>
+    <%= submit_button(form: f, button: :UPDATE.l) %>
     <span style="margin-left:5em"></span>
-    <%= f.submit(:CANCEL.l, class: "btn btn-default") %>
+    <%= submit_button(form: r, button: :CANCEL.l) %>
   </div><!-- .text-center -->
 <% end %>

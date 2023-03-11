@@ -23,7 +23,7 @@ end
                     data: { role: "change_vote", id: naming.id } }) %>
   <% end %>
 
-  <%= f.submit(:show_namings_cast.l, class: "btn btn-default w-100",
-               data: { role: "save_vote" }) %>
+  <%= submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+                    data: { role: "save_vote" }) %>
 
 <% end %>

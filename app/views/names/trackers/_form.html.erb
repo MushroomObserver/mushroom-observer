@@ -7,10 +7,10 @@
 
   <div class="text-center my-3">
     <%= if @name_tracker
-      f.submit(:UPDATE.t, class: "btn btn-default") + " " +
-        f.submit(:DISABLE.t, class: "btn btn-default")
+      submit_button(form: f, button: :UPDATE.t) + " " +
+        submit_button(form: f, button: :DISABLE.t)
     else
-      f.submit(:ENABLE.t, class: "btn btn-default")
+      submit_button(form: f, button: :ENABLE.t)
     end %>
   </div><!-- .text-center -->
 

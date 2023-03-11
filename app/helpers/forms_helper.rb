@@ -40,6 +40,10 @@ module FormsHelper
 
   # <%= submit_button(form: f, button: button.t, center: true) %>
   def submit_button(**args)
+    unless args[:form].is_a?(ActionView::Helpers::FormBuilder)
+      return args[:button]
+    end
+
     opts = args.except(:form, :button, :class, :center)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
@@ -74,7 +78,7 @@ module FormsHelper
     opts = args.except(:form, :field, :value, :text, :class)
 
     content_tag(:div, class: "radio #{args[:class]}") do
-      args[:form].label(args[:field]) do
+      args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:text])
       end

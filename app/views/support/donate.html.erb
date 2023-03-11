@@ -51,7 +51,7 @@ javascript_include "donate"
   <%= inline_label_text_field(form: f, field: :email, size: 30,
                               text: :donate_email.t) %>
 
-  <%= f.submit(:donate_confirm.t, class: "btn btn-default center-block my-3") %>
+  <%= submit_button(form: f, button: :donate_confirm.t, center: true) %>
 
 <% end %>
 
