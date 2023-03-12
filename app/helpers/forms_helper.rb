@@ -52,11 +52,20 @@ module FormsHelper
     args[:form].submit(args[:button], opts)
   end
 
+  # convenience for account prefs: auto-populates label text arg
+  def check_if_prefs(args)
+    return args if args[:prefs].blank?
+
+    args = args.merge({ label: :"prefs_#{args[:field]}".t + ":" })
+    args.except(:prefs)
+  end
+
   # Bootstrap checkbox: form, field, label, class,
   # checkbox options: checked, value, disabled, data, etc.
   # NOTE: Only need to set `checked` if state not inferrable from db field name
   # (i.e. a model attribute of the form_with(@model))
   def check_box_with_label(**args)
+    args = check_if_prefs(args)
     opts = args.except(:form, :field, :label, :class)
 
     content_tag(:div, class: "checkbox #{args[:class]}") do
@@ -67,14 +76,9 @@ module FormsHelper
     end
   end
 
-  # convenience for account prefs: auto-populates label text arg
-  def prefs_check_box_with_label(args)
-    args = args.merge({ label: :"prefs_#{args[:field]}".t })
-    check_box_with_label(**args)
-  end
-
   # Bootstrap radio: form, field, value, label, class, checked
   def radio_with_label(**args)
+    args = check_if_prefs(args)
     opts = args.except(:form, :field, :value, :label, :class)
 
     content_tag(:div, class: "radio #{args[:class]}") do
@@ -87,6 +91,7 @@ module FormsHelper
 
   # Bootstrap text_field
   def text_field_with_label(**args)
+    args = check_if_prefs(args)
     opts = args.except(:form, :field, :label, :class, :inline)
     opts[:class] = "form-control"
 
@@ -95,12 +100,15 @@ module FormsHelper
 
     content_tag(:div, class: "form-group #{args[:class]}") do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:between]) if args[:between].present?
       concat(args[:form].text_field(args[:field], opts))
+      concat(args[:append]) if args[:append].present?
     end
   end
 
   # Bootstrap text_area
   def text_area_with_label(**args)
+    args = check_if_prefs(args)
     opts = args.except(:form, :field, :label, :class, :inline)
     opts[:class] = "form-control"
 
@@ -109,23 +117,91 @@ module FormsHelper
 
     content_tag(:div, class: "form-group #{args[:class]}") do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
+      concat(args[:append]) if args[:append].present?
     end
   end
 
   # Bootstrap select
   def select_with_label(**args)
+    args = check_if_prefs(args)
     opts = args.except(:form, :field, :options, :label, :class, :inline,
                        :select_opts)
     opts[:class] = "form-control"
+    opts[:class] += " w-auto" if args[:width] == :auto
+
+    args[:class] ||= ""
+    args[:class] += " form-inline" if args[:inline] == true
+    args[:select_opts] ||= {}
+
+    content_tag(:div, class: "form-group #{args[:class]}") do
+      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:between]) if args[:between].present?
+      concat(args[:form].select(args[:field], args[:options],
+                                args[:select_opts], opts))
+      concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # Bootstrap number_field
+  def number_field_with_label(**args)
+    args = check_if_prefs(args)
+    opts = args.except(:form, :field, :label, :class, :inline)
+    opts[:class] = "form-control"
+    opts[:min] ||= 1
 
     args[:class] ||= ""
     args[:class] += " form-inline" if args[:inline] == true
 
     content_tag(:div, class: "form-group #{args[:class]}") do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(args[:form].select(args[:field], args[:options],
-                                args[:select_opts], opts))
+      concat(args[:form].number_field(args[:field], opts))
+    end
+  end
+
+  # Bootstrap password_field
+  def password_field_with_label(**args)
+    opts = args.except(:form, :field, :label, :class, :inline)
+    opts[:class] = "form-control"
+    opts[:value] ||= ""
+
+    args[:class] ||= ""
+    args[:class] += " form-inline" if args[:inline] == true
+
+    content_tag(:div, class: "form-group #{args[:class]}") do
+      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:form].password_field(args[:field], opts))
+    end
+  end
+
+  # Bootstrap email_field
+  def email_field_with_label(**args)
+    opts = args.except(:form, :field, :label, :class, :inline)
+    opts[:class] = "form-control"
+    opts[:value] ||= ""
+
+    args[:class] ||= ""
+    args[:class] += " form-inline" if args[:inline] == true
+
+    content_tag(:div, class: "form-group #{args[:class]}") do
+      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:form].email_field(args[:field], opts))
+    end
+  end
+
+  # Bootstrap url_field
+  def url_field_with_label(**args)
+    opts = args.except(:form, :field, :label, :class, :inline)
+    opts[:class] = "form-control"
+    opts[:value] ||= ""
+
+    args[:class] ||= ""
+    args[:class] += " form-inline" if args[:inline] == true
+
+    content_tag(:div, class: "form-group #{args[:class]}") do
+      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:form].url_field(args[:field], opts))
     end
   end
 end

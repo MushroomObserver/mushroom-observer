@@ -1,24 +1,13 @@
 <!-- Login Settings for Account Preferences Form -->
 
-<div class="form-group">
-  <%= f.label(:login, :prefs_login.t + ":") %>
-  <%= f.text_field(:login, class: "form-control") %>
-</div>
+<%= text_field_with_label(form: f, field: :login, prefs: true) %>
 
-<div class="form-group">
-  <%= f.label(:email, :prefs_email.t + ":") %>
-  <%= f.text_field(:email, class: "form-control") %>
-</div>
+<%= text_field_with_label(form: f, field: :email, prefs: true) %>
 
-<div class="form-group">
-  <%= f.label(:password, :prefs_password_new.t + ":") %>
-  <%= f.password_field(:password, value: "", class: "form-control") %>
-</div>
+<%= password_field_with_label(form: f, field: :password,
+                              label: :prefs_password_new.t + ":") %>
 
-<div class="form-group">
-  <%= f.label(:password_confirmation, :prefs_password_confirm.t + ":") %>
-  <%= f.password_field(:password_confirmation, value: "",
-                          class: "form-control") %>
-</div>
+<%= password_field_with_label(form: f, field: :password_confirmation,
+                              label: :prefs_password_confirm.t + ":") %>
 
 <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
