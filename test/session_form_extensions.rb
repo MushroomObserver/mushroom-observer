@@ -489,12 +489,13 @@ module SessionExtensions
       found = false
       hash = {}
       inputs.each do |field|
-        if field.type == :checkbox
+        case field.type
+        when :checkbox
           hash[field.name] =
             field.node["checked"] == "checked" ? field.on_value : "0"
-        elsif field.type == :radio
+        when :radio
           hash[field.name] = field.on_value if field.value
-        elsif field.type == :file
+        when :file
           if field.value
             file = field.value.filename
             type = field.value.content_type
