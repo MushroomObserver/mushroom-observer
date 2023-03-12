@@ -343,16 +343,6 @@ Security/Eval:
   Exclude:
     - 'script/config.rb'
 
-# Offense count: 4
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: MinBranchesCount.
-Style/CaseLikeIf:
-  Exclude:
-    - 'app/classes/textile.rb'
-    - 'app/controllers/ajax_controller/external_link.rb'
-    - 'app/controllers/ajax_controller/pivotal.rb'
-    - 'test/session_form_extensions.rb'
-
 # Offense count: 244
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: EnforcedStyle.
