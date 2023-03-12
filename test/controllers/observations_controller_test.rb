@@ -1743,24 +1743,24 @@ class ObservationsControllerTest < FunctionalTestCase
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0)
+                                  }, 1, 0, 0)
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0, roy)
+                                  }, 1, 0, 0, roy)
 
     # Test mix of city and county
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0)
+                                  }, 1, 0, 0)
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0, roy)
+                                  }, 1, 0, 0, roy)
 
     # Test some bad terms
     where = "Some County, Ohio, USA"
