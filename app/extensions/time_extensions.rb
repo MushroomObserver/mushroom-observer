@@ -115,8 +115,9 @@ class Time
 
   delegate :email_time, to: :in_time_zone
 
-  def fancy_time(*args)
-    in_time_zone.fancy_time(*args)
+  # dd Mon yyyy hh:mm:ss
+  def display_time
+    strftime("%d %b %Y %T")
   end
 end
 
