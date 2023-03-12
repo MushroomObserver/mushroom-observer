@@ -120,8 +120,8 @@ class MatrixBoxPresenter < BasePresenter
     }
   end
 
-  def fancy_time
-    time&.fancy_time
+  def display_time
+    time&.display_time
   end
 
   # pass another arg to allow image stretched-link to link to obs, or other obj
