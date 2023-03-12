@@ -63,7 +63,7 @@ class ScriptTest < UnitTestCase
     script = script_file("make_eol_xml")
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
-    assert !File.exist?(dest_file) || File.size(dest_file).zero?
+    assert !File.exist?(dest_file) || File.empty?(dest_file)
     cmd = "#{script} #{dest_file} > #{stdout_file}"
 
     script_succeeded = system(cmd)
