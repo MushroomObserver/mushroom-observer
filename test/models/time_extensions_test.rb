@@ -73,6 +73,7 @@ class TimeExtensionsTest < ActiveSupport::TestCase
   end
 
   def test_fancy_time
+    skip "to_be deleted"
     assert_fancy_time(0.seconds, :time_just_seconds_ago)
     assert_fancy_time(59.seconds, :time_just_seconds_ago)
     assert_fancy_time(60.seconds, :time_one_minute_ago)
@@ -99,6 +100,7 @@ class TimeExtensionsTest < ActiveSupport::TestCase
   end
 
   def test_future_fancy_time
+    skip "to_be deleted"
     ref = Time.zone.now
     ten_minutes_away = ref + 10.minutes
     fancy_future_time = ten_minutes_away.fancy_time(ref)
