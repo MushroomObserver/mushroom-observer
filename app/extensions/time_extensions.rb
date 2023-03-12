@@ -53,52 +53,6 @@ class ActiveSupport::TimeWithZone
   def email_time
     strftime(MO.email_time_format)
   end
-
-  # Format time as "5 days ago", etc.
-  def fancy_time(ref = Time.zone.now)
-    # This used to correct for daylight savings time, but on
-    # Sunday Nov. 6, 2022 around 5pm EST (the time change was
-    # early this morning) tests started failing.  The tests
-    # work fine if we no longer try to compensate for DST.
-    diff = ref - self # diff_corrected_for_dst_change(ref)
-    if -diff > 1.minute
-      web_time
-    elsif diff < 1.minute
-      :time_just_seconds_ago.l
-    elsif diff < 1.hour
-      show_time_ago(diff / 60, :minute)
-    elsif diff < 1.day
-      show_time_ago(diff / 60 / 60, :hour)
-    elsif diff < 1.week
-      show_time_ago(diff / 60 / 60 / 24, :day)
-    elsif diff < 1.month
-      show_time_ago(diff / 60 / 60 / 24 / 7, :week)
-    elsif diff < 1.year
-      show_time_ago(diff / 60 / 60 / 24 * 12 / 365.24218967, :month)
-    else
-      show_time_ago(diff / 60 / 60 / 24 / 365.24218967, :year)
-    end
-  end
-
-  def show_time_ago(diff, unit)
-    n = diff.truncate
-    if n < 2
-      :"time_one_#{unit}_ago".l(date: web_date)
-    else
-      :"time_#{unit}s_ago".l(n: n, date: web_date)
-    end
-  end
-
-  ##############################################################################
-
-  # private
-
-  # def diff_corrected_for_dst_change(ref)
-  #   return ref - self - 1.hour if dst? && !ref.dst?
-  #   return ref - self + 1.hour if !dst? && ref.dst?
-
-  #   ref - self
-  # end
 end
 
 # Make MO date and time formats available to Time, just in case.
@@ -115,8 +69,9 @@ class Time
 
   delegate :email_time, to: :in_time_zone
 
-  def fancy_time(*args)
-    in_time_zone.fancy_time(*args)
+  # dd Mon yyyy hh:mm:ss
+  def display_time
+    strftime("%d %b %Y %T")
   end
 end
 
@@ -143,10 +98,4 @@ class DateTime
   delegate :api_time, to: :in_time_zone
 
   delegate :email_time, to: :in_time_zone
-
-  # This fails with *** TypeError Exception: expected numeric
-  # in class ActiveSupport::TimeWithZone.fancy_time
-  # def fancy_time(*args)
-  #   in_time_zone.fancy_time(*args)
-  # end
 end
