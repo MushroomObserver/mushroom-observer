@@ -400,9 +400,10 @@ module SessionExtensions
     # Change the value of the given input field.  Matches field whose ID _ends_
     # in the given String.
     def change(id, val)
-      if val == true
+      case val
+      when true
         assert_enabled(id).node["checked"] = "checked"
-      elsif val == false
+      when false
         assert_enabled(id).node.remove_attribute("checked")
       else
         assert_enabled(id).value = val
