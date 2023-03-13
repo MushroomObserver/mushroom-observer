@@ -1,27 +1,5 @@
 # frozen_string_literal: true
 
-#
-#  = Species List Controller
-#
-#  == Actions
-#
-#  index::                   Endpoint for all lists
-#    (private methods)
-#  index_species_list::      List of lists in current query.
-#  list_species_lists::      List of lists by date.
-#  species_lists_by_title::  List of lists by title.
-#  species_lists_by_user::   List of lists created by user.
-#  species_list_search::     List of lists matching search.
-#
-#  show::                    Display notes/etc. and list of species.
-#
-#  new::                     Form to create new list.
-#  edit::                    Form to edit existing list.
-#  create::                  Create new list.
-#  update::                  Update existing list.
-#  clear::                   Remove all observations from list.
-#  destroy::                 Destroy list.
-#
 #  *NOTE*: There is some ambiguity between observations and names that makes
 #  this slightly confusing.  The end result of a species list is actually a
 #  list of Observation's, not Name's.  However, creation and editing is
@@ -31,6 +9,7 @@
 #
 class SpeciesListsController < ApplicationController
   before_action :login_required
+  # disable cop because index is defined in ApplicationController
   before_action :disable_link_prefetching,
                 except: [:show, :new, :edit, :create, :update]
   before_action :require_successful_user, only: [:new, :create]
@@ -42,6 +21,7 @@ class SpeciesListsController < ApplicationController
     :update
   ]
 
+  # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,
     :by_user,
@@ -50,20 +30,9 @@ class SpeciesListsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    pattern: :species_list_search,
-    by_user: :species_lists_by_user,
-    for_project: :species_lists_for_project,
     by: :by_title_or_selected_by_query
   }.freeze
 
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
-
-  # def show_species_list
   def show
     store_location
     clear_query_in_session
@@ -80,16 +49,14 @@ class SpeciesListsController < ApplicationController
     init_ivars_for_show
   end
 
-  # rubocop:disable Naming/MemoizedInstanceVariableName
   def new
     @species_list = SpeciesList.new
     init_name_vars_for_create
     init_member_vars_for_create
     init_project_vars_for_create
     init_name_vars_for_clone(params[:clone]) if params[:clone].present?
-    @checklist ||= calc_checklist
+    @checklist ||= calc_checklist # rubocop:disable Naming/MemoizedInstanceVariableName
   end
-  # rubocop:enable Naming/MemoizedInstanceVariableName
 
   def edit
     return unless (@species_list = find_species_list!)
@@ -143,48 +110,33 @@ class SpeciesListsController < ApplicationController
     end
   end
 
+  ##############################################################################
+
   private
 
-  ##############################################################################
-  #
   #  :section: Index
-  #
-  ##############################################################################
 
   def default_index_subaction
-    list_species_lists
-  end
-
-  # Display list of selected species_lists, based on current Query.
-  # (Linked from show_species_list, next to "prev" and "next".)
-  def index_species_list
-    query = find_or_create_query(:SpeciesList, by: params[:by])
-    show_selected_species_lists(query, id: params[:id].to_s,
-                                       always_index: true)
+    list_all
   end
 
   # Display list of all species_lists, sorted by date.
-  def list_species_lists
-    query = create_query(:SpeciesList, :all, by: :date)
+  def list_all
+    query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
   end
 
-  # Display list of user's species_lists, sorted by date.
-  def species_lists_by_user
-    user = params[:id] ? find_or_goto_index(User, params[:by_user].to_s) : @user
-    return unless user
-
-    query = create_query(:SpeciesList, :by_user, user: user)
-    show_selected_species_lists(query)
+  def sorted_by_default_or_date
+    params[:by] == default_sort_order ? default_sort_order.to_sym : :date
   end
 
-  # Display list of SpeciesList's attached to a given project.
-  def species_lists_for_project
-    project = find_or_goto_index(Project, params[:for_project].to_s)
-    return unless project
+  def default_sort_order
+    ::Query::SpeciesListBase.default_order
+  end
 
-    query = create_query(:SpeciesList, :for_project, project: project)
-    show_selected_species_lists(query, always_index: 1)
+  # choose another subaction when params[:by].present?
+  def by_title_or_selected_by_query
+    params[:by] == "title" ? species_lists_by_title : index_query_results
   end
 
   # Display list of all species_lists, sorted by title.
@@ -193,9 +145,37 @@ class SpeciesListsController < ApplicationController
     show_selected_species_lists(query)
   end
 
+  # Display list of selected species_lists, based on current Query.
+  # (Linked from show_species_list, next to "prev" and "next".)
+  def index_query_results
+    query = find_or_create_query(:SpeciesList, by: params[:by])
+    show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Display list of user's species_lists, sorted by date.
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: species_lists_path
+    )
+    return unless user
+
+    query = create_query(:SpeciesList, :by_user, user: user)
+    show_selected_species_lists(query)
+  end
+
+  # Display list of SpeciesList's attached to a given project.
+  def for_project
+    project = find_or_goto_index(Project, params[:for_project].to_s)
+    return unless project
+
+    query = create_query(:SpeciesList, :for_project, project: project)
+    show_selected_species_lists(query, always_index: 1)
+  end
+
   # Display list of SpeciesList's whose title, notes, etc. matches a string
   # pattern.
-  def species_list_search
+  def pattern
     pattern = params[:pattern].to_s
     spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if spl
@@ -204,11 +184,6 @@ class SpeciesListsController < ApplicationController
       query = create_query(:SpeciesList, :pattern_search, pattern: pattern)
       show_selected_species_lists(query)
     end
-  end
-
-  # choose another subaction when params[:by].present?
-  def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : index_species_list
   end
 
   # Show selected list of species_lists.
@@ -233,8 +208,7 @@ class SpeciesListsController < ApplicationController
 
     # Paginate by letter if sorting by user.
     args[:letters] =
-      if query.params[:by] == "user" ||
-         query.params[:by] == "reverse_user"
+      if [query.params[:by]].intersect?(%w[user reverse_user])
         "users.login"
       else
         # Can always paginate by title letter.

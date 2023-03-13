@@ -1381,7 +1381,13 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   class << self
-    attr :index_subaction_dispatch_table, :index_subaction_param_keys
+    def index_subaction_param_keys
+      @index_subaction_param_keys ||= []
+    end
+
+    def index_subaction_dispatch_table
+      @index_subaction_dispatch_table ||= {}
+    end
   end
 
   # Dispatch to a subaction

@@ -1,49 +1,31 @@
 # frozen_string_literal: true
 
-#
-#  = Comments Controller
-#
-#  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
-#
-#  ==== Searches and Indexes
-#  index:: (params call private methods below)
-#
-#  - list_comments::
-#  - show_comments_by_user::
-#  - show_comments_for_target::
-#  - show_comments_for_user::
-#  - comment_search::
-#  - index_comment::
-#  - show_selected_comments::
-#
 #  ==== Show, CRUD actions
-#  show:: (use params for next and prev)
+#  index::
+#  show::
 #  new::
 #  create::
 #  edit::
 #  update::
 #  destroy::
 #
-################################################################################
+#
 class CommentsController < ApplicationController
   before_action :login_required
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
   before_action :disable_link_prefetching, except: [:new, :edit, :show]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
   ##############################################################################
-  #
-  #  :section: Searches and Indexes
-  #
-  ##############################################################################
 
+  # index::
+  # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :target,
     :pattern,
@@ -53,51 +35,54 @@ class CommentsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    target: :show_comments_for_target,
-    pattern: :comment_search,
-    by_user: :show_comments_by_user,
-    for_user: :show_comments_for_user,
-    by: :index_comment
+    by: :index_query_results
   }.freeze
 
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
+  ###########################################################
 
   private
 
   def default_index_subaction
-    list_comments
+    list_all
+  end
+
+  # Show list of latest comments. (Linked from left panel.)
+  def list_all
+    query = create_query(:Comment, :all, by: default_sort_order)
+    show_selected_comments(query)
+  end
+
+  def default_sort_order
+    ::Query::CommentBase.default_order
   end
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def index_comment
-    query = find_or_create_query(:Comment, by: params[:by])
+  def index_query_results
+    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
+    query = find_or_create_query(:Comment, by: sorted_by)
     show_selected_comments(query, id: params[:id].to_s, always_index: true)
   end
 
-  # Show list of latest comments. (Linked from left panel.)
-  def list_comments
-    query = create_query(:Comment, :all, by: :created_at)
-    show_selected_comments(query)
-  end
-
   # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def show_comments_by_user
-    user = find_or_goto_index(User, params[:by_user].to_s) || @user
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: comments_path
+    )
     return unless user
 
     query = create_query(:Comment, :by_user, user: user)
     show_selected_comments(query)
   end
 
-  # Shows comments for a given user, most recent first. (Linked from show_user.)
-  def show_comments_for_user
-    user = find_or_goto_index(User, params[:for_user].to_s) || @user
+  # Shows comments for a given user's Observations, most recent first.
+  # (Linked from show_user.)
+  def for_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:for_user].to_s,
+      index_path: comments_path
+    )
     return unless user
 
     query = create_query(:Comment, :for_user, user: user)
@@ -106,24 +91,24 @@ class CommentsController < ApplicationController
 
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def show_comments_for_target
-    model = Comment.safe_model_from_name(params[:type])
-    if !model
-      flash_error(:runtime_invalid.t(type: '"type"',
-                                     value: params[:type].to_s))
-      redirect_back_or_default(action: :index)
-    elsif (target = find_or_goto_index(model, params[:target].to_s))
-      query = create_query(:Comment, :for_target, target: target.id,
-                                                  type: target.class.name)
-      show_selected_comments(query)
-    end
+  def target
+    return no_model unless (model = Comment.safe_model_from_name(params[:type]))
+    return unless (target = find_or_goto_index(model, params[:target].to_s))
+
+    query = create_query(:Comment, :for_target, target: target.id,
+                                                type: target.class.name)
+    show_selected_comments(query)
+  end
+
+  def no_model
+    flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
+    redirect_back_or_default(action: :index)
   end
 
   # Display list of Comment's whose text matches a string pattern.
-  def comment_search
+  def pattern
     pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (comment = Comment.safe_find(pattern))
+    if pattern.match?(/^\d+$/) && (comment = Comment.safe_find(pattern))
       redirect_to(action: :show, id: comment.id)
     else
       query = create_query(:Comment, :pattern_search, pattern: pattern)
@@ -153,10 +138,6 @@ class CommentsController < ApplicationController
     if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")
       args[:letters] = "users.login"
-      # Paginate by letter if sorting by summary.
-      # elsif (query.params[:by] == "summary") or
-      #    (query.params[:by] == "reverse_summary")
-      #   args[:letters] = 'comments.summary'
     end
 
     @full_detail = (query.flavor == :for_target)

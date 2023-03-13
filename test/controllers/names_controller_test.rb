@@ -41,126 +41,97 @@ class NamesControllerTest < FunctionalTestCase
     Name.new_name(parse.params)
   end
 
-  def test_index_name
+  ################################################
+  #
+  #   TEST INDEX
+  #
+  ################################################
+  #
+  # Tests of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  # miscellaneous tests using get(:index)
+  def test_index
     login
     get(:index)
-    assert_template("index")
+
+    assert_displayed_title("Names by Name")
   end
 
-  def test_index_sort_by_user
-    by = "user"
+  def test_index_with_non_default_sort
+    by = "num_views"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Names by #{by.capitalize}")
+    assert_displayed_title("Names by Popularity")
   end
 
-  # observation_index
-  def test_names_with_observations
-    login
-    get(:index, params: { with_observations: true })
-    assert_template("index")
-  end
-
-  # observation_index
-  def test_names_with_observations_by_letter
-    login
-    get(:index, params: { with_observations: true, letter: "A" })
-    assert_template("index")
-  end
-
-  # authored_names
-  def test_names_with_descriptions
-    login
-    get(:index, params: { with_descriptions: true })
-    assert_match(/not the default/i, @response.body)
-    assert_template("index")
-  end
-
-  def test_names_by_user
-    login
-    get(:index, params: { by_user: rolf.id })
-    assert_template("index")
-  end
-
-  def test_names_by_user_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+  def test_index_with_saved_query
+    user = dick
+    query = Query.lookup_and_save(:Observation, :by_user, user: user)
+    q = query.id.alphabetize
 
     login
-    get(:index, params: { by_user: bad_user_id })
+    get(:index, params: { q: q })
 
-    assert_flash_error("id ##{bad_user_id}")
-    assert_redirected_to(names_path)
+    assert_displayed_title("Names with Observations created by #{user.name}")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.joins(:observations).with_correct_spelling.
+               where(observations: { user: user }).distinct.count },
+      "Wrong number of (correctly spelled) Names"
+    )
   end
 
-  def test_names_by_editor
+  def test_index_advanced_search_multiple_hits
+    search_string = "Suil"
+    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+
     login
-    get(:index, params: { by_editor: rolf.id })
-    assert_template("index")
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
+
+    assert_response(:success)
+    assert_displayed_title("Advanced Search")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
+                    with_correct_spelling.count },
+      "Wrong number of (correctly spelled) Names"
+    )
   end
 
-  def test_names_by_editor_bad_user_id
-    bad_user_id = 666
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+  def test_index_advanced_search_one_hit
+    search_string = "Stereum hirsutum"
+    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+    assert(query.results.one?,
+           "Test needs a string that has exactly one hit")
 
     login
-    get(:index, params: { by_editor: bad_user_id })
-
-    assert_flash_error("id ##{bad_user_id}")
-    assert_redirected_to(names_path)
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
+    assert_match(name_path(names(:stereum_hirsutum)), redirect_to_url,
+                 "Wrong page")
   end
 
-  def test_names_needing_descriptions
-    login
-    get(:index, params: { need_descriptions: rolf.id })
-    assert_template("index")
-  end
-
-  def test_name_search
-    id = names(:agaricus).id
-    login
-    get(:index, params: { pattern: id })
-    assert_redirected_to(name_path(id))
-  end
-
-  def test_name_search_help
-    login
-    get(:index, params: { pattern: "help:me" })
-    assert_match(/unexpected term/i, @response.body)
-  end
-
-  def test_name_search_with_spelling_correction
-    login
-    get(:index, params: { pattern: "agaricis campestrus" })
-    assert_template("index")
-    assert_select("div.alert-warning", 1)
-    assert_select("a[href*='names/#{names(:agaricus_campestrus).id}']",
-                  text: names(:agaricus_campestrus).search_name)
-    assert_select("a[href*='names/#{names(:agaricus_campestras).id}']",
-                  text: names(:agaricus_campestras).search_name)
-    assert_select("a[href*='names/#{names(:agaricus_campestros).id}']",
-                  text: names(:agaricus_campestros).search_name)
-
-    get(:index, params: { pattern: "Agaricus" })
-    assert_template("index")
-    assert_select("div.alert-warning", 0)
-  end
-
-  def test_advanced_search
+  def test_index_advanced_search_no_hits
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
+
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_template("index")
+
+    assert_select("title", { text: "#{:app_title.l}: Index" }, # metadata
+                  "Wrong page or <title>text")
+    assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
-  def test_advanced_search_with_deleted_query
+  def test_index_advanced_search_with_deleted_query
     query = Query.lookup_and_save(:Name, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
@@ -168,12 +139,14 @@ class NamesControllerTest < FunctionalTestCase
                                   location: "Eastern Oklahoma")
     params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
+
     login
     get(:index, params: params)
+
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_advanced_search_error
+  def test_index_advanced_search_error
     query_without_conditions = Query.lookup_and_save(
       :Name, :advanced_search
     )
@@ -187,10 +160,222 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  ################################################
-  #
-  #   TEST INDEX
-  #
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_displayed_title("Names Matching ‘#{pattern}’")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
+                    with_correct_spelling.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
+  def test_index_pattern_id
+    id = names(:agaricus).id
+
+    login
+    get(:index, params: { pattern: id })
+
+    assert_redirected_to(name_path(id))
+  end
+
+  def test_index_pattern_help
+    login
+    get(:index, params: { pattern: "help:me" })
+
+    assert_match(/unexpected term/i, @response.body)
+  end
+
+  def test_index_pattern_near_miss
+    near_miss_pattern = "agaricis campestrus"
+    assert_empty(Name.with_correct_spelling.
+                      where(search_name: near_miss_pattern),
+                 "Test needs a pattern without a correctly spelled exact match")
+    near_misses = Name.with_correct_spelling.
+                  where(Name[:search_name] =~ /agaric.s campestr.s/)
+
+    login
+    get(:index, params: { near_miss_pattern: })
+
+    near_misses.each do |near_miss|
+      assert_select("#results a[href*='names/#{near_miss.id}']",
+                    text: near_miss.search_name)
+    end
+  end
+
+  def test_index_with_observations
+    login
+    get(:index, params: { with_observations: true })
+
+    assert_response(:success)
+    assert_displayed_title("Names with Observations")
+    assert_select(
+      "#results a:match('href', ?)", %r{#{names_path}/\d+},
+      { count: Name.joins(:observations).
+                    with_correct_spelling.
+                    distinct.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
+  def test_index_with_observations_by_letter
+    letter = "A"
+    names = Name.joins(:observations).
+            with_correct_spelling. # website seems to behave this way
+            where(Observation[:text_name].matches("#{letter}%"))
+    assert(names.many?, "Test needs different letter")
+
+    login
+    get(:index, params: { with_observations: true, letter: letter })
+
+    assert_response(:success)
+    assert_displayed_title("Names with Observations")
+    names.each do |name|
+      assert_select("#results a[href*='/names/#{name.id}']",
+                    text: name.search_name)
+    end
+  end
+
+  def test_index_with_descriptions
+    login
+    get(:index, params: { with_descriptions: true })
+
+    assert_response(:success)
+    assert_displayed_title("Names with Descriptions")
+    assert_select("#results", { text: /not the default/ },
+                  "Results should include non-default descriptions")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.joins(:descriptions).
+                    with_correct_spelling.
+                    distinct.count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
+  def test_index_needing_descriptions
+    login
+    get(:index, params: { need_descriptions: true })
+
+    assert_response(:success)
+    assert_displayed_title("Selected Names")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      # need length; count & size return a hash; description_needed is grouped
+      { count: Name.description_needed.length },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
+  def test_index_by_user_who_created_multiple_names
+    user = dick
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_response(:success)
+    assert_displayed_title("Names created by #{user.name}")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.where(user: user, correct_spelling_id: nil).count },
+      "Wrong number of (correctly spelled) Names"
+    )
+  end
+
+  def test_index_by_user_who_created_one_name
+    user = roy
+    assert(Name.where(user: user).none?)
+    name = names(:boletus_edulis)
+    name.user = user
+    name.save
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_response(:redirect)
+    assert_match(name_path(Name.where(user: user).first),
+                 redirect_to_url)
+  end
+
+  def test_index_by_user_who_created_zero_locations
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_flash_text(:runtime_no_matches.l(type: :names.l))
+  end
+
+  def test_index_by_user_bad_user_id
+    bad_user_id = observations(:minimal_unknown_obs).id
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
+    assert_redirected_to(names_path)
+  end
+
+  def test_index_by_editor_of_multiple_names
+    user = dick
+    make_dick_editor_of_addtional_name
+    names_edited_by_user = Name.joins(:versions).
+                           where.not(user: user).
+                           where(versions: { user_id: user.id })
+    assert(names_edited_by_user.many?)
+
+    login
+    get(:index, params: { by_editor: user })
+
+    assert_displayed_title("Names Edited by #{user.name}")
+    assert_select("#results a:match('href',?)", %r{^/names/\d+},
+                  { count: names_edited_by_user.count },
+                  "Wrong number of results")
+  end
+
+  # A hack to make dick an editor of this name
+  # He is the creator of the name and of a version
+  # Changing the creator to rolf makes dick look like an editor
+  def make_dick_editor_of_addtional_name
+    name = names(:boletus_edulis)
+    name.user = users(:rolf)
+    name.save
+  end
+
+  def test_index_by_editor_of_one_name
+    user = dick
+    names_edited_by_user = Name.joins(:versions).
+                           where.not(user: user).
+                           where(versions: { user_id: user.id })
+    assert(names_edited_by_user.one?)
+
+    login
+    get(:index, params: { by_editor: user.id })
+
+    assert_response(:redirect)
+    assert_match(name_path(names_edited_by_user.first), redirect_to_url)
+  end
+
+  def test_index_by_editor_bad_user_id
+    bad_user_id = observations(:minimal_unknown_obs).id
+
+    login
+    get(:index, params: { by_editor: bad_user_id })
+
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
+    assert_redirected_to(names_path)
+  end
+
   ################################################
 
   def ids_from_links(links)

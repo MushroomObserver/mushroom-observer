@@ -2,6 +2,8 @@
 
 module Observations
   class MapsController < ApplicationController
+    before_action :login_required
+
     # Map results of a search or index.
     def index
       show and return if params[:id].present?
