@@ -3,6 +3,7 @@
 %>
 
 <%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>
+
 <%= post_button(name: :reverify_link.t,
                 path: account_resend_verification_email_path(
                         id: @unverified_user.id),
