@@ -259,9 +259,7 @@ class Observation < AbstractModel
   scope :without_name,
         -> { where(name: Name.unknown) }
   scope :with_name_above_genus,
-        lambda {
-          where(name_id: Name.with_rank_above_genus.map(&:id))
-        }
+        -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
   scope :without_confident_name, lambda {
     with_name_above_genus.or(where(vote_cache: ..0))
   }
