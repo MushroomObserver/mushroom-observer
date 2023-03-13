@@ -258,9 +258,14 @@ class Observation < AbstractModel
         -> { where.not(name: Name.unknown) }
   scope :without_name,
         -> { where(name: Name.unknown) }
+  scope :with_name_above_genus,
+        lambda {
+          where(name_id: Name.with_rank_above_genus.map(&:id))
+        }
   scope :without_confident_name, lambda {
-    without_name.or(where(vote_cache: ..0))
+    with_name_above_genus.or(where(vote_cache: ..0))
   }
+
   scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
     joins(:votes).where(user_id: user_id)
