@@ -88,8 +88,8 @@ module Query
     end
 
     def initialize_needs_id
-      names_above_genus = Name.with_rank_above_genus.map(&:id)
-      where << "observations.name_id IN #{names_above_genus} OR " \
+      names_above_genus = Name.with_rank_above_genus.select(:name_id).to_sql
+      where << "observations.name_id IN (#{names_above_genus}) OR " \
                "observations.vote_cache <= 0"
       where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
                "FROM observation_views WHERE observation_views.user_id = " \
