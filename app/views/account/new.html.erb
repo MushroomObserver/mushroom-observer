@@ -22,8 +22,8 @@
   <%= text_field_with_label(form: f, field: :email_confirmation,
                             label: :signup_email_confirmation.t + ":",
                             append: help_note(:div,
-                                      [:signup_email_help.tp.
-                                        :email_spam_notice.tp].safe_join)) %>
+                                      [:signup_email_help.tp,
+                                       :email_spam_notice.tp].safe_join)) %>
 
   <%= text_field_with_label(form: f, field: :name,
                             label: :signup_name.t + ":") %>
