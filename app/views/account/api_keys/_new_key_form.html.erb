@@ -1,10 +1,9 @@
 <%= form_with(scope: :key, url: account_api_keys_path, method: :post,
               id: "account_new_api_key_form") do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:notes, :account_api_keys_notes_label.t) %>
-    <%= f.text_field(:notes, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :notes,
+                            label: "#{:account_api_keys_notes_label.t}",
+                            class: "mt-3") %>
 
   <%= submit_button(form: f, button: :account_api_keys_create_button.l,
                     center: true, id: "create_button") %>

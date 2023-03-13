@@ -41,7 +41,7 @@
           </div>
           <div class="view_key_notes_container"
                data-target-key="<%= key.id %>">
-            <span class="current_notes"><%= key.notes.t %></span>
+            <%= content_tag(:span, key.notes.t, class: "current_notes") %>
             <%= link_to(:EDIT.t, edit_account_api_key_path(id: key.id),
                         data: { role: "edit_api_key", id: key.id }) %>
           </div>
