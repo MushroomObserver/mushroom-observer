@@ -432,32 +432,6 @@ module ApplicationHelper
     Textile.textilize(str, do_object_links)
   end
 
-  # Create stylable file input field with client-side size validation.
-  def custom_file_field(obj, attr, opts = {})
-    max_size = MO.image_upload_max_size
-    max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(
-      obj,
-      attr,
-      opts.merge(
-        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size
-      )
-    )
-    content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
-      content_tag(:span, :no_file_selected.t)
-  end
-
-  def date_select_opts(obj = nil)
-    start_year = 20.years.ago.year
-    init_value = obj.try(&:when).try(&:year)
-    start_year = init_value if init_value && init_value < start_year
-    { start_year: start_year,
-      end_year: Time.zone.now.year,
-      order: [:day, :month, :year] }
-  end
-
   # contents of the <title> in html header
   def title_tag_contents(action_name)
     if @title.present?

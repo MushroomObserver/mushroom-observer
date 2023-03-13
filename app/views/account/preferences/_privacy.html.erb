@@ -25,13 +25,13 @@ filename_values = [
                       options: anon_values, width: :auto) %>
 
 <%= select_with_label(form: f, field: :keep_filenames,
-                      label: :prefs_keep_image_filenames.t + ":",
+                      label: :prefs_keep_image_filenames.t,
                       options: filename_values, width: :auto) %>
 
-<% between = content_tag(:span, ["(", :prefs_license_note.t, ")"].safe_join,
-                         class: "help-note")%>
 <%= select_with_label(form: f, field: :license_id,
-                      label: :License.t.t + ":", options: @licenses,
-                      between: between, width: :auto) %>
+                      label: :License.t + ":", options: @licenses,
+                      between: help_note(:span,
+                        ["(", :prefs_license_note.t, ")"].safe_join),
+                      width: :auto) %>
 
 <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
