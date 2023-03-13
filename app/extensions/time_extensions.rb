@@ -71,7 +71,7 @@ class Time
 
   # dd Mon yyyy hh:mm:ss
   def display_time
-    strftime("%d %b %Y %T")
+    strftime("%F %T")
   end
 end
 
