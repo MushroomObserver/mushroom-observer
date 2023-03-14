@@ -90,17 +90,14 @@ module Query
     end
 
     def initialize_needs_id
+      user = User.current_id
       names_above_genus = Name.with_rank_above_genus.map(&:id).join(", ")
-      obs_with_vote_by_user = Observation.with_vote_by_user(
-        User.current_id
-      ).map(&:id).join(", ")
-      obs_reviewed_by_user = Observation.reviewed_by_user(
-        User.current_id
-      ).map(&:id).join(", ")
+      obs_voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
+      obs_reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
       where << "observations.name_id IN (#{names_above_genus}) OR " \
                "observations.vote_cache <= 0"
-      where << "observations.id NOT IN (#{obs_with_vote_by_user})"
-      where << "observations.id NOT IN (#{obs_reviewed_by_user})"
+      where << "observations.id NOT IN (#{obs_voted})"
+      where << "observations.id NOT IN (#{obs_reviewed})"
     end
 
     def initialize_needs_id_by_taxon
@@ -119,9 +116,9 @@ module Query
       obs_reviewed_by_user = Observation.reviewed_by_user(
         User.current_id
       ).map(&:id).join(", ")
-      where << "(observations.name_id IN (#{subtaxa_above_genus})) OR " \
+      where << "((observations.name_id IN (#{subtaxa_above_genus})) OR " \
                "(observations.name_id IN (#{lower_subtaxa}) AND " \
-               "observations.vote_cache <= 0)"
+               "observations.vote_cache <= 0))"
       where << "observations.id NOT IN (#{obs_with_vote_by_user})"
       where << "observations.id NOT IN (#{obs_reviewed_by_user})"
     end
