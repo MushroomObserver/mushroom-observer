@@ -1,6 +1,12 @@
 <%# filter for identify observations index %>
 <%# TODO: make this a select with autocomplete that sends the ID %>
-<% placeholder = "Filter by taxon: " + params[:name] || "Filter by taxon" %>
+<%# Otherwise the name has to be looked up (several times) %>
+
+<% placeholder = "Filtered by taxon: " + params[:name] || "Filter by taxon" %>
+
+<%= content_tag(:h5) do
+      content_tag(:strong, "Filter by taxon:")
+    end %>
 
 <%= form_with(url: identify_observations_path, method: :get,
               id: "filter_by_taxon") do |f| %>
