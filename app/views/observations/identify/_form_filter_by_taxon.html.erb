@@ -1,0 +1,13 @@
+<%# filter for identify observations index %>
+
+<%= form_with(url: identify_observations_path, method: :get,
+              id: "filter_by_taxon") do |f| %>
+
+  <%= search_field_with_submit(form: f, field: :name, label: "Filter by taxon:",
+                               # turn off browser autocomplete
+                               size: 51, inline: true, autocomplete: "off",
+                               data: { autofocus: true }) %>
+
+  <% turn_into_name_above_genus_auto_completer(:name) %>
+
+<% end %>

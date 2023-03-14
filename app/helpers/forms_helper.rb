@@ -287,6 +287,31 @@ module FormsHelper
       content_tag(:span, :no_file_selected.t)
   end
 
+  def search_field_with_submit(args)
+    opts = separate_field_options_from_args(args)
+    opts[:class] = "form-control"
+    opts[:value] ||= ""
+    opts[:placeholder] = args[:label]
+
+    args[:inline] = true
+    wrap_class = form_group_wrap_class(args)
+
+    content_tag(:div, class: wrap_class) do
+      concat(args[:form].label(args[:field], args[:label],
+                               class: "mr-3"))
+      concat(
+        content_tag(:div, class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(
+            content_tag(:span, class: "input-group-btn") do
+              submit_button(form: args[:form], button: :SEARCH.l)
+            end
+          )
+        end
+      )
+    end
+  end
+
   # convenience for account prefs: auto-populates label text arg
   def auto_label_if_form_is_account_prefs(args)
     return args if args[:prefs].blank?
