@@ -15,14 +15,20 @@ placeholder = if params[:name].present?
     end %>
 
 <%= form_with(url: identify_observations_path, method: :get,
-              id: "filter_by_taxon") do |f| %>
+              class: "d-inline-block", id: "filter_by_taxon") do |f| %>
 
   <%= search_field_with_submit(form: f, field: :name, label: "Filter by taxon:",
                                # turn off browser autocomplete
                                size: 51, inline: true, autocomplete: "off",
                                placeholder: placeholder,
+                              #  class: "d-inline-block",
                                data: { autofocus: true }) %>
 
   <% turn_into_name_above_genus_auto_completer(:name) %>
 
+<% end %>
+
+<% if params[:name].present? %>
+  <%= button_to("Clear filter", identify_observations_path(clear_filter: true),
+                method: :get, class: "btn btn-default d-inline-block") %>
 <% end %>

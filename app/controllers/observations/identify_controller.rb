@@ -10,6 +10,7 @@ module Observations
     def index
       @layout = calc_layout_params
       return filtered_index if params[:name].present?
+      return clear_filter if params[:clear_filter].present?
 
       full_index_or_inherited_query
     end
@@ -20,6 +21,12 @@ module Observations
       return unless (@filter = Name.find_by(text_name: params[:name]))
 
       query = create_query(:Observation, :all, { needs_id_by_taxon: @filter })
+
+      show_selected_results(query)
+    end
+
+    def clear_filter
+      query = create_query(:Observation, :all, { needs_id: true })
 
       show_selected_results(query)
     end
