@@ -2,7 +2,13 @@
 <%# TODO: make this a select with autocomplete that sends the ID %>
 <%# Otherwise the name has to be looked up (several times) %>
 
-<% placeholder = "Filtered by taxon: " + params[:name] || "Filter by taxon" %>
+<%
+placeholder = if params[:name].present?
+                ("Filtered by taxon: " + params[:name])
+              else
+                "Filter by taxon"
+              end
+%>
 
 <%= content_tag(:h5) do
       content_tag(:strong, "Filter by taxon:")

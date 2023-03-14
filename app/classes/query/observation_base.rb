@@ -98,29 +98,38 @@ module Query
                "observations.vote_cache <= 0"
       where << "observations.id NOT IN (#{obs_voted})"
       where << "observations.id NOT IN (#{obs_reviewed})"
+      # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
+      #           "FROM observation_views WHERE observation_views.user_id = " \
+      #           "#{User.current_id} AND observation_views.reviewed = 1)"
+      # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
+      #           "FROM votes WHERE user_id = #{User.current_id})"
     end
 
     def initialize_needs_id_by_taxon
+      user = User.current_id
       # Although the whole name is passed, it only receives the ID
       # Seems we have to look it up again (?)
       name = Name.find(params[:needs_id_by_taxon])
+
       # Avoid inner queries: get these ids directly
       name_plus_subtaxa = Name.include_subtaxa_of(name)
       subtaxa_above_genus = name_plus_subtaxa.
                             with_rank_above_genus.map(&:id).join(", ")
       lower_subtaxa = name_plus_subtaxa.
                       with_rank_at_or_below_genus.map(&:id).join(", ")
-      obs_with_vote_by_user = Observation.with_vote_by_user(
-        User.current_id
-      ).map(&:id).join(", ")
-      obs_reviewed_by_user = Observation.reviewed_by_user(
-        User.current_id
-      ).map(&:id).join(", ")
-      where << "((observations.name_id IN (#{subtaxa_above_genus})) OR " \
-               "(observations.name_id IN (#{lower_subtaxa}) AND " \
-               "observations.vote_cache <= 0))"
-      where << "observations.id NOT IN (#{obs_with_vote_by_user})"
-      where << "observations.id NOT IN (#{obs_reviewed_by_user})"
+      obs_voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
+      obs_reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
+
+      # careful... the name may not have lower_subtaxa
+      first_condition = "observations.name_id IN (#{subtaxa_above_genus})"
+      if lower_subtaxa.present?
+        first_condition += " OR (observations.name_id IN (#{lower_subtaxa})" \
+                           " AND observations.vote_cache <= 0)"
+      end
+
+      where << first_condition
+      where << "observations.id NOT IN (#{obs_voted})"
+      where << "observations.id NOT IN (#{obs_reviewed})"
     end
 
     def initialize_projects_parameter

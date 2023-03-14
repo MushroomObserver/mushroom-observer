@@ -262,7 +262,7 @@ class Observation < AbstractModel
         -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
   scope :without_confident_name,
         -> { where(vote_cache: ..0) }
-  scope :with_name_above_genus_or_not_confident, lambda {
+  scope :needs_id, lambda {
     with_name_above_genus.or(without_confident_name)
   }
 
@@ -272,9 +272,7 @@ class Observation < AbstractModel
   }
   scope :without_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    joins(:votes).where.not(
-      id: Vote.without_vote_by_user(user_id).select(:observation_id).distinct
-    )
+    where.not(id: Vote.where(user_id: user_id).select(:observation_id).distinct)
   }
   scope :reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -286,9 +284,8 @@ class Observation < AbstractModel
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
               select(:observation_id).distinct)
   }
-  scope :needs_identification, lambda { |user|
-    with_name_above_genus_or_not_confident.
-      without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  scope :needs_id_for_user, lambda { |user|
+    needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct
   }
   scope :needs_id_by_taxon, lambda { |user, name|
     name_plus_subtaxa = Name.include_subtaxa_of(name)
