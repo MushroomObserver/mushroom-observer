@@ -7,7 +7,7 @@ module Observations
     def test_identify_observations_index
       login("mary")
       mary = users(:mary)
-      obs = Observation.needs_identification(users(:mary))
+      obs = Observation.needs_id_for_user(users(:mary))
       obs_count = obs.count
       mary.update(layout_count: obs_count + 1)
 
@@ -17,7 +17,7 @@ module Observations
       assert_response(:success)
 
       # make a query, and test that the obs scope filters appropriately
-      cal_obs = Observation.needs_identification(users(:mary)).
+      cal_obs = Observation.needs_id_for_user(users(:mary)).
                 in_region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
@@ -49,7 +49,7 @@ module Observations
 
       # Vote on the first unconfident naming and check the new obs_count
       # On the site, this happens via JS, so we'll do it directly
-      new_cal_obs = Observation.needs_identification(users(:mary)).
+      new_cal_obs = Observation.needs_id_for_user(users(:mary)).
                     in_region("California, USA")
       # Have to check for an actual naming, because some obs have no namings,
       # and obs.name_id.present? doesn't necessarily mean there's a naming
