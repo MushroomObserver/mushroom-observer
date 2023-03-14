@@ -576,6 +576,8 @@ class Name < AbstractModel
           names = [name] + subtaxa_of(name)
           where(id: names.map(&:id)).with_correct_spelling
         }
+  scope :include_subtaxa_above_genus,
+        ->(name) { include_subtaxa_of(name).with_rank_above_genus }
   scope :text_name_includes,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
   scope :with_classification,

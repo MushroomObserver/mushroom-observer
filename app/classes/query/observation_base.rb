@@ -27,6 +27,7 @@ module Query
         project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
+        needs_id_by_taxon?: [Name],
 
         # numeric
         confidence?: [:float],
@@ -89,13 +90,33 @@ module Query
 
     def initialize_needs_id
       names_above_genus = Name.with_rank_above_genus.map(&:id).join(", ")
+      obs_with_vote_by_user = Observation.with_vote_by_user(
+        User.current_id
+      ).map(&:id).join(", ")
+      obs_reviewed_by_user = Observation.reviewed_by_user(
+        User.current_id
+      ).map(&:id).join(", ")
       where << "observations.name_id IN (#{names_above_genus}) OR " \
                "observations.vote_cache <= 0"
-      where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-               "FROM votes WHERE user_id = #{User.current_id})"
-      where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-               "FROM observation_views WHERE observation_views.user_id = " \
-               "#{User.current_id} AND observation_views.reviewed = 1)"
+      where << "observations.id NOT IN (#{obs_with_vote_by_user})"
+      where << "observations.id NOT IN (#{obs_reviewed_by_user})"
+    end
+
+    def initialize_needs_id_by_taxon
+      name_plus_subtaxa = Name.include_subtaxa_of(params[:needs_id_by_taxon])
+      subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
+      lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+      obs_with_vote_by_user = Observation.with_vote_by_user(
+        User.current_id
+      ).map(&:id).join(", ")
+      obs_reviewed_by_user = Observation.reviewed_by_user(
+        User.current_id
+      ).map(&:id).join(", ")
+      where << "(observations.name_id IN (#{subtaxa_above_genus})) OR " \
+               "(observations.name_id IN (#{lower_subtaxa}) AND " \
+               "observations.vote_cache <= 0)"
+      where << "observations.id NOT IN (#{obs_with_vote_by_user})"
+      where << "observations.id NOT IN (#{obs_reviewed_by_user})"
     end
 
     def initialize_projects_parameter

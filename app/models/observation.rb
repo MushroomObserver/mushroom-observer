@@ -260,8 +260,10 @@ class Observation < AbstractModel
         -> { where(name: Name.unknown) }
   scope :with_name_above_genus,
         -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
-  scope :without_confident_name, lambda {
-    with_name_above_genus.or(where(vote_cache: ..0))
+  scope :without_confident_name,
+        -> { where(vote_cache: ..0) }
+  scope :with_name_above_genus_or_not_confident, lambda {
+    with_name_above_genus.or(without_confident_name)
   }
 
   scope :with_vote_by_user, lambda { |user|
@@ -270,7 +272,9 @@ class Observation < AbstractModel
   }
   scope :without_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: Vote.where(user_id: user_id).select(:observation_id).distinct)
+    joins(:votes).where.not(
+      id: Vote.without_vote_by_user(user_id).select(:observation_id).distinct
+    )
   }
   scope :reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -283,9 +287,21 @@ class Observation < AbstractModel
               select(:observation_id).distinct)
   }
   scope :needs_identification, lambda { |user|
-    without_confident_name.without_vote_by_user(user).
-      not_reviewed_by_user(user).distinct
+    with_name_above_genus_or_not_confident.
+      without_vote_by_user(user).not_reviewed_by_user(user).distinct
   }
+  scope :needs_id_by_taxon, lambda { |user, name|
+    name_plus_subtaxa = Name.include_subtaxa_of(name)
+    subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
+    lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+
+    where(name_id: subtaxa_above_genus).or(
+      Observation.where(name_id: lower_subtaxa).and(
+        Observation.where(vote_cache: ..0)
+      )
+    ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  }
+
   # scope :of_name(name, **args)
   #
   # Accepts either a Name instance, a string, or an id as the first argument.

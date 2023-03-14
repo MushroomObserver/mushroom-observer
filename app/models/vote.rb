@@ -67,6 +67,15 @@ class Vote < AbstractModel
   belongs_to :naming
   belongs_to :observation
 
+  scope :with_vote_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    where(user_id: user_id)
+  }
+  scope :without_vote_by_user, lambda { |user|
+    user_id = user.is_a?(Integer) ? user : user&.id
+    where.not(user_id: user_id)
+  }
+
   # ----------------------------
   #  :section: Values
   # ----------------------------
