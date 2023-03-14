@@ -1,4 +1,6 @@
 <%# filter for identify observations index %>
+<%# TODO: make this a select with autocomplete that sends the ID %>
+<% placeholder = "Filter by taxon: " + params[:name] || "Filter by taxon" %>
 
 <%= form_with(url: identify_observations_path, method: :get,
               id: "filter_by_taxon") do |f| %>
@@ -6,6 +8,7 @@
   <%= search_field_with_submit(form: f, field: :name, label: "Filter by taxon:",
                                # turn off browser autocomplete
                                size: 51, inline: true, autocomplete: "off",
+                               placeholder: placeholder,
                                data: { autofocus: true }) %>
 
   <% turn_into_name_above_genus_auto_completer(:name) %>

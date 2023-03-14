@@ -27,7 +27,7 @@ module Query
         project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
-        needs_id_by_taxon?: [Name],
+        needs_id_by_taxon?: Name,
 
         # numeric
         confidence?: [:float],
@@ -57,6 +57,7 @@ module Query
       initialize_boolean_parameters
       initialize_search_parameters
       initialize_needs_id if params[:needs_id]
+      initialize_needs_id_by_taxon if params[:needs_id_by_taxon]
       add_range_condition("observations.vote_cache", params[:confidence])
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
@@ -103,9 +104,15 @@ module Query
     end
 
     def initialize_needs_id_by_taxon
-      name_plus_subtaxa = Name.include_subtaxa_of(params[:needs_id_by_taxon])
-      subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
-      lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+      # Although the whole name is passed, it only receives the ID
+      # Seems we have to look it up again (?)
+      name = Name.find(params[:needs_id_by_taxon])
+      # Avoid inner queries: get these ids directly
+      name_plus_subtaxa = Name.include_subtaxa_of(name)
+      subtaxa_above_genus = name_plus_subtaxa.
+                            with_rank_above_genus.map(&:id).join(", ")
+      lower_subtaxa = name_plus_subtaxa.
+                      with_rank_at_or_below_genus.map(&:id).join(", ")
       obs_with_vote_by_user = Observation.with_vote_by_user(
         User.current_id
       ).map(&:id).join(", ")

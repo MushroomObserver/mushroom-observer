@@ -17,9 +17,9 @@ module Observations
     private
 
     def filtered_index
-      return unless (name = Name.find(params[:name]))
+      return unless (@filter = Name.find_by(text_name: params[:name]))
 
-      query = Query.create_query(Observation, :all, { needs_id_by_taxon: name })
+      query = create_query(:Observation, :all, { needs_id_by_taxon: @filter })
 
       show_selected_results(query)
     end
