@@ -287,6 +287,8 @@ class Observation < AbstractModel
   scope :needs_id_for_user, lambda { |user|
     needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct
   }
+  # Higher taxa: returns narrowed-down group of id'd obs,
+  # in higher taxa under the given taxon
   scope :needs_id_by_taxon, lambda { |user, name|
     name_plus_subtaxa = Name.include_subtaxa_of(name)
     subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
