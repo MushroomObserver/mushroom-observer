@@ -34,10 +34,11 @@ identify_page = controller.controller_name == "identify"
 
   <%= fields_for(:search) do |f_s| %>
     <div class="form-group has-feedback has-search">
-      <span class="glyphicon glyphicon-search form-control-feedback"></span>
-        <%= f_s.text_field(:pattern, { value: session[:pattern],
-                                       class: "form-control",
-                                       placeholder: :app_find.t }) %>
+      <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
+                                        "form-control-feedback") %>
+      <%= f_s.text_field(:pattern, { value: session[:pattern],
+                                     class: "form-control",
+                                     placeholder: :app_find.t }) %>
     </div><!--.form-group-->
 
     <div class="form-group text-nowrap">

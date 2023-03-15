@@ -1,0 +1,52 @@
+<%# filter for identify observations index %>
+<%# TODO: make this a select with autocomplete that sends the ID %>
+<%# Otherwise the name has to be looked up (several times) %>
+
+<%
+placeholder = if params[:name].present?
+                ("Filtered by: " + params[:name])
+              elsif params[:where].present?
+                ("Filtered by: " + params[:where])
+              # elsif params[:user].present?
+              #   ("Filtered by: " + params[:user])
+              else
+                "Filter by:"
+              end
+options = [
+  [:TAXON.l, :name],
+  [:WHERE.l, :where],
+  # [:USER.l, :user],
+]
+%>
+
+<%= form_with(url: identify_observations_path, method: :get,
+              class: "navbar-form navbar-left", scope: :filter,
+              id: "identify_filter") do |f| %>
+
+  <div class="form-group has-feedback has-search">
+    <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
+                                      "form-control-feedback") %>
+    <%# f.label(:term, "Filter by:") %>
+    <%= f.text_field(:term,
+                      # turn off browser autocomplete
+                      autocomplete: "off",
+                      placeholder: placeholder,
+                      class: "form-control", size: 42,
+                      data: { autofocus: true }) %>
+  </div><!--.form-group-->
+
+  <%= f.select(:type, options_for_select(options), { selected: :name },
+               { class: "form-control" }) %>
+
+  <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
+
+  <%= f.submit("Clear", class: "btn btn-default") %>
+
+  <%# TODO: script to change into the right kind of autocompleter by term %>
+  <% turn_into_name_above_genus_auto_completer(:filter_term) %>
+
+  <% # initializes module with translations for js messages
+  inject_javascript_at_end %(
+  ) %>
+
+<% end %>

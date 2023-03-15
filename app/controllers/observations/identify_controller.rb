@@ -9,24 +9,46 @@ module Observations
 
     def index
       @layout = calc_layout_params
-      return filtered_index if params[:name].present?
-      return clear_filter if params[:clear_filter].present?
+
+      # first deal with filters, or clear filter
+      if params[:commit] == "Clear"
+        return clear_filter
+      elsif (type = params.dig(:filter, :type).to_sym)
+        return filtered_index(type)
+      end
 
       full_index_or_inherited_query
     end
 
     private
 
-    def filtered_index
-      return unless (@filter = Name.find_by(text_name: params[:name]))
-
-      query = create_query(:Observation, :all, { needs_id_by_taxon: @filter })
+    def clear_filter
+      query = create_query(:Observation, :all, { needs_id: true })
 
       show_selected_results(query)
     end
 
-    def clear_filter
-      query = create_query(:Observation, :all, { needs_id: true })
+    # need both a :type and a :term
+    def filtered_index(type)
+      return unless (term = params.dig(:filter, :term).strip)
+
+      case type
+      when :name
+        name_filter(term)
+        # when :location
+        #   location_filter
+        # when :user
+        #   user_filter
+      end
+    end
+
+    def name_filter(term)
+      return unless (filter = Name.find_by(text_name: term))
+
+      # Nimmo note: 2023-03-14 to be researched: This obviously sends, and
+      # `Query::ObservationAll` expects, a full `Name` instance, but somehow
+      # the flavor parsing method `needs_id` only receives the name ID.
+      query = create_query(:Observation, :all, { needs_id_by_taxon: filter })
 
       show_selected_results(query)
     end
@@ -38,6 +60,9 @@ module Observations
       show_selected_results(new_query)
     end
 
+    # TODO: Allow show_index_of_objects to `render` rather than `redirect`,
+    # or better yet `respond_to do |format|` and write index.js.erb templates
+    # to just render the #results div.
     def show_selected_results(query)
       show_index_of_objects(query,
                             { matrix: true,
