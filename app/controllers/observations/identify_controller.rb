@@ -13,8 +13,8 @@ module Observations
       # first deal with filters, or clear filter
       if params[:commit] == "Clear"
         return clear_filter
-      elsif (type = params.dig(:filter, :type).to_sym)
-        return filtered_index(type)
+      elsif (type = params.dig(:filter, :type))
+        return filtered_index(type.to_sym)
       end
 
       full_index_or_inherited_query
@@ -33,8 +33,8 @@ module Observations
       return unless (term = params.dig(:filter, :term).strip)
 
       case type
-      when :name
-        name_filter(term)
+      when :taxon
+        taxon_filter(term)
         # when :location
         #   location_filter
         # when :user
@@ -42,7 +42,7 @@ module Observations
       end
     end
 
-    def name_filter(term)
+    def taxon_filter(term)
       return unless (filter = Name.find_by(text_name: term))
 
       # Nimmo note: 2023-03-14 to be researched: This obviously sends, and

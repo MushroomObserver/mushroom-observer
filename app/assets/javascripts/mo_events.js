@@ -18,3 +18,18 @@ MOEvents.savingWhirly = function () {
 
   $("#mo_ajax_progress").modal('show');
 }
+
+MOEvents.rebindAutoComplete = function (type) {
+  // var type = this.value
+  alert(type)
+  var filter_term = $("#filter_term");
+  switch (type) {
+    case "taxon":
+      AUTOCOMPLETERS[$('#ur_taxon').data('uuid')].reuse(filter_term)
+    case "where":
+      AUTOCOMPLETERS[$('#ur_location').data('uuid')].reuse(filter_term)
+    case "user":
+      AUTOCOMPLETERS[$('#ur_user').data('uuid')].reuse(filter_term)
+  }
+
+}

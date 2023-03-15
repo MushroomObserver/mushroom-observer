@@ -3,17 +3,17 @@
 # (saves on reloading the primer)
 %>
 
-<%= form_with(url: "", id: "ur_taxa_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_taxa", value: "", size: 40, class: "") %>
-  <% turn_into_name_above_genus_auto_completer(:ur_taxa) %>
+<%= form_with(url: "", id: "ur_taxon_autocomplete") do |f| %>
+  <%= f.hidden_field("ur_taxon", value: "", size: 40, class: "") %>
+  <% turn_into_name_above_genus_auto_completer(:ur_taxon) %>
 <% end %>
 
 <%= form_with(url: "", id: "ur_location_autocomplete") do |f| %>
   <%= f.hidden_field("ur_location", value: "", size: 40, class: "") %>
-  <% turn_into_name_above_genus_auto_completer(:ur_location) %>
+  <% turn_into_location_auto_completer(:ur_location) %>
 <% end %>
 
 <%= form_with(url: "", id: "ur_user_autocomplete") do |f| %>
   <%= f.hidden_field("ur_user", value: "", size: 40, class: "") %>
-  <% turn_into_name_above_genus_auto_completer(:ur_user) %>
+  <% turn_into_user_auto_completer(:ur_user) %>
 <% end %>

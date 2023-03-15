@@ -3,8 +3,8 @@
 <%# Otherwise the name has to be looked up (several times) %>
 
 <%
-placeholder = if params[:name].present?
-                ("Filtered by: " + params[:name])
+placeholder = if params[:taxon].present?
+                ("Filtered by: " + params[:taxon])
               elsif params[:where].present?
                 ("Filtered by: " + params[:where])
               # elsif params[:user].present?
@@ -13,7 +13,7 @@ placeholder = if params[:name].present?
                 "Filter by:"
               end
 options = [
-  [:TAXON.l, :name],
+  [:TAXON.l, :taxon],
   [:WHERE.l, :where],
   # [:USER.l, :user],
 ]
@@ -36,7 +36,8 @@ options = [
   </div><!--.form-group-->
 
   <%= f.select(:type, options_for_select(options), { selected: :name },
-               { class: "form-control" }) %>
+               { class: "form-control",
+                 onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
 
   <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
 
@@ -45,8 +46,11 @@ options = [
   <%# TODO: script to change into the right kind of autocompleter by term %>
   <% turn_into_name_above_genus_auto_completer(:filter_term) %>
 
-  <% # initializes module with translations for js messages
+  <%# initializes module with translations for js messages
   inject_javascript_at_end %(
+    $("#filter_term").on("change", function() {
+      MOEvents.rebindAutoComplete(this.value)
+    })
   ) %>
 
 <% end %>
