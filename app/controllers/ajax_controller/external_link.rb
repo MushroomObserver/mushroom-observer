@@ -6,11 +6,12 @@ module AjaxController::ExternalLink
   # Returns link id on success.
   def external_link
     @user = session_user!
-    if @type == "add"
+    case @type
+    when "add"
       add_external_link(@id, params[:site].to_s, @value)
-    elsif @type == "edit"
+    when "edit"
       edit_external_link(@id, @value)
-    elsif @type == "remove"
+    when "remove"
       remove_external_link(@id)
     end
   end
