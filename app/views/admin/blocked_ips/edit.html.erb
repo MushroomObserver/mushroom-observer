@@ -26,7 +26,9 @@
                       path: admin_blocked_ips_path(clear_okay: 1),
                       class: "btn btn-default",
                       form_class: "d-inline-block float-right",
-                      id: "clear_okay_ips_list") %>
+                      id: "clear_okay_ips_list",
+                      data: { confirm: :are_you_sure.t }
+) %>
 
       <table id="okay_ips" class="ips my-3 table table-striped">
         <% @okay_ips.each do |ip| %>
@@ -58,7 +60,9 @@
                         path: admin_blocked_ips_path(clear_bad: 1),
                         class: "btn btn-default",
                         form_class: "d-inline-block float-right",
-                        id: "clear_blocked_ips_list") %>
+                        id: "clear_blocked_ips_list",
+                        data: { confirm: :are_you_sure.t }
+                      ) %>
 
       <table id="blocked_ips" class="ips my-3 table table-striped">
         <% @blocked_ips.each do |ip| %>
