@@ -1580,7 +1580,7 @@ class NamesControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
-    assert_input_value("name_author", "")
+    assert_textarea_value("name_author", "")
 
     params = {
       id: name.id,
@@ -1605,7 +1605,7 @@ class NamesControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoënsis")
-    assert_input_value("name_author", "(Gyelnik) Hale")
+    assert_textarea_value("name_author", "(Gyelnik) Hale")
 
     params[:name][:text_name] = "Xanthoparmelia coloradoensis"
     params[:name][:author] = ""
