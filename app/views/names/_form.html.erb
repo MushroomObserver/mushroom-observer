@@ -36,9 +36,9 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
                               data: { autofocus: true }) %>
 
     <% append = help_block(:p, :form_names_author_help.t) %>
-    <%= text_field_with_label(form: f, field: :author,
-                              label: :Authority.t + ":",
-                              append: append) %>
+    <%= text_area_with_label(form: f, field: :author, rows: 2,
+                             label: :Authority.t + ":",
+                             append: append) %>
 
   <% else %>
     <div class="mt-3 mb-3">
@@ -60,8 +60,8 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
     concat(:form_names_citation_help.t)
     concat(:form_names_citation_textilize_note.t)
   end %>
-  <%= text_field_with_label(form: f, field: :citation,
-                            label: :Citation.t + ":", append: append) %>
+  <%= text_area_with_label(form: f, field: :citation, rows: 6,
+                           label: :Citation.t + ":", append: append) %>
 
   <% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
     <div class="my-4 mx-0">
