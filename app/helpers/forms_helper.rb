@@ -185,6 +185,16 @@ module FormsHelper
     end
   end
 
+  # default select_opts - also generate year options if start_year given
+  def select_generate_default_options(args)
+    args[:select_opts] ||= {}
+
+    return args unless args[:start_year].present? && args[:end_year].present?
+
+    args[:options] = args[:end_year].downto(args[:start_year])
+    args
+  end
+
   # Bootstrap number_field
   def number_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -293,16 +303,6 @@ module FormsHelper
 
     args = args.merge({ label: :"prefs_#{args[:field]}".t })
     args.except(:prefs)
-  end
-
-  # Make selects versatile - generate year options if start_year given
-  def select_generate_default_options(args)
-    args[:select_opts] ||= {}
-
-    return args unless args[:start_year].present? && args[:end_year].present?
-
-    args[:options] = args[:end_year].downto(args[:start_year])
-    args
   end
 
   # convenience for the bootstrap "form-group" wrap class.
