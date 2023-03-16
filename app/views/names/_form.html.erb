@@ -60,7 +60,7 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
     concat(:form_names_citation_help.t)
     concat(:form_names_citation_textilize_note.t)
   end %>
-  <%= text_area_with_label(form: f, field: :citation, rows: 6,
+  <%= text_area_with_label(form: f, field: :citation, rows: 3,
                            label: :Citation.t + ":", append: append) %>
 
   <% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
