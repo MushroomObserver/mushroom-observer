@@ -102,7 +102,7 @@ class SearchController < ApplicationController
 
   def add_applicable_filter_parameters(query_params, model)
     ContentFilter.by_model(model).each do |fltr|
-      query_params[fltr.sym] = params.dig(:content_filter, :"#{fltr.sym}")
+      query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
     end
   end
 
