@@ -231,6 +231,8 @@
   article: article
   ARTICLES: Articles
   articles: articles
+  CLADE: Clade
+  clade: clade
   COLLECTION_NUMBER: Collection Number
   collection_number: collection number
   COLLECTION_NUMBERS: Collection Numbers
@@ -283,6 +285,8 @@
   license: license
   LICENSES: Licenses
   licenses: licenses
+  LICHEN: Lichen
+  lichen: lichen
   LOCATION: Location
   location: location
   LOCATIONS: Locations
@@ -346,6 +350,8 @@
   publication: publication
   PUBLICATIONS: Publications
   publications: publications
+  REGION: Region
+  region: region
   RSS_LOG: Activity Log
   rss_log: activity log
   RSS_LOGS: Activity Logs
