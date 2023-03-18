@@ -571,6 +571,8 @@ class Name < AbstractModel
         lambda { |name|
           where(id: name.synonyms.map(&:id)).with_correct_spelling
         }
+  # alias of `include_subtaxa_of`
+  scope :in_clade, ->(name) { include_subtaxa_of(name) }
   scope :include_subtaxa_of,
         lambda { |name|
           names = [name] + subtaxa_of(name)

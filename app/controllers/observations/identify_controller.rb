@@ -12,18 +12,18 @@ module Observations
 
       # first deal with filters, or clear filter
       if params[:commit] == "Clear"
-        return clear_filter
+        return unfiltered_index
       elsif (type = params.dig(:filter, :type))
         return filtered_index(type.to_sym)
       end
 
-      full_index_or_inherited_query
+      unfiltered_index
     end
 
     private
 
-    def clear_filter
-      query = create_query(:Observation, :all, { needs_id: true })
+    def unfiltered_index
+      query = create_query(:Observation, :needs_id, { unfiltered: true })
 
       show_selected_results(query)
     end
@@ -35,30 +35,39 @@ module Observations
       case type
       when :taxon
         taxon_filter(term)
-        # when :location
-        #   location_filter
+      when :region
+        region_filter(term)
         # when :user
         #   user_filter
       end
     end
 
+    # Some inefficiency here comes from having to parse the name from a string.
+    # Write a filtered select/autocomplete that passes the name_id?
     def taxon_filter(term)
-      return unless (filter = Name.find_by(text_name: term))
+      # return unless (clade = Name.find_by(text_name: term))
 
       # Nimmo note: 2023-03-14 to be researched: This obviously sends, and
       # `Query::ObservationAll` expects, a full `Name` instance, but somehow
       # the flavor parsing method `needs_id` only receives the name ID.
-      query = create_query(:Observation, :all, { needs_id_by_taxon: filter })
+      # Changed: just passing the text_name
+      query = create_query(:Observation, :needs_id, { in_clade: term })
 
       show_selected_results(query)
     end
 
-    def full_index_or_inherited_query
-      old_query = find_or_create_query(:Observation)
-      new_query = Query.lookup_and_save(old_query.model, old_query.flavor,
-                                        old_query.params.merge(needs_id: true))
-      show_selected_results(new_query)
+    def region_filter(term)
+      query = create_query(:Observation, :needs_id, { in_region: term })
+
+      show_selected_results(query)
     end
+
+    # def full_index_or_inherited_query
+    #   old_query = find_or_create_query(:Observation)
+    #   new_query = Query.lookup_and_save(old_query.model, old_query.flavor,
+    #                                     old_query.params.merge(needs_id: true))
+    #   show_selected_results(new_query)
+    # end
 
     # TODO: Allow show_index_of_objects to `render` rather than `redirect`,
     # or better yet `respond_to do |format|` and write index.js.erb templates

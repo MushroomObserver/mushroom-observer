@@ -27,7 +27,6 @@ module Query
         project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
-        needs_id_by_taxon?: Name,
 
         # numeric
         confidence?: [:float],
@@ -42,8 +41,7 @@ module Query
         has_name?: :boolean,
         has_notes?: :boolean,
         has_sequences?: { boolean: [true] },
-        is_collection_location?: :boolean,
-        needs_id?: { boolean: [true] }
+        is_collection_location?: :boolean
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
         merge(consensus_parameter_declarations)
@@ -56,8 +54,6 @@ module Query
       initialize_association_parameters
       initialize_boolean_parameters
       initialize_search_parameters
-      initialize_needs_id if params[:needs_id]
-      initialize_needs_id_by_taxon if params[:needs_id_by_taxon]
       add_range_condition("observations.vote_cache", params[:confidence])
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
@@ -87,50 +83,6 @@ module Query
         lookup_herbarium_records_by_name(params[:herbarium_records]),
         :observation_herbarium_records
       )
-    end
-
-    def initialize_needs_id
-      user = User.current_id
-      names_above_genus = Name.with_rank_above_genus.map(&:id).join(", ")
-      voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
-      reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
-
-      where << "observations.name_id IN (#{names_above_genus}) OR " \
-               "observations.vote_cache <= 0"
-      where << "observations.id NOT IN (#{voted})" if voted.present?
-      where << "observations.id NOT IN (#{reviewed})" if reviewed.present?
-      # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-      #           "FROM observation_views WHERE observation_views.user_id = " \
-      #           "#{User.current_id} AND observation_views.reviewed = 1)"
-      # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-      #           "FROM votes WHERE user_id = #{User.current_id})"
-    end
-
-    def initialize_needs_id_by_taxon
-      user = User.current_id
-      # Although the whole name is passed, it only receives the ID
-      # Seems we have to look it up again (?)
-      name = Name.find(params[:needs_id_by_taxon])
-
-      # Avoid inner queries: get these ids directly
-      name_plus_subtaxa = Name.include_subtaxa_of(name)
-      subtaxa_above_genus = name_plus_subtaxa.
-                            with_rank_above_genus.map(&:id).join(", ")
-      lower_subtaxa = name_plus_subtaxa.
-                      with_rank_at_or_below_genus.map(&:id).join(", ")
-      voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
-      reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
-
-      # careful... the name may not have lower_subtaxa
-      first_condition = "observations.name_id IN (#{subtaxa_above_genus})"
-      if lower_subtaxa.present?
-        first_condition += " OR (observations.name_id IN (#{lower_subtaxa}) " \
-                           "AND observations.vote_cache <= 0)"
-      end
-
-      where << first_condition
-      where << "observations.id NOT IN (#{voted})" if voted.present?
-      where << "observations.id NOT IN (#{reviewed})" if reviewed.present?
     end
 
     def initialize_projects_parameter

@@ -5,8 +5,8 @@
 <%
 placeholder = if params[:taxon].present?
                 ("Filtered by: " + params[:taxon])
-              elsif params[:where].present?
-                ("Filtered by: " + params[:where])
+              elsif params[:region].present?
+                ("Filtered by: " + params[:region])
               # elsif params[:user].present?
               #   ("Filtered by: " + params[:user])
               else
@@ -14,7 +14,7 @@ placeholder = if params[:taxon].present?
               end
 options = [
   [:TAXON.l, :taxon],
-  [:WHERE.l, :where],
+  [:WHERE.l, :region],
   # [:USER.l, :user],
 ]
 %>
