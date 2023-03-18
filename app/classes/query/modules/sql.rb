@@ -88,13 +88,15 @@ module Query::Modules::Sql
   # table join specs.
   def flatten_joins(arg = join, keep_qualifiers = true)
     result = []
-    if arg.is_a?(Hash)
+    case arg
+    when Hash
       arg.each do |key, val|
         key = key.to_s.sub(/\..*/, "") unless keep_qualifiers
         result << key.to_s
         result += flatten_joins(val)
       end
-    elsif arg.is_a?(Array)
+    # elsif arg.is_a?(Array)
+    when Array
       result += arg.map { |x| flatten_joins(x) }.flatten
     else
       arg = arg.to_s.sub(/\..*/, "") unless keep_qualifiers
@@ -109,12 +111,13 @@ module Query::Modules::Sql
   def calc_join_conditions(from, to, done = [from.to_s])
     result = []
     from = from.to_s
-    if to.is_a?(Hash)
+    case to
+    when Hash
       to.each do |key, val|
         result += calc_join_condition(from, key.to_s, done)
         result += calc_join_conditions(key.to_s, val, done)
       end
-    elsif to.is_a?(Array)
+    when Array
       result += to.map { |x| calc_join_conditions(from, x, done) }.flatten
     else
       result += calc_join_condition(from, to.to_s, done)

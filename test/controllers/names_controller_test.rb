@@ -1580,7 +1580,7 @@ class NamesControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
-    assert_input_value("name_author", "")
+    assert_textarea_value("name_author", "")
 
     params = {
       id: name.id,
@@ -1605,7 +1605,7 @@ class NamesControllerTest < FunctionalTestCase
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoënsis")
-    assert_input_value("name_author", "(Gyelnik) Hale")
+    assert_textarea_value("name_author", "(Gyelnik) Hale")
 
     params[:name][:text_name] = "Xanthoparmelia coloradoensis"
     params[:name][:author] = ""
@@ -1771,7 +1771,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("select#name_rank", count: 0)
     assert_select("select#name_deprecated", count: 0)
     assert_select("input[type=text]#name_text_name", count: 0)
-    assert_select("input[type=text]#name_author", count: 0)
+    assert_select("textarea#name_author", count: 0)
     assert_select("input[type=checkbox]#name_misspelling", count: 0)
     assert_select("input[type=text]#name_correct_spelling", count: 0)
 
@@ -1795,7 +1795,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("select#name_rank", count: 1)
     assert_select("select#name_deprecated", count: 1)
     assert_select("input[type=text]#name_text_name", count: 1)
-    assert_select("input[type=text]#name_author", count: 1)
+    assert_select("textarea#name_author", count: 1)
     assert_select("input[type=checkbox]#name_misspelling", count: 1)
     assert_select("input[type=text]#name_correct_spelling", count: 1)
 

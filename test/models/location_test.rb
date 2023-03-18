@@ -17,7 +17,6 @@ class LocationTest < UnitTestCase
     bad_location("USA, North America")
     bad_location("San Francisco, USA")
     bad_location("San Francisco, CA, USA")
-    bad_location("San Francisco, San Francisco Co., California, USA")
     # bad_location("Tilden Park, California, USA") - can't detect
     # bad_location("Tilden Park, Kensington, California, USA") - can't detect
     bad_location("Albis Mountain Range, Zurich area, Switzerland")
@@ -38,6 +37,7 @@ class LocationTest < UnitTestCase
     good_location("Earth")
     good_location("North America")
     good_location("San Francisco, California, USA")
+    good_location("San Francisco, San Francisco Co., California, USA")
     good_location("Tilden Park, Contra Costa Co., California, USA")
     good_location("Albis Mountain Range, near Zurich, Switzerland")
     good_location("Southern California, USA")

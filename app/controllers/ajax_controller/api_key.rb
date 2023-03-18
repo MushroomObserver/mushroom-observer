@@ -13,9 +13,10 @@ module AjaxController::APIKey
     key   = APIKey.find(@id)
     raise("Permission denied") if key.user != @user
 
-    if @type == "activate"
+    case @type
+    when "activate"
       activate_api_key(key)
-    elsif @type == "edit"
+    when "edit"
       edit_api_key(key, @value)
     end
   end
