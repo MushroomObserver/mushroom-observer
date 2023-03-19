@@ -8,17 +8,17 @@
 
   <% if filter.type == :boolean && filter.prefs_vals.count == 1 %>
     <%= render(partial: "account/preferences/filters/checkbox",
-               locals: { filter: filter, form: f }) %>
+               locals: { filter: filter, f: f }) %>
   <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
     <%= render(partial: "account/preferences/filters/select",
-               locals: { filter: filter, form: f }) %>
+               locals: { filter: filter, f: f }) %>
   <% elsif filter.type == [:string] %>
     <%= render(partial: "account/preferences/filters/text_field",
-               locals: { filter: filter, form: f }) %>
+               locals: { filter: filter, f: f }) %>
   <% else %>
     <% raise "unrecognized content filter type #{filter.type.inspect}" %>
   <% end %>
 
 <% end %>
 
-<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

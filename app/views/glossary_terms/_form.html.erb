@@ -13,6 +13,6 @@
 
   <%= yield f %>
 
-  <%= f.submit(:SAVE.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :SAVE.t, center: true) %>
 
 <% end %>

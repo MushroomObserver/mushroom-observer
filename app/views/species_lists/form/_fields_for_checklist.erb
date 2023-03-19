@@ -6,7 +6,7 @@
       <% @checklist.sort_by(&:first).each do |name, id| %>
         <%= check_box_with_label(form: fcd, field: id,
                                  checked: @checklist_names[id],
-                                 text: name.t) %>
+                                 label: name.t) %>
       <% end %>
     </div>
   </div>

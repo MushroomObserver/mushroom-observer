@@ -134,4 +134,34 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
       notices.assert_text("fr:mo.runtime_ask_user_question_success")
     end
   end
+
+  def test_observation_pattern_search_with_correctable_pattern
+    correctable_pattern = "agaricis campestrus"
+
+    login
+    visit("/")
+    fill_in("search_pattern", with: correctable_pattern)
+    page.select("Observations", from: :search_type)
+    click_button("Search")
+
+    assert_selector("#flash_notices",
+                    text: :runtime_no_matches.l(type: :observations.l))
+    assert_selector("#title", text: "Observation Search")
+    assert_selector("#results", text: "")
+    assert_selector(
+      "#content a[href *= 'observations?pattern=Agaricus+campestris']",
+      text: names(:agaricus_campestris).search_name
+    )
+
+    corrected_pattern = "Agaricus campestris"
+    obs = observations(:agaricus_campestris_obs)
+
+    fill_in("search_pattern", with: corrected_pattern)
+    page.select("Observations", from: :search_type)
+    click_button("Search")
+
+    assert_no_selector("#content div.alert-warning")
+    assert_selector("#title",
+                    text: "Observation #{obs.id}: #{obs.name.search_name}")
+  end
 end

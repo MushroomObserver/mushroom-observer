@@ -4,6 +4,6 @@
                              checked: @project_checks[project.id],
                              disabled: @image.user != @user &&
                                !project.is_member?(@user),
-                             text: link_to_object(project)) %>
+                             label: link_to_object(project)) %>
   </div>
 <% end %>

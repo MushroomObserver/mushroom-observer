@@ -57,9 +57,9 @@ source_types = [
   <div class="form-group">
     <%= content_tag(:b, "#{:form_description_permissions.t}:") %>
     <%= check_box_with_label(form: f, field: :public_write, disabled: disabled,
-                             text: :form_description_public_writable.t) %>
+                             label: :form_description_public_writable.t) %>
     <%= check_box_with_label(form: f, field: :public, disabled: disabled,
-                             text: :form_description_public_readable.t) %>
+                             label: :form_description_public_readable.t) %>
     <%= content_tag(:p, :form_description_permissions_help.t,
                     class: "help-block") %>
   </div>

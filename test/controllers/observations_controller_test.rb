@@ -127,14 +127,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
 
-  # NOTE: This tests a deleted route, test should be deleted too.
-  # def test_show_obs
-  #   obs = observations(:fungi_obs)
-  #   login
-  #   get(:show, params: { id: obs.id })
-  #   assert_redirected_to(action: :show, id: obs.id)
-  # end
-
   def test_show_obs_view_stats
     obs = observations(:minimal_unknown_obs)
     assert_empty(ObservationView.where(observation: obs))
@@ -173,202 +165,153 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   ######## Index ################################################
+  # Tests of index, with tests arranged as follows:
+  # default subaction; then
+  # other subactions in order of @index_subaction_param_keys
+  # miscellaneous tests using get(:index)
 
-  def test_index_page_loads
+  def test_index
     login
     get(:index)
+
     assert_template("shared/_matrix_box")
-
-    # Test again, this time specifying page number via an observation id.
-    get(:index,
-        params: { id: observations(:agaricus_campestris_obs).id })
-    assert_template("shared/_matrix_box")
-
-    get(:index,
-        params: { project: projects(:bolete_project).id })
-    assert_template("shared/_matrix_box")
-
-    get(:index, params: { by: "name" })
-    assert_template("shared/_matrix_box")
-
-    get(:index,
-        params: { name: names(:boletus_edulis).text_name })
-    assert_template("shared/_matrix_box")
-
-    get(:index,
-        params: { look_alikes: "1",
-                  name: names(:tremella_mesenterica).text_name })
-    assert_template(:index)
-
-    get(:index,
-        params: { related_taxa: "1",
-                  name: names(:tremella_mesenterica).text_name })
-    assert_template(:index)
-
-    get(:index, params: { user: rolf.id })
-    assert_template("shared/_matrix_box")
+    assert_displayed_title("Observations by Date")
   end
 
-  def test_index_sort_by_user
+  def test_index_sorted_by_name
+    by = "name"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_displayed_title("Observations by #{by.capitalize}")
+  end
+
+  def test_index_sorted_by_user
     by = "user"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Observations by #{by.capitalize}")
+    assert_displayed_title("Observations by #{by.capitalize}")
   end
 
-  def test_observations_by_unknown_user
+  def test_index_with_id
+    obs = observations(:agaricus_campestris_obs)
+
     login
-    get(:index, params: { user: 1e6 })
-    assert_redirected_to(users_path)
-  end
+    get(:index, params: { id: obs.id })
 
-  def test_observations_by_known_user
-    # Make sure fixtures are still okay
-    obs = observations(:coprinus_comatus_obs)
-    assert_nil(obs.rss_log_id)
-    assert_not_nil(obs.thumb_image_id)
-    user = rolf
-    assert(
-      user.layout_count >= rolf.observations.size,
-      "User must be able to display all rolf's Observations in a single page"
+    assert_template("shared/_matrix_box")
+    assert_displayed_title("Observation Index")
+    assert_select(
+      "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
+      "Index should open at the page that includes #{obs.unique_text_name}"
     )
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
+  end
 
-    test_show_owner_id_noone_logged_in
+  # Created in response to a bug seen in the wild
+  # place_name isn't a param for Observation#index
+  # but is an API param and a param for Observation#create
+  def test_index_useless_param
+    params = { place_name: "Burbank" }
 
-    login(user.login)
-    get(:index, params: { user: rolf.id })
+    login
+    get(:index, params: params)
 
-    assert_template(:index)
-    assert_match(
-      Image.url(:small, obs.thumb_image_id), @response.body,
-      "Observation thumbnail should display although this is not an rss_log"
+    assert_displayed_title("Observations by Date")
+  end
+
+  def test_index_useless_param_page2
+    params = { place_name: "Burbank", page: 2 }
+
+    login
+    get(:index, params: params)
+
+    assert_displayed_title("Observations by Date")
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
+  end
+
+  def test_index_advanced_search_name_and_location_multiple_hits
+    name = "Agaricus"
+    location = "California"
+    expected_hits = Observation.where(Observation[:text_name] =~ name).
+                    where(Observation[:where] =~ location).
+                    count
+
+    login
+    get(:index,
+        params: { name: name, location: location,
+                  advanced_search: "1" })
+
+    assert_response(:success)
+    assert_displayed_title("Advanced Search")
+    assert_select(
+      "#results .rss-what a:match('href', ?)", %r{^/\d},
+      { count: expected_hits },
+      "Wrong number of results"
     )
   end
 
-  def test_prev_and_next_observation
-    # Uses default observation query
-    o_chron = Observation.order(:created_at)
-    login
-    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
-    assert_redirected_to(action: :show, id: o_chron.third.id,
-                         params: @controller.query_params(QueryRecord.last))
-
-    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
-    assert_redirected_to(action: :show, id: o_chron.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
-  end
-
-  def test_prev_and_next_observation_with_fancy_query
-    n1 = names(:agaricus_campestras)
-    n2 = names(:agaricus_campestris)
-    n3 = names(:agaricus_campestros)
-    n4 = names(:agaricus_campestrus)
-
-    n2.transfer_synonym(n1)
-    n2.transfer_synonym(n3)
-    n2.transfer_synonym(n4)
-    n1.correct_spelling = n2
-    n1.save_without_our_callbacks
-
-    o1 = n1.observations.first
-    o2 = n2.observations.first
-    o3 = n3.observations.first
-    o4 = n4.observations.first
-
-    # When requesting non-synonym observations of n2, it should include n1,
-    # since an observation of n1 was clearly intended to be an observation of
-    # n2.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: false,
-                                  by: :name)
-    assert_equal(2, query.num_results)
-
-    # Likewise, when requesting *synonym* observations, neither n1 nor n2
-    # should be included.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: true,
-                                  exclude_original_names: true,
-                                  by: :name)
-    assert_equal(2, query.num_results)
-
-    # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: true,
-                                  by: :name)
-    assert_equal(4, query.num_results)
-    qp = @controller.query_params(query)
-
-    o_id = observations(:minimal_unknown_obs).id
+  def test_index_advanced_search_name_one_hit
+    obs = observations(:strobilurus_diminutivus_obs)
+    search_string = obs.text_name
+    query = Query.lookup_and_save(:Observation, :advanced_search,
+                                  name: search_string)
+    assert(query.results.one?,
+           "Test needs a string that has exactly one hit")
 
     login
-    get(:show, params: qp.merge({ id: o_id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o_id, params: qp)
-    assert_flash_text(/can.*t find.*results.*index/i)
-    get(:show, params: qp.merge({ id: o1.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({ id: o2.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({ id: o3.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o4.id, params: qp)
-    get(:show, params: qp.merge({ id: o4.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o4.id, params: qp)
-    assert_flash_text(/no more/i)
+    get(:index,
+        params: @controller.query_params(query).merge(advanced_search: true))
 
-    get(:show, params: qp.merge({ id: o4.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({ id: o3.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({ id: o2.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o1.id, params: qp)
-    get(:show, params: qp.merge({ id: o1.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o1.id, params: qp)
-    assert_flash_text(/no more/i)
-    get(:show, params: qp.merge({ id: o_id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o_id, params: qp)
-    assert_flash_text(/can.*t find.*results.*index/i)
+    assert_match(/#{obs.id}/, redirect_to_url,
+                 "Advanced Search with 1 hit should show the hit")
   end
 
-  def test_advanced_search
+  def test_index_advanced_search_no_hits
     query = Query.lookup_and_save(:Observation, :advanced_search,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
+
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_template(:index)
+
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or metadata <title>")
+    assert_displayed_title("")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
   end
 
-  def test_advanced_search2
+  def test_index_advanced_search_notes1
     login
-    get(:index,
-        params: { name: "Agaricus",
-                  location: "California",
-                  advanced_search: "1" })
-    assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(4, results.length)
-  end
-
-  def test_advanced_search3
-    login
-    # Fail to include notes.
     get(:index,
         params: {
           name: "Fungi",
           location: "String in notes",
+          # Deliberately omit search_location_notes: 1
           advanced_search: "1"
         })
-    assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(0, results.length)
 
+    assert_response(:success)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or metadata <title>")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_select(
+      "#results a", false,
+      "There should be no results when string is missing from notes, " \
+      "and search_location_notes param is missing"
+    )
+  end
+
+  def test_index_advanced_search_notes2
+    login
     # Include notes, but notes don't have string yet!
     get(
       :index,
@@ -379,10 +322,19 @@ class ObservationsControllerTest < FunctionalTestCase
         advanced_search: "1"
       }
     )
-    assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(0, results.length)
 
+    assert_response(:success)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or metadata <title>")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_select(
+      "#results a", false,
+      "There should be no results when string is missing from notes, " \
+      "even if search_location_notes param is true"
+    )
+  end
+
+  def test_index_advanced_search_notes3
     # Add string to notes, make sure it is actually added.
     login("rolf")
     loc = locations(:burbank)
@@ -391,17 +343,37 @@ class ObservationsControllerTest < FunctionalTestCase
     loc.reload
     assert(loc.notes.to_s.include?("String in notes"))
 
+    login
     # Forget to include notes again.
     get(:index,
         params: {
           name: "Fungi",
           location: "String in notes",
+          # Deliberately omit search_location_notes: 1
           advanced_search: "1"
         })
-    assert_response(:success)
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(0, results.length)
 
+    assert_response(:success)
+    assert_select("title", { text: "#{:app_title.l}: Index" },
+                  "Wrong page or metadata <title>")
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_select(
+      "#results a", false,
+      "There should be no results when notes include search string, " \
+      "if search_location_notes param is missing"
+    )
+  end
+
+  def test_index_advanced_search_notes4
+    # Add string to notes, make sure it is actually added.
+    login("rolf")
+    loc = locations(:burbank)
+    loc.notes = "blah blah blahString in notesblah blah blah"
+    loc.save
+    loc.reload
+    assert(loc.notes.to_s.include?("String in notes"))
+
+    login
     # Now it should finally find the three unknowns at Burbank because Burbank
     # has the magic string in its notes, and we're looking for it.
     get(:index,
@@ -411,126 +383,260 @@ class ObservationsControllerTest < FunctionalTestCase
           search_location_notes: 1,
           advanced_search: "1"
         })
+
     assert_response(:success)
     results = @controller.instance_variable_get(:@objects)
     assert_equal(3, results.length)
   end
 
-  # Prove that if advanced_search provokes exception,
-  # it returns to advanced search form.
-  def test_advanced_search_error
+  def test_index_advanced_search_error
     ObservationsController.any_instance.stubs(:show_selected_observations).
       raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
+
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_redirected_to(search_advanced_path)
+
+    assert_redirected_to(
+      search_advanced_path,
+      "Advanced Search should reload form if it throws an error"
+    )
   end
 
-  def test_observation_search_help
+  def test_index_pattern_search_help
     login
     get(:index, params: { pattern: "help:me" })
+
+    assert_flash_error
     assert_match(/unexpected term/i, @response.body)
   end
 
-  def test_observation_search1
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+
     login
-    pattern = "Boletus edulis"
     get(:index, params: { pattern: pattern })
-    assert_template(:index)
-    assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get(:@title)
+
+    assert_displayed_title("Observations Matching ‘#{pattern}’")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { text: /#{pattern}/i,
+        count: Observation.where(Observation[:text_name] =~ /#{pattern}/i).
+               count },
+      "Wrong number of results displayed"
     )
+  end
+
+  def test_index_pattern_needs_id_with_filter
+    pattern = "Briceland"
+
+    login
+    get(:index, params: { pattern: pattern, needs_id: true })
+
+    assert_displayed_title("")
+    assert_match(/^#{identify_observations_url}/, redirect_to_url,
+                 "Wrong page. Should redirect to #{:obs_needing_id.l}")
+  end
+
+  def test_index_pattern1
+    pattern = "Boletus edulis"
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
-  def test_observation_search2
-    login
+  def test_index_pattern_page2
     pattern = "Boletus edulis"
+
+    login
     get(:index, params: { pattern: pattern, page: 2 })
-    assert_template(:index)
-    assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get(:@title)
-    )
+
+    assert_displayed_title("Observations Matching ‘#{pattern}’")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
   end
 
-  def test_observation_search_no_hits
-    login
-    # When there are no hits, no title is displayed, there's no rh tabset, and
-    # html <title> contents are the action name
+  def test_index_pattern_no_hits
     pattern = "no hits"
-    get(:index, params: { pattern: pattern })
-    assert_template(:index)
 
-    # Change 2022/07 : Now setting @title explicitly for refactored indexes
-    # assert_empty(@controller.instance_variable_get("@title"))
-    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
-    assert_equal(
-      :title_for_observation_search.t,
-      @controller.instance_variable_get(:@title),
-      "metadata <title> tag incorrect"
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_empty(css_select('[id="right_tabs"]').text,
+                 "RH tabset should be empty when search has no hits")
+    assert_displayed_title(:title_for_observation_search.l)
+  end
+
+  def test_index_pattern_one_hit
+    obs = observations(:two_img_obs)
+
+    login
+    get(:index, params: { pattern: obs.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url,
+                 "Search with 1 hit should show the hit")
+  end
+
+  def test_index_pattern_bad_pattern
+    pattern = { error: "" }
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:success)
+    assert_flash_error
+    assert_displayed_title("")
+    assert_select("#results", { text: "" }, "There should be no results")
+  end
+
+  def test_index_pattern_bad_pattern_from_needs_id
+    pattern = { error: "" }
+
+    login
+    get(:index, params: { pattern: pattern, needs_id: true })
+
+    assert_redirected_to(
+      identify_observations_path,
+      "Bad pattern in search from obs_needing_ids should render " \
+      "obs_needing_ids"
+    )
+  end
+
+  def test_index_look_alikes
+    obs = observations(:owner_only_favorite_ne_consensus)
+    name = obs.name
+    look_alikes = Observation.joins(:namings).
+                  where(namings: { name: name }).
+                  where.not(name: name).count
+    assert(look_alikes > 1, "Test needs different fixture")
+
+    login
+    get(:index, params: { look_alikes: "1", name: name.id })
+
+    assert_displayed_title("Observations by Confidence Level")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { count: look_alikes },
+      "Wrong number of results displayed"
+    )
+  end
+
+  def test_index_look_alikes_no_hits
+    obs = observations(:strobilurus_diminutivus_obs)
+    name = obs.name
+    look_alikes = Observation.joins(:namings).
+                  where(namings: { name: name }).
+                  where.not(name: name).count
+    assert(look_alikes.zero?, "Test needs different fixture")
+
+    login
+    get(:index, params: { look_alikes: "1", name: name.id })
+
+    assert_response(:success)
+    assert_displayed_title("")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { count: look_alikes },
+      "Wrong number of results displayed"
+    )
+  end
+
+  def test_index_related_taxa
+    name = names(:tremella_mesenterica)
+    parent = name.parents.first
+    obss_of_related_taxa = \
+      Observation.where(
+        name: Name.where(Name[:text_name] =~ /#{parent.text_name} /).or(
+          Name.where(Name[:classification] =~ /: _#{parent.text_name}_/)
+        ).or(Name.where(id: parent.id))
+      )
+
+    login
+    get(:index, params: { related_taxa: "1", name: name.text_name })
+
+    assert_displayed_title("Observations by Confidence Level")
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { count: obss_of_related_taxa.count },
+      "Wrong number of results displayed"
+    )
+  end
+
+  def test_index_name
+    name = names(:fungi)
+    ids = Observation.where(name: name).map(&:id)
+    assert(ids.length.positive?, "Test needs different fixture for 'name'")
+    params = { name: name }
+
+    login("zero") # Has no observations
+    get(:index, params: params)
+
+    assert_response(:success)
+    assert_displayed_title("Observations by Confidence Level")
+    ids.each do |id|
+      assert_select(
+        "a:match('href', ?)", %r{^/#{id}}, true,
+        "Observations of Name should link to each Observation of Name"
+      )
+    end
+  end
+
+  def test_index_user_by_known_user
+    # Make sure fixtures are still okay
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.rss_log_id)
+    assert_not_nil(obs.thumb_image_id)
+    user = rolf
+    assert(
+      user.layout_count >= user.observations.size,
+      "User must be able to display all rolf's Observations in a single page"
     )
 
-    # If pattern is id of a real Observation, go directly to that Observation.
-    obs = Observation.first
-    get(:index, params: { pattern: obs.id })
-    assert_redirected_to(action: :show, id: Observation.first.id)
+    test_show_owner_id_noone_logged_in
+
+    login(user.login)
+    get(:index, params: { user: user.id })
+
+    assert_displayed_title("Observations created by #{user.name}")
+    assert_select(
+      "#results img[src = '#{Image.url(:small, obs.thumb_image_id)}']",
+      true,
+      "Observation thumbnail should display although this is not an rss_log"
+    )
+    assert_select(
+      "#results a:match('href', ?)", %r{^/\d+},
+      { text: /\S+/, # ignore links in buttons
+        count: Observation.where(user: user).count },
+      "Wrong number of results displayed"
+    )
   end
 
-  # Prove that when pattern is the id of a real observation,
-  # goes directly to that observation.
-  def test_observation_search_matching_id
-    obs = observations(:minimal_unknown_obs)
+  def test_index_user_unknown_user
+    user = observations(:minimal_unknown_obs)
+
     login
-    get(:index, params: { pattern: obs.id })
-    assert_redirected_to(%r{/#{obs.id}})
+    get(:index, params: { user: user })
+
+    assert_equal(users_url, redirect_to_url, "Wrong page")
+    assert_flash_text(:runtime_object_not_found.l(type: :user.l, id: user.id))
   end
 
-  # Prove that when the pattern causes an error,
-  # MO just displays an observation list
-  def test_observation_search_bad_pattern
-    login
-    get(:index, params: { pattern: { error: "" } })
-    assert_template(:index)
-
-    # Bad pattern from obs_needing_ids should render that index instead
-    get(:index, params: { pattern: { error: "" }, needs_id: true })
-    assert_redirected_to(identify_observations_path)
-  end
-
-  def test_observation_search_with_spelling_correction
-    # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
-    login("rolf")
-    Name.find_or_create_name_and_parents("Coprinus comatus").each(&:save!)
-    names = Name.suggest_alternate_spellings("Coprinus comatis")
-    assert_not_equal([], names.map(&:search_name))
-
-    get(:index, params: { pattern: "coprinis comatis" })
-    assert_template(:index)
-    assert_equal("coprinis comatis", assigns(:suggest_alternate_spellings))
-    assert_select("div.alert-warning", 1)
-    assert_select("a[href *= 'observations?pattern=Coprinus+comatus']",
-                  text: names(:coprinus_comatus).search_name)
-
-    get(:index, params: { pattern: "Coprinus comatus" })
-    assert_response(:redirect)
-  end
-
-  def test_index_at_location_with_observations
+  def test_index_location_with_observations
     location = locations(:obs_default_location)
     params = { location: location.id }
 
     login
     get(:index, params: params)
 
-    assert_select("#title", text: "Observations from #{location.name}")
+    assert_displayed_title("Observations from #{location.name}")
   end
 
-  def test_index_at_location_without_observations
+  def test_index_location_without_observations
     location = locations(:unused_location)
     params = { location: location }
     flash_matcher = Regexp.new(
@@ -542,11 +648,12 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
+    assert_response(:success)
     assert_flash(flash_matcher)
-    assert_template(:index)
+    assert_displayed_title("")
   end
 
-  def test_index_at_location_with_nonexistent_location
+  def test_index_location_with_nonexistent_location
     location = "non-existent"
     params = { location: location }
     flash_matcher = Regexp.new(
@@ -562,72 +669,75 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
-  def test_index_at_where
+  def test_index_where
     location = locations(:obs_default_location)
-    params = { where: location.name }
 
     login
-    get(:index, params: params)
+    get(:index, params: { where: location.name })
 
-    assert_select("#title", text: "Observations from ‘#{location.name}’")
+    assert_displayed_title("Observations from ‘#{location.name}’")
   end
 
-  # NIMMO NOTE: Is the param  `place_name` or `where`?
-  # Created in response to a bug seen in the wild
-  def test_where_search_next_page
+  def test_index_where_page2
+    location = locations(:obs_default_location)
+
     login
-    params = { place_name: "Burbank", page: 2 }
-    get(:index, params: params)
-    assert_template(:index)
+    get(:index, params: { where: location.name, page: 2 })
+
+    assert_displayed_title("Observations from ‘#{location.name}’")
+    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_select("#results a", { text: "« Prev" },
+                  "Wrong page or display is missing a link to Prev page")
   end
 
-  # NIMMO NOTE: Is the param  `place_name` or `where`?
-  # Created in response to a bug seen in the wild
-  def test_where_search_pattern
+  def test_index_project
+    project = projects(:bolete_project)
+
     login
-    params = { place_name: "Burbank" }
-    get(:index, params: params)
-    assert_template("shared/_matrix_box")
-  end
-
-  def test_observations_of_name
-    name = names(:fungi)
-    ids = Observation.where(name: name).map(&:id)
-    assert(ids.length.positive?, "Test needs ifferent fixture for 'name'")
-
-    params = { name: name }
-    login("zero") # Has no observations
-    get(:index, params: params)
+    get(:index, params: { project: project.id })
 
     assert_response(:success)
-    ids.each do |id|
-      assert_select(
-        "a:match('href', ?)", %r{^/#{id}}, true,
-        "Observations of Name should link to each Observation of Name"
-      )
-    end
+    assert_displayed_title("Observations attached to #{project.title}")
+  end
+
+  def test_index_project_without_observations
+    project = projects(:empty_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_displayed_title("")
   end
 
   # Prove that lichen content_filter works on observations
-  def test_observations_with_lichen_filter
-    login(users(:lichenologist).name)
+  def test_index_with_lichen_filter_only_lichens
+    user = users(:lichenologist)
+
+    login(user.name)
     get(:index)
+
     results = @controller.instance_variable_get(:@objects)
 
-    assert(results.count.positive?)
+    assert(results.many?)
     assert(results.all? { |result| result.lifeform.include?("lichen") },
            "All results should be lichen-ish")
+  end
 
-    login(users(:antilichenologist).name)
+  def test_index_with_lichen_filter_hide_lichens
+    user = users(:antilichenologist)
+
+    login(user.name)
     get(:index)
+
     results = @controller.instance_variable_get(:@objects)
 
-    assert(results.count.positive?)
+    assert(results.many?)
     assert(results.none? { |result| result.lifeform.include?(" lichen ") },
            "No results should be lichens")
   end
 
-  def test_observations_with_region_filter
+  def test_index_with_region_filter
     observations_in_region = Observation.where(
       Observation[:where].matches("%California, USA")
     ).order(:id).to_a
@@ -640,6 +750,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login(user.name)
     get(:index)
+
     results = @controller.instance_variable_get(:@objects).sort_by(&:id)
     assert_obj_arrays_equal(observations_in_region, results)
   end
@@ -1111,6 +1222,92 @@ class ObservationsControllerTest < FunctionalTestCase
         )
       end
     end
+  end
+
+  def test_prev_and_next_observation
+    # Uses default observation query
+    o_chron = Observation.order(:created_at)
+    login
+    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
+    assert_redirected_to(action: :show, id: o_chron.third.id,
+                         params: @controller.query_params(QueryRecord.last))
+
+    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
+    assert_redirected_to(action: :show, id: o_chron.fifth.id,
+                         params: @controller.query_params(QueryRecord.last))
+  end
+
+  def test_prev_and_next_observation_with_fancy_query
+    n1 = names(:agaricus_campestras)
+    n2 = names(:agaricus_campestris)
+    n3 = names(:agaricus_campestros)
+    n4 = names(:agaricus_campestrus)
+
+    n2.transfer_synonym(n1)
+    n2.transfer_synonym(n3)
+    n2.transfer_synonym(n4)
+    n1.correct_spelling = n2
+    n1.save_without_our_callbacks
+
+    o1 = n1.observations.first
+    o2 = n2.observations.first
+    o3 = n3.observations.first
+    o4 = n4.observations.first
+
+    # When requesting non-synonym observations of n2, it should include n1,
+    # since an observation of n1 was clearly intended to be an observation of
+    # n2.
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: false,
+                                  by: :name)
+    assert_equal(2, query.num_results)
+
+    # Likewise, when requesting *synonym* observations, neither n1 nor n2
+    # should be included.
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  exclude_original_names: true,
+                                  by: :name)
+    assert_equal(2, query.num_results)
+
+    # But for our prev/next test, lets do the all-inclusive query.
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  by: :name)
+    assert_equal(4, query.num_results)
+    qp = @controller.query_params(query)
+
+    o_id = observations(:minimal_unknown_obs).id
+
+    login
+    get(:show, params: qp.merge({ id: o_id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o_id, params: qp)
+    assert_flash_text(/can.*t find.*results.*index/i)
+    get(:show, params: qp.merge({ id: o1.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o2.id, params: qp)
+    get(:show, params: qp.merge({ id: o2.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o3.id, params: qp)
+    get(:show, params: qp.merge({ id: o3.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o4.id, params: qp)
+    get(:show, params: qp.merge({ id: o4.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o4.id, params: qp)
+    assert_flash_text(/no more/i)
+
+    get(:show, params: qp.merge({ id: o4.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o3.id, params: qp)
+    get(:show, params: qp.merge({ id: o3.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o2.id, params: qp)
+    get(:show, params: qp.merge({ id: o2.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o1.id, params: qp)
+    get(:show, params: qp.merge({ id: o1.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o1.id, params: qp)
+    assert_flash_text(/no more/i)
+    get(:show, params: qp.merge({ id: o_id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o_id, params: qp)
+    assert_flash_text(/can.*t find.*results.*index/i)
   end
 
   ##############################################################################
@@ -1743,24 +1940,24 @@ class ObservationsControllerTest < FunctionalTestCase
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0)
+                                  }, 1, 0, 0)
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0, roy)
+                                  }, 1, 0, 0, roy)
 
     # Test mix of city and county
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0)
+                                  }, 1, 0, 0)
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     naming: { name: "Unknown" }
-                                  }, 0, 0, 0, roy)
+                                  }, 1, 0, 0, roy)
 
     # Test some bad terms
     where = "Some County, Ohio, USA"
@@ -2909,6 +3106,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: :modified })
     assert_response(:success)
+
     get(:index, params: { by: :created })
     assert_response(:success)
   end

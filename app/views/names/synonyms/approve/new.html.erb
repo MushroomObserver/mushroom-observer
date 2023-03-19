@@ -12,21 +12,21 @@
 
 <%= form_with(url: action, id: "name_approve_synonym_form") do |f| %>
 
-  <%= f.submit(:APPROVE.l, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :APPROVE.l, center: true) %>
 
   <% if @approved_names %>
     <%= check_box_with_label(form: f, field: :deprecate_others,
                              checked: "checked",
-                             text: :name_approve_deprecate.t) %>
+                             label: :name_approve_deprecate.t) %>
     <% @approved_names.each do |n| %>
       <%= n.display_name.t %><br/>
     <% end %></p>
   <% end %>
   <%= content_tag(:div, :name_approve_deprecate_help.tp, class: "help-note") %>
 
-  <%= inline_label_text_area(form: f, field: :comment,
-                             text: "#{:name_approve_comments.t}:",
-                             cols: 80, rows: 5, data: { autofocus: true }) %>
+  <%= text_area_with_label(form: f, field: :comment, inline: true,
+                           label: "#{:name_approve_comments.t}:",
+                           cols: 80, rows: 5, data: { autofocus: true }) %>
   <%= content_tag(:div,
                   :name_approve_comments_help.tp(name: @name.display_name),
                   class: "help-note") %>

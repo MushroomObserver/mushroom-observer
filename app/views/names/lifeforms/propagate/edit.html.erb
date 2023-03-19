@@ -21,7 +21,7 @@
         <td>
           <%= check_box_with_label(form: f, field: :"add_#{word}",
                                    value: "1", checked: false,
-                                   text: :"lifeform_#{word}".t) %>
+                                   label: :"lifeform_#{word}".t) %>
         </td>
         <td class="container-text">
           <%= :"lifeform_help_#{word}".t %>
@@ -40,7 +40,7 @@
         <td>
           <%= check_box_with_label(form: f, field: :"remove_#{word}",
                                    value: "1", checked: false,
-                                   text: :"lifeform_#{word}".t) %>
+                                   label: :"lifeform_#{word}".t) %>
         </td>
         <td class="container-text">
           <%= :"lifeform_help_#{word}".t %>
@@ -49,6 +49,6 @@
     <% end %>
   </table>
 
-  <%= f.submit(:APPLY.t, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :APPLY.t, center: true) %>
 
 <% end %>

@@ -3,13 +3,12 @@
 require("geocoder")
 
 #  :index
-#   :advanced_search,
-#   :index_location,
-#   :list_by_country,
-#   :list_locations,
-#   :location_search,
-#   :locations_by_editor,
-#   :locations_by_user,
+#   params:
+#   advanced_search:
+#   pattern:
+#   country:
+#   by_user:
+#   by_editor:
 #  :show,
 #  :new,
 #  :create,
@@ -19,8 +18,11 @@ require("geocoder")
 
 # Locations controller.
 class LocationsController < ApplicationController
+  # disable cop because index is defined in ApplicationController
+  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index, :destroy]
   before_action :pass_query_params, except: [:index]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
   before_action :disable_link_prefetching, except: [
     :new,
@@ -32,10 +34,9 @@ class LocationsController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Searches and Indexes
-  #
-  ##############################################################################
+  # index::
 
+  # ApplicationController uses this to dispatch #index to a private method
   @index_subaction_param_keys = [
     :advanced_search,
     :pattern,
@@ -48,74 +49,48 @@ class LocationsController < ApplicationController
   ].freeze
 
   @index_subaction_dispatch_table = {
-    pattern: :location_search,
-    country: :list_by_country,
-    by_user: :locations_by_user,
-    by_editor: :locations_by_editor,
-    by: :index_location,
-    q: :index_location,
-    id: :index_location
+    by: :index_query_results,
+    q: :index_query_results,
+    id: :index_query_results
   }.freeze
 
-  # Disable cop because method definition prevents a
-  # Rails/LexicallyScopedActionFilter offense
-  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railslexicallyscopedactionfilter
-  def index # rubocop:disable Lint/UselessMethodDefinition
-    super
-  end
+  #############################################
 
-  private
+  private # private methods used by #index
 
   def default_index_subaction
     list_locations
   end
 
+  # Displays a list of all locations.
+  def list_locations
+    query = create_query(:Location, :all, by: default_sort_order)
+    show_selected_locations(query, link_all_sorts: true)
+  end
+
+  def default_sort_order
+    ::Query::LocationBase.default_order
+  end
+
   # Displays a list of selected locations, based on current Query.
-  def index_location
+  def index_query_results
     query = find_or_create_query(:Location, by: params[:by])
     show_selected_locations(query, id: params[:id].to_s, always_index: true)
   end
 
-  # Displays a list of all locations whose country matches the id param.
-  def list_by_country
-    query = create_query(
-      :Location, :regexp_search, regexp: "#{params[:country]}$"
-    )
+  # Displays matrix of advanced search results.
+  def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
+    query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
-  end
-
-  # Displays a list of all locations.
-  def list_locations
-    query = create_query(:Location, :all, by: :name)
-    show_selected_locations(query, link_all_sorts: true)
-  end
-
-  # Display list of locations that a given user created.
-  def locations_by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: locations_path
-    )
-    return unless user
-
-    query = create_query(:Location, :by_user, user: user)
-    show_selected_locations(query, link_all_sorts: true)
-  end
-
-  # Display list of locations that a given user is editor on.
-  def locations_by_editor
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_editor].to_s,
-      index_path: locations_path
-    )
-    return unless user
-
-    query = create_query(:Location, :by_editor, user: user)
-    show_selected_locations(query)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to(search_advanced_path)
   end
 
   # Displays a list of locations matching a given string.
-  def location_search
+  def pattern
     pattern = params[:pattern].to_s
     loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
     if loc
@@ -129,15 +104,36 @@ class LocationsController < ApplicationController
     end
   end
 
-  # Displays matrix of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Location)
+  # Displays a list of all locations whose country matches the id param.
+  def country
+    query = create_query(
+      :Location, :regexp_search, regexp: "#{params[:country]}$"
+    )
     show_selected_locations(query, link_all_sorts: true)
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
+  end
+
+  # Display list of locations that a given user created.
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: locations_path
+    )
+    return unless user
+
+    query = create_query(:Location, :by_user, user: user)
+    show_selected_locations(query, link_all_sorts: true)
+  end
+
+  # Display list of locations that a given user is editor on.
+  def by_editor
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_editor].to_s,
+      index_path: locations_path
+    )
+    return unless user
+
+    query = create_query(:Location, :by_editor, user: user)
+    show_selected_locations(query)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -200,6 +196,8 @@ class LocationsController < ApplicationController
       @undef_data = nil
     end
   end
+
+  #############################################
 
   public # for test!
 
@@ -275,10 +273,6 @@ class LocationsController < ApplicationController
   end
 
   ##############################################################################
-  #
-  #  :section: Show Location
-  #
-  ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
   def show
@@ -305,12 +299,6 @@ class LocationsController < ApplicationController
 
     init_projects_ivar
   end
-
-  ##############################################################################
-  #
-  #  :section: Create/Edit/Destroy Location
-  #
-  ##############################################################################
 
   def new
     init_caller_ivars_for_new

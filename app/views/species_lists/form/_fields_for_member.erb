@@ -36,14 +36,15 @@
 
   <%= check_box_with_label(form: f_m, field: :is_collection_location,
                            checked: @member_is_collection_location,
-                           text: :form_observations_is_collection_location.t) %>
+                           label: :form_observations_is_collection_location.t)
+                           %>
   <%= content_tag(:span,
                   :form_observations_is_collection_location_help.t,
                   class: "help-note") %>
 
   <%= check_box_with_label(form: f_m, field: :specimen,
                            checked: @member_specimen,
-                           text: :form_observations_specimen_available.t) %>
+                           label: :form_observations_specimen_available.t) %>
   <%= content_tag(:span,
                   :form_observations_specimen_available_help.t,
                   class: "help-note") %>

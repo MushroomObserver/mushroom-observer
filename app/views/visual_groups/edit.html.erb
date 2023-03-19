@@ -30,14 +30,13 @@
   <hr>
 
   <%= form_with(url: edit_visual_group_path(@visual_group), method: :get,
-                id: "visual_group_filters_form") do |form| %>
+                id: "visual_group_filters_form") do |f| %>
 
-    <%= form.label(:filter, :edit_visual_group_filter_options.t) %>
+    <%= f.label(:filter, :edit_visual_group_filter_options.t) %>
     <div class="form-group form-inline">
-      <%= form.text_field(:filter, value: @filter, size: 60,
-                          class: "form-control", id: "filter") %>
-      <%= form.submit(:edit_visual_group_update_filter.t,
-                      class: "btn btn-default") %>
+      <%= f.text_field(:filter, value: @filter, size: 60,
+                       class: "form-control", id: "filter") %>
+      <%= submit_button(form: f, button: :edit_visual_group_update_filter.t) %>
     </div>
 
   <% end %>

@@ -1,9 +1,10 @@
 <%= form_with(model: @species_list, url: action,
               id: "species_list_form") do |f| %>
 
-  <%= f.submit(button.l, class: "btn btn-default center-block mt-3 mb-3") %>
+  <%= submit_button(form: f, button: button.l, center: true) %>
 
-  <%= if !(partial = render(partial: "shared/form_list_feedback")).blank?
+  <%= if !(partial = render(partial: "shared/form_list_feedback",
+                            locals: { f: f })).blank?
     content_tag(:div, partial)
   end %>
 
@@ -32,7 +33,8 @@
 
   <div class="form-group mt-3">
     <%= f.label(:title,
-                :form_species_lists_title.t + ":") %> (<%= :required.t %>)
+                :form_species_lists_title.t + ":") %>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
     <%= f.text_field(:title, class: "form-control") %>
   </div>
 
@@ -54,7 +56,8 @@
              locals: { button: button } ) %>
 
   <div class="form-group mt-3">
-    <%= f.label(:place_name, :WHERE.t + ":") %> (<%= :required.t %>)
+    <%= f.label(:place_name, :WHERE.t + ":") %>
+    <%= content_tag(:span, "(#{:required.t})", class: "help-note ml-3") %>
     <%= f.text_field(:place_name, class: "form-control") %>
   </div>
   <% turn_into_location_auto_completer(:species_list_place_name) %>
@@ -67,6 +70,6 @@
                locals: { f: f }) %>
   <% end %>
 
-  <%= f.submit(button.l, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: button.l, center: true) %>
 
 <% end %>

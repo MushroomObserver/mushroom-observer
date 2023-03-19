@@ -24,54 +24,135 @@ module Names
       _name_description
     ].freeze
 
-    def test_name_description_index
+    def test_index_default_sort_order
       login
       get(:index)
-      assert_template("names/descriptions/index")
+
+      assert_displayed_title("Name Descriptions by Name")
     end
 
     def test_index_sorted_by_user
-      by = "user"
-
       login
-      get(:index, params: { by: by })
+      get(:index, params: { by: "user" })
 
-      assert_select("#title", text: "Name Descriptions by #{by.capitalize}")
+      assert_displayed_title("Name Descriptions by User")
     end
 
-    def test_name_descriptions_by_author
+    def test_index_by_author_of_one_description
+      desc = name_descriptions(:draft_boletus_edulis)
+      user = desc.user
+      assert_equal(
+        1,
+        NameDescriptionAuthor.where(user: user).count,
+        "Test needs a user who authored exactly one description"
+      )
+
       login
-      get(:index, params: { by_author: rolf.id })
-      assert_template("names/descriptions/index")
+      get(:index, params: { by_author: user })
+
+      assert_redirected_to(/#{name_description_path(desc)}/)
     end
 
-    def test_name_descriptions_by_author_bad_user_id
-      bad_user_id = 666
+    def test_index_by_author_of_multiple_descriptions
+      user = users(:katrina)
+      descs_authored_by_user_count = \
+        NameDescriptionAuthor.where(user: user).count
+      assert_operator(
+        descs_authored_by_user_count, :>, 1,
+        "Test needs a user who authored multiple descriptions"
+      )
+
+      login
+      get(:index, params: { by_author: user })
+
+      assert_template("index")
+      assert_displayed_title("Name Descriptions Authored by #{user.name}")
+      assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
+                    { count: descs_authored_by_user_count },
+                    "Wrong number of results")
+    end
+
+    def test_index_by_author_of_no_descriptions
+      user = users(:zero_user)
+
+      login
+      get(:index, params: { by_author: user })
+
+      assert_flash_text("No matching name descriptions found.")
+      assert_template("index")
+    end
+
+    def test_index_by_author_bad_user_id
+      bad_user_id = images(:in_situ_image).id
       assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
       login
       get(:index, params: { by_author: bad_user_id })
 
-      assert_flash_error("id ##{bad_user_id}")
+      assert_flash_text(
+        :runtime_object_not_found.l(type: "user", id: bad_user_id)
+      )
       assert_redirected_to(name_descriptions_path)
     end
 
-    def test_name_descriptions_by_editor
+    def test_index_by_editor_of_one_description
+      desc = name_descriptions(:coprinus_desc)
+      user = desc.editors.first
+      assert_equal(
+        1,
+        NameDescriptionEditor.where(user: user).count,
+        "Test needs a user who edited exactly one description"
+      )
+
       login
-      get(:index, params: { by_editor: rolf.id })
-      assert_redirected_to(action: :show,
-                           id: name_descriptions(:coprinus_comatus_desc).id,
-                           params: @controller.query_params)
+      get(:index, params: { by_editor: user })
+
+      assert_redirected_to(
+        %r{/names/descriptions/#{desc.id}}
+      )
     end
 
-    def test_name_descriptions_by_editor_bad_user_id
-      bad_user_id = 666
+    def test_index_by_editor_of_multiple_descriptions
+      user = users(:mary)
+      [name_descriptions(:agaricus_desc),
+       name_descriptions(:suillus_desc)].each do |desc|
+        desc.editors = [user]
+        desc.save
+      end
+      descs_edited_by_user_count = \
+        NameDescriptionEditor.where(user: user).count
+
+      login
+      get(:index, params: { by_editor: user.id })
+
+      assert_template("index")
+      assert_displayed_title("Name Descriptions Edited by #{user.name}")
+      assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
+                    { count: descs_edited_by_user_count },
+                    "Wrong number of results")
+    end
+
+    def test_index_by_editor_of_no_descriptions
+      user = users(:zero_user)
+
+      login
+      get(:index, params: { by_editor: user.id })
+
+      assert_flash_text("No matching name descriptions found.")
+      assert_template("index")
+    end
+
+    def test_index_by_editor_bad_user_id
+      bad_user_id = images(:in_situ_image).id
+      # Above should ensure there's no user with that id. But just in case:
       assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
       login
       get(:index, params: { by_editor: bad_user_id })
 
-      assert_flash_error("id ##{bad_user_id}")
+      assert_flash_text(
+        :runtime_object_not_found.l(type: "user", id: bad_user_id)
+      )
       assert_redirected_to(name_descriptions_path)
     end
 

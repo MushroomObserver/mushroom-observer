@@ -5,24 +5,18 @@
 <%= form_with(scope: :user, url: account_login_path,
               id: "account_login_form") do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:login, :login_user.t + ":") %>
-    <%= f.text_field(:login, value: @login,
-                      data: { autofocus: @login.blank? },
-                      class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :login, value: @login,
+                            label: :login_user.t + ":", class: "mt-3",
+                            data: { autofocus: @login.blank? }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:password, :login_password.t + ":") %>
-    <%= f.password_field(:password, value: "",
-                          data: { autofocus: !@login.blank? },
-                          class: "form-control") %>
-  </div>
+  <%= password_field_with_label(form: f, field: :password, value: "",
+                                label: :login_password.t + ":", class: "mt-3",
+                                data: { autofocus: !@login.blank? }) %>
 
   <%= check_box_with_label(form: f, field: :remember_me, checked: @remember,
-                           class: "mt-3", text: :login_remember_me.t) %>
+                           class: "mt-3", label: :login_remember_me.t) %>
 
-  <%= f.submit(:login_login.l, class: "btn btn-default center-block mt-3") %>
+  <%= submit_button(form: f, button: :login_login.l, center: true) %>
 
   <div class="form-group mt-3">
     <%= :login_forgot_password.tp %>

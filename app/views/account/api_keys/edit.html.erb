@@ -33,14 +33,12 @@
     </tr>
   </table>
 
-  <div class="form-group mt-3">
-    <%= f.label(:notes, :NOTES.t + ":") %>
-    <%= f.text_field(:notes, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :notes,
+                            label: :NOTES.t + ":", class: "mt-3") %>
 
   <div class="text-center mt-3">
-    <%= f.submit(:UPDATE.l, class: "btn btn-default") %>
+    <%= submit_button(form: f, button: :UPDATE.l) %>
     <span style="margin-left:5em"></span>
-    <%= f.submit(:CANCEL.l, class: "btn btn-default") %>
+    <%= submit_button(form: f, button: :CANCEL.l) %>
   </div><!-- .text-center -->
 <% end %>

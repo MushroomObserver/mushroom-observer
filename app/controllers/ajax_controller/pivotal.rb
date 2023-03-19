@@ -7,11 +7,12 @@ module AjaxController::Pivotal
   # id::    ID of story.
   # value:: Value of comment or vote (as necessary).
   def pivotal
-    if @type == "story"
+    case @type
+    when "story"
       pivotal_story(@id)
-    elsif @type == "vote"
+    when "vote"
       pivotal_vote(@id, @value)
-    elsif @type == "comment"
+    when "comment"
       pivotal_comment(@id, @value)
     end
   end

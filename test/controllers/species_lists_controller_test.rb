@@ -101,27 +101,177 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_index_sort_by_user
+  def test_index
+    login
+    get(:index)
+
+    assert_displayed_title("Species Lists by Date")
+    assert_select(
+      "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
+      { count: SpeciesList.count },
+      "Wrong number of results"
+    )
+  end
+
+  def test_index_sorted_by_user
     by = "user"
 
     login
     get(:index, params: { by: by })
 
-    assert_select("#title", text: "Species Lists by #{by.capitalize}")
+    assert_displayed_title("Species Lists by #{by.capitalize}")
   end
 
-  def test_index_species_list_by_past_bys
+  def test_index_sorted_by_time_modifed
+    by = "modified"
+
     login
-    get(:index, params: { by: :modified })
+    get(:index, params: { by: by })
+
     assert_response(:success)
-    get(:index, params: { by: :created })
-    assert_response(:success)
+    assert_displayed_title("Species Lists by Time Last Modified")
   end
 
-  def test_list_species_lists
+  def test_index_sorted_by_date_created
+    by = "created"
+
     login
-    get(:index)
-    assert_template(:index)
+    get(:index, params: { by: by })
+
+    assert_response(:success)
+    assert_displayed_title("Species Lists by Date Created")
+  end
+
+  def test_index_sorted_by_title
+    by = "title"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_displayed_title("Species Lists by Title")
+  end
+
+  def test_index_with_id_and_sorted_by_title
+    list = species_lists(:unknown_species_list)
+    by = "title"
+
+    login
+    get(:index, params: { id: list.id, by: by })
+
+    assert_displayed_title("Species Lists by Title")
+  end
+
+  def test_index_with_id
+    list = species_lists(:unknown_species_list)
+
+    login
+    get(:index, params: { id: list.id })
+
+    assert_displayed_title("Species Lists by Date")
+  end
+
+  def test_index_pattern_multiple_hits
+    pattern = "query"
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:success)
+    assert_displayed_title("Species Lists Matching ‘#{pattern}’")
+    assert_select(
+      "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
+      { count: SpeciesList.where(SpeciesList[:title] =~ pattern).count },
+      "Wrong number of results"
+    )
+  end
+
+  def test_index_pattern_id
+    spl = species_lists(:unknown_species_list)
+
+    login
+    get(:index, params: { pattern: spl.id })
+
+    assert_redirected_to(species_list_path(spl.id))
+  end
+
+  def test_index_pattern_one_hit
+    pattern = "mysteries"
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:redirect)
+    assert_match(
+      species_list_path(species_lists(:unknown_species_list)),
+      redirect_to_url,
+      "Wrong page"
+    )
+  end
+
+  def test_index_by_user
+    user = rolf
+
+    login
+    get(:index, params: { by_user: user })
+
+    assert_displayed_title("Species Lists created by #{user.name}")
+  end
+
+  def test_index_by_user_with_no_species_lists
+    user = users(:zero_user)
+
+    login
+    get(:index, params: { by_user: user })
+
+    assert_response(:success)
+    assert_displayed_title("")
+  end
+
+  def test_index_for_user_who_does_not_exist
+    user = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { by_user: user })
+
+    assert_response(:redirect)
+    assert_redirected_to(species_lists_path)
+    assert_displayed_title("")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: :user, id: user.id)
+    )
+  end
+
+  def test_index_for_project
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { for_project: project.id })
+
+    assert_displayed_title("Species Lists attached to #{project.title}")
+  end
+
+  def test_index_for_project_with_no_lists
+    project = projects(:empty_project)
+
+    login
+    get(:index, params: { for_project: project.id })
+
+    assert_response(:success)
+    assert_displayed_title("")
+    assert_flash_text(:runtime_no_matches.l(types: :species_lists))
+  end
+
+  def test_index_for_project_that_does_not_exist
+    project = observations(:minimal_unknown_obs)
+
+    login
+    get(:index, params: { for_project: project.id })
+
+    assert_response(:redirect)
+    assert_redirected_to(projects_path)
+    assert_flash_text(
+      :runtime_object_not_found.l(type: :project, id: project.id)
+    )
   end
 
   def test_show_species_list
@@ -196,35 +346,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  def test_species_lists_by_title
-    login
-    get(:index, params: { by: "title" })
-    assert_template(:index)
-  end
-
-  def test_species_lists_by_user
-    login
-    get(:index, params: { by_user: rolf.id })
-    assert_template(:index)
-  end
-
-  def test_species_lists_for_project
-    login
-    get(:index, params: { for_project: projects(:bolete_project).id })
-    assert_template(:index)
-  end
-
-  def test_species_list_search
-    login
-    spl = species_lists(:unknown_species_list)
-    get(:index, params: { pattern: spl.id.to_s })
-    assert_redirected_to(species_list_path(spl.id))
-
-    get(:index, params: { pattern: "mysteries" })
-    assert_response(:redirect)
-  end
-
-  def test_list_species_list_by_user
+  def test_show_flow
     login
     query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
     query_params = @controller.query_params(query)

@@ -16,7 +16,7 @@
   <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
     <%= form_with(model: @image, url: form_action, method: :put) do |f| %>
 
-      <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+      <%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>
 
       <%= render(partial: "observations/images/form/fields_for_images",
                 locals: { f: f, leave_out_original_file_name: false }) %>
@@ -31,7 +31,7 @@
       <% end %>
 
       <div class="text-center mt-3 mb-5">
-        <%= f.submit(:SAVE_EDITS.l, class: "btn btn-default") %>
+        <%= submit_button(form: f, button: :SAVE_EDITS.l) %>
         <%= link_with_query(:cancel_and_show.t(type: :image),
                             image_path(@image.id),
                             { class: "btn btn-default" }) %>

@@ -7,5 +7,5 @@ checked = if @user.content_filter[filter.sym] == filter.prefs_vals.first
           end
 %>
 
-<%= check_box_with_label(form: form, field: :"#{filter.sym}", checked: checked,
-                         text: :"prefs_filters_#{filter.sym}".t) %>
+<%= check_box_with_label(form: f, field: :"#{filter.sym}", checked: checked,
+                         label: :"prefs_filters_#{filter.sym}".t) %>

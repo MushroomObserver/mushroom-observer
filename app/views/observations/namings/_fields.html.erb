@@ -14,7 +14,8 @@ unfocused ||= false
 focus_on_name = !unfocused && (button_name != :CREATE.l || what.empty?)
 focus_on_vote = !unfocused && (button_name == :CREATE.l && what.present?)
 
-locals = {
+feedback_locals = {
+  f: f,
   button_name: button_name,
   what: what,
   valid_names: valid_names,
@@ -27,7 +28,7 @@ locals = {
 <div class="row">
   <div class="col-xs-12 col-sm-6">
     <%= render(partial: "shared/form_name_feedback",
-               locals: locals) if what.present? %>
+               locals: feedback_locals) if what.present? %>
   </div>
 </div><!--.row-->
 

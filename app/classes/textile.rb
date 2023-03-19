@@ -155,15 +155,16 @@ class Textile < String
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
     @@name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/
-    if rank == "Species"
+    case rank
+    when "Species"
       @@last_species    = name
       @@last_subspecies = nil
       @@last_variety    = nil
-    elsif rank == "Subspecies"
+    when "Subspecies"
       @@last_species    = name.sub(/ ssp\. .*/, "")
       @@last_subspecies = name
       @@last_variety    = nil
-    elsif rank == "Variety"
+    when "Variety"
       @@last_species    = name.sub(/ (ssp|var)\. .*/, "")
       @@last_subspecies = name.sub(/ var\. .*/, "")
       @@last_variety    = name

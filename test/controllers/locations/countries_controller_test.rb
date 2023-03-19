@@ -15,7 +15,7 @@ module Locations
       login
       get(:index)
 
-      assert_select("#title", text: :list_countries_title.l)
+      assert_displayed_title(:list_countries_title.l)
       assert_select(
         "a:match('href', ?)", %r{^/locations\?country=\S+},
         { count: links_to_countries_with_obss +

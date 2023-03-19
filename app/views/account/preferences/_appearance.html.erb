@@ -24,44 +24,31 @@ image_sizes = options_for_select(
                )
 %>
 
-<div class="form-group mt-3 font-weight-bold">
-  <%= :prefs_appearance.t %>
-</div>
+<%= content_tag(:div, :prefs_appearance.t,
+                class: "form-group mt-3 font-weight-bold") %>
 
-<div class="form-group mb-1 form-inline">
-  <%= f.label(:hide_authors, :prefs_hide_authors.t + ":") %>
-  <%= f.select(:hide_authors, hide_authors_opts,
-               {}, { class: "form-control" }) %><br/>
-</div>
+<%= select_with_label(form: f, field: :hide_authors, prefs: true,
+                      options: hide_authors_opts, inline: true) %>
 
-<div class="form-group mb-1 form-inline">
-  <%= f.label(:location_format, :prefs_location_format.t + ":") %>
-  <%= f.select(:location_format, location_formats,
-               {}, { class: "form-control" }) %><br/>
-</div>
+<%= select_with_label(form: f, field: :location_format, prefs: true,
+                      options: location_formats, inline: true) %>
 
-<div class="form-group mb-1 form-inline">
-  <%= f.label(:theme, :prefs_theme.t + ":") %>
-  <%= f.select(:theme, themes, {}, { class: "form-control mr-3" }) %>
-  <%= link_to(:prefs_themes_about.t, theme_color_themes_path) %><br/>
-</div>
+<%= select_with_label(form: f, field: :theme, prefs: true,
+                      options: themes, inline: true,
+                      append: link_to(:prefs_themes_about.t,
+                                      theme_color_themes_path,
+                                      class: "ml-4")) %>
 
-<div class="form-group mb-1 form-inline">
-  <%= f.label(:locale, :prefs_locale.t + ":") %>
-  <%= f.select(:locale, locales, {}, { class: "form-control" }) %><br/>
-</div>
+<%= select_with_label(form: f, field: :locale, prefs: true,
+                      options: locales, inline: true) %>
 
-<%= prefs_check_box_with_label(form: f, field: :thumbnail_maps) %>
-<%= prefs_check_box_with_label(form: f, field: :view_owner_id) %>
+<%= check_box_with_label(form: f, field: :thumbnail_maps, prefs: true) %>
+<%= check_box_with_label(form: f, field: :view_owner_id, prefs: true) %>
 
-<div class="form-group mt-3 form-inline">
-  <%= f.label(:layout_count, :prefs_layout_count.t + ":") %>
-  <%= f.number_field(:layout_count, class: "form-control", min: 1) %>
-</div>
+<%= number_field_with_label(form: f, field: :layout_count, prefs: true,
+                            class: "mt-3", inline: true) %>
 
-<div class="form-group mt-3 form-inline">
-  <%= f.label(:image_size, :prefs_image_size.t) %>
-  <%= f.select(:image_size, image_sizes, {}, { class: "form-control" }) %>
-</div>
+<%= select_with_label(form: f, field: :image_size, prefs: true,
+                      options: image_sizes, inline: true) %>
 
-<%= f.submit(:SAVE_EDITS.l, class: "btn btn-default center-block mt-3") %>
+<%= submit_button(form: f, button: :SAVE_EDITS.l, center: true) %>

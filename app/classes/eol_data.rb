@@ -303,10 +303,11 @@ class EolData
   end
 
   def eol_search_url(class_name, subject)
-    if class_name == "Image"
+    case class_name
+    when Image
       "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}" \
       "&type%5B%5D=Image"
-    elsif class_name == "Name"
+    when Name
       "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}" \
       "&type%5B%5D=TaxonConcept"
     else

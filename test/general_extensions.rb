@@ -435,6 +435,20 @@ module GeneralExtensions
 
   ##############################################################################
   #
+  #  :section:  css assertions
+  #
+  ##############################################################################
+
+  def assert_displayed_title(expect)
+    if expect.is_a?(Regexp)
+      assert_match(expect, css_select("#title").text, "Wrong page or title")
+    else
+      assert_equal(expect, css_select("#title").text, "Wrong page or title")
+    end
+  end
+
+  ##############################################################################
+  #
   #  :section:  File contents assertions
   #
   ##############################################################################

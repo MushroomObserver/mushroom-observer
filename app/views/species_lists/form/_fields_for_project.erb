@@ -9,7 +9,7 @@
                                  checked: @project_checks[project.id],
                                  disabled: @species_list.user_id != @user.id &&
                                    !project.is_member?(@user),
-                                 text: link_to_object(project)) %>
+                                 label: link_to_object(project)) %>
       <% end %>
     </div>
   </div>

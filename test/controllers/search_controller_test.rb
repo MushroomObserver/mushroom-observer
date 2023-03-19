@@ -54,11 +54,13 @@ class SearchControllerTest < FunctionalTestCase
         model: "observation",
         user: "rolf"
       },
-      content_filter_has_images: "",
-      content_filter_has_specimen: "yes",
-      content_filter_lichen: "no",
-      content_filter_region: "California",
-      content_filter_clade: ""
+      content_filter: {
+        has_images: "",
+        has_specimen: "yes",
+        lichen: "no",
+        region: "California",
+        clade: ""
+      }
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query

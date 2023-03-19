@@ -15,8 +15,8 @@ action = { controller: "/species_lists/observations", action: :update,
   </div>
 
   <div class="form-group center-block">
-    <%= f.submit(:ADD.l, class: "btn btn-default") %>
-    <%= f.submit(:REMOVE.l, class: "btn btn-default") %>
+    <%= submit_button(form: f, button: :ADD.l) %>
+    <%= submit_button(form: f, button: :REMOVE.l) %>
   </div>
 
 <% end %>

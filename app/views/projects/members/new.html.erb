@@ -23,7 +23,7 @@
                                                class: "form-control") %><br/>
     <% turn_into_user_auto_completer(:candidate) %>
 
-    <%= f.submit(:ADD.t, class: "btn btn-default ml-3") %>
+    <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
 
   <% end %>
 

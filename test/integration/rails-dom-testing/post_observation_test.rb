@@ -67,7 +67,7 @@ class PostObservationTest < IntegrationTestCase
     submit_form_with_changes(create_location_form_first_changes,
                              /create/i, "#location_form")
     assert_template(CREATE_LOCATION_TEMPLATE)
-    assert_has_location_warning(/County may not be required/)
+    assert_has_location_warning(/Contains unexpected character/)
     assert_form_has_correct_values(
       create_location_form_values_after_first_changes
     )
@@ -341,7 +341,10 @@ class PostObservationTest < IntegrationTestCase
 
   def create_location_form_first_changes
     {
-      "location_display_name" => "Pasadena, Some Co., California, USA",
+
+      # "location_display_name" => "({[;:|]}), California, USA",
+      "location_display_name" =>
+        "Pasadena: Disneyland, Some Co., California, USA",
       "location_high" => 8765,
       "location_low" => 4321,
       "location_notes" => "oops"
@@ -350,6 +353,7 @@ class PostObservationTest < IntegrationTestCase
 
   def create_location_form_second_changes
     {
+      "location_display_name" => "Pasadena, Some Co., California, USA",
       "location_high" => 5678,
       "location_low" => 1234,
       "location_notes" => "Notes for location"

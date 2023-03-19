@@ -155,4 +155,13 @@ class RedirectsTest < IntegrationTestCase
       :get, "/observer/lookup_name/#{name.id}", name_path(name.id)
     )
   end
+
+  # SpecisList/show  ---------------------------------
+  def test_show_species_list
+    spl = species_lists(:first_species_list)
+    login
+    assert_old_url_redirects_to_new_path(
+      :get, "/species_list/show_species_list//#{spl.id}", species_list_path(spl)
+    )
+  end
 end

@@ -1,11 +1,14 @@
 # Read about fixtures at http_version_1://ar.rubyonrails.org/classes/Fixtures.html
 # location and user associations must be specified by id, not label
 
-albion_version_1:
-  location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
-  updated_at: 2007-12-27 06:41:20
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
+DEFAULTS:
+  &DEFAULTS
   version: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
+
+albion_version_1:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
   name: Albion, California, USA
   scientific_name: USA California, Albion
   north: 39.3
@@ -16,9 +19,8 @@ albion_version_1:
   low: 0.0
 
 albion_version_2:
+  <<: *DEFAULTS
   location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
-  updated_at: 2007-12-27 06:41:20
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 2
   name: Albion, California, USA
   scientific_name: USA, California, Albion
@@ -30,10 +32,8 @@ albion_version_2:
   low: 0.0
 
 burbank_version_1:
+  <<: *DEFAULTS
   location_id: <%= ActiveRecord::FixtureSet.identify(:burbank) %>
-  updated_at: 2007-12-27 06:47:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Burbank, Los Angeles Co., California, USA
   scientific_name: USA, California, Los Angeles Co., Burbank
   north: 34.22
@@ -45,9 +45,6 @@ burbank_version_1:
 
 mitrula_marsh_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:mitrula_marsh) %>
-  updated_at: 2007-12-27 06:47:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: '\"Mitrula Marsh\", Sand Lake, Bassetts, Yuba Co., California, USA'
   scientific_name: 'USA, California, Yuba Co., Bassetts, Sand Lake, \"Mitrula Marsh\"'
   north: 39.7184
@@ -57,9 +54,6 @@ mitrula_marsh_version_1:
 
 salt_point_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:salt_point) %>
-  updated_at: 2007-12-27 06:47:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Salt Point State Park, Sonoma Co., California, USA
   scientific_name: USA, California, Sonoma Co., Salt Point State Park
   north: 38.5923
@@ -71,9 +65,6 @@ salt_point_version_1:
 
 gualala_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:gualala) %>
-  updated_at: 2007-12-27 06:47:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Gualala, Mendocino Co., California, USA
   scientific_name: USA, California, Mendocino Co., Gualala
   north: 38.7868
@@ -85,9 +76,6 @@ gualala_version_1:
 
 elgin_co_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:elgin_co) %>
-  updated_at: 2007-12-27 06:47:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Elgin County, Ontario, Canada
   scientific_name: Canada, Ontario, Elgin County
   north: 42.876
@@ -97,9 +85,6 @@ elgin_co_version_1:
 
 brett_woods_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:bretton_woods) %>
-  updated_at: 2007-12-27 06:47:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Brett Woods, Fairfield Co., Connecticut, USA
   scientific_name: USA, Connecticut, Fairfield Co., Brett Woods
   north: 41.2125
@@ -109,9 +94,6 @@ brett_woods_version_1:
 
 point_reyes_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:point_reyes) %>
-  updated_at: 2008-01-01 11:50:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Point Reyes National Seashore, Marin Co., California, USA
   scientific_name: USA, California, Marin Co., Point Reyes National Seashore
   north: 38.2441
@@ -121,12 +103,45 @@ point_reyes_version_1:
 
 howarth_park_version_1:
   location_id: <%= ActiveRecord::FixtureSet.identify(:howarth_park) %>
-  updated_at: 2008-01-01 15:24:18
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
-  version: 1
   name: Howarth Park, Santa Rosa, Sonoma Co., California, USA
   scientific_name: USA, California, Sonoma Co., Santa Rosa, Howarth Park
   north: 38.4582
   west: -122.6712
   east: -122.6632
   south: 38.4496
+
+loc_edited_by_katrina_v1:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:loc_edited_by_katrina) %>
+  version: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
+
+loc_edited_by_katrina_v2:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:loc_edited_by_katrina) %>
+  version: 2
+  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
+
+loc_1_edited_by_roy_v1:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:loc_1_edited_by_roy) %>
+  version: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
+
+loc_1_edited_by_roy_v2:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:loc_1_edited_by_roy) %>
+  version: 2
+  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
+
+loc_2_edited_by_roy_v1:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:loc_2_edited_by_roy) %>
+  version: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
+
+loc_2_edited_by_roy_v2:
+  <<: *DEFAULTS
+  location_id: <%= ActiveRecord::FixtureSet.identify(:loc_2_edited_by_roy) %>
+  version: 2
+  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
