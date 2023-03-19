@@ -36,7 +36,8 @@ def report_update_usage
     "Aseroe rubra # Add all images for a species to visual group\n" \
     "Bovista pila, Cyathus olla # Multiple species/visual groups\n" \
     "1234 Lepista nuda # Include specific image\n" \
-    "-2345 Verpa conica1 # Exclude specific image\n"
+    "-2345 Verpa conica1 # Exclude specific image\n" \
+    "3456 # Move image to current name"
   )
   exit
 end
@@ -72,7 +73,7 @@ end
 
 def parse_cmd(cmd)
   first_space = cmd.index(" ")
-  return [nil, cmd] if first_space.nil?
+  return process_simple_cmd(cmd) if first_space.nil?
 
   id = begin
          Integer(cmd[..first_space - 1])
@@ -82,6 +83,19 @@ def parse_cmd(cmd)
   return [nil, cmd] if id.nil?
 
   [id, cmd[first_space + 1..]]
+end
+
+def process_simple_cmd(cmd)
+  id = Integer(cmd)
+  img = Image.find_by(id: id)
+  return [nil, cmd] unless img
+
+  obs = img.observations.first
+  return [id, cmd] unless obs
+
+  [id, obs.name.text_name]
+rescue StandardError
+  [nil, cmd]
 end
 
 def add_visual_group(model, name)
