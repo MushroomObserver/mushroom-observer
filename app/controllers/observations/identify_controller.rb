@@ -23,7 +23,8 @@ module Observations
     private
 
     def unfiltered_index
-      query = create_query(:Observation, :needs_id, { unfiltered: true })
+      query = create_query(:Observation, :needs_id, { in_clade: false,
+                                                      in_region: false })
 
       show_selected_results(query)
     end
@@ -33,8 +34,8 @@ module Observations
       return unless (term = params.dig(:filter, :term).strip)
 
       case type
-      when :taxon
-        taxon_filter(term)
+      when :clade
+        clade_filter(term)
       when :region
         region_filter(term)
         # when :user
@@ -44,20 +45,22 @@ module Observations
 
     # Some inefficiency here comes from having to parse the name from a string.
     # Write a filtered select/autocomplete that passes the name_id?
-    def taxon_filter(term)
+    def clade_filter(term)
       # return unless (clade = Name.find_by(text_name: term))
 
       # Nimmo note: 2023-03-14 to be researched: This obviously sends, and
       # `Query::ObservationAll` expects, a full `Name` instance, but somehow
       # the flavor parsing method `needs_id` only receives the name ID.
       # Changed: just passing the text_name
-      query = create_query(:Observation, :needs_id, { in_clade: term })
+      query = create_query(:Observation, :needs_id, { in_clade: term,
+                                                      in_region: false })
 
       show_selected_results(query)
     end
 
     def region_filter(term)
-      query = create_query(:Observation, :needs_id, { in_region: term })
+      query = create_query(:Observation, :needs_id, { in_clade: false,
+                                                      in_region: term })
 
       show_selected_results(query)
     end

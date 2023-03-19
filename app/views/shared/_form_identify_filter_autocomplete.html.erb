@@ -3,9 +3,9 @@
 # (saves on reloading the primer)
 %>
 
-<%= form_with(url: "", id: "ur_taxon_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_taxon", value: "", size: 40, class: "") %>
-  <% turn_into_name_above_genus_auto_completer(:ur_taxon) %>
+<%= form_with(url: "", id: "ur_clade_autocomplete") do |f| %>
+  <%= f.hidden_field("ur_clade", value: "", size: 40, class: "") %>
+  <% turn_into_clade_auto_completer(:ur_clade) %>
 <% end %>
 
 <%= form_with(url: "", id: "ur_location_autocomplete") do |f| %>

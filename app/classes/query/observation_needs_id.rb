@@ -2,11 +2,11 @@
 
 module Query
   # methods for initializing Queries for Observations Needing Identification
-  class ObservationNeedsId < Query::Base
+  class ObservationNeedsId < Query::ObservationBase
     def parameter_declarations
       super.merge(
-        needs_id?: { boolean: [true] },
-        needs_id_by_taxon?: Name
+        in_clade: :string,
+        in_region: :string
       )
     end
 
@@ -22,9 +22,9 @@ module Query
       #           "#{User.current_id} AND observation_views.reviewed = 1)"
       # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
       #           "FROM votes WHERE user_id = #{User.current_id})"
-      initialize_unfiltered if params[:unfiltered]
-      initialize_by_clade if params[:clade]
-      initialize_by_region if params[:region]
+      initialize_unfiltered
+      initialize_by_clade if params[:in_clade]
+      initialize_by_region if params[:in_region]
       super
     end
 
@@ -74,7 +74,7 @@ module Query
 
     # from content_filter/clade.rb
     def name_in_clade_condition
-      val = params[:clade]
+      val = params[:in_clade]
       name, rank = parse_name(val)
       if Name.ranks_above_genus.include?(rank)
         "observations.text_name = '#{name}' OR " \
@@ -93,19 +93,16 @@ module Query
     end
 
     # from content_filter/region.rb
+    # keeping this simple.
     def location_in_region_condition
-      val = params[:region]
-      val = Location.reverse_name_if_necessary(val)
-      expr = make_regexp(query, val)
-      "CONCAT(', ', observations.where) #{expr}"
-    end
+      region = params[:in_region]
+      region = Location.reverse_name_if_necessary(region)
 
-    def make_regexp(query, val)
-      if Location.understood_continent?(val)
-        vals = Location.countries_in_continent(val).join("|")
-        "REGEXP #{query.escape(", (#{vals})$")}"
+      if Location.understood_continent?(region)
+        countries = Location.countries_in_continent(region).join("|")
+        "observations.where REGEXP #{escape(", (#{countries})$")}"
       else
-        "LIKE #{query.escape("%, #{val}")}"
+        "observations.where LIKE #{escape("%, #{region}")}"
       end
     end
   end

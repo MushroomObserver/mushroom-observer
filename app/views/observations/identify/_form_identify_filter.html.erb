@@ -1,20 +1,18 @@
 <%# filter for identify observations index %>
-<%# TODO: make this a select with autocomplete that sends the ID %>
+<%# Replaces the usual pattern_search form in the top nav %>
+
+<%# TODO: make the form input a select with autocomplete that sends the ID %>
 <%# Otherwise the name has to be looked up (several times) %>
 
 <%
-placeholder = if params[:taxon].present?
-                ("Filtered by: " + params[:taxon])
-              elsif params[:region].present?
-                ("Filtered by: " + params[:region])
-              # elsif params[:user].present?
-              #   ("Filtered by: " + params[:user])
-              else
-                "Filter by:"
-              end
+# Show the incoming `needs_id` query in the search bar if there has been one
+filter_type = params.dig(:filter, :type) || false
+selected = filter_type ? filter_type.to_sym : :name
+value = filter_type ? params.dig(:filter, :term) : ""
+placeholder = "Filter by:"
 options = [
-  [:TAXON.l, :taxon],
-  [:WHERE.l, :region],
+  [:CLADE.l, :clade],
+  [:REGION.l, :region],
   # [:USER.l, :user],
 ]
 %>
@@ -29,13 +27,13 @@ options = [
     <%# f.label(:term, "Filter by:") %>
     <%= f.text_field(:term,
                       # turn off browser autocomplete
-                      autocomplete: "off",
+                      autocomplete: "off", value: value,
                       placeholder: placeholder,
                       class: "form-control", size: 42,
                       data: { autofocus: true }) %>
   </div><!--.form-group-->
 
-  <%= f.select(:type, options_for_select(options), { selected: :name },
+  <%= f.select(:type, options_for_select(options), { selected: selected },
                { class: "form-control",
                  onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
 
@@ -43,8 +41,7 @@ options = [
 
   <%= f.submit("Clear", class: "btn btn-default") %>
 
-  <%# TODO: script to change into the right kind of autocompleter by term %>
-  <% turn_into_name_above_genus_auto_completer(:filter_term) %>
+  <% turn_into_clade_auto_completer(:filter_term) %>
 
   <%# initializes module with translations for js messages
   inject_javascript_at_end %(
