@@ -16,6 +16,7 @@ module Observations
       assert_select(".matrix-box", obs_count)
       assert_response(:success)
 
+      # Replace with filter
       # make a query, and test that the obs scope filters appropriately
       cal_obs = Observation.needs_id_for_user(users(:mary)).
                 in_region("California, USA")

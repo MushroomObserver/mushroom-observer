@@ -289,17 +289,17 @@ class Observation < AbstractModel
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
-  scope :needs_id_by_taxon, lambda { |user, name|
-    name_plus_subtaxa = Name.include_subtaxa_of(name)
-    subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
-    lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+  # scope :needs_id_by_taxon, lambda { |user, name|
+  #   name_plus_subtaxa = Name.include_subtaxa_of(name)
+  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
+  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
 
-    where(name_id: subtaxa_above_genus).or(
-      Observation.where(name_id: lower_subtaxa).and(
-        Observation.where(vote_cache: ..0)
-      )
-    ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
-  }
+  #   where(name_id: subtaxa_above_genus).or(
+  #     Observation.where(name_id: lower_subtaxa).and(
+  #       Observation.where(vote_cache: ..0)
+  #     )
+  #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  # }
 
   # scope :of_name(name, **args)
   #
@@ -349,6 +349,21 @@ class Observation < AbstractModel
   }
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
+  scope :in_clade, lambda { |val|
+    if val.is_a?(Name)
+      name = val
+      text_name = name.text_name
+      rank = name.rank
+    elsif val.is_a?(String) && (name = Name.best_match(val))
+      text_name = name.text_name
+      rank = name.rank
+    else
+      text_name = val
+      rank = "Genus"
+    end
+    where(Observation[:classification].matches("#{rank}: _#{text_name}_")).
+      or(Observation.where(text_name: text_name))
+  }
   scope :by_user,
         ->(user) { where(user: user) }
   scope :mappable,
