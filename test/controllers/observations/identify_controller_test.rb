@@ -17,15 +17,20 @@ module Observations
       assert_select(".matrix-box", obs_count)
       assert_response(:success)
 
-      # Replace with filter
       # make a query, and test that the obs scope filters appropriately
       cal_obs = Observation.needs_id_for_user(users(:mary)).
                 in_region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
-      Query.lookup_and_save(:Observation, :needs_id,
-                            region: "California, USA")
-      get(:index, params: { q: QueryRecord.last.id.alphabetize })
+
+      query = Query.lookup_and_save(:Observation, :needs_id,
+                                    in_region: "California, USA")
+      # get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      assert_equal(query.num_results, cal_obs_count)
+
+      get(:index, params: { q: query.record.id.alphabetize })
+      # get(:index,
+      #     params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
 
