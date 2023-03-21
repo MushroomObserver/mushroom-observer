@@ -5,8 +5,8 @@ module Query
   class ObservationNeedsId < Query::ObservationBase
     def parameter_declarations
       super.merge(
-        in_clade: :string,
-        in_region: :string
+        in_clade?: :string,
+        in_region?: :string
       )
     end
 

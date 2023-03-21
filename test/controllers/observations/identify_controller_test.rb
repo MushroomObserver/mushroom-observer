@@ -7,6 +7,7 @@ module Observations
     def test_identify_observations_index
       login("mary")
       mary = users(:mary)
+      # First make sure the index is showing everything.
       obs = Observation.needs_id_for_user(users(:mary))
       obs_count = obs.count
       mary.update(layout_count: obs_count + 1)
@@ -22,8 +23,8 @@ module Observations
                 in_region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
-      Query.lookup_and_save(:Observation, :pattern_search,
-                            pattern: "California, USA")
+      Query.lookup_and_save(:Observation, :needs_id,
+                            region: "California, USA")
       get(:index, params: { q: QueryRecord.last.id.alphabetize })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
