@@ -17,7 +17,18 @@ module Observations
       assert_select(".matrix-box", obs_count)
       assert_response(:success)
 
-      # make a query, and test that the obs scope filters appropriately
+      # # CLADE
+      # # make a query, and test that the query results match obs scope
+      # aga_obs = Observation.needs_id_for_user(users(:mary)).
+      #           in_clade("Agaricales")
+
+      # query = Query.lookup_and_save(:Observation, :needs_id,
+      #                               in_clade: "Agaricales")
+      # # get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      # assert_equal(query.num_results, aga_obs.count)
+
+      # REGION
+      # make a query, and test that the query results match obs scope
       cal_obs = Observation.needs_id_for_user(users(:mary)).
                 in_region("California, USA")
       # remember the original count, will change
@@ -28,9 +39,9 @@ module Observations
       # get(:index, params: { q: QueryRecord.last.id.alphabetize })
       assert_equal(query.num_results, cal_obs_count)
 
-      get(:index, params: { q: query.record.id.alphabetize })
-      # get(:index,
-      #     params: { filter: { type: :region, term: "California, USA" } })
+      # get(:index, params: { q: query.record.id.alphabetize })
+      get(:index,
+          params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
 
@@ -50,7 +61,9 @@ module Observations
         )
       end
 
-      get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      # get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      get(:index,
+          params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 5)
 
@@ -67,7 +80,9 @@ module Observations
       vote_on_obs = not_confident[with_naming]
       vote_on_obs.change_vote(vote_on_obs.namings.first, 1)
 
-      get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      # get(:index, params: { q: QueryRecord.last.id.alphabetize })
+      get(:index,
+          params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 6)
     end

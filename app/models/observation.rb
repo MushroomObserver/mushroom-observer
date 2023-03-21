@@ -349,6 +349,7 @@ class Observation < AbstractModel
   }
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
+
   scope :in_clade, lambda { |val|
     if val.is_a?(Name)
       name = val
@@ -362,8 +363,9 @@ class Observation < AbstractModel
       rank = "Genus"
     end
     where(Observation[:classification].matches("#{rank}: _#{text_name}_")).
-      or(Observation.where(text_name: text_name))
+      or(Observation.where(text_name: text_name).distinct)
   }
+
   scope :by_user,
         ->(user) { where(user: user) }
   scope :mappable,

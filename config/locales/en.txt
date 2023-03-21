@@ -4142,6 +4142,7 @@
   query_title_in_set: Selected [TYPES]
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
+  query_title_needs_id: "[OBSERVATIONS] needing identification for [USER]"
   query_title_nonpersonal: List of Institutional Fungaria
   query_title_of_children: Lower Taxa under [NAME]
   query_title_of_name: "[TYPES] of [NAME]"

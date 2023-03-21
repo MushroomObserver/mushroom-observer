@@ -10,6 +10,7 @@ module Query
       )
     end
 
+    # 15x faster to use the scope to assemble the IDs vs SQL SELECT DISTINCT!
     def initialize_flavor
       user = User.current_id
       voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
@@ -17,16 +18,16 @@ module Query
 
       where << "observations.id NOT IN (#{voted})" if voted.present?
       where << "observations.id NOT IN (#{reviewed})" if reviewed.present?
-      # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-      #           "FROM observation_views WHERE observation_views.user_id = " \
-      #           "#{User.current_id} AND observation_views.reviewed = 1)"
-      # where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-      #           "FROM votes WHERE user_id = #{User.current_id})"
+
       initialize_unfiltered
       initialize_by_clade if params[:in_clade]
       initialize_by_region if params[:in_region]
       super
     end
+
+    # def default_order
+    #   "rss_log"
+    # end
 
     # The basic query: any namings with low confidence, or names above genus
     def initialize_unfiltered
@@ -36,32 +37,7 @@ module Query
                "observations.vote_cache <= 0"
     end
 
-    # This was built to pass a giant array of name ids, because I believe it's
-    # faster than some kind of join.
-    # Another way would be to parse_name and check observations.classification
-    # on the already initialize_unfiltered list of id's.
     def initialize_by_clade
-      # # Although the whole name is passed, it only receives the ID
-      # # Seems we have to look it up again (?)
-      # name = Name.find(params[:clade])
-
-      # # Avoid inner queries: get these ids directly
-      # name_plus_subtaxa = Name.include_subtaxa_of(name)
-      # subtaxa_above_genus = name_plus_subtaxa.
-      #                       with_rank_above_genus.map(&:id).join(", ")
-      # lower_subtaxa = name_plus_subtaxa.
-      #                 with_rank_at_or_below_genus.map(&:id).join(", ")
-
-      # # careful... the name may not have lower_subtaxa
-      # condition = "observations.name_id IN (#{subtaxa_above_genus})"
-      # if lower_subtaxa.present?
-      #   condition += " OR (observations.name_id IN (#{lower_subtaxa}) " \
-      #                      "AND observations.vote_cache <= 0)"
-      # end
-
-      # where << condition
-
-      # Change: just passing the text_name to parse_name
       where << name_in_clade_condition
     end
 
@@ -69,10 +45,11 @@ module Query
       where << location_in_region_condition
     end
 
-    # Some inefficiency here comes from having to parse the name from a string.
-    # Write a filtered select/autocomplete that passes the name_id?
-
     # from content_filter/clade.rb
+    # parse_name and check the already initialize_unfiltered list of
+    # observations against observations.classification.
+    # Some inefficiency here comes from having to parse the name from a string.
+    # TODO: Write a filtered select/autocomplete that passes the name_id as val
     def name_in_clade_condition
       val = params[:in_clade]
       name, rank = parse_name(val)
@@ -92,8 +69,8 @@ module Query
       [val, Name.guess_rank(val) || "Genus"]
     end
 
-    # from content_filter/region.rb
-    # keeping this simple.
+    # from content_filter/region.rb, but simpler.
+    # includes region itself (i.e., no comma before region in 2nd regex)
     def location_in_region_condition
       region = params[:in_region]
       region = Location.reverse_name_if_necessary(region)
@@ -102,7 +79,7 @@ module Query
         countries = Location.countries_in_continent(region).join("|")
         "observations.where REGEXP #{escape(", (#{countries})$")}"
       else
-        "observations.where LIKE #{escape("%, #{region}")}"
+        "observations.where LIKE #{escape("%#{region}")}"
       end
     end
   end
