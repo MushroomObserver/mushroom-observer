@@ -16,7 +16,7 @@ module Names::Trackers
 
       params = { id: tracker.id }
       get(:new, params: params)
-      assert_no_flash
+      assert_flash(:login_required.lp)
       assert_not(tracker.reload.approved)
       assert_equal(0, QueuedEmail.count)
 
