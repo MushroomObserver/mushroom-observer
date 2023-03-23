@@ -1336,10 +1336,11 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_clear_checklist
     spl = species_lists(:one_genus_three_species_list)
     assert_equal("mary", spl.user.login)
-    assert_operator(spl.observations.count, :>, 1)
+    assert(spl.observations.many?,
+           "Test needs SpeciesList fixture with many Observations")
 
     put(:clear, params: { id: spl.id })
-    assert_no_flash
+    assert_flash(/#{:login_required.l}/)
     assert_not_equal(0, spl.reload.observations.count)
 
     login("rolf")
