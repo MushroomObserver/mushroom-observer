@@ -1340,7 +1340,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
            "Test needs SpeciesList fixture with many Observations")
 
     put(:clear, params: { id: spl.id })
-    assert_flash(/#{:login_required.l}/)
+    assert_flash(:login_required.lp)
     assert_not_equal(0, spl.reload.observations.count)
 
     login("rolf")

@@ -6,6 +6,7 @@
 #
 #  localize:: Wrapper on I18n#localize.
 #  l::           Alias for localize.
+#  lp::          Wrap l in paragraph
 #  t::           Localize, textilize (no paragraphs or obj links).
 #  tl::          Localize, textilize with obj links (no paragraphs).
 #  tp::          Localize, textilize with paragraphs (no obj links).
@@ -303,5 +304,9 @@ class Symbol
 
   def strip_html(*args)
     localize(*args).strip_html
+  end
+
+  def lp(*args)
+    "<p>#{localize(*args)}</p>"
   end
 end
