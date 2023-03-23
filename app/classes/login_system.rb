@@ -51,6 +51,7 @@ module LoginSystem
     # come back after the user logged in
     store_location
 
+    flash_error(:login_required.t)
     # call overwriteable reaction to unauthorized access
     access_denied
     false

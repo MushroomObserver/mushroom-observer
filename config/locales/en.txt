@@ -1720,6 +1720,7 @@
   location_dubious_unknown_state: Unrecognized state or province '[state]' for '[country]'.
 
   # account/login/new
+  login_required: The feature that you tried to use is available only to logged in users
   login_please_login: Please login
   login_login: Login
   login_user: User name or Email address

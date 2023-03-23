@@ -408,6 +408,7 @@ module ControllerExtensions
       result = :login if result == true
       send(method, action, params: params)
       assert_response(result, "No user: ")
+      assert_flash_text(:login_required.l)
     end
 
     # Login alternate user, and make sure that also fails.
