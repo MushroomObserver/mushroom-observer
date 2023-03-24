@@ -401,8 +401,11 @@ module ControllerExtensions
     alt_password = args[:alt_password] || "testpassword"
 
     logout
+    flash.clear
 
     # Make sure it fails if not logged in at all.
+    # TODO: Is there a way to clear prior flash and
+    # have more specific (non-regexp) flash assertion
     if (result = args[:require_login])
       result = :login if result == true
       send(method, action, params: params)
