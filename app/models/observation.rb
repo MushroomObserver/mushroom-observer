@@ -379,7 +379,15 @@ class Observation < AbstractModel
   scope :at_location,
         ->(location) { where(location: location) }
   scope :in_region,
-        ->(where) { where(Observation[:where].matches("%#{where}")) }
+        lambda { |region|
+          region = Location.reverse_name_if_necessary(region)
+          if Location.understood_continent?(region)
+            countries = Location.countries_in_continent(region).join("|")
+            where(Observation[:where].matches(", (#{countries})$"))
+          else
+            where(Observation[:where].matches("%#{region}"))
+          end
+        }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           box = Box.new(
