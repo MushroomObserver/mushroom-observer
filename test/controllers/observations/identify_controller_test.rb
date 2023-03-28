@@ -12,20 +12,27 @@ module Observations
       obs_count = obs.count
       mary.update(layout_count: obs_count + 1)
 
+      query = Query.lookup_and_save(:Observation, :needs_id)
+      assert_equal(query.num_results, obs_count)
       get(:index)
       assert_no_flash
       assert_select(".matrix-box", obs_count)
       assert_response(:success)
 
-      # # CLADE
-      # # make a query, and test that the query results match obs scope
-      # aga_obs = Observation.needs_id_for_user(users(:mary)).
-      #           in_clade("Agaricales")
+      # CLADE
+      # make a query, and test that the query results match obs scope
+      aga_obs = Observation.needs_id_for_user(users(:mary)).
+                in_clade("Agaricales")
 
-      # query = Query.lookup_and_save(:Observation, :needs_id,
-      #                               in_clade: "Agaricales")
+      query = Query.lookup_and_save(:Observation, :needs_id,
+                                    in_clade: "Agaricales")
       # # get(:index, params: { q: QueryRecord.last.id.alphabetize })
-      # assert_equal(query.num_results, aga_obs.count)
+      # binding.break
+      assert_equal(query.num_results, aga_obs.count)
+      # get(:index,
+      #     params: { filter: { type: :clade, term: "Agaricales" } })
+      # assert_no_flash
+      # assert_select(".matrix-box", aga_obs.count)
 
       # REGION
       # make a query, and test that the query results match obs scope

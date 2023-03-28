@@ -13,15 +13,18 @@ module Query
     # 15x faster to use the scope to assemble the IDs vs SQL SELECT DISTINCT!
     def initialize_flavor
       user = User.current_id
-      voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
-      reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
+      # voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
+      # reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
 
-      where << "observations.id NOT IN (#{voted})" if voted.present?
-      where << "observations.id NOT IN (#{reviewed})" if reviewed.present?
+      # where << "observations.id NOT IN (#{voted})" # if voted.present?
+      # where << "observations.id NOT IN (#{reviewed})" # if reviewed.present?
+      needs_id = Observation.needs_id_for_user(user).map(&:id).join(", ")
+      where << "observations.id IN (#{needs_id})" if needs_id.present?
 
-      initialize_unfiltered
-      initialize_by_clade if params[:in_clade]
-      initialize_by_region if params[:in_region]
+      where << unspecific_or_unconfident_condition
+      where << name_in_clade_condition if params[:in_clade]
+      where << location_in_region_condition if params[:in_region]
+      # binding.break
       super
     end
 
@@ -30,19 +33,11 @@ module Query
     # end
 
     # The basic query: any namings with low confidence, or names above genus
-    def initialize_unfiltered
+    def unspecific_or_unconfident_condition
       names_above_genus = Name.with_rank_above_genus.map(&:id).join(", ")
 
-      where << "observations.name_id IN (#{names_above_genus}) OR " \
+      "observations.name_id IN (#{names_above_genus}) OR " \
                "observations.vote_cache <= 0"
-    end
-
-    def initialize_by_clade
-      where << name_in_clade_condition
-    end
-
-    def initialize_by_region
-      where << location_in_region_condition
     end
 
     # from content_filter/clade.rb
