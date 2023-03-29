@@ -9,9 +9,9 @@ module Observations
     def index
       @layout = calc_layout_params
       # first deal with filters, or clear filter
-      if params[:commit] == :CLEAR.l
-        return unfiltered_index
-      elsif (type = params.dig(:filter, :type))
+      return unfiltered_index if params[:commit] == :CLEAR.l
+
+      if (type = params.dig(:filter, :type))
         return filtered_index(type.to_sym)
       elsif params[:q].present?
         index_query_results
