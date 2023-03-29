@@ -36,7 +36,7 @@ module Observations
       when :region
         region_filter(term)
         # when :user
-        #   user_filter
+        #   user_filter(term)
       end
     end
 
@@ -55,6 +55,12 @@ module Observations
 
       show_selected_results(query)
     end
+
+    # def user_filter(term)
+    #   query = create_query(:Observation, :needs_id, { by_user: term })
+
+    #   show_selected_results(query)
+    # end
 
     # TODO: Allow show_index_of_objects to `render` rather than `redirect`,
     # or better yet `respond_to do |format|` and write index.js.erb templates

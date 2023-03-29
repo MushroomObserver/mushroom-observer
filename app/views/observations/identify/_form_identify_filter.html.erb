@@ -1,8 +1,8 @@
 <%# filter for identify observations index %>
 <%# Replaces the usual pattern_search form in the top nav %>
 
-<%# TODO: make the form input a select with autocomplete that sends the ID %>
-<%# Otherwise the name has to be looked up (several times) %>
+<%# TODO: make the form input have selects with autocomplete that send the ID %>
+<%# Otherwise the records have to be looked up (several times) %>
 
 <%
 # Show the incoming `needs_id` query in the search bar if there has been one
@@ -43,7 +43,7 @@ options = [
 
   <% turn_into_clade_auto_completer(:filter_term) %>
 
-  <%# initializes module with translations for js messages
+  <% # initializes module with translations for js messages
   inject_javascript_at_end %(
     $("#filter_term").on("change", function() {
       MOEvents.rebindAutoComplete(this.value)

@@ -6,7 +6,8 @@ module Query
     def parameter_declarations
       super.merge(
         in_clade?: :string,
-        in_region?: :string
+        in_region?: :string #,
+        # by_user?: :string
       )
     end
 
@@ -58,5 +59,12 @@ module Query
         "observations.where LIKE #{escape("%#{region}")}"
       end
     end
+
+    # The tricky thing here is, without the user.id as the value passed in
+    # params[:filter][:term], we're hunting for a user from a string like
+    # "Name <name>". Better to have the id as the value!
+    # def by_user_condition
+    #   user = params[:by_user]
+    # end
   end
 end
