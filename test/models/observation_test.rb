@@ -1082,14 +1082,14 @@ class ObservationTest < UnitTestCase
     )
   end
 
-  def test_scope_without_confident_name
-    assert_includes(Observation.without_confident_name,
+  def test_scope_needs_id
+    assert_includes(Observation.needs_id,
                     observations(:fungi_obs))
-    assert_not_includes(Observation.without_confident_name,
+    assert_not_includes(Observation.needs_id,
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_identification
+  def test_scope_needs_id_for_user
     assert_includes(Observation.needs_id_for_user(users(:rolf)),
                     observations(:fungi_obs))
     assert_not_includes(Observation.needs_id_for_user(users(:rolf)),
