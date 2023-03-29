@@ -7,7 +7,7 @@
 <%
 # Show the incoming `needs_id` query in the search bar if there has been one
 filter_type = params.dig(:filter, :type) || false
-selected = filter_type ? filter_type.to_sym : :name
+selected = filter_type ? filter_type.to_sym : :clade
 value = filter_type ? params.dig(:filter, :term) : ""
 placeholder = "Filter by:"
 options = [
@@ -33,7 +33,7 @@ options = [
                       data: { autofocus: true }) %>
   </div><!--.form-group-->
 
-  <%= f.select(:type, options_for_select(options), { selected: selected },
+  <%= f.select(:type, options, selected: selected,
                { class: "form-control",
                  onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
 
