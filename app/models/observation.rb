@@ -268,11 +268,11 @@ class Observation < AbstractModel
 
   scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    joins(:votes).where(user_id: user_id)
+    joins(:votes).where(votes: { user_id: user_id })
   }
   scope :without_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: Vote.where(user_id: user_id).select(:observation_id).distinct)
+    where.not(id: Vote.where(user_id: user_id).map(&:observation_id).uniq)
   }
   scope :reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -282,7 +282,7 @@ class Observation < AbstractModel
   scope :not_reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-              select(:observation_id).distinct)
+              map(&:observation_id).uniq)
   }
   scope :needs_id_for_user, lambda { |user|
     needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct

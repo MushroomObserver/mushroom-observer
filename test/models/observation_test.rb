@@ -1082,6 +1082,27 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  def test_scope_with_vote_by_user
+    obs_with_vote_by_rolf = Observation.with_vote_by_user(users(:rolf))
+    assert_includes(obs_with_vote_by_rolf,
+                    observations(:coprinus_comatus_obs))
+    assert_includes(Observation.with_vote_by_user(users(:mary)),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(obs_with_vote_by_rolf,
+                        observations(:peltigera_obs))
+  end
+
+  # There are no observation views in the fixtures
+  def test_scope_reviewed_by_user
+    ObservationView.create({ observation_id: observations(:fungi_obs).id,
+                             user_id: users(:rolf).id,
+                             reviewed: true })
+    assert_includes(Observation.reviewed_by_user(users(:rolf)),
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.reviewed_by_user(users(:rolf)),
+                        observations(:peltigera_obs))
+  end
+
   def test_scope_needs_id
     assert_includes(Observation.needs_id,
                     observations(:fungi_obs))
@@ -1101,6 +1122,25 @@ class ObservationTest < UnitTestCase
                     observations(:peltigera_obs))
     assert_not_includes(Observation.of_name(names(:fungi)),
                         observations(:peltigera_obs))
+  end
+
+  def test_scope_in_clade
+    assert_includes(Observation.in_clade("Agaricales"),
+                    observations(:coprinus_comatus_obs))
+    assert_not_includes(Observation.in_clade("Agaricales"),
+                        observations(:peltigera_obs))
+    # test the scope can handle a genus
+    assert_includes(Observation.in_clade("Tremella"),
+                    observations(:owner_only_favorite_ne_consensus))
+    assert_includes(Observation.in_clade("Tremella"),
+                    observations(:sortable_obs_users_first_obs))
+    assert_includes(Observation.in_clade("Tremella"),
+                    observations(:sortable_obs_users_second_obs))
+    assert_not_includes(Observation.in_clade("Tremella"),
+                        observations(:chlorophyllum_rachodes_obs))
+    # test the scope can handle a name instance
+    assert_includes(Observation.in_clade(names(:coprinus)),
+                    observations(:coprinus_comatus_obs))
   end
 
   def test_scope_by_user
