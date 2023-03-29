@@ -9,7 +9,7 @@ module Observations
     def index
       @layout = calc_layout_params
       # first deal with filters, or clear filter
-      if params[:commit] == "Clear"
+      if params[:commit] == :CLEAR.l
         return unfiltered_index
       elsif (type = params.dig(:filter, :type))
         return filtered_index(type.to_sym)

@@ -4,6 +4,8 @@ require("test_helper")
 
 module Observations
   class IdentifyControllerTest < FunctionalTestCase
+    # NOTE: This is more like an integration test, but we can't write one of
+    # those yet, without a JS runtime like Capybara
     def test_identify_observations_index
       login("mary")
       mary = users(:mary)
@@ -91,6 +93,12 @@ module Observations
           params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 6)
+
+      # clear the query and be sure we get everything,
+      # ...minus the ones marked reviewed and the one voted on
+      get(:index, params: { commit: :CLEAR.l })
+      assert_no_flash
+      assert_select(".matrix-box", obs_count - 6)
     end
   end
 end

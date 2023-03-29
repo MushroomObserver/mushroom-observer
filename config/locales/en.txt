@@ -638,6 +638,9 @@
   attach: attach
   CANCEL: Cancel
   cancel: cancel
+  # clear a search form
+  CLEAR: Clear
+  clear: clear
   # close a popup window
   CLOSE: Close
   close: close
