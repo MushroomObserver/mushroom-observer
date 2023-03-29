@@ -37,7 +37,7 @@ module Query
       names_above_genus = Name.with_rank_above_genus.map(&:id).join(", ")
 
       "observations.name_id IN (#{names_above_genus}) OR " \
-               "observations.vote_cache <= 0"
+      "observations.vote_cache <= 0"
     end
 
     # from content_filter/clade.rb

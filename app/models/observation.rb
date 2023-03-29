@@ -362,8 +362,10 @@ class Observation < AbstractModel
       text_name = val
       rank = "Genus"
     end
-    where(Observation[:classification].matches("#{rank}: _#{text_name}_")).
-      or(Observation.where(text_name: text_name).distinct)
+    # binding.break
+    where(text_name: text_name).or(
+      where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
+    )
   }
 
   scope :by_user,
