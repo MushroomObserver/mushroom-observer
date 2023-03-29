@@ -5,6 +5,7 @@ class SearchController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   /comments/index (params[:pattern])
+  #   /glossary_terms/index (params[:pattern])
   #   /herbaria/index (params[:pattern])
   #   /herbarium_records/index (params[:pattern])
   #   /images/index (params[:pattern])
@@ -74,8 +75,8 @@ class SearchController < ApplicationController
     case type
     when :google
       site_google_search(pattern)
-    when :comment, :herbarium, :herbarium_record, :image, :location, :name,
-         :observation, :project, :species_list, :user
+    when :comment, :glossary_term, :herbarium, :herbarium_record, :image,
+         :location, :name, :observation, :project, :species_list, :user
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send("#{type.to_s.pluralize}_path",
