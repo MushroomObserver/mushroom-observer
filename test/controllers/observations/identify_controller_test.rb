@@ -35,8 +35,22 @@ module Observations
       assert_no_flash
       assert_select(".matrix-box", aga_obs.count)
 
+      bol_obs = Observation.needs_id_for_user(mary).
+                in_clade("Boletus")
+
+      query = Query.lookup_and_save(:Observation, :needs_id,
+                                    in_clade: "Boletus")
+      assert_equal(query.num_results, bol_obs.count)
+
       # REGION
       # make a query, and test that the query results match obs scope
+      # start with continent
+      sam_obs = Observation.needs_id_for_user(users(:mary)).
+                in_region("South America")
+      query = Query.lookup_and_save(:Observation, :needs_id,
+                                    in_region: "South America")
+      assert_equal(query.num_results, sam_obs.count)
+
       cal_obs = Observation.needs_id_for_user(users(:mary)).
                 in_region("California, USA")
       # remember the original count, will change

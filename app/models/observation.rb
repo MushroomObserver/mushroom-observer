@@ -364,9 +364,15 @@ class Observation < AbstractModel
       rank = "Genus"
     end
 
-    where(text_name: text_name).or(
-      where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
-    )
+    if Name.ranks_above_genus.include?(rank)
+      where(text_name: text_name).or(
+        where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
+      )
+    else
+      where(text_name: text_name).or(
+        where(Observation[:text_name].matches("#{text_name} %"))
+      )
+    end
   }
 
   scope :by_user,
