@@ -13,8 +13,6 @@ module Observations
 
       if (type = params.dig(:filter, :type))
         return filtered_index(type.to_sym)
-      elsif params[:q].present?
-        index_query_results
       end
 
       unfiltered_index
@@ -24,12 +22,6 @@ module Observations
 
     def unfiltered_index
       query = create_query(:Observation, :needs_id, {})
-
-      show_selected_results(query)
-    end
-
-    def index_query_results
-      query = find_or_create_query(:Observation)
 
       show_selected_results(query)
     end
