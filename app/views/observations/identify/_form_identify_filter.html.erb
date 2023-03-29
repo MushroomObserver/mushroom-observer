@@ -33,7 +33,7 @@ options = [
                       data: { autofocus: true }) %>
   </div><!--.form-group-->
 
-  <%= f.select(:type, options, selected: selected,
+  <%= f.select(:type, options, { selected: selected },
                { class: "form-control",
                  onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
 
