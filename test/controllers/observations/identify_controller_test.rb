@@ -23,11 +23,10 @@ module Observations
 
       # CLADE
       # make a query, and test that the query results match obs scope
-      aga_obs = Observation.needs_id_for_user(mary).
-                in_clade("Agaricales")
-
+      aga_obs = Observation.needs_id_for_user(mary).in_clade("Agaricales")
       query = Query.lookup_and_save(:Observation, :needs_id,
                                     in_clade: "Agaricales")
+
       # # get(:index, params: { q: QueryRecord.last.id.alphabetize })
       assert_equal(query.num_results, aga_obs.count)
       get(:index,
@@ -35,9 +34,7 @@ module Observations
       assert_no_flash
       assert_select(".matrix-box", aga_obs.count)
 
-      bol_obs = Observation.needs_id_for_user(mary).
-                in_clade("Boletus")
-
+      bol_obs = Observation.needs_id_for_user(mary).in_clade("Boletus")
       query = Query.lookup_and_save(:Observation, :needs_id,
                                     in_clade: "Boletus")
       assert_equal(query.num_results, bol_obs.count)
@@ -45,23 +42,18 @@ module Observations
       # REGION
       # make a query, and test that the query results match obs scope
       # start with continent
-      sam_obs = Observation.needs_id_for_user(users(:mary)).
-                in_region("South America")
+      sam_obs = Observation.needs_id_for_user(mary).in_region("South America")
       query = Query.lookup_and_save(:Observation, :needs_id,
                                     in_region: "South America")
       assert_equal(query.num_results, sam_obs.count)
 
-      cal_obs = Observation.needs_id_for_user(users(:mary)).
-                in_region("California, USA")
+      cal_obs = Observation.needs_id_for_user(mary).in_region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
-
       query = Query.lookup_and_save(:Observation, :needs_id,
                                     in_region: "California, USA")
-      # get(:index, params: { q: QueryRecord.last.id.alphabetize })
       assert_equal(query.num_results, cal_obs_count)
 
-      # get(:index, params: { q: query.record.id.alphabetize })
       get(:index,
           params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
@@ -72,14 +64,14 @@ module Observations
       # First we have to create the ov, does not exist yet
       done_with_these = cal_obs.take(5).pluck(:id).each do |id|
         ObservationView.create({ observation_id: id,
-                                 user_id: users(:mary).id,
+                                 user_id: mary.id,
                                  reviewed: true })
       end
       done_with_these.each do |id|
         assert_equal(
           true,
           ObservationView.find_by(observation_id: id,
-                                  user_id: users(:mary).id).reviewed
+                                  user_id: mary.id).reviewed
         )
       end
 
@@ -91,7 +83,7 @@ module Observations
 
       # Vote on the first unconfident naming and check the new obs_count
       # On the site, this happens via JS, so we'll do it directly
-      new_cal_obs = Observation.needs_id_for_user(users(:mary)).
+      new_cal_obs = Observation.needs_id_for_user(mary).
                     in_region("California, USA")
       # Have to check for an actual naming, because some obs have no namings,
       # and obs.name_id.present? doesn't necessarily mean there's a naming
