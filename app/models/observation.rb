@@ -347,6 +347,7 @@ class Observation < AbstractModel
       where(name_id: name_ids)
     end
   }
+
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
 
@@ -362,7 +363,7 @@ class Observation < AbstractModel
       text_name = val
       rank = "Genus"
     end
-    # binding.break
+
     where(text_name: text_name).or(
       where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
     )

@@ -12,16 +12,16 @@ module Query
 
     # 15x faster to use the scope to assemble the IDs vs SQL SELECT DISTINCT!
     def initialize_flavor
+      # where << unspecific_or_unconfident_condition
+
       user = User.current_id
       # voted = Observation.with_vote_by_user(user).map(&:id).join(", ")
       # reviewed = Observation.reviewed_by_user(user).map(&:id).join(", ")
-
       # where << "observations.id NOT IN (#{voted})" # if voted.present?
       # where << "observations.id NOT IN (#{reviewed})" # if reviewed.present?
       needs_id = Observation.needs_id_for_user(user).map(&:id).join(", ")
       where << "observations.id IN (#{needs_id})" if needs_id.present?
 
-      where << unspecific_or_unconfident_condition
       where << name_in_clade_condition if params[:in_clade]
       where << location_in_region_condition if params[:in_region]
       # binding.break
