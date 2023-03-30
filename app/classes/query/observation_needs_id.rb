@@ -6,7 +6,7 @@ module Query
     def parameter_declarations
       super.merge(
         in_clade?: :string,
-        in_region?: :string #,
+        in_region?: :string # ,
         # by_user?: :string
       )
     end
@@ -60,11 +60,14 @@ module Query
       end
     end
 
-    # The tricky thing here is, without the user.id as the value passed in
+    # The tricky thing here is, without the user.id being the value passed in
     # params[:filter][:term], we're hunting for a user from a string like
     # "Name <name>". Better to have the id as the value!
+    # Below uses the method in query/initializers/advanced_search to get a
+    # string but is expensive. Something like
+    # joins(:users).where((User[:login] + User[:name]).matches(str))
     # def by_user_condition
-    #   user = params[:by_user]
+    #   user = params[:by_user].to_s.gsub(/ *<[^<>]*>/, "")
     # end
   end
 end
