@@ -27,8 +27,6 @@ class SearchController < ApplicationController
 
     special_params = if type == :herbarium
                        { flavor: :all }
-                     elsif params[:needs_id] == "true"
-                       { needs_id: true }
                      else
                        {}
                      end

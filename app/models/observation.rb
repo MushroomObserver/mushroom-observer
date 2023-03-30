@@ -258,16 +258,21 @@ class Observation < AbstractModel
         -> { where.not(name: Name.unknown) }
   scope :without_name,
         -> { where(name: Name.unknown) }
-  scope :without_confident_name, lambda {
-    without_name.or(where(vote_cache: ..0))
+  scope :with_name_above_genus,
+        -> { where(name_id: Name.with_rank_above_genus.map(&:id)) }
+  scope :without_confident_name,
+        -> { where(vote_cache: ..0) }
+  scope :needs_id, lambda {
+    with_name_above_genus.or(without_confident_name)
   }
+
   scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    joins(:votes).where(user_id: user_id)
+    joins(:votes).where(votes: { user_id: user_id })
   }
   scope :without_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
-    where.not(id: Vote.where(user_id: user_id).select(:observation_id).distinct)
+    where.not(id: Vote.where(user_id: user_id).map(&:observation_id).uniq)
   }
   scope :reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -277,12 +282,25 @@ class Observation < AbstractModel
   scope :not_reviewed_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
-              select(:observation_id).distinct)
+              map(&:observation_id).uniq)
   }
-  scope :needs_identification, lambda { |user|
-    without_confident_name.without_vote_by_user(user).
-      not_reviewed_by_user(user).distinct
+  scope :needs_id_for_user, lambda { |user|
+    needs_id.without_vote_by_user(user).not_reviewed_by_user(user).distinct
   }
+  # Higher taxa: returns narrowed-down group of id'd obs,
+  # in higher taxa under the given taxon
+  # scope :needs_id_by_taxon, lambda { |user, name|
+  #   name_plus_subtaxa = Name.include_subtaxa_of(name)
+  #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus.map(&:id)
+  #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus.map(&:id)
+
+  #   where(name_id: subtaxa_above_genus).or(
+  #     Observation.where(name_id: lower_subtaxa).and(
+  #       Observation.where(vote_cache: ..0)
+  #     )
+  #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
+  # }
+
   # scope :of_name(name, **args)
   #
   # Accepts either a Name instance, a string, or an id as the first argument.
@@ -329,8 +347,34 @@ class Observation < AbstractModel
       where(name_id: name_ids)
     end
   }
+
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
+
+  scope :in_clade, lambda { |val|
+    if val.is_a?(Name)
+      name = val
+      text_name = name.text_name
+      rank = name.rank
+    elsif val.is_a?(String) && (name = Name.best_match(val))
+      text_name = name.text_name
+      rank = name.rank
+    else
+      text_name = val
+      rank = "Genus"
+    end
+
+    if Name.ranks_above_genus.include?(rank)
+      where(text_name: text_name).or(
+        where(Observation[:classification].matches("%#{rank}: _#{text_name}_%"))
+      )
+    else
+      where(text_name: text_name).or(
+        where(Observation[:text_name].matches("#{text_name} %"))
+      )
+    end
+  }
+
   scope :by_user,
         ->(user) { where(user: user) }
   scope :mappable,
@@ -344,7 +388,15 @@ class Observation < AbstractModel
   scope :at_location,
         ->(location) { where(location: location) }
   scope :in_region,
-        ->(where) { where(Observation[:where].matches("%#{where}")) }
+        lambda { |region|
+          region = Location.reverse_name_if_necessary(region)
+          if Location.understood_continent?(region)
+            countries = Location.countries_in_continent(region).join("|")
+            where(Observation[:where].matches(", (#{countries})$"))
+          else
+            where(Observation[:where].matches("%#{region}"))
+          end
+        }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           box = Box.new(

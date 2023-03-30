@@ -7,7 +7,8 @@ module MatrixBoxHelper
     return unless identify
 
     if (object.name_id != 1) && (nam = object.consensus_naming)
-      content_tag(:div, class: "vote-select-container mb-3") do
+      content_tag(:div, class: "vote-select-container mb-3",
+                        data: { vote_cache: object.vote_cache }) do
         render(partial: "observations/namings/votes/form",
                locals: { naming: nam })
       end

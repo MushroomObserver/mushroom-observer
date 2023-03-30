@@ -41,8 +41,7 @@ module Query
         has_name?: :boolean,
         has_notes?: :boolean,
         has_sequences?: { boolean: [true] },
-        is_collection_location?: :boolean,
-        needs_id?: { boolean: [true] }
+        is_collection_location?: :boolean
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
         merge(consensus_parameter_declarations)
@@ -55,7 +54,6 @@ module Query
       initialize_association_parameters
       initialize_boolean_parameters
       initialize_search_parameters
-      initialize_needs_id if params[:needs_id]
       add_range_condition("observations.vote_cache", params[:confidence])
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
@@ -85,16 +83,6 @@ module Query
         lookup_herbarium_records_by_name(params[:herbarium_records]),
         :observation_herbarium_records
       )
-    end
-
-    def initialize_needs_id
-      where << "observations.name_id = #{Name.unknown.id} OR " \
-               "observations.vote_cache <= 0"
-      where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-               "FROM observation_views WHERE observation_views.user_id = " \
-               "#{User.current_id} AND observation_views.reviewed = 1)"
-      where << "observations.id NOT IN (SELECT DISTINCT observation_id " \
-               "FROM votes WHERE user_id = #{User.current_id})"
     end
 
     def initialize_projects_parameter
