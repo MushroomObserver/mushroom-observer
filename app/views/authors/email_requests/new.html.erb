@@ -1,25 +1,18 @@
 <% @title = :author_request_title.t(title: @object.format_name) %>
 
 <%= form_with(url: authors_email_requests_path(id: @object.id,
-      type: @object.type_tag, q: get_query_param),
+      type: @object.type_tag, q: get_query_param), scope: :email,
       id: "authors_email_requests_form") do |f| %>
 
   <%= :author_request_note.tp %>
 
-  <%= fields_for(:email) do |f_e| %>
+  <%= text_field_with_label(form: f, field: :subject,
+                            label: :request_subject.t + ":",
+                            data: { autofocus: true }) %>
 
-    <div class="form-group mt-3">
-      <%= f_e.label(:subject, :request_subject.t + ":") %>
-      <%= f_e.text_field(:subject, data: { autofocus: true },
-                      class: "form-control") %>
-    </div>
-
-    <div class="form-group mt-3">
-      <%= f_e.label(:content, :request_message.t + ":") %>
-      <%= f_e.text_area(:content, rows: 10, class: "form-control") %>
-    </div>
-
-  <% end %>
+  <%= text_area_with_label(form: f, field: :content, rows: 10,
+                            label: :request_message.t + ":",
+                            data: { autofocus: true }) %>
 
   <%= submit_button(form: f, button: :SEND.l, center: true) %>
 
