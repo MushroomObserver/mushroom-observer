@@ -98,7 +98,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
                     "Form should have one field for #{attr}")
     end
-    assert_select("input#glossary_term_upload_image", { count: 1 },
+    assert_select("input#upload_image", { count: 1 },
                   "Form should include upload image field")
   end
 
@@ -131,7 +131,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       { text: /#{term.description}/, count: 1 },
       "Form lacks Description field that defaults to glossary term description"
     )
-    assert_select("input#glossary_term_upload_image", false,
+    assert_select("input#upload_image", false,
                   "Edit GlossaryTerm form should omit upload image field")
   end
 
@@ -337,9 +337,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def create_term_params
     {
       glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
-      copyright_holder: "Insil Choi",
-      date: { copyright_year: "2013" },
-      upload: { license_id: licenses(:ccnc30).id }
+      upload: {
+        copyright_holder: "Insil Choi",
+        copyright_year: "2013",
+        license_id: licenses(:ccnc30).id
+      }
     }.freeze
   end
 
@@ -347,9 +349,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     {
       id: glossary_terms(:conic_glossary_term).id,
       glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
-      copyright_holder: "Insil Choi",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
+      upload: {
+        copyright_holder: "Insil Choi",
+        copyright_year: 2013,
+        license_id: licenses(:ccnc25).id
+      }
     }.freeze
   end
 
@@ -361,16 +365,15 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     {
       glossary_term: {
         name: "Pancake",
-        description: "Flat",
-        upload_image: {
-          image: file,
-          copyright_holder: "zuul",
-          when: Time.current
-        }
+        description: "Flat"
       },
-      copyright_holder: "Me",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
+      upload: {
+        image: file,
+        copyright_holder: "zuul",
+        copyright_year: 2013,
+        when: Time.current,
+        license_id: licenses(:ccnc25).id
+      }
     }.freeze
   end
 end
