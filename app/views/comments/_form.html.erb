@@ -13,17 +13,13 @@ end
 <%= form_with(model: @comment, url: url, id: "comment_form",
               local: local) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:summary, :form_comments_summary.t + ":") %>
-    <%= f.text_field(:summary, size: 80, data: { autofocus: true },
-                     class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :summary, size: 80,
+                            label: :form_comments_summary.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:comment, :form_comments_comment.t + ":") %>
-    <%= f.text_area(:comment, rows: 10, class: "form-control") %>
-    <%= render(partial: "shared/textilize_help") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :comment, rows: 10,
+                           label: :form_comments_comment.t + ":") %>
+  <%= render(partial: "shared/textilize_help") %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

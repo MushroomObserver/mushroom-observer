@@ -21,8 +21,7 @@ url_params = url_params.merge({ back: back }) if action == :update
                             data: { autofocus: true }) %>
 
   <%= text_field_with_label(form: f, field: :number, between: required,
-                            label: :collection_number_number.t + ":",
-                            data: { autofocus: true }) %>
+                            label: :collection_number_number.t + ":") %>
 
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 
