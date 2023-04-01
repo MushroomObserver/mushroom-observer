@@ -15,17 +15,13 @@ url_params = url_params.merge({ back: back }) if action == :update
     </div>
   <% end %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:name, "#{:collection_number_name.t}:".html_safe) %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
-    <%= f.text_field(:name, class: "form-control") %>
-  </div>
+  <% required = help_note(:span, "(#{:required.t})") # same note for both %>
+  <%= text_field_with_label(form: f, field: :name, between: required,
+                            label: :collection_number_name.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:number, "#{:collection_number_number.t}:".html_safe) %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
-    <%= f.text_field(:number, class:"form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :number, between: required,
+                            label: :collection_number_number.t + ":") %>
 
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 

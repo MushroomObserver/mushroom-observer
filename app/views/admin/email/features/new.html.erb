@@ -1,14 +1,15 @@
 <% @title = "Email Features" %>
 
-<%= form_with(url: admin_emails_feature_path) do |form| %>
-  <p>Sending to <%= @users.length %> users.</p>
+<%= form_with(url: admin_emails_feature_path,
+              scope: :feature_email) do |f| %>
 
-  <% fields_for(:feature_email) do |f| %>
-    <%= f.label(:content, "Feature Email:") %>
-    <%= f.text_area(:content, rows: 20, class: "form-control") %>
+  <%= content_tag(:p, "Sending to #{@users.length} users.") %>
 
-    <%= submit_button(form: f, button: :SEND.l, center: true) %>
-  <% end %>
+  <%= text_area_with_label(form: f, field: :content,
+                           label: "Feature Email:", rows: 20,
+                           data: { autofocus: true }) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
 
   <div class="form-group">
     <%= "#{:USERS.l}:" + (@users.map { |u| u.login }).safe_join(", ") %>
