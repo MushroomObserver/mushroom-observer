@@ -1,15 +1,12 @@
 <%= form_with(model: @glossary_term, html: { multipart: true }) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:name, "#{:glossary_term_name.t}:") %>
-    <%= f.text_field(:name, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :name,
+                            label: :glossary_term_name.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:description, "#{:glossary_term_description.t}:") %>
-    <%= f.text_area(:description, rows: 16, class: "form-control") %>
-    <%= :field_textile_link.t %>
-  </div>
+  <%= text_area_with_label(form: f, field: :description, rows: 16,
+                           label: :glossary_term_description.t + ":",
+                           append: :field_textile_link.t) %>
 
   <%= yield f %>
 
