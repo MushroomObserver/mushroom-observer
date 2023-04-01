@@ -13,17 +13,14 @@ url = { action: :name_change_request, name_id: @name.id, new_name: @new_name }
 
 <%= form_with(url: url) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:name, :NAME.t) %>:
-        <%= @name.unique_search_name %>
-        [#<%= @name.icn_id.to_s %>]
-  </div>
+  <%= static_text_with_label(form: f, field: :name,
+                             label: :NAME.t + ":", inline: true,
+                             value: @name.unique_search_name +
+                                    "[##{@name.icn_id.to_s}]") %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:new_name.t) %>: <%= @new_name_with_icn_id %>
-    <%# pass it back to the action, else it's clobbered there %>
-    <%= hidden_field_tag(:new_name_with_icn_id, @new_name_with_icn_id) %>
-  </div>
+  <%= hidden_field_with_label(form: f, field: :new_name_with_icn_id,
+                              label: :new_name.t + ":", inline: true,
+                              value: @new_name_with_icn_id) %>
 
   <%= text_area_with_label(form: f, field: :notes, rows: 10,
                            value: "", label: :Notes.t + ":",

@@ -14,15 +14,13 @@ url = { action: :merge_request, type: @model.name,
 
 <%= form_with(url: url) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:old_obj, @model.type_tag.to_s.upcase.to_sym.t) %>:
-        <%= @old_obj.unique_format_name.t %>
-  </div>
+  <%= static_text_with_label(form: f, field: :old_obj, inline: true,
+                             label: @model.type_tag.to_s.upcase.to_sym.t + ":",
+                             value: @old_obj.unique_format_name.t) %>
 
-  <div class="form-group mt-3">
-    <%= label_tag(:new_obj, @model.type_tag.to_s.upcase.to_sym.t) %>:
-        <%= @new_obj.unique_format_name.t %>
-  </div>
+  <%= static_text_with_label(form: f, field: :new_obj, inline: true,
+                             label: @model.type_tag.to_s.upcase.to_sym.t + ":",
+                             value: @new_obj.unique_format_name.t) %>
 
   <%= text_area_with_label(form: f, field: :notes, rows: 10,
                            value: "", label: :Notes.t + ":",

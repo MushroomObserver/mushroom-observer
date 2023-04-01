@@ -225,16 +225,45 @@ module FormsHelper
   end
 
   # Bootstrap email_field. Unused because our email fields are text fields
-  def email_field_with_label(**args)
+  # def email_field_with_label(**args)
+  #   opts = separate_field_options_from_args(args)
+  #   opts[:class] = "form-control"
+  #   opts[:value] ||= ""
+
+  #   wrap_class = form_group_wrap_class(args)
+
+  #   content_tag(:div, class: wrap_class) do
+  #     concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+  #     concat(args[:form].email_field(args[:field], opts))
+  #   end
+  # end
+
+  # We have fields like this. Prints a static value for submitted field:
+  def hidden_field_with_label(**args)
     opts = separate_field_options_from_args(args)
-    opts[:class] = "form-control"
-    opts[:value] ||= ""
+    text = opts[:value] || ""
 
     wrap_class = form_group_wrap_class(args)
 
     content_tag(:div, class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(args[:form].email_field(args[:field], opts))
+      concat(content_tag(:p, text, class: "form-control-static"))
+      concat(args[:form].hidden_field(args[:field], opts))
+    end
+  end
+
+  # Bootstrap allows you to style static text like this:
+  def static_text_with_label(**args)
+    opts = separate_field_options_from_args(args)
+    opts[:class] = "form-control-static"
+    text = opts[:value] || ""
+    opts.delete(:value)
+
+    wrap_class = form_group_wrap_class(args)
+
+    content_tag(:div, class: wrap_class) do
+      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(content_tag(:p, text, opts))
     end
   end
 
