@@ -15,12 +15,11 @@ url_params = url_params.merge({ back: back }) if action == :update
     </div>
   <% end %>
 
-  <% required = help_note(:span, "(#{:required.t})") # same note for both %>
-  <%= text_field_with_label(form: f, field: :name, between: required,
+  <%= text_field_with_label(form: f, field: :name, between: :required,
                             label: :collection_number_name.t + ":",
                             data: { autofocus: true }) %>
 
-  <%= text_field_with_label(form: f, field: :number, between: required,
+  <%= text_field_with_label(form: f, field: :number, between: :required,
                             label: :collection_number_number.t + ":") %>
 
   <%= submit_button(form: f, button: button_name.t, center: true) %>
