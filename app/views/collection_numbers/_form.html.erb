@@ -10,9 +10,9 @@ url_params = url_params.merge({ back: back }) if action == :update
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 
   <% if @collection_number.observations.count > 1 %>
-    <div class="alert alert-warning mt-3">
-      <%= :edit_affects_multiple_observations.t(type: :collection_number) %>
-    </div>
+    <%= alert_block(
+      :warning, :edit_affects_multiple_observations.t(type: :collection_number)
+    ) %>
   <% end %>
 
   <%= text_field_with_label(form: f, field: :name, between: :required,
