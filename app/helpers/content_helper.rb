@@ -48,7 +48,7 @@ module ContentHelper
     end
   end
 
-  def alert_warning(element = :div, string = "")
-    content_tag(element, string, class: "alert alert-warning")
+  def alert_block(level = :warning, string = "")
+    content_tag(:div, string, class: "alert alert-#{level}")
   end
 end

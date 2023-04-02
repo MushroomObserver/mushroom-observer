@@ -13,8 +13,8 @@ end
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 
   <% if @herbarium_record.observations.count > 1 %>
-    <%= alert_warning(
-      :div, :edit_affects_multiple_observations.t(type: :herbarium_record)
+    <%= alert_block(
+      :warning, :edit_affects_multiple_observations.t(type: :herbarium_record)
     ) %>
   <% end %>
 
