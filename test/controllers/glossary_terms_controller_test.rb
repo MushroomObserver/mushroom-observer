@@ -10,7 +10,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** index *****
   def test_index
-    login
+    # make sure public can access
     get(:index)
 
     assert_response(:success)
@@ -25,7 +25,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_index_by_letter
-    login
+    # make sure public can access
     term = glossary_terms(:plane_glossary_term)
     get(:index, params: { letter: "P" })
     assert_template("index")
@@ -36,7 +36,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_glossary_term_search
-    login
     conic = glossary_terms(:conic_glossary_term)
     convex = glossary_terms(:convex_glossary_term)
 
@@ -44,6 +43,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     qr = QueryRecord.last.id.alphabetize
     assert_redirected_to(glossary_term_path(conic.id, params: { q: qr }))
 
+    login
     get(:index, params: { pattern: "con" })
     assert_template("index")
     assert_select(
@@ -57,6 +57,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ***** show *****
   def test_show
     term = glossary_terms(:square_glossary_term)
+    # make sure public can access
+    get(:show, params: { id: term.id })
+
+    assert_response(:success)
     prior_version_path = glossary_term_versions_path(
       term.id, version: term.version - 1
     )
