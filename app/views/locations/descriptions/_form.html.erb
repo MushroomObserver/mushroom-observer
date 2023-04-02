@@ -12,12 +12,9 @@ presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
   <hr/>
 
   <% LocationDescription.all_note_fields.each do |field| %>
-    <div class="form-group">
-      <%= f.label(field, "form_locations_#{field}".to_sym.t + ":") %>
-      <%= content_tag(:div, "form_locations_#{field}_help".to_sym.l,
-                      class: "help-block mt-0") %>
-      <%= f.text_area(field, rows: 10, class: "form-control") %>
-    </div>
+    <% between = help_block(:div,"form_locations_#{field}_help".to_sym.l) %>
+    <%= text_area_with_label(form: f, field: field, rows: 10, between: between,
+                             label: "form_locations_#{field}".to_sym.t + ":") %>
   <% end %>
 
   <%= render(partial: "shared/textilize_help") %>
