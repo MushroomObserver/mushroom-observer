@@ -2,52 +2,6 @@
 
 # helpers for form tags
 module FormsHelper
-  # make a help-note styled element, like a div, p, or span
-  def help_note(element = :span, string = "")
-    content_tag(element, string, class: "help-note")
-  end
-
-  # make a help-block styled element, like a div, p
-  def help_block(element = :div, string = "")
-    content_tag(element, string, class: "help-block")
-  end
-
-  # draw a help block with an arrow
-  def help_block_with_arrow(direction = nil, **args, &block)
-    div_class = "well well-sm help-block position-relative"
-    div_class += " mt-3" if direction == "up"
-
-    content_tag(:div, class: div_class,
-                      id: args[:id]) do
-      concat(capture(&block).to_s)
-      if direction
-        arrow_class = "arrow-#{direction}"
-        arrow_class += " hidden-xs" unless args[:mobile]
-        concat(content_tag(:div, "", class: arrow_class))
-      end
-    end
-  end
-
-  def panel_with_outer_heading(**args, &block)
-    html = []
-    h_tag = (args[:h_tag].presence || :h4)
-    html << content_tag(h_tag, args[:heading]) if args[:heading]
-    html << panel_block(**args, &block)
-    safe_join(html)
-  end
-
-  def panel_block(**args, &block)
-    content_tag(
-      :div,
-      class: "panel panel-default #{args[:class]}",
-      id: args[:id]
-    ) do
-      content_tag(:div, class: "panel-body #{args[:inner_class]}") do
-        concat(capture(&block).to_s)
-      end
-    end
-  end
-
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
   def submit_button(**args)
@@ -133,6 +87,7 @@ module FormsHelper
   # Bootstrap text_field
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_optional_or_required_note(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
@@ -149,6 +104,7 @@ module FormsHelper
   # Bootstrap text_area
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_optional_or_required_note(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
@@ -167,6 +123,7 @@ module FormsHelper
   def select_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = select_generate_default_options(args)
+    args = check_for_optional_or_required_note(args)
 
     opts = separate_field_options_from_args(
       args, [:options, :select_opts, :start_year, :end_year]
@@ -375,19 +332,28 @@ module FormsHelper
     wrap_class
   end
 
+  # shorthand to set a between or append string with (optional) or (required)
+  # use:       between: :optional, append: :required
+  def check_for_optional_or_required_note(args)
+    return args unless args[:between].present? || args[:append].present?
+
+    positions = [:between, :append].freeze
+    keys = [:optional, :required].freeze
+    positions.each do |pos|
+      keys.each do |key|
+        args[pos] = help_note(:span, "(#{key.t})") if args[pos] == key
+      end
+    end
+    args
+  end
+
   # These are args that should not be passed to the field
   # Note that :value is sometimes explicitly passed, so it must
   # be excluded separately (not here)
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
-      :form,
-      :field,
-      :label,
-      :class,
-      :width,
-      :inline,
-      :between,
-      :append
+      :form, :field, :label, :class, :width, :inline, :between, :append,
+      :optional, :required
     ] + extras
 
     args.clone.except(*exceptions)
