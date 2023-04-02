@@ -133,6 +133,7 @@ module FormsHelper
   # Bootstrap text_field
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_optional_or_required_note(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
@@ -149,6 +150,7 @@ module FormsHelper
   # Bootstrap text_area
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_optional_or_required_note(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
@@ -167,6 +169,7 @@ module FormsHelper
   def select_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = select_generate_default_options(args)
+    args = check_for_optional_or_required_note(args)
 
     opts = separate_field_options_from_args(
       args, [:options, :select_opts, :start_year, :end_year]
@@ -375,19 +378,30 @@ module FormsHelper
     wrap_class
   end
 
+  # shorthand to set a between or append string with (optional) or (required)
+  # use:       between: :optional, append: :required
+  def check_for_optional_or_required_note(args)
+    return args unless args[:between].present? || args[:append].present?
+
+    positions = [:between, :append].freeze
+    keys = [:optional, :required].freeze
+    positions.each do |pos|
+      keys.each do |key|
+        if args[pos] == key
+          args[pos] = help_note(:span, "(#{key.t})", class: "mr-3")
+        end
+      end
+    end
+    args
+  end
+
   # These are args that should not be passed to the field
   # Note that :value is sometimes explicitly passed, so it must
   # be excluded separately (not here)
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
-      :form,
-      :field,
-      :label,
-      :class,
-      :width,
-      :inline,
-      :between,
-      :append
+      :form, :field, :label, :class, :width, :inline, :between, :append,
+      :optional, :required
     ] + extras
 
     args.clone.except(*exceptions)
