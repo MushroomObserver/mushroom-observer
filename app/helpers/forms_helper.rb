@@ -4,7 +4,7 @@
 module FormsHelper
   # make a help-note styled element, like a div, p, or span
   def help_note(element = :span, string = "")
-    content_tag(element, string, class: "help-note")
+    content_tag(element, string, class: "help-note mr-3")
   end
 
   # make a help-block styled element, like a div, p
@@ -387,9 +387,7 @@ module FormsHelper
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        if args[pos] == key
-          args[pos] = help_note(:span, "(#{key.t})", class: "mr-3")
-        end
+        args[pos] = help_note(:span, "(#{key.t})") if args[pos] == key
       end
     end
     args
