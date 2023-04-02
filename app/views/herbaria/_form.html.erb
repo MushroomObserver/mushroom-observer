@@ -47,7 +47,7 @@
     <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
                               label: :create_herbarium_code.t + ":",
                               append: help_note(:span, "(#{:optional.t})")) %>
-    <%= help_block_with_arrow("up", :create_herbarium_code_help.t) %>
+    <%= help_block_with_arrow("up") do :create_herbarium_code_help.t end %>
   <% end %>
 
   <%= text_field_with_label(form: f, field: :place_name,
