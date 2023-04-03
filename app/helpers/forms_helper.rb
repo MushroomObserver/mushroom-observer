@@ -17,6 +17,16 @@ module FormsHelper
     args[:form].submit(args[:button], opts)
   end
 
+  # form-agnostic button, type=button
+  def js_button(**args)
+    opts = args.except(:form, :button, :class, :center)
+    opts[:class] = "btn btn-default"
+    opts[:class] += " center-block my-3" if args[:center] == true
+    opts[:class] += " #{args[:class]}" if args[:class].present?
+
+    button_tag(args[:button], type: :button, **opts)
+  end
+
   # Form field builders with labels, consistent styling and less template code!
   # Pass everything as a keyword argument, no positional args.
   #
