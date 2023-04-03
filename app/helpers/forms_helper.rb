@@ -214,7 +214,7 @@ module FormsHelper
   def static_text_with_label(**args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control-static"
-    text = opts[:value] || ""
+    text = opts[:text] || opts[:value] || ""
     opts.delete(:value)
 
     wrap_class = form_group_wrap_class(args)
