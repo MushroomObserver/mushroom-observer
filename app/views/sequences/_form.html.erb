@@ -27,7 +27,7 @@ end
                 WebSequenceArchive.blast_format_help,
                 class: "d-inline-block float-right") %>
   <%= text_area_with_label(form: f, field: :bases, cols: 80, rows: 5,
-                           label: :BASES.t + ":", class: "text-monospace",
+                           label: :BASES.t + ":", monospace: true,
                            between: between) %>
 
   <%# deposit info %>

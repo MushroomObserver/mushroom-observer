@@ -118,6 +118,7 @@ module FormsHelper
     args = check_for_optional_or_required_note(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
+    opts[:class] += " text-monospace" if args[:monospace].present?
 
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
@@ -373,7 +374,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required
+      :optional, :required, :monospace
     ] + extras
 
     args.clone.except(*exceptions)
