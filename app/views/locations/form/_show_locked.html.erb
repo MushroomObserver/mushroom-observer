@@ -8,21 +8,21 @@
                                 value: @display_name,
                                 text: @location.display_name.t) %>
     <%= hidden_field_with_label(form: f, field: :north, label: :NORTH.t + ":",
-                                value: @location.north + "°") %>
+                                value: "#{@location.north}°") %>
     <%= hidden_field_with_label(form: f, field: :south, label: :SOUTH.t + ":",
-                                value: @location.south + "°") %>
+                                value: "#{@location.south}°") %>
     <%= hidden_field_with_label(form: f, field: :east, label: :EAST.t + ":",
-                                value: @location.east + "°") %>
+                                value: "#{@location.east}°") %>
     <%= hidden_field_with_label(form: f, field: :west, label: :WEST.t + ":",
-                                value: @location.west + "°") %>
+                                value: "#{@location.west}°") %>
 
     <% if @location.high.present? && @location.low.present? %>
       <%= hidden_field_with_label(form: f, field: :high,
                                   label: :show_location_highest.t + ":",
-                                  value: @location.high + "m") %>
+                                  value: "#{@location.high}m") %>
       <%= hidden_field_with_label(form: f, field: :low,
                                   label: :show_location_lowest.t + ":",
-                                  value: @location.low + "m") %>
+                                  value: "#{@location.low}m") %>
     <% end %>
 
     <%= help_block(:div, :show_location_locked.t) %>

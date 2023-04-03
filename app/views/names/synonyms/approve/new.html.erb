@@ -22,13 +22,13 @@
       <%= n.display_name.t %><br/>
     <% end %></p>
   <% end %>
-  <%= content_tag(:div, :name_approve_deprecate_help.tp, class: "help-note") %>
+
+  <%= help_note(:div, :name_approve_deprecate_help.tp) %>
 
   <%= text_area_with_label(form: f, field: :comment, inline: true,
-                           label: "#{:name_approve_comments.t}:",
+                           label: :name_approve_comments.t + ":",
                            cols: 80, rows: 5, data: { autofocus: true }) %>
-  <%= content_tag(:div,
-                  :name_approve_comments_help.tp(name: @name.display_name),
-                  class: "help-note") %>
+  <%= help_note(:div,
+                :name_approve_comments_help.tp(name: @name.display_name)) %>
 
 <% end %>
