@@ -568,7 +568,7 @@ class User < AbstractModel
   # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
-    @preferred_herbarium ||= \
+    @preferred_herbarium ||=
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
                        order(created_at: :desc).limit(1).

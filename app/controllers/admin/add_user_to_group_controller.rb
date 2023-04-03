@@ -27,13 +27,13 @@ module Admin
 
     def do_add_user_to_group(user, group)
       user.user_groups << group
-      flash_notice(:add_user_to_group_success. \
+      flash_notice(:add_user_to_group_success.
         t(user: user.name, group: group.name))
     end
 
     def do_not_add_user_to_group(user, group, user_name, group_name)
       if user && group
-        flash_warning(:add_user_to_group_already. \
+        flash_warning(:add_user_to_group_already.
           t(user: user_name, group: group_name))
       else
         flash_error(:add_user_to_group_no_user.t(user: user_name)) unless user

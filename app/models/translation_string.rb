@@ -60,8 +60,11 @@ class TranslationString < AbstractModel
 
   def self.translations(locale)
     do_init = I18n.backend.translations.empty?
+    # Cop disabled becuase line continuation is necessary
+    # rubocop disable:Style/RedundantLineContinuation
     I18n.backend.translations(do_init: do_init) \
       [locale.to_sym][MO.locale_namespace.to_sym]
+    # rubocop enable:Style/RedundantLineContinuation
   end
 
   # Check if tag exists before storing nonsense in the I18n backend

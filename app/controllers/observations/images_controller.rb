@@ -267,7 +267,7 @@ module Observations
         @projects << proj unless @projects.include?(proj)
       end
       @projects.each do |proj|
-        @project_checks[proj.id] = \
+        @project_checks[proj.id] =
           param_lookup([:project, "id_#{proj.id}"]) == "1"
       end
     end

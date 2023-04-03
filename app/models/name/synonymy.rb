@@ -197,7 +197,7 @@ module Name::Synonymy
 
   # (if no namings, returns created_at)
   def time_of_last_naming
-    @time_of_last_naming ||= \
+    @time_of_last_naming ||=
       Naming.where(name_id: id).maximum(:created_at) ||
       created_at
   end
