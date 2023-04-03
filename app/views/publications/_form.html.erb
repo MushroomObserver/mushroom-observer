@@ -6,7 +6,7 @@ button = (action == :create) ? :CREATE.t : :SAVE.t
               id: "publication_form") do |f| %>
 
   <%= text_area_with_label(form: f, field: :full, rows: 10,
-                           label: :publication_full.t + ":"
+                           label: :publication_full.t + ":",
                            between: help_note(:span,
                                               :publication_full_help.t)) %>
 

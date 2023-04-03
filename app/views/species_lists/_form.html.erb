@@ -23,27 +23,20 @@
 
   <div class="form-group mt-3">
     <%= fields_for(:list) do |f_l|
-      f_l.label(:members, :form_species_lists_write_in_species.t)
-      f_l.text_area(:members, value: @list_members, rows: 8,
-                        class: "form-control")
+      text_area_with_label(form: f_l, field: :members, rows: 8,
+                           label: :form_species_lists_write_in_species.t + ":",
+                           value: @list_members)
     end %>
   </div>
   <% turn_into_name_auto_completer(:list_members, primer: Name.primer,
                                    token: "\n") %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:title,
-                :form_species_lists_title.t + ":") %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
-    <%= f.text_field(:title, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :title, between: :required,
+                            label: :form_species_lists_title.t + ":") %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:notes,
-                :form_species_lists_list_notes.t + ":") %>
-    <%= f.text_area(:notes, rows: 12, class: "form-control") %>
-    <%= render(partial: "shared/textilize_help") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :notes, rows: 12,
+                           label: :form_species_lists_list_notes.t + ":") %>
+  <%= render(partial: "shared/textilize_help") %>
 
   <div class="form-group form-inline">
     <%= f.label(:when, :WHEN.t + ":") %>
@@ -55,11 +48,8 @@
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button } ) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:place_name, :WHERE.t + ":") %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note ml-3") %>
-    <%= f.text_field(:place_name, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :place_name, between: :required,
+                            label: :WHERE.t + ":") %>
   <% turn_into_location_auto_completer(:species_list_place_name) %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
