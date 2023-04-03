@@ -78,7 +78,7 @@ module Names
 
     def create_or_update_name_tracker_and_interest(name_id)
       @note_template = param_lookup([:name_tracker, :note_template])
-      note_template_enabled = 
+      note_template_enabled =
         param_lookup([:name_tracker, :note_template_enabled]) == "1"
       @note_template = nil if @note_template.blank? || !note_template_enabled
       if @name_tracker.nil?

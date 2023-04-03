@@ -161,7 +161,7 @@ module Name::Taxonomy
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
-    @accepted_genus ||= 
+    @accepted_genus ||=
       begin
         accepted = approved_name
         if accepted.text_name.include?(" ")

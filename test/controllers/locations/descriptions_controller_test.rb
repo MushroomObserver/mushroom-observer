@@ -98,7 +98,7 @@ module Locations
 
     def test_index_by_author_of_multiple_descriptions
       user = users(:dick)
-      descs_authored_by_user_count = 
+      descs_authored_by_user_count =
         LocationDescription.joins(:authors).where(user: user).count
       assert_operator(
         descs_authored_by_user_count, :>, 1,
@@ -167,7 +167,7 @@ module Locations
         desc.editors = [user]
         desc.save
       end
-      descs_edited_by_user_count = 
+      descs_edited_by_user_count =
         LocationDescriptionEditor.where(user: user).count
 
       login
