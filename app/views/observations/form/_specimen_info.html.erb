@@ -14,9 +14,9 @@
 
     <!-- no_specimen_info -->
     <% if button_name == :SAVE_EDITS.l %>
-      <div class="well well-sm help-block">
-        <%= :form_observations_edit_specimens_help.t %>
-      </div><!--.well-->
+      <%= help_block_with_arrow(nil) do
+        :form_observations_edit_specimens_help.t
+      end %>
     <% end # if button_name %>
     <!-- /no_specimen_info -->
 

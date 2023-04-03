@@ -36,11 +36,11 @@
 
         <div class="row">
           <div class="col-xs-12 col-sm-6">
-            <%= f_n.label(@observation.notes_normalized_key(part),
-                          "#{strip_tags(part.tl)}: ") %>
-            <%= f_n.text_area(@observation.notes_normalized_key(part),
-                              value: @observation.notes_part_value(part),
-                              rows: 1, class: "form-control mb-3") %>
+            <%= text_area_with_label(
+                  form: f_n, rows: 1, label: strip_tags(part.tl) + ": ",
+                  field: @observation.notes_normalized_key(part),
+                  value: @observation.notes_part_value(part)
+                ) %>
           </div>
         </div><!--.row-->
 
