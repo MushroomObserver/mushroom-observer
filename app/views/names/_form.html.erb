@@ -43,20 +43,20 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
   <% else %>
     <div class="mt-3 mb-3">
       <%= hidden_field_with_label(
-            form: f, field: :rank, label: :Rank.t + ":",
-            text: :"Rank_#{@name.rank.to_s.downcase}".t
+            form: f, field: :rank, label: :Rank.t + ":", inline: true,
+            class: "mb-0", text: :"Rank_#{@name.rank.to_s.downcase}".t
           ) %>
       <%= hidden_field_with_label(
-            form: f, field: :deprecated, label: :Status.t + ":",
-            text: @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t
+            form: f, field: :deprecated, label: :Status.t + ":", inline: true,
+            class: "mb-0", text: @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t
           ) %>
       <%= hidden_field_with_label(
-            form: f, field: :text_name, label: :Name.t + ":",
-            value: @name_string, text: @name.real_text_name.t
+            form: f, field: :text_name, label: :Name.t + ":", inline: true,
+            class: "mb-0", value: @name_string, text: @name.real_text_name.t
           ) %>
       <%= hidden_field_with_label(
-            form: f, field: :author, label: :Authority.t + ":",
-            text: @name.author.t
+            form: f, field: :author, label: :Authority.t + ":", inline: true,
+            class: "mb-0", text: @name.author.t
           ) %>
       <%= help_block(:div, :show_name_locked.tp) %>
     </div>
