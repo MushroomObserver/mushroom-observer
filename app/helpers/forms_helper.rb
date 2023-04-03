@@ -195,10 +195,11 @@ module FormsHelper
   #   end
   # end
 
-  # We have fields like this. Prints a static value for submitted field:
+  # We have fields like this. Prints a static value for submitted field,
+  # from either a "text" option (first choice) or a "value" option
   def hidden_field_with_label(**args)
     opts = separate_field_options_from_args(args)
-    text = opts[:value] || ""
+    text = opts[:text] || opts[:value] || ""
 
     wrap_class = form_group_wrap_class(args)
 
@@ -213,7 +214,7 @@ module FormsHelper
   def static_text_with_label(**args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control-static"
-    text = opts[:value] || ""
+    text = opts[:text] || opts[:value] || ""
     opts.delete(:value)
 
     wrap_class = form_group_wrap_class(args)

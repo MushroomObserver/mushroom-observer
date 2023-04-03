@@ -1,6 +1,7 @@
-<div class="form-group container-text mt-3">
-  <%= f.label(:notes, :NOTES.t + ":") %>
-  <%= content_tag(:div, :form_locations_notes_help.t, class: "help-block") %>
-  <%= f.text_area(:notes, class: "form-control") %>
+<div class="container-text mt-3">
+  <%= text_area_with_label(
+        form: f, field: :notes, label: :NOTES.t + ":",
+        between: help_block(:div, :form_locations_notes_help.t)
+      ) %>
   <%= render(partial: "shared/textilize_help") %>
 </div><!--.container-text-->

@@ -29,30 +29,36 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
                             options: statuses, class: "pl-3" ) %>
     </div>
 
-    <% append = help_block(:p, :form_names_text_name_help.t) %>
-    <%= text_field_with_label(form: f, field: :text_name,
-                              label: :form_names_text_name.t + ":",
-                              value: @name_string, append: append,
-                              data: { autofocus: true }) %>
+    <%= text_field_with_label(
+          form: f, field: :text_name, label: :form_names_text_name.t + ":",
+          value: @name_string, data: { autofocus: true },
+          append: help_block(:p, :form_names_text_name_help.t)
+        ) %>
 
-    <% append = help_block(:p, :form_names_author_help.t) %>
-    <%= text_area_with_label(form: f, field: :author, rows: 2,
-                             label: :Authority.t + ":",
-                             append: append) %>
+    <%= text_area_with_label(
+          form: f, field: :author, rows: 2, label: :Authority.t + ":",
+          append: help_block(:p, :form_names_author_help.t)
+        ) %>
 
   <% else %>
     <div class="mt-3 mb-3">
-      <%= content_tag(:b, :Rank.t + ":") %>
-        <%= :"Rank_#{@name.rank.to_s.downcase}".t %><br/>
-      <%= content_tag(:b, :Status.t + ":") %>
-        <%= @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t %><br/>
-      <%= content_tag(:b, :Name.t) %>:<%= @name.real_text_name.t %><br/>
-      <%= content_tag(:b, :Authority.t) %>:<%= @name.author.t %><br/>
+      <%= hidden_field_with_label(
+            form: f, field: :rank, label: :Rank.t + ":", inline: true,
+            class: "mb-0", text: :"Rank_#{@name.rank.to_s.downcase}".t
+          ) %>
+      <%= hidden_field_with_label(
+            form: f, field: :deprecated, label: :Status.t + ":", inline: true,
+            class: "mb-0", text: @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t
+          ) %>
+      <%= hidden_field_with_label(
+            form: f, field: :text_name, label: :Name.t + ":", inline: true,
+            class: "mb-0", value: @name_string, text: @name.real_text_name.t
+          ) %>
+      <%= hidden_field_with_label(
+            form: f, field: :author, label: :Authority.t + ":", inline: true,
+            class: "mb-0", text: @name.author.t
+          ) %>
       <%= help_block(:div, :show_name_locked.tp) %>
-      <%= f.hidden_field(:rank) %>
-      <%= f.hidden_field(:deprecated) %>
-      <%= f.hidden_field(:text_name, value: @name_string) %>
-      <%= f.hidden_field(:author) %>
     </div>
   <% end %>
 
@@ -68,11 +74,10 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
       <%= check_box_with_label(form: f, field: :misspelling,
                                checked: @misspelling,
                                label: :form_names_misspelling.t) %>
-      <% append = help_block(:p, :form_names_misspelling_note.t) %>
       <%= text_field_with_label(
             form: f, field: :correct_spelling, value: @correct_spelling,
             label: :form_names_misspelling_it_should_be.t + ":",
-            append: append
+            append: help_block(:p, :form_names_misspelling_note.t)
           ) %>
       <% turn_into_name_auto_completer(:name_correct_spelling,
                                        primer: Name.primer) %>
