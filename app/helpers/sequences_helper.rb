@@ -13,7 +13,7 @@ module SequencesHelper
   end
 
   # dropdown list for create_sequence
-  def archive_dropdown
+  def sequence_archive_options
     WebSequenceArchive.archives.each_with_object([]) do |archive, array|
       # append array which repeats archive[:name] twice
       array << Array.new(2, archive[:name])
