@@ -19,10 +19,11 @@ charsets = ["ISO-8859-1", "WINDOWS-1252", "UTF-8"]
   <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
 
   <% if false %>
-    <br/>
-    <%= f.label(:charset, :name_lister_charset.t + ":") %>
-    <%= f.select(:charset, options_for_select(charsets, @charset)) %>
-    <%= content_tag(:span, :name_lister_charset_help.t, class: "help-note") %>
+    <%= select_with_label(
+          form: f, field: :charset, label: :name_lister_charset.t + ":",
+          options: charsets, select_opts: { selected: @charset }, inline: true,
+          append: help_note(:span, :name_lister_charset_help.t)
+        ) %>
   <% end %>
 
 <% end %>

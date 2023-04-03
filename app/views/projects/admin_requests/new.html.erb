@@ -9,16 +9,12 @@
 
   <%= :admin_request_note.tp %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:subject, :request_subject.t + ":") %>
-    <%= f.text_field(:subject, class: "form-control",
-                     data: { autofocus: true }) %>
-  </div>
+  <%= text_field_with_label(form: f, field: :subject,
+                            label: :request_subject.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:content, :request_message.t + ":") %>
-    <%= f.text_area(:content, rows: 5, class: "form-control") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :content, rows: 5,
+                           label: :request_message.t + ":") %>
 
   <%= submit_button(form: f, button: :SEND.l, center: true) %>
 

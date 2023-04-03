@@ -47,8 +47,7 @@ source_types = [
     <%= f.hidden_field(:project_id) %>
 
     <% if need_help %>
-      <%= content_tag(:div, :form_description_source_help.tpl,
-                      class: "help-block") %>
+      <%= help_block(:div, :form_description_source_help.tpl) %>
     <% end %>
   </div>
 
@@ -60,15 +59,13 @@ source_types = [
                              label: :form_description_public_writable.t) %>
     <%= check_box_with_label(form: f, field: :public, disabled: disabled,
                              label: :form_description_public_readable.t) %>
-    <%= content_tag(:p, :form_description_permissions_help.t,
-                    class: "help-block") %>
+    <%= help_block(:p, :form_description_permissions_help.t) %>
   </div>
 
-  <div class="form-group">
-    <%= f.label(:license_id, :License.t + ":") %>
-    <%= f.select(:license_id, @licenses, {}, { class: "form-control" }) %>
-    <%= content_tag(:p, :form_description_license_help.t,
-                    class: "help-block") %>
-  </div>
+  <%= select_with_label(
+        form: f, field: :license_id, label: :License.t + ":",
+        options: @licenses,
+        after: help_block(:p, :form_description_license_help.t)
+      ) %>
 
 <% end %>
