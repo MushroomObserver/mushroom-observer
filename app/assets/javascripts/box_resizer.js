@@ -3,7 +3,7 @@
 // if moving to Bootstrap 4+
 
 $(window).on('load', function () {
-  var boxes = jQuery('.matrix-box .panel-body');
+  var boxes = jQuery('.matrix-box .panel-sizing');
 
   //if there are matrix boxes
   if (boxes) {
@@ -21,8 +21,10 @@ $(window).on('load', function () {
           adjustHeightForEveryNth(arrayedObjects, 2);
           break;
         case "md":
-        case "lg":
           adjustHeightForEveryNth(arrayedObjects, 3);
+          break;
+        case "lg":
+          adjustHeightForEveryNth(arrayedObjects, 4);
           break;
         default:
           //no op
