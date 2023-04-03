@@ -1,10 +1,17 @@
 //
 // sidebar
 // --------------------------------------------------
-$sidebar-max-width: 15em;
+$sidebar-max-width: 18rem;
 
 .sidebar-offcanvas {
   max-width: $sidebar-max-width;
+}
+
+// https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
+@media screen and (min-width: 108rem) {
+  #right_side {
+    width: calc(100% - #{$sidebar-max-width}) !important;
+  }
 }
 
 //
