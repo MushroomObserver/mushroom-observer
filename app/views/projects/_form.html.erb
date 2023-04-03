@@ -2,16 +2,13 @@
 
   <%= submit_button(form: f, button: button, center: true) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:title, :form_projects_title.t + ":") %>
-    <%= f.text_field(:title, class: "form-control",
-                     data: { autofocus: true }) %>
-  </div>
+  <%= text_field_with_label(form: f, field: :title,
+                            label: :form_projects_title.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:summary, :SUMMARY.t + ":") %>
-    <%= f.text_area(:summary, rows: 20, class: "form-control") %>
-    <%= render(partial: "shared/textilize_help") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :summary, rows: 20,
+                           label: :SUMMARY.t + ":") %>
+
+  <%= render(partial: "shared/textilize_help") %>
 
 <% end %>

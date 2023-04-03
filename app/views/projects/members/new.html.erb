@@ -16,11 +16,9 @@
 
   <%= form_with(url: action, id: "project_member_form") do |f| %>
 
-    <h4><%= :LOGIN_NAME.t %>:</h4>
-
-    <%= text_field_tag(:candidate, @candidate, size: 40,
-                                               data: { autofocus: true },
-                                               class: "form-control") %><br/>
+    <%= text_field_with_label(form: f, field: :candidate, size: 40,
+                              value: @candidate, data: { autofocus: true },
+                              label: :LOGIN_NAME.t + ":") %>
     <% turn_into_user_auto_completer(:candidate) %>
 
     <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
@@ -29,7 +27,7 @@
 
 </div><!--.container-text-->
 
-<table class="table-striped table-project-members mt-3">
+<table class="table table-striped table-project-members mt-3">
   <thead>
     <tr>
       <th><%= :Login_name.t %></th>
