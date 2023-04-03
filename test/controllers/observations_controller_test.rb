@@ -549,7 +549,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_index_related_taxa
     name = names(:tremella_mesenterica)
     parent = name.parents.first
-    obss_of_related_taxa = \
+    obss_of_related_taxa = 
       Observation.where(
         name: Name.where(Name[:text_name] =~ /#{parent.text_name} /).or(
           Name.where(Name[:classification] =~ /: _#{parent.text_name}_/)
