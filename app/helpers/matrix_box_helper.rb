@@ -25,9 +25,9 @@ module MatrixBoxHelper
       class: "panel-footer"
     ) do
       if presenter.detail.present?
-        concat(content_tag(:div, presenter.detail, class: "rss-detail"))
+        concat(content_tag(:div, presenter.detail, class: "rss-detail small"))
       end
-      concat(content_tag(:div, presenter.display_time, class: "rss-what"))
+      concat(content_tag(:div, presenter.display_time, class: "rss-what small"))
     end
   end
 
