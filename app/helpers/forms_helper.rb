@@ -102,9 +102,10 @@ module FormsHelper
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
+    label_opts = field_label_opts(args)
 
     content_tag(:div, class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_field(args[:field], opts))
       concat(args[:append]) if args[:append].present?
@@ -119,9 +120,10 @@ module FormsHelper
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
+    label_opts = field_label_opts(args)
 
     content_tag(:div, class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].text_area(args[:field], opts))
       concat(args[:append]) if args[:append].present?
@@ -129,7 +131,7 @@ module FormsHelper
   end
 
   # Bootstrap select.
-  # Works for select_year
+  # Works for select_year but not date_select, which generates multiple selects
   def select_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = select_generate_default_options(args)
@@ -142,9 +144,10 @@ module FormsHelper
     opts[:class] += " w-auto" if args[:width] == :auto
 
     wrap_class = form_group_wrap_class(args)
+    label_opts = field_label_opts(args)
 
     content_tag(:div, class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
+      concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].select(args[:field], args[:options],
                                 args[:select_opts], opts))
@@ -341,6 +344,12 @@ module FormsHelper
 
     wrap_class += " #{args[:class]}" if args[:class].present?
     wrap_class
+  end
+
+  def field_label_opts(args)
+    label_opts = { class: "mr-3" }
+    label_opts[:index] = args[:index] if args[:index].present?
+    label_opts
   end
 
   # shorthand to set a between or append string with (optional) or (required)

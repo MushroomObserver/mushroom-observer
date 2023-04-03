@@ -4,25 +4,23 @@
 
   <div class="col-sm-6">
     <%= fields_for(:herbarium_record) do |fhr| %>
-      <div class="form-group">
-        <%= fhr.label(:herbarium_name,
-                      :herbarium_record_herbarium_name.t + ":") %>
-        <%= fhr.text_field(:herbarium_name, value: @herbarium_name,
-                          class: "form-control") %>
-        <% turn_into_herbarium_auto_completer(
-            :herbarium_record_herbarium_name
+
+      <%= text_field_with_label(
+            form: fhr, field: :herbarium_name, value: @herbarium_name,
+            label: :herbarium_record_herbarium_name.t + ":"
           ) %>
-      </div>
-      <div class="form-group">
-        <%= fhr.label(:herbarium_id,
-                      :herbarium_record_accession_number.t + ":") %>
-        <%= fhr.text_field(:herbarium_id, value: @herbarium_id,
-                          class: "form-control") %>
-      </div>
-      <div class="form-group">
-        <%= fhr.label(:notes, "#{:herbarium_record_notes.t}:") %>
-        <%= fhr.text_field(:notes, value: "", class: "form-control") %>
-      </div>
+      <% turn_into_herbarium_auto_completer(
+            :herbarium_record_herbarium_name
+         ) %>
+
+      <%= text_field_with_label(
+            form: fhr, field: :herbarium_id, value: @herbarium_id,
+            label: :herbarium_record_accession_number.t + ":"
+          ) %>
+
+      <%= text_field_with_label(form: fhr, field: :notes, value: "",
+                                label: :herbarium_record_notes.t + ":") %>
+
     <% end # fields_for(:herbarium_record) %>
   </div>
 
