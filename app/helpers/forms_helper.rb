@@ -385,6 +385,7 @@ module FormsHelper
     start_year = init_value if init_value && init_value < start_year
     { start_year: start_year,
       end_year: Time.zone.now.year,
+      selected: obj.try(&:when) || Time.zone.today,
       order: [:day, :month, :year] }
   end
 end
