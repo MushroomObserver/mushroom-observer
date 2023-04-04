@@ -205,8 +205,9 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_displayed_title("Observation Index")
     assert_select(
-      "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
-      "Index should open at the page that includes #{obs.unique_text_name}"
+      "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
+      { text: obs.format_name.t.strip_html },
+      "Index should open at the page that includes #{obs.format_name}"
     )
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
