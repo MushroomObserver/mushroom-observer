@@ -42,7 +42,6 @@ class String
     # characters and accents -- it covers HTML codes &#1 to &#400.
     # Disable alignment cop to make code more readable
     # rubocop:disable Layout/HashAlignment
-    # rubocop:disable Metrics/CollectionLiteralLength
     UTF8_TO_ASCII = { #
       "\x00"         => " ",
       "\x01"         => " ",
@@ -368,7 +367,6 @@ class String
       "nbsp"  => " "
     }.freeze
   end
-  # rubocop:enable Metrics/CollectionLiteralLength
   # rubocop:enable Layout/HashAlignment
   # :startdoc:
 

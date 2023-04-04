@@ -3,6 +3,7 @@
 # Gather details for items in matrix-style ndex pages.
 class MatrixBoxPresenter < BasePresenter
   attr_accessor \
+    :type,       # what kind of box is this
     :image_data, # data passed to thumbnail_presenter
     :when,       # when object or target was created
     :who,        # owner of object or target
@@ -31,12 +32,15 @@ class MatrixBoxPresenter < BasePresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log)
     target = rss_log.target
+    self.type = rss_log.target_type || :rss_log
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = target.user if target&.user
-    self.name = if target
-                  target.unique_format_name.t.break_name.small_author
+    self.name = if rss_log.target_type == :image
+                  target.unique_format_name.t
+                elsif target
+                  target.format_name.t.break_name.small_author
                 else
-                  rss_log.unique_format_name.t.break_name.small_author
+                  rss_log.format_name.t.break_name.small_author
                 end
     self.what = target || rss_log
     if target&.respond_to?(:location)
@@ -63,6 +67,7 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image)
+    self.type = :image
     self.when = begin
                   image.when.web_date
                 rescue StandardError
@@ -79,9 +84,10 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation)
+    self.type       = :observation
     self.when       = observation.when.web_date
     self.who        = observation.user if observation.user
-    self.name       = observation.unique_format_name.t.break_name.small_author
+    self.name       = observation.format_name.t.break_name.small_author
     self.what       = observation
     self.place_name = observation.place_name
     self.where      = observation.location
@@ -100,6 +106,7 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user)
+    self.type = :user
     # rubocop:disable Rails/OutputSafety
     # The results of .t and web_date are guaranteed to be safe, and both
     # user.contribution and observations.count are just numbers.

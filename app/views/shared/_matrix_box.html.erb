@@ -8,6 +8,12 @@ object_id = object&.id.present? ? object.id : "no_ID"
 locals = local_assigns.except(:columns, :object, :object_counter,
                               :object_iteration)
 if presenter
+heading = presenter.image_data ? :h5 : :h3
+link_heading = content_tag(:small, "(#{object_id})",
+                            class: "rss-id float-right") +
+               content_tag(:span, presenter.name, class: "rss-name")
+
+# note panel-sizing div shd be deleted in bs4. thumbnail goes in card-img-top
 %>
   <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
     <div class="panel panel-default">
@@ -23,8 +29,8 @@ if presenter
         <div class="panel-body rss-box-details">
 
           <div class="rss-what">
-            <%= content_tag(:h5, class: "mt-0") do
-                  link_with_query(presenter.name, presenter.what.show_link_args)
+            <%= content_tag(heading, class: "mt-0 rss-heading") do
+                  link_with_query(link_heading, presenter.what.show_link_args)
                 end %>
             <%= matrix_box_vote_or_propose_ui(identify, object) %>
           </div><!-- .rss-what -->
@@ -40,9 +46,9 @@ if presenter
           <% unless presenter.when.blank? %>
             <div class="rss-what">
               <%= content_tag(:small, class: "nowrap-ellipsis") do
-                concat(presenter.when)
+                concat(content_tag(:span, presenter.when, class: "rss-when"))
                 concat(": ")
-                concat(user_link(presenter.who))
+                concat(user_link(presenter.who, nil, class: "rss-who"))
               end %>
             </div><!-- .rss-when -->
           <% end %>
