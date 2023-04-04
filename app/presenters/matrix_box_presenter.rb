@@ -34,9 +34,9 @@ class MatrixBoxPresenter < BasePresenter
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = target.user if target&.user
     self.name = if target
-                  target.unique_format_name.t
+                  target.unique_format_name.t.break_name.small_author
                 else
-                  rss_log.unique_format_name.t
+                  rss_log.unique_format_name.t.break_name.small_author
                 end
     self.what = target || rss_log
     if target&.respond_to?(:location)
@@ -81,7 +81,7 @@ class MatrixBoxPresenter < BasePresenter
   def observation_to_presenter(observation)
     self.when       = observation.when.web_date
     self.who        = observation.user if observation.user
-    self.name       = observation.unique_format_name.t
+    self.name       = observation.unique_format_name.t.break_name.small_author
     self.what       = observation
     self.place_name = observation.place_name
     self.where      = observation.location
