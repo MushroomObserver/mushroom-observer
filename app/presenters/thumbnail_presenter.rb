@@ -96,13 +96,12 @@ class ThumbnailPresenter < BasePresenter
     img_proportion = BigDecimal(img_height / img_width)
     # Limit proportion 2:1 h/w for thumbnail
     # img_proportion = "200" if img_proportion.to_i > 200 # default for tall
+    self.proportion = (img_proportion * 100).to_f.truncate(1)
 
     # Constrain width to currently expected dimensions for img size (not layout)
     # NOTE: can get rid of self.width if switching to full-width images
     size = Image.all_sizes_index[args[:size]]
     container_width = img_width > img_height ? size : size / img_proportion
-
-    self.proportion = (img_proportion * 100).to_f.truncate(1)
     self.width = container_width.to_f.truncate(0)
   end
 
