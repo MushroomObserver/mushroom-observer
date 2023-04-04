@@ -53,7 +53,8 @@ class MatrixBoxPresenter < BasePresenter
       self.image_data = {
         image: target.thumb_image,
         image_link: target.show_link_args,
-        obs_data: obs_data_hash(target)
+        obs_data: obs_data_hash(target),
+        context: :matrix_box
       }
     end
     return unless (temp = rss_log.detail)
@@ -78,7 +79,8 @@ class MatrixBoxPresenter < BasePresenter
     self.what = image
     self.image_data = {
       image: image,
-      image_link: image.show_link_args
+      image_link: image.show_link_args,
+      context: :matrix_box
     }
   end
 
@@ -100,7 +102,8 @@ class MatrixBoxPresenter < BasePresenter
     self.image_data = {
       image: observation.thumb_image,
       image_link: obs_or_other_link(observation),
-      obs_data: obs_data_hash(observation)
+      obs_data: obs_data_hash(observation),
+      context: :matrix_box
     }
   end
 
@@ -123,7 +126,8 @@ class MatrixBoxPresenter < BasePresenter
     self.image_data = {
       image: user.image_id,
       image_link: user.show_link_args,
-      votes: false
+      votes: false,
+      context: :matrix_box
     }
   end
 

@@ -27,6 +27,19 @@
   }
 }
 
+.rss-box-details {
+
+  a {
+    color: inherit !important;
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: $link-color !important;
+    }
+  }
+}
+
 // To make way for floating ID
 .rss-heading {
 

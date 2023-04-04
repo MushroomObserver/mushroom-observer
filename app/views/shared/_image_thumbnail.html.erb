@@ -1,9 +1,9 @@
 <%
 presenter = ThumbnailPresenter.new(image, @view, local_assigns.except(:image))
+set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 %>
 
-<div class="image-sizer position-relative mx-auto"
-     style="width: <%= presenter.width %>px;">
+<div class="image-sizer position-relative mx-auto" style="<%= set_width %>">
   <div class="image-lazy-sizer overflow-hidden"
        style="padding-bottom: <%= presenter.proportion %>%;">
     <%= image_tag("placeholder.svg", presenter.options_lazy) %>
