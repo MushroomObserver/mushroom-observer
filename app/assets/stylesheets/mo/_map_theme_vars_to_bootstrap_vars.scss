@@ -77,6 +77,10 @@ $dropdown-link-disabled-color:              mix($MENU_FG_COLOR, $MENU_BG_COLOR, 
 $dropdown-header-color:                     $MENU_FG_COLOR;
 $dropdown-caret-color:                      $BODY_FG_COLOR;
 
+$screen-lg:                                 1320px;
+$screen-lg-min:                             1320px;
+$screen-md-max:                             1319px;
+
 $grid-gutter-width:                         30px;
 $navbar-height:                             40px;
 $navbar-margin-bottom:                      13px;
