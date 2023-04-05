@@ -10,8 +10,8 @@ class LurkerTest < CapybaraIntegrationTestCase
     login
 
     # Click on first observation in feed results
-    first(".rss-box-details .rss-detail", text: "Observation Created").
-      ancestor(".rss-box-details").first("a").click
+    first(".rss-detail", text: "Observation Created").
+      ancestor(".panel").first(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
