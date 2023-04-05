@@ -22,7 +22,8 @@ class FilterTest < CapybaraIntegrationTestCase
     click_button("Search")
 
     assert_match(
-      /#{:app_title.l}: Observations Matching ‘#{obs.name.text_name}/,
+      # /#{:app_title.l}: Observations Matching ‘#{obs.name.text_name}/,
+      /#{:app_title.l}: Observations of #{obs.name.text_name}/,
       page.title, "Wrong page"
     )
     page.find("#title_bar").assert_text(:filtered.t)

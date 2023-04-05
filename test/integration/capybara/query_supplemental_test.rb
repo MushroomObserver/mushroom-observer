@@ -21,6 +21,7 @@ class QuerySupplementalTest < CapybaraIntegrationTestCase
     click_link("Map Locations")
 
     title = page.find("#title")
-    title.assert_text("‘#{obs.name.text_name}’")
+    # title.assert_text("‘#{obs.name.text_name}’")
+    title.assert_text(obs.name.text_name)
   end
 end

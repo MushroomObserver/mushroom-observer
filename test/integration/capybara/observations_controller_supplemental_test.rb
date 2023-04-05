@@ -22,7 +22,8 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
     click_link("Show Observations")
     click_link("Show Map")
     title = page.find("#title")
-    title.assert_text("Map of Observation Index")
+    # title.assert_text("Map of Observation Index")
+    title.assert_text("Map of Observations of #{name.text_name}")
   end
 
   # Prove that if a user clicks an Observation in Observation search results
