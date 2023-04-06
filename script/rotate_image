@@ -80,8 +80,7 @@ case $op in
 esac
 
 # Update size and clear "transferred" bit in database.
-# Changing from $app_root/script/jpegsize to identify (ImageMagick)
-size=$( identify $orig_file )
+size=$( $app_root/script/jpegsize $orig_file )
 w=$( echo $size | sed "s/ .*//" )
 h=$( echo $size | sed "s/.* //" )
 run_mysql "UPDATE images SET transferred=FALSE, width=$w, height=$h WHERE id=$id" || warn "Failed to update database: $id should be $w x $h."

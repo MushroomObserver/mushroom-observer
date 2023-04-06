@@ -34,6 +34,7 @@ class ScriptTest < UnitTestCase
     assert_equal(expect, actual)
   end
 
+  # Now uses gem, no need to test here
   # test "jpegsize" do
   #   script = script_file("jpegsize")
   #   [

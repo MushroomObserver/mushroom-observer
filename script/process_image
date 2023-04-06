@@ -75,9 +75,8 @@ fi
 # Make sure image is oriented correctly.
 log_cmd exifautotran $full_file
 
-# Changing from $app_root/script/jpegsize to identify (ImageMagick)
 if (( $set_size )); then
-  size=$( identify $full_file )
+  size=$( $app_root/script/jpegsize $full_file )
   w=$( echo $size | sed "s/ .*//" )
   h=$( echo $size | sed "s/.* //" )
   log_mysql "UPDATE images SET width=$w, height=$h WHERE id=$id" || true

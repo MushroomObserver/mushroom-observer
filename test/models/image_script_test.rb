@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ScriptTest < UnitTestCase
+class ImageScriptTest < UnitTestCase
   DATABASE_CONFIG = YAML.safe_load(
     Rails.root.join("config/database.yml").read
   )["test"]
@@ -114,7 +114,6 @@ class ScriptTest < UnitTestCase
       file.puts("#{local_root}/320//#{in_situ_id}.jpg")
       file.puts("#{local_root}/thumb//#{in_situ_id}.jpg")
     end
-    # Not sure how to convert this to ImageMagick `identify`
     output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
     sizes = output.each_line.map do |line|
       line[local_root.length + 1..-1].chomp
