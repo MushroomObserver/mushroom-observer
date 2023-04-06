@@ -34,17 +34,18 @@ class ScriptTest < UnitTestCase
     assert_equal(expect, actual)
   end
 
-  test "jpegsize" do
-    script = script_file("jpegsize")
-    [
-      ["Coprinus_comatus.jpg", 2288, 2168],
-      ["perf.jpg", 4288, 2848],
-      ["sticky.jpg", 407, 500]
-    ].each do |file, width, height|
-      result = `#{script} #{::Rails.root}/test/images/#{file}`.chomp
-      assert_equal("#{width} #{height}", result)
-    end
-  end
+  # Now uses gem, no need to test here
+  # test "jpegsize" do
+  #   script = script_file("jpegsize")
+  #   [
+  #     ["Coprinus_comatus.jpg", 2288, 2168],
+  #     ["perf.jpg", 4288, 2848],
+  #     ["sticky.jpg", 407, 500]
+  #   ].each do |file, width, height|
+  #     result = `#{script} #{::Rails.root}/test/images/#{file}`.chomp
+  #     assert_equal("#{width} #{height}", result)
+  #   end
+  # end
 
   test "lookup_user" do
     script = script_file("lookup_user")
