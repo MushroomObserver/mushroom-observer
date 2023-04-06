@@ -114,11 +114,11 @@ class ScriptTest < UnitTestCase
       file.puts("#{local_root}/320//#{in_situ_id}.jpg")
       file.puts("#{local_root}/thumb//#{in_situ_id}.jpg")
     end
-    # output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
-    # sizes = output.each_line.map do |line|
-    #   line[local_root.length + 1..-1].chomp
-    # end
-    sizes = FastImage.sizes(tempfile)
+    # Not sure how to convert this to ImageMagick `identify`
+    output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
+    sizes = output.each_line.map do |line|
+      line[local_root.length + 1..-1].chomp
+    end
     assert_equal("orig//#{in_situ_id}.jpg: 2560 1920", sizes[0],
                  "full-size image is wrong size")
     assert_equal("1280//#{in_situ_id}.jpg: 1280 960", sizes[1],

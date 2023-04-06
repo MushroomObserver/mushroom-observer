@@ -22,7 +22,7 @@ DESCRIPTION
   This grabs the original image from the image server if it's already
   been moved, rotates or flips the original as requested, updates the
   database, then transfers execution to script/process_image.  It aborts at
-  the first sign of trouble. 
+  the first sign of trouble.
 
 OPERATIONS
   0     No transformation, just reprocess the image.
@@ -80,7 +80,8 @@ case $op in
 esac
 
 # Update size and clear "transferred" bit in database.
-size=$( $app_root/script/jpegsize $orig_file )
+# Changing from $app_root/script/jpegsize to identify (ImageMagick)
+size=$( identify $orig_file )
 w=$( echo $size | sed "s/ .*//" )
 h=$( echo $size | sed "s/.* //" )
 run_mysql "UPDATE images SET transferred=FALSE, width=$w, height=$h WHERE id=$id" || warn "Failed to update database: $id should be $w x $h."

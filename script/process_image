@@ -75,8 +75,9 @@ fi
 # Make sure image is oriented correctly.
 log_cmd exifautotran $full_file
 
+# Changing from $app_root/script/jpegsize to identify (ImageMagick)
 if (( $set_size )); then
-  size=$( $app_root/script/jpegsize $full_file )
+  size=$( identify $full_file )
   w=$( echo $size | sed "s/ .*//" )
   h=$( echo $size | sed "s/.* //" )
   log_mysql "UPDATE images SET width=$w, height=$h WHERE id=$id" || true
@@ -121,7 +122,7 @@ if (( !$development && !$errors && $transferred_any )); then
 fi
 
 if (( !$development && $errors )); then
-  send_mail -s "[MO] process_image" $webmaster_email < $log_file 
+  send_mail -s "[MO] process_image" $webmaster_email < $log_file
 fi
 
 exit $errors
