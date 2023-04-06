@@ -2,7 +2,7 @@
 
 require("open3")
 require("mimemagic")
-require("fastimage")
+# require("fastimage")
 #
 #  = Image Model
 #
