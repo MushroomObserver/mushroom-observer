@@ -117,6 +117,9 @@ gem("rtf")
 # Enable remote procedure calls over HTTP (used in MO API)
 gem("xmlrpc")
 
+# Get image sizes from a file
+gem("fastimage")
+
 # Simple versioning
 # Use our own fork, which stores enum attrs as integers in the db
 gem("mo_acts_as_versioned", ">= 0.6.6",
