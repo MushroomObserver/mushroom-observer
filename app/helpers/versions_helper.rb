@@ -15,7 +15,7 @@ module VersionsHelper
     if previous_version
       previous_version_link(previous_version, obj)
     else
-      initial_html(obj)
+      initial_version_html(obj)
     end
   end
 
