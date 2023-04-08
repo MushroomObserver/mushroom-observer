@@ -33,7 +33,8 @@ module VersionsHelper
   #   </p>
   #
   def show_past_versions(obj, args = {})
-    table = make_table(build_version_table(obj, args), class: "w-100")
+    table = make_table(build_version_table(obj, args),
+                       class: "table table-condensed")
     panel = content_tag(:div, table, class: "panel-body")
     tag.strong("#{:VERSIONS.t}:") +
       content_tag(:div, panel, class: "panel panel-default")
@@ -59,16 +60,7 @@ module VersionsHelper
     obj.versions.reverse.map do |ver|
       [find_version_date(ver), indent,
        find_version_user(ver), indent,
-       style_version_link(obj, ver, args), indent]
-    end
-  end
-
-  def style_version_link(obj, ver, args)
-    link = link_to_version(initial_version_link_text(ver), ver, obj)
-    if args[:bold]&.call(ver)
-      content_tag(:b, link)
-    else
-      link
+       link_to_version(initial_version_link_text(ver, args), ver, obj), indent]
     end
   end
 
@@ -87,9 +79,10 @@ module VersionsHelper
 
   def link_to_version(text, ver, obj)
     if ver == obj.versions.last
-      link_with_query(text, controller: obj.show_controller,
-                            action: obj.show_action,
-                            id: obj.id)
+      link_with_query(text,
+                      controller: obj.show_controller,
+                      action: obj.show_action,
+                      id: obj.id)
     else
       link_with_query(text,
                       controller: "#{obj.show_controller}/versions",
@@ -98,10 +91,12 @@ module VersionsHelper
     end
   end
 
-  def initial_version_link_text(ver)
+  def initial_version_link_text(ver, args)
     text = "#{:VERSION.t} #{ver.version}"
-    return text unless ver.respond_to?(:format_name)
+    text = content_tag(:strong, text) if args[:bold]&.call(ver)
+    return text unless ver.respond_to?(:display_name)
 
-    text + " #{ver.format_name.t}"
+    # keep this out of the above `strong` tag, because it has its own tags
+    text + "<br/> #{ver.display_name.t}".html_safe
   end
 end
