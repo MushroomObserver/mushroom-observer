@@ -97,6 +97,6 @@ module VersionsHelper
     return text unless ver.respond_to?(:display_name)
 
     # keep this out of the above `strong` tag, because it has its own tags
-    text + "<br/> #{ver.display_name.t}".html_safe
+    [text, safe_br, ver.display_name.t].safe_join
   end
 end
