@@ -16,7 +16,7 @@
   <%= text_area_with_label(
         form: f, field: :classification, rows: 10, value: @name.classification,
         between: help_block(p, :form_names_classification_help.l(rank: rank)),
-        label: :"form_names_classification".t + ":",
+        label: "#{:form_names_classification.t}:",
         data: { autofocus: true }
       ) %>
 
