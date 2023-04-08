@@ -43,7 +43,7 @@ module VersionsHelper
 
   def previous_version_link(previous_version, obj)
     str = :show_name_previous_version.t + " " + previous_version.version.to_i
-    initial_html(obj) +
+    initial_version_html(obj) +
       link_with_query(str,
                       controller: "#{obj.show_controller}/versions",
                       action: :show, id: obj.id,
@@ -51,20 +51,20 @@ module VersionsHelper
       safe_br
   end
 
-  def initial_html(obj)
+  def initial_version_html(obj)
     :VERSION.t + ": " + obj.version.to_s + safe_br
   end
 
   def build_version_table(obj, args)
     obj.versions.reverse.map do |ver|
-      [find_ver_date(ver), indent,
-       find_ver_user(ver), indent,
-       calc_link(obj, ver, args), indent]
+      [find_version_date(ver), indent,
+       find_version_user(ver), indent,
+       style_version_link(obj, ver, args), indent]
     end
   end
 
-  def calc_link(obj, ver, args)
-    link = query_link(obj, ver, initial_link(ver))
+  def style_version_link(obj, ver, args)
+    link = link_to_version(initial_version_link_text(ver), ver, obj)
     if args[:bold]&.call(ver)
       content_tag(:b, link)
     else
@@ -72,51 +72,36 @@ module VersionsHelper
     end
   end
 
-  def find_ver_date(ver)
+  def find_version_date(ver)
     ver.updated_at.web_date
   rescue StandardError
     :unknown.t
   end
 
-  def find_ver_user(ver)
+  def find_version_user(ver)
     user = User.safe_find(ver.user_id)
     return :unknown.t unless user
 
     user_link(user, user.login)
   end
 
-  def link_to_ver(link, ver, obj)
+  def link_to_version(text, ver, obj)
     if ver == obj.versions.last
-      link_with_query(link, controller: obj.show_controller,
+      link_with_query(text, controller: obj.show_controller,
                             action: obj.show_action,
                             id: obj.id)
     else
-      link_with_query(link,
+      link_with_query(text,
                       controller: "#{obj.show_controller}/versions",
                       action: :show, id: obj.id,
                       version: ver.version)
     end
   end
 
-  def initial_link(ver)
+  def initial_version_link_text(ver)
     link = "#{:VERSION.t} #{ver.version}"
     return link unless ver.respond_to?(:format_name)
 
     link + " #{ver.format_name.t}"
-  end
-
-  def query_link(obj, ver, link)
-    return link if ver.version != obj.version
-
-    if ver == obj.versions.last
-      link_with_query(link, controller: obj.show_controller,
-                            action: obj.show_action,
-                            id: obj.id)
-    else
-      link_with_query(link,
-                      controller: "#{obj.show_controller}/versions",
-                      action: :show, id: obj.id,
-                      version: ver.version)
-    end
   end
 end
