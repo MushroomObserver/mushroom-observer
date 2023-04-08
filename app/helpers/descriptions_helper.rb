@@ -149,7 +149,7 @@ module DescriptionsHelper
     # Filter out empty descriptions (unless it's public or one you own).
     list = object.descriptions.includes(:user).select do |desc|
       desc.notes? || (desc.user == user) ||
-        reviewer? || (desc.source_type == :public)
+        reviewer? || (desc.source_type == :public) || in_admin_mode?
     end
 
     list = sort_description_list(object, list)
