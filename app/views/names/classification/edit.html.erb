@@ -11,7 +11,7 @@
   @container = :text
 %>
 
-<%= form_with(url: action) do |f| %>
+<%= form_with(url: action, method: :put) do |f| %>
 
   <%= text_area_with_label(
         form: f, field: :classification, rows: 10, value: @name.classification,
