@@ -99,9 +99,9 @@ module VersionsHelper
   end
 
   def initial_version_link_text(ver)
-    link = "#{:VERSION.t} #{ver.version}"
-    return link unless ver.respond_to?(:format_name)
+    text = "#{:VERSION.t} #{ver.version}"
+    return text unless ver.respond_to?(:format_name)
 
-    link + " #{ver.format_name.t}"
+    text + " #{ver.format_name.t}"
   end
 end
