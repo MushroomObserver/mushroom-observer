@@ -12,7 +12,7 @@
   width: 23px;
 }
 
-@media (min-width: $screen-sm-min) {
+@include media-breakpoint-up(md) {
   .interest-eyes {
     position: absolute !important;
     top: 0 !important;

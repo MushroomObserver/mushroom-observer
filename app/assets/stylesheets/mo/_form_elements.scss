@@ -10,7 +10,7 @@
 input.has-error,
 textarea.has-error,
 select.has-error {
-  border-color: $alert-danger-border !important;
+  border-color: theme-color("danger") !important;
 }
 
 // got this trick from:
@@ -53,7 +53,7 @@ form.button_to {
   input[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
-    -webkit-appearance: caret;
+    appearance: caret;
     background: none;
     border: none;
     font-size: inherit;
@@ -82,7 +82,7 @@ a.filter-only {
   @extend .py-3;
   border-width: 1px 0 0 0;
   border-style: solid;
-  border-color: $btn-default-border;
+  border-color: theme-color("secondary");
 
   &:last-child {
     border-width: 1px 0;

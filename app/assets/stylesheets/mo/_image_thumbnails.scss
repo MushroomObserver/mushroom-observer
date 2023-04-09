@@ -8,7 +8,7 @@
 
 svg.placeholder {
   rect {
-    fill: rgba($panel-bg, 0.3) !important;
+    fill: rgba($card-bg, 0.3) !important;
   }
 }
 
@@ -65,7 +65,7 @@ svg.placeholder {
 
     &:hover,
     &:focus {
-      color: $text-color;
+      color: $body-color;
       text-decoration: none;
     }
   }
