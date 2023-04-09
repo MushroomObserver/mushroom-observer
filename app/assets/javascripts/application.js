@@ -1,6 +1,7 @@
 //= require jquery3
 //= require jquery_extensions
 //= require rails-ujs
+//= require popper
 //= require bootstrap-sprockets
 //= require jstz
 //= require autocomplete
