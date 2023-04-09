@@ -7,7 +7,7 @@ if presenter
 
   link_method ||= :get
   identify ||= false
-  columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3"
+  columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
   # presenter.image_data includes context: :matrix_box where appropriate
   thumb_locals = local_assigns.
@@ -19,7 +19,7 @@ if presenter
                 content_tag(:span, presenter.name, class: "rss-name")
   %>
 
-  <li class="matrix-box <%= columns %>" id="box_<%= object_id %>">
+  <%= matrix_box(columns: columns, id: object_id) do %>
     <div class="panel panel-default">
 
       <div class="panel-sizing">
@@ -66,5 +66,5 @@ if presenter
       <%= matrix_box_identify_footer(identify, object_id) %>
 
     </div><!-- .panel -->
-  </li><!-- .matrix-box -->
+  <% end %><!-- .matrix-box -->
 <% end %>
