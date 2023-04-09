@@ -13,13 +13,13 @@
 
   a,
   a:visited {
-    color: $navbar-default-link-color;
-    background-color: $navbar-default-link-active-bg;
+    color: $navbar-light-link-color;
+    // background-color: $navbar-light-link-active-bg;
   }
 
   a:hover {
-    color: $navbar-default-link-hover-color;
-    background-color: $navbar-default-link-hover-bg;
+    color: $navbar-light-link-hover-color;
+    // background-color: $navbar-light-link-hover-bg;
   }
 
   .navbar-nav {
@@ -28,14 +28,14 @@
 
   .navbar-nav > li > a,
   .navbar-nav > li > a.dropdown-toggle {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
+    color: $navbar-light-color !important;
+    // background-color: $navbar-light-bg !important;
     padding-left: 8px;
     padding-right: 8px;
 
     &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
+      color: $navbar-light-link-hover-color !important;
+      // background-color: $navbar-light-link-hover-bg !important;
     }
   }
 }

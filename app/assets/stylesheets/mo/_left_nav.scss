@@ -1,5 +1,6 @@
 //
-// left nav bar styles. layout is in layout.scss
+// left nav bar styles. uses navbar-dark.
+// layout is in layout.scss
 // --------------------------------------------------
 
 .sidebar-nav {
@@ -30,33 +31,33 @@
     &:hover a.dropdown-toggle,
     &:focus a.dropdown-toggle,
     a.dropdown-toggle:hover {
-      color: $navbar-inverse-link-hover-color;
-      background-color: $navbar-inverse-link-hover-bg;
+      color: $navbar-dark-hover-color;
+      // background-color: $navbar-inverse-link-hover-bg;
     }
 
     // These are the headers
     &.disabled,
     &.disabled:hover,
     &.disabled:focus {
-      color: $navbar-inverse-link-disabled-color;
-      background-color: $navbar-inverse-link-disabled-bg;
+      color: $navbar-dark-disabled-color;
+      // background-color: $navbar-inverse-link-disabled-bg;
       cursor: default;
       padding-left: 5px;
     }
 
     &#nav_bug_report_link {
-      color: $navbar-inverse-link-disabled-color;
+      color: $navbar-dark-disabled-color;
       &:hover,
       &:focus {
-        color: $navbar-inverse-link-color;
+        color: $navbar-dark-color;
       }
     }
   }
 
   .list-group-item,
   a.dropdown-toggle {
-    color: $navbar-inverse-link-color;
-    background-color: $navbar-inverse-bg;
+    color: $navbar-dark-color;
+    // background-color: $navbar-inverse-bg;
   }
 }
 
