@@ -92,10 +92,11 @@ class ThumbnailPresenter < BasePresenter
     # NOTE: requires image, or defaults to 1:1. Be sure it works in all cases
     img_width = image&.width ? BigDecimal(image&.width) : 100
     img_height = image&.height ? BigDecimal(image&.height) : 100
-    img_proportion = (BigDecimal(img_height / img_width) * 100).to_f.truncate(1)
+    img_proportion = BigDecimal(img_height / img_width)
+    img_padding = (img_proportion * 100).to_f.truncate(1)
     # Limit proportion 2:1 h/w for thumbnail
-    img_proportion = "150" if img_proportion.to_i > 150 # default for tall
-    self.proportion = img_proportion
+    img_padding = "150" if img_padding.to_i > 150 # default for tall
+    self.proportion = img_padding
 
     if args[:context] == :matrix_box
       self.width = false

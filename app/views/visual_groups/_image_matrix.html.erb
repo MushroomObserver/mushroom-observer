@@ -5,7 +5,8 @@
                locals: {objects: @subset}) do |row| %>
         <%= matrix_box(id: row[0]) do %>
           <%= panel_block do %>
-            <%= thumbnail(row[0], original: true, votes: false) %>
+            <%= thumbnail(row[0], original: true, votes: false,
+                                  context: :matrix_box) %>
             <%= render(partial: "visual_group_status_links",
                        locals: {
                          visual_group: visual_group,
