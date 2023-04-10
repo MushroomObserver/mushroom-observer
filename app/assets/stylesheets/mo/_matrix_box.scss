@@ -80,7 +80,7 @@ h5.rss-heading {
   text-overflow: ellipsis;
 }
 
-@media screen and (max-width: 767px) {
+@include media-breakpoint-down(sm) {
   .rss-box-details {
     height: auto !important;
   }
