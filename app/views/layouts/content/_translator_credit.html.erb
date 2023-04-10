@@ -1,6 +1,6 @@
 <% lang = Language.find_by_locale(I18n.locale) %>
 <% if lang && (!lang.official || Language.tracking_usage) %>
-  <div id="translators_credit" class="hidden-print">
+  <div id="translators_credit" class="d-print-none">
     <hr/>
     <% if !lang.official %>
       <%= :app_translators_credit.t %>:

@@ -20,7 +20,7 @@
         image_vote_link(image, vote)
       end.safe_join("|") %>
     </div><!-- .text-center.small -->
-    <span class="hidden data_container" data-id="<%= image.id %>"
+    <span class="d-none data_container" data-id="<%= image.id %>"
           data-percentage="<%= vote_percentage %>" data-role="image_vote_percentage"></span>
   </div>
 </div>

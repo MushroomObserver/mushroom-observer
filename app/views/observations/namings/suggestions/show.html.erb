@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @owner_naming = owner_naming_line(@observation) # must before show_obs_title
   @title = show_obs_title(obs: @observation, owner_naming: @owner_naming)
   num_images = @observation.images.length
@@ -12,7 +12,7 @@
 %>
 
 <div class="row">
-  <div class="col-sm-8 float-sm-left">
+  <div class="col-12 col-md-8">
 
     <% last_level = nil
        @suggestions.reject(&:useless?).sort_by(&:max).reverse.each do |sugg| %>
@@ -45,7 +45,7 @@
                                   name: sugg.name.search_name,
                                   ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"
                                 ),
-                                { class: "btn btn-default mt-3" }) %>
+                                { class: "btn btn-secondary mt-3" }) %>
             <% end %>
             <br/><br/>
             <b><%= :suggestions_confidence.t %>:</b><br/>
@@ -68,7 +68,7 @@
     </tbody></table>
 
   </div>
-  <div class="col-sm-4 float-sm-right">
+  <div class="col-12 col-md-4">
     <%= render(partial: "observations/show/images",
                locals: { observation: @observation }) %>
   </div>

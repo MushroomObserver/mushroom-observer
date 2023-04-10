@@ -742,20 +742,20 @@ function MultiImageUploader(localized_text) {
 
       //reset selections
 
-      //remove hidden from the links
-      jQuery('[data-role="set_as_default_thumbnail"]').removeClass('hidden');
-      //add hidden to the default thumbnail text
-      jQuery('.is_default_thumbnail').addClass('hidden');
-      //reset teh chcked default thumbnail
+      //remove d-none from the links
+      jQuery('[data-role="set_as_default_thumbnail"]').removeClass('d-none');
+      //add d-none to the default thumbnail text
+      jQuery('.is_default_thumbnail').addClass('d-none');
+      //reset the checked default thumbnail
       jQuery('input[type="radio"][name="observation[thumb_image_id]"]').prop('checked', false);
 
 
       //set selections
 
-      //add hidden to the link clicked
-      $this.addClass('hidden');
+      //add d-none to the link clicked
+      $this.addClass('d-none');
       //show that the image is default
-      $this.siblings('.is_default_thumbnail').removeClass('hidden');
+      $this.siblings('.is_default_thumbnail').removeClass('d-none');
       //adjust hidden radio button to select default thumbnail
       $this.siblings('input[type="radio"][name="observation[thumb_image_id]"]').prop('checked', true);
 

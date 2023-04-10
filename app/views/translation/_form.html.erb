@@ -1,3 +1,5 @@
+<%# bs4 TODO: can this form submit to rails controller js? %>
+
 <%= hidden_field_tag(:tag, @tag) %>
 
 <!-- Show "official" text at top -->
@@ -8,7 +10,7 @@
 
   <% @edit_tags.each do |tag| %>
     <% if record = @official_records[tag] %>
-      <span class="underline"><%= h(tag) %>:</span>
+      <span class="text-underline"><%= h(tag) %>:</span>
       <p><%=
         str = record.text.gsub(/\\n/, "\n")
         h(str).gsub("\n", "<br/>\n")
@@ -53,18 +55,20 @@
   <div class="form-group">
     <%= label_tag("tag_#{tag}", tag) %>
     <span><%= "(" + notes.safe_join(", ") + ")" if notes.any? %></span><br/>
-    <%= text_area_tag("tag_#{tag}", str, rows: rows, class: "form-control pb-2") %>
+    <%= text_area_tag("tag_#{tag}", str, rows: rows,
+                      class: "form-control pb-2") %>
   </div>
 
 <% end %>
 
 <div class="center-text">
-  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn btn-default pl-4") %>
-  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn btn-default pl-4",
+  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn btn-secondary pl-4") %>
+  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn btn-secondary pl-4",
                  type: "cancel") %>
-  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn btn-default pl-4",
+  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn btn-secondary pl-4",
                  type: "button", data: {tag: @tag}) %>
-  <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale),
+  <%= select_tag(:locale,
+                 options_for_select(Language.menu_options, @lang.locale),
                  class: "pl-4", data: {tag: @tag}) %>
 </div>
 

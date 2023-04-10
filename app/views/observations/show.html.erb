@@ -1,4 +1,5 @@
-<%
+<% # bs4
+  # TODO: replace with full width carousel - details, then columns
   @owner_naming = owner_naming_line(@observation) # must before show_obs_title
   @title = show_obs_title(obs: @observation, owner_naming: @owner_naming)
   @tabsets = show_observation_tabset(obs: @observation, user: @user,
@@ -13,12 +14,26 @@
 %>
 
 <div class="row">
-  <div class="col-sm-8 col-lg-7 float-sm-left">
+
+  <div class="col-12 col-md-8 col-xl-7">
     <%= panel_block(id: "observation_details", class: "name-section") do
       render(partial: "observations/show/observation", locals: obs_locals)
     end %>
+    <%# note the following is duplicated below for layout order %>
+    <%# mobile should be details - map - namings %>
+    <div class="d-none d-md-block">
+      <% if @user %>
+        <%= render(partial: "observations/show/namings", locals: obs_locals) %>
+      <% end %>
+
+      <%= render(partial: "comments/comments_for_object",
+                locals: { object: @observation, controls: true, limit: nil }) %>
+
+      <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
+    </div>
   </div>
-  <div class="col-sm-4 col-lg-5 float-sm-right">
+
+  <div class="col-12 col-md-4 col-xl-5">
     <% if @user %>
       <%= panel_block(id: "observation_name_info",
                       class: "name-section small") do
@@ -50,7 +65,7 @@
     <%= render(partial: "observations/show/images", locals: obs_locals) %>
   </div>
 
-  <div class="col-sm-8 col-lg-7 float-sm-left">
+  <div class="col-12 d-md-none">
     <% if @user %>
       <%= render(partial: "observations/show/namings", locals: obs_locals) %>
     <% end %>

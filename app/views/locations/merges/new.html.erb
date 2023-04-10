@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @title ||= :list_merge_options_title.t(where: @where)
   @container = :wide
   # NOTE: the "forms" are patch buttons in the "row" partial
@@ -8,7 +8,7 @@
 <div class="row">
 
   <% if @matches.any? %>
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6">
       <div class="h4">
         <%= :list_merge_options_near_matches.t %>
       </div>
@@ -21,7 +21,7 @@
   <% end %>
 
   <% if @others.any? %>
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6">
       <div class="h4">
         <%= :list_merge_options_others.t %>
       </div>

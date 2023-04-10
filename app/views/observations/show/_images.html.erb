@@ -1,10 +1,12 @@
-<% if observation.images.any? || check_permission(observation) %>
+<% #bs4
+if observation.images.any? || check_permission(observation)
+%>
   <div class="row">
-    <div class="col-sm-6 col-md-4">
+    <div class="col-12 col-md-6 col-lg-4">
       <%= content_tag(:h4, :IMAGES.t, class: "mt-0") %>
     </div>
-    <% if check_permission(observation) %>
-      <div class="col-sm-6 col-md-8 float-sm-right">
+    <% if check_permission(observation) # header links for image things %>
+      <div class="col-12 col-md-6 col-lg-8">
         <small>
           <%= link_with_query(:show_observation_add_images.t,
                               new_image_for_observation_path(observation.id)) %>

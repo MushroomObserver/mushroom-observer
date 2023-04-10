@@ -27,7 +27,7 @@ module MatrixBoxHelper
                locals: { naming: nam })
       end
     else
-      propose_naming_link(object.id, "btn-default mb-3")
+      propose_naming_link(object.id, "btn-secondary mb-3")
     end
   end
 
@@ -36,7 +36,7 @@ module MatrixBoxHelper
 
     content_tag(
       :div,
-      class: "panel-footer log-footer"
+      class: "card-footer log-footer"
     ) do
       if presenter.detail.present?
         concat(content_tag(:div, presenter.detail, class: "rss-detail small"))
@@ -52,7 +52,7 @@ module MatrixBoxHelper
 
     content_tag(
       :div,
-      class: "panel-footer panel-active text-center position-relative"
+      class: "card-footer card-active text-center position-relative"
     ) do
       mark_as_reviewed_toggle(object_id, "box_reviewed", "stretched-link")
     end

@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @title ||= @description.format_name.t
   @tabsets = show_description_tabset(description: @description, pager: false)
   @container = :wide
@@ -7,12 +7,12 @@
 <%= panel_block do %>
   <div class="row">
 
-    <div class="col-xs-12 col-md-6">
+    <div class="col-12 col-lg-6">
       <%= render( partial: "shared/show_description",
                   locals: { description: @description }) %>
     </div><!-- .col -->
 
-    <div class="col-xs-12 col-md-6">
+    <div class="col-12 col-lg-6">
       <%= show_alt_descriptions(object: @name, projects: @projects) %>
     </div><!-- .col -->
 

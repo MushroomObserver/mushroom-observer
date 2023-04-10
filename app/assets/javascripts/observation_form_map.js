@@ -1,5 +1,6 @@
 // Observation Form Map - Lat/Long/Alt Helper
 /* globals $, google */
+// TODO: Fix close map toggle, maybe make this a Bootstrap collapse div?
 
 // This key is configured in Google Cloud Platform.
 // It is a public key that accepts requests only from mushroomobserver.org/*
@@ -16,9 +17,9 @@ $(document).ready(function () {
     opened = true;
     var indicator_url = map_div.dataset.indicatorUrl //("indicator-url");
 
-    map_div.classList.remove("hidden");
+    map_div.classList.remove("d-none");
     map_div.style.backgroundImage = "url(" + indicator_url + ")";
-    $('.map-clear').removeClass("hidden");
+    $('.map-clear').removeClass("d-none");
     $('.map-open').hide();
 
     $.getScript(GMAPS_API_SCRIPT, function () {

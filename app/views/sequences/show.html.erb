@@ -1,4 +1,4 @@
-<%
+<% #bs4 TODO: check
   @title = @sequence.unique_format_name
 
   tabs = [
@@ -30,8 +30,8 @@
 <table class="table-namings">
   <thead>
     <tr>
-      <th class="col-md-1"></th>
-      <th class="col-md-11"></th>
+      <th class="col-12 col-lg-1"></th>
+      <th class="col-12 col-lg-11"></th>
     </tr>
   </thead>
   <tbody>
@@ -60,7 +60,7 @@
     <% end %>
     <tr align="center">
       <td colspan="2">
-        <button type="button" class="btn btn-default">
+        <button type="button" class="btn btn-secondary">
           <%= link_to(:show_observation_blast_link.t,
                       @sequence.blast_url, target: "_blank") %>
         </button>

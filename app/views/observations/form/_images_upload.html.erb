@@ -1,4 +1,4 @@
-<%# Images upload section of create_observation form %>
+<%# bs4 Images upload section of create_observation form %>
 
 <div class="my-4" id="observation_images_upload">
 
@@ -18,7 +18,7 @@
       var CHANGED_DATES = [];
     ) %>
 
-    <div id="image_forms" class="col-xs-12 col-sm-6">
+    <div id="image_forms" class="col-12 col-md-6">
       <%
       i = 0
       @images.push(@new_image)
@@ -34,7 +34,7 @@
       onclick="image_new();"
       type="button"
       value="<%= :form_observations_upload_another.t %>"
-      class="btn btn-default"/>
+      class="btn btn-secondary"/>
 
     <% javascript_include("single_image_uploader") %>
 

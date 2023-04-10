@@ -9,11 +9,11 @@
 <div class="row">
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
   <%= content_tag(:div, safe_nbsp,
-                  class: "hidden-print visible-xs visible-sm mt-4") %>
+                  class: "d-block d-lg-none d-print-none mt-4") %>
 
-  <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title_bar">
+  <div class="col-<%= @tabsets[:right] ? 8 : 12 %>" id="title_bar">
     <!-- Pager -->
-    <%= content_tag(:div, class: "hidden-print") do
+    <%= content_tag(:div, class: "d-print-none") do
           if @tabsets[:pager_for]
             render(partial: "layouts/content/prev_next_pager",
                   locals: { object: @tabsets[:pager_for] })
@@ -34,23 +34,23 @@
   <!-- Tabsets -->
   <%= content_tag_if(@tabsets[:right], :div, @tabsets[:right],
                     id: "right_tabs",
-                    class: "hidden-print text-right col-sm-4 mb-3") %>
+                    class: "col-12 col-md-4 text-right mb-3 d-print-none") %>
 
   <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
-                    class: "hidden-print col-xs-12") %>
+                    class: "col-12 d-print-none") %>
 
   <!-- Sorter -->
   <% if @sorts %>
-    <div class="hidden-print col-xs-12">
+    <div class="col-12 d-print-none">
       <div class="pt-3">
         <%= content_tag(:span, :sort_by_header.t) %>
         <div id="sorts" class="btn-group btn-group-xs" role="group">
           <% @sorts.each do |title, action| %>
             <%= if action.nil?
-                  link_with_query(title, {}, class: "btn btn-default active",
+                  link_with_query(title, {}, class: "btn btn-secondary active",
                                               disabled: true)
                 else
-                  link_with_query(title, action, class: "btn btn-default")
+                  link_with_query(title, action, class: "btn btn-secondary")
                 end %>
           <% end %>
         </div>

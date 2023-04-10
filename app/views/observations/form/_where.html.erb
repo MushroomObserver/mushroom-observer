@@ -1,5 +1,7 @@
 <%# Where (location) section of create_observation form
-    including location autocomplete, map, lat/long/alt %>
+    including location autocomplete, map, lat/long/alt
+    TODO: make map bootstrap collapse
+    %>
 
 <!-- WHERE_REASONS -->
 <%= render(partial: "shared/form_location_feedback",
@@ -63,13 +65,13 @@
     <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
     <%= content_tag(:div, "",
                     id: "observation_form_map",
-                    class: "observation-form-map hidden",
+                    class: "observation-form-map d-none",
                     data: { indicator_url: asset_path('indicator.gif') } ) %>
     <div>
       <%= js_button(button: :form_observations_open_map.t,
                     name: "map-open", class: "map-open") %>
       <%= js_button(button: :form_observations_clear_map.t,
-                    name: "map-clear", class: "map-clear") %>
+                    name: "map-clear", class: "map-clear d-none") %>
     </div>
   </div>
   <div class="col-sm-6">

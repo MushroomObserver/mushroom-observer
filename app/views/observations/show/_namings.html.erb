@@ -1,4 +1,4 @@
-<%
+<% #bs4
 logged_in = @user&.verified
 do_suggestions = logged_in && observation.thumb_image_id.present? &&
                   (@user.admin ||
@@ -23,9 +23,9 @@ eyes = content_tag(:div,
   <!--HELP TEXT AND EYES -->
   <div class="float-sm-right text-right my-2 ml-3"><%= buttons %></div>
   <div class="help-block container-text my-2"><%= help %></div>
-  <div class="row hidden-xs">
-    <div class="col-xs-6"><%= eye %></div>
-    <div class="col-xs-6"><%= eyes %></div>
+  <div class="row d-none d-md-block">
+    <div class="col-md-6"><%= eye %></div>
+    <div class="col-md-6"><%= eyes %></div>
   </div>
   <!--/HELP TEXT AND EYES -->
 

@@ -1,4 +1,4 @@
-<%# filter for identify observations index %>
+<%# bs4 filter for identify observations index %>
 <%# Replaces the usual pattern_search form in the top nav %>
 
 <%# TODO: make the form input have selects with autocomplete that send the ID %>
@@ -37,9 +37,9 @@ options = [
                { class: "form-control",
                  onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
 
-  <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
+  <%= f.submit(:SEARCH.l, class: "btn btn-secondary") %>
 
-  <%= f.submit(:CLEAR.l, class: "btn btn-default") %>
+  <%= f.submit(:CLEAR.l, class: "btn btn-secondary") %>
 
   <% turn_into_clade_auto_completer(:filter_term) %>
 

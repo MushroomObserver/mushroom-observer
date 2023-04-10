@@ -5,7 +5,6 @@
 //= require bootstrap-sprockets
 //= require jstz
 //= require autocomplete
-//= require box_resizer
 //= require lazyload_verlok
 //= require csrf_token
 //= require external_link

@@ -1,3 +1,4 @@
+<%# bs4 %>
 <!--[form:image]-->
 <%= :form_observations_upload_help.tp %>
 <% @image = @images[index] %>
@@ -10,11 +11,11 @@
                           onchange: "auto_image_new(#{index})") %>
 
     <% if @js %>
-      <span class="ml-10px">&nbsp;</span>
+      <span class="ml-2">&nbsp;</span>
       <input id="image_<%=index%>_more" onclick="image_on(<%=index%>);"
-            type="button" class="btn btn-default" value="<%=:MORE.t%> »" />
+            type="button" class="btn btn-secondary" value="<%=:MORE.t%> »" />
       <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);"
-            type="button" class="btn btn-default" value="« <%=:LESS.t%>"
+            type="button" class="btn btn-secondary" value="« <%=:LESS.t%>"
             style="display:none" />
     <% end %>
   </div>

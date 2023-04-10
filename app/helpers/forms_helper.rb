@@ -10,8 +10,8 @@ module FormsHelper
     end
 
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
+    opts[:class] = "btn btn-primary"
+    opts[:class] += " mx-auto my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
     args[:form].submit(args[:button], opts)
@@ -20,8 +20,8 @@ module FormsHelper
   # form-agnostic button, type=button
   def js_button(**args)
     opts = args.except(:form, :button, :class, :center)
-    opts[:class] = "btn btn-default"
-    opts[:class] += " center-block my-3" if args[:center] == true
+    opts[:class] = "btn btn-primary"
+    opts[:class] += " mx-auto my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
     button_tag(args[:button], type: :button, **opts)
@@ -256,7 +256,7 @@ module FormsHelper
   # Bootstrap file input field with client-side size validation.
   def file_field_with_label(**args)
     opts = separate_field_options_from_args(args)
-    input_span_class = "file-field btn btn-default"
+    input_span_class = "file-field btn btn-primary"
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
     opts = opts.merge(
@@ -294,7 +294,7 @@ module FormsHelper
       )
     )
     content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
+                class: "file-field btn btn-primary") +
       content_tag(:span, :no_file_selected.t)
   end
 

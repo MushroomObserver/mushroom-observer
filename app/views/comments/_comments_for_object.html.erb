@@ -1,4 +1,4 @@
-<%
+<% #bs4
   comments = object.comments.includes(:user).sort_by(&:created_at).reverse
   if limit
     and_more = comments.length - limit
@@ -12,12 +12,12 @@
   <%= link_with_query(:show_comments_add_comment.t,
                       new_comment_path(target: object.id,
                                        type: object.class.name),
-                      class: "btn btn-default pull-right",
+                      class: "btn btn-primary float-right",
                       remote: true) if controls %>
 
   <div class="list-group comments">
     <% if comments.empty? %>
-      <div class="list-group-item default">
+      <div class="list-group-item">
         <%= :show_comments_no_comments_yet.t %>
       </div>
     <% else %>

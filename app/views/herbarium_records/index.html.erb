@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @title ||= :list_herbarium_records_title.t
 
   tabs = create_links(@links)
@@ -22,7 +22,7 @@
                     edit_herbarium_record_path(
                       id: rec.id, back: :index, q: get_query_param
                     ),
-                    class: "btn btn-default btn-sm",
+                    class: "btn btn-secondary btn-sm",
                     id: "edit_herbarium_record_link_#{rec.id}"
                   )
                 end %>
@@ -48,7 +48,7 @@
                   destroy_button(
                     name: :destroy_object.t(type: :herbarium_record),
                     target: herbarium_record_path(rec.id),
-                    class: "btn btn-default btn-sm",
+                    class: "btn btn-secondary btn-sm",
                     id: "destroy_herbarium_record_link_#{rec.id}"
                   )
                 end %>

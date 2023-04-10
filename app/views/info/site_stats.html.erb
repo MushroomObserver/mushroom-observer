@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @title = :show_site_stats_title.t
 
   tabs = [
@@ -10,7 +10,7 @@
 %>
 
 <div class="row mt-3">
-  <div class="hidden-xs col-md-3">
+  <div class="d-none d-lg-block col-lg-3">
     <% obs_length = @observations ? @observations.length : 0
     if obs_length > 0 %>
       <% @observations[0,3].each do |obs| %>
@@ -24,7 +24,7 @@
     <% end %>
   </div><!--.row-->
 
-  <div class="col-md-6 center-block">
+  <div class="col-lg-6 mx-auto">
     <table class="table">
       <% fields = [
         :images,
@@ -59,7 +59,7 @@
     </table>
   </div>
 
-  <div class="hidden-xs col-md-3">
+  <div class="d-none d-lg-block col-lg-3">
     <% if obs_length > 3 %>
       <% @observations[3,3].each do |obs| %>
         <%= thumbnail(obs.thumb_image,

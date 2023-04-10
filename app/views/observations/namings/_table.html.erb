@@ -10,11 +10,17 @@ votes = gather_users_votes(observation, @user)
 <div class="namings-table" id="namings_table">
   <div class="container-fluid">
     <header class="row">
-      <div class="col col-xs-12 col-sm-3"><%= header[:heading] %></div>
-      <div class="col col-sm-3 hidden-xs"><%= header[:user_name] %></div>
-      <div class="col col-sm-2 hidden-xs"><%= header[:consensus_vote] %></div>
-      <div class="col col-sm-3 hidden-xs"><%= header[:your_vote] %></div>
-      <div class="col col-sm-1 hidden-xs"></div>
+      <div class="col-12 col-md-3"><%= header[:heading] %></div>
+      <div class="col-12 col-md-3 d-none d-md-block">
+        <%= header[:user_name] %>
+      </div>
+      <div class="col-12 col-md-2 d-none d-md-block">
+        <%= header[:consensus_vote] %>
+      </div>
+      <div class="col-12 col-md-3 d-none d-md-block">
+        <%= header[:your_vote] %>
+      </div>
+      <div class="col-12 col-md-1 d-none d-md-block"></div>
     </header>
   </div>
 

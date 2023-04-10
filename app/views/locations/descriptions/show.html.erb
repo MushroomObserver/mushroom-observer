@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @title ||= @description.format_name.t
 
   @tabsets = show_description_tabset(description: @description, pager: true)
@@ -6,11 +6,11 @@
 %>
 
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-12 col-lg-6">
     <%= render(partial: "shared/show_description",
               locals: {description: @description}) %>
   </div>
-  <div class="col-md-6">
+  <div class="col-12 col-lg-6">
     <%= show_alt_descriptions(object: @location, projects: @projects) %>
   </div>
 </div><!--.row-->

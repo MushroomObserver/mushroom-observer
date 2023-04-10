@@ -1,4 +1,4 @@
-<%
+<% #bs4
   @title ||= :list_collection_numbers_title.t
 
   tabs = create_links(@links)
@@ -18,7 +18,7 @@
               link_with_query(:EDIT.t,
                 edit_collection_number_path(id: collection_number.id,
                                             params: { back: :index }),
-                class: "btn btn-default btn-sm")
+                class: "btn btn-secondary btn-sm")
             end %>
           </td>
           <td>

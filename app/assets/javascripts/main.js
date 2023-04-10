@@ -18,8 +18,7 @@ jQuery(document).ready(function () {
   jQuery('[data-toggle="offcanvas"]').on('click', function () {
     jQuery(document).scrollTop(0);
     jQuery('.row-offcanvas').toggleClass('active');
-    jQuery('#main_container').toggleClass('hidden-overflow-x');
-
+    jQuery('#main_container').toggleClass('overflow-x-hidden');
   });
 
   // SEARCH BAR FINDER

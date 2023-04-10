@@ -14,7 +14,7 @@ module ContentHelper
 
   # draw a help block with an arrow
   def help_block_with_arrow(direction = nil, **args, &block)
-    div_class = "well well-sm help-block position-relative"
+    div_class = "card help-block position-relative"
     div_class += " mt-3" if direction == "up"
 
     content_tag(:div, class: div_class,
