@@ -1,6 +1,6 @@
 <!-- IMAGE_PANEL -->
-<div class="panel panel-default">
-  <div class="panel-heading">
+<div class="card bg-secondary">
+  <div class="card-header">
     <div class="text-center small image-controls">
       <% if check_permission(@image) %>
         <%= put_button(name: :image_show_rotate_left.t,
@@ -23,8 +23,8 @@
       <%= image_exif_link(@image.id, "") %>
 
     </div><!--.text-center-->
-  </div><!--.panel-heading-->
-  <div class="panel-body">
+  </div><!--.card-header-->
+  <div class="card-body">
 
     <%= thumbnail(@image,
                   size: :medium,
@@ -59,6 +59,6 @@
       <% end %>
     </div>
 
-  </div><!--.panel-body-->
-</div><!--.panel-->
+  </div><!--.card-body-->
+</div><!--.card-->
 <!-- /IMAGE_PANEL -->

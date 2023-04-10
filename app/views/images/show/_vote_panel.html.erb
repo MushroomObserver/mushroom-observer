@@ -6,13 +6,13 @@ votes = find_list_of_votes(@image)
 <div id="image_vote_content" class="card bg-secondary">
 
   <!-- CURRENT_VOTE -->
-  <div class="card-heading">
+  <div class="card-header">
     <b><%= :image_show_quality.t %></b>:
     <span class="small"><%=
       vote = (@image.vote_cache + 0.5).to_i rescue 0
       image_vote_as_long_string(vote).t
     %></span>
-  </div>
+  </div><!-- .card-header -->
   <!-- /CURRENT_VOTE -->
 
   <div class="card-body py-2">
@@ -55,7 +55,7 @@ votes = find_list_of_votes(@image)
       </div>
     <% end %>
     <!-- /YOUR_VOTE -->
-  </div><!-- .panel-body -->
+  </div><!-- .card-body -->
 
   <!-- VOTE_TABLE -->
   <div id="show_votes_container">
