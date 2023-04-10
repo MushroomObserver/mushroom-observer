@@ -4,7 +4,11 @@
 
   <!-- GOOD_IMAGE -->
   <div class="col-xs-1" style="max-width:30px">
-    <%= f.radio_button(:thumb_image_id, image.id) %>
+    <div class="form-check">
+      <%= f.radio_button(:thumb_image_id, image.id,
+                         class: "form-check-input position-static",
+                         aria: { label: "Make this the default thumbnail" }) %>
+    </div><!--.form-check-->
   </div><!--.col-->
 
   <div class="col-xs-11 col-sm-3">
