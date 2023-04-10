@@ -22,7 +22,7 @@ module ContentHelper
       concat(capture(&block).to_s)
       if direction
         arrow_class = "arrow-#{direction}"
-        arrow_class += " hidden-xs" unless args[:mobile]
+        arrow_class += " d-none d-md-block" unless args[:mobile]
         concat(content_tag(:div, "", class: arrow_class))
       end
     end

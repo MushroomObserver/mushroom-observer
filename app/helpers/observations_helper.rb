@@ -168,7 +168,7 @@ module ObservationsHelper
 
     # row props have mobile-friendly labels
     [content_tag(:small, "#{:show_namings_user.t}: ",
-                 class: "visible-xs-inline mr-4"),
+                 class: "d-inline d-md-none mr-4"),
      user_link].safe_join
   end
 
@@ -182,7 +182,7 @@ module ObservationsHelper
 
     # row props have mobile-friendly labels
     [content_tag(:small, "#{:show_namings_consensus.t}: ",
-                 class: "visible-xs-inline mr-4"),
+                 class: "d-inline d-md-none mr-4"),
      content_tag(:span, consensus_votes)].safe_join
   end
 
@@ -206,7 +206,7 @@ module ObservationsHelper
   def your_vote_html(naming)
     # row props have mobile-friendly labels
     [content_tag(:small, "#{:show_namings_your_vote.t}: ",
-                 class: "visible-xs-block"),
+                 class: "d-block d-md-none"),
      render(partial: "observations/namings/votes/form",
             locals: { naming: naming })].safe_join
   end

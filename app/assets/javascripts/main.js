@@ -27,7 +27,7 @@ jQuery(document).ready(function () {
     jQuery(document).scrollTop(0);
     var target = jQuery(this).data().target;
     // jQuery(target).css('margin-top', '32px');
-    jQuery(target).toggleClass('hidden-xs');
+    jQuery(target).toggleClass('d-none d-md-block');
   });
 
   jQuery('[data-dismiss="alert"]').on('click', function () {
