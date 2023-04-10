@@ -29,7 +29,7 @@ identify_page = controller.controller_name == "identify"
 %>
 
 <%= form_with(url: search_pattern_path, method: :get,
-              class: "navbar-form navbar-left px-0",
+              class: "form-inline px-0",
               id: "pattern_search_form") do |f| %>
 
   <%= fields_for(:search) do |f_s| %>
