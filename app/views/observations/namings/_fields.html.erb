@@ -65,8 +65,8 @@ select_opts = { include_blank: (action == :create) }
 
       <%= f_n.fields_for(:reasons) do |f_r| %>
         <% reasons.values.sort_by(&:order).each do |r| %>
-          <div class="checkbox">
-            <%= f_r.label("#{r.num}_check",
+          <div class="form-check">
+            <%= f_r.label("#{r.num}_check", class: "form-check-label",
                           { data: {
                               toggle: "collapse",
                               target: "#reasons_#{r.num}_notes"
@@ -79,7 +79,7 @@ select_opts = { include_blank: (action == :create) }
                         :check,
                         { index: r.num,
                           checked: r.used?,
-                          class: "" },
+                          class: "form-check-input" },
                         "1") %>
               <%= r.label.t %>
             <% end  # label %>

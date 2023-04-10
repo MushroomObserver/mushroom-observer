@@ -7,14 +7,14 @@ module ContentHelper
     content_tag(element, string, class: "help-note mr-3")
   end
 
-  # make a help-block styled element, like a div, p
+  # make a form-text styled element, like a div, p
   def help_block(element = :div, string = "")
-    content_tag(element, string, class: "help-block")
+    content_tag(element, string, class: "form-text")
   end
 
   # draw a help block with an arrow
   def help_block_with_arrow(direction = nil, **args, &block)
-    div_class = "card help-block position-relative"
+    div_class = "card form-text position-relative"
     div_class += " mt-3" if direction == "up"
 
     content_tag(:div, class: div_class,

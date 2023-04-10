@@ -44,7 +44,7 @@
     <div class="col-12 d-print-none">
       <div class="pt-3">
         <%= content_tag(:span, :sort_by_header.t) %>
-        <div id="sorts" class="btn-group btn-group-xs" role="group">
+        <div id="sorts" class="btn-group btn-group-sm" role="group">
           <% @sorts.each do |title, action| %>
             <%= if action.nil?
                   link_with_query(title, {}, class: "btn btn-secondary active",

@@ -11,13 +11,14 @@ $help-block-max-width: 600px;
   }
 }
 
+// .help-block is now .form-text
 // $WELL_FG_COLOR only differs from $panel-default-text in Amanita
-.help-note,
-.help-block {
-  color: $WELL_FG_COLOR;
-}
+// .help-note,
+// .form-text {
+//   color: $WELL_FG_COLOR;
+// }
 
-.help-block {
+.form-text {
   max-width: $help-block-max-width;
 }
 

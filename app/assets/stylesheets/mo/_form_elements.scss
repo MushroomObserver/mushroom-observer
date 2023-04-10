@@ -1,7 +1,7 @@
 // form elements and inputs
 
-.checkbox,
-.radio {
+// .checkbox and .radio are now .form-check
+.form-check {
   label {
     font-weight: $btn-font-weight;
   }

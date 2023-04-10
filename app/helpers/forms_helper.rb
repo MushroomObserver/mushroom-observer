@@ -68,11 +68,12 @@ module FormsHelper
   def check_box_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
+    opts[:class] = "form-check-input"
 
-    wrap_class = form_group_wrap_class(args, "checkbox")
+    wrap_class = form_group_wrap_class(args, "form-check")
 
     content_tag(:div, class: wrap_class) do
-      args[:form].label(args[:field]) do
+      args[:form].label(args[:field], class: "form-check-label") do
         concat(args[:form].check_box(args[:field], opts))
         concat(args[:label])
       end
@@ -83,11 +84,13 @@ module FormsHelper
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args, [:value])
+    opts[:class] = "form-check-input"
 
-    wrap_class = form_group_wrap_class(args, "radio")
+    wrap_class = form_group_wrap_class(args, "form-check")
 
     content_tag(:div, class: wrap_class) do
-      args[:form].label("#{args[:field]}_#{args[:value]}") do
+      args[:form].label("#{args[:field]}_#{args[:value]}",
+                        class: "form-check-label") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
       end
