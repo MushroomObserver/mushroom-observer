@@ -2,23 +2,24 @@
 // top nav bar
 // --------------------------------------------------
 
-.navbar-light {
+#top_nav {
   border-width: 1px;
   border-style: solid;
   border-radius: 0;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
-  border-right-width: 0px;
+  border-right-width: 0;
+  border-left-width: 0;
   padding: 0px;
 
   a,
   a:visited {
-    color: $navbar-light-link-color;
+    color: $navbar-light-color;
     // background-color: $navbar-light-link-active-bg;
   }
 
   a:hover {
-    color: $navbar-light-link-hover-color;
+    color: $navbar-light-hover-color;
     // background-color: $navbar-light-link-hover-bg;
   }
 
@@ -34,7 +35,7 @@
     padding-right: 8px;
 
     &:hover {
-      color: $navbar-light-link-hover-color !important;
+      color: $navbar-light-hover-color !important;
       // background-color: $navbar-light-link-hover-bg !important;
     }
   }

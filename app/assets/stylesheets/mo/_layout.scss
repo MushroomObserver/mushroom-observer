@@ -1,7 +1,7 @@
 //
 // layout: sidebar offcanvas and right_side
 // --------------------------------------------------
-$sidebar-max-width: 18rem;
+$sidebar-max-width: 12rem;
 
 .sidebar-offcanvas {
   max-width: $sidebar-max-width;
@@ -10,11 +10,12 @@ $sidebar-max-width: 18rem;
 // https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
 @include media-breakpoint-up(md) {
   .sidebar-offcanvas {
-    width: $sidebar-max-width !important;
+    width: $sidebar-max-width;
   }
 
   #right_side {
-    width: calc(100% - #{$sidebar-max-width}) !important;
+    flex: 0 0 calc(100% - #{$sidebar-max-width});
+    max-width: calc(100% - #{$sidebar-max-width});
   }
 }
 

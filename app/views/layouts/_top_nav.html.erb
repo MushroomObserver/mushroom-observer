@@ -1,6 +1,6 @@
 <%# bs4 %>
-<!--SEARCH_BAR-->
-<nav id="search_bar"
+<!--top_nav-->
+<nav id="top_nav"
      class="navbar navbar-light bg-secondary navbar-expand-md d-print-none">
 
   <div class="container-fluid px-0 justify-content-between">
@@ -8,15 +8,15 @@
       <% if controller.controller_name == "identify" %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else ##user is logged in %>
-        <%= render(partial: "layouts/search_bar/search_form") %>
+        <%= render(partial: "layouts/top_nav/search_form") %>
       <% end %>
     </div>
 
     <div class="top-bar-right">
       <% if @user.nil? %>
-        <%= render(partial: "layouts/search_bar/login") %>
+        <%= render(partial: "layouts/top_nav/login") %>
       <% else ##user is logged in %>
-        <%= render(partial: "layouts/search_bar/user_nav") %>
+        <%= render(partial: "layouts/top_nav/user_nav") %>
       <% end %>
     </div>
   </div>

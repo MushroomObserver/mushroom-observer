@@ -98,18 +98,19 @@
 }
 
 .spinner-right {
-  @extend .glyphicon, .glyphicon-repeat;
+  // @extend .glyphicon, .glyphicon-repeat;
+  @extend .fas, .fa-spinner, .fa-spin;
 
   line-height: 1.1 !important;
-  animation: spin-r 1s infinite linear;
+  // animation: spin-r 1s infinite linear;
 }
 
-@keyframes spin-r {
-  0% {
-    transform: rotate(0deg);
-  }
+// @keyframes spin-r {
+//   0% {
+//     transform: rotate(0deg);
+//   }
 
-  100% {
-    transform: rotate(359deg);
-  }
-}
+//   100% {
+//     transform: rotate(359deg);
+//   }
+// }

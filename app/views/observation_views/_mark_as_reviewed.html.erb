@@ -11,8 +11,9 @@ form_with(url: observation_view_path(id: id),
       concat(:mark_as_reviewed.t)
       concat(
         f.check_box(
-          :reviewed, class: "form-check-input",
-          { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
+          :reviewed,
+          { checked: "1", class: "form-check-input mx-3",
+            id: "#{selector}_#{id}",
             onchange: "Rails.fire(this.closest('form'), 'submit')" }
         )
       )
