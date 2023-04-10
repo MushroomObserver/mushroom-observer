@@ -1,0 +1,8 @@
+<%# passing in the objects as a collection with a partial is much faster, but not always possible if we want to render a block %>
+
+<%= content_tag(:ul, class: "row list-unstyled mt-3") do %>
+  <%= yield(object) %>
+<% end %>
+
+<%= content_tag(:div, "", class: "clearfix") %>
+

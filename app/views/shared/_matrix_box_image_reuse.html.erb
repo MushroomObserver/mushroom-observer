@@ -1,0 +1,12 @@
+<%# card for a candidate for image reuse %>
+
+<%= matrix_box(class: "text-center", id: image.id) do %>
+  <%= panel_block do %>
+    <%= thumbnail(image,
+                  image_link: form_action.merge(img_id: image.id),
+                  link_method: :post,
+                  votes: false,
+                  extra_classes: "image-to-reuse",
+                  original: true) %>
+  <% end %>
+<% end %>

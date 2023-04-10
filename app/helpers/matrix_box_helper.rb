@@ -2,9 +2,9 @@
 
 module MatrixBoxHelper
   # Use this helper to produce a standard li.matrix-box with an object id.
-  # Or, send your own column classes and other args
+  # Or, send your own column classes and other args *b4
   def matrix_box(**args, &block)
-    columns = args[:columns] || "col-xs-12 col-sm-6 col-md-4 col-lg-3"
+    columns = args[:columns] || "col-12 col-sm-6 col-lg-4 col-xl-3"
     extra_classes = args[:class] || ""
     box_id = args[:id] ? "box_#{args[:id]}" : ""
     wrap_class = "matrix-box #{columns} #{extra_classes}"
