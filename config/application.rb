@@ -68,7 +68,7 @@ module MushroomObserver
     # conspicuous, has no effect on the layout.  This is not a hack, this is
     # just a standard configuration many rails apps take advantage of.
     # Note client side validation is not working as of 2023-02-01
-    # For bootstrap 4 the class is "is-invalid"
+    # For bootstrap 4 the class is "is-invalid" or CSS :invalid
     config.action_view.field_error_proc = proc { |html_tag, _instance|
       html_tag.gsub("form-control", "form-control has-error").html_safe
     }

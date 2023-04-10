@@ -222,7 +222,7 @@ module FormsHelper
 
     content_tag(:div, class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, class: "form-control-static"))
+      concat(content_tag(:p, text, class: "form-control-plaintext"))
       concat(args[:form].hidden_field(args[:field], opts))
     end
   end
@@ -230,7 +230,7 @@ module FormsHelper
   # Bootstrap allows you to style static text like this:
   def static_text_with_label(**args)
     opts = separate_field_options_from_args(args)
-    opts[:class] = "form-control-static"
+    opts[:class] = "form-control-plaintext"
     text = opts[:text] || opts[:value] || ""
     opts.delete(:value)
 

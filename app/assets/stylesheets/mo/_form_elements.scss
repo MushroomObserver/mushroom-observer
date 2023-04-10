@@ -7,9 +7,10 @@
   }
 }
 
-input.has-error,
-textarea.has-error,
-select.has-error {
+// bs4 no longer uses .has-error, use CSS pseudo :valid
+input:invalid,
+textarea:invalid,
+select:invalid {
   border-color: theme-color("danger") !important;
 }
 

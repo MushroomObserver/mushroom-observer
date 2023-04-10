@@ -39,10 +39,10 @@ module ContentHelper
   def panel_block(**args, &block)
     content_tag(
       :div,
-      class: "panel panel-default #{args[:class]}",
+      class: "card bg-secondary #{args[:class]}",
       id: args[:id]
     ) do
-      content_tag(:div, class: "panel-body #{args[:inner_class]}") do
+      content_tag(:div, class: "card-body #{args[:inner_class]}") do
         concat(capture(&block).to_s)
       end
     end

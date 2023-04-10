@@ -284,9 +284,9 @@ module DescriptionsHelper
   #
   def notes_panel(msg = nil, &block)
     msg = capture(&block) if block
-    result = content_tag(:div, msg, class: "panel-body")
+    result = content_tag(:div, msg, class: "card-body")
     wrapper = content_tag(:div, result,
-                          class: "panel panel-default dotted-border")
+                          class: "card bg-secondary dotted-border")
     if block
       concat(wrapper)
     else

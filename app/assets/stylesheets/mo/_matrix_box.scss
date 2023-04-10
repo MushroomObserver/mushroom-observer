@@ -4,7 +4,7 @@
 
 .matrix-box {
 
-  .panel {
+  .card {
     min-height: 200px;
     margin-bottom: $grid-gutter-width;
 
@@ -16,7 +16,7 @@
   // for when the whole panel section is a link, or has a stretched link
   // rule necessary when the "link" is a checkbox <label>, not an <a>.
   // e.g. "Mark as reviewed"
-  .panel-active {
+  .card-active {
     &:hover,
     &:focus,
     .stretched-link:hover,
