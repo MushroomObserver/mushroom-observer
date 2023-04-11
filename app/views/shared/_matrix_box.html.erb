@@ -6,20 +6,20 @@ if presenter
 
   link_method ||= :get
   identify ||= false
-  columns ||= "col-12 col-sm-6 col-lg-4 col-xl-3" # maybe passed as a local
+  columns ||= "col" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
   # presenter.image_data includes context: :matrix_box where appropriate
   thumb_locals = local_assigns.
                   except(:columns, :object, :object_counter, :object_iteration).
                   merge(presenter.image_data || {})
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
-  link_heading = content_tag(:small, "(#{object_id})",
+  link_heading = content_tag(:div, "#{object_id}",
                               class: "rss-id float-right") +
                  content_tag(:span, presenter.name, class: "rss-name")
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do %>
-    <div class="card bg-secondary">
+    <div class="card h-100">
 
       <%= if presenter.image_data
         content_tag(:div, class: "thumbnail-container card-img-top") do
@@ -29,29 +29,33 @@ if presenter
 
       <div class="card-body rss-box-details">
 
-        <div class="rss-what">
-          <%= content_tag(h_element, class: "mt-0 rss-heading") do
-                link_with_query(link_heading, presenter.what.show_link_args)
-              end %>
-          <%= matrix_box_vote_or_propose_ui(identify, object) %>
-        </div><!-- .rss-what -->
+        <%=
+        link_to(presenter.what.show_link_args.merge({ q: get_query_param }),
+                class: "log-item-link") do
+          content_tag(h_element, class: "card-title rss-what d-flex flex-row justify-content-between align-items-start") do
+            concat(content_tag(:span, presenter.name, class: "rss-name"))
+            concat(content_tag(:span, object_id, class: "rss-id"))
+          end
+        end %>
+
+        <%= matrix_box_vote_or_propose_ui(identify, object) %>
 
         <% if presenter.place_name %>
-          <div class="rss-where">
-            <%= content_tag(:small) do
+          <%= content_tag(:p, class: "card-text mb-1") do
+            content_tag(:span, class: "rss-where") do
               location_link(presenter.place_name, presenter.where)
-            end %>
-          </div><!-- .rss-where -->
+            end
+          end %>
         <% end %>
 
         <% unless presenter.when.blank? %>
-          <div class="rss-what">
-            <%= content_tag(:small, class: "text-truncate") do
+          <%= content_tag(:p, class: "card-text mb-0") do
+            content_tag(:span, class: "text-truncate") do
               concat(content_tag(:span, presenter.when, class: "rss-when"))
               concat(": ")
               concat(user_link(presenter.who, nil, class: "rss-who"))
-            end %>
-          </div><!-- .rss-when -->
+            end
+          end %>
         <% end %>
 
       </div><!-- .card-body -->

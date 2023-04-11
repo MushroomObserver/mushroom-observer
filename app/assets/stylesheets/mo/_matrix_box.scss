@@ -5,12 +5,38 @@
 .matrix-box {
 
   .card {
-    min-height: 200px;
-    margin-bottom: $grid-gutter-width;
+    background-color: $gray-100;
+    transition: background-color 0.3s ease-out;
+
+    &:hover {
+      background-color: $gray-200;
+    }
 
     .thumbnail-container {
       min-height: 30px;
     }
+  }
+
+  // To make way for floating ID
+  .card-title {
+
+    // .rss-name {
+    //   margin-right: 4.5rem;
+    // }
+
+    // Standardize the size of the ID
+    .rss-id {
+      @extend .micro, .badge, .badge-outline, .py-1, .mt-1, .ml-2;
+      font-weight: $font-weight-normal;
+    }
+  }
+
+  h5.card-title {
+    font-size: $font-size-base;
+  }
+
+  .card-text {
+    font-size: $small-font-size;
   }
 
   // for when the whole panel section is a link, or has a stretched link
@@ -35,42 +61,33 @@
     &:hover,
     &:active,
     &:focus {
-      color: $link-color !important;
+      color: $link-hover-color !important;
     }
   }
 }
 
-// To make way for floating ID
-.rss-heading {
+a.log-item-link {
+  &:hover {
+    color: $link-hover-color;
 
-  .rss-name {
-    margin-right: 7.5rem;
+    .rss-id {
+      background: $link-hover-color;
+      color: $light !important;
+      text-decoration: none;
+    }
   }
-
-  // Standardize the size of the ID
-  small.rss-id {
-    font-size: 1.05rem !important;
-  }
-  // small {
-  //   font-size: 81%;
-  // }
-}
-
-h5.rss-heading {
-  font-size: 14px;
 }
 
 .rss-detail {
   margin-top: 5px;
   margin-bottom: 5px;
-  // text-align: center;
 }
 
 // .rss-where,
 // .rss-what,
 // .rss-when,
 // .rss-fancy-time {
-  // text-align: center;
+  // @extend .smaller;
 // }
 
 .rss-what,

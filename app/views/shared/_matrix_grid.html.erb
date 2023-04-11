@@ -1,7 +1,18 @@
-<%# passing in the objects as a collection with a partial is much faster, but not always possible if we want to render a block %>
+<%#
+passing in the objects as a collection with a partial is much faster, but not always possible if we want to render a block
+allows passing locals through to the partial, except the ones used here
+%>
 
-<%= content_tag(:ul, class: "row list-unstyled mt-3") do %>
-  <%= yield(object) %>
+<%
+partial = local_assigns[:partial].present? ? local_assigns[:partial] :
+                                             "shared/matrix_box"
+as = local_assigns[:as].present? ? local_assigns[:as] : :object
+%>
+
+<%= content_tag(:ul, class: "row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 list-unstyled mt-3") do %>
+  <%= render(partial: partial,
+             locals: local_assigns.except(:object, :as),
+             collection: local_assigns[:objects], as: as) %>
 <% end %>
 
 <%= content_tag(:div, "", class: "clearfix") %>

@@ -19,6 +19,12 @@ $sidebar-max-width: 12rem;
   }
 }
 
+.form-max-width {
+  max-width: map-get($container-max-widths, md);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 //
 // specialized stuff for print view
 // --------------------------------------------------

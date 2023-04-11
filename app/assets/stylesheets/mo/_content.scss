@@ -1,3 +1,42 @@
+// text
+
+.lh-1-2 {
+  line-height: 1.2;
+}
+
+.smaller {
+  font-size: 81%;
+  line-height: 1;
+}
+
+.micro {
+  font-size: 0.78rem;
+  line-height: 0.7;
+}
+
+.square-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+
+  > img {
+    position: absolute;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.small-caps {
+  font-size: 66%;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.badge-outline {
+  border: 1px solid $gray-500;
+}
+
 //
 // interest eyes
 // --------------------------------------------------

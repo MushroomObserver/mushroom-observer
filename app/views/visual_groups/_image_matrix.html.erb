@@ -1,8 +1,8 @@
 <%= content_tag(:div, id: "results") do %>
   <%= paginate_block(@pages) do %>
-    <%= render(partial: "matrix_box_visual_group",
-               layout: "shared/matrix_grid",
-               collection: @subset, as: :row) %>
+    <%= render(partial: "shared/matrix_grid",
+               locals: { objects: @subset, as: :row,
+                         partial: "matrix_box_visual_group" }) %>
     <% end %>
   <% end %>
 <% end %>

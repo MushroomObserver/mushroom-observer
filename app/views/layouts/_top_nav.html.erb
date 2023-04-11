@@ -1,10 +1,10 @@
 <%# bs4 %>
 <!--top_nav-->
 <nav id="top_nav"
-     class="navbar navbar-light bg-secondary navbar-expand-md d-print-none">
+     class="navbar navbar-light bg-light navbar-expand-md d-print-none">
 
   <div class="container-fluid px-0 justify-content-between">
-    <div class="top-bar-left">
+    <div class="top-bar-left d-flex flex-row">
       <% if controller.controller_name == "identify" %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else ##user is logged in %>
@@ -12,7 +12,7 @@
       <% end %>
     </div>
 
-    <div class="top-bar-right">
+    <div class="top-bar-right d-flex flex-row">
       <% if @user.nil? %>
         <%= render(partial: "layouts/top_nav/login") %>
       <% else ##user is logged in %>

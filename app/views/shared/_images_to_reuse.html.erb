@@ -35,8 +35,8 @@ query = query_images_to_reuse(@all_users, @user)
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
 <%= paginate_block(@pages) do %>
-  <%= render(partial: "shared/matrix_box_image_reuse",
-             layout: "shared/matrix_grid",
-             collection: @objects, as: :image) %>
+  <%= render(partial: "shared/matrix_grid",
+             locals: { objects: @objects, as: :image,
+                       partial: "shared/matrix_box_image_reuse" }) %>
   <% end %>
 <% end %>

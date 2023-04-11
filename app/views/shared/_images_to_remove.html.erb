@@ -6,9 +6,9 @@
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>
 
-  <%= render(partial: "shared/matrix_box_image_remove",
-             layout: "shared/matrix_grid",
-             collection: @object.images, as: :image) %>
+  <%= render(partial: "shared/matrix_grid",
+             locals: { objects: @object.images, as: :image,
+                       partial: "shared/matrix_box_image_remove" }) %>
   <% end %>
 
   <%= submit_button(form: f, button: :image_remove_remove.l, center: true) %>

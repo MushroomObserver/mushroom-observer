@@ -52,10 +52,8 @@
   # ----------------------------
   else %>
     <%= paginate_block(@pages) do %>
-      <%= render(partial: "shared/matrix_box",
-                 layout: "shared/matrix_grid",
-                 collection: @objects,
-                 as: :object) %>
+      <%= render(partial: "shared/matrix_grid",
+                 locals: { objects: @objects }) %>
     <% end %>
 <% end %>
 

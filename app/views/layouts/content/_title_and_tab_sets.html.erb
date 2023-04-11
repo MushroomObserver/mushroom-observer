@@ -47,10 +47,10 @@
         <div id="sorts" class="btn-group btn-group-sm" role="group">
           <% @sorts.each do |title, action| %>
             <%= if action.nil?
-                  link_with_query(title, {}, class: "btn btn-secondary active",
+                  link_with_query(title, {}, class: "btn btn-light active",
                                               disabled: true)
                 else
-                  link_with_query(title, action, class: "btn btn-secondary")
+                  link_with_query(title, action, class: "btn btn-light")
                 end %>
           <% end %>
         </div>

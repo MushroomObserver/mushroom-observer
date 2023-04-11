@@ -25,11 +25,9 @@ inject_javascript_at_end %(
 ) %>
 
 <%= paginate_block(@pages) do %>
-  <%= render(partial: "shared/matrix_box",
-             locals: { link_method: :get, identify: true },
-             layout: "shared/matrix_grid",
-             collection: @objects,
-             as: :object) %>
+  <%= render(partial: "shared/matrix_grid",
+             locals: { objects: @objects,
+                       link_method: :get, identify: true }) %>
 <% end %>
 
 <!--AJAX SAVING VOTE MESSAGE-->
