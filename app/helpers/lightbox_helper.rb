@@ -4,7 +4,7 @@
 module LightboxHelper
   # this link needs to contain all the data for the lightbox image
   def lightbox_link(lightbox_data)
-    icon = content_tag(:i, "", class: "glyphicon glyphicon-fullscreen")
+    icon = icon("fa-solid", "fa-arrows-maximize", class: "fa-lg")
     caption = lightbox_caption_html(lightbox_data)
 
     link_to(icon, lightbox_data[:url],

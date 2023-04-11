@@ -53,8 +53,16 @@ module ApplicationHelper
     "&nbsp;".html_safe
   end
 
-  def safe_spinner(text = "")
-    "#{text}<span class='spinner-right mx-2'></span>".html_safe
+  # This uses the fontawesome gem's `icon` helper! Can take class, id & args
+  def safe_spinner(text = "", **args)
+    space = text.present? ? " " : ""
+    # Add the spin animation only if not present. Note cool string check:
+    if args[:class].present?
+      args[:class] += " fa-spin" unless args[:class]["fa-spin"]
+    else
+      args[:class] = "fa-spin"
+    end
+    [text, space, icon("fa-solid", "fa-loader", args)].safe_join
   end
 
   # Return escaped HTML.
@@ -234,7 +242,7 @@ module ApplicationHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent
-    content_tag(:span, "&nbsp;".html_safe, class: "ml-10px")
+    content_tag(:span, "&nbsp;".html_safe, class: "ml-2")
   end
 
   def spacer

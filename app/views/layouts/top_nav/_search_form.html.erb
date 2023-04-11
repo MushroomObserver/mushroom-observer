@@ -23,46 +23,34 @@ adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
 )
-identify_page = controller.controller_name == "identify"
+search_types = options_for_select(options, session[:search_type] ||
+                                           :observation)
 
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
-<%= form_with(url: search_pattern_path, method: :get,
+<%= form_with(url: search_pattern_path, method: :get, scope: :search,
               class: "form-inline px-0",
-              id: "pattern_search_form") do |f| %>
+              id: "pattern_search_form") do |f|
 
-  <%= fields_for(:search) do |f_s| %>
-    <div class="form-group has-feedback has-search">
-      <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
-                                        "form-control-feedback") %>
-      <%= f_s.text_field(:pattern, { value: session[:pattern],
-                                     class: "form-control",
-                                     placeholder: :app_find.t }) %>
-    </div><!--.form-group-->
+  content_tag(:div, class: "input-group") do
+    concat(f.text_field(:pattern, { value: session[:pattern],
+                                    class: "form-control",
+                                    placeholder: :app_find.t }))
+    concat(f.select(:type, search_types, { },
+                    { class: "custom-select w-auto" }))
+    concat(content_tag(:div, class: "input-group-append") do
+             f.submit(icon("fa-solid", "fa-magnifiying-glass",
+                           class: "btn btn-outline-primary"),
+                           aria: { label: :app_search.l })
+           end)
+  end
+end %>
 
-    <div class="form-group text-nowrap">
-      <%= f_s.select(
-            :type,
-            options_for_select(options, session[:search_type] || :observation),
-            { }, { class: "form-control w-auto" }
-          ) %>
-    </div><!--.form-group-->
-  <% end %>
-
-  <%= hidden_field_tag(:needs_id, true) if identify_page %>
-
-  <div class="form-group text-nowrap">
-    <%= submit_button(form: f, button: :app_search.l, class: "mr-2") %>
-  </div><!--.form-group-->
-
-<% end %>
-
-<p class="navbar-text mx-2 text-nowrap">
-  <%= link_to(content_tag(:span, :search_bar_help.t),
-              info_search_bar_help_path) %>
-  <span class=""> |</span>
-</p>
+<%= content_tag(:p, class: "navbar-text mx-2 text-nowrap") do
+  link_to(content_tag(:span, :search_bar_help.t),
+          info_search_bar_help_path)
+end %>
 
 <% if @timer_start %>
   <div class="navbar-text my-1 mx-2 d-none d-md-block smaller">

@@ -60,6 +60,7 @@ gem("arel_extensions")
 
 # Use bootstrap style generator
 gem("bootstrap", "~> 4.6", ">= 4.6.2")
+gem("font-awesome-sass", "~> 6.4.0")
 
 # Use SCSS for stylesheets
 gem("sassc-rails")

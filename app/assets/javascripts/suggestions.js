@@ -3,7 +3,7 @@ var attach_suggestion_bindings;
 function SuggestionModule(ids, url, text) {
   attach_suggestion_bindings = function () {
     var button = $("[data-role='suggest_names']");
-    var whirly = " <span class='spinner-right mx-2'></span>";
+    var whirly = ' <i class="fa-solid fa-loader fa-spin fa-2xl mx-2"></i>';
 
     button.on('click', function (event) {
       button.attr("disabled", "disabled");

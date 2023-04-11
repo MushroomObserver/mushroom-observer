@@ -77,7 +77,7 @@ function MOPivotalModule(stories, localizedText) {
           }
         }
       });
-      span.html("<span class='spinner-right mx-2'></span>");
+      span.html("<i class='fa-solid fa-loader fa-spin fa-2xl mx-2'></i>");
     }
 
     function click_on_story(story) {
@@ -108,7 +108,7 @@ function MOPivotalModule(stories, localizedText) {
       });
       div.html('<span class="pivotal_loading">' +
         PIVOTAL_STORY_LOADING +
-        ' <span class="spinner-right mx-2"></span></span>');
+        ' <i class="fa-solid fa-loader fa-spin fa-2xl mx-2"></i>');
       div.show();
       jQuery("#pivotal_" + story).ensureVisible();
     }

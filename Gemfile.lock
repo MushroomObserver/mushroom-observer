@@ -108,6 +108,8 @@ GEM
     execjs (2.8.1)
     fastimage (2.2.6)
     ffi (1.15.5)
+    font-awesome-sass (6.4.0)
+      sassc (~> 2.0)
     globalid (1.1.0)
       activesupport (>= 5.0)
     graphql (2.0.20)
@@ -326,6 +328,7 @@ DEPENDENCIES
   date (>= 3.2.1)
   debug (>= 1.0.0)
   fastimage
+  font-awesome-sass (~> 6.4.0)
   graphiql-rails!
   graphql
   graphql-batch

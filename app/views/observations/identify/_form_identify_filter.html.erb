@@ -10,7 +10,7 @@ filter_type = params.dig(:filter, :type) || false
 selected = filter_type ? filter_type.to_sym : :clade
 value = filter_type ? params.dig(:filter, :term) : ""
 placeholder = "Filter by:"
-options = [
+filter_types = [
   [:CLADE.l, :clade],
   [:REGION.l, :region],
   # [:USER.l, :user],
@@ -21,25 +21,25 @@ options = [
               class: "form-inline", scope: :filter,
               id: "identify_filter") do |f| %>
 
-  <div class="form-group has-feedback has-search">
-    <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
-                                      "form-control-feedback") %>
-    <%# f.label(:term, "Filter by:") %>
-    <%= f.text_field(:term,
-                      # turn off browser autocomplete
-                      autocomplete: "off", value: value,
-                      placeholder: placeholder,
-                      class: "form-control", size: 42,
-                      data: { autofocus: true }) %>
-  </div><!--.form-group-->
-
-  <%= f.select(:type, options, { selected: selected },
-               { class: "form-control",
-                 onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
-
-  <%= f.submit(:SEARCH.l, class: "btn btn-secondary") %>
-
-  <%= f.submit(:CLEAR.l, class: "btn btn-secondary") %>
+  <%= content_tag(:div, class: "input-group") do
+    concat(f.text_field(:term,
+                        # turn off browser autocomplete
+                        autocomplete: "off", value: value,
+                        placeholder: placeholder,
+                        class: "form-control", size: 42,
+                        data: { autofocus: true }))
+    concat(f.select(:type, filter_types, { selected: selected },
+                    { class: "form-control",
+                      onchange: "MOEvents.rebindAutoComplete(this.value);" }))
+    concat(content_tag(:div, class: "input-group-append") do
+              concat(f.submit(icon("fa-solid", "fa-magnifiying-glass",
+                                   class: "btn btn-outline-primary"),
+                                   aria: { label: :SEARCH.l }))
+              concat(f.submit(icon("fa-solid", "fa-broom-wide",
+                                   class: "btn btn-outline-primary"),
+                                   aria: { label: :CLEAR.l }))
+            end)
+  end %>
 
   <% turn_into_clade_auto_completer(:filter_term) %>
 

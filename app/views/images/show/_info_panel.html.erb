@@ -3,7 +3,7 @@
       <div class="card-header">
         <b><%= :NOTES.t %></b>:
       </div><!--.card-header -->
-      <div class="card-body py-5px">
+      <div class="card-body py-2">
         <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
         <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
         <% @image.projects.each do |proj| %>

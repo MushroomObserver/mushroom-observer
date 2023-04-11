@@ -20,7 +20,7 @@ function VoteByAjaxModule(translations) {
         // bootstrap modal printed in layout already, just activate it
         $('#mo_ajax_progress_caption').empty().append(
           $("<span>").text(translations.show_namings_saving + "... "),
-          $("<span class='spinner-right mx-2'></span>")
+          $("<i class='fa-solid fa-loader fa-spin fa-2xl'></i>")
         );
         $("#mo_ajax_progress").modal({ backdrop: 'static', keyboard: false });
       });

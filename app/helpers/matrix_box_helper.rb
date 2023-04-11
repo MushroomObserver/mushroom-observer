@@ -39,9 +39,11 @@ module MatrixBoxHelper
       class: "card-footer log-footer"
     ) do
       if presenter.detail.present?
-        concat(content_tag(:div, presenter.detail, class: "rss-detail small"))
+        concat(content_tag(:div, presenter.detail,
+                           class: "rss-detail card-text mb-1"))
       end
-      concat(content_tag(:div, presenter.display_time, class: "rss-what small"))
+      concat(content_tag(:div, presenter.display_time,
+                         class: "rss-what card-text"))
     end
   end
 

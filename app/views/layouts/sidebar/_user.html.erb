@@ -1,11 +1,13 @@
-<div class="<%= classes[:mobile_only] %>">
-  <i class="glyphicon glyphicon-user"> </i>
-  <span> <%= h(@user.login) %></span>
-  <span class="pull-right">
-    <%= link_to(:app_logout.t, account_logout_path,
-                { id: "nav_user_logout_link" }) %>
-  </span>
-</div>
+<%# uses fontawesome icon helper %>
+
+<%= content_tag(:div, class: classes[:mobile_only]) do
+  concat(icon("fa-solid", "fa-user", class: "fa-lg"))
+  concat(content_tag(:span, h(@user.login)))
+  concat(link_to(:app_logout.t, account_logout_path,
+                 { id: "nav_user_logout_link",
+                   class: "float-right" }))
+end %>
+
 <%= link_to(:app_comments_for_you.t,
             comments_path(for_user: @user.id),
             { class: classes[:mobile_only],
