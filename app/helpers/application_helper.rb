@@ -62,7 +62,7 @@ module ApplicationHelper
     else
       args[:class] = "fa-spin"
     end
-    [text, space, icon("fa-solid", "fa-loader", args)].safe_join
+    [text, space, icon("fa-solid", "loader", args)].safe_join
   end
 
   # Return escaped HTML.

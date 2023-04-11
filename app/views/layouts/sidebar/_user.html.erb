@@ -1,7 +1,7 @@
 <%# uses fontawesome icon helper %>
 
 <%= content_tag(:div, class: classes[:mobile_only]) do
-  concat(icon("fa-solid", "fa-user", class: "fa-lg"))
+  concat(icon("fa-solid", "user", class: "fa-lg"))
   concat(content_tag(:span, h(@user.login)))
   concat(link_to(:app_logout.t, account_logout_path,
                  { id: "nav_user_logout_link",

@@ -32,10 +32,10 @@ filter_types = [
                     { class: "form-control",
                       onchange: "MOEvents.rebindAutoComplete(this.value);" }))
     concat(content_tag(:div, class: "input-group-append") do
-              concat(f.submit(icon("fa-solid", "fa-magnifiying-glass",
+              concat(f.submit(icon("fa-solid", "magnifiying-glass",
                                    class: "btn btn-outline-primary"),
                                    aria: { label: :SEARCH.l }))
-              concat(f.submit(icon("fa-solid", "fa-broom-wide",
+              concat(f.submit(icon("fa-solid", "broom-wide",
                                    class: "btn btn-outline-primary"),
                                    aria: { label: :CLEAR.l }))
             end)

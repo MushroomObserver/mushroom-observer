@@ -6,6 +6,8 @@
 @import "mo/map_theme_vars_to_bootstrap_4_vars"; // Rewrite bootstrap variables
 @import "bootstrap";
 
+@import "font-awesome";
+
 // Now, set custom styles for MO elements.
 @import "mo/elements";
 @import "mo/utilities";
@@ -31,5 +33,3 @@
 @import "mo/namings";
 @import "mo/icons";
 @import "mo/content";
-
-@import "font-awesome";
