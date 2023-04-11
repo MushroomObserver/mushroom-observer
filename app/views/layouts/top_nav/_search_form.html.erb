@@ -40,9 +40,12 @@ search_types = options_for_select(options, session[:search_type] ||
     concat(f.select(:type, search_types, { },
                     { class: "custom-select w-auto" }))
     concat(content_tag(:div, class: "input-group-append") do
-             f.submit(icon("fa-solid", "fa-magnifiying-glass",
-                           class: "btn btn-outline-primary"),
-                           aria: { label: :app_search.l })
+             button_tag(type: :submit, value: "submit",
+                        class: "btn btn-outline-primary",
+                        aria: { label: :app_search.l }) do
+               icon("fa-solid", "fa-magnifiying-glass", # :app_search.l,
+                    class: "fa-lg")
+             end
            end)
   end
 end %>

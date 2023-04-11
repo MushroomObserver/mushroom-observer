@@ -3,7 +3,7 @@
 <div class="row my-4 form_image">
 
   <!-- GOOD_IMAGE -->
-  <div class="col-xs-1" style="max-width:30px">
+  <div class="col-1" style="max-width:30px">
     <div class="form-check">
       <%= f.radio_button(:thumb_image_id, image.id,
                          class: "form-check-input position-static",
@@ -11,11 +11,11 @@
     </div><!--.form-check-->
   </div><!--.col-->
 
-  <div class="col-xs-11 col-sm-3">
+  <div class="col-11 col-md-3">
     <%= thumbnail(image, votes: false) %>
   </div><!--.col-->
 
-  <div class="col-xs-12 col-sm-8">
+  <div class="col-12 col-md-8">
     <% if check_permission(image) %>
       <%= render(partial: "observations/form/good_image_fields",
                locals: { f: f, image: image })
