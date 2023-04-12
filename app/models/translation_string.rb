@@ -64,7 +64,7 @@ class TranslationString < AbstractModel
     # False positive
     I18n.backend.translations(do_init: do_init) \
       [locale.to_sym][MO.locale_namespace.to_sym]
-      # rubocop:enable Style/RedundantLineContinuation
+    # rubocop:enable Style/RedundantLineContinuation
   end
 
   # Check if tag exists before storing nonsense in the I18n backend
