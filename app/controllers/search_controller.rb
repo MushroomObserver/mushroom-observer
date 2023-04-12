@@ -5,6 +5,7 @@ class SearchController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   /comments/index (params[:pattern])
+  #   /glossary_terms/index (params[:pattern])
   #   /herbaria/index (params[:pattern])
   #   /herbarium_records/index (params[:pattern])
   #   /images/index (params[:pattern])
@@ -26,8 +27,6 @@ class SearchController < ApplicationController
 
     special_params = if type == :herbarium
                        { flavor: :all }
-                     elsif params[:needs_id] == "true"
-                       { needs_id: true }
                      else
                        {}
                      end
@@ -74,8 +73,8 @@ class SearchController < ApplicationController
     case type
     when :google
       site_google_search(pattern)
-    when :comment, :herbarium, :herbarium_record, :image, :location, :name,
-         :observation, :project, :species_list, :user
+    when :comment, :glossary_term, :herbarium, :herbarium_record, :image,
+         :location, :name, :observation, :project, :species_list, :user
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send("#{type.to_s.pluralize}_path",
@@ -102,7 +101,7 @@ class SearchController < ApplicationController
 
   def add_applicable_filter_parameters(query_params, model)
     ContentFilter.by_model(model).each do |fltr|
-      query_params[fltr.sym] = params.dig(:content_filter, :"#{fltr.sym}")
+      query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
     end
   end
 

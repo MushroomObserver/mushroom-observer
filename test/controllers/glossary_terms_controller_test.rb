@@ -10,7 +10,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** index *****
   def test_index
-    login
+    # make sure public can access
     get(:index)
 
     assert_response(:success)
@@ -25,7 +25,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_index_by_letter
-    login
+    # make sure public can access
     term = glossary_terms(:plane_glossary_term)
     get(:index, params: { letter: "P" })
     assert_template("index")
@@ -36,7 +36,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_glossary_term_search
-    login
     conic = glossary_terms(:conic_glossary_term)
     convex = glossary_terms(:convex_glossary_term)
 
@@ -44,6 +43,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     qr = QueryRecord.last.id.alphabetize
     assert_redirected_to(glossary_term_path(conic.id, params: { q: qr }))
 
+    login
     get(:index, params: { pattern: "con" })
     assert_template("index")
     assert_select(
@@ -57,6 +57,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ***** show *****
   def test_show
     term = glossary_terms(:square_glossary_term)
+    # make sure public can access
+    get(:show, params: { id: term.id })
+
+    assert_response(:success)
     prior_version_path = glossary_term_versions_path(
       term.id, version: term.version - 1
     )
@@ -98,7 +102,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
                     "Form should have one field for #{attr}")
     end
-    assert_select("input#glossary_term_upload_image", { count: 1 },
+    assert_select("input#upload_image", { count: 1 },
                   "Form should include upload image field")
   end
 
@@ -131,7 +135,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       { text: /#{term.description}/, count: 1 },
       "Form lacks Description field that defaults to glossary term description"
     )
-    assert_select("input#glossary_term_upload_image", false,
+    assert_select("input#upload_image", false,
                   "Edit GlossaryTerm form should omit upload image field")
   end
 
@@ -337,9 +341,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def create_term_params
     {
       glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
-      copyright_holder: "Insil Choi",
-      date: { copyright_year: "2013" },
-      upload: { license_id: licenses(:ccnc30).id }
+      upload: {
+        copyright_holder: "Insil Choi",
+        copyright_year: "2013",
+        license_id: licenses(:ccnc30).id
+      }
     }.freeze
   end
 
@@ -347,9 +353,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     {
       id: glossary_terms(:conic_glossary_term).id,
       glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
-      copyright_holder: "Insil Choi",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
+      upload: {
+        copyright_holder: "Insil Choi",
+        copyright_year: 2013,
+        license_id: licenses(:ccnc25).id
+      }
     }.freeze
   end
 
@@ -361,16 +369,15 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     {
       glossary_term: {
         name: "Pancake",
-        description: "Flat",
-        upload_image: {
-          image: file,
-          copyright_holder: "zuul",
-          when: Time.current
-        }
+        description: "Flat"
       },
-      copyright_holder: "Me",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
+      upload: {
+        image: file,
+        copyright_holder: "zuul",
+        copyright_year: 2013,
+        when: Time.current,
+        license_id: licenses(:ccnc25).id
+      }
     }.freeze
   end
 end

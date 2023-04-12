@@ -6,13 +6,12 @@ action = { controller: "/species_lists/observations", action: :update,
 <%= form_with(url: action, method: :put,
               id: "species_list_observations_form") do |f| %>
 
-  <p><%= :species_list_add_remove_body.tp(num: @query.num_results) %></p>
+  <%= content_tag(:p,
+                  :species_list_add_remove_body.tp(num: @query.num_results)) %>
 
-  <div class="form-group">
-    <%= label_tag(:species_list, :species_list_add_remove_label.t) %>:
-    <%= text_field_tag(:species_list, @id, class: "form-control") %>
-    <% turn_into_species_list_auto_completer(:species_list) %>
-  </div>
+  <%= text_field_with_label(form: f, field: :species_list, value: @id,
+                            label: :species_list_add_remove_label.t + ":") %>
+  <% turn_into_species_list_auto_completer(:species_list) %>
 
   <div class="form-group center-block">
     <%= submit_button(form: f, button: :ADD.l) %>

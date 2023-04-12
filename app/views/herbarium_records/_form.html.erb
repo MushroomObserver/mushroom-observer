@@ -13,41 +13,30 @@ end
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 
   <% if @herbarium_record.observations.count > 1 %>
-    <div class="alert alert-warning">
-      <%= :edit_affects_multiple_observations.t(type: :herbarium_record) %>
-    </div>
+    <%= alert_block(
+      :warning, :edit_affects_multiple_observations.t(type: :herbarium_record)
+    ) %>
   <% end %>
 
-  <div class="form-group">
-    <%= f.label(:herbarium_name, :NAME.t + ":") %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note ml-3") %>
-    <%= f.text_field(:herbarium_name, class: "form-control") %>
-    <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
-  </div>
+  <%= text_field_with_label(form: f, field: :herbarium_name,
+                            label: :NAME.t + ":", between: :required) %>
+  <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
 
-  <div class="form-group">
-    <%= f.label(:initial_det,
-                "#{:herbarium_record_initial_det.t}:".html_safe) %>
-    <%= content_tag(:span, "(#{:optional.t})", class: "help-note ml-3") %>
-    <%= f.text_field(:initial_det, class:"form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :initial_det,
+                            label: :herbarium_record_initial_det.t + ":",
+                            between: :optional) %>
 
-  <div class="form-inline">
-    <%= f.label(:accession_number,
-                "#{:herbarium_record_accession_number.t}:".html_safe) %>
-    <%= f.text_field(:accession_number, class:"form-control") %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :accession_number,
+                            label: :herbarium_record_accession_number.t + ":",
+                            append: :required) %>
 
   <%= help_block_with_arrow("up") do %>
     <%= :create_herbarium_record_accession_number_help.t %>
   <% end %>
 
-  <div class="form-group">
-    <%= f.label(:notes, :NOTES.t + ":") %>
-    <%= content_tag(:span, "(#{:optional.t})", class: "help-note ml-3") %>
-    <%= f.text_area(:notes, class: "form-control", rows: 6) %>
-  </div>
+  <%= text_area_with_label(form: f, field: :notes, rows: 6,
+                           label: :NOTES.t + ":",
+                           between: :optional) %>
 
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 

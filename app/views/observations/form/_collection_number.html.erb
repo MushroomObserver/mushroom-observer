@@ -4,16 +4,12 @@
 
   <div class="col-sm-6">
     <%= fields_for(:collection_number) do |fcn| %>
-      <div class="form-group">
-        <%= fcn.label(:name, :collection_number_name.t + ":") %>
-        <%= fcn.text_field(:name, value: @collectors_name,
-                            class: "form-control") %>
-      </div>
-      <div class="form-group">
-        <%= fcn.label(:number, :collection_number_number.t + ":") %>
-        <%= fcn.text_field(:number, value: @collectors_number,
-                            class: "form-control") %>
-      </div>
+      <%= text_field_with_label(form: fcn, field: :name,
+                                value: @collectors_name,
+                                label: :collection_number_name.t + ":") %>
+      <%= text_field_with_label(form: fcn, field: :number,
+                                value: @collectors_number,
+                                label: :collection_number_number.t + ":") %>
     <% end # fields_for %>
   </div>
 

@@ -15,6 +15,7 @@
 #  == Instance methods
 #
 #  sym::             Name of filter (symbol).
+#  name::            Name of filter (translation string).
 #  models::          Array of models this filter can be applied to.
 #  applicable_to_model?:: Can this filter be applied to a model query?
 #  on?::             Test if a filter is turned on.
@@ -30,7 +31,7 @@
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
 class ContentFilter
-  attr_accessor :sym, :models
+  attr_accessor :sym, :models, :name
 
   def initialize(opts)
     opts.each do |key, val|

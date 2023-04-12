@@ -5,11 +5,8 @@
   <%= f.hidden_field :back, value: @back %>
   <%= f.hidden_field :q, value: get_query_param %>
 
-  <div class="form-group">
-    <%= f.label(:name, "#{:NAME.t}:") %>
-    <%= content_tag(:span, "(#{:required.t})", class: "help-note") %>
-    <%= f.text_field(:name, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :name, label: :NAME.t + ":",
+                            between: :required) %>
 
   <% if in_admin_mode? %>
     <%= text_field_with_label(form: f, field: :personal_user_name, inline: true,
@@ -30,64 +27,44 @@
 
   <% else %>
     <% if @herbarium.personal_user_id == @user.id %>
-      <div class="form-group">
-        <%= content_tag(:div, :edit_herbarium_this_is_personal_herbarium.tp,
-                        class: "help-block") %>
-      </div>
+      <%= content_tag(:div, class: "form-group") do
+        help_block(:div, :edit_herbarium_this_is_personal_herbarium.tp)
+      end %>
     <% end %>
 
     <% if button_name == :CREATE || @herbarium.can_make_personal?(@user) %>
-      <div class="form-group">
-        <%= check_box_with_label(form: f, field: :personal,
-                                 label: :create_herbarium_personal.t) %>
-        <%= help_block_with_arrow("up") do %>
-          <%= :create_herbarium_personal_help.t(
-                name: @user.personal_herbarium_name
-              ) %>
-        <% end %>
-      </div>
+      <%= check_box_with_label(form: f, field: :personal,
+                               label: :create_herbarium_personal.t) %>
+      <%= help_block_with_arrow("up") do %>
+        <%= :create_herbarium_personal_help.t(
+              name: @user.personal_herbarium_name
+            ) %>
+      <% end %>
     <% end %>
   <% end %>
 
   <% if !@herbarium.personal_user_id %>
-    <div class="form-group">
-      <div class="form-inline">
-        <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
-                                  label: "#{:create_herbarium_code.t}:") %>
-        <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
-      </div>
-      <%= help_block_with_arrow("up") do %>
-        <%= :create_herbarium_code_help.t %>
-      <% end %>
-    </div>
+    <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
+                              label: :create_herbarium_code.t + ":",
+                              between: :optional) %>
+    <%= help_block_with_arrow("up") do :create_herbarium_code_help.t end %>
   <% end %>
 
-  <div class="form-group">
-    <%= f.label(:place_name, "#{:LOCATION.t}:") %>
-    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
-    <%# workaround for auto completer; creates an id %>
-    <%= f.text_field(:place_name, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :place_name,
+                            label: :LOCATION.t + ":", between: :optional) %>
   <% turn_into_location_auto_completer(:herbarium_place_name) %>
 
-  <div class="form-group">
-    <%= f.label(:herbarium_email, "#{:create_herbarium_email.t}:") %>
-    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
-    <%= f.text_field(:email, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :email,
+                            label: :create_herbarium_email.t + ":",
+                            between: :optional) %>
 
-  <div class="form-group">
-    <%= f.label(:herbarium_mailing_address,
-                "#{:create_herbarium_mailing_address.t}:") %>
-    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
-    <%= f.text_area(:mailing_address, rows: 5,  class: "form-control") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :mailing_address, rows: 5,
+                           label: :create_herbarium_mailing_address.t + ":",
+                           between: :optional) %>
 
-  <div class="form-group">
-    <%= f.label(:herbarium_description, "#{:NOTES.t}:") %>
-    <%= content_tag(:span, "(#{:optional.t})", class: "help-note") %>
-    <%= f.text_area(:description, rows: 10, class: "form-control") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :description, rows: 10,
+                           label: :NOTES.t + ":",
+                           between: :optional) %>
 
   <%= submit_button(form: f, button: button_name.t, center: true) %>
 

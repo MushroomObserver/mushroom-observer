@@ -5,24 +5,19 @@ button = (action == :create) ? :CREATE.t : :SAVE.t
 <%= form_with(model: @publication, action: action,
               id: "publication_form") do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:full, :publication_full.t + ":") %>
-    <%= content_tag(:span, :publication_full_help.t, class: "help-note") %>
-    <%= f.text_area(:full, rows: 10, class: "form-control") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :full, rows: 10,
+                           label: :publication_full.t + ":",
+                           between: help_note(:span,
+                                              :publication_full_help.t)) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:link, :publication_link.t + ":") %>
-    <%= f.text_field(:link, class: "form-control") %>
-  </div>
+  <%= text_field_with_label(form: f, field: :link,
+                            label: :publication_link.t + ":") %>
 
   <%= check_box_with_label(form: f, field: :peer_reviewed,
                            label: :publication_peer_reviewed.t) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:how_helped, :publication_how_helped.t) %>
-    <%= f.text_area(:how_helped, rows: 10, class: "form-control") %>
-  </div>
+  <%= text_area_with_label(form: f, field: :how_helped, rows: 10,
+                           label: :publication_how_helped.t + ":") %>
 
   <%= check_box_with_label(form: f, field: :mo_mentioned,
                            label: :publication_mo_mentioned.t) %>

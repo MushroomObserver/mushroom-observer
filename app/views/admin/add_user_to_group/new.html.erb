@@ -5,15 +5,12 @@
 <%= form_with(url: admin_add_user_to_group_path,
               id: "admin_add_user_to_group_form") do |f| %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:user_name, :add_user_to_group_user.t + ":") %>
-    <%= f.text_field(:user_name, { value: "", class: "form-control" }) %>
-  </div>
+  <%= text_field_with_label(form: f, field: :user_name, value: "",
+                            label: :add_user_to_group_user.t + ":",
+                            data: { autofocus: true }) %>
 
-  <div class="form-group mt-3">
-    <%= f.label(:group_name, :add_user_to_group_group.t + ":") %>
-    <%= f.text_field(:group_name, { value: "", class: "form-control" }) %>
-  </div>
+  <%= text_field_with_label(form: f, field: :group_name, value: "",
+                            label: :add_user_to_group_group.t + ":") %>
 
   <%= submit_button(form: f, button: :ADD.t, center: true) %>
 

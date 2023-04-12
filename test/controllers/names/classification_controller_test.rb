@@ -25,6 +25,10 @@ module Names
       assert_response(:success)
       assert_template("names/classification/edit")
       assert_textarea_value(:classification, "")
+      assert_select("form[action = '#{name_classification_path(name)}']") do
+        assert_select("input[value = 'put']", { count: 1 },
+                      "Form should submit via PUT")
+      end
 
       name = names(:agaricus_campestris)
       get(:edit, params: { id: name.id })

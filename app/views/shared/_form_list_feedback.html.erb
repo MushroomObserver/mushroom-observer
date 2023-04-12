@@ -1,11 +1,8 @@
 <% if !@new_names.blank? %>
   <div class="Errors" id="missing_names">
-    <p>
-      <b><%= :form_list_feedback_missing_names.t %></b><br/>
-      <span class="help-note">
-        <%= :form_list_feedback_missing_names_help.t %>
-      </span>
-    </p>
+    <%= content_tag(:div, :form_list_feedback_missing_names.t,
+                    class: "font-weight-bold") %>
+    <%= help_note(:div, :form_list_feedback_missing_names_help.t) %>
     <p>
       <% @new_names.each do |n| %>
       <br/><%= indent + h(n) %>
@@ -16,12 +13,9 @@
 
 <% if !@deprecated_names.blank? %>
   <div class="Errors" id="deprecated_names">
-    <p>
-      <b><%= :form_species_lists_deprecated.t %>:</b><br/>
-      <span class="help-note">
-        <%= :form_species_lists_deprecated_help.t %>
-      </span>
-    </p>
+    <%= content_tag(:div, :form_species_lists_deprecated.t,
+                    class: "font-weight-bold") %>
+    <%= help_note(:div, :form_species_lists_deprecated_help.t) %>
     <p>
       <% @deprecated_names.each do |name|
         approved_names = name.approved_synonyms %>
@@ -43,11 +37,9 @@
 
 <% if !@multiple_names.blank? %>
   <div class="Errors" id="ambiguous_names">
-    <p>
-      <b><%= :form_species_lists_multiple_names.t %>:</b><br/>
-      <%= content_tag(:span, :form_species_lists_multiple_names_help.t,
-                      class: "help-note") %>
-    </p>
+    <%= content_tag(:div, :form_species_lists_multiple_names.t,
+                    class: "font-weight-bold") %>
+    <%= help_note(:div, :form_species_lists_multiple_names_help.t) %>
     <p>
       <% @multiple_names.each do |name| %>
         <%= name.display_name.t %><br/>

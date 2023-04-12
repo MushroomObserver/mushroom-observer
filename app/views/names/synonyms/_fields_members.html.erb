@@ -3,13 +3,12 @@
 <% if @new_names && (@new_names != []) %>
   <div class="alert alert-danger">
     <%= :form_synonyms_missing_names.t %><br/>
-      <span class="pl-3">
-        <% @new_names.each do |n| %>
+    <span class="pl-3">
+      <% @new_names.each do |n| %>
         <%= h(n) %><br/>
-        <% end %>
-      </span>
-    <%= content_tag(:span, :form_synonyms_missing_names_help.t,
-                    class: "help-note") %>
+      <% end %>
+    </span>
+    <%= help_note(:span, :form_synonyms_missing_names_help.t) %>
   </div>
 <% end %>
 
@@ -17,16 +16,12 @@
   <%= check_box_with_label(form: f, field: :deprecate_all, value: "1",
                            checked: @deprecate_all && "checked",
                            label: :form_synonyms_deprecate_synonyms.t) %>
-  <%= content_tag(:p, :form_synonyms_deprecate_synonyms_help.t,
-                  class: "help-block") %>
+  <%= help_block(:p, :form_synonyms_deprecate_synonyms_help.t) %>
 </div>
 
-<div class="form-group">
-  <%= f.label(:synonym_members, "#{:form_synonyms_names.t}:") %>
-  <%= content_tag(:p,
-                  :form_synonyms_names_help.t(name: @name.display_name),
-                  class: "help-block") %>
-  <%= f.text_area(:synonym_members, value: @list_members,
-                  class: "form-control",
-                  data: { autofocus: true }) %>
-</div>
+<%= text_area_with_label(
+      form: f, field: :synonym_members, value: @list_members,
+      label: :form_synonyms_names.t + ":", data: { autofocus: true },
+      between: help_block(:p, :form_synonyms_names_help.t(
+                                name: @name.display_name))
+    ) %>

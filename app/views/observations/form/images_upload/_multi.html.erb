@@ -16,11 +16,9 @@ legible_max_size = (max_size.to_f/1024/1024).round
     </label>
   </div><!--.col-->
   <div class="col-sm-6">
-    <%= help_block_with_arrow("left", id: "upload_multi_help") do %>
-      <p class="">
-        <%= :form_observations_upload_help_multi_select.t %>
-      </p>
-    <% end # help_block_with_arrow do %>
+    <%= help_block_with_arrow("left", id: "upload_multi_help") do
+      content_tag(:p, :form_observations_upload_help_multi_select.t)
+    end %>
   </div><!--.col-->
 </div><!--.row-->
 
@@ -32,19 +30,28 @@ legible_max_size = (max_size.to_f/1024/1024).round
 
       <div class="col-sm-7">
         <div class="inconsistent_date_options">
-          <p class="mb-0 font-weight-bold"><%= :form_observations_set_observation_date_to.t %>:</p>
-          <div id="image_date_radio_container"></div>
-          <p class="mb-0 font-weight-bold"><%= :form_observations_set_image_dates_to.t %>:</p>
-          <div id="observation_date_radio_container"></div>
+          <%= content_tag(
+                :div, :form_observations_set_observation_date_to.t + ":",
+                class: "font-weight-bold"
+              ) %>
+          <%= content_tag(:div, "", id: "image_date_radio_container") %>
+          <%= content_tag(
+                :div, :form_observations_set_image_dates_to.t + ":",
+                class: "font-weight-bold"
+              ) %>
+          <%= content_tag(:div, "",
+                          id: "observation_date_radio_container") %>
         </div>
         <div class="mt-3">
-          <button id="fix_dates" type="button" class="btn btn-default"><%= :form_observations_use_date.t %></button>
-          <button id="ignore_dates" type="button" class="btn btn-default"><%= :IGNORE.t %></button>
+          <%= js_button(button: :form_observations_use_date.t,
+                        name: "fix_dates", id: "fix_dates") %>
+          <%= js_button(button: :IGNORE.t, name: "ignore_dates",
+                        id: "ignore_dates") %>
         </div>
       </div><!--.col-->
 
       <div class="col-sm-4">
-        <span><%= :form_observations_date_warning.t %></span>
+        <%= content_tag(:span, :form_observations_date_warning.t) %>
       </div><!--.col-->
 
     </div><!--.row-->
@@ -56,15 +63,19 @@ legible_max_size = (max_size.to_f/1024/1024).round
     <div class="row">
 
       <div class="col-sm-7">
-        <p class="mb-0"><strong>Set observation Latitude/Longitude to:</strong></p>
-        <div id="geocode_radio_container" class="mb-3"></div>
-        <button id="set_geocode" type="button" class="btn btn-default"><%= :UPDATE.t %></button>
-        <button id="ignore_geocode" type="button" class="btn btn-default"><%= :IGNORE.t %></button>
+        <%= content_tag(:div, "Set observation Latitude/Longitude to:",
+                        class: "font-weight-bold") %>
+        <%= content_tag(:div, "",
+                        id: "geocode_radio_container", class: "mb-3") %>
+        <%= js_button(button: :UPDATE.t, name: "set_geocode",
+                      id: "set_geocode") %>
+        <%= js_button(button: :IGNORE.t, name: "ignore_geocode",
+                      id: "ignore_geocode") %>
       </div>
 
       <div class="col-sm-4">
-        <span><%= :form_observations_gps_info.t %></span>
-        <div id="geocode_map" class="w-100"></div>
+        <%= content_tag(:span, :form_observations_gps_info.t) %>
+        <%= content_tag(:div, "", id: "geocode_map", class: "w-100") %>
       </div>
 
     </div><!--.row-->
@@ -73,9 +84,8 @@ legible_max_size = (max_size.to_f/1024/1024).round
 
 <!--Container for appending images-->
 <div class="images_container">
-  <div id="added_images_container" data-upload-max-size="<%= max_size %>">
-    <!--Target for insertion-->
-  </div>
+  <%= content_tag(:div, "", id: "added_images_container",
+                            data: { upload_max_size: max_size }) %>
 </div>
 
 <% inject_javascript_at_end %(

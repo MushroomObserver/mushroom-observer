@@ -105,6 +105,10 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern, params: params)
     assert_redirected_to(users_path(pattern: "34"))
 
+    params = { search: { pattern: "34", type: :glossary_term } }
+    get(:pattern, params: params)
+    assert_redirected_to(glossary_terms_path(pattern: "34"))
+
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }

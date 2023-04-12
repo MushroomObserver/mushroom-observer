@@ -1,9 +1,9 @@
 <%= form_with(url: { action: :create, id: @list.id, q: query_param },
               id: "species_list_download_report") do |f| %>
 
-  <h3 class="mt-5"><%= :species_list_report_header.t %>:</h3>
+  <%= content_tag(:h3, :species_list_report_header.t + ":") %>
 
-  <p><%= :download_observations_format.t %>:</p>
+  <%= content_tag(:p, :download_observations_format.t + ":") %>
 
   <div class="form-group">
     <%= radio_with_label(form: f, field: :type, value: :txt,

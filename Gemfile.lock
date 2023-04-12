@@ -105,6 +105,7 @@ GEM
     docile (1.4.0)
     erubi (1.12.0)
     execjs (2.8.1)
+    fastimage (2.2.6)
     ffi (1.15.5)
     globalid (1.1.0)
       activesupport (>= 5.0)
@@ -322,6 +323,7 @@ DEPENDENCIES
   database_cleaner-active_record
   date (>= 3.2.1)
   debug (>= 1.0.0)
+  fastimage
   graphiql-rails!
   graphql
   graphql-batch

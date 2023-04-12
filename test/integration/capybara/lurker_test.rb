@@ -10,8 +10,8 @@ class LurkerTest < CapybaraIntegrationTestCase
     login
 
     # Click on first observation in feed results
-    first(".rss-box-details .rss-detail", text: "Observation Created").
-      ancestor(".rss-box-details").first("a").click
+    first(".rss-detail", text: "Observation Created").
+      ancestor(".panel").first(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
@@ -210,8 +210,9 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     visit("/observations/identify")
     # Search for a location.
-    place = "Massachusetts"
-    fill_in("search_pattern", with: place)
+    place = "Massachusetts, USA"
+    fill_in("filter_term", with: place)
+    select("Region", from: "filter_type")
     click_button("Search")
     assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
     where_ats = find_all(".rss-where").map(&:text)

@@ -1,5 +1,7 @@
-<%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
-<%= f.text_field(:"#{filter.sym}",
-                 value: @filter_defaults[filter.sym],
-                 class: "form-control") %><br/>
-<br/>
+<%=
+between = help_note(:span, :"advanced_search_filter_#{filter.sym}".t)
+text_field_with_label(
+  form: f, field: filter.sym, label: filter.name + ":",
+  between: between, value: @filter_defaults[filter.sym]
+)
+%>

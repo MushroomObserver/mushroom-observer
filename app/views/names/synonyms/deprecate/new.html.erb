@@ -26,11 +26,11 @@
   <%= render(partial: "shared/form_name_feedback",
              locals: feedback_locals.merge({ f: f })) if @what.present? %>
 
-  <%= text_field_with_label(form: f, field: :proposed_name, inline: true,
-                            label: "#{:name_deprecate_preferred.t}:",
-                            value: @what, data: { autofocus: true }) %>
-  <%= content_tag(:div, :name_deprecate_preferred_help.tp,
-                  class: "help-note") %>
+  <%= text_field_with_label(
+        form: f, field: :proposed_name, inline: true, value: @what,
+        label: "#{:name_deprecate_preferred.t}:", data: { autofocus: true },
+        append: help_note(:div, :name_deprecate_preferred_help.tp)
+      ) %>
   <% turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
 
   <%= check_box_with_label(form: f, field: :is_misspelling,

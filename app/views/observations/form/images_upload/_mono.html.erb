@@ -4,41 +4,42 @@
 
 <div id="image_<%= index %>_box" class="form_image">
 
-  <%= radio_button(:observation, :thumb_image_id, -index) %>
-  <%= custom_file_field(:image, :image, index: index,
-                        onchange: "auto_image_new(#{index})") %>
+  <div class="my-4">
+    <%= radio_button(:observation, :thumb_image_id, -index) %>
+    <%= custom_file_field(:image, :image, index: index,
+                          onchange: "auto_image_new(#{index})") %>
 
-  <% if @js %>
-    <span class="ml-10px">&nbsp;</span>
-    <input id="image_<%=index%>_more" onclick="image_on(<%=index%>);"
-           type="button" class="btn btn-default" value="<%=:MORE.t%> »" />
-    <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);"
-           type="button" class="btn btn-default" value="« <%=:LESS.t%>"
-           style="display:none" />
-  <% end %><br/>
+    <% if @js %>
+      <span class="ml-10px">&nbsp;</span>
+      <input id="image_<%=index%>_more" onclick="image_on(<%=index%>);"
+            type="button" class="btn btn-default" value="<%=:MORE.t%> »" />
+      <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);"
+            type="button" class="btn btn-default" value="« <%=:LESS.t%>"
+            style="display:none" />
+    <% end %>
+  </div>
 
   <%= fields_for(:image) do |f_i| %>
-    <%= f_i.label("#{index}_notes".to_sym, "#{:NOTES.t}:") %>
-    <%= f_i.text_field(:notes, index: index, size: 50, class: "form-control") %>
+    <%= text_field_with_label(form: f_i, field: :notes, index: index,
+                              size: 50, label: :NOTES.t + ":") %>
 
-    <div id="image_<%= index %>_div"
-         style="line-height:100%<%= "; display:none" if @js %>">
-      <%= f_i.label("#{index}_copyright_holder".to_sym,
-                    "#{:form_images_copyright_holder.t}:") %>
-      <%= f_i.text_field(:copyright_holder, index: index) %></p>
+    <div id="image_<%= index %>_div" style="<%= "display:none;" if @js %>">
+      <%= text_field_with_label(form: f_i, field: :copyright_holder,
+                                index: index, inline: true,
+                                label: :form_images_copyright_holder.t + ":") %>
 
-      <%= f_i.label("#{index}_when_1i".to_sym,
-                    "#{:form_images_when_taken.t}:") %>
-      <%= f_i.date_select(:when, date_select_opts(@image).merge(index: index),
-                          { onchange: "changed_date(#{index})" }) %>
-      <% turn_into_year_auto_completer(:species_list_when_1i) %>
+      <div class="form-group form-inline">
+        <%= f_i.label("#{index}_when_1i".to_sym,
+                      "#{:form_images_when_taken.t}:") %>
+        <%= f_i.date_select(:when, date_select_opts(@image).merge(index: index),
+                            { onchange: "changed_date(#{index})", class: "form-control" }) %>
+        <% turn_into_year_auto_completer("image_#{index}_when_1i") %>
+      </div>
 
-      <%= f_i.label("#{index}_license_id".to_sym,
-                    "#{:form_images_select_license.t}:".html_safe) %>
-      <%= f_i.select(:license_id, @licenses,
-                     { value: @image.license_id },
-                     { id: "image_#{index}_license_id",
-                       name: "image[#{index}] [license_id]" }) %></p>
+      <%= select_with_label(form: f_i, field: :license_id, index: index,
+                            label: :form_images_select_license.t + ":",
+                            inline: true,
+                            options: @licenses, value: @image.license_id) %>
     </div>
   <% end %>
 

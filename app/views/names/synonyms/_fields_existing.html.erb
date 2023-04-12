@@ -5,8 +5,7 @@
     <div class="form-group">
       <%= content_tag(:div, "#{:form_synonyms_current_synonyms.t}:",
                       class: "font-weight-bold my-3") %>
-      <%= content_tag(:p, :form_synonyms_current_synonyms_help.t,
-                      class: "help-block") %>
+      <%= help_block(:p, :form_synonyms_current_synonyms_help.t) %>
       <% current_synonyms.each do |n| %>
         <% if n != @name %>
           <%= check_box_with_label(form: fes, field: n.id,

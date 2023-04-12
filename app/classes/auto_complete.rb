@@ -119,7 +119,6 @@ end
 # Or would this scatter the code?
 # Thinking the scope could be useful for graphQL, or it could use this class.
 #
-# rubocop:disable Metrics/AbcSize
 class AutoCompleteLocation < AutoCompleteByWord
   attr_accessor :reverse
 
@@ -149,6 +148,15 @@ class AutoCompleteName < AutoCompleteByString
     Name.with_correct_spelling.select(:text_name).distinct.
       where(Name[:text_name].matches("#{letter}%")).
       pluck(:text_name).sort_by { |x| (x.match?(" ") ? "b" : "a") + x }.uniq
+  end
+end
+
+class AutoCompleteNameAboveGenus < AutoCompleteByString
+  def rough_matches(letter)
+    # (this sort puts higher rank on top)
+    Name.with_correct_spelling.with_rank_above_genus.
+      where(Name[:text_name].matches("#{letter}%")).order(rank: :desc).
+      select(:text_name, :rank).map(&:text_name).uniq
   end
 end
 

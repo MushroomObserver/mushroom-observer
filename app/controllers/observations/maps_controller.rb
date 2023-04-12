@@ -47,7 +47,7 @@ module Observations
         where: "observations.lat IS NOT NULL OR " \
                 "observations.location_id IS NOT NULL"
       }
-      @observations = \
+      @observations =
         @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
           locations[loc_id.to_i] = nil if loc_id.present?
           lat = long = nil if gps_hidden == 1

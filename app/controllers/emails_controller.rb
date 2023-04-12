@@ -64,8 +64,7 @@ class EmailsController < ApplicationController
   end
 
   def merge_request
-    @model = validate_merge_model!(params[:type])
-    return unless @model
+    return unless (@model = validate_merge_model!(params[:type]))
 
     @old_obj = @model.safe_find(params[:old_id])
     @new_obj = @model.safe_find(params[:new_id])
@@ -82,7 +81,9 @@ class EmailsController < ApplicationController
   #   }
   # )
   def name_change_request
-    @name = Name.safe_find(params[:name_id])
+    return unless (@name = Name.safe_find(params[:name_id])) &&
+                  (@new_name_with_icn_id = params[:new_name_with_icn_id])
+
     name_with_icn_id = "#{@name.search_name} [##{@name.icn_id}]"
 
     if name_with_icn_id == params[:new_name_with_icn_id]
@@ -90,7 +91,6 @@ class EmailsController < ApplicationController
       return
     end
 
-    @new_name_with_icn_id = params[:new_name_with_icn_id]
     return unless request.method == "POST"
 
     send_name_change_request(name_with_icn_id, @new_name_with_icn_id)

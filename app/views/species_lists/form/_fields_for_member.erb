@@ -1,11 +1,10 @@
 <%= fields_for(:member) do |f_m| %>
 
-  <div class="form-group form-inline mt-3">
-    <%= f_m.label(:value, :form_species_lists_confidence.t + ":") %>
-    <%= f_m.select(:value, Vote.confidence_menu, class: "form-control") %>
-  </div>
+  <%= select_with_label(form: f_m, field: :value,
+                        label: :form_species_lists_confidence.t + ":",
+                        options: Vote.confidence_menu, inline: true) %>
 
-  <div class="form-group mt-3">
+  <div class="form-group">
     <%= f_m.label(:notes, :form_species_lists_member_notes.t + ":") %>
       (<%= :general_textile_link.t %>)
     <%= f_m.fields_for(:notes) do |f_n| %>
@@ -19,34 +18,28 @@
     <% end %>
   </div>
 
-  <div class="form-group form-inline mt-3">
-    <%= f_m.label(:lat, :LATITUDE.t + ":") %>&nbsp;<%=
-      f_m.text_field(:lat, size: 8, value: @member_lat,
-                     class: "form-control") %>
-    <%= f_m.label(:long, :LONGITUDE.t + ":") %>&nbsp;<%=
-      f_m.text_field(:long, size: 8, value: @member_long,
-                     class: "form-control") %>
-    <%= f_m.label(:alt, :ALTITUDE.t + ":") %>&nbsp;<%=
-      f_m.text_field(:alt, size: 6, value: @member_alt,
-                     class: "form-control") %>
-    <br/>
-    <%= content_tag(:span, :form_observations_lat_long_help.t,
-                    class: "help-note") %>
+  <div class="form-group form-inline">
+    <%= text_field_with_label(form: f_m, field: :lat, size: 8,
+                              value: @member_lat, inline: true,
+                              label: :LATITUDE.t + ":") %>
+    <%= text_field_with_label(form: f_m, field: :long, size: 8,
+                              value: @member_long, inline: true,
+                              label: :LONGITUDE.t + ":") %>
+    <%= text_field_with_label(form: f_m, field: :alt, size: 6,
+                              value: @member_alt, inline: true,
+                              label: :ALTITUDE.t + ":") %>
   </div>
+  <%= help_note(:div, :form_observations_lat_long_help.t) %>
 
   <%= check_box_with_label(form: f_m, field: :is_collection_location,
                            checked: @member_is_collection_location,
                            label: :form_observations_is_collection_location.t)
                            %>
-  <%= content_tag(:span,
-                  :form_observations_is_collection_location_help.t,
-                  class: "help-note") %>
+  <%= help_note(:div, :form_observations_is_collection_location_help.t) %>
 
   <%= check_box_with_label(form: f_m, field: :specimen,
                            checked: @member_specimen,
                            label: :form_observations_specimen_available.t) %>
-  <%= content_tag(:span,
-                  :form_observations_specimen_available_help.t,
-                  class: "help-note") %>
+  <%= help_note(:div, :form_observations_specimen_available_help.t) %>
 
 <% end %>

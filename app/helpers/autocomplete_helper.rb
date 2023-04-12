@@ -36,6 +36,14 @@ module AutocompleteHelper
     }.merge(opts))
   end
 
+  # Make text_field auto-complete for Name.with_rank_above_genus text_name.
+  def turn_into_clade_auto_completer(id, opts = {})
+    turn_into_auto_completer(id, {
+      ajax_url: "/ajax/auto_complete/name_above_genus/@",
+      collapse: 1
+    }.merge(opts))
+  end
+
   # Make text_field auto-complete for Location display name.
   def turn_into_location_auto_completer(id, opts = {})
     format = if @user && @user.location_format == "scientific"

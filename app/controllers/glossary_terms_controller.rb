@@ -2,7 +2,7 @@
 
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
-  before_action :login_required
+  before_action :login_required, except: [:index, :show]
   before_action :store_location, except: [:create, :update, :destroy]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
@@ -134,8 +134,8 @@ class GlossaryTermsController < ApplicationController
   end
 
   def assign_image_form_ivars
-    @copyright_holder = params[:copyright_holder] || @user.name
-    @copyright_year = params.dig(:date, :copyright_year)&.to_i ||
+    @copyright_holder = params.dig(:upload, :copyright_holder) || @user.name
+    @copyright_year = params.dig(:upload, :copyright_year)&.to_i ||
                       Time.now.utc.year
     @licenses = License.current_names_and_ids(@user.license)
     @upload_license_id = params.dig(:upload, :license_id) || @user.license_id
@@ -176,7 +176,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def upload_specified?
-    params[:glossary_term][:upload_image]
+    params[:upload][:image]
   end
 
   def process_upload(args)
@@ -217,11 +217,11 @@ class GlossaryTermsController < ApplicationController
 
   def strong_upload_image_param
     {
-      copyright_holder: params[:copyright_holder],
-      when: Time.local(params[:date][:copyright_year]).utc,
+      copyright_holder: params[:upload][:copyright_holder],
+      when: Time.local(params[:upload][:copyright_year]).utc,
       license: License.safe_find(params[:upload][:license_id]),
       user: @user,
-      image: params[:glossary_term][:upload_image]
+      image: params[:upload][:image]
     }
   end
 
@@ -229,7 +229,7 @@ class GlossaryTermsController < ApplicationController
   # Do this only in test environment
   def permit_upload_image_param
     args = strong_upload_image_param
-    args[:image] = params[:glossary_term][:upload_image][:image]
+    args[:image] = params[:upload][:image]
     args
   end
 end

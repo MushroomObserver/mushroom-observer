@@ -5,15 +5,11 @@
              id: @species_list.id }
 %>
 
-<%= form_with(url: action, multipart: true) do |f| %>
+<%= form_with(url: action, scope: :species_list, multipart: true) do |f| %>
 
-  <div class="form-group mt-3">
-    <%= :species_list_upload_label.t %>:
-    <%= custom_file_field(:species_list, :file) %>
-    <div class="help_block">
-      <%= :species_list_upload_help.tp %>
-    </div>
-  </div>
+  <%= file_field_with_label(form: f, field: :file,
+                            label: :species_list_upload_label.t + ":") %>
+  <%= help_block(:div, :species_list_upload_help.tp) %>
 
   <%= submit_button(form: f, button: :UPLOAD.l, center: true) %>
 

@@ -42,8 +42,9 @@ class String
     # characters and accents -- it covers HTML codes &#1 to &#400.
     # Disable alignment cop to make code more readable
     # rubocop:disable Layout/HashAlignment
+    # Disable CollectionLiteralLength because constant is most convenient method
     # rubocop:disable Metrics/CollectionLiteralLength
-    UTF8_TO_ASCII = { #
+    UTF8_TO_ASCII = {
       "\x00"         => " ",
       "\x01"         => " ",
       "\x02"         => " ",
@@ -337,6 +338,7 @@ class String
       "\xC6\x90"     => "E"     # Ɛ
     }.freeze
   end
+  # rubocop:enable Metrics/CollectionLiteralLength
 
   # Plain-text alternatives to the HTML special characters RedCloth uses.
   unless defined? HTML_SPECIAL_CHAR_EQUIVALENTS
@@ -368,7 +370,6 @@ class String
       "nbsp"  => " "
     }.freeze
   end
-  # rubocop:enable Metrics/CollectionLiteralLength
   # rubocop:enable Layout/HashAlignment
   # :startdoc:
 

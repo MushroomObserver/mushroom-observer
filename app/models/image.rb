@@ -2,6 +2,7 @@
 
 require("open3")
 require("mimemagic")
+require("fastimage")
 #
 #  = Image Model
 #
@@ -757,11 +758,9 @@ class Image < AbstractModel
   end
 
   # Get image size from JPEG header and set the corresponding record fields.
-  # Saves the record.
+  # Saves the record. NOTE: Requires gem("fastimage")
   def set_image_size(file = local_file_name(:full_size))
-    script = Rails.root.join("script/jpegsize").to_s
-    output, _status = Open3.capture2(script, file)
-    w, h = output.to_s.chomp.split
+    w, h = FastImage.size(file)
     return unless /^\d+$/.match?(w.to_s)
 
     self.width  = w.to_i

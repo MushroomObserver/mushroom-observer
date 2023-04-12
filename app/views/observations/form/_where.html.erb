@@ -9,13 +9,13 @@
 <!-- WHERE -->
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <div class="form-group">
-      <%= f.label(:place_name, "#{:WHERE.t}: (#{:required.t})") %>
-      <%= f.text_field(:place_name, class: "form-control") %>
-      <% turn_into_location_auto_completer(
-          :observation_place_name, primer: Location.primer
-        ) %>
-    </div>
+    <%= text_field_with_label(form: f, field: :place_name,
+                              label: :WHERE.t + ":",
+                              between: :required) %>
+
+    <% turn_into_location_auto_completer(
+        :observation_place_name, primer: Location.primer
+      ) %>
   </div>
   <div class="col-xs-12 col-sm-6">
     <%= help_block_with_arrow("left", id: "where_help") do %>
@@ -34,7 +34,8 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-6">
-    <button type="button" class="map-locate btn btn-default my-3">Locate on Map</button>
+    <%= js_button(button: :form_observations_locate_on_map.t,
+                  name: "locate_on_map", class: "map-locate my-3") %>
     <%= help_block_with_arrow("up", id: "locate_on_map_help") do %>
       <%= :form_observations_locate_on_map_help.t %>
     <% end  # help_block_with_arrow do %>
@@ -60,11 +61,15 @@
 <div class="row mt-3" id="observation_geolocation">
   <div class="col-sm-6">
     <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
-    <div id="observation_form_map" class="observation-form-map hidden"
-         data-indicator-url="<%= asset_path('indicator.gif') %>"></div>
+    <%= content_tag(:div, "",
+                    id: "observation_form_map",
+                    class: "observation-form-map hidden",
+                    data: { indicator_url: asset_path('indicator.gif') } ) %>
     <div>
-      <button type="button" class="map-open btn btn-default"><%= :form_observations_open_map.t %></span>
-      <button type="button" class="map-clear btn btn-default hidden"><%= :form_observations_clear_map.t %></span>
+      <%= js_button(button: :form_observations_open_map.t,
+                    name: "map-open", class: "map-open") %>
+      <%= js_button(button: :form_observations_clear_map.t,
+                    name: "map-clear", class: "map-clear") %>
     </div>
   </div>
   <div class="col-sm-6">
@@ -78,23 +83,17 @@
   <div class="col-xs-12 col-sm-6">
     <div class="row">
       <div class="col-xs-12 col-sm-4">
-        <div class="form-group">
-          <%= f.label(:lat, :LATITUDE.t + ":") %>
-          <%= f.text_field(:lat, class: "form-control") %>
-        </div>
+        <%= text_field_with_label(form: f, field: :lat,
+                                  label: :LATITUDE.t + ":") %>
       </div>
       <div class="col-xs-12 col-sm-4">
-        <div class="form-group">
-          <%= f.label(:long, :LONGITUDE.t + ":") %>
-          <%= f.text_field(:long, class: "form-control") %>
-        </div>
+        <%= text_field_with_label(form: f, field: :long,
+                                  label: :LONGITUDE.t + ":") %>
       </div>
       <div class="col-xs-12 col-sm-4">
-        <div class="form-group">
-          <%= f.label(:alt, :ALTITUDE.t + ":") %>
-          <%= f.text_field(:alt, class: "form-control") %>
-          (<%= :units_meters.t %>)
-        </div>
+        <%= text_field_with_label(form: f, field: :alt,
+                                  label: :ALTITUDE.t + ":",
+                                  append: "(#{:units_meters.t})") %>
       </div>
       <div class="col-xs-12 col-sm-12">
         <%= check_box_with_label(form: f, field: :gps_hidden,
