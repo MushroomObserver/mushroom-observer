@@ -24,7 +24,7 @@ votes = gather_users_votes(observation, @user)
     </header>
   </div>
 
-  <div class="container-fluid card bg-secondary">
+  <div class="container-fluid card bg-light">
     <% namings.each do |naming| %>
       <%= render(partial: "observations/namings/row",
                   locals: { naming: naming, observation: observation,

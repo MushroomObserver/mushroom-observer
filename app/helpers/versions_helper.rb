@@ -37,7 +37,7 @@ module VersionsHelper
                        class: "table table-sm")
     body = content_tag(:div, table, class: "card-body")
     tag.strong("#{:VERSIONS.t}:") +
-      content_tag(:div, body, class: "card bg-secondary")
+      content_tag(:div, body, class: "card bg-light")
   end
 
   private

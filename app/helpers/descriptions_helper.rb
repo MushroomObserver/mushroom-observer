@@ -286,7 +286,7 @@ module DescriptionsHelper
     msg = capture(&block) if block
     result = content_tag(:div, msg, class: "card-body")
     wrapper = content_tag(:div, result,
-                          class: "card bg-secondary dotted-border")
+                          class: "card bg-light dotted-border")
     if block
       concat(wrapper)
     else

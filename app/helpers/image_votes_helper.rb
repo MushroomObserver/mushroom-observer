@@ -17,16 +17,26 @@ module ImageVotesHelper
   # Even though this is not an <a> tag, but an <input>, it's ok.
   def image_vote_link(image, vote)
     current_vote = image.users_vote(User.current)
-    vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
+    vote_text = if vote.zero?
+                  image_vote_none.html_safe
+                else
+                  image_vote_as_short_string(vote)
+                end
 
     if current_vote == vote
-      return content_tag(:span, image_vote_as_short_string(vote))
+      return content_tag(:span, image_vote_as_short_string(vote),
+                         class: "image-vote")
     end
 
     put_button(name: vote_text, remote: true,
+               class: "image-vote-link",
                path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
                data: { role: "image_vote", image_id: image.id, value: vote })
+  end
+
+  def image_vote_none
+    icon("fa-regular", "circle-xmark", class: "fa-sm")
   end
 
   # image vote lookup used in show_image

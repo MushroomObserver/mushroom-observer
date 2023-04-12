@@ -205,7 +205,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_displayed_title("Observation Index")
     assert_select(
-      "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
+      "#results .card-title a[href ^= '/#{obs.id}'] .log-name",
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )

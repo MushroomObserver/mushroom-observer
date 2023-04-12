@@ -10,8 +10,8 @@ class LurkerTest < CapybaraIntegrationTestCase
     login
 
     # Click on first observation in feed results
-    first(".rss-detail", text: "Observation Created").
-      ancestor(".card").first(".rss-box-details").first("a").click
+    first(".log-entry", text: "Observation Created").
+      ancestor(".card").first(".log-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
@@ -215,7 +215,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     select("Region", from: "filter_type")
     click_button("Search")
     assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
-    where_ats = find_all(".rss-where").map(&:text)
+    where_ats = find_all(".log-where").map(&:text)
     assert(where_ats.all? { |wa| wa.match(place) },
            "Expected only obs from #{place}" \
            "Found these: #{where_ats.inspect}")

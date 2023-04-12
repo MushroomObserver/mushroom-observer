@@ -164,6 +164,11 @@ module ApplicationHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
+  #
+  #  TO USE CAPTURE BLOCK
+  #  content = @view_context.capture(self, &block) if block_given?
+  #  probably need content.html_safe
+  #
   def destroy_button(target:, name: :DESTROY.t, **args)
     path = if target.is_a?(String)
              target
@@ -208,8 +213,9 @@ module ApplicationHelper
       method: :put,
       class: ""
     }.merge(args)
-
-    button_to(name, path, html_options)
+    # Must pass a block in case the button has an icon or html.
+    # block generates a button not an input #quirksmode
+    button_to(path, html_options) { name }
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js

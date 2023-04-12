@@ -38,6 +38,10 @@ svg.placeholder {
   // border-radius: $border-radius-sm;
   color: white;
   transition: opacity 0.3s ease-out;
+
+  form.button_to input {
+    color: white;
+  }
 }
 
 .theater-btn {
@@ -45,13 +49,13 @@ svg.placeholder {
   padding: 0.125em;
 
   &:hover {
-    color: rgba(white, 0.75);
+    color: $link-color;
   }
 
   i {
-    height: 2.4rem;
-    width: 2.4rem;
-    font-size: 2.1rem;
+    height: 1.65rem;
+    width: 1.65rem;
+    font-size: 1.5rem;
     vertical-align: bottom;
   }
 }
@@ -65,9 +69,26 @@ svg.placeholder {
 
     &:hover,
     &:focus {
-      color: $body-color;
+      color: $link-color;
       text-decoration: none;
     }
+  }
+}
+
+.image-vote,
+.image-vote-link {
+  color: white;
+  background-color: transparent !important;
+  padding: 0.125rem 0.25rem !important;
+  border-radius: 0;
+}
+
+.image-vote-link {
+  &:hover,
+  &:focus {
+    color: white;
+    background-color: $link-color !important;
+    text-decoration: none !important;
   }
 }
 

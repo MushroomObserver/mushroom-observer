@@ -11,14 +11,14 @@
   </div>
 <% end %>
 
-<div class="vote-buttons mt-2">
+<div class="vote-buttons">
   <div class="image-vote-links" id="image_vote_links_<%= image.id %>">
     <div class="text-center small">
       <%= if user && !image.users_vote(user).blank?
         image_vote_link(image, 0) + "&nbsp;".html_safe
       end %><%= Image.all_votes.map do |vote|
         image_vote_link(image, vote)
-      end.safe_join("|") %>
+      end.safe_join %>
     </div><!-- .text-center.small -->
     <span class="d-none data_container" data-id="<%= image.id %>"
           data-percentage="<%= vote_percentage %>" data-role="image_vote_percentage"></span>

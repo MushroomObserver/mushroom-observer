@@ -40,10 +40,10 @@ module MatrixBoxHelper
     ) do
       if presenter.detail.present?
         concat(content_tag(:div, presenter.detail,
-                           class: "rss-detail card-text mb-1"))
+                           class: "log-entry card-text mb-1"))
       end
       concat(content_tag(:div, presenter.display_time,
-                         class: "rss-what card-text"))
+                         class: "log-what card-text"))
     end
   end
 
