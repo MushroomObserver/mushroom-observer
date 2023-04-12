@@ -251,7 +251,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Advanced Search")
     assert_select(
-      "#results .rss-what a:match('href', ?)", %r{^/\d},
+      "#results a.log-item-link:match('href', ?)", %r{^/\d},
       { count: expected_hits },
       "Wrong number of results"
     )
