@@ -55,7 +55,7 @@ module Names
 
     def test_index_by_author_of_multiple_descriptions
       user = users(:katrina)
-      descs_authored_by_user_count = \
+      descs_authored_by_user_count = 
         NameDescriptionAuthor.where(user: user).count
       assert_operator(
         descs_authored_by_user_count, :>, 1,
@@ -119,7 +119,7 @@ module Names
         desc.editors = [user]
         desc.save
       end
-      descs_edited_by_user_count = \
+      descs_edited_by_user_count = 
         NameDescriptionEditor.where(user: user).count
 
       login

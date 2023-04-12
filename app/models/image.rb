@@ -609,7 +609,7 @@ class Image < AbstractModel
   def validate_image_type
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
-      self.upload_type = \
+      self.upload_type = 
         MimeMagic.by_magic(File.open(upload_temp_file)).try(&:type)
       if upload_type&.start_with?("image")
         result = true
