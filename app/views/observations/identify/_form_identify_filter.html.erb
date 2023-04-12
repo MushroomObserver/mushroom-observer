@@ -15,6 +15,12 @@ filter_types = [
   [:REGION.l, :region],
   # [:USER.l, :user],
 ]
+search_icon = content_tag(:i, class: "fa-solid fa-magnifying-glass fa-lg") do
+                content_tag(:span, :SEARCH.l, class: "sr-only")
+              end
+clear_icon = content_tag(:i, class: "fa-solid fa-delete-left fa-lg") do
+               content_tag(:span, :CLEAR.l, class: "sr-only")
+             end
 %>
 
 <%= form_with(url: identify_observations_path, method: :get,
@@ -22,23 +28,26 @@ filter_types = [
               id: "identify_filter") do |f| %>
 
   <%= content_tag(:div, class: "input-group") do
-    concat(f.text_field(:term,
-                        # turn off browser autocomplete
-                        autocomplete: "off", value: value,
-                        placeholder: placeholder,
-                        class: "form-control", size: 42,
-                        data: { autofocus: true }))
-    concat(f.select(:type, filter_types, { selected: selected },
-                    { class: "form-control",
-                      onchange: "MOEvents.rebindAutoComplete(this.value);" }))
-    concat(content_tag(:div, class: "input-group-append") do
-              concat(f.submit(icon("fa-solid", "magnifying-glass",
-                                   class: "btn btn-outline-primary"),
-                                   aria: { label: :SEARCH.l }))
-              concat(f.submit(icon("fa-solid", "broom-wide",
-                                   class: "btn btn-outline-primary"),
-                                   aria: { label: :CLEAR.l }))
-            end)
+    [f.text_field(:term,
+                  # turn off browser autocomplete
+                  autocomplete: "off", value: value,
+                  placeholder: placeholder,
+                  style: "flex-grow: 2;",
+                  class: "form-control", size: 42,
+                  data: { autofocus: true }),
+     f.select(:type, filter_types, { selected: selected },
+              { class: "form-control",
+                onchange: "MOEvents.rebindAutoComplete(this.value);" }),
+     content_tag(:div, class: "input-group-append") do
+       [button_tag(type: :submit, value: :SEARCH.l,
+                   class: "btn btn-outline-secondary") do
+          search_icon
+        end,
+        button_tag(type: :submit, value: :CLEAR.l,
+                   class: "btn btn-outline-secondary") do
+          clear_icon
+        end].safe_join
+     end].safe_join
   end %>
 
   <% turn_into_clade_auto_completer(:filter_term) %>

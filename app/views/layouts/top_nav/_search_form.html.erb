@@ -36,6 +36,7 @@ search_types = options_for_select(options, session[:search_type] ||
   content_tag(:div, class: "input-group") do
     concat(f.text_field(:pattern, { value: session[:pattern],
                                     class: "form-control",
+                                    style: "flex-grow: 2;",
                                     placeholder: :app_find.t }))
     concat(f.select(:type, search_types, { },
                     { class: "custom-select" }))

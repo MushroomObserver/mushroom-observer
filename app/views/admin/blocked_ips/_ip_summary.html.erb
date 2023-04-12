@@ -17,7 +17,7 @@
         <td><% unless IpStats.blocked?(ip) %>
               <%= patch_button(name: "Block",
                                path: admin_blocked_ips_path(add_bad: ip),
-                               class: "btn btn-secondary") %>
+                               class: "btn btn-outline-secondary") %>
             <% end %>
         </td>
         <td>

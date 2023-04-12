@@ -24,7 +24,7 @@
 
       <%= patch_button(name: "Clear List",
                        path: admin_blocked_ips_path(clear_okay: 1),
-                       class: "btn btn-secondary",
+                       class: "btn btn-outline-secondary",
                        form_class: "d-inline-block float-right",
                        id: "clear_okay_ips_list",
                        data: { confirm: :are_you_sure.t }
@@ -58,7 +58,7 @@
 
       <%= patch_button(name: "Clear List",
                        path: admin_blocked_ips_path(clear_bad: 1),
-                       class: "btn btn-secondary",
+                       class: "btn btn-outline-secondary",
                        form_class: "d-inline-block float-right",
                        id: "clear_blocked_ips_list",
                        data: { confirm: :are_you_sure.t }

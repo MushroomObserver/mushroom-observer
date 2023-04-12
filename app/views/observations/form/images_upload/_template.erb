@@ -20,7 +20,7 @@
       <div class="form-group mb-2">
         <a href="#"
            data-role="set_as_default_thumbnail"
-           class="btn btn-sm btn-secondary"><%= :image_set_default.t %></a>
+           class="btn btn-sm btn-outline-secondary"><%= :image_set_default.t %></a>
         <label class="is_default_thumbnail d-none"><%= :image_add_default.t %></label>
         <input type="radio" name="observation[thumb_image_id]" value="true" class="d-none">
       </div>
@@ -40,7 +40,7 @@
 
       <div class="text-right mb-2">
         <a href="javascript:"
-           class="remove_image_link btn btn-sm btn-secondary"><%= :image_remove_remove.t %></a>
+           class="remove_image_link btn btn-sm btn-outline-secondary"><%= :image_remove_remove.t %></a>
       </div>
 
       <%= fields_for(:temp_image) do |fti| %>

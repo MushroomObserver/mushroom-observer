@@ -27,7 +27,7 @@ module MatrixBoxHelper
                locals: { naming: nam })
       end
     else
-      propose_naming_link(object.id, "btn-secondary mb-3")
+      propose_naming_link(object.id, "btn-outline-secondary mb-3")
     end
   end
 

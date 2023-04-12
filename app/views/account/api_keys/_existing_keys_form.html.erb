@@ -35,10 +35,11 @@
                              { value: key.notes,
                                data: { role: "key_notes_input",
                                        id: key.id } }) %>
-            <%= f.button(:SAVE.l, type: "button", class: "btn btn-secondary",
-                            data: { role: "key_notes_save", id: key.id }) %>
+            <%= f.button(:SAVE.l, type: "button",
+                         class: "btn btn-outline-secondary",
+                         data: { role: "key_notes_save", id: key.id }) %>
             <%= f.button(:CANCEL.l, type: "button",
-                            class: "btn btn-secondary",
+                            class: "btn btn-outline-secondary",
                             data: { role: "key_notes_cancel", id: key.id }) %>
           </div>
           <div class="view_key_notes_container"

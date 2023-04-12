@@ -126,12 +126,12 @@ module ObservationsHelper
     buttons << render(partial: "observations/namings/propose_button",
                       locals: { obs_id: observation.id,
                                 text: :show_namings_propose_new_name.t,
-                                btn_class: "btn-secondary" },
+                                btn_class: "btn-outline-secondary" },
                       layout: false)
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
-                           class: "btn btn-secondary mt-2" })
+                           class: "btn btn-outline-secondary mt-2" })
     end
     buttons.safe_join(tag.br)
   end

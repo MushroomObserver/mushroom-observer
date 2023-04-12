@@ -6,9 +6,9 @@
 <% if @selected_type || @types.length > 1 && @pages.num_total > 1 %>
   <div class="btn-group d-none d-md-block pb-1 mt-5 text-nowrap">
     <%= content_tag(:span, :rss_show.t,
-                    class: "btn btn-secondary btn-sm disabled") %>
+                    class: "btn btn-outline-secondary btn-sm disabled") %>
 
-    <span class="btn btn-secondary btn-sm<%= first_active %>">
+    <span class="btn btn-outline-secondary btn-sm<%= first_active %>">
       <%= label = :rss_all.t
           url = interests_path
           first_active.present? ? label : link_with_query(label, url) %>
@@ -16,7 +16,7 @@
 
     <% @types.each do |type|
          second_active = @selected_type == type.to_s ? " active" : "" %>
-      <span class="btn btn-secondary btn-sm<%= second_active %>">
+      <span class="btn btn-outline-secondary btn-sm<%= second_active %>">
         <%= label = type.to_s.underscore.pluralize.upcase.to_sym.t
             url = interests_path(type: type)
             second_active.present? ? label : link_with_query(label, url) %>
