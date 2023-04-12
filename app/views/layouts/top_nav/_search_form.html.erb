@@ -17,8 +17,9 @@ options = [
 
 @timer_end ||= Time.zone.now
 secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-timer = "(#{ :app_index_timer.t(seconds: secs,
-                                num: @num_results.to_i) })"
+timer_text = "(#{ :app_index_timer.t(seconds: secs,
+                                     num: @num_results.to_i) })"
+timer = content_tag(:div, timer_text, class: "text-nowrap", id: "timer")
 adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
@@ -41,34 +42,30 @@ search_types = options_for_select(options, session[:search_type] ||
     concat(f.select(:type, search_types, { },
                     { class: "custom-select" }))
     concat(content_tag(:div, class: "input-group-append") do
-             button_tag(type: :submit, value: "submit",
-                        class: "btn btn-outline-primary",
+             button_tag(type: :submit, value: :app_search.l,
+                        class: "btn btn-outline-secondary",
                         aria: { label: :app_search.l }) do
-               icon("fa-solid", "magnifying-glass", # :app_search.l,
-                    class: "fa-lg")
+               icon("fa-solid", "magnifying-glass")
              end
            end)
   end
 end %>
 
-<%= content_tag(:p, class: "navbar-text mx-2 text-nowrap") do
+<%= content_tag(:div, class: "navbar-text mx-2 text-nowrap") do
   link_to(content_tag(:span, :search_bar_help.t),
           info_search_bar_help_path)
 end %>
 
 <% if @timer_start %>
-  <div class="navbar-text my-1 mx-2 d-none d-md-block smaller">
-    <span id="timer"><%= timer %></span><br/>
-    <%= adv_search %>
-  </div>
+  <%= content_tag(:div, class: "navbar-text mx-2 d-none d-md-block smaller") do
+    [timer, adv_search].safe_join
+  end %>
 <% else %>
-  <p class="navbar-text mx-2 d-none d-md-block">
-    <%= adv_search %>
-  </p>
+  <%= content_tag(:div, adv_search,
+                  class: "navbar-text mx-2 d-none d-md-block") %>
 <% end %>
 
-<div class="d-block d-md-none">
-  <%= content_tag(:span, timer, id: "timer",
-                  class: "text-nowrap") if @timer_start %>
-  <%= adv_search %>
-</div>
+<%= content_tag(:div, class: "d-block d-md-none") do
+  concat(timer) if @timer_start
+  concat(adv_search)
+end %>

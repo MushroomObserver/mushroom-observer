@@ -1,13 +1,17 @@
 <%# bs4 %>
 <!--top_nav-->
-<nav id="top_nav"
-     class="navbar navbar-light bg-light navbar-expand-md mb-4 d-print-none">
+<%
+top_nav_classes = %w[navbar navbar-light bg-light border-light
+                     navbar-expand-md mb-4 d-print-none].join(" ")
+%>
+
+<%= content_tag(:nav, id: "top_nav", class: top_nav_classes) do %>
 
   <div class="container-fluid px-0 justify-content-between">
     <div class="top-bar-left d-flex flex-row">
       <% if controller.controller_name == "identify" %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
-      <% else ##user is logged in %>
+      <% else ##future filters %>
         <%= render(partial: "layouts/top_nav/search_form") %>
       <% end %>
     </div>
@@ -21,5 +25,5 @@
     </div>
   </div>
 
-</nav>
+<% end %>
 <!--/SEARCH_BAR-->
