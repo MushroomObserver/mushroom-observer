@@ -252,7 +252,7 @@ class QueuedEmail < AbstractModel
   rescue StandardError => e
     warn("ERROR CREATING EMAIL")
     warn(log_msg)
-    warn(e.to_s)
+    warn(e)
     warn(e.backtrace)
     I18n.locale = current_locale
     false
