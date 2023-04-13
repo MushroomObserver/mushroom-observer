@@ -36,6 +36,10 @@
   }
 }
 
+.namings-table-header {
+  line-height: $headings-line-height;
+}
+
 // Slick - this encodes the image in css, no loading
 .vote-icon-yours,
 .vote-icon-consensus {

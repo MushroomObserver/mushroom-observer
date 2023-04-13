@@ -2,14 +2,13 @@
 # called from observations/show/namings
 # Just the "table" of current namings, with headers
 logged_in = @user&.verified
-header = observation_naming_header_row(observation, logged_in)
 namings = observation.namings.sort_by(&:created_at)
 votes = gather_users_votes(observation, @user)
 %>
 
 <div class="namings-table card bg-light" id="namings_table">
   <%= render(partial: "observations/namings/table_header",
-             locals: { header: header }) %>
+             locals: { logged_in: logged_in, observation: observation }) %>
 
   <div class="card-body">
     <% namings.each do |naming| %>

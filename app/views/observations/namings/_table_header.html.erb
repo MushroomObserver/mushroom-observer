@@ -1,8 +1,9 @@
 <%
 # called from observations/namings/table
+header = observation_naming_header_row(observation, logged_in)
 %>
 
-<div class="card-header pb-2">
+<div class="card-header pb-2 namings-table-header">
   <div class="row">
     <div class="col-12 col-md-3"><%= header[:heading] %></div>
     <div class="col-12 col-md-3 d-none d-md-block">
