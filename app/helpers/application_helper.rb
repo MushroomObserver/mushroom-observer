@@ -165,9 +165,12 @@ module ApplicationHelper
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
   #
-  #  TO USE CAPTURE BLOCK
-  #  content = @view_context.capture(self, &block) if block_given?
-  #  probably need content.html_safe
+  #  TO USE CAPTURE &BLOCK
+  #  content = block_given? ? capture(&block) : content
+  #  probably need content.html_safe.
+  #  https://stackoverflow.com/questions/1047861/how-do-i-create-a-helper-with-block
+  #  heads up about button_to input vs button
+  #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
   #
   def destroy_button(target:, name: :DESTROY.t, **args)
     path = if target.is_a?(String)
