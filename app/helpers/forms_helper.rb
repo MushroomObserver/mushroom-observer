@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 # helpers for form tags
+#  custom_file_field            # stylable file input field with
+#                               # client-side size validation
+#  date_select_opts
+
 module FormsHelper
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
