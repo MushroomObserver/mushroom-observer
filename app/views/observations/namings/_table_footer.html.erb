@@ -1,0 +1,23 @@
+<%
+# called from observations/namings/table
+
+suggest = logged_in && observation.thumb_image_id.present? &&
+          (@user.admin || MO.image_model_beta_testers.include?(@user.id))
+buttons = observation_naming_buttons(observation, suggest)
+help_text = logged_in ? :show_namings_consensus_help.t :
+                        :show_namings_please_login.t
+help = content_tag(:div, help_text, class: "card-text small")
+%>
+
+<div class="card-footer d-none d-md-block">
+  <div class="row">
+    <div class="col-3"><%= buttons %></div>
+    <div class="col-9"><%= help %></div>
+  </div>
+</div>
+<div class="card-footer d-none d-md-block py-2">
+  <div class="row">
+    <div class="col-4 offset-3"><%= vote_legend_yours %></div>
+    <div class="col-5"><%= vote_legend_consensus %></div>
+  </div>
+</div>

@@ -4,12 +4,19 @@
 #  link_with_query              # link_to with query params
 #  destroy_button               # button to destroy object
 #  post_button                  # button to post to a path
+#
+#  TO USE CAPTURE &BLOCK
+#  content = block_given? ? capture(&block) : name
+#  probably need content.html_safe.
+#  https://stackoverflow.com/questions/1047861/how-do-i-create-a-helper-with-block
+#  heads up about button_to input vs button
+#  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
 module LinkHelper
-
   # Call link_to with query params added.
-  def link_with_query(name = nil, options = nil, html_options = nil)
-    link_to(name, add_query_param(options), html_options)
+  def link_with_query(name = nil, options = nil, html_options = nil, &block)
+    content = block ? capture(&block) : name
+    link_to(add_query_param(options), html_options) { content }
   end
 
   # Take a query which can be coerced into a different model, and create a link
@@ -31,13 +38,6 @@ module LinkHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
-  #
-  #  TO USE CAPTURE &BLOCK
-  #  content = block_given? ? capture(&block) : content
-  #  probably need content.html_safe.
-  #  https://stackoverflow.com/questions/1047861/how-do-i-create-a-helper-with-block
-  #  heads up about button_to input vs button
-  #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
   #
   def destroy_button(target:, name: :DESTROY.t, **args)
     path = if target.is_a?(String)
@@ -100,5 +100,4 @@ module LinkHelper
 
     button_to(name, path, html_options)
   end
-
 end

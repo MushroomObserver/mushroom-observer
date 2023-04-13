@@ -1,34 +1,24 @@
-<%
+<% #bs4
 # called from observations/show/namings
 # Just the "table" of current namings, with headers
 logged_in = @user&.verified
-namings = observation.namings.sort_by(&:created_at)
 header = observation_naming_header_row(observation, logged_in)
+namings = observation.namings.sort_by(&:created_at)
 votes = gather_users_votes(observation, @user)
 %>
 
-<div class="namings-table" id="namings_table">
-  <div class="container-fluid">
-    <header class="row">
-      <div class="col-12 col-md-3"><%= header[:heading] %></div>
-      <div class="col-12 col-md-3 d-none d-md-block">
-        <%= header[:user_name] %>
-      </div>
-      <div class="col-12 col-md-2 d-none d-md-block">
-        <%= header[:consensus_vote] %>
-      </div>
-      <div class="col-12 col-md-3 d-none d-md-block">
-        <%= header[:your_vote] %>
-      </div>
-      <div class="col-12 col-md-1 d-none d-md-block"></div>
-    </header>
-  </div>
+<div class="namings-table card bg-light" id="namings_table">
+  <%= render(partial: "observations/namings/table_header",
+             locals: { header: header }) %>
 
-  <div class="container-fluid card bg-light">
+  <div class="card-body">
     <% namings.each do |naming| %>
       <%= render(partial: "observations/namings/row",
-                  locals: { naming: naming, observation: observation,
-                            votes: votes, logged_in: logged_in }) %>
+                 locals: { logged_in: logged_in, observation: observation,
+                           naming: naming, votes: votes }) %>
     <% end # each naming %>
   </div>
+
+  <%= render(partial: "observations/namings/table_footer",
+             locals: { logged_in: logged_in, observation: observation }) %>
 </div>

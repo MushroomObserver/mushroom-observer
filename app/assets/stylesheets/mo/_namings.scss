@@ -17,12 +17,13 @@
   }
 
   div.row {
-    background-color: $card-bg;
+    // background-color: $card-bg;
 
     .col {
       padding: $card-spacer-x;
       vertical-align: middle;
 
+      // xs-sm only
       &.naming-reasons {
         padding-top: 0;
       }
@@ -33,4 +34,23 @@
       }
     }
   }
+}
+
+// Slick - this encodes the image in css, no loading
+.vote-icon-yours,
+.vote-icon-consensus {
+  display: inline-block;
+  width: 60px;
+  height: 42px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.vote-icon-yours {
+  background-image: asset-data-url('eye3.png');
+}
+
+.vote-icon-consensus {
+  background-image: asset-data-url('eyes3.png');
 }

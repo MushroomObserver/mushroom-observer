@@ -26,7 +26,7 @@
 
     // Standardize the size of the ID
     .log-id {
-      @extend .micro, .badge, .badge-outline, .py-1, .mt-1, .ml-2;
+      @extend .micro, .badge, .badge-outline, .py-1, .mt-1, .ml-2, .text-monospace;
       font-weight: $font-weight-normal;
     }
   }
