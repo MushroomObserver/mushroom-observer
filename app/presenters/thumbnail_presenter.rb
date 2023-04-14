@@ -23,11 +23,22 @@ class ThumbnailPresenter < BasePresenter
     # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
 
+    notes = ""
+    # new: for the img alt property. extra lookup of image.user worth it?
+    # if image.is_a?(Image)
+    #   notes = !image.notes || image.notes.blank? ? "" : image.notes
+    #   show_name = image.original_name.present? &&
+    #               (check_permission(image) ||
+    #                image.user && image.user.keep_filenames == :keep_and_show)
+    #   notes += "\n#{image.original_name}" if show_name
+    # end
+
     default_args = {
       size: :small,
-      notes: "",
+      notes: notes,
       data: {},
       data_sizes: {},
+      fit: :cover,
       extra_classes: false,
       obs_data: {}, # used in lightbox caption
       identify: false,
@@ -52,7 +63,7 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid ab-fab object-fit-cover"
+    img_class = "img-fluid ab-fab object-fit-#{args[:fit]}"
     img_class += " #{args[:extra_classes]}" if args[:extra_classes]
 
     # <img> data attributes. Account for possible data-confirm, etc

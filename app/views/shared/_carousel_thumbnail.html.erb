@@ -1,0 +1,8 @@
+
+<%
+  presenter_args = local_assigns.except(:image).merge({ fit: :contain })
+  presenter = ThumbnailPresenter.new(image, @view, presenter_args)
+%>
+
+
+<%= image_tag(presenter.img_src, presenter.options_lazy) %>

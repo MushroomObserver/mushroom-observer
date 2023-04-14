@@ -2,6 +2,7 @@
 
 module ThumbnailHelper
   # Draw a thumbnail image.  It takes either an Image instance or an id.
+  # Template uses thumbnail_presenter to assemble data
   #
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
@@ -20,6 +21,16 @@ module ThumbnailHelper
   # )
   def thumbnail(image, args)
     render(partial: "shared/image_thumbnail",
+           locals: args.merge({ image: image }))
+  end
+
+  def carousel_image(image, args)
+    render(partial: "shared/carousel_image",
+           locals: args.merge({ image: image }))
+  end
+
+  def carousel_thumbnail(image, args)
+    render(partial: "shared/carousel_thumbnail",
            locals: args.merge({ image: image }))
   end
 
