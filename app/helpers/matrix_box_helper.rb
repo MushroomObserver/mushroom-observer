@@ -54,7 +54,7 @@ module MatrixBoxHelper
 
     content_tag(
       :div,
-      class: "card-footer card-active text-center position-relative"
+      class: "card-footer card-active position-relative"
     ) do
       mark_as_reviewed_toggle(object_id, "btn-outline-secondary",
                               "box_reviewed")
