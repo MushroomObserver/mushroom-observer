@@ -30,7 +30,7 @@ module LightboxHelper
        (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
       html << propose_naming_link(obs_data[:id])
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
-      html << mark_as_reviewed_toggle(obs_data[:id])
+      html << mark_as_reviewed_toggle(obs_data[:id], "btn-primary")
     end
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",

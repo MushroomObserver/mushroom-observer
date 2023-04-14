@@ -56,7 +56,8 @@ module MatrixBoxHelper
       :div,
       class: "card-footer card-active text-center position-relative"
     ) do
-      mark_as_reviewed_toggle(object_id, "box_reviewed", "stretched-link")
+      mark_as_reviewed_toggle(object_id, "btn-outline-secondary",
+                              "box_reviewed")
     end
   end
 end

@@ -17,8 +17,8 @@ module IdentifyHelper
   # with some additions to the lightbox JS, to keep track of the checked
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
-  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
-                              label_class = "")
+  def mark_as_reviewed_toggle(id, label_class = "",
+                              selector = "caption_reviewed")
     render(partial: "observation_views/mark_as_reviewed",
            locals: { id: id, selector: selector, label_class: label_class },
            layout: false)

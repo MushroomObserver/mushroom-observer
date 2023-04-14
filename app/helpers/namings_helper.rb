@@ -94,7 +94,7 @@ module NamingsHelper
   def consensus_vote_html(naming)
     consensus_votes =
       (if naming.votes&.length&.positive?
-         "#{pct_html(naming)} (#{num_votes_html(naming)})"
+         "#{pct_html(naming)} #{num_votes_html(naming)}"
        else
          "(#{:show_namings_no_votes.t})"
        end).html_safe # has links
@@ -118,8 +118,12 @@ module NamingsHelper
   end
 
   def num_votes_html(naming)
-    content_tag(:span, naming.votes&.length,
-                { class: "vote-number", data: { id: naming.id } })
+    content_tag(:div, class: "vote-number-text") do
+      ["(",
+       content_tag(:span, naming.votes&.length,
+                   { class: "vote-number", data: { id: naming.id } }),
+       ")"].safe_join
+    end
   end
 
   def your_vote_html(naming)
