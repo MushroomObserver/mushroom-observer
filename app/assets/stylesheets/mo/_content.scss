@@ -71,17 +71,17 @@
   }
 }
 
-.name-section p {
-  margin: 0;
-  padding-left: 1em;
-  text-indent: -1em;
-}
-
-.obs-notes {
-  .textile p {
+.list-indented {
+  p {
     margin: 0;
     padding-left: 1em;
     text-indent: -1em;
+  }
+}
+
+.obs-notes {
+  .textile {
+    @extend .list-indented;
   }
 }
 

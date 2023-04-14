@@ -16,7 +16,8 @@
 <div class="row">
 
   <div class="col-12 col-md-8 col-xl-7">
-    <%= panel_block(id: "observation_details", class: "name-section") do
+    <%= panel_block(id: "observation_details", class: "mb-3",
+                    inner_class: "list-indented") do
       render(partial: "observations/show/observation", locals: obs_locals)
     end %>
     <%# note the following is duplicated below for layout order %>
@@ -35,8 +36,8 @@
 
   <div class="col-12 col-md-4 col-xl-5">
     <% if @user %>
-      <%= panel_block(id: "observation_name_info",
-                      class: "name-section small") do
+      <%= panel_block(id: "observation_name_info", class: "mb-3",
+                      inner_class: "list-indented small") do
         render(partial: "observations/show/name_info", locals: obs_locals)
       end %>
 

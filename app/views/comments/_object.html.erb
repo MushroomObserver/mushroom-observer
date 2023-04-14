@@ -13,7 +13,7 @@
       str += tag.p("#{:show_name_notes.t}:")
       str += notes_panel(object.notes.tpl)
     end
-    content_tag(:div, str, class: "name-section m-3")
+    content_tag(:div, str, class: "m-3")
 
   when "NameDescription"
     render(partial: "names/descriptions/show/name_description", object: object, locals: { review: false })
