@@ -59,7 +59,7 @@
 
 .log-details {
 
-  a {
+  a:not(.btn) {
     color: inherit !important;
 
     &:hover,
@@ -98,10 +98,4 @@ a.log-link {
 .log-fancy-time {
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-@include media-breakpoint-down(sm) {
-  .log-details {
-    height: auto !important;
-  }
 }
