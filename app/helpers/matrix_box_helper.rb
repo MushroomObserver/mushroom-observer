@@ -27,7 +27,7 @@ module MatrixBoxHelper
                locals: { naming: nam })
       end
     else
-      propose_naming_link(object.id, "btn-outline-secondary mb-3")
+      propose_naming_link(object.id, "btn-sm btn-outline-secondary mb-3")
     end
   end
 
@@ -56,7 +56,7 @@ module MatrixBoxHelper
       :div,
       class: "card-footer card-active position-relative"
     ) do
-      mark_as_reviewed_toggle(object_id, "btn-outline-secondary",
+      mark_as_reviewed_toggle(object_id, "btn-sm btn-outline-secondary",
                               "box_reviewed")
     end
   end

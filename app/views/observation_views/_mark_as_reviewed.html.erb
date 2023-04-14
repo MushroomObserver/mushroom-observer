@@ -8,7 +8,7 @@ form_with(url: observation_view_path(id: id),
   content_tag(:div, class: "d-inline btn-group-toggle",
               data: { toggle: "buttons" }) do
     f.label("#{selector}_#{id}",
-            class: "btn caption-reviewed-link #{label_class}") do
+            class: "caption-reviewed-link btn #{label_class}") do
       concat(:mark_as_reviewed.t)
       concat(
         f.check_box(
