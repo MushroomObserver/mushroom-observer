@@ -40,15 +40,23 @@
   line-height: $headings-line-height;
 }
 
-.vote-icon-yours,
-.vote-icon-consensus {
+.vote-icon-width {
   display: inline-block;
+  position: relative;
   width: 60px;
   max-width: 100%;
+}
+
+.vote-icon-sizer {
+  width: 100%;
   padding-bottom: 70%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+
+  > div {
+    @extend .ab-fab;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
 }
 
 // Slick - this encodes the image in css, no loading

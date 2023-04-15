@@ -143,11 +143,19 @@ module NamingsHelper
   end
 
   def vote_icon_yours
-    content_tag(:div, "", class: "vote-icon-yours")
+    tag.div("", class: "vote-icon-width") do
+      tag.div("", class: "vote-icon-sizer") do
+        tag.div("", class: "vote-icon-yours")
+      end
+    end
   end
 
   def vote_icon_consensus
-    content_tag(:div, "", class: "vote-icon-consensus")
+    tag.div("", class: "vote-icon-width") do
+      tag.div("", class: "vote-icon-sizer") do
+        tag.div("", class: "vote-icon-consensus")
+      end
+    end
   end
 
   def vote_legend_yours

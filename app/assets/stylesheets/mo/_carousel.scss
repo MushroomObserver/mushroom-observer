@@ -49,6 +49,10 @@
   margin-left: 0;
   margin-right: 0;
 
+  @include media-breakpoint-up(md){
+    border-left: 1px solid $card-border-color;
+  }
+
   li {
     background-color: transparent;
     width: 6vw;
