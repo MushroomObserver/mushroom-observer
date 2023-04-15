@@ -8,7 +8,7 @@ $sidebar-max-width: 12rem;
 }
 
 // https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
-@include media-breakpoint-up(md) {
+@include media-breakpoint-up(xl) {
   .sidebar-offcanvas {
     width: $sidebar-max-width;
   }
@@ -39,7 +39,7 @@ $sidebar-max-width: 12rem;
 // small devices, tablets
 // --------------------------------------------------
 
-@include media-breakpoint-down(sm) {
+@include media-breakpoint-down(lg) {
 
   .row-offcanvas {
     position: relative;

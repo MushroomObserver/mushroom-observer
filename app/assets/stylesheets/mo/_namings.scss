@@ -40,17 +40,18 @@
   line-height: $headings-line-height;
 }
 
-// Slick - this encodes the image in css, no loading
 .vote-icon-yours,
 .vote-icon-consensus {
   display: inline-block;
   width: 60px;
-  height: 42px;
+  max-width: 100%;
+  padding-bottom: 70%;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
 }
 
+// Slick - this encodes the image in css, no loading
 .vote-icon-yours {
   background-image: asset-data-url('eye3.png');
 }
