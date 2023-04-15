@@ -205,7 +205,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_displayed_title("Observation Index")
     assert_select(
-      "#results .card-title a[href ^= '/#{obs.id}'] .log-name",
+      "#results a.log-link[href ^= '/#{obs.id}'] .log-name",
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )
@@ -251,7 +251,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_displayed_title("Advanced Search")
     assert_select(
-      "#results a.log-item-link:match('href', ?)", %r{^/\d},
+      "#results a.log-link:match('href', ?)", %r{^/\d},
       { count: expected_hits },
       "Wrong number of results"
     )

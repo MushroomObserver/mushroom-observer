@@ -3,14 +3,16 @@
 obs_id = observation.id
 caption ||= false
 %>
+
 <p class="obs-when" id="observation_when_<%= obs_id %>">
-  <%= :WHEN.t %>: <span class="font-weight-bold"><%= observation.when.web_date %></span>
+  <%= tag.b(:WHEN.t + ":") %> <%= observation.when.web_date %>
 </p>
 
 <p class="obs-where" id="observation_where_<%= obs_id %>">
-  <%= observation.is_collection_location ?
+  <%= label = observation.is_collection_location ?
         :show_observation_collection_location.t :
-        :show_observation_seen_at.t %>:
+        :show_observation_seen_at.t
+    tag.b(label + ":") %>
   <%= location_link(observation.place_name,
                     observation.location, nil, true) %>
 </p>
@@ -38,14 +40,14 @@ caption ||= false
 </p>
 
 <p class="obs-who" id="observation_who_<%= obs_id %>">
-  <%= :WHO.t %>: <span><%= user_link(observation.user) %></span>
+  <%= tag.b(:WHO.t + ":") %> <%= user_link(observation.user) %>
 </p>
 
 <% if !caption %>
   <% if @user %>
     <div class="obs-projects" id="observation_projects_<%= obs_id %>">
       <% observation.projects.each do |project| %>
-        <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
+        <p><%= tag.b(:PROJECT.t + ":") %> <%= link_to_object(project) %></p>
       <% end %>
     </div>
   <% end %>
@@ -57,7 +59,7 @@ caption ||= false
 
   <% if @user %>
     <div class="obs-collection"
-         id="observation_collection_numbers_<%= obs_id %>">
+        id="observation_collection_numbers_<%= obs_id %>">
       <%= render(partial: "observations/show/collection_numbers",
                 locals: { observation: observation }) %>
     </div>
@@ -79,8 +81,10 @@ caption ||= false
     Textile.clear_textile_cache
     Textile.register_name(observation.name)
     content_tag(
-      :div, observation.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+      :div, observation.notes_show_formatted.
+            sub(/^\A/, tag.b(:NOTES.t + ":\n")).tpl
     )
   end %>
 </div><!--.obs-notes-->
+
 

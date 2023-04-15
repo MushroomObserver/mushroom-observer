@@ -1,0 +1,50 @@
+<%
+# CAROUSEL TEMPLATE
+# Requires an object that responds to .images
+# TODO: NIMMO make it link to fullscreen lightbox
+# javascript_include("image_slider")
+html_id = "#{object.type_tag}_carousel"
+default_image = object&.thumb_image || nil
+has_images = !object.images.nil? && object.images.any?
+%>
+
+<% if has_images %>
+  <div id="<%= html_id %>" class="carousel slide card-img" data-ride="false">
+    <div class="carousel-inner bg-light">
+      <% object.images.each do |img| %>
+        <% active = (img == default_image) ? " active" : "" %>
+        <%= tag.div(class: "carousel-item#{active}") do
+          carousel_image(img)
+        end %>
+      <% end %>
+    </div>
+    <a class="carousel-control-prev"
+       href="#<%= html_id %>"
+       role="button"
+       data-slide="prev">
+      <div class="btn">
+        <span class="fas fa-chevron-left fa-2x text-white" aria-hidden="true"></span>
+        <span class="sr-only"><%= :PREV.l %></span>
+      </div>
+    </a>
+    <a class="carousel-control-next"
+       href="#<%= html_id %>"
+       role="button"
+       data-slide="next">
+      <div class="btn">
+        <span class="fas fa-chevron-right fa-2x text-white" aria-hidden="true"></span>
+        <span class="sr-only"><%= :NEXT.l %></span>
+      </div>
+    </a>
+    <ol class="carousel-indicators bg-light mb-0">
+      <% object.images.each_with_index do |img, index| %>
+        <% active = (img == default_image) ? " active" : "" %>
+          <li data-target="#<%= html_id %>"
+              data-slide-to="<%= index %>"
+              class="<%= active %>">
+            <%= carousel_thumbnail(img) %>
+          </li>
+      <% end %>
+    </ol>
+  </div>
+<% end %>

@@ -1,5 +1,7 @@
 <% # bs4
   # TODO: replace with full width carousel - details, then columns
+  # The move is to make the whole top thing a card:
+  #    carousel header details footer
   @owner_naming = owner_naming_line(@observation) # must before show_obs_title
   @title = show_obs_title(obs: @observation, owner_naming: @owner_naming)
   @tabsets = show_observation_tabset(obs: @observation, user: @user,
@@ -13,28 +15,49 @@
   obs_locals = { observation: @observation }
 %>
 
+<div class="card mb-4">
+
+  <div class="row no-gutters">
+    <div class="col-md-4">
+      <div class="h-100 d-flex flex-column">
+        <div class="card-header pr-md-4">
+          <%= tag.h6("#{:show_observation_header.t} #{@observation.id}",
+                     class: "mb-0") %>
+        </div>
+
+        <div class="card-body list-indented pr-md-4" id="observation_details">
+          <%= render(partial: "observations/show/observation",
+                    locals: obs_locals) %>
+        </div>
+
+        <div class="card-footer pr-md-4">
+          <%= show_object_footer(@observation) %>
+        </div>
+      </div>
+    </div><!--.col-->
+
+    <div class="col-md-8">
+      <%= render(partial: "shared/images/carousel",
+                locals: { object: @observation }) %>
+    </div><!--.col-->
+  </div><!--.row-->
+
+</div><!--.card-->
+
 <div class="row">
 
-  <div class="col-12 col-md-8 col-xl-7">
-    <%= panel_block(id: "observation_details", class: "mb-3",
-                    inner_class: "list-indented") do
-      render(partial: "observations/show/observation", locals: obs_locals)
-    end %>
-    <%# note the following is duplicated below for layout order %>
-    <%# mobile should be details - map - namings %>
-    <div class="d-none d-md-block">
-      <% if @user %>
-        <%= render(partial: "observations/show/namings", locals: obs_locals) %>
-      <% end %>
+  <div class="col-md-8 col-xl-7">
+    <% if @user %>
+      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
+    <% end %>
 
-      <%= render(partial: "comments/comments_for_object",
-                locals: { object: @observation, controls: true, limit: nil }) %>
+    <%= render(partial: "comments/comments_for_object",
+               locals: { object: @observation, controls: true, limit: nil }) %>
 
-      <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
-    </div>
+    <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>
 
-  <div class="col-12 col-md-4 col-xl-5">
+  <div class="col-md-4 col-xl-5">
     <% if @user %>
       <%= panel_block(id: "observation_name_info", class: "mb-3",
                       inner_class: "list-indented small") do
@@ -63,20 +86,8 @@
                  locals: obs_locals) %>
     <% end %>
 
-    <%= render(partial: "observations/show/images", locals: obs_locals) %>
-  </div>
-
-  <div class="col-12 d-md-none">
-    <% if @user %>
-      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
-    <% end %>
-
-    <%= render(partial: "comments/comments_for_object",
-               locals: { object: @observation, controls: true, limit: nil }) %>
-
-    <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
+    <%# render(partial: "observations/show/images", locals: obs_locals) %>
   </div>
 
 </div><!--.row-->
 
-<%= show_object_footer(@observation) %>

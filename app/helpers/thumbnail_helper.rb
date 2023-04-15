@@ -19,18 +19,18 @@ module ThumbnailHelper
   #     extra_classes: ""
   #   }
   # )
-  def thumbnail(image, args)
-    render(partial: "shared/image_thumbnail",
+  def thumbnail(image, **args)
+    render(partial: "shared/images/image_thumbnail",
            locals: args.merge({ image: image }))
   end
 
-  def carousel_image(image, args)
-    render(partial: "shared/carousel_image",
+  def carousel_image(image, **args)
+    render(partial: "shared/images/carousel_image",
            locals: args.merge({ image: image }))
   end
 
-  def carousel_thumbnail(image, args)
-    render(partial: "shared/carousel_thumbnail",
+  def carousel_thumbnail(image, **args)
+    render(partial: "shared/images/carousel_thumbnail",
            locals: args.merge({ image: image }))
   end
 

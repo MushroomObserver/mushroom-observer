@@ -137,6 +137,6 @@ module FooterHelper
     end
 
     html = html.safe_join(safe_br)
-    tag.p(html, class: "small footer-view-stats mt-3")
+    tag.p(html, class: "small footer-view-stats my-0")
   end
 end

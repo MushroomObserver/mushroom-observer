@@ -125,14 +125,30 @@ module ContentHelper
   end
 
   def panel_block(**args, &block)
+    header = if args[:header].present?
+               content_tag(:div, class: "card-header") do
+                 args[:header]
+               end
+             else
+               ""
+             end
+    footer = if args[:footer].present?
+               content_tag(:div, class: "card-footer") do
+                 args[:footer]
+               end
+             else
+               ""
+             end
     content_tag(
       :div,
       class: "card bg-light #{args[:class]}",
       id: args[:id]
     ) do
-      content_tag(:div, class: "card-body #{args[:inner_class]}") do
-        concat(capture(&block).to_s)
-      end
+      [header,
+       content_tag(:div, class: "card-body #{args[:inner_class]}") do
+         concat(capture(&block).to_s)
+       end,
+       footer].safe_join
     end
   end
 

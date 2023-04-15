@@ -23,7 +23,7 @@ if presenter
 
       <%= if presenter.image_data
         content_tag(:div, class: "thumbnail-container card-img-top") do
-          render(partial: "shared/image_thumbnail", locals: thumb_locals)
+          render(partial: "shared/images/image_thumbnail", locals: thumb_locals)
         end
       end %>
 

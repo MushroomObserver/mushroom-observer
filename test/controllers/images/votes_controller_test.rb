@@ -67,7 +67,7 @@ module Images
       # Assert
       assert_template(layout: nil)
       assert_template(layout: false)
-      assert_template(partial: "shared/_image_vote_links")
+      assert_template(partial: "shared/images/_image_vote_links")
     end
   end
 end

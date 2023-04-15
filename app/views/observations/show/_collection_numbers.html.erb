@@ -11,7 +11,7 @@
           observation.user.try(&:hide_specimen_stuff?) %>
   <% if numbers.any? && can_edit %>
     <div>
-      <%= :Collection_numbers.t %>: [<%=
+      <%= tag.b(:Collection_numbers.t + ":") %> [<%=
         link_with_query(:create_collection_number.t,
           new_collection_number_path(observation_id: observation.id))
       %>]

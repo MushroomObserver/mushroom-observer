@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module ImageVotesHelper
-  # used in shared/image_thumbnail
+  # used in shared/images/image_thumbnail
   def vote_section_html(votes, image)
     return "" unless votes && image && User.current
 
     content_tag(:div, "", class: "vote-section") do
-      render(partial: "shared/image_vote_links",
+      render(partial: "shared/images/image_vote_links",
              locals: { image: image })
     end
   end
