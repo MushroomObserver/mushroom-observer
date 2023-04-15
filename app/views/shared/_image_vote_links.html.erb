@@ -15,7 +15,7 @@
   <div class="image-vote-links" id="image_vote_links_<%= image.id %>">
     <div class="text-center small">
       <%= if user && !image.users_vote(user).blank?
-        image_vote_link(image, 0) + "&nbsp;".html_safe
+        image_vote_link(image, 0)
       end %><%= Image.all_votes.map do |vote|
         image_vote_link(image, vote)
       end.safe_join %>

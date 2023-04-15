@@ -24,7 +24,7 @@ module MatrixBoxHelper
       content_tag(:div, class: "vote-select-container mb-3",
                         data: { vote_cache: object.vote_cache }) do
         render(partial: "observations/namings/votes/form",
-               locals: { naming: nam })
+               locals: { naming: nam, classes: "form-control-sm" })
       end
     else
       propose_naming_link(object.id, "btn-sm btn-outline-secondary mb-3")

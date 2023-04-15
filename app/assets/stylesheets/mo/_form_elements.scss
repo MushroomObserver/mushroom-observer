@@ -98,3 +98,10 @@ a.filter-only {
   max-width: 21rem;
   display: inline-block;
 }
+
+// This needs to line up with a btn-sm. Could go inside
+.vote-number-text {
+  @extend .d-inline-block;
+  padding: $btn-padding-y 0;
+  border: 1px solid transparent;
+}

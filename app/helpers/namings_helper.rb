@@ -131,7 +131,7 @@ module NamingsHelper
     [content_tag(:small, "#{:show_namings_your_vote.t}: ",
                  class: "d-block d-md-none"),
      render(partial: "observations/namings/votes/form",
-            locals: { naming: naming })].safe_join
+            locals: { naming: naming, classes: "form-control-sm" })].safe_join
   end
 
   # May show both user and consensus icons
@@ -151,13 +151,13 @@ module NamingsHelper
   end
 
   def vote_legend_yours
-    content_tag(:div, class: "d-flex flex-row align-items-center") do
+    content_tag(:div, class: "d-flex flex-row align-items-center small") do
       [vote_icon_yours, " = ", :show_namings_eye_help.t].safe_join
     end
   end
 
   def vote_legend_consensus
-    content_tag(:div, class: "d-flex flex-row align-items-center") do
+    content_tag(:div, class: "d-flex flex-row align-items-center small") do
       [vote_icon_consensus, " = ", :show_namings_eyes_help.t].safe_join
     end
   end
