@@ -1,36 +1,39 @@
 <%
-  if observation.location
-    loc = observation.location
-    n = ((90.0 - loc.north) / 1.80).round(6)
-    s = ((90.0 - loc.south) / 1.80).round(6)
-    e = ((180.0 + loc.east) / 3.60).round(6)
-    w = ((180.0 + loc.west) / 3.60).round(6)
-  end
+if observation.location
+  loc = observation.location
+  n = ((90.0 - loc.north) / 1.80).round(6)
+  s = ((90.0 - loc.south) / 1.80).round(6)
+  e = ((180.0 + loc.east) / 3.60).round(6)
+  w = ((180.0 + loc.west) / 3.60).round(6)
+end
 
-  lat, long = if observation.lat && observation.long
-    [observation.public_lat, observation.public_long]
-  elsif observation.location
-    observation.location.center
-  end
-  if lat && long
-    x = ((180.0 + long) / 3.60).round(6)
-    y = ((90.0 - lat) / 1.80).round(6)
-  end
+lat, long = if observation.lat && observation.long
+  [observation.public_lat, observation.public_long]
+elsif observation.location
+  observation.location.center
+end
+if lat && long
+  x = ((180.0 + long) / 3.60).round(6)
+  y = ((90.0 - lat) / 1.80).round(6)
+end
 
-  map_url = map_observation_path(id: observation.id, q: get_query_param)
+map_url = map_observation_path(id: observation.id, q: get_query_param)
+hide_map_path = add_query_param(
+                  javascript_hide_thumbnail_map_path(id: @observation.id)
+                )
 %>
 
-<div class="d-none d-md-block" id="observation_thumbnail_map">
+<div class="card d-none d-md-block" id="observation_thumbnail_map">
 
-  <h4 class="d-inline-block mt-0"><%= :MAP.t %></h4>
-  <span class="pull-right inline">
-    <%= link_with_query(
-          :show_observation_hide_map.t,
-          javascript_hide_thumbnail_map_path(id: @observation.id)
-        ) %>
-  </span>
+  <%= tag.div(class: "card-header d-flex justify-content-between") do
+    [tag.h6(:MAP.t),
+     link_to(hide_map_path) do
+       concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
+       concat(icon("fa-regular", "eye-slash", class: "fa-sm"))
+     end].safe_join
+  end %>
 
-  <div class="thumbnail-map-container">
+  <div class="thumbnail-map-container card-img-bottom">
 
     <div class="thumbnail-buttons">
       <div class="plus-button"></div>

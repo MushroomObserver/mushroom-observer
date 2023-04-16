@@ -2,13 +2,6 @@
 // rss log
 // --------------------------------------------------
 
-.card-header {
-  h6, .h6 {
-    font-weight: $font-weight-bold;
-    margin-bottom: 0;
-  }
-}
-
 .card.log-item {
   background-color: $gray-100;
   transition: background-color 0.3s ease-out;

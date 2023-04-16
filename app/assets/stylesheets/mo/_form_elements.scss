@@ -99,9 +99,7 @@ a.filter-only {
   display: inline-block;
 }
 
-// This needs to line up with a btn-sm. Could go inside
+// Should be $card-color
 .vote-number-text {
-  @extend .d-inline-block;
-  padding: $btn-padding-y 0;
-  border: 1px solid transparent;
+  color: $body-color;
 }

@@ -1,0 +1,17 @@
+.card-header {
+  h6, .h6 {
+    font-weight: $font-weight-bold;
+    margin-bottom: 0;
+  }
+}
+
+.no-gutters {
+  .card-header,
+  .card-body,
+  .card-footer {
+
+    @include media-breakpoint-up(lg){
+      border-right: 1px solid $card-border-color;
+    }
+  }
+}

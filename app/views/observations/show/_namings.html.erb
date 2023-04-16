@@ -1,7 +1,8 @@
 <% #bs4
+# js needs to prepend observation_namings with fresh namings_table on update
 %>
 
-<div id="observation_namings" class="mb-3">
+<div id="observation_namings">
   <!--TABLE OF NAMES / REFRESHED BY AJAX -->
   <%= render(partial: "observations/namings/table",
              locals: { observation: observation }) %>

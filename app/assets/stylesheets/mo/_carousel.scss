@@ -17,7 +17,7 @@
 
 .carousel-control-prev,
 .carousel-control-next {
-  padding: 2rem;
+  padding: 2rem 6rem;
   bottom: 6vw;
 
   div.btn {
@@ -37,10 +37,12 @@
 
 .carousel-control-prev {
   justify-content: flex-start;
+  padding-left: 1rem;
 }
 
 .carousel-control-next {
   justify-content: flex-end;
+  padding-right: 1rem;
 }
 
 .carousel-indicators {
@@ -48,10 +50,6 @@
   width: 100%;
   margin-left: 0;
   margin-right: 0;
-
-  @include media-breakpoint-up(md){
-    border-left: 1px solid $card-border-color;
-  }
 
   li {
     background-color: transparent;

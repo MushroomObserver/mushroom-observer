@@ -9,8 +9,8 @@ $('#modal_naming').on('hidden.bs.modal', function () {
 $('#modal_naming').on('shown.bs.modal', function() {
   var naming_input = $("#naming_name");
   var naming_form = $("#naming_form");
-  var namings_table = $("#namings_table");
-  var observation_namings = $("#observation_namings");
+  // var namings_table = $("#namings_table");
+  // var observation_namings = $("#observation_namings");
   var this_modal = $(this);
 
   AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse(naming_input)
@@ -18,12 +18,12 @@ $('#modal_naming').on('shown.bs.modal', function() {
   naming_input.focus();
 
   // Success now handled in create.js.erb or form_reload.js.erb
-  naming_form.on("ajax:success", (event) => {
+  // naming_form.on("ajax:success", (event) => {
     // const [_data, _status, xhr] = event.detail;
     // namings_table.remove();
     // observation_namings.prepend(xhr.responseText);
     // Don't hide it here, you or it will disappear when form has flash errors
-  });
+  // });
 
   // Form errors are still ajax success, handled in flash.js.erb
   // This is for an ajax error, should not happen.

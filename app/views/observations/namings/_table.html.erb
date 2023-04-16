@@ -6,11 +6,11 @@ namings = observation.namings.sort_by(&:created_at)
 votes = gather_users_votes(observation, @user)
 %>
 
-<div class="namings-table card bg-light" id="namings_table">
+<div class="namings-table card bg-light mb-4" id="namings_table">
   <%= render(partial: "observations/namings/table_header",
              locals: { logged_in: logged_in, observation: observation }) %>
 
-  <div class="card-body">
+  <div class="list-group list-group-flush">
     <% namings.each do |naming| %>
       <%= render(partial: "observations/namings/row",
                  locals: { logged_in: logged_in, observation: observation,

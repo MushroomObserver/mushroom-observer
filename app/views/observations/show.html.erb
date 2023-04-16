@@ -13,81 +13,67 @@
   show_links = @user && (@observation.external_links.any? || @new_sites.any?)
 
   obs_locals = { observation: @observation }
+  bp = "lg"
 %>
 
-<div class="card mb-4">
+<div class="card card-combination mb-4">
 
   <div class="row no-gutters">
-    <div class="col-md-4">
-      <div class="h-100 d-flex flex-column">
-        <div class="card-header pr-md-4">
-          <%= tag.h6("#{:show_observation_header.t} #{@observation.id}",
-                     class: "mb-0") %>
-        </div>
+    <%= tag.div(class: "col-#{bp}-4") do
+      tag.div(class: "h-100 d-flex flex-column") do
+        [
+          tag.div(class:"card-header pr-#{bp}-4") do
+            tag.h6(:show_observation_details.t, class: "mb-0")
+          end,
+          tag.div(class:"card-body list-indented pr-#{bp}-4",
+                    id: "observation_details") do
+            render(partial: "observations/show/observation",
+                      locals: obs_locals)
+          end,
+          tag.div(class:"card-footer pr-#{bp}-4") do
+            show_object_footer(@observation)
+          end
+        ].safe_join
+      end
+    end %>
 
-        <div class="card-body list-indented pr-md-4" id="observation_details">
-          <%= render(partial: "observations/show/observation",
-                    locals: obs_locals) %>
-        </div>
-
-        <div class="card-footer pr-md-4">
-          <%= show_object_footer(@observation) %>
-        </div>
-      </div>
-    </div><!--.col-->
-
-    <div class="col-md-8">
-      <%= render(partial: "shared/images/carousel",
-                locals: { object: @observation }) %>
-    </div><!--.col-->
+    <%= tag.div(class: "col-#{bp}-8") do
+      render(partial: "shared/images/carousel",
+             locals: { object: @observation })
+    end %>
   </div><!--.row-->
 
 </div><!--.card-->
 
 <div class="row">
 
-  <div class="col-md-8 col-xl-7">
-    <% if @user %>
-      <%= render(partial: "observations/show/namings", locals: obs_locals) %>
-    <% end %>
+  <%= tag.div(class: "col-#{bp}-8 col-xl-7") do
+    if @user
+      concat(render(partial: "observations/show/namings", locals: obs_locals))
+    end
+    concat(render(partial: "comments/comments_for_object",
+               locals: { object: @observation, controls: true, limit: nil }))
+    concat(@observation.source_credit.tpl) if @observation.source_noteworthy?
+  end %>
 
-    <%= render(partial: "comments/comments_for_object",
-               locals: { object: @observation, controls: true, limit: nil }) %>
-
-    <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
-  </div>
-
-  <div class="col-md-4 col-xl-5">
-    <% if @user %>
-      <%= card_block(id: "observation_name_info", class: "mb-3",
-                      inner_class: "list-indented small") do
-        render(partial: "observations/show/name_info", locals: obs_locals)
-      end %>
-
-      <% if show_lists %>
-        <%= card_block(header: :show_lists_header.t,
-                        id: "observation_species_lists",
-                        inner_class: "p-0") do
-          render(partial: "observations/show/species_lists", locals: obs_locals)
-        end %>
-      <% end %>
-
-      <% if show_links %>
-        <%= card_block(header: :EXTERNAL_LINKS.t,
-                        id: "observation_links",
-                        inner_class: "p-0") do
-          render(partial: "observations/show/links", locals: obs_locals)
-        end %>
-      <% end %>
-    <% end %>
-
-    <% if show_map %>
-      <%= render(partial: "observations/show/thumbnail_map",
-                 locals: obs_locals) %>
-    <% end %>
-
-    <%# render(partial: "observations/show/images", locals: obs_locals) %>
-  </div>
+  <%= tag.div(class: "col-#{bp}-4 col-xl-5") do
+    if @user
+      concat(render(partial: "observations/show/name_info",
+                    locals: obs_locals))
+    end
+    if show_lists
+      concat(
+        render(partial: "observations/show/species_lists", locals: obs_locals)
+      )
+    end
+    if show_links
+      concat(render(partial: "observations/show/links", locals: obs_locals))
+    end
+    if show_map
+      concat(render(partial: "observations/show/thumbnail_map",
+                    locals: obs_locals))
+    end
+  end %>
 
 </div><!--.row-->
 

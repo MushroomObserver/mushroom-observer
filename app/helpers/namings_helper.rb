@@ -11,7 +11,7 @@ module NamingsHelper
             else
               :show_namings_no_names_yet.t
             end)
-    heading_html = content_tag(:h6, text, class: "")
+    heading_html = content_tag(:h6, text, class: "mb-1")
     user_heading_html = content_tag(:small, :show_namings_user.t)
     consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
     your_heading_html = content_tag(:small, :show_namings_your_vote.t)
@@ -57,12 +57,12 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
-                                  class: "edit_naming_link_#{naming.id}",
-                                  remote: true, onclick: "MOEvents.whirly();")
+      edit_link = link_to(:EDIT.t,
+                          add_query_param(edit_naming_path(id: naming.id)),
+                          class: "edit_naming_link_#{naming.id}",
+                          remote: true, onclick: "MOEvents.whirly();")
       delete_link = destroy_button(target: naming, remote: true)
-      proposer_links = [tag.br,
-                        "[", edit_link, " | ", delete_link, "]"].safe_join
+      proposer_links = ["[", edit_link, " | ", delete_link, "]"].safe_join
     else
       proposer_links = ""
     end
@@ -71,10 +71,9 @@ module NamingsHelper
   end
 
   def naming_name_link(naming)
-    link_with_query(nil, name_path(id: naming.name), nil) do
+    link_to(add_query_param(name_path(id: naming.name))) do
       content_tag(:h6, naming.display_name_brief_authors.t.
-                              break_name.small_author,
-                  class: "mb-0")
+                              break_name.small_author)
     end
   end
 
@@ -94,7 +93,7 @@ module NamingsHelper
   def consensus_vote_html(naming)
     consensus_votes =
       (if naming.votes&.length&.positive?
-         "#{pct_html(naming)} #{num_votes_html(naming)}"
+         pct_html(naming)
        else
          "(#{:show_namings_no_votes.t})"
        end).html_safe # has links
@@ -110,15 +109,15 @@ module NamingsHelper
   def pct_html(naming)
     percent = "#{naming.vote_percent.round}%"
 
-    link_with_query(h(percent),
-                    naming_vote_path(naming_id: naming.id),
-                    { class: "vote-percent btn btn-link px-0",
-                      onclick: "MOEvents.whirly();",
-                      remote: true })
+    link_to(add_query_param(naming_vote_path(naming_id: naming.id)),
+            class: "vote-percent btn btn-link px-0",
+            onclick: "MOEvents.whirly();", remote: true) do
+              [h(percent), num_votes_html(naming)].safe_join(" ")
+            end
   end
 
   def num_votes_html(naming)
-    content_tag(:div, class: "vote-number-text") do
+    content_tag(:span, class: "vote-number-text") do
       ["(",
        content_tag(:span, naming.votes&.length,
                    { class: "vote-number", data: { id: naming.id } }),

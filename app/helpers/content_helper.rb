@@ -142,7 +142,7 @@ module ContentHelper
              end
     content_tag(
       :div,
-      class: "card bg-light #{args[:class]}",
+      class: "card bg-light mb-3 mb-lg-4 #{args[:class]}",
       id: args[:id]
     ) do
       [header,
