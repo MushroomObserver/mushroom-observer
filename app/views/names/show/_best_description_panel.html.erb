@@ -4,7 +4,7 @@
           name_description_path(@name.description.id)) %> |
       <%= link_with_query(:EDIT.t,
           edit_name_description_path(@name.description.id)) %>]
-  <%= panel_block do %>
+  <%= card_block do %>
     <%= @best_description.tpl %>
   <% end %>
 </div><!--#name_best_description-->

@@ -116,15 +116,16 @@ module ContentHelper
     end
   end
 
+  # unused
   def panel_with_outer_heading(**args, &block)
     html = []
     h_tag = (args[:h_tag].presence || :h4)
     html << content_tag(h_tag, args[:heading]) if args[:heading]
-    html << panel_block(**args, &block)
+    html << card_block(**args, &block)
     safe_join(html)
   end
 
-  def panel_block(**args, &block)
+  def card_block(**args, &block)
     header = if args[:header].present?
                content_tag(:div, class: "card-header") do
                  args[:header]

@@ -1,6 +1,6 @@
 <% if @first_four&.length&.positive? %>
-  <%= panel_with_outer_heading(
-    heading: "#{:show_name_most_confident.t}:",
+  <%= card_block(
+    header: "#{:show_name_most_confident.t}:",
     h_tag: :strong,
     id: "name_confident_observations"
   ) do %>

@@ -6,7 +6,7 @@ description_links = list_descriptions(object: @name) || []
   <strong><%= :show_name_descriptions.t %>:</strong>
     [<%= link_with_query(:show_name_create_description.t,
                           new_name_description_path(@name.id)) %>]
-  <%= panel_block do %>
+  <%= card_block do %>
     <% description_links.each do |desc| %>
     <div><%= desc %></div>
     <% end %>

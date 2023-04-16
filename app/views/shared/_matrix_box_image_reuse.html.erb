@@ -1,12 +1,13 @@
 <%# card for a candidate for image reuse %>
 
-<%= matrix_box(class: "text-center", id: image.id) do %>
-  <%= panel_block do %>
+<%= matrix_box(class: "", id: image.id) do %>
+  <div class="card log-item h-100">
     <%= thumbnail(image,
                   image_link: form_action.merge(img_id: image.id),
                   link_method: :post,
                   votes: false,
-                  extra_classes: "image-to-reuse",
+                  extra_classes: "card-img-top image-to-reuse",
                   original: true) %>
-  <% end %>
+      <div class="card-body">
+    </div>
 <% end %>

@@ -18,7 +18,7 @@ module Observations
       assert_equal(query.num_results, obs_count)
       get(:index)
       assert_no_flash
-      assert_select(".matrix-box", obs_count)
+      assert_select(".log-item", obs_count)
       assert_response(:success)
 
       # CLADE
@@ -32,7 +32,7 @@ module Observations
       get(:index,
           params: { filter: { type: :clade, term: "Agaricales" } })
       assert_no_flash
-      assert_select(".matrix-box", aga_obs.count)
+      assert_select(".log-item", aga_obs.count)
 
       bol_obs = Observation.needs_id_for_user(mary).in_clade("Boletus")
       query = Query.lookup_and_save(:Observation, :needs_id,
@@ -57,7 +57,7 @@ module Observations
       get(:index,
           params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
-      assert_select(".matrix-box", cal_obs_count)
+      assert_select(".log-item", cal_obs_count)
 
       # mark five observations as reviewed and check the new obs_count
       # On the site, this happens via JS, so directly update the obs_view
@@ -79,7 +79,7 @@ module Observations
       get(:index,
           params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
-      assert_select(".matrix-box", cal_obs_count - 5)
+      assert_select(".log-item", cal_obs_count - 5)
 
       # Vote on the first unconfident naming and check the new obs_count
       # On the site, this happens via JS, so we'll do it directly
@@ -98,13 +98,13 @@ module Observations
       get(:index,
           params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
-      assert_select(".matrix-box", cal_obs_count - 6)
+      assert_select(".log-item", cal_obs_count - 6)
 
       # clear the query and be sure we get everything,
       # ...minus the ones marked reviewed and the one voted on
       get(:index, params: { commit: :CLEAR.l })
       assert_no_flash
-      assert_select(".matrix-box", obs_count - 6)
+      assert_select(".log-item", obs_count - 6)
     end
   end
 end

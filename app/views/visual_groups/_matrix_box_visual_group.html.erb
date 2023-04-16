@@ -1,7 +1,7 @@
 <%# card for a candidate for a visual group %>
 
 <%= matrix_box(id: row[0]) do %>
-  <%= panel_block do %>
+  <%= card_block(class: "log-item") do %>
     <%= thumbnail(row[0], original: true, votes: false,
                           context: :matrix_box) %>
     <%= render(partial: "visual_group_status_links",

@@ -5,7 +5,7 @@
       [<%= link_with_query(:EDIT.t,
                             edit_name_classification_path(@name.id)) %>]
     <% end %>
-    <%= panel_block(id: "classification_section", class: "mb-3",
+    <%= card_block(id: "classification_section", class: "mb-3",
                     inner_class: "list-indented") do
       render(partial: "names/show/classification")
     end %>

@@ -9,7 +9,7 @@ partial = local_assigns[:partial].present? ? local_assigns[:partial] :
 as = local_assigns[:as].present? ? local_assigns[:as] : :object
 %>
 
-<%= content_tag(:ul, class: "row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 list-unstyled mt-3") do %>
+<%= content_tag(:ul, class: "row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 list-unstyled mt-3") do %>
   <%= render(partial: partial,
              locals: local_assigns.except(:objects, :as, :partial),
              collection: local_assigns[:objects], as: as) %>

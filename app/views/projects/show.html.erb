@@ -27,7 +27,7 @@
 
 <div class="row">
   <div class="col-12 col-lg-6">
-    <%= panel_block do %>
+    <%= card_block do %>
       <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
       <% if false %>
         <p><b><%= :show_project_published.t %>:</b> <%= @name_count %></p>
@@ -43,7 +43,7 @@
   </div>
 
   <div class="col-12 col-lg-6">
-    <%= panel_block do %>
+    <%= card_block do %>
 
       <b><%= :OBSERVATIONS.t %>:</b>
       <% if @project.observations.any? %>

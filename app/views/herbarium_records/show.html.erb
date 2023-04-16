@@ -35,8 +35,8 @@
   <% end %>
 </div>
 
-<ul class="row list-unstyled">
-  <%= render(partial: "shared/matrix_box", locals: { columns: "col-xs-12" },
+<ul class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 list-unstyled mb-4">
+  <%= render(partial: "shared/matrix_box",
              collection: @herbarium_record.observations, as: :object) %>
 </ul>
 

@@ -11,7 +11,7 @@ module NamingsHelper
             else
               :show_namings_no_names_yet.t
             end)
-    heading_html = content_tag(:h6, text, class: "font-weight-bold mb-0")
+    heading_html = content_tag(:h6, text, class: "")
     user_heading_html = content_tag(:small, :show_namings_user.t)
     consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
     your_heading_html = content_tag(:small, :show_namings_your_vote.t)

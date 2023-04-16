@@ -19,7 +19,7 @@ if presenter
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do %>
-    <div class="card h-100">
+    <div class="card log-item h-100">
 
       <%= if presenter.image_data
         content_tag(:div, class: "thumbnail-container card-img-top") do
@@ -65,5 +65,5 @@ if presenter
       <%= matrix_box_identify_footer(identify, object_id) %>
 
     </div><!-- .card -->
-  <% end %><!-- .matrix-box -->
+  <% end %><!-- .log-item -->
 <% end %>

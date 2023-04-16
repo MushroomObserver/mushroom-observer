@@ -59,23 +59,23 @@
 
   <div class="col-md-4 col-xl-5">
     <% if @user %>
-      <%= panel_block(id: "observation_name_info", class: "mb-3",
+      <%= card_block(id: "observation_name_info", class: "mb-3",
                       inner_class: "list-indented small") do
         render(partial: "observations/show/name_info", locals: obs_locals)
       end %>
 
       <% if show_lists %>
-        <%= panel_with_outer_heading(heading: :show_lists_header.t,
-                                     id: "observation_species_lists",
-                                     inner_class: "p-0") do
+        <%= card_block(header: :show_lists_header.t,
+                        id: "observation_species_lists",
+                        inner_class: "p-0") do
           render(partial: "observations/show/species_lists", locals: obs_locals)
         end %>
       <% end %>
 
       <% if show_links %>
-        <%= panel_with_outer_heading(heading: :EXTERNAL_LINKS.t,
-                                     id: "observation_links",
-                                     inner_class: "p-0") do
+        <%= card_block(header: :EXTERNAL_LINKS.t,
+                        id: "observation_links",
+                        inner_class: "p-0") do
           render(partial: "observations/show/links", locals: obs_locals)
         end %>
       <% end %>

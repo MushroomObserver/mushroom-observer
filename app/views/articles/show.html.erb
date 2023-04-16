@@ -9,6 +9,6 @@
   <%= content_tag(:small, @article.created_at.display_time) %>
 </div>
 
-<%= panel_block(class: "mt-3") do @article.body.tpl end %>
+<%= card_block(class: "mt-3") do @article.body.tpl end %>
 
 <%= show_object_footer(@article) %>

@@ -5,7 +5,7 @@
       [<%= link_with_query(:EDIT.t,
                             edit_name_lifeform_path(@name.id)) %>]
     <% end %>
-    <%= panel_block(id: "lifeform_section", class: "mb-3",
+    <%= card_block(id: "lifeform_section", class: "mb-3",
                     inner_class: "list-indented") do
       render(partial: "names/show/lifeform")
     end %>

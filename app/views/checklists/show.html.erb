@@ -52,7 +52,7 @@
                            genera: @data.num_genera) %>
 </div>
 
-<%= panel_block(inner_class: "checklist") do %>
+<%= card_block(inner_class: "checklist") do %>
   <ul class="list-unstyled">
     <% names.each do |name| %>
       <li><i><%= link_to(name[0], name_path(name[1])) %></i></li>

@@ -2,19 +2,23 @@
 // rss log
 // --------------------------------------------------
 
-.matrix-box {
+.card-header {
+  h6, .h6 {
+    font-weight: $font-weight-bold;
+    margin-bottom: 0;
+  }
+}
 
-  .card {
-    background-color: $gray-100;
-    transition: background-color 0.3s ease-out;
+.card.log-item {
+  background-color: $gray-100;
+  transition: background-color 0.3s ease-out;
 
-    &:hover {
-      background-color: $gray-200;
-    }
+  &:hover {
+    background-color: $gray-200;
+  }
 
-    .thumbnail-container {
-      min-height: 30px;
-    }
+  .thumbnail-container {
+    min-height: 30px;
   }
 
   // To make way for floating ID
@@ -54,6 +58,10 @@
       cursor: pointer;
       background-color: darken($card-bg, 6.5%)
     }
+  }
+
+  .vote-buttons {
+    font-size: 0.875em;
   }
 }
 

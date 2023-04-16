@@ -2,7 +2,7 @@
   <div>
     <strong><%= :show_name_create_draft.t %>:</strong>
   </div>
-  <%= panel_block do %>
+  <%= card_block do %>
     <% @projects.each do |project| %>
       <%= link_with_query(project.title,
                           new_name_description_path(
