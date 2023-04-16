@@ -13,6 +13,17 @@
     object-fit: contain;
     object-position: center;
   }
+
+  .carousel-caption {
+    opacity: 0;
+  }
+
+  &:hover,
+  &:focus {
+    .carousel-caption {
+      opacity: 1;
+    }
+  }
 }
 
 .carousel-control-prev,

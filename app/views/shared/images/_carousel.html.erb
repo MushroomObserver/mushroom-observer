@@ -14,7 +14,8 @@ has_images = !object.images.nil? && object.images.any?
       <% object.images.each do |img| %>
         <% active = (img == default_image) ? " active" : "" %>
         <%= tag.div(class: "carousel-item#{active}") do
-          carousel_image(img)
+          [carousel_image(img),
+           carousel_caption(img)].safe_join
         end %>
       <% end %>
     </div>

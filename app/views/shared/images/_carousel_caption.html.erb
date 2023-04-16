@@ -1,0 +1,9 @@
+<%# carousel caption %>
+
+<% if (notes = image_notes(image)).present? %>
+
+  <%= tag.div(class:"carousel-caption d-none d-md-block") do
+    tag.p(notes)
+  end %>
+
+<% end %>

@@ -34,6 +34,20 @@ module ThumbnailHelper
            locals: args.merge({ image: image }))
   end
 
+  def carousel_caption(image, **args)
+    render(partial: "shared/images/carousel_caption",
+           locals: args.merge({ image: image }))
+  end
+
+  def image_notes(image)
+    notes = []
+    if image.copyright_holder != observation.user.legal_name
+      notes << image_copyright(image)
+    end
+    notes << image.notes.tl.truncate_html(300) if image.notes.present?
+    notes.safe_join(safe_br)
+  end
+
   def show_best_image(obs)
     return unless obs&.thumb_image
 
