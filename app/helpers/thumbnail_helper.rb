@@ -39,8 +39,9 @@ module ThumbnailHelper
   #          locals: args.merge({ image: image }))
   # end
 
-  def image_notes(image)
+  def image_notes(image, original_name)
     notes = []
+    notes << image_original_name(original_name, image)
     if image.copyright_holder != observation.user.legal_name
       notes << image_copyright(image)
     end

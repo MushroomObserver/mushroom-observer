@@ -3,7 +3,7 @@
 presenter_args = local_assigns.except(:image).merge({ fit: :contain })
 presenter = ThumbnailPresenter.new(image, @view, presenter_args)
 active = (image == default_image) ? " active" : ""
-caption = if (notes = image_notes(image)).present?
+caption = if (notes = image_notes(image, presenter.original)).present?
             tag.div(notes, class: "carousel-caption d-none d-md-block")
           else
             ""
