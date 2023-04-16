@@ -11,9 +11,10 @@ has_images = !object.images.nil? && object.images.any?
 <% if has_images %>
   <div id="<%= html_id %>" class="carousel slide card-img" data-ride="false">
     <div class="carousel-inner bg-light">
-      <% object.images.each do |img| %>
+      <% object.images.each do |image| %>
         <%= render(partial: "shared/images/carousel_item",
-                   locals: { image: img, default_image: default_image }) %>
+                   locals: { image: image, default_image: default_image,
+                             object: object }) %>
       <% end %>
     </div>
     <a class="carousel-control-prev"
@@ -35,13 +36,13 @@ has_images = !object.images.nil? && object.images.any?
       </div>
     </a>
     <ol class="carousel-indicators bg-light mb-0">
-      <% object.images.each_with_index do |img, index| %>
-        <% active = (img == default_image) ? " active" : "" %>
+      <% object.images.each_with_index do |image, index| %>
+        <% active = (image == default_image) ? " active" : "" %>
           <li data-target="#<%= html_id %>"
               data-slide-to="<%= index %>"
               class="<%= active %>">
             <%= render(partial: "shared/images/carousel_thumbnail",
-                       locals: { image: img }) %>
+                       locals: { image: image }) %>
           </li>
       <% end %>
     </ol>

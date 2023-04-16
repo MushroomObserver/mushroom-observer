@@ -39,10 +39,13 @@ module ThumbnailHelper
   #          locals: args.merge({ image: image }))
   # end
 
+  # Currently for the observation
   def image_notes(image, original_name)
     notes = []
     notes << image_original_name(original_name, image)
-    if image.copyright_holder != observation.user.legal_name
+    if object.type_tag != :observation ||
+       (object.type_tag == :observation &&
+        image.copyright_holder != object.user.legal_name)
       notes << image_copyright(image)
     end
     notes << image.notes.tl.truncate_html(300) if image.notes.present?
