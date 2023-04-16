@@ -12,11 +12,8 @@ has_images = !object.images.nil? && object.images.any?
   <div id="<%= html_id %>" class="carousel slide card-img" data-ride="false">
     <div class="carousel-inner bg-light">
       <% object.images.each do |img| %>
-        <% active = (img == default_image) ? " active" : "" %>
-        <%= tag.div(class: "carousel-item#{active}") do
-          [carousel_image(img),
-           carousel_caption(img)].safe_join
-        end %>
+        <%= render(partial: "shared/images/carousel_item",
+                   locals: { image: img, default_image: default_image }) %>
       <% end %>
     </div>
     <a class="carousel-control-prev"
@@ -43,7 +40,8 @@ has_images = !object.images.nil? && object.images.any?
           <li data-target="#<%= html_id %>"
               data-slide-to="<%= index %>"
               class="<%= active %>">
-            <%= carousel_thumbnail(img) %>
+            <%= render(partial: "shared/images/carousel_thumbnail",
+                       locals: { image: img }) %>
           </li>
       <% end %>
     </ol>

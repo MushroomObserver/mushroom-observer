@@ -24,20 +24,20 @@ module ThumbnailHelper
            locals: args.merge({ image: image }))
   end
 
-  def carousel_image(image, **args)
-    render(partial: "shared/images/carousel_image",
-           locals: args.merge({ image: image }))
-  end
+  # def carousel_image(image, **args)
+  #   render(partial: "shared/images/carousel_image",
+  #          locals: args.merge({ image: image }))
+  # end
 
-  def carousel_thumbnail(image, **args)
-    render(partial: "shared/images/carousel_thumbnail",
-           locals: args.merge({ image: image }))
-  end
+  # def carousel_thumbnail(image, **args)
+  #   render(partial: "shared/images/carousel_thumbnail",
+  #          locals: args.merge({ image: image }))
+  # end
 
-  def carousel_caption(image, **args)
-    render(partial: "shared/images/carousel_caption",
-           locals: args.merge({ image: image }))
-  end
+  # def carousel_caption(image, **args)
+  #   render(partial: "shared/images/carousel_caption",
+  #          locals: args.merge({ image: image }))
+  # end
 
   def image_notes(image)
     notes = []
