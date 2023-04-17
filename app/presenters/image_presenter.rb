@@ -24,8 +24,8 @@ class ImagePresenter < BasePresenter
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
 
     notes = ""
-    # new: for the img alt property. extra lookup of image.user worth it?
-    # if image.is_a?(Image)
+    # new: for the img alt property. nah, messes up format. in helper now
+    # if image.is_a?(Image) && args[:original] == true
     #   notes = !image.notes || image.notes.blank? ? "" : image.notes
     #   show_name = image.original_name.present? &&
     #               (check_permission(image) ||

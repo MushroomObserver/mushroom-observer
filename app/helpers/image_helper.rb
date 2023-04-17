@@ -25,16 +25,45 @@ module ImageHelper
   end
 
   # Currently for the observation
-  def image_notes(image, object, original_name = "")
+  def image_notes(image, object, original: false)
     notes = []
-    notes << image_original_name(original_name, image) if original_name.present?
-    if object.type_tag != :observation ||
-       (object.type_tag == :observation &&
-        image.copyright_holder != object.user.legal_name)
-      notes << image_copyright(image)
-    end
+    notes << image_owner_original_name(image, original)
+    notes << image_copyright(image, object)
     notes << image.notes.tl.truncate_html(300) if image.notes.present?
     notes.safe_join(safe_br)
+  end
+
+  def image_owner_original_name(image, original)
+    return "" unless image && show_original_name?(image, original)
+
+    content_tag(:div, image.original_name, class: "mt-3")
+  end
+
+  def show_original_name?(image, original)
+    original && image &&
+      image.original_name.present? &&
+      (check_permission(image) ||
+       image.user &&
+       image.user.keep_filenames == "keep_and_show")
+  end
+
+  # Grab the copyright_text for an Image.
+  def image_copyright(image, object = image)
+    return "" unless image && show_image_copyright?(image, object)
+
+    holder = if image.copyright_holder == image.user.legal_name
+               user_link(image.user)
+             else
+               image.copyright_holder.to_s.t
+             end
+    content_tag(:div, image.license.copyright_text(image.year, holder),
+                class: "mt-2 small")
+  end
+
+  def show_image_copyright?(image, object)
+    object.type_tag != :observation ||
+      (object.type_tag == :observation &&
+       image.copyright_holder != object.user.legal_name)
   end
 
   def show_best_image(obs)
@@ -43,18 +72,7 @@ module ImageHelper
     interactive_image(obs.thumb_image,
                       link: observation_path(id: obs.id),
                       size: :small,
-                      votes: true) + image_copyright(obs.thumb_image)
-  end
-
-  # Grab the copyright_text for an Image.
-  def image_copyright(image)
-    link = if image.copyright_holder == image.user.legal_name
-             user_link(image.user)
-           else
-             image.copyright_holder.to_s.t
-           end
-    content_tag(:div, image.license.copyright_text(image.year, link),
-                class: "mt-2 small")
+                      votes: true) + image_copyright(obs.thumb_image, obs)
   end
 
   def original_image_link(image_id, classes)
@@ -90,20 +108,6 @@ module ImageHelper
 
   def stretched_link_classes
     "image-link stretched-link"
-  end
-
-  def image_original_name(original, image)
-    return "" unless image && show_original_name(original, image)
-
-    content_tag(:div, image.original_name, class: "mt-3")
-  end
-
-  def show_original_name(original, image)
-    original && image &&
-      image.original_name.present? &&
-      (check_permission(image) ||
-       image.user &&
-       image.user.keep_filenames == "keep_and_show")
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)

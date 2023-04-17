@@ -15,4 +15,4 @@ set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
   <%= lightbox_link(presenter.lightbox_data) %>
   <%= image_vote_section_html(presenter.votes, presenter.image) %>
 </div>
-<%= image_original_name(presenter.original, presenter.image) %>
+<%= image_owner_original_name(presenter.image, presenter.original) %>
