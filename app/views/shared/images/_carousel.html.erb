@@ -8,7 +8,8 @@ has_images = !object.images.nil? && object.images.any?
 %>
 
 <% if has_images %>
-  <div id="<%= html_id %>" class="carousel slide card-img" data-ride="false">
+  <div id="<%= html_id %>" class="carousel slide card-img"
+       data-ride="false" data-interval="false">
     <div class="carousel-inner bg-light">
       <% object.images.each do |image| %>
         <%= render(partial: "shared/images/carousel_item",
@@ -46,4 +47,8 @@ has_images = !object.images.nil? && object.images.any?
       <% end %>
     </ol>
   </div>
+<% else %>
+  <%= tag.div(:show_observation_no_images.l,
+              class: "d-flex flex-column justify-content-center w-100 h-100 text-center h3 text-muted") %>
 <% end %>
+

@@ -28,7 +28,8 @@
                                       class: "context-help"),
                           :rss_filtered_mouseover.t)
         end -%>
-    <%= content_tag_if(@owner_naming, :h5, @owner_naming, id: "owner_naming") %>
+    <%= content_tag_if(@owner_naming, :p, @owner_naming,
+                       class: "small", id: "owner_naming") %>
   </div>
 
   <!-- Tabsets -->
