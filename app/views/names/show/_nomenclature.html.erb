@@ -1,8 +1,8 @@
 <%# Nomenclature partial; used by:
     show_name, show_past_name, and add_comment (via _object) %>
-<strong><%= :show_name_nomenclature.t %>:</strong>
-<%= card_block(id: "nomenclature", class: "mb-3",
-                inner_class: "list-indented") do %>
+<%= card_block(id: "nomenclature",
+               header: :show_name_nomenclature.t,
+               inner_class: "list-indented") do %>
 
   <div class="row">
 

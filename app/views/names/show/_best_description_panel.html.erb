@@ -1,10 +1,22 @@
-<div id="name_best_description">
-  <strong><%= :show_name_brief_description.t %>:</strong>
-    [<%= link_with_query(:show_name_see_more.t,
-          name_description_path(@name.description.id)) %> |
-      <%= link_with_query(:EDIT.t,
-          edit_name_description_path(@name.description.id)) %>]
-  <%= card_block do %>
-    <%= @best_description.tpl %>
-  <% end %>
-</div><!--#name_best_description-->
+<%
+header = [
+  tag.span(:show_name_brief_description.t),
+  tag.span do
+    [
+      link_to(
+        :show_name_see_more.t,
+        add_query_param(name_description_path(@name.description.id))
+      ),
+      " | ",
+      link_to(
+        :EDIT.t,
+        add_query_param(edit_name_description_path(@name.description.id))
+      )
+    ].safe_join
+  end
+].safe_join
+%>
+
+<%= card_block(header: header, id: "name_best_description") do
+  @best_description.tpl
+end %>

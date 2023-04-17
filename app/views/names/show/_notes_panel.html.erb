@@ -1,5 +1,12 @@
-<div id="name_notes">
-  <strong><%= :show_name_notes.t %>:</strong>
-    [<%= link_with_query(:EDIT.t, edit_name_path(@name.id)) %>]
-  <%= card_block do @name.notes.tpl end %>
-</div><!--#name_notes-->
+<%
+header = [tag.span(:show_name_notes.t)]
+if @user
+  header << tag.span do
+              link_to(:EDIT.t,
+                      add_query_param(edit_name_path(@name.id)))
+            end
+end
+header = header.safe_join
+%>
+
+<%= card_block(id: "name_notes", header: header) do @name.notes.tpl end %>

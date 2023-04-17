@@ -1,13 +1,17 @@
-<div class="col-sm-6">
-  <div id="name_lifeform">
-    <strong><%= :show_name_lifeform.t %>:</strong>
-    <% if @user %>
-      [<%= link_with_query(:EDIT.t,
-                            edit_name_lifeform_path(@name.id)) %>]
-    <% end %>
-    <%= card_block(id: "lifeform_section", class: "mb-3",
-                    inner_class: "list-indented") do
-      render(partial: "names/show/lifeform")
-    end %>
-  </div>
-</div><!--#name_lifeform-->
+<%
+header = [tag.span(:show_name_lifeform.t)]
+if @user
+  header << tag.span do
+              link_to(:EDIT.t,
+                      add_query_param(edit_name_lifeform_path(@name.id)))
+            end
+end
+header = header.safe_join
+%>
+
+<%= tag.div(id: "name_lifeform") do
+  card_block(id: "lifeform_section", header: header,
+             inner_class: "list-indented") do
+    render(partial: "names/show/lifeform")
+  end
+end %>
