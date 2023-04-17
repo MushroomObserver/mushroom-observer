@@ -4,10 +4,10 @@
 <%= matrix_box(id: image.id) do %>
   <div class="card log-item h-100">
     <% # no special link-or-button param here, there's a checkbox below %>
-    <%= thumbnail(image,
-                  original: true,
-                  extra_classes: "card-img-top image-to-remove",
-                  votes: false) %>
+    <%= interactive_image(image,
+                          original: true,
+                          extra_classes: "card-img-top image-to-remove",
+                          votes: false) %>
 
     <div class="card-body text-center">
       <%= fields_for(:selected) do |f_s| %>

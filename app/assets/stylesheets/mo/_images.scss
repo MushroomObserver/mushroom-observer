@@ -1,0 +1,233 @@
+.thumbnail-container {
+  background-color: rgba(0,0,0, 0.33)
+}
+
+//
+// image interactions - theater and votes
+// --------------------------------------------------
+
+svg.placeholder {
+  rect {
+    fill: rgba($card-bg, 0.3) !important;
+  }
+}
+
+.image-sizer {
+  max-width: 100%;
+}
+
+//
+// user thumbnails for comments, etc
+// --------------------------------------------------
+
+.user-image-sizer {
+  max-width: 160px;
+  max-height: 160px;
+  position: relative;
+}
+
+//
+// lightbox activator and vote links
+// --------------------------------------------------
+
+.vote-section,
+.theater-btn {
+  @extend .bg-legible;
+  z-index: 4;
+  opacity: 0;
+  // border-radius: $border-radius-sm;
+  color: white;
+  transition: opacity 0.3s ease-out;
+
+  form.button_to input {
+    color: white;
+  }
+}
+
+.theater-btn {
+  @extend .top-right, .text-center, .mr-2, .mt-2;
+  padding: 0.125em;
+
+  &:hover {
+    color: $link-color;
+  }
+
+  i {
+    height: 1.65rem;
+    width: 1.65rem;
+    font-size: 1.5rem;
+    vertical-align: bottom;
+  }
+}
+
+.vote-section {
+  a {
+    color: white;
+
+    &:hover,
+    &:focus {
+      color: $link-color;
+      text-decoration: none;
+    }
+  }
+}
+
+.image-sizer {
+  .vote-section {
+    @extend .ab-bottom, .text-center;
+    padding: 0.5em 0.25em;
+  }
+}
+
+.image-vote,
+.image-vote-link {
+  color: white;
+  background-color: transparent !important;
+  padding: 0.125rem 0.25rem !important;
+  border-radius: 0;
+}
+
+.image-vote-link {
+  &:hover,
+  &:focus {
+    color: white;
+    background-color: $link-color !important;
+    text-decoration: none !important;
+  }
+}
+
+.image-sizer:hover,
+.image-sizer:focus,
+.carousel-item:hover,
+.carousel-item:focus {
+  .vote-section,
+  .theater-btn {
+    opacity: 1;
+    text-decoration: none;
+  }
+}
+
+
+//
+// image vote meter bar
+// --------------------------------------------------
+
+.progress.vote-meter {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 200px;
+  height: 7px;
+  margin-bottom: 0;
+
+  .progress-bar {
+    font-size: 12px;
+    line-height: 5px;
+    color: #FFF;
+  }
+}
+
+//
+// Mushroom Observer carousels
+// --------------------------------------------------
+
+.carousel-item {
+  padding-bottom: 75%;
+  position: relative;
+
+  > div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .carousel-caption {
+    @extend .bg-legible, .py-2;
+    // position: absolute;
+    bottom: 0;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: auto;
+    height: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    .vote-section {
+      background: transparent;
+    }
+    .image-notes {
+      @extend .smaller, .px-3, .pb-2;
+    }
+  }
+
+  &:hover,
+  &:focus {
+    .carousel-caption {
+      opacity: 1;
+    }
+  }
+
+  // .carousel-caption-and-votes {
+  //   position: absolute;
+  //   bottom: 0;
+  //   top: auto;
+  // }
+
+  .vote-section {
+    @extend .text-center, .px-3, .py-2;
+    width: auto;
+    height: auto;
+  }
+}
+
+
+
+.carousel-control-prev,
+.carousel-control-next {
+  padding: 2rem 6rem;
+  bottom: 6vw;
+  z-index: 3;
+
+  div.btn {
+    @extend .bg-visible;
+    color: $white;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+  }
+  &:hover {
+    div.btn {
+      background: rgba($black, 1);
+    }
+  }
+}
+
+.carousel-control-prev {
+  justify-content: flex-start;
+  padding-left: 1rem;
+}
+
+.carousel-control-next {
+  justify-content: flex-end;
+  padding-right: 1rem;
+}
+
+.carousel-indicators {
+  position: static;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+
+  li {
+    background-color: transparent;
+    width: 6vw;
+    height: 6vw;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+  }
+}

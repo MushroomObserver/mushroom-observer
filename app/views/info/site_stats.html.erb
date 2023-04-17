@@ -14,12 +14,10 @@
     <% obs_length = @observations ? @observations.length : 0
     if obs_length > 0 %>
       <% @observations[0,3].each do |obs| %>
-        <div class="pb-1">
-          <%= thumbnail(obs.thumb_image,
-                        image_link: observation_path(obs.id),
-                        votes: true) %><br/><br/>
-
-        </div>
+        <%= tag.div(class: "mb-4") do
+          interactive_image(obs.thumb_image,
+                            image_link: observation_path(obs.id), votes: true)
+        end %>
       <% end %>
     <% end %>
   </div><!--.row-->
@@ -62,9 +60,10 @@
   <div class="d-none d-lg-block col-lg-3">
     <% if obs_length > 3 %>
       <% @observations[3,3].each do |obs| %>
-        <%= thumbnail(obs.thumb_image,
-                      image_link: observation_path(obs.id),
-                      votes: true) %><br/><br/>
+        <%= tag.div(class: "mb-4") do
+          interactive_image(obs.thumb_image,
+                            image_link: observation_path(obs.id), votes: true)
+        end %>
       <% end %>
     <% end %>
   </div>

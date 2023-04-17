@@ -25,7 +25,8 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Click on the first image.
     go_back_after do
-      first("#content .show_images .image-link").click
+      # first("#content .show_images .image-link").click
+      first("#observation_carousel .image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation

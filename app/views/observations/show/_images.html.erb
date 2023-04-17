@@ -30,25 +30,17 @@ if observation.images.any? || check_permission(observation)
     observation.images.
                 sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id}.
                 each do |image| %>
-      <div class="list-group-item">
-        <%= thumbnail(
-              image,
-              image_link: image.show_link_args.merge({ obs: observation.id }),
-              original: true,
-              is_set: true,
-              votes: true) %>
-        <%=
-          notes = []
-          if image.copyright_holder != observation.user.legal_name
-            notes << image_copyright(image)
-          end
-          if !image.notes.blank?
-            notes << image.notes.tl.truncate_html(300)
-          end
-          notes = notes.safe_join(safe_br)
-          content_tag(:center, notes) if !notes.blank?
-        %>
-      </div>
+      <% notes = image_notes(image, observation, "") %>
+      <%= tag.div(class: "list-group-item") do
+        concat(interactive_image(
+                image,
+                image_link: image.show_link_args.merge({ obs: observation.id }),
+                original: true,
+                is_set: true,
+                votes: true
+              ))
+        concat(notes) if !notes.blank?
+      end %>
     <% end %>
   </div>
 <% end %>

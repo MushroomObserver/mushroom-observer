@@ -3,6 +3,6 @@
 require("test_helper")
 
 # test the helpers for image thumbnails
-class ThumbnailHelperTest < ActionView::TestCase
+class ImageHelperTest < ActionView::TestCase
   include ApplicationHelper
 end

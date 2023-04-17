@@ -1,10 +1,10 @@
 
 <%
 presenter_args = local_assigns.except(:image).merge({ fit: :contain })
-presenter = ThumbnailPresenter.new(image, @view, presenter_args)
+presenter = ImagePresenter.new(image, @view, presenter_args)
 active = (image == default_image) ? " active" : ""
-caption = if (notes = image_notes(image, presenter.original)).present?
-            tag.div(notes, class: "carousel-caption d-none d-md-block")
+caption = if (notes = image_notes(image, object, presenter.original)).present?
+            tag.div(notes, class: "image-notes d-none d-md-block")
           else
             ""
           end
@@ -13,9 +13,12 @@ caption = if (notes = image_notes(image, presenter.original)).present?
 <%= tag.div(class: "carousel-item#{active}") do
   [
     image_tag(presenter.img_src, presenter.options_lazy),
-    caption,
     image_stretched_link(presenter.image_link, presenter.image_link_method),
     lightbox_link(presenter.lightbox_data),
-    vote_section_html(presenter.votes, presenter.image),
+    tag.div(
+      class: "carousel-caption d-flex flex-column justify-content-center") do
+      concat(image_vote_section_html(presenter.votes, presenter.image))
+      concat(caption)
+    end,
   ].safe_join
 end %>

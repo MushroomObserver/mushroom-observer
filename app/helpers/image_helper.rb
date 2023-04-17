@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module ThumbnailHelper
-  # Draw a thumbnail image.  It takes either an Image instance or an id.
+module ImageHelper
+  # Draw an image with all the fixins. Takes either an Image instance or an id.
   # Template uses thumbnail_presenter to assemble data
   #
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
@@ -12,37 +12,22 @@ module ThumbnailHelper
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
   #
-  # def thumbnail(
+  # USE: interactive_image(
   #   image,
   #   args = {
   #     notes: "",
   #     extra_classes: ""
   #   }
   # )
-  def thumbnail(image, **args)
-    render(partial: "shared/images/image_thumbnail",
+  def interactive_image(image, **args)
+    render(partial: "shared/images/interactive_image",
            locals: args.merge({ image: image }))
   end
 
-  # def carousel_image(image, **args)
-  #   render(partial: "shared/images/carousel_image",
-  #          locals: args.merge({ image: image }))
-  # end
-
-  # def carousel_thumbnail(image, **args)
-  #   render(partial: "shared/images/carousel_thumbnail",
-  #          locals: args.merge({ image: image }))
-  # end
-
-  # def carousel_caption(image, **args)
-  #   render(partial: "shared/images/carousel_caption",
-  #          locals: args.merge({ image: image }))
-  # end
-
   # Currently for the observation
-  def image_notes(image, original_name)
+  def image_notes(image, object, original_name = "")
     notes = []
-    notes << image_original_name(original_name, image)
+    notes << image_original_name(original_name, image) if original_name.present?
     if object.type_tag != :observation ||
        (object.type_tag == :observation &&
         image.copyright_holder != object.user.legal_name)
@@ -55,10 +40,10 @@ module ThumbnailHelper
   def show_best_image(obs)
     return unless obs&.thumb_image
 
-    thumbnail(obs.thumb_image,
-              link: observation_path(id: obs.id),
-              size: :small,
-              votes: true) + image_copyright(obs.thumb_image)
+    interactive_image(obs.thumb_image,
+                      link: observation_path(id: obs.id),
+                      size: :small,
+                      votes: true) + image_copyright(obs.thumb_image)
   end
 
   # Grab the copyright_text for an Image.
@@ -134,4 +119,66 @@ module ThumbnailHelper
                        vgid: visual_group.id,
                        status: link })
   end
+
+  # used in shared/images/interactive_image
+  def image_vote_section_html(votes, image)
+    return "" unless votes && image && User.current
+
+    content_tag(:div, "", class: "vote-section") do
+      render(partial: "shared/images/image_vote_links",
+             locals: { image: image })
+    end
+  end
+
+  # Create an image link vote, where vote param is vote number ie: 3
+  # Returns a form input button if the user has NOT voted this way
+  # JS is listening to any element with [data-role="image_vote"],
+  # Even though this is not an <a> tag, but an <input>, it's ok.
+  def image_vote_link(image, vote)
+    current_vote = image.users_vote(User.current)
+    vote_text = if vote.zero?
+                  image_vote_none.html_safe
+                else
+                  image_vote_as_short_string(vote)
+                end
+
+    if current_vote == vote
+      return content_tag(:span, image_vote_as_short_string(vote),
+                         class: "image-vote")
+    end
+
+    put_button(name: vote_text, remote: true,
+               class: "image-vote-link",
+               path: image_vote_path(image_id: image.id, value: vote),
+               title: image_vote_as_help_string(vote),
+               data: { role: "image_vote", image_id: image.id, value: vote })
+  end
+
+  def image_vote_none
+    icon("fa-regular", "circle-xmark", class: "fa-sm")
+  end
+
+  # image vote lookup used in show_image
+  def find_list_of_votes(image)
+    image.image_votes.sort_by do |v|
+      (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
+    rescue StandardError
+      "?"
+    end
+  end
+
+  # def carousel_image(image, **args)
+  #   render(partial: "shared/images/carousel_image",
+  #          locals: args.merge({ image: image }))
+  # end
+
+  # def carousel_thumbnail(image, **args)
+  #   render(partial: "shared/images/carousel_thumbnail",
+  #          locals: args.merge({ image: image }))
+  # end
+
+  # def carousel_caption(image, **args)
+  #   render(partial: "shared/images/carousel_caption",
+  #          locals: args.merge({ image: image }))
+  # end
 end

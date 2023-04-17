@@ -1,8 +1,7 @@
 <%
 # CAROUSEL TEMPLATE
 # Requires an object that responds to .images
-# TODO: NIMMO make it link to fullscreen lightbox
-# javascript_include("image_slider")
+# javascript_include("image_slider") huh?
 html_id = "#{object.type_tag}_carousel"
 default_image = object&.thumb_image || nil
 has_images = !object.images.nil? && object.images.any?

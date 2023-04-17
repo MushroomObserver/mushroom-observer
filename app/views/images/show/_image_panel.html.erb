@@ -26,12 +26,12 @@
   </div><!--.card-header-->
   <div class="card-body">
 
-    <%= thumbnail(@image,
-                  size: :medium,
-                  image_link: {},
-                  img_class: "huge-image",
-                  theater_on_click: true,
-                  votes: false) %>
+    <%= interactive_image(@image,
+                          size: :medium,
+                          image_link: {},
+                          img_class: "huge-image",
+                          theater_on_click: true,
+                          votes: false) %>
 
     <% # Insert huge-size image via js only when necessary to prevent
     # some browsers from eager-loading it even when invisible.

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Gather details for items in matrix-style ndex pages.
-class ThumbnailPresenter < BasePresenter
+# Gather details for items in interactive images.
+class ImagePresenter < BasePresenter
   attr_accessor \
     :image,             # image instance or id
     :img_src,           # img src for noscript image
