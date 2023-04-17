@@ -4,35 +4,63 @@
 module ObservationTabsHelper
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
-  def show_observation_tabset(obs:, user:, mappable:)
+  def show_observation_tabset(obs:, user:)
     tabs = [
-      show_obs_google_links_for(obs.name),
       general_questions_link(obs, user),
       manage_lists_link(obs, user),
-      map_link(mappable),
-      obs_change_links(obs),
+      # obs_change_links(obs: obs),
       draw_interest_icons(obs)
     ].flatten.reject(&:empty?)
     { pager_for: obs, right: draw_tab_set(tabs) }
   end
 
-  def show_obs_google_links_for(obs_name)
-    return unless obs_name.known?
-
-    [google_images_for(obs_name), google_distribution_map_for(obs_name)]
+  def name_links_on_mo(name:, mappable:)
+    [
+      tag.p(link_to(:show_name.t(name: name.display_name_brief_authors),
+                    name_path(name.id))),
+      tag.p(link_to(:show_observation_more_like_this.t,
+                    observations_path(name: name.id))),
+      tag.p(link_to(:show_observation_look_alikes.t,
+                    observations_path(name: name.id,
+                                      look_alikes: "1"))),
+      tag.p(link_to(:show_observation_related_taxa.t,
+                    observations_path(name: name.id,
+                                      related_taxa: "1"))),
+      list_descriptions(object: name)&.map do |link|
+        tag.div(link)
+      end,
+      map_link(mappable)
+    ].flatten.reject(&:empty?)
   end
 
-  def google_images_for(obs_name)
-    link_to(:google_images.t, google_images_link(obs_name))
+  def name_links_web(name:)
+    [
+      tag.p(link_to("MyCoPortal", mycoportal_url(name),
+                    target: :_blank, rel: :noopener)),
+      tag.p(link_to("Mycobank", mycobank_name_search_url(name),
+                    target: :_blank, rel: :noopener)),
+      tag.p(google_images_for(name)),
+      tag.p(google_distribution_map_for(name))
+    ].flatten.reject(&:empty?)
   end
 
-  def google_images_link(obs_name)
-    format("https://images.google.com/images?q=%s", obs_name.real_text_name)
+  def show_obs_google_links_for(name)
+    return unless name.known?
+
+    [google_images_for(name), google_distribution_map_for(name)]
   end
 
-  def google_distribution_map_for(obs_name)
+  def google_images_for(name)
+    link_to(:google_images.t, google_images_link(name))
+  end
+
+  def google_images_link(name)
+    format("https://images.google.com/images?q=%s", name.real_text_name)
+  end
+
+  def google_distribution_map_for(name)
     link_with_query(:show_name_distribution_map.t,
-                    map_name_path(id: obs_name.id))
+                    map_name_path(id: name.id))
   end
 
   def general_questions_link(obs, user)
@@ -56,15 +84,69 @@ module ObservationTabsHelper
     link_with_query(:MAP.t, map_locations_path)
   end
 
-  def obs_change_links(obs)
+  def obs_change_links(obs:)
     return unless check_permission(obs)
 
-    [
-      link_with_query(:show_observation_edit_observation.t,
-                      edit_observation_path(obs.id)),
-      destroy_button(target: obs)
-    ]
+    icon_size = "" # "fa-sm"
+    btn_style = "btn-sm btn-link"
+    links = []
+    links << link_to(
+      add_query_param(edit_observation_path(obs.id)),
+      class: "btn #{btn_style}",
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_observation_edit_observation.t }
+    ) do
+      concat(tag.span(:EDIT.t, class: "mr-1"))
+      concat(icon("fa-regular", "pen-to-square", class: icon_size))
+    end
+    links << destroy_button(
+      target: obs,
+      class: "btn #{btn_style} text-danger",
+      data: { toggle: "tooltip", placement: "top",
+              title: "#{:DESTROY.t} #{:OBSERVATION.t}" }
+    ) do
+      icon("fa-regular", "trash", class: icon_size)
+    end
   end
+
+  # Using link_to in order to enable icons in these links
+  def observation_image_edit_links(obs:)
+    icon_size = "" # "fa-sm"
+    btn_style = "btn-link"
+    links = []
+    links << link_to(
+      add_query_param(new_image_for_observation_path(obs.id)),
+      class: "btn #{btn_style}",
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_observation_add_images.t }
+    ) do
+      concat(tag.span(:ADD.t, class: "mr-1"))
+      concat(icon("fa-regular", "plus", class: icon_size))
+    end
+    links << link_to(
+      add_query_param(reuse_images_for_observation_path(obs.id)),
+      class: "btn #{btn_style}",
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_observation_reuse_image.t }
+    ) do
+      concat(tag.span(:image_reuse_reuse.t, class: "mr-1"))
+      concat(icon("fa-regular", "clone", class: icon_size))
+    end
+    if obs.images.length.positive?
+      links << link_to(
+        add_query_param(remove_images_from_observation_path(obs.id)),
+        class: "btn #{btn_style}",
+        data: { toggle: "tooltip", placement: "top",
+                title: :show_observation_remove_images.t }
+      ) do
+        concat(tag.span(:image_remove_remove.t, class: "mr-1"))
+        concat(icon("fa-regular", "trash", class: icon_size))
+      end
+    end
+    links
+  end
+
+  # INDEX
 
   def index_observation_tabset(query:)
     tabs = [

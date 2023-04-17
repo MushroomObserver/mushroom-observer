@@ -25,18 +25,22 @@ module ImageHelper
   end
 
   # Currently for the observation
-  def image_notes(image, object, original: false)
+  def image_info(image, object, original: false)
     notes = []
-    notes << image_owner_original_name(image, original)
-    notes << image_copyright(image, object)
-    notes << image.notes.tl.truncate_html(300) if image.notes.present?
-    notes.safe_join(safe_br)
+    notes << tag.div(image_owner_original_name(image, original),
+                     class: "image-original-name")
+    notes << tag.div(image_copyright(image, object), class: "image-copyright")
+    if image.notes.present?
+      notes << tag.div(image.notes.tl.truncate_html(300),
+                       class: "image-notes")
+    end
+    notes.compact_blank.safe_join
   end
 
   def image_owner_original_name(image, original)
     return "" unless image && show_original_name?(image, original)
 
-    content_tag(:div, image.original_name, class: "mt-3")
+    content_tag(:div, image.original_name)
   end
 
   def show_original_name?(image, original)
@@ -57,7 +61,7 @@ module ImageHelper
                image.copyright_holder.to_s.t
              end
     content_tag(:div, image.license.copyright_text(image.year, holder),
-                class: "mt-2 small")
+                class: "small")
   end
 
   def show_image_copyright?(image, object)

@@ -1,4 +1,6 @@
-<%# bs4 TODO: glyphicons %>
+<% #bs4
+icon_size = "" # "fa-lg"
+%>
 
 <ul class="nav navbar-nav d-none d-md-flex mr-0">
   <% if @user.admin %>
@@ -10,7 +12,7 @@
           title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
           data: { toggle: "tooltip", placement: "bottom" } }
       ) do
-        icon("fa-solid", "user-shield", class: "fa-lg")
+        icon("fa-solid", "user-shield", class: icon_size)
       end
     end %>
   <% end %>
@@ -22,7 +24,7 @@
         title: :app_comments_for_you.t,
         data: { toggle: "tooltip", placement: "bottom" } }
     ) do
-      icon("fa-solid", "inbox", class: "fa-lg")
+      icon("fa-solid", "inbox", class: icon_size)
     end
   end %>
 
@@ -33,7 +35,7 @@
         title: :app_your_interests.t,
         data: { toggle: "tooltip", placement: "bottom" } }
     ) do
-      icon("fa-solid", "bullhorn", class: "fa-lg")
+      icon("fa-solid", "bullhorn", class: icon_size)
     end
   end %>
 
@@ -44,7 +46,7 @@
         title: :app_preferences.t,
         data: { toggle: "tooltip", placement: "bottom" } }
     ) do
-      icon("fa-solid", "gear", class: "fa-lg")
+      icon("fa-solid", "gear", class: icon_size)
     end
   end %>
 

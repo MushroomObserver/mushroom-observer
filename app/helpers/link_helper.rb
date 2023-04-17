@@ -39,26 +39,25 @@ module LinkHelper
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
   #
-  def destroy_button(target:, name: :DESTROY.t, **args)
+  def destroy_button(target:, name: :DESTROY.t, **args, &block)
+    content = block ? capture(&block) : name
     path = if target.is_a?(String)
              target
            else
              add_query_param(send("#{target.type_tag}_path", target.id))
            end
-    classes ||= "text-danger"
-    id ||= nil
-    unless target.is_a?(String)
-      classes += " destroy_#{target.type_tag}_link_#{target.id}"
-    end
 
     html_options = {
       method: :delete,
-      class: classes,
-      id: id,
+      class: "text-danger",
       data: { confirm: :are_you_sure.t }
     }.merge(args)
 
-    button_to(name, path, html_options)
+    unless target.is_a?(String)
+      html_options[:class] += " destroy_#{target.type_tag}_link_#{target.id}"
+    end
+
+    button_to(path, html_options) { content }
   end
 
   # POST to a path; used instead of a link because POST link requires js

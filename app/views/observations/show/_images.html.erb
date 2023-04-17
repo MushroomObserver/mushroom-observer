@@ -30,7 +30,7 @@ if observation.images.any? || check_permission(observation)
     observation.images.
                 sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id}.
                 each do |image| %>
-      <% notes = image_notes(image, observation, original: false) %>
+      <% info = image_info(image, observation, original: false) %>
       <%= tag.div(class: "list-group-item") do
         concat(interactive_image(
                 image,
@@ -39,7 +39,7 @@ if observation.images.any? || check_permission(observation)
                 is_set: true,
                 votes: true
               ))
-        concat(notes) if !notes.blank?
+        concat(info) if !info.blank?
       end %>
     <% end %>
   </div>

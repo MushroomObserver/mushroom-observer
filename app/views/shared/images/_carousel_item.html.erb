@@ -1,12 +1,12 @@
 
 <%
 presenter_args = local_assigns.except(:image).
-                 merge({ fit: :contain, original: true })
+                 merge({ size: :large, fit: :contain, original: true })
 presenter = ImagePresenter.new(image, @view, presenter_args)
 active = (image == default_image) ? " active" : ""
-caption = if (notes = image_notes(image, object,
-                                  original: presenter.original)).present?
-            tag.div(notes, class: "image-notes d-none d-md-block")
+caption = if (info = image_info(image, object,
+                                original: presenter.original)).present?
+            tag.div(info, class: "image-info d-none d-md-block")
           else
             ""
           end

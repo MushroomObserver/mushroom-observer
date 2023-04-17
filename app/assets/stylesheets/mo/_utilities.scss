@@ -194,3 +194,6 @@
   background: rgba($black, 0.6);
 }
 
+.row-justified {
+  @extend .d-flex, .flex-row, .align-items-center, .justify-content-between;
+}
