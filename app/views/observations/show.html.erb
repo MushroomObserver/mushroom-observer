@@ -35,6 +35,9 @@
                    locals: obs_locals)
           end
         ]
+        tags << tag.div(class:"card-footer pr-#{bp}-4") do
+                  show_object_footer(@observation)
+                end
         if check_permission(@observation)
           tags << tag.div(class: "card-footer row-justified py-1 pr-#{bp}-1") do
                     [
@@ -46,9 +49,6 @@
                     ].safe_join
                   end
         end
-        tags << tag.div(class:"card-footer pr-#{bp}-4") do
-                  show_object_footer(@observation)
-                end
         %>
         <%= tags.safe_join %>
       <% end

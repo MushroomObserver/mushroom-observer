@@ -87,7 +87,7 @@ module ObservationTabsHelper
   def obs_change_links(obs:)
     return unless check_permission(obs)
 
-    icon_size = "" # "fa-sm"
+    icon_size = "fa-lg" # "fa-sm"
     btn_style = "btn-sm btn-link"
     links = []
     links << link_to(
@@ -111,7 +111,7 @@ module ObservationTabsHelper
 
   # Using link_to in order to enable icons in these links
   def observation_image_edit_links(obs:)
-    icon_size = "" # "fa-sm"
+    icon_size = "fa-lg" # "fa-sm"
     btn_style = "btn-link"
     links = []
     links << link_to(

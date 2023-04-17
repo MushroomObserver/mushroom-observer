@@ -134,7 +134,7 @@ module FooterHelper
       html << link_to(activity_log_path(obj.rss_log_id),
                       class: "small") do
         concat(tag.span(:show_object.t(type: :log), class: "mr-1"))
-        concat(icon("fa-regular", "list-ul", class: "fa-sm"))
+        concat(icon("fa-regular", "list-ul", class: "fa-lg"))
       end
     end
 

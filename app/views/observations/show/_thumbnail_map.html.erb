@@ -26,11 +26,17 @@ hide_map_path = add_query_param(
 <div class="card d-none d-md-block" id="observation_thumbnail_map">
 
   <%= tag.div(class: "card-header d-flex justify-content-between") do
-    [tag.h6(:MAP.t),
-     link_to(hide_map_path) do
-       concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
-       concat(icon("fa-regular", "eye-slash", class: "fa-sm"))
-     end].safe_join
+    [
+      tag.h6(:MAP.t),
+      link_to(
+        hide_map_path,
+        data: { toggle: "tooltip", placement: "top",
+                title: :show_observation_hide_map.t }
+      ) do
+        concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
+        concat(icon("fa-regular", "eye-slash", class: "fa-sm"))
+      end
+    ].safe_join
   end %>
 
   <div class="thumbnail-map-container card-img-bottom">
