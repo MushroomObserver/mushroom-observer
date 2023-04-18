@@ -295,7 +295,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   #   end
 
   # Default page is /rss_logs
-  root "rss_logs#index"
+  root "observations#index"
 
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
