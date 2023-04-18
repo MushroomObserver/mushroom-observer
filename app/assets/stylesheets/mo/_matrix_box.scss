@@ -88,7 +88,9 @@ h5.rss-heading {
 
 .theme-amanita {
 
-  .panel {
+  .panel,
+  .table,
+  .list-group:not(.sidebar-nav) .list-group-item {
     background: rgba($panel-bg, 0.45);
   }
 
@@ -96,17 +98,22 @@ h5.rss-heading {
     background: none;
   }
 
-  .rss-box-details {
+  .rss-box-details,
+  .panel {
 
     h5 small,
     a {
-      color: inherit !important;
+      color: lighten($link-color, 12%) !important;
 
       &:hover,
       &:active,
       &:focus {
-        color: lighten($text-color, 12%) !important;
+        color: lighten($link-color, 21%) !important;
       }
     }
+  }
+
+  .help-block {
+    color: $text-color;
   }
 }
