@@ -85,3 +85,35 @@ h5.rss-heading {
     height: auto !important;
   }
 }
+
+.theme-amanita {
+
+  .panel,
+  .table,
+  .list-group:not(.sidebar-nav) .list-group-item {
+    background: rgba($panel-bg, 0.45);
+  }
+
+  .panel-footer {
+    background: none;
+  }
+
+  .rss-box-details,
+  .panel {
+
+    h5 small,
+    a {
+      color: lighten($link-color, 12%) !important;
+
+      &:hover,
+      &:active,
+      &:focus {
+        color: lighten($link-color, 21%) !important;
+      }
+    }
+  }
+
+  .help-block {
+    color: $text-color;
+  }
+}
