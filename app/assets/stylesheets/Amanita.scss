@@ -99,7 +99,7 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   black;
 
-$WELL_BG_COLOR:                     $pachycolea_light_stipe;
-$WELL_FG_COLOR:                     $pachycolea_dark_brown;
+$WELL_BG_COLOR:                     rgba($pachycolea_light_stipe, 0.45);
+$WELL_FG_COLOR:                     $pachycolea_foreground;
 
 @import "mushroom_observer";
