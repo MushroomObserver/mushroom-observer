@@ -89,7 +89,11 @@ h5.rss-heading {
 .theme-amanita {
 
   .panel {
-    background: rgba($panel-bg, 0.75);
+    background: rgba($panel-bg, 0.45);
+  }
+
+  .panel-footer {
+    background: none;
   }
 
   .rss-box-details {
@@ -101,7 +105,7 @@ h5.rss-heading {
       &:hover,
       &:active,
       &:focus {
-        color: lighten($text-color, 6%) !important;
+        color: lighten($text-color, 12%) !important;
       }
     }
   }
