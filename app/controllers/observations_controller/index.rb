@@ -206,12 +206,12 @@ class ObservationsController
 
       # Add some alternate sorting criteria.
       links = [
-        ["name", :sort_by_name.t],
-        ["date", :sort_by_date.t],
-        ["user", :sort_by_user.t],
-        ["created_at", :sort_by_posted.t],
         [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
          :sort_by_updated_at.t],
+        ["date", :sort_by_date.t],
+        ["name", :sort_by_name.t],
+        ["user", :sort_by_user.t],
+        ["created_at", :sort_by_posted.t],
         ["confidence", :sort_by_confidence.t],
         ["thumbnail_quality", :sort_by_thumbnail_quality.t],
         ["num_views", :sort_by_num_views.t]

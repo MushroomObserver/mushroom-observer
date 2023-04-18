@@ -23,7 +23,7 @@ class RandomTest < IntegrationTestCase
   test "the homepage" do
     login(users(:zero_user))
     get("/")
-    assert_template("rss_logs/index")
+    assert_template("observations/index")
     assert(/account/i, response.body)
   end
 

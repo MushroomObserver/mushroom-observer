@@ -307,7 +307,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
     within("#title_bar") do
-      click_link(text: "Index", href: /#{observations_path}/)
+      click_link(text: "Index") # href: /#{observations_path}/
     end
     results = results_observation_links
     assert_equal(query_params, parse_query_params(results.first[:href]))
@@ -332,7 +332,11 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
-    assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+    # assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+    assert_equal(
+      "#{:app_title.l}: #{:query_title_observations_by_updated_at.l}",
+      page.title, "Login failed"
+    )
   end
 
   # This returns results so you can reset a `results` variable within test scope

@@ -171,7 +171,7 @@ module Query
     end
 
     def self.default_order
-      "date"
+      "updated_at"
     end
   end
 end
