@@ -28,78 +28,78 @@ detailed_unknown_obs_rss_log:
 coprinus_comatus_obs_rss_log:
   <<: *DEFAULTS
   observation: coprinus_comatus_obs
-  updated_at: 2007-02-27 20:21:00
+  updated_at: 2007-02-27 20:21:04
   created_at: 2007-02-27 20:20:00
   notes: " log_observation_created user rolf\n"
 
 agaricus_campestris_obs_rss_log:
   <<: *DEFAULTS
   observation: agaricus_campestris_obs
-  updated_at: 2007-03-19 20:21:00
+  updated_at: 2007-03-19 20:21:02
   created_at: 2007-03-19 20:20:00
   notes: " log_observation_created user rolf\n"
 
 agaricus_campestrus_obs_rss_log:
   <<: *DEFAULTS
   observation: agaricus_campestrus_obs
-  updated_at: 2007-06-23 20:00:00
+  updated_at: 2007-06-23 20:00:01
   created_at: 2007-06-23 20:00:00
   notes: " log_observation_created user rolf\n"
 
 agaricus_campestras_obs_rss_log:
   <<: *DEFAULTS
   observation: agaricus_campestras_obs
-  updated_at: 2007-06-24 12:00:00
+  updated_at: 2007-06-24 12:00:01
   created_at: 2007-06-24 12:00:00
   notes: " log_observation_created user rolf\n"
 
 agaricus_campestros_obs_rss_log:
   <<: *DEFAULTS
   observation: agaricus_campestros_obs
-  updated_at: 2007-06-24 12:00:00
+  updated_at: 2007-06-24 12:00:01
   created_at: 2007-06-24 12:00:00
   notes: " log_observation_created user rolf\n"
 
 strobilurus_diminutivus_obs_rss_log:
   <<: *DEFAULTS
   observation: strobilurus_diminutivus_obs
-  updated_at: 2007-07-20 20:54:45
+  updated_at: 2007-07-20 20:54:46
   created_at: 2007-07-20 20:54:45
   notes: " log_observation_created user rolf\n"
 
 stereum_hirsutum_1_rss_log:
   <<: *DEFAULTS
   observation: stereum_hirsutum_1
-  updated_at: 2017-06-23
-  created_at: 2017-06-23
+  updated_at: 2017-06-23 09:02:00
+  created_at: 2017-06-23 09:01:00
   notes: " log_observation_created user rolf\n"
 
 stereum_hirsutum_2_rss_log:
   <<: *DEFAULTS
   observation: stereum_hirsutum_2
-  updated_at: 2017-06-24
-  created_at: 2017-06-24
+  updated_at: 2017-06-24 09:02:00
+  created_at: 2017-06-24 09:01:00
   notes: " log_observation_created user rolf\n"
 
 tubaria_furfuracea_1_rss_log:
   <<: *DEFAULTS
   observation: tubaria_furfuracea_1
-  updated_at: 2017-06-23
-  created_at: 2017-06-23
+  updated_at: 2017-06-23 09:22:00
+  created_at: 2017-06-23 09:21:00
   notes: " log_observation_created user rolf\n"
 
 tubaria_furfuracea_2_rss_log:
   <<: *DEFAULTS
   observation: tubaria_furfuracea_2
-  updated_at: 2017-06-24
-  created_at: 2017-06-24
+  updated_at: 2017-06-24 09:03:00
+  created_at: 2017-06-24 09:02:00
   notes: " log_observation_created user rolf\n"
 
 unknown_with_no_naming_rss_log:
   <<: *DEFAULTS
   observation: unknown_with_no_naming
-  updated_at: 2008-09-23
-  created_at: 2008-09-23
+  updated_at: 2008-09-23 09:03:00
+  created_at: 2008-09-23 09:00:00
   notes: " log_observation_created user mary\n"
 
 unknown_with_lat_long_rss_log:

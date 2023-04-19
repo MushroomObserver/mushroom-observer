@@ -61,7 +61,8 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
     assert_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name.text_name}/,
-      css_select(".rss-what").text)
+      css_select(".rss-what").text
+    )
 
     comments_for_path = comments_path(for_user: User.current_id)
     assert_select(
@@ -95,7 +96,6 @@ class RssLogsControllerTest < FunctionalTestCase
   def test_next_and_prev_rss_log
     # First 2 log entries
     logs = RssLog.order(updated_at: :desc).limit(2)
-
     login
     get(:show, params: { flow: "next", id: logs.first })
     # assert_redirected_to does not work here because #next redirects to a url
