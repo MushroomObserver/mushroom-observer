@@ -33,7 +33,7 @@ class MatrixBoxPresenter < BasePresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log)
     target = rss_log.target
-    self.id = target.id || rss_log.id
+    self.id = target&.id || rss_log.id
     self.type = rss_log.target_type || :rss_log
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = target.user if target&.user
