@@ -14,9 +14,10 @@ class ObservationsController
       list_all
     end
 
-    # Displays matrix of all Observation's, sorted by date.
+    # Displays home matrix of all Observation's, sorted by :rss_log
+    # Note all other filters of the obs index are sorted by date.
     def list_all
-      query = create_query(:Observation, :all, by: default_sort_order)
+      query = create_query(:Observation, :all, by: :rss_log)
       show_selected_observations(query)
     end
 

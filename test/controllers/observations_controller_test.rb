@@ -590,7 +590,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_index_user_by_known_user
     # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
-    assert_nil(obs.rss_log_id)
+    assert_not_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
     user = rolf
     assert(

@@ -334,7 +334,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     # assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
     assert_equal(
-      "#{:app_title.l}: #{:query_title_observations_by_updated_at.l}",
+      "#{:app_title.l}: #{:query_title_observations_by_activity.l}",
       page.title, "Login failed"
     )
   end

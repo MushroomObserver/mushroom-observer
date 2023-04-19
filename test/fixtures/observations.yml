@@ -22,6 +22,7 @@ DEFAULTS: &DEFAULTS
   lifeform: " "
   text_name: Boletus edulis
   classification: ""
+  rss_log: $LABEL_rss_log
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -52,7 +53,6 @@ detailed_unknown_obs:
   specimen: 1
   notes:
     :Other: Found in a strange place... & with śtrangè characters™
-  rss_log: observation_rss_log
   thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
   species_lists: unknown_species_list
@@ -355,7 +355,6 @@ imged_unvouchered_obs:
   <<: *DEFAULTS
   images: query_first_image
   thumb_image: query_first_image
-  rss_log: imged_unvouchered_obs_rss_log
 
 vouchered_obs:
   <<: *DEFAULTS
@@ -445,7 +444,6 @@ same_user_owns_name_and_naming_obs:
 # has Sequence which has not been deposited in an Archive
 locally_sequenced_obs:
   <<: *DEFAULTS
-  rss_log: $LABEL_rss_log
   images: locally_sequenced_obs_image
   thumb_image: locally_sequenced_obs_image
 

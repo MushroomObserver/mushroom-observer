@@ -15,7 +15,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:rss)
     assert_template(:rss)
 
-    get(:show, params: { id: rss_logs(:observation_rss_log).id })
+    get(:show, params: { id: rss_logs(:detailed_unknown_obs_rss_log).id })
     assert_template(:show)
   end
 
@@ -51,14 +51,17 @@ class RssLogsControllerTest < FunctionalTestCase
     login
     get(:index, params: { type: :glossary_term })
     assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
-    assert_no_match(/#{rss_logs(:observation_rss_log).observation.name}/,
-                    css_select(".rss-what").text)
+    assert_no_match(
+      /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name}/,
+      css_select(".rss-what").text
+    )
 
     # Without params[:type], it should display all logs
     get(:index)
     assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
-    assert_match(/#{rss_logs(:observation_rss_log).observation.name.text_name}/,
-                 css_select(".rss-what").text)
+    assert_match(
+      /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name.text_name}/,
+      css_select(".rss-what").text)
 
     comments_for_path = comments_path(for_user: User.current_id)
     assert_select(
@@ -86,7 +89,7 @@ class RssLogsControllerTest < FunctionalTestCase
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
-    assert(results.include?(rss_logs(:observation_rss_log)))
+    assert(results.include?(rss_logs(:detailed_unknown_obs_rss_log)))
   end
 
   def test_next_and_prev_rss_log
