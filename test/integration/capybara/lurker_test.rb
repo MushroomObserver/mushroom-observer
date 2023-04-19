@@ -14,8 +14,8 @@ class LurkerTest < CapybaraIntegrationTestCase
     assert_selector("#box_#{rss_log.id} .rss-id",
                     text: rss_log.observation_id)
 
-    # Click on first obs immediately after one that has images. NOTE: must
-    # be a "created" log. Hopefully future rss_logs will not break this!
+    # Click on first obs immediately after one that has images.
+    # NOTE: BS4 matrix-box will make it easier to find siblings
     first(".image-link").ancestor(".matrix-box+.matrix-box").
       first(".rss-detail", text: "Observation Created").
       ancestor(".panel").first(".rss-box-details").first("a").click
