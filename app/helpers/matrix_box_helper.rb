@@ -49,14 +49,14 @@ module MatrixBoxHelper
 
   # Obs with uncertain name: mark as reviewed (to skip in future)
   # used if matrix_box local_assigns identify == true
-  def matrix_box_identify_footer(identify, object_id)
+  def matrix_box_identify_footer(identify, obs_id)
     return unless identify
 
     content_tag(
       :div,
       class: "card-footer card-active position-relative"
     ) do
-      mark_as_reviewed_toggle(object_id, "btn-sm btn-outline-secondary",
+      mark_as_reviewed_toggle(obs_id, "btn-sm btn-outline-secondary",
                               "box_reviewed")
     end
   end

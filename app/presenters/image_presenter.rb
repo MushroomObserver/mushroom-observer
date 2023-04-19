@@ -105,8 +105,8 @@ class ImagePresenter < BasePresenter
     img_height = image&.height ? BigDecimal(image&.height) : 100
     img_proportion = BigDecimal(img_height / img_width)
     img_padding = (img_proportion * 100).to_f.truncate(1)
-    # Limit proportion 2:1 h/w for thumbnail
-    img_padding = "150" if img_padding.to_i > 150 # default for tall
+    # Limit proportion 1.3:1 h/w for thumbnail
+    img_padding = "133.33" if img_padding.to_i > 133 # default for tall
     self.proportion = img_padding
 
     if args[:context] == :matrix_box
