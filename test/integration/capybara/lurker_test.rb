@@ -9,21 +9,22 @@ class LurkerTest < CapybaraIntegrationTestCase
     reset_session!
     login
 
-    # Click on first observation in feed results
-    first(".rss-detail", text: "Observation Created").
+    # Click on first obs immediately after one that has images. NOTE: must
+    # be a "created" log. Hopefully future rss_logs will not break this!
+    first(".image-link").ancestor(".matrix-box+.matrix-box").
+      first(".rss-detail", text: "Observation Created").
       ancestor(".panel").first(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
-    # push_page is a stop-gap until a js-enabled driver is installed and working
     go_back_after do
       click_link("« Prev")
     end
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
-    # Click on the first image.
+    # Click on the first image. (That's why we picked the one after this.)
     go_back_after do
       first("#content .show_images .image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
