@@ -9,6 +9,11 @@ class LurkerTest < CapybaraIntegrationTestCase
     reset_session!
     login
 
+    # visit("/activity_logs")
+    rss_log = RssLog.where.not(observation_id: nil).last
+    assert_selector("#box_#{rss_log.id} .rss-id",
+                    text: rss_log.observation_id)
+
     # Click on first observation in feed results
     first(".rss-detail", text: "Observation Created").
       ancestor(".panel").first(".rss-box-details").first("a").click
