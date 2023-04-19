@@ -3,6 +3,7 @@
 # Gather details for items in matrix-style ndex pages.
 class MatrixBoxPresenter < BasePresenter
   attr_accessor \
+    :id,         # id of the target or log object
     :type,       # what kind of box is this
     :image_data, # data passed to thumbnail_presenter
     :when,       # when object or target was created
@@ -32,6 +33,7 @@ class MatrixBoxPresenter < BasePresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log)
     target = rss_log.target
+    self.id = target.id || rss_log.id
     self.type = rss_log.target_type || :rss_log
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = target.user if target&.user
@@ -68,6 +70,7 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image)
+    self.id = image.id
     self.type = :image
     self.when = begin
                   image.when.web_date
@@ -86,6 +89,7 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation)
+    self.id         = observation.id
     self.type       = :observation
     self.when       = observation.when.web_date
     self.who        = observation.user if observation.user
@@ -109,6 +113,7 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user)
+    self.id = user.id
     self.type = :user
     # rubocop:disable Rails/OutputSafety
     # The results of .t and web_date are guaranteed to be safe, and both

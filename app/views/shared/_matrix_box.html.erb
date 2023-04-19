@@ -14,7 +14,7 @@ if presenter
                   except(:columns, :object, :object_counter, :object_iteration).
                   merge(presenter.image_data || {})
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
-  link_heading = content_tag(:small, "(#{object_id})",
+  link_heading = content_tag(:small, "(#{presenter.id})",
                               class: "rss-id float-right") +
                 content_tag(:span, presenter.name, class: "rss-name")
   %>
@@ -63,7 +63,7 @@ if presenter
 
       <%= matrix_box_log_footer(presenter) %>
 
-      <%= matrix_box_identify_footer(identify, object_id) %>
+      <%= matrix_box_identify_footer(identify, presenter.id) %>
 
     </div><!-- .panel -->
   <% end %><!-- .matrix-box -->
