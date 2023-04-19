@@ -9,6 +9,11 @@ class LurkerTest < CapybaraIntegrationTestCase
     reset_session!
     login
 
+    # visit("/activity_logs")
+    rss_log = RssLog.where.not(observation_id: nil).last
+    assert_selector("#box_#{rss_log.id} .rss-id",
+                    text: rss_log.observation_id)
+
     # Click on first obs immediately after one that has images. NOTE: must
     # be a "created" log. Hopefully future rss_logs will not break this!
     first(".image-link").ancestor(".matrix-box+.matrix-box").
