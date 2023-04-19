@@ -171,7 +171,7 @@ module Query
     end
 
     def self.default_order
-      "updated_at"
+      "rss_log"
     end
   end
 end

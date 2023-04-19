@@ -1505,8 +1505,8 @@ class ApplicationController < ActionController::Base
   # Special title for new obs by updated at default home page query
   def index_default_title(query)
     if query.title_args[:type] == :observation &&
-       query.title_args[:order] == :sort_by_updated_at
-      return :query_title_observations_by_updated_at.l
+       query.title_args[:order] == :sort_by_rss_log
+      return :query_title_observations_by_activity.l
     end
 
     query.title
