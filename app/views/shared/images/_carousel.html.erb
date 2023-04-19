@@ -17,24 +17,26 @@ has_images = !object.images.nil? && object.images.any?
                              object: object }) %>
       <% end %>
     </div>
-    <a class="carousel-control-prev"
-       href="#<%= html_id %>"
-       role="button"
-       data-slide="prev">
-      <div class="btn">
-        <span class="fas fa-chevron-left fa-2x text-white" aria-hidden="true"></span>
-        <span class="sr-only"><%= :PREV.l %></span>
-      </div>
-    </a>
-    <a class="carousel-control-next"
-       href="#<%= html_id %>"
-       role="button"
-       data-slide="next">
-      <div class="btn">
-        <span class="fas fa-chevron-right fa-2x text-white" aria-hidden="true"></span>
-        <span class="sr-only"><%= :NEXT.l %></span>
-      </div>
-    </a>
+    <% if object.images.length > 1 %>
+      <a class="carousel-control-prev"
+        href="#<%= html_id %>"
+        role="button"
+        data-slide="prev">
+        <div class="btn">
+          <span class="fas fa-chevron-left fa-2x text-white" aria-hidden="true"></span>
+          <span class="sr-only"><%= :PREV.l %></span>
+        </div>
+      </a>
+      <a class="carousel-control-next"
+        href="#<%= html_id %>"
+        role="button"
+        data-slide="next">
+        <div class="btn">
+          <span class="fas fa-chevron-right fa-2x text-white" aria-hidden="true"></span>
+          <span class="sr-only"><%= :NEXT.l %></span>
+        </div>
+      </a>
+    <% end %>
     <ol class="carousel-indicators bg-light mb-0">
       <% object.images.each_with_index do |image, index| %>
         <% active = (image == default_image) ? " active" : "" %>

@@ -117,29 +117,32 @@ module ObservationTabsHelper
     links << link_to(
       add_query_param(new_image_for_observation_path(obs.id)),
       class: "btn #{btn_style}",
+      aria: { label: :show_observation_add_images.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_add_images.t }
     ) do
-      concat(tag.span(:ADD.t, class: "mr-1"))
+      # concat(tag.span(:ADD.t, class: "mr-1"))
       concat(icon("fa-regular", "plus", class: icon_size))
     end
     links << link_to(
       add_query_param(reuse_images_for_observation_path(obs.id)),
       class: "btn #{btn_style}",
+      aria: { label: :show_observation_reuse_image.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_reuse_image.t }
     ) do
-      concat(tag.span(:image_reuse_reuse.t, class: "mr-1"))
+      # concat(tag.span(:image_reuse_reuse.t, class: "mr-1"))
       concat(icon("fa-regular", "clone", class: icon_size))
     end
     if obs.images.length.positive?
       links << link_to(
         add_query_param(remove_images_from_observation_path(obs.id)),
         class: "btn #{btn_style}",
+        aria: { label: :show_observation_remove_images.t },
         data: { toggle: "tooltip", placement: "top",
                 title: :show_observation_remove_images.t }
       ) do
-        concat(tag.span(:image_remove_remove.t, class: "mr-1"))
+        # concat(tag.span(:image_remove_remove.t, class: "mr-1"))
         concat(icon("fa-regular", "trash", class: icon_size))
       end
     end
