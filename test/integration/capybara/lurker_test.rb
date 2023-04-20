@@ -9,14 +9,17 @@ class LurkerTest < CapybaraIntegrationTestCase
     reset_session!
     login
 
-    # visit("/activity_logs")
-    rss_log = RssLog.where.not(observation_id: nil).last
+    visit("/activity_logs")
+    rss_log = RssLog.where.not(observation_id: nil).order(:updated_at).last
     assert_selector("#box_#{rss_log.id} .rss-id",
                     text: rss_log.observation_id)
 
     # Click on first obs immediately after one that has images.
-    # NOTE: BS4 matrix-box will make it easier to find siblings
-    first(".image-link").ancestor(".matrix-box+.matrix-box").
+    # NOTE: BS3 matrix-box are a bit harder to find siblings
+    # because the layout clearfix boxes interrupt the matrix boxes.
+    # This selects next matching peer, but you can do adjacent in bs4
+    # (do + instead of ~)
+    first(".image-link").ancestor(".matrix-box~.matrix-box").
       first(".rss-detail", text: "Observation Created").
       ancestor(".panel").first(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
