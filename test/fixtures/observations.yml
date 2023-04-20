@@ -28,9 +28,9 @@ DEFAULTS: &DEFAULTS
 
 minimal_unknown_obs:
   <<: *DEFAULTS
-  created_at: 2005-05-12 17:20:00
-  updated_at: 2005-05-12 17:21:00
-  when: 2005-05-11
+  created_at: 2006-05-12 17:20:00
+  updated_at: 2006-05-12 17:21:00
+  when: 2006-05-11
   user: mary
   location: burbank
   is_collection_location: 1
