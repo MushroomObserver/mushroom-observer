@@ -1230,7 +1230,7 @@ class ObservationsControllerTest < FunctionalTestCase
     o_chron = Observation.order(created_at: :desc, id: :desc)
     login
     # need to save a query here to get :next in a non-standard order
-    query = Query.lookup_and_save(:Observation, :all, by: :created_at)
+    Query.lookup_and_save(:Observation, :all, by: :created_at)
     qr = QueryRecord.last.id.alphabetize
 
     get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
