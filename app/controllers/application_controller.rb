@@ -1502,11 +1502,11 @@ class ApplicationController < ActionController::Base
     @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
   end
 
-  # Special title for new obs by updated at default home page query
+  # Special title for new obs default home page query
   def index_default_title(query)
     if query.title_args[:type] == :observation &&
        query.title_args[:order] == :sort_by_rss_log
-      return :query_title_observations_by_activity.l
+      return :query_title_observations_by_activity_log.l
     end
 
     query.title

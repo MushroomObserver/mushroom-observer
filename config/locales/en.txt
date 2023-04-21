@@ -4134,7 +4134,7 @@
   query_title_advanced_search: "[:app_advanced_search]"
   query_title_all: "[TYPE] Index"
   query_title_all_by: "[TYPES] by [ORDER]"
-  query_title_observations_by_activity: "Observation Activity"
+  query_title_observations_by_activity_log: "Observation Activity"
   query_title_at_location: "[TYPES] from [LOCATION]"
   query_title_at_where: "[TYPES] from '[USER_WHERE]'"
   query_title_by_author: "[TYPES] Authored by [USER]"

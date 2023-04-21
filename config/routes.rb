@@ -294,7 +294,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   #     resources :products
   #   end
 
-  # Default page is /rss_logs
+  # Default page "/" is /observations ordered by: :rss_log
   root "observations#index"
 
   # Route /123 to /observations/123.
