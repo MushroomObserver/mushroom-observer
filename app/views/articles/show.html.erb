@@ -4,11 +4,14 @@
   @container = :wide
 %>
 
-<div>
-  <%= :BY.t %> <%= user_link(@article.user) %>,
-  <%= content_tag(:small, @article.created_at.display_time) %>
-</div>
+<% card_title = tag.div(class: "card-title") do
+  concat("#{:BY.t} #{user_link(@article.user)},")
+  concat(tag.small(@article.created_at.display_time))
+end %>
 
-<%= card_block(class: "mt-3") do @article.body.tpl end %>
-
-<%= show_object_footer(@article) %>
+<%=
+card_block(footer: show_object_footer(@article)) do
+  concat(card_title)
+  concat(@article.body.tpl)
+end
+%>
