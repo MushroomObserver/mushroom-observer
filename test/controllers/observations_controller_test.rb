@@ -1225,17 +1225,19 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_prev_and_next_observation
-    # Uses default observation query
-    o_chron = Observation.order(:created_at)
+  def test_prev_and_next_observation_simple
+    # Uses non-default observation query. :when is the default order
+    o_chron = Observation.order(created_at: :desc, id: :desc)
     login
-    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
-    assert_redirected_to(action: :show, id: o_chron.third.id,
-                         params: @controller.query_params(QueryRecord.last))
+    # need to save a query here to get :next in a non-standard order
+    query = Query.lookup_and_save(:Observation, :all, by: :created_at)
+    qr = QueryRecord.last.id.alphabetize
 
-    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
-    assert_redirected_to(action: :show, id: o_chron.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
+    get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
+    assert_redirected_to(action: :show, id: o_chron.fifth.id, q: qr)
+
+    get(:show, params: { id: o_chron.fourth.id, flow: :prev, q: qr })
+    assert_redirected_to(action: :show, id: o_chron.third.id, q: qr)
   end
 
   def test_prev_and_next_observation_with_fancy_query
