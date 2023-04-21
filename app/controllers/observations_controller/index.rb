@@ -21,10 +21,6 @@ class ObservationsController
       show_selected_observations(query)
     end
 
-    def default_sort_order
-      ::Query::ObservationBase.default_order
-    end
-
     # Displays matrix of selected Observations (based on current Query).
     # NOTE: Why are all the :id params converted .to_s below?
     def index_query_results
