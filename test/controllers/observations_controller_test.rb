@@ -204,7 +204,7 @@ class ObservationsControllerTest < FunctionalTestCase
     exception = assert_raise(RuntimeError) do
       get(:index, params: { by: by })
     end
-    assert_equal("Can't figure out how to sort Observation by :#{by}.",
+    assert_equal("Can't figure out how to sort Observations by :#{by}.",
                  exception.message)
   end
 

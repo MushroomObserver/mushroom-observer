@@ -20,7 +20,9 @@ module Query
       def initialize_order_specs(by)
         sorting_method = "sort_by_#{by}"
         unless ::Query::Modules::Ordering.method_defined?(sorting_method)
-          raise("Can't figure out how to sort #{model} by :#{by}.")
+          raise(
+            "Can't figure out how to sort #{model.name.pluralize} by :#{by}."
+          )
         end
 
         send(sorting_method, model)
