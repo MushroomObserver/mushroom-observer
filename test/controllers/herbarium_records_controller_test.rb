@@ -47,6 +47,15 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_displayed_title("Fungarium Records by Initial Determination")
   end
 
+  def test_index_by_accession_number
+    by = "accession_number"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_displayed_title("Fungarium Records by Accession Number")
+  end
+
   def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
