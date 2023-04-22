@@ -163,11 +163,7 @@ module Query
 
         # Join Users with null locations, else join records with locations
         model == User ? add_join(:locations!) : add_join(:locations)
-        if User.current_location_format == "scientific"
-          "locations.scientific_name ASC"
-        else
-          "locations.name ASC"
-        end
+        sort_locations_by_name
       end
 
       def sort_by_rss_log(model)
