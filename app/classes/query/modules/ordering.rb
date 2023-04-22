@@ -51,37 +51,55 @@ module Query::Modules::Ordering
   end
 
   def sort_by_name(model)
-    case model.name
-    when Image.name
-      add_join(:observation_images, :observations)
-      add_join(:observations, :names)
-      self.group = "images.id"
-      "MIN(names.sort_name) ASC, images.when DESC"
-    when Location.name
-      if User.current_location_format == "scientific"
-        "locations.scientific_name ASC"
-      else
-        "locations.name ASC"
-      end
-    when LocationDescription.name
-      add_join(:locations)
-      "locations.name ASC, location_descriptions.created_at ASC"
-    when Name.name
-      "names.sort_name ASC"
-    when NameDescription.name
-      add_join(:names)
-      "names.sort_name ASC, name_descriptions.created_at ASC"
-    when Observation.name
-      add_join(:names)
-      "names.sort_name ASC, observations.when DESC"
+    sort_by_name_method = "sort_#{model.name.underscore.pluralize}_by_name"
+    if ::Query::Modules::Ordering.method_defined?(sort_by_name_method)
+      send(sort_by_name_method)
     else
-      if model.column_names.include?("sort_name")
-        "#{model.table_name}.sort_name ASC"
-      elsif model.column_names.include?("name")
-        "#{model.table_name}.name ASC"
-      elsif model.column_names.include?("title")
-        "#{model.table_name}.title ASC"
-      end
+      sort_other_models_by_name(model)
+    end
+  end
+
+  def sort_images_by_name
+    add_join(:observation_images, :observations)
+    add_join(:observations, :names)
+    self.group = "images.id"
+    "MIN(names.sort_name) ASC, images.when DESC"
+  end
+
+  def sort_locations_by_name
+    if User.current_location_format == "scientific"
+      "locations.scientific_name ASC"
+    else
+      "locations.name ASC"
+    end
+  end
+
+  def sort_location_descriptions_by_name
+    add_join(:locations)
+    "locations.name ASC, location_descriptions.created_at ASC"
+  end
+
+  def sort_names_by_name
+    "names.sort_name ASC"
+  end
+
+  def sort_name_descriptions_by_name
+    add_join(:names)
+    "names.sort_name ASC, name_descriptions.created_at ASC"
+  end
+
+  def sort_observations_by_name
+    add_join(:names)
+    "names.sort_name ASC, observations.when DESC"
+  end
+
+  def sort_other_models_by_name(model)
+    if model.column_names.include?("sort_name")
+      "#{model.table_name}.sort_name ASC"
+    elsif model.column_names.include?("name")
+      "#{model.table_name}.name ASC"
+    elsif model.column_names.include?("title")
+      "#{model.table_name}.title ASC"
     end
   end
 
