@@ -35,7 +35,7 @@ if presenter
                 class: "log-link") do
           content_tag(h_element, class: "card-title log-what d-flex flex-row justify-content-between align-items-start") do
             concat(content_tag(:span, presenter.name, class: "log-name"))
-            concat(content_tag(:span, object_id, class: "log-id"))
+            concat(content_tag(:span, presenter.id, class: "log-id"))
           end
         end %>
 

@@ -19,7 +19,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     # because the layout clearfix boxes interrupt the matrix boxes.
     # This selects next matching peer, but you can do adjacent in bs4
     # (do + instead of ~)
-    first(".image-link").ancestor(".matrix-box+.matrix-box").
+    first(".image-link").ancestor(".matrix-box~.matrix-box").
       first(".log-entry", text: "Observation Created").
       ancestor(".card").first(".log-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
