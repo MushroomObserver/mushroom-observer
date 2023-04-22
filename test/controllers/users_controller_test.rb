@@ -129,6 +129,15 @@ class UsersControllerTest < FunctionalTestCase
     assert_displayed_title("Users by Last Login")
   end
 
+  def test_index_sorted_by_contribution
+    by = "contribution"
+
+    login
+    make_admin
+    get(:index, params: { by: by })
+
+    assert_displayed_title("Users by Contribution")
+  end
 
   #   ---------------------
   #    show_selected_users
