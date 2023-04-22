@@ -156,7 +156,7 @@ module Query
       def sort_by_accession_number(model)
         return unless model.column_names.include?("accession_number")
 
-        "#(model.table_name}.accession_number ASC"
+        "#{model.table_name}.accession_number ASC"
       end
 
       def sort_by_user(model)

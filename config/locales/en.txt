@@ -4272,6 +4272,7 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
+  sort_by_accession_number: "[:herbarium_record_accession_number]"
   sort_by_code: Code
   sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
