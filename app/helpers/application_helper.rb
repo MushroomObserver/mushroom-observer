@@ -78,7 +78,7 @@ module ApplicationHelper
     end
   end
 
-  # --------- links and buttons ------------------------------------------------
+  # --------- template nav ------------------------------------------------
 
   # contents of the <title> in html header
   def title_tag_contents(action_name)

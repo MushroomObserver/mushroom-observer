@@ -17,6 +17,24 @@ module LinkHelper
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
   end
+  # Make it so it can take a block
+  # def link_with_query(text = nil, path = nil, **opts, &block)
+  #   link = block ? text : path # because positional
+  #   content = block ? capture(&block) : text
+  #   link_to(add_query_param(link), opts) { content }
+  # end
+
+  # https://stackoverflow.com/questions/18642001/add-an-active-class-to-all-active-links-in-rails
+  def active_link_to(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # because positional
+    opts[:class] = class_names(opts[:class], { active: current_page?(link) })
+
+    if block
+      link_to(link, opts, &block)
+    else
+      link_to(text, link, opts)
+    end
+  end
 
   # Take a query which can be coerced into a different model, and create a link
   # to the results of that coerced query.  Return +nil+ if not coercable.
