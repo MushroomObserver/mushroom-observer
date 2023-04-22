@@ -138,7 +138,7 @@ module Observations
       image = images(:agaricus_campestris_image)
       obs = image.observations.first
       assert(obs)
-      assert(obs.rss_log.nil?)
+      assert_not_nil(obs.rss_log)
       new_name = "new nāme.jpg"
 
       params = {

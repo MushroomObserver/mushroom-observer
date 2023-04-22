@@ -197,7 +197,7 @@ class ImagesController < ApplicationController
   # Outputs: @image
   def show
     store_location
-    return false unless (@image = find_image!)
+    return false unless find_image!
 
     case params[:flow]
     when "next"
@@ -221,7 +221,14 @@ class ImagesController < ApplicationController
   private
 
   def find_image!
-    find_or_goto_index(Image, params[:id].to_s)
+    @image = Image.includes(show_image_includes).find_by(id: params[:id]) ||
+             flash_error_and_goto_index(Image, params[:id])
+  end
+
+  def show_image_includes
+    [
+      { image_votes: :user }
+    ]
   end
 
   def set_default_size
