@@ -15,46 +15,10 @@ module Query::Modules::Ordering
     self.order = reverse ? reverse_order(result) : result
   end
 
-  SORT_METHODS = {
-    "updated_at" => :sort_by_updated_at,
-    "created_at" => :sort_by_created_at,
-    "last_login" => :sort_by_last_login,
-    "num_views" => :sort_by_num_views,
-    "date" => :sort_by_date,
-    "name" => :sort_by_name,
-    "title" => :sort_by_title,
-    "login" => :sort_by_title,
-    "summary" => :sort_by_summary,
-    "copyright_holder" => :sort_by_copyright_holder,
-    "where" => :sort_by_where,
-    "initial_det" => :sort_by_initial_det,
-    "accession_number" => :sort_by_accession_number,
-    "user" => :sort_by_user,
-    "location" => :sort_by_location,
-    "rss_log" => :sort_by_rss_log,
-    "confidence" => :sort_by_confidence,
-    "image_quality" => :sort_by_image_quality,
-    "thumbnail_quality" => :sort_by_thumbnail_quality,
-    "owners_quality" => :sort_by_owners_quality,
-    "owners_thumbnail_quality" => :sort_by_owners_thumbnail_quality,
-    "observation" => :sort_by_observation,
-    "contribution" => :sort_by_contribution,
-    "original_name" => :sort_by_original_name,
-    "url" => :sort_by_url,
-    "herbarium_name" => :sort_by_herbarium_name,
-    "herbarium_label" => :sort_by_herbarium_label,
-    "name_and_number" => :sort_by_name_and_number,
-    "code" => :sort_by_code,
-    "code_then_name" => :sort_by_code_then_name,
-    "records" => :sort_by_records,
-    "id" => :sort_by_id,
-    # Add more sorting criteria here
-  }
-
   def initialize_order_specs(by)
-    method_name = SORT_METHODS[by]
-    if method_name
-      send(method_name, model)
+    sorting_method = "sort_by_#{by}"
+    if ::Query::Modules::Ordering.method_defined?(sorting_method)
+      send(sorting_method, model)
     else
       raise("Can't figure out how to sort #{model} by :#{by}.")
     end
