@@ -19,7 +19,9 @@ module Query
 
       def initialize_order_specs(by)
         sorting_method = "sort_by_#{by}"
-        unless ::Query::Modules::Ordering.method_defined?(sorting_method)
+        unless ::Query::Modules::Ordering.private_method_defined(
+          sorting_method
+        )
           raise(
             "Can't figure out how to sort #{model.name.pluralize} by :#{by}."
           )
@@ -27,6 +29,10 @@ module Query
 
         send(sorting_method, model)
       end
+
+      #######
+
+      private
 
       def sort_by_updated_at(model)
         return unless model.column_names.include?("updated_at")
@@ -64,7 +70,9 @@ module Query
 
       def sort_by_name(model)
         sort_by_name_method = "sort_#{model.name.underscore.pluralize}_by_name"
-        if ::Query::Modules::Ordering.method_defined?(sort_by_name_method)
+        if ::Query::Modules::Ordering.private_method_defined?(
+          sort_by_name_method
+        )
           send(sort_by_name_method)
         else
           sort_other_models_by_name(model)
@@ -264,6 +272,10 @@ module Query
       def sort_by_id(model)
         "#{model.table_name}.id ASC"
       end
+
+      #######
+
+      public
 
       def reverse_order(order)
         order.gsub(/(\s)(ASC|DESC)(,|\Z)/) do
