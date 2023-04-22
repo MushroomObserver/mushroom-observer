@@ -196,6 +196,18 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_displayed_title("Observations by #{by.capitalize}")
   end
 
+  def test_index_sorted_by_invalid_order
+    by = "edibility"
+
+    login
+
+    exception = assert_raise(RuntimeError) do
+      get(:index, params: { by: by })
+    end
+    assert_equal("Can't figure out how to sort Observation by :#{by}.",
+                 exception.message)
+  end
+
   def test_index_with_id
     obs = observations(:agaricus_campestris_obs)
 

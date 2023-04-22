@@ -4292,6 +4292,7 @@
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
+  sort_by_owners_quality: "Owner's Quality"
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
