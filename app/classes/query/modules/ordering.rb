@@ -19,7 +19,7 @@ module Query
 
       def initialize_order_specs(by)
         sorting_method = "sort_by_#{by}"
-        unless ::Query::Modules::Ordering.private_method_defined(
+        unless ::Query::Modules::Ordering.private_method_defined?(
           sorting_method
         )
           raise(
