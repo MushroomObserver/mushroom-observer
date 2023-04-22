@@ -175,7 +175,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title("Observations by Date")
+    assert_displayed_title(:query_title_observations_by_activity_log.l)
   end
 
   def test_index_sorted_by_name
@@ -222,7 +222,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations by Date")
+    assert_displayed_title(:query_title_observations_by_activity_log.l)
   end
 
   def test_index_useless_param_page2
@@ -231,7 +231,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations by Date")
+    assert_displayed_title(:query_title_observations_by_activity_log.l)
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -590,7 +590,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_index_user_by_known_user
     # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
-    assert_nil(obs.rss_log_id)
+    assert_not_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
     user = rolf
     assert(
@@ -1225,17 +1225,19 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_prev_and_next_observation
-    # Uses default observation query
-    o_chron = Observation.order(:created_at)
+  def test_prev_and_next_observation_simple
+    # Uses non-default observation query. :when is the default order
+    o_chron = Observation.order(created_at: :desc, id: :desc)
     login
-    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
-    assert_redirected_to(action: :show, id: o_chron.third.id,
-                         params: @controller.query_params(QueryRecord.last))
+    # need to save a query here to get :next in a non-standard order
+    Query.lookup_and_save(:Observation, :all, by: :created_at)
+    qr = QueryRecord.last.id.alphabetize
 
-    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
-    assert_redirected_to(action: :show, id: o_chron.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
+    get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
+    assert_redirected_to(action: :show, id: o_chron.fifth.id, q: qr)
+
+    get(:show, params: { id: o_chron.fourth.id, flow: :prev, q: qr })
+    assert_redirected_to(action: :show, id: o_chron.third.id, q: qr)
   end
 
   def test_prev_and_next_observation_with_fancy_query

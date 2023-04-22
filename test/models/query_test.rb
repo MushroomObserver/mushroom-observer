@@ -2953,6 +2953,11 @@ class QueryTest < UnitTestCase
     assert_query(ids, :RssLog, :all)
   end
 
+  def test_rss_log_type
+    ids = [rss_logs(:species_list_rss_log).id]
+    assert_query(ids, :RssLog, :all, type: :species_list)
+  end
+
   def test_rss_log_in_set
     rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
                       rss_logs(:name_rss_log).id]

@@ -15,7 +15,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:rss)
     assert_template(:rss)
 
-    get(:show, params: { id: rss_logs(:observation_rss_log).id })
+    get(:show, params: { id: rss_logs(:detailed_unknown_obs_rss_log).id })
     assert_template(:show)
   end
 
@@ -86,13 +86,12 @@ class RssLogsControllerTest < FunctionalTestCase
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
-    assert(results.include?(rss_logs(:observation_rss_log)))
+    assert(results.include?(rss_logs(:detailed_unknown_obs_rss_log)))
   end
 
   def test_next_and_prev_rss_log
     # First 2 log entries
     logs = RssLog.order(updated_at: :desc).limit(2)
-
     login
     get(:show, params: { flow: "next", id: logs.first })
     # assert_redirected_to does not work here because #next redirects to a url

@@ -223,6 +223,8 @@
   # COMMON WORDS AND PHRASES
 
   # Object titles, all nouns.
+  ACTIVITY: Activity
+  activity: activity
   API_KEY: API Key
   api_key: API key
   API_KEYS: API Keys
@@ -4137,6 +4139,7 @@
   query_title_advanced_search: "[:app_advanced_search]"
   query_title_all: "[TYPE] Index"
   query_title_all_by: "[TYPES] by [ORDER]"
+  query_title_observations_by_activity_log: "Observation Activity"
   query_title_at_location: "[TYPES] from [LOCATION]"
   query_title_at_where: "[TYPES] from '[USER_WHERE]'"
   query_title_by_author: "[TYPES] Authored by [USER]"
@@ -4277,6 +4280,7 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
+  sort_by_activity: "[:ACTIVITY]"
   sort_by_code: Code
   sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
