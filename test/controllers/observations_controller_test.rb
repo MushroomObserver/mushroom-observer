@@ -932,7 +932,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
     assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
-    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
+    assert_select("button[value='#{:DESTROY.t}']", minimum: 1)
     assert_select("a[href=?]",
                   new_image_for_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",
@@ -947,7 +947,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
     assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
-    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
+    assert_select("button[value='#{:DESTROY.t}']", minimum: 1)
     assert_select("a[href=?]",
                   new_image_for_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",

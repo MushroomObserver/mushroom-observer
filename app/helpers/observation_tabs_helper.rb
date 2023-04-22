@@ -85,7 +85,7 @@ module ObservationTabsHelper
   end
 
   def obs_change_links(obs:)
-    return unless check_permission(obs)
+    return [] unless check_permission(obs)
 
     icon_size = "fa-lg" # "fa-sm"
     btn_style = "btn-sm btn-link"

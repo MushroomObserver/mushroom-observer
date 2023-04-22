@@ -13,6 +13,13 @@
 
   obs_locals = { observation: @observation }
   bp = "lg" # breakpoint, for easier adjustment
+  obs_changes = if check_permission(@observation)
+                  tag.div(class: "observation-change-links") do
+                    obs_change_links(obs: @observation).safe_join
+                  end
+                else
+                  ""
+                end
 %>
 
 <div class="card card-combination mb-4">
@@ -24,9 +31,7 @@
           tag.div(class:"card-header row-justified py-1 pr-#{bp}-1") do
             [
               tag.h6(:show_observation_details.t, class: "mb-0"),
-              tag.div(class: "observation-change-links") do
-                obs_change_links(obs: @observation).safe_join
-              end
+              obs_changes
             ].safe_join
           end,
           tag.div(class:"card-body list-indented pr-#{bp}-4",
