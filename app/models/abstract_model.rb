@@ -43,6 +43,7 @@
 #  show_url::           "Official" URL for this database object.
 #  show_link_args::     "Official" link_to args for this database object.
 #  index_action::       Name of action to display index of these objects
+#  index_link_args::    link_to args for this database object's index.
 #
 #  ==== Callbacks
 #  before_create::      Do several things before creating a new record.

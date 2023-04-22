@@ -13,27 +13,31 @@
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
 module LinkHelper
-  # Call link_to with query params added.
-  def link_with_query(name = nil, options = nil, html_options = nil)
-    link_to(name, add_query_param(options), html_options)
+  # Call link_to with query params added. Can take a block.
+  # TODO: splat **opts so behaves == link_to. means redoing a bunch of links!
+  def link_with_query(text = nil, path = nil, opts = nil, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+
+    link_to(add_query_param(link), opts) { content }
   end
-  # Make it so it can take a block
-  # def link_with_query(text = nil, path = nil, **opts, &block)
-  #   link = block ? text : path # because positional
-  #   content = block ? capture(&block) : text
-  #   link_to(add_query_param(link), opts) { content }
-  # end
 
   # https://stackoverflow.com/questions/18642001/add-an-active-class-to-all-active-links-in-rails
+  # make a link that has .active class if it's a link to the current page
   def active_link_to(text = nil, path = nil, **opts, &block)
     link = block ? text : path # because positional
+    content = block ? capture(&block) : text
     opts[:class] = class_names(opts[:class], { active: current_page?(link) })
 
-    if block
-      link_to(link, opts, &block)
-    else
-      link_to(text, link, opts)
-    end
+    link_to(link, opts) { content }
+  end
+
+  def active_link_with_query(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+    opts[:class] = class_names(opts[:class], { active: current_page?(link) })
+
+    link_to(add_query_param(link), opts) { content }
   end
 
   # Take a query which can be coerced into a different model, and create a link
