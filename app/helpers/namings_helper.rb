@@ -66,7 +66,7 @@ module NamingsHelper
   end
 
   def naming_name_link(naming)
-    link_to(add_query_param(name_path(id: naming.name))) do
+    link_with_query(name_path(id: naming.name)) do
       content_tag(:h6, naming.display_name_brief_authors.t.
                               break_name.small_author)
     end
@@ -104,11 +104,11 @@ module NamingsHelper
   def pct_html(naming)
     percent = "#{naming.vote_percent.round}%"
 
-    link_to(add_query_param(naming_vote_path(naming_id: naming.id)),
-            class: "vote-percent btn btn-link px-0",
-            onclick: "MOEvents.whirly();", remote: true) do
-              [h(percent), num_votes_html(naming)].safe_join(" ")
-            end
+    link_with_query(naming_vote_path(naming_id: naming.id),
+                    class: "vote-percent btn btn-link px-0",
+                    onclick: "MOEvents.whirly();", remote: true) do
+                      [h(percent), num_votes_html(naming)].safe_join(" ")
+                    end
   end
 
   def num_votes_html(naming)

@@ -1,12 +1,10 @@
-<%# uses fontawesome icon helper %>
-
-<%= content_tag(:div, class: classes[:heading]) do
-  concat(icon("fa-solid", "user", class: "fa-lg"))
-  concat(content_tag(:span, :app_account.t + ":"))
+<%= tag.div("", class: classes[:heading]) do
+  [
+    icon("fa-solid", "user", class: "fa-lg"),
+    tag.span(:app_account.t + ":")
+  ].safe_join
 end %>
-<%= link_to(:app_login.t, new_account_login_path,
-            { class: classes[:indent],
-              id: "nav_login_link" }) %>
-<%= link_to(:app_create_account.t, account_signup_path,
-            { class: classes[:indent],
-              id: "nav_signup_link" }) %>
+<%= active_link_to(:app_login.t, new_account_login_path,
+                   class: classes[:indent], id: "nav_login_link") %>
+<%= active_link_to(:app_create_account.t, account_signup_path,
+                   class: classes[:indent], id: "nav_signup_link") %>

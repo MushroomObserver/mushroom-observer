@@ -13,10 +13,31 @@
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
 module LinkHelper
-  # Call link_to with query params added.
-  def link_with_query(name = nil, options = nil, html_options = nil, &block)
-    content = block ? capture(&block) : name
-    link_to(add_query_param(options), html_options) { content }
+  # Call link_to with query params added. Can take a block.
+  # TODO: splat **opts so behaves == link_to. means redoing a bunch of links!
+  def link_with_query(text = nil, path = nil, opts = nil, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+
+    link_to(add_query_param(link), opts) { content }
+  end
+
+  # https://stackoverflow.com/questions/18642001/add-an-active-class-to-all-active-links-in-rails
+  # make a link that has .active class if it's a link to the current page
+  def active_link_to(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+    opts[:class] = class_names(opts[:class], { active: current_page?(link) })
+
+    link_to(link, opts) { content }
+  end
+
+  def active_link_with_query(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+    opts[:class] = class_names(opts[:class], { active: current_page?(link) })
+
+    link_to(add_query_param(link), opts) { content }
   end
 
   # Take a query which can be coerced into a different model, and create a link
@@ -38,6 +59,7 @@ module LinkHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
+  # NOTE: button_to with block generates a button, not an input #quirksmode
   #
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
     content = block ? capture(&block) : name
@@ -64,6 +86,7 @@ module LinkHelper
   # post_button(name: herbarium.name.t,
   #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
   #             data: { confirm: :are_you_sure.t })
+  # NOTE: button_to with block generates a button, not an input #quirksmode
   def post_button(name:, path:, **args)
     html_options = {
       method: :post,
@@ -77,13 +100,13 @@ module LinkHelper
   # put_button(name: herbarium.name.t,
   #            path: herbarium_path(id: @herbarium.id),
   #            data: { confirm: :are_you_sure.t })
+  # NOTE: button_to with block generates a button, not an input #quirksmode
   def put_button(name:, path:, **args)
     html_options = {
       method: :put,
       class: ""
     }.merge(args)
     # Must pass a block in case the button has an icon or html.
-    # block generates a button not an input #quirksmode
     button_to(path, html_options) { name }
   end
 
@@ -91,6 +114,7 @@ module LinkHelper
   # patch_button(name: herbarium.name.t,
   #              path: herbarium_path(id: @herbarium.id),
   #              data: { confirm: :are_you_sure.t })
+  # NOTE: button_to with block generates a button, not an input #quirksmode
   def patch_button(name:, path:, **args)
     html_options = {
       method: :patch,

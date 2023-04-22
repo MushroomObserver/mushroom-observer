@@ -1,17 +1,14 @@
-<div class="<%= classes[:heading] %>">
-  <%= :app_species_list.t %>
-</div>
+<%= tag.div("#{:app_species_list.t}:", class: classes[:heading]) %>
 <% unless @user.nil? %>
-  <%= link_to(:app_your_lists.t, species_lists_path(by_user: @user.id),
-              { class: classes[:indent],
-                id: "nav_your_species_lists_link" } ) %>
+  <%= active_link_to(:app_your_lists.t, species_lists_path(by_user: @user.id),
+                     class: classes[:indent],
+                     id: "nav_your_species_lists_link") %>
 <% end%>
-<%= link_to(:app_create_list.t, new_species_list_name_lister_path,
-              { class: classes[:indent],
-                id: "nav_new_species_list_link" } ) %>
-<%= link_to(:app_sort_by_date_spl.t, species_lists_path,
-              { class: classes[:indent],
-                id: "nav_species_lists_by_date_link" }) %>
-<%= link_to(:app_sort_by_title.t, species_lists_path(by: "title"),
-              { class: classes[:indent],
-                id: "nav_species_lists_by_title_link" }) %>
+<%= active_link_to(:app_create_list.t, new_species_list_name_lister_path,
+                   class: classes[:indent], id: "nav_new_species_list_link" ) %>
+<%= active_link_to(:app_sort_by_date_spl.t, species_lists_path,
+                   class: classes[:indent],
+                   id: "nav_species_lists_by_date_link") %>
+<%= active_link_to(:app_sort_by_title.t, species_lists_path(by: "title"),
+                   class: classes[:indent],
+                   id: "nav_species_lists_by_title_link") %>

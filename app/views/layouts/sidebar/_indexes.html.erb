@@ -1,20 +1,27 @@
-<%= content_tag(:div, "#{:INDEXES.t}:",
-                class: classes[:heading]) %>
-<%= link_to(:GLOSSARY.t, glossary_terms_path,
-            { class: classes[:indent],
-              id: "nav_glossary_terms_link" }) %>
-<%= link_to(:HERBARIA.t, herbaria_path(flavor: :all),
-            { class: classes[:indent],
-              id: "nav_herbaria_link" }) %>
-<%= link_to(:LOCATIONS.t, locations_path,
-            { class: classes[:indent],
-              id: "nav_locations_link" }) %>
-<%= link_to(:NAMES.t, names_path(with_observations: true),
-            { class: classes[:indent],
-              id: "nav_name_observations_link" }) %>
-<%= link_to(:NEWS.t, articles_path,
-            { class: classes[:indent],
-              id: "nav_articles_link" }) %>
-<%= link_to(:PROJECTS.t, projects_path,
-            { class: classes[:indent],
-              id: "nav_projects_link" }) %>
+<%=
+tag.div("#{:INDEXES.t}:", class: classes[:heading])
+%>
+<%=
+active_link_to(:GLOSSARY.t, glossary_terms_path,
+               class: classes[:indent], id: "nav_glossary_terms_link")
+%>
+<%=
+active_link_to(:HERBARIA.t, herbaria_path(flavor: :all),
+               class: classes[:indent], id: "nav_herbaria_link")
+%>
+<%=
+active_link_to(:LOCATIONS.t, locations_path,
+               class: classes[:indent], id: "nav_locations_link")
+%>
+<%=
+active_link_to(:NAMES.t, names_path(with_observations: true),
+               class: classes[:indent], id: "nav_name_observations_link")
+%>
+<%=
+active_link_to(:NEWS.t, articles_path,
+               class: classes[:indent], id: "nav_articles_link")
+%>
+<%=
+active_link_to(:PROJECTS.t, projects_path,
+               class: classes[:indent], id: "nav_projects_link")
+%>
