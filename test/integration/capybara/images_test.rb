@@ -34,7 +34,7 @@ class ImagesTest < CapybaraIntegrationTestCase
     visit(edit_image_path(img.id))
     assert_selector("body.images__edit")
     visit(image_path(img.id))
-    click_button(:destroy_object.t(type: :image))
+    click_button(class: "destroy_image_link_#{img.id}")
     assert_flash_success
   end
 end
