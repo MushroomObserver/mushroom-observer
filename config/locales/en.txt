@@ -4273,6 +4273,7 @@
 
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"
+  sort_by_activity: "[:ACTIVITY]"
   sort_by_code: Code
   sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
