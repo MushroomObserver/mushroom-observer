@@ -86,6 +86,7 @@ module LinkHelper
     end
   end
 
+  # Not a <button> element, but an <a> because it's a GET
   def edit_button(target:, name: :EDIT.t, **args, &block)
     content = block ? capture(&block) : ""
     path = if target.is_a?(String)
@@ -103,7 +104,7 @@ module LinkHelper
       html_options[:class] += " edit_#{target.type_tag}_link_#{target.id}"
     end
 
-    button_to(path, html_options) do
+    link_to(path, html_options) do
       [content, icon("fa-regular", "pen-to-square", class: "fa-lg")].safe_join
     end
   end
