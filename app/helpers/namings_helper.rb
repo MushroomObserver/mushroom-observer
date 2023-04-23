@@ -104,13 +104,13 @@ module NamingsHelper
   # Makes a link to naming_vote_path for no-js.
   # The controller will render a modal if js request
   def pct_html(naming)
-    percent = naming.vote_percent.round.to_s + "%"
+    percent = "#{naming.vote_percent.round}%"
 
     link_with_query(h(percent),
                     naming_vote_path(naming_id: naming.id),
                     class: "vote-percent btn btn-link px-0",
                     onclick: "MOEvents.whirly();",
-                    remote: true )
+                    remote: true)
   end
 
   def num_votes_html(naming)

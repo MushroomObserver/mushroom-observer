@@ -58,7 +58,10 @@ module ContentHelper
   # ----------------------------------------------------------------------------
 
   def safe_spinner(text = "")
-    "#{text}<span class='spinner-right mx-2'></span>".html_safe
+    [
+      text,
+      tag.span("", class: "spinner-right mx-2")
+    ].safe_join
   end
 
   def content_tag_if(condition, name, content_or_options_with_block = nil,
