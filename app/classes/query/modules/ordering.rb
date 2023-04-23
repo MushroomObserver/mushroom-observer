@@ -156,10 +156,6 @@ module Query
       end
 
       def sort_by_user(model)
-        unless model.column_names.include?("user_id") || model == Herbarium
-          return
-        end
-
         add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
