@@ -169,7 +169,10 @@ module NamingsHelper
       if reason.notes.blank?
         reason.label.t
       else
-        "#{reason.label.l}: #{reason.notes.to_s.html_safe}".tl # may have links
+        [
+          "#{reason.label.l}: ",
+          reason.notes.to_s
+        ].safe_join.tl # may have links
       end
     end
 
