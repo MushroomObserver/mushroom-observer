@@ -5,16 +5,20 @@
 #
 #  Methods available to all templates in the application:
 #
+#  css_theme
+#  container_class
 #
 #  --- template navigation ----
 #
 #  title_tag_contents           # text to put in html header <title>
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
-#  create_link                  # convert links into list of tabs
+#  create_links                 # convert links into list of tabs
+#  draw_tab_set
 #
 #  --------------------------
 #
+#  indent                       # in-lined white-space element of n pixels
 #  add_header                   # add to html header from within view
 #  reload_with_args             # add args to url that got us to this page
 #  add_args_to_url              # change params of arbitrary url

@@ -13,10 +13,11 @@
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
 module LinkHelper
-  # Call link_to with query params added. Can take a block.
-  # TODO: splat **opts so behaves == link_to. means redoing a bunch of links!
-  def link_with_query(text = nil, path = nil, opts = nil, &block)
-    link = block ? text : path # because positional
+  # Call link_to with query params added.
+  # Should now take exactly the same args as link_to.
+  # You can pass a hash to `path`, but not separate args. Can take a block.
+  def link_with_query(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # first two positional, if block then path first
     content = block ? capture(&block) : text
 
     link_to(add_query_param(link), opts) { content }

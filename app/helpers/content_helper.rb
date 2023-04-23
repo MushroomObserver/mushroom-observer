@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-#  textilize_without_paragraph  # override Rails method of same name
-#  textilize                    # override Rails method of same name
 #  safe_br                      # <br/>,html_safe
 #  safe_empty
 #  safe_nbsp
+#  indent
+#  spacer
 #  escape_html                  # Return escaped HTML
-#  indent                       # in-lined white-space element of n pixels
+#  textilize_without_paragraph  # override Rails method of same name
+#  textilize                    # override Rails method of same name
 #  content_tag_if
 #  content_tag_unless
 #  add content_help             # help text viewable on mouse-over

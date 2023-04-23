@@ -166,7 +166,7 @@ module ObjectLinkHelper
     return result if result.match?("(#{:private.t})$")
 
     link_with_query(result, desc.show_link_args,
-                    { id: "show_description_link_#{desc.id}" })
+                    id: "show_description_link_#{desc.id}")
   end
 
   # Array of links to searches on external sites;
