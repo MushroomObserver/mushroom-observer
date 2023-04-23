@@ -62,7 +62,7 @@ module LinkHelper
   # NOTE: button_to with block generates a button, not an input #quirksmode
   #
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
-    content = block ? capture(&block) : name
+    content = block ? capture(&block) : ""
     path = if target.is_a?(String)
              target
            else
@@ -71,15 +71,40 @@ module LinkHelper
 
     html_options = {
       method: :delete,
-      class: "text-danger",
-      data: { confirm: :are_you_sure.t }
+      class: "text-danger", # usually also btn
+      data: { confirm: :are_you_sure.t,
+              toggle: "tooltip", placement: "top", title: name }
     }.merge(args)
 
     unless target.is_a?(String)
       html_options[:class] += " destroy_#{target.type_tag}_link_#{target.id}"
     end
 
-    button_to(path, html_options) { content }
+    button_to(path, html_options) do
+      [content, icon("fa-regular", "trash", class: "fa-lg")].safe_join
+    end
+  end
+
+  def edit_button(target:, name: :EDIT.t, **args, &block)
+    content = block ? capture(&block) : ""
+    path = if target.is_a?(String)
+             target
+           else
+             add_query_param(send("edit_#{target.type_tag}_path", target.id))
+           end
+
+    html_options = {
+      class: "", # usually also btn
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.merge(args)
+
+    unless target.is_a?(String)
+      html_options[:class] += " edit_#{target.type_tag}_link_#{target.id}"
+    end
+
+    button_to(path, html_options) do
+      [content, icon("fa-regular", "pen-to-square", class: "fa-lg")].safe_join
+    end
   end
 
   # POST to a path; used instead of a link because POST link requires js

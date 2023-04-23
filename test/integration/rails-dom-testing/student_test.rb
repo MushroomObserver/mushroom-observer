@@ -50,7 +50,7 @@ class StudentTest < IntegrationTestCase
       assert_select("a[href*=?]", new_name_description_path(name.id), 1)
       click_mo_link(href: name_description_path(marys_draft.id))
       assert_select("a[href*=?]", edit_name_description_path(marys_draft.id))
-      assert_select("form input[value='Destroy']")
+      assert_select("button[data-title='#{:show_description_destroy.t}']")
       assert_select("form[action*=?]", name_description_path(marys_draft.id))
       click_mo_link(href: edit_name_description_path(marys_draft.id))
       open_form("#name_description_form") do |form|
@@ -101,7 +101,7 @@ class StudentTest < IntegrationTestCase
       get(url)
       assert_select("a[href*=?]", edit_name_description_path(marys_draft.id))
       # Both of these test for a destroy button:
-      assert_select("form input[value='Destroy']")
+      assert_select("button[data-title='#{:show_description_destroy.t}']")
       assert_select("form[action*=?]", name_description_path(marys_draft.id))
 
       # Now give it some text to make sure it *can* (but doesn't) actually get
@@ -132,7 +132,7 @@ class StudentTest < IntegrationTestCase
       marys_draft = NameDescription.last
       click_mo_link(href: name_description_path(marys_draft.id))
       assert_select("a[href*=?]", edit_name_description_path(marys_draft.id), 0)
-      assert_select("form input[value='Destroy']", 0)
+      assert_select("button[data-title='#{:show_description_destroy.t}']", 0)
     end
   end
 

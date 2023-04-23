@@ -1,3 +1,7 @@
+.matrix-box {
+  @extend .mb-4;
+}
+
 .card-header {
   h6, .h6 {
     font-weight: $font-weight-bold;

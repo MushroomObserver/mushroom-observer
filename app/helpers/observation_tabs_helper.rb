@@ -84,69 +84,77 @@ module ObservationTabsHelper
     link_with_query(:MAP.t, map_locations_path)
   end
 
+  def obs_icon_size
+    "fa-lg"
+  end
+
+  def obs_icon_style
+    "btn-link"
+  end
+
   def obs_change_links(obs:)
     return [] unless check_permission(obs)
 
     icon_size = "fa-lg" # "fa-sm"
     btn_style = "btn-sm btn-link"
     links = []
-    links << link_to(
-      add_query_param(edit_observation_path(obs.id)),
-      class: "btn #{btn_style}",
-      data: { toggle: "tooltip", placement: "top",
-              title: :show_observation_edit_observation.t }
-    ) do
-      concat(tag.span(:EDIT.t, class: "mr-1"))
-      concat(icon("fa-regular", "pen-to-square", class: icon_size))
-    end
+    links << edit_button(
+      target: obs, name: :show_observation_edit_observation.t,
+      class: "btn #{btn_style}"
+    )
     links << destroy_button(
-      target: obs,
-      class: "btn #{btn_style} text-danger",
-      data: { toggle: "tooltip", placement: "top",
-              title: "#{:DESTROY.t} #{:OBSERVATION.t}" }
-    ) do
-      icon("fa-regular", "trash", class: icon_size)
-    end
+      target: obs, name: "#{:DESTROY.t} #{:OBSERVATION.t}",
+      class: "btn #{btn_style}"
+    )
   end
 
   # Using link_to in order to enable icons in these links
   def observation_image_edit_links(obs:)
-    icon_size = "fa-lg" # "fa-sm"
-    btn_style = "btn-link"
     links = []
-    links << link_to(
+    links << obs_add_images_link(obs)
+    links << obs_reuse_images_link(obs)
+    links << obs_remove_images_link(obs) if obs.images.length.positive?
+    links
+  end
+
+  # used by observation_image_edit_links
+  def obs_add_images_link(obs)
+    link_to(
       add_query_param(new_image_for_observation_path(obs.id)),
-      class: "btn #{btn_style}",
+      class: "btn #{obs_icon_style}",
       aria: { label: :show_observation_add_images.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_add_images.t }
     ) do
       # concat(tag.span(:ADD.t, class: "mr-1"))
-      concat(icon("fa-regular", "plus", class: icon_size))
+      concat(icon("fa-regular", "plus", class: obs_icon_size))
     end
-    links << link_to(
+  end
+
+  def obs_reuse_images_link(obs)
+    link_to(
       add_query_param(reuse_images_for_observation_path(obs.id)),
-      class: "btn #{btn_style}",
+      class: "btn #{obs_icon_style}",
       aria: { label: :show_observation_reuse_image.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_reuse_image.t }
     ) do
       # concat(tag.span(:image_reuse_reuse.t, class: "mr-1"))
-      concat(icon("fa-regular", "clone", class: icon_size))
+      concat(icon("fa-regular", "clone", class: obs_icon_size))
     end
-    if obs.images.length.positive?
-      links << link_to(
-        add_query_param(remove_images_from_observation_path(obs.id)),
-        class: "btn #{btn_style}",
-        aria: { label: :show_observation_remove_images.t },
-        data: { toggle: "tooltip", placement: "top",
-                title: :show_observation_remove_images.t }
-      ) do
-        # concat(tag.span(:image_remove_remove.t, class: "mr-1"))
-        concat(icon("fa-regular", "trash", class: icon_size))
-      end
+  end
+
+  def obs_remove_images_link(obs)
+    link_to(
+      add_query_param(remove_images_from_observation_path(obs.id)),
+      class: "btn #{obs_icon_style}",
+      aria: { label: :show_observation_remove_images.t },
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_observation_remove_images.t }
+    ) do
+      # concat(tag.span(:image_remove_remove.t, class: "mr-1"))
+      concat(icon("fa-regular", "trash", class: obs_icon_size))
     end
-    links
   end
 
   # INDEX
