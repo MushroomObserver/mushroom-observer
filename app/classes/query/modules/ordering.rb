@@ -224,7 +224,7 @@ module Query
         "external_links.url ASC" if model == ExternalLink
       end
 
-      def sort_by_user(model)
+      def sort_by_user(_model)
         add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
