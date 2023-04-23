@@ -121,7 +121,7 @@ class PostObservationTest < IntegrationTestCase
 
   def destroy_observation
     assert_template(SHOW_OBSERVATION_TEMPLATE)
-    binding.break
+    # binding.break
     click_mo_link(class: /destroy_observation_link/)
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_TEMPLATE)
