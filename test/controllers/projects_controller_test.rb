@@ -87,6 +87,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_displayed_title("Projects by Time Last Modified")
   end
 
+  def test_index_by_summary
+    login
+
+    get(:index, params: { by: "summary" })
+
+    assert_template("index")
+    assert_displayed_title("Projects by Summary")
+  end
+
   def test_index_pattern_search_multiple_hits
     pattern = "Project"
 
