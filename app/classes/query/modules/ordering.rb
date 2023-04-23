@@ -59,9 +59,7 @@ module Query
       end
 
       def sort_by_date(model)
-        if model.column_names.include?("date")
-          "#{model.table_name}.date DESC"
-        elsif model.column_names.include?("when")
+        if model.column_names.include?("when")
           "#{model.table_name}.when DESC"
         elsif model.column_names.include?("created_at")
           "#{model.table_name}.created_at DESC"
