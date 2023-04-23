@@ -133,7 +133,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: obs.id })
     assert_equal(1, ObservationView.where(observation: obs).count)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: :footer_never.l,
                                                times: :many_times.l(num: 0)))
     end
@@ -144,7 +144,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_equal(2, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
                                                times: :one_time.l))
       assert_includes(p.to_s, :footer_last_you_viewed.t(date: :footer_never.l))
@@ -156,7 +156,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_equal(2, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
                                                times: :many_times.l(num: 2)))
       assert_includes(p.to_s,

@@ -14,7 +14,7 @@ class ImagesTest < CapybaraIntegrationTestCase
     login!("rolf")
     visit(image_path(img.id))
     assert_selector("a[href*='#{edit_image_path(img.id)}']", count: 0)
-    assert_selector("input[value*='#{:DESTROY.t}']", count: 0)
+    assert_selector("button.destroy_image_link_#{img.id}", count: 0)
     visit(edit_image_path(img.id)) # nope
     assert_selector("body.images__show")
 
@@ -22,7 +22,7 @@ class ImagesTest < CapybaraIntegrationTestCase
     login!("mary")
     visit(image_path(img.id))
     assert_selector("a[href*='#{edit_image_path(img.id)}']", minimum: 1)
-    assert_selector("input[value*='#{:DESTROY.t}']", minimum: 1)
+    assert_selector("button.destroy_image_link_#{img.id}", minimum: 1)
     visit(edit_image_path(img.id))
     assert_selector("body.images__edit")
 
@@ -30,7 +30,7 @@ class ImagesTest < CapybaraIntegrationTestCase
     login!("dick")
     visit(image_path(img.id))
     assert_selector("a[href*='#{edit_image_path(img.id)}']", minimum: 1)
-    assert_selector("input[value*='#{:DESTROY.t}']", minimum: 1)
+    assert_selector("button.destroy_image_link_#{img.id}", minimum: 1)
     visit(edit_image_path(img.id))
     assert_selector("body.images__edit")
     visit(image_path(img.id))

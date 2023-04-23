@@ -5,13 +5,19 @@
 %>
 
 <% card_title = tag.div(class: "card-title") do
-  concat("#{:BY.t} #{user_link(@article.user)},")
-  concat(tag.small(@article.created_at.display_time))
+  [
+    "#{:BY.t} ",
+    user_link(@article.user),
+    ", ",
+    tag.small(@article.created_at.display_time)
+  ].safe_join
 end %>
 
 <%=
 card_block(footer: show_object_footer(@article)) do
-  concat(card_title)
-  concat(@article.body.tpl)
+  [
+    card_title,
+    @article.body.tpl
+  ].safe_join
 end
 %>

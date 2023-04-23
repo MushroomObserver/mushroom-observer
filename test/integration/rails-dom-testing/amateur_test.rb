@@ -123,7 +123,7 @@ class AmateurTest < IntegrationTestCase
 
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select(
-      "a[class*='edit_comment_'], input[class*='destroy_comment_']", false
+      "a[class*='edit_comment_'], button[class*='destroy_comment_']", false
     )
 
     click_mo_link(label: "Add Comment")
@@ -144,7 +144,7 @@ class AmateurTest < IntegrationTestCase
       form.change("comment", message)
       form.submit
     end
-    assert_template("observations/show")
+    assert_template("observations/show/_observation")
     assert_objs_equal(obs, assigns(:observation))
 
     com = Comment.last
@@ -156,10 +156,10 @@ class AmateurTest < IntegrationTestCase
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
     assert_select("a[class*='edit_comment_']", 1)
-    assert_select("input[class*='destroy_comment_']", 1)
+    assert_select("button[class*='destroy_comment_']", 1)
 
-    # Try changing it.
-    click_mo_link(label: /edit/i, href: /#{edit_comment_path(com.id)}/)
+    # Try changing it. label: /edit/i,
+    click_mo_link(href: /#{edit_comment_path(com.id)}/)
     assert_template("comments/edit")
     open_form("#comment_form") do |form|
       form.assert_value("summary", summary)
@@ -167,7 +167,7 @@ class AmateurTest < IntegrationTestCase
       form.change("comment", message2)
       form.submit
     end
-    assert_template("observations/show")
+    assert_template("observations/show/_observation")
     assert_objs_equal(obs, assigns(:observation))
 
     com.reload
@@ -184,13 +184,15 @@ class AmateurTest < IntegrationTestCase
                    url.value)
     end
 
-    # I grow weary of this comment.
-    click_mo_link(label: /destroy/i, href: /#{comment_path(com.id)}/)
-    assert_template("observations/show")
+    # I grow weary of this comment. label: /destroy/i,
+    click_mo_link(href: /#{comment_path(com.id)}/)
+    assert_template("observations/show/_observation")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
-    assert_select("a[class*='edit_comment_'], input[class*='destroy_comment_']",
-                  false)
+    assert_select(
+      "a[class*='edit_comment_'], button[class*='destroy_comment_']",
+      false
+    )
     assert_nil(Comment.safe_find(com.id))
   end
 
@@ -358,7 +360,7 @@ class AmateurTest < IntegrationTestCase
         form.submit("Login")
       end
       assert_select(
-        "a[class*='edit_naming_'], input[class*='destroy_naming_']",
+        "a[class*='edit_naming_'], button[class*='destroy_naming_']",
         false
       )
       click_mo_link(label: /propose.*name/i)
@@ -421,12 +423,12 @@ class AmateurTest < IntegrationTestCase
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now one: same for wide-screen as for mobile.)
       assert_select("a[href*='#{edit_naming_path(naming.id)}']", 1)
-      assert_select("input.destroy_naming_link_#{naming.id}", 1)
+      assert_select("button.destroy_naming_link_#{naming.id}", 1)
 
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click_mo_link(label: /edit/i, href: /#{edit_naming_path(naming.id)}/)
+      click_mo_link(href: /#{edit_naming_path(naming.id)}/) # label: /edit/i,
       assert_template("observations/namings/edit")
       open_form do |form|
         form.assert_value("naming_name", text_name)
@@ -453,7 +455,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click_mo_link(label: /edit/i, href: /#{edit_naming_path(naming.id)}/)
+      click_mo_link(href: /#{edit_naming_path(naming.id)}/) # label: /edit/i,
       assert_template("observations/namings/edit")
       open_form do |form|
         form.assert_value("naming_name", "#{text_name} #{author}")
@@ -469,12 +471,12 @@ class AmateurTest < IntegrationTestCase
     end
 
     def failed_delete(_obs)
-      click_mo_link(label: /destroy/i, href: /namings/)
+      click_mo_link(class: /destroy_naming_link/)
       assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      click_mo_link(label: /destroy/i, href: /#{naming_path(naming.id)}/)
+      click_mo_link(class: /destroy_naming_link_#{naming.id}/)
       assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
