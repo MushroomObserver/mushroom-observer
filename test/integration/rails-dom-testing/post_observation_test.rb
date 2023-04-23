@@ -28,10 +28,10 @@ class PostObservationTest < IntegrationTestCase
     open_edit_observation_form
     submit_observation_form_with_changes
     path = @request.fullpath
-    make_sure_observation_is_in_main_index(obs = Observation.last)
+    make_sure_observation_is_in_log_index(obs = Observation.last)
     get(path)
     destroy_observation
-    make_sure_observation_is_not_in_main_index(obs)
+    make_sure_observation_is_not_in_log_index(obs)
   end
 
   def open_create_observation_form
@@ -125,16 +125,16 @@ class PostObservationTest < IntegrationTestCase
     assert_template(OBSERVATION_INDEX_TEMPLATE)
   end
 
-  def make_sure_observation_is_in_main_index(obs)
+  def make_sure_observation_is_in_log_index(obs)
     open_session do
-      get("/")
+      get(activity_logs_path)
       assert_link_exists_beginning_with("/#{obs.id}?")
     end
   end
 
-  def make_sure_observation_is_not_in_main_index(obs)
+  def make_sure_observation_is_not_in_log_index(obs)
     open_session do
-      get("/")
+      get(activity_logs_path)
       assert_no_link_exists_beginning_with("/#{obs.id}?")
       assert_exists_deleted_item_log
     end
