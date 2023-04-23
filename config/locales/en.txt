@@ -1368,8 +1368,8 @@
   comment_show_summary: "[:Summary]"
   comment_show_comment: "[:Comment]"
   comment_show_show: "[:show_object]"
-  comment_show_edit: "[:EDIT]"
-  comment_show_destroy: "[:DESTROY]"
+  comment_show_edit: Edit comment
+  comment_show_destroy: Delete comment
 
   # emails/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]

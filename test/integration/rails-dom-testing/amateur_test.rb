@@ -159,7 +159,8 @@ class AmateurTest < IntegrationTestCase
     assert_select("button[class*='destroy_comment_']", 1)
 
     # Try changing it. label: /edit/i,
-    click_mo_link(href: /#{edit_comment_path(com.id)}/)
+    click_mo_link(class: "edit_comment_link_#{com.id}")
+    # For some reason this wants a new login. Huh?
     assert_template("comments/edit")
     open_form("#comment_form") do |form|
       form.assert_value("summary", summary)
@@ -185,7 +186,7 @@ class AmateurTest < IntegrationTestCase
     end
 
     # I grow weary of this comment. label: /destroy/i,
-    click_mo_link(href: /#{comment_path(com.id)}/)
+    click_mo_link(class: "destroy_comment_link_#{com.id}")
     assert_template("observations/show/_observation")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
