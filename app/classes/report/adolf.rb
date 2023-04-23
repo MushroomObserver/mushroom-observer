@@ -5,8 +5,7 @@ module Report
   class Adolf < CSV
     self.mime_type = "application/vnd.ms-excel"
 
-    # rubocop:disable Metrics/MethodLength
-    def labels
+    def labels # rubocop:disable Metrics/MethodLength
       [
         "Database Field",
         "Herbarium",
@@ -51,7 +50,7 @@ module Report
       ]
     end
 
-    def format_row(row)
+    def format_row(row) # rubocop:disable Metrics/MethodLength
       notes, orig_label = parse_orig_label(row)
       [
         nil,
