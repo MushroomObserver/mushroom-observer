@@ -7,7 +7,7 @@
   ]
   if check_permission(@sequence)
     tabs << link_with_query(:edit_object.t(type: :sequence),
-                            action: :edit, id: @sequence.id,
+                            @sequence.edit_link_args,
                             back: :show)
     tabs << destroy_button(
         name: :destroy_object.t(type: :sequence),

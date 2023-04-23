@@ -46,9 +46,9 @@ module VersionsHelper
     str = :show_name_previous_version.t + " " + previous_version.version.to_i
     initial_version_html(obj) +
       link_with_query(str,
-                      controller: "#{obj.show_controller}/versions",
-                      action: :show, id: obj.id,
-                      version: previous_version.version) +
+                      { controller: "#{obj.show_controller}/versions",
+                        action: :show, id: obj.id,
+                        version: previous_version.version }) +
       safe_br
   end
 

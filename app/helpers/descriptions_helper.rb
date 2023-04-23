@@ -36,16 +36,13 @@ module DescriptionsHelper
 
   def show_parent_link(description, type)
     link_with_query(:show_object.t(type: type),
-                    { controller: description.parent.show_controller,
-                      action: :show, id: description.parent_id })
+                    description.parent.show_link_args)
   end
 
   def edit_description_link(description)
     return unless writer?(description)
 
-    link_with_query(:show_description_edit.t,
-                    { controller: description.show_controller,
-                      action: :edit, id: description.id })
+    link_with_query(:show_description_edit.t, description.edit_link_args)
   end
 
   def destroy_description_link(description, admin)
