@@ -21,6 +21,5 @@
 
 <%= if target = @rss_log.target
   link_with_query(:show_object.t(type: target.type_tag),
-                  controller: target.show_controller,
-                  action: target.show_action, id: target.id)
+                  target.show_link_args)
 end %>
