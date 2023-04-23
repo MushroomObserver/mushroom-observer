@@ -47,7 +47,7 @@ class SequencesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_by_observation_id
+  def test_index_by_observation
     by = "observation"
 
     login
