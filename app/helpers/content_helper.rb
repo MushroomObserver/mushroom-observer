@@ -1,5 +1,17 @@
 # frozen_string_literal: true
 
+#  safe_br                      # <br/>,html_safe
+#  safe_empty
+#  safe_nbsp
+#  indent
+#  spacer
+#  escape_html                  # Return escaped HTML
+#  textilize_without_paragraph  # override Rails method of same name
+#  textilize                    # override Rails method of same name
+#  content_tag_if
+#  content_tag_unless
+#  add content_help             # help text viewable on mouse-over
+
 # helpers for content tags
 module ContentHelper
   def safe_empty
