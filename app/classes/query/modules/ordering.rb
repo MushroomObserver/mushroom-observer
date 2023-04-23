@@ -112,9 +112,7 @@ module Query
       end
 
       def sort_other_models_by_name(model)
-        if model.column_names.include?("sort_name")
-          "#{model.table_name}.sort_name ASC"
-        elsif model.column_names.include?("name")
+        if model.column_names.include?("name")
           "#{model.table_name}.name ASC"
         elsif model.column_names.include?("title")
           "#{model.table_name}.title ASC"
