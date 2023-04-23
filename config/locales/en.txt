@@ -4280,6 +4280,7 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
+  sort_by_accession_number: "[:herbarium_record_accession_number]"
   sort_by_activity: "[:ACTIVITY]"
   sort_by_code: Code
   sort_by_code_then_name: Code and Name
@@ -4294,6 +4295,7 @@
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID
   sort_by_image_quality: Image Quality
+  sort_by_initial_det: Initial Determination
   sort_by_last_login: Last Login
   sort_by_location: "[:LOCATION]"
   sort_by_login: "[:LOGIN_NAME]"
@@ -4301,6 +4303,7 @@
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
+  sort_by_owners_quality: "Owner's Quality"
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
