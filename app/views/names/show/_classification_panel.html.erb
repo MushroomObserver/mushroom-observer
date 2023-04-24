@@ -1,7 +1,7 @@
 <%
 header = [
-  tag.span(:show_name_classification.t),
-  tag.span do
+  tag.h6(:show_name_classification.t),
+  tag.div do
     link_to(:EDIT.t,
             add_query_param(edit_name_classification_path(@name.id)))
   end

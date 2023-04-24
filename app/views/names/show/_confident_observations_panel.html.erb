@@ -1,6 +1,6 @@
 <% if @first_four&.length&.positive? %>
   <%= card_block(
-    header: "#{:show_name_most_confident.t}:",
+    header: tag.h6("#{:show_name_most_confident.t}:"),
     id: "name_confident_observations"
   ) do %>
     <% @first_four.each do |obs| %>

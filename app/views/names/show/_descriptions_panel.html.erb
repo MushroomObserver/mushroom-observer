@@ -1,7 +1,7 @@
 <%
-header = [tag.span(:show_name_descriptions.t)]
+header = [tag.h6(:show_name_descriptions.t)]
 if @user
-  header << tag.span do
+  header << tag.div do
               link_to(:show_name_create_description.t,
                       add_query_param(new_name_description_path(@name.id)))
             end

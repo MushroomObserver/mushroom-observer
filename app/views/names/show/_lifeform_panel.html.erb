@@ -1,9 +1,11 @@
 <%
-header = [tag.span(:show_name_lifeform.t)]
+header = [tag.h6(:show_name_lifeform.t)]
 if @user
-  header << tag.span do
-              link_to(:EDIT.t,
-                      add_query_param(edit_name_lifeform_path(@name.id)))
+  header << tag.div do
+              edit_button(
+                name: :EDIT.t,
+                target: add_query_param(edit_name_lifeform_path(@name.id))
+              )
             end
 end
 header = header.safe_join

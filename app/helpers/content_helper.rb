@@ -128,7 +128,7 @@ module ContentHelper
 
   def card_block(**args, &block)
     header = if args[:header].present?
-               content_tag(:div, class: "card-header") do
+               content_tag(:div, class: "card-header row-justified") do
                  args[:header]
                end
              else

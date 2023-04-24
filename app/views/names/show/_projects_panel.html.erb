@@ -1,5 +1,5 @@
 <%= card_block(id: "name_projects",
-               header: :show_name_create_draft.t) do %>
+               header: tag.h6(:show_name_create_draft.t)) do %>
   <% @projects.each do |project| %>
     <%= link_to(project.title,
                 add_query_param(new_name_description_path(
