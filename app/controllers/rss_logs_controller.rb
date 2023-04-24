@@ -75,8 +75,6 @@ class RssLogsController < ApplicationController
     render_xml(layout: false)
   end
 
-  private
-
   # Show selected search results as a matrix with "index" template.
   def show_selected_rss_logs(query, args = {})
     store_query_in_session(query)
