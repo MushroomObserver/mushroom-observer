@@ -43,6 +43,13 @@ class RssLogsControllerTest < FunctionalTestCase
     params[:type] = RssLog.all_types
     post(:index, params: params)
     assert_template(:index)
+
+    # Be sure "all" loads some rss_logs!
+    get(:index, params: { type: "all" })
+    assert_template("shared/_matrix_box")
+
+    get(:index, params: { type: [] })
+    assert_template(:index)
   end
 
   def test_get_index_rss_log
@@ -81,6 +88,10 @@ class RssLogsControllerTest < FunctionalTestCase
     # Prove that user can change his default rss log type.
     get(:index, params: { type: :glossary_term, make_default: 1 })
     assert_equal("glossary_term", rolf.reload.default_rss_type)
+    # Test that this actually works
+    qr = QueryRecord.last.id.alphabetize
+    get(:index, params: { q: qr })
+    assert_template(:index)
   end
 
   # Prove that user content_filter works on rss_log
