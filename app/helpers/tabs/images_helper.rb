@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # html used in tabsets
-module ImageTabsHelper
+module Tabs::ImagesHelper
   # assemble HTML for "tabset" for show_image
   # actually a list of links and the interest icons
   def show_image_tabset(image:)

@@ -77,13 +77,18 @@ module FormsHelper
     args = auto_label_if_form_is_account_prefs(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-check-input"
+    args[:checked_value] ||= "1"
+    args[:unchecked_value] ||= "0"
 
     wrap_class = form_group_wrap_class(args, "form-check")
 
     content_tag(:div, class: wrap_class) do
       args[:form].label(args[:field], class: "form-check-label") do
-        concat(args[:form].check_box(args[:field], opts))
-        concat(args[:label])
+        [
+          args[:form].check_box(args[:field], opts,
+                                args[:checked_value], args[:unchecked_value]),
+          args[:label]
+        ].safe_join
       end
     end
   end
@@ -385,7 +390,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace
+      :optional, :required, :monospace, :checked_value, :unchecked_value
     ] + extras
 
     args.clone.except(*exceptions)

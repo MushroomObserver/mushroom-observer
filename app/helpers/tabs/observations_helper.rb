@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # html used in tabsets
-module ObservationTabsHelper
+module Tabs::ObservationsHelper
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
   def show_observation_tabset(obs:, user:)

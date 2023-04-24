@@ -116,7 +116,7 @@ module ApplicationHelper
 
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "layouts/content/tab_set", locals: { links: links })
+    render(partial: "application/content/tab_set", locals: { links: links })
   end
 
   # ----------------------------------------------------------------------------

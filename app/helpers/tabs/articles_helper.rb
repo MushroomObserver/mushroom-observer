@@ -6,7 +6,7 @@
 #                  write Articles only if user has write permission
 #   xx_title::     Title of x page; includes any markup
 #
-module ArticlesHelper
+module Tabs::ArticlesHelper
   def index_tabs_for_user(user)
     return [] unless permitted?(user)
 

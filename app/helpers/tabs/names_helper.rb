@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # html used in tabsets
-module NameTabsHelper
+module Tabs::NamesHelper
   # assemble HTML for "tabset" for show_name
   def show_name_tabset(name:, user:)
     tabs = [
