@@ -50,6 +50,11 @@ class RssLogsControllerTest < FunctionalTestCase
 
     get(:index, params: { type: [] })
     assert_template(:index)
+
+    Query.lookup_and_save(:RssLog, :all, type: "observation")
+    qr = QueryRecord.last.id.alphabetize
+    get(:index, params: { q: qr })
+    assert_template(:index)
   end
 
   def test_get_index_rss_log
