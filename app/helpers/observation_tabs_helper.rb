@@ -121,7 +121,7 @@ module ObservationTabsHelper
   def obs_add_images_link(obs)
     link_to(
       add_query_param(new_image_for_observation_path(obs.id)),
-      class: "btn #{obs_icon_style} observation-add-images-link",
+      class: "btn #{obs_icon_style} observation_add_images_link_#{obs.id}",
       aria: { label: :show_observation_add_images.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_add_images.t }
@@ -134,7 +134,7 @@ module ObservationTabsHelper
   def obs_reuse_images_link(obs)
     link_to(
       add_query_param(reuse_images_for_observation_path(obs.id)),
-      class: "btn #{obs_icon_style} observation-reuse-images-link",
+      class: "btn #{obs_icon_style} observation_reuse_images_link_#{obs.id}",
       aria: { label: :show_observation_reuse_image.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_reuse_image.t }
@@ -147,7 +147,7 @@ module ObservationTabsHelper
   def obs_remove_images_link(obs)
     link_to(
       add_query_param(remove_images_from_observation_path(obs.id)),
-      class: "btn #{obs_icon_style} observation-remove-images-link",
+      class: "btn #{obs_icon_style} observation_remove_images_link_#{obs.id}",
       aria: { label: :show_observation_remove_images.t },
       data: { toggle: "tooltip", placement: "top",
               title: :show_observation_remove_images.t }

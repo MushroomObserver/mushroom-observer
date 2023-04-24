@@ -39,6 +39,15 @@ module DescriptionsHelper
                     description.parent.show_link_args)
   end
 
+  # TODO: add icon
+  def create_description_link(object)
+    link_to(
+      :show_name_create_description.t,
+      { controller: "#{object.show_controller}/descriptions",
+        action: :new, id: object.id, q: get_query_param }
+    )
+  end
+
   def edit_description_link(description)
     return unless writer?(description)
 
@@ -61,7 +70,7 @@ module DescriptionsHelper
       { controller: description.show_controller,
         action: :new, id: description.parent_id,
         clone: description.id, q: get_query_param },
-      class: "clone_description_link",
+      class: "clone_description_link_#{description.id}",
       help: :show_description_clone_help.l,
       data: { toggle: "tooltip", placement: "top",
               title: :show_description_clone.t }
@@ -77,7 +86,7 @@ module DescriptionsHelper
     link_to(
       { controller: "#{description.show_controller}/merges",
         action: :new, id: description.id, q: get_query_param },
-      class: "merge_description_link",
+      class: "merge_description_link_#{description.id}",
       help: :show_description_merge_help.l,
       data: { toggle: "tooltip", placement: "top",
               title: :show_description_merge.t }
@@ -87,6 +96,7 @@ module DescriptionsHelper
     end
   end
 
+  # TODO: add icon
   def move_description_link(description, admin)
     return unless admin
 
@@ -94,7 +104,7 @@ module DescriptionsHelper
     link_to(
       { controller: "#{description.show_controller}/moves",
         action: :new, id: description.id, q: get_query_param },
-      class: "move_description_link",
+      class: "move_description_link_#{description.id}",
       help: :show_description_move_help.l(parent: parent_type),
       data: { toggle: "tooltip", placement: "top",
               title: :show_description_move.t }
@@ -104,17 +114,22 @@ module DescriptionsHelper
     end
   end
 
+  # TODO: add icon
   def adjust_permissions_link(description, type, admin)
     return unless admin && type == :name
 
     link_to(
-      :show_description_adjust_permissions.t,
       { controller: "#{description.show_controller}/permissions",
         action: :edit, id: description.id, q: get_query_param },
+      class: "adjust_description_permissions_link_#{description.id}",
       help: :show_description_adjust_permissions_help.l
-    )
+    ) do
+      # concat(:show_description_adjust_permissions.t)
+      icon("fa-regular", "adjust", class: "fa-lg")
+    end
   end
 
+  # TODO: add icon
   def make_default_link(description)
     return unless description.public && User.current &&
                   (description.parent.description_id != description.id)
@@ -123,20 +138,28 @@ module DescriptionsHelper
       name: :show_description_make_default.t,
       path: { controller: "#{description.show_controller}/defaults",
               action: :update, id: description.id, q: get_query_param },
+      class: "make_description_default_link_#{description.id}",
       help: :show_description_make_default_help.l
-    )
+    ) do
+      # concat(:show_description_adjust_permissions.t)
+      icon("fa-regular", "default", class: "fa-lg")
+    end
   end
 
+  # TODO: add icon
   def project_link(description)
     return unless (description.source_type == :project) &&
                   (project = description.source_object)
 
     link_to(
-      :show_object.t(type: :project),
       add_query_param(project.show_link_args)
-    )
+    ) do
+      # concat(:show_object.t(type: :project))
+      icon("fa-regular", "project", class: "fa-lg")
+    end
   end
 
+  # TODO: add icon
   def publish_draft_link(description, type, admin)
     return unless admin && (type == :name) &&
                   (description.source_type != :public)
@@ -146,6 +169,7 @@ module DescriptionsHelper
       path: { controller: "#{description.show_controller}/publish",
               action: :update, id: description.id,
               q: get_query_param },
+      class: "publish_description_draft_link_#{description.id}",
       help: :show_description_publish_help.l
     )
   end
@@ -158,24 +182,12 @@ module DescriptionsHelper
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
   def show_embedded_description_title(desc)
-    parent_type = desc.parent.type_tag
     title = description_title(desc)
-    links = []
-    if writer?(desc)
-      links << link_to(
-        :EDIT.t,
-        { controller: "/#{parent_type}s/descriptions",
-          action: :edit, id: desc.id, q: get_query_param }
-      )
-    end
-    if is_admin?(desc)
-      links << destroy_button(
-        name: :show_description_destroy.t,
-        target: desc,
-        q: get_query_param
-      )
-    end
-    content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
+    links = [
+      edit_description_link(desc), # checks for writer
+      destroy_description_link(desc) # checks for admin
+    ].safe_join(" | ")
+    content_tag(:p, tag.span(title) + links)
   end
 
   # Show list of name/location descriptions.
@@ -217,22 +229,11 @@ module DescriptionsHelper
       writer = writer?(desc)
       admin  = is_admin?(desc)
       if writer || admin
-        links = []
-        if writer
-          links << link_to(
-            :EDIT.t,
-            { controller: desc.show_controller, action: :edit,
-              id: desc.id, q: get_query_param }
-          )
-        end
-        if admin
-          links << destroy_button(
-            name: :show_description_destroy.t,
-            target: desc,
-            q: get_query_param
-          )
-        end
-        item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
+        links = [
+          edit_description_link(desc), # checks for writer
+          destroy_description_link(desc) # checks for admin
+        ].safe_join(" ")
+        item += indent + links if links.any?
       end
       item
     end
@@ -240,9 +241,10 @@ module DescriptionsHelper
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, { controller: desc.show_controller,
-                                          action: :new,
-                                          id: obj.id })
+      link = link_with_query(
+        :CREATE.t,
+        { controller: desc.show_controller, action: :new, id: obj.id }
+      )
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
@@ -273,11 +275,7 @@ module DescriptionsHelper
 
     # Show existing drafts, with link to create new one.
     head = content_tag(:b, :show_name_descriptions.t) + ": "
-    head += link_to(
-      :show_name_create_description.t,
-      { controller: "#{object.show_controller}/descriptions",
-        action: :new, id: object.id, q: get_query_param }
-    )
+    head += create_description_link(object)
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object).map { |link| indent + link }
@@ -308,26 +306,6 @@ module DescriptionsHelper
     html2 = list.safe_join(safe_br)
     html += content_tag(:p, html2)
     html
-  end
-
-  # Create a div for notes in Description subclasses.
-  #
-  #   <%= notes_panel(html) %>
-  #
-  #   <% notes_panel() do %>
-  #     Render stuff in here.  Note lack of "=" in line above.
-  #   <% end %>
-  #
-  def notes_panel(msg = nil, &block)
-    msg = capture(&block) if block
-    result = content_tag(:div, msg, class: "card-body")
-    wrapper = content_tag(:div, result,
-                          class: "card bg-light dotted-border")
-    if block
-      concat(wrapper)
-    else
-      wrapper
-    end
   end
 
   # Create a descriptive title for a Description.  Indicates the source and
