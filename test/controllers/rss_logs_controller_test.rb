@@ -43,6 +43,10 @@ class RssLogsControllerTest < FunctionalTestCase
     params[:type] = RssLog.all_types
     post(:index, params: params)
     assert_template(:index)
+
+    # Be sure "all" loads some rss_logs!
+    get(:index, params: { type: "all" })
+    assert_template("shared/_matrix_box")
   end
 
   def test_get_index_rss_log
@@ -50,18 +54,18 @@ class RssLogsControllerTest < FunctionalTestCase
     expect = rss_logs(:glossary_term_rss_log)
     login
     get(:index, params: { type: :glossary_term })
-    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
     assert_no_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name}/,
-      css_select(".log-what").text
+      css_select(".rss-what").text
     )
 
     # Without params[:type], it should display all logs
     get(:index)
-    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
     assert_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name.text_name}/,
-      css_select(".log-what").text
+      css_select(".rss-what").text
     )
 
     comments_for_path = comments_path(for_user: User.current_id)

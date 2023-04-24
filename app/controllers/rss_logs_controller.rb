@@ -19,16 +19,8 @@ class RssLogsController < ApplicationController
     # POST requests with param `type` potentially show an array of types
     # of objects. The array comes from the checkboxes in tabset
     if params[:type].present?
-      if params[:type].is_a?(ActionController::Parameters)
-        types = params[:type].values
-        types = RssLog.all_types.intersection(types)
-        types = "all" if types.length == RssLog.all_types.length
-        types = "none" if types.empty?
-        types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-      elsif params[:type].is_a?(String)
-        types = params[:type]
-      end
-      query = find_or_create_query(:RssLog, type: types)
+      query = find_or_create_query(:RssLog,
+                                   type: types_query_string_from_params)
     # Previously saved query, incorporating type and other params
     elsif params[:q].present?
       query = find_query(:RssLog)
@@ -41,6 +33,24 @@ class RssLogsController < ApplicationController
     end
     show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
   end
+
+  private
+
+  def types_query_string_from_params
+    types = ""
+    if params[:type].is_a?(ActionController::Parameters)
+      types = params[:type].values
+      types = RssLog.all_types.intersection(types)
+      types = "all" if types.length == RssLog.all_types.length
+      types = "none" if types.empty?
+      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+    elsif params[:type].is_a?(String)
+      types = params[:type]
+    end
+    types
+  end
+
+  public
 
   # Show a single RssLog.
   def show
