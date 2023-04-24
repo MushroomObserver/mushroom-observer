@@ -43,6 +43,10 @@ class RssLogsControllerTest < FunctionalTestCase
     params[:type] = RssLog.all_types
     post(:index, params: params)
     assert_template(:index)
+
+    # Be sure "all" loads some rss_logs!
+    get(:index, params: { type: "all" })
+    assert_template("shared/_matrix_box")
   end
 
   def test_get_index_rss_log
