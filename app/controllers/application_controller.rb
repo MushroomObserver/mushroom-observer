@@ -1595,7 +1595,7 @@ class ApplicationController < ActionController::Base
 
   def link_or_grayed_text(link_all, this_by, label, query, by)
     if !link_all && (by.to_s == this_by)
-      label.t
+      [label.t, nil]
     else
       sort_link(label.t, query, by)
     end
