@@ -51,6 +51,22 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
                  "Wrong page")
   end
 
+  # Prevent reversion of the bug that was fixed in PR #1479
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1479
+  def test_edit_observation_with_query
+    user = users(:dick)
+    obs = observations(:collected_at_obs)
+    assert_equal(user, obs.user,
+                 "Test needs an Observation fixture owned by user")
+    q_id = "123abc" # Can be anything, but is need to expose the bug
+
+    login(user)
+    # Throws an error pre-PR #1479
+    visit(edit_observation_path(obs.id, params: { q: q_id }))
+
+    assert_current_path(edit_observation_path(obs.id, params: { q: q_id }))
+  end
+
   # Prove that unchecking a Project as part of editing an Observation
   # removes the Observation from the Project.
   def test_observation_edit_uncheck_project
