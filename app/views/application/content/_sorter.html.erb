@@ -1,0 +1,22 @@
+<%# index sorter. sorts from app_controller#show_index_count_results %>
+
+<div class="dropdown" id="sorts">
+  <button
+    class="btn btn-outline-secondary font-weight-bold dropdown-toggle"
+    type="button"
+    data-toggle="dropdown"
+    aria-expanded="false">
+    <%= :sort_by_header.t %>
+  </button>
+  <%= tag.div(class: "dropdown-menu") do %>
+    <%# these need aria attributes %>
+    <% sorts.each do |title, action| %>
+      <%= if action.nil?
+        link_to(title, "#", class: "dropdown-item active",
+                                      disabled: true)
+      else
+        link_with_query(title, action, class: "dropdown-item")
+      end %>
+    <% end %>
+  <% end %>
+</div>

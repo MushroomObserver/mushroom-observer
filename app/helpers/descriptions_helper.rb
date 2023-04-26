@@ -17,10 +17,11 @@ module DescriptionsHelper
   def show_description_tabset(description:, pager: false)
     type = description.parent.type_tag
     admin = is_admin?(description)
+    writer = writer?(description)
     # assemble HTML for "tabset" for show_{type}_description
     tabs = [
       show_parent_link(description, type),
-      edit_description_link(description),
+      edit_description_link(description, writer),
       destroy_description_link(description, admin),
       clone_description_link(description),
       merge_description_link(description, admin),
@@ -48,8 +49,8 @@ module DescriptionsHelper
     )
   end
 
-  def edit_description_link(description)
-    return unless writer?(description)
+  def edit_description_link(description, writer)
+    return unless writer
 
     edit_button(
       target: description, name: :show_description_edit.t
@@ -183,10 +184,12 @@ module DescriptionsHelper
   #
   def show_embedded_description_title(desc)
     title = description_title(desc)
+    writer = writer?(desc)
+    admin = is_admin?(desc)
     links = [
-      edit_description_link(desc), # checks for writer
-      destroy_description_link(desc) # checks for admin
-    ].safe_join(" | ")
+      edit_description_link(desc, writer), # checks for writer
+      destroy_description_link(desc, admin) # checks for admin
+    ].compact.safe_join(" | ")
     content_tag(:p, tag.span(title) + links)
   end
 
@@ -230,10 +233,10 @@ module DescriptionsHelper
       admin  = is_admin?(desc)
       if writer || admin
         links = [
-          edit_description_link(desc), # checks for writer
-          destroy_description_link(desc) # checks for admin
+          edit_description_link(desc, writer), # checks for writer
+          destroy_description_link(desc, admin) # checks for admin
         ].safe_join(" ")
-        item += indent + links if links.any?
+        item += indent + links if links.present?
       end
       item
     end

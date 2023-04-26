@@ -3,17 +3,12 @@
 # Custom View Helpers for Rss_log View (Activity Feed)
 #
 module Tabs::RssLogsHelper
-  # All types of RssLogs. Helpers have no scope, removing
-  # def types
-  #   RssLog.all_types(&:to_s)
-  # end
-
   # The "Everything" tab in Activity Feed tabset
   def log_tab_for_everything(types)
     label = :rss_all.t
     link = activity_logs_path(params: { type: :all })
     help = { title: :rss_all_help.t, class: "filter-only" }
-    @types == ["all"] ? label : link_with_query(label, link, **help)
+    types == ["all"] ? label : link_with_query(label, link, **help)
   end
 
   # A single tab in Activity Feed tabset

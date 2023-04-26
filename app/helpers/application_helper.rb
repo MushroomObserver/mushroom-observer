@@ -108,6 +108,7 @@ module ApplicationHelper
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.
+  # TODO: Convert into a dropdown instead
   def create_links(links)
     return [] unless links
 
@@ -116,7 +117,19 @@ module ApplicationHelper
 
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "application/content/tab_set", locals: { links: links })
+    render(partial: "application/content/tab_set",
+           locals: { links: links })
+  end
+
+  def dropdown_tab_set(title, links)
+    render(partial: "application/content/dropdown_tab_set",
+           locals: { title: title, links: links })
+  end
+
+  def index_sorter(sorts)
+    return "" unless sorts
+
+    render(partial: "application/content/sorter", locals: { sorts: sorts })
   end
 
   # ----------------------------------------------------------------------------
