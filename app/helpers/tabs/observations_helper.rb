@@ -221,7 +221,8 @@ module Tabs
     # NOTE: coerced_query_link returns an array [text, path]
     # This refactors coerced query links into hashes for iteration
     def coerced_query_link_hash(query, model)
-      array = coerced_query_link(query, model)
+      return {} unless (array = coerced_query_link(query, model))
+
       klass = "#{model.to_s.downcase.pluralize}_for_observation_link"
       { name: array[0], link: array[1], class: klass }
     end
