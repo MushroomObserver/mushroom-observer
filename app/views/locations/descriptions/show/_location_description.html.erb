@@ -10,7 +10,7 @@ LocationDescription.all_note_fields.each do |f|
   if value != ""
     any = true %>
     <%=
-    card_block(header: tag.h6("form_locations_#{field}".to_sym.t + ":")) do
+    card_block(header: tag.h6("form_locations_#{f}".to_sym.t + ":")) do
       value.tpl
     end %>
   <% end %>

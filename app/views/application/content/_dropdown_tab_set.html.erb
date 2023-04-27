@@ -1,0 +1,21 @@
+<%
+# TODO: Make it so if there's only one link, it's a button, not a dropdown.
+title ||= "Links"
+links ||= []
+%>
+
+<div class="dropdown">
+  <button
+    class="btn btn-outline-secondary font-weight-bold dropdown-toggle"
+    type="button"
+    data-toggle="dropdown"
+    aria-expanded="false">
+    <%= title %>
+  </button>
+  <div class="dropdown-menu">
+    <%# these need aria attributes %>
+    <% links.each do |title, action| %>
+      <%= link_to(title, action, class: "dropdown-item") %>
+    <% end %>
+  </div>
+</div>

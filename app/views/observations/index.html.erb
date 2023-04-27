@@ -1,5 +1,9 @@
 <%
-  @tabsets = index_observation_tabset(query: @query) if @objects.any?
+  # New style dropdown tabsets take tabs as arrays of [title, link],
+  #   not fully-formed `link_to` or `link_with_query`
+  tab_title = "Show As:"
+  tabs = index_observation_tabs(query: @query)
+  @tabsets = { right: dropdown_tab_set(tab_title, tabs) } if @objects.any?
 
   @container = :full
 
