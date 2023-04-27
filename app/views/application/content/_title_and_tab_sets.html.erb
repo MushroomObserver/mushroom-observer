@@ -41,21 +41,5 @@
                     class: "col-12 d-print-none") %>
 
   <!-- Sorter -->
-  <% if @sorts %>
-    <div class="col-12 d-print-none">
-      <div class="pt-3">
-        <%= content_tag(:span, :sort_by_header.t) %>
-        <div id="sorts" class="btn-group btn-group-sm" role="group">
-          <% @sorts.each do |title, action| %>
-            <%= if action.nil?
-                  link_with_query(title, {}, class: "btn btn-light active",
-                                              disabled: true)
-                else
-                  link_with_query(title, action, class: "btn btn-light")
-                end %>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  <% end %>
+  <%= index_sorter(@sorts) %>
 </div>

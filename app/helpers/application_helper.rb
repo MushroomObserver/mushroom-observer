@@ -119,6 +119,12 @@ module ApplicationHelper
     render(partial: "application/content/tab_set", locals: { links: links })
   end
 
+  def index_sorter(sorts)
+    return "" unless sorts
+
+    render(partial: "layouts/content/sorter", locals: { sorts: sorts })
+  end
+
   # ----------------------------------------------------------------------------
 
   # Add something to the header from within view.  This can be called as many
