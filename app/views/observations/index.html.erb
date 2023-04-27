@@ -1,9 +1,9 @@
 <%
-  # New style dropdown tabsets take tabs as arrays of [title, link],
-  #   not fully-formed `link_to` or `link_with_query`
-  tab_title = "Show As:"
-  tabs = index_observation_tabs(query: @query)
-  @tabsets = { right: dropdown_tab_set(tab_title, tabs) } if @objects.any?
+  if @objects.any?
+    tab_title = "Show As:" # TODO: make new translation string
+    tabs = index_observation_tabs(query: @query)
+    @tabsets = { right: dropdown_tab_set(title: tab_title, links: tabs) }
+  end
 
   @container = :full
 

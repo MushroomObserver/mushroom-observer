@@ -121,15 +121,10 @@ module ApplicationHelper
            locals: { links: links })
   end
 
-  def dropdown_tab_set(title, links)
+  # NOTE: refactored tabset requires both title and links
+  def dropdown_tab_set(links:, title: :LINKS.t)
     render(partial: "application/content/dropdown_tab_set",
            locals: { title: title, links: links })
-  end
-
-  def index_sorter(sorts)
-    return "" unless sorts
-
-    render(partial: "application/content/sorter", locals: { sorts: sorts })
   end
 
   def index_sorter(sorts)
