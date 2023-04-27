@@ -121,10 +121,16 @@ module ApplicationHelper
            locals: { links: links })
   end
 
-  # NOTE: refactored tabset requires both title and links
-  def dropdown_tab_set(links:, title: :LINKS.t)
+  # New style dropdown tabsets take array of tabs as hash of args,
+  #   { name:, link:, class:, id:, etc. }
+  #   not fully-formed `link_to` or `link_with_query`
+  def dropdown_tab_set(tabs:, title: :LINKS.t)
     render(partial: "application/content/dropdown_tab_set",
-           locals: { title: title, links: links })
+           locals: { title: title, tabs: tabs })
+  end
+
+  def dropdown_link_options(args)
+    args.except(:name, :link)
   end
 
   def index_sorter(sorts)
