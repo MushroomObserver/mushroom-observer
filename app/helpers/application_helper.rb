@@ -130,7 +130,7 @@ module ApplicationHelper
   end
 
   def dropdown_link_options(args)
-    args.except(:name, :link)
+    args.except(:name, :link, :class)
   end
 
   def index_sorter(sorts)

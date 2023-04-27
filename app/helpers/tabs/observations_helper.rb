@@ -184,49 +184,62 @@ module Tabs
       return unless query.flavor == :at_where
 
       [
-        [
-          :list_observations_location_define.l,
-          new_location_path(where: query.params[:user_where])
-        ],
-        [
-          :list_observations_location_merge.l,
-          location_merges_form_path(where: query.params[:user_where])
-        ],
-        [
-          :list_observations_location_all.l,
-          locations_path
-        ]
+        {
+          name: :list_observations_location_define.l,
+          link: new_location_path(where: query.params[:user_where]),
+          class: "define_new_location_link"
+        },
+        {
+          name: :list_observations_location_merge.l,
+          link: location_merges_form_path(where: query.params[:user_where]),
+          class: "merge_locations_link"
+        },
+        {
+          name: :list_observations_location_all.l,
+          link: locations_path,
+          class: "index_locations_link"
+        }
       ]
     end
 
     def index_map_tab(query)
+      {
+        name: :show_object.t(type: :map),
+        link: map_observations_path(q: get_query_param(query)),
+        class: "map_locations_link"
+      }
+    end
+
+    def coerced_query_tabs(query)
       [
-        :show_object.t(type: :map),
-        map_observations_path(q: get_query_param(query))
+        coerced_query_link_hash(query, Location),
+        coerced_query_link_hash(query, Name),
+        coerced_query_link_hash(query, Image)
       ]
     end
 
     # NOTE: coerced_query_link returns an array [text, path]
-    def coerced_query_tabs(query)
-      [
-        coerced_query_link(query, Location),
-        coerced_query_link(query, Name),
-        coerced_query_link(query, Image)
-      ]
+    # This refactors coerced query links into hashes for iteration
+    def coerced_query_link_hash(query, model)
+      array = coerced_query_link(query, model)
+      klass = "#{model.to_s.downcase.pluralize}_for_observation_link"
+      { name: array[0], link: array[1], class: klass }
     end
 
     def add_to_list_tab(query)
-      [
-        :list_observations_add_to_list.t,
-        add_query_param(edit_species_list_observations_path, query)
-      ]
+      {
+        name: :list_observations_add_to_list.t,
+        link: add_query_param(edit_species_list_observations_path, query),
+        class: "add_to_list_link"
+      }
     end
 
     def download_as_csv_tab(query)
-      [
-        :list_observations_download_as_csv.t,
-        add_query_param(new_observations_download_path, query)
-      ]
+      {
+        name: :list_observations_download_as_csv.t,
+        link: add_query_param(new_observations_download_path, query),
+        class: "download_observations_link"
+      }
     end
   end
 end

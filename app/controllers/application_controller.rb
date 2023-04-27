@@ -1595,16 +1595,18 @@ class ApplicationController < ActionController::Base
 
   def link_or_grayed_text(link_all, this_by, label, query, by)
     if !link_all && (by.to_s == this_by)
-      [label.t, nil]
+      { name: label.t, link: nil }
     else
       sort_link(label.t, query, by)
     end
   end
 
   def sort_link(text, query, by)
-    [text, { controller: query.model.show_controller,
-             action: query.model.index_action,
-             by: by }.merge(query_params)]
+    { name: text,
+      link: { controller: query.model.show_controller,
+              action: query.model.index_action,
+              by: by }.merge(query_params),
+      class: "sort_by_#{by}_link" }
   end
 
   def reverse_by(query, this_by)

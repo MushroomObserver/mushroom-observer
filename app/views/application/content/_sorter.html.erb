@@ -1,22 +1,24 @@
-<%# index sorter. sorts from app_controller#show_index_count_results %>
+<%# index sorter. sorts from ApplicationController#sort_link %>
+<%# TODO: these need aria attributes %>
 
-<div class="dropdown" id="sorts">
-  <button
-    class="btn btn-outline-secondary font-weight-bold dropdown-toggle"
-    type="button"
-    data-toggle="dropdown"
-    aria-expanded="false">
-    <%= :sort_by_header.t %>
-  </button>
-  <%= tag.div(class: "dropdown-menu") do %>
-    <%# these need aria attributes %>
-    <% sorts.each do |title, action| %>
-      <%= if action.nil?
-        link_to(title, "#", class: "dropdown-item active",
-                                      disabled: true)
+<%= tag.div(class: "dropdown", id: "sorts") do %>
+  <%= tag.button(
+    class: "btn btn-outline-secondary font-weight-bold dropdown-toggle",
+    type: "button",
+    data: { toggle: "dropdown" },
+    aria: { expanded: "false" }
+  ) { :sort_by_header.t } %>
+  <%= tag.div(class: "dropdown-menu dropdown-menu-right") do %>
+    <% sorts.each do |sort|
+      opts = dropdown_link_options(sort) %>
+      <%= if sort[:link].nil?
+        link_to(sort[:name], "#",
+                class: class_names("dropdown-item active", sort[:class]),
+                disabled: true, **opts)
       else
-        link_with_query(title, action, class: "dropdown-item")
+        link_with_query(sort[:name], sort[:link],
+                        class: class_names("dropdown-item", sort[:class]))
       end %>
     <% end %>
   <% end %>
-</div>
+<% end %>

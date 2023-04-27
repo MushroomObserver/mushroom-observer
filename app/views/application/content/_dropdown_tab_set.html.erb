@@ -1,32 +1,38 @@
 <%# The new one. Called from application_helper#dropdown_tab_set %>
 <%# TODO: these need aria nav attributes %>
 <%# TODO: Make it so if there's only one link, it's a button, not a dropdown. %>
-<%
+<% # Requires two locals: title and tabs
 title ||= "Links"
 tabs ||= []
 
 if tabs&.count == 1
 
   tab = tabs[0]
-  opts = dropdown_link_opts(tab) %>
+  opts = dropdown_link_options(tab) %>
 
-  <%= link_to(tab[:link], class: "btn btn-outline-secondary", **opts) do
+  <%= link_to(tab[:link],
+              class: class_names("btn btn-outline-secondary", tab[:class]),
+              **opts) do
     tab[:name]
   end %>
 
 <% elsif tabs %>
 
-  <%= tag.div(class: "dropdown") do %>
+  <%= tag.div(class: "dropdown", id: "dropdown-tabs") do %>
     <%= tag.button(
       class: "btn btn-outline-secondary font-weight-bold dropdown-toggle",
       type: "button",
       data: { toggle: "dropdown" },
       aria: { expanded: "false" }
-    ) { button } %>
-    <%= tag.div(class: "dropdown-menu") do %>
-      <%# Change to accept link hash. %>
-      <% tabs.each do |title, action| %>
-        <%= link_to(title, action, class: "dropdown-item") %>
+    ) { title } %>
+    <%= tag.div(class: "dropdown-menu dropdown-menu-right") do %>
+      <%# Changed to accept tab hash. %>
+      <% tabs.each do |tab|
+        opts = dropdown_link_options(tab) %>
+        <%= link_to(tab[:link],
+                    class: class_names("dropdown-item", tab[:class]), **opts) do
+          tab[:name]
+        end %>
       <% end %>
     <% end %>
   <% end %>
