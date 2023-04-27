@@ -122,7 +122,7 @@ module ApplicationHelper
   def index_sorter(sorts)
     return "" unless sorts
 
-    render(partial: "layouts/content/sorter", locals: { sorts: sorts })
+    render(partial: "application/content/sorter", locals: { sorts: sorts })
   end
 
   # ----------------------------------------------------------------------------
