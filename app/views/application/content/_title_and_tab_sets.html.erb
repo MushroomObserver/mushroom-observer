@@ -22,15 +22,15 @@
     <%= content_tag(:h1, @title, class: "h3", id: "title") -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
-                                      class: "context-help"),
-                          :rss_filtered_mouseover.t)
+                                       class: "context-help"),
+                                       :rss_filtered_mouseover.t)
         end -%>
     <%= content_tag_if(@owner_naming, :p, @owner_naming,
                        class: "small", id: "owner_naming") %>
   </div>
 
   <!-- Sorts and Tabsets -->
-  <%= if @tabsets[:right] # defined on page or in helper
+  <%= if @tabsets[:right] || @sorts # defined on page or in helper
     tag.div(id: "right_tabs", class: "d-flex flex-row d-print-none") do
       [
         index_sorter(@sorts),

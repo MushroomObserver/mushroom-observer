@@ -133,6 +133,9 @@ module ApplicationHelper
     args.except(:name, :link, :class)
   end
 
+  # TODO: Rearrange sorts so active sort is removed from array
+  # and assigned as toggle text. Then we can have
+  #    Sort by: [ Active sort ^ ]
   def index_sorter(sorts)
     return "" unless sorts
 
