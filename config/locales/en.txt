@@ -2151,6 +2151,7 @@
   show_observation_no_clear_preference: no clear preference
   show_observation_details: Details
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
+  show_observation_destroy_observation: "[:destroy_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
   show_observation_alternative_names: Alternative Name(s)

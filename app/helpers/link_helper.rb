@@ -72,10 +72,10 @@ module LinkHelper
 
     html_options = {
       method: :delete,
-      class: "text-danger", # usually also btn
+      class: class_names("text-danger", args[:class]), # usually also btn
       data: { confirm: :are_you_sure.t,
               toggle: "tooltip", placement: "top", title: name }
-    }.merge(args)
+    }.merge(args.except(:class))
 
     unless target.is_a?(String)
       html_options[:class] += " destroy_#{target.type_tag}_link_#{target.id}"

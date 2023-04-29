@@ -120,9 +120,12 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def destroy_observation
+    login!(katrina)
+    new_obs = Observation.last
     assert_template(SHOW_OBSERVATION_TEMPLATE)
     # binding.break
-    click_mo_link(class: /destroy_observation_link/)
+    click_mo_link(class: "destroy_observation_link_#{new_obs.id}")
+    # DEBUG: this is taking katrina to a login page. what's up?
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_TEMPLATE)
   end

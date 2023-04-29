@@ -104,7 +104,7 @@ module Tabs
         class: "btn #{btn_style}"
       )
       links << destroy_button(
-        target: obs, name: "#{:DESTROY.t} #{:OBSERVATION.t}",
+        target: obs, name: :show_observation_destroy_observation.t,
         class: "btn #{btn_style}"
       )
     end
