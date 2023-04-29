@@ -131,4 +131,56 @@ module CapybaraSessionExtensions
   def click_commit
     first(:button, type: "submit").click
   end
+
+  # def string_value_is_number?(string)
+  #   Float(string, exception: false)
+  # end
+
+  # fields have to be { field => { type:, value: } }
+  def assert_form_has_correct_values(expected_fields, form_selector)
+    within(form_selector) do
+      expected_fields.each do |key, field|
+        if field[:type] == :select
+          assert_select(key, selected: field[:value])
+        elsif field[:type].in?([:check, :radio]) && field[:value] == true
+          assert_checked_field(key)
+        elsif field[:type].in?([:check, :radio]) && field[:value] == false
+          assert_unchecked_field(key)
+        elsif field[:type] == :text && field[:value] == ""
+          assert_field(key, text: field[:value])
+        else
+          assert_field(key, with: field[:value])
+        end
+      end
+    end
+  end
+
+  # fields have to be { field => { type:, value: } }
+  def submit_form_with_changes(changes, form_selector)
+    within(form_selector) do
+      changes.each do |key, change|
+        if change.key?(:visible)
+          set_hidden_field(key, change)
+        elsif change[:type] == :select
+          select(change[:value], from: key)
+        elsif change[:type] == :file
+          attach_file(key, change[:value])
+        elsif change[:type] == :check && change[:value] == true
+          check(key)
+        elsif change[:type] == :check && change[:value] == false
+          uncheck(key)
+        elsif change[:type] == :radio
+          choose(change[:value])
+        elsif change[:type] == :text
+          fill_in(key, with: change[:value])
+        end
+      end
+      first(:button, type: "submit").click
+    end
+  end
+
+  # change[:field] should be an ID, unless u wanna get fancy
+  def set_hidden_field(id, field)
+    first("##{id}", visible: false).set(field[:value])
+  end
 end
