@@ -53,15 +53,14 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     open_create_observation_form
     submit_observation_form_with_errors
     submit_observation_form_without_errors
-    # submit_location_form_with_errors
-    # submit_location_form_without_errors
-    # open_edit_observation_form
-    # submit_observation_form_with_changes
-    # path = @request.fullpath
-    # make_sure_observation_is_in_log_index(obs = Observation.last)
-    # get(path)
-    # destroy_observation
-    # make_sure_observation_is_not_in_log_index(obs)
+    submit_location_form_with_errors
+    submit_location_form_without_errors
+    open_edit_observation_form
+    submit_observation_form_with_changes
+    make_sure_observation_is_in_log_index(obs = Observation.last)
+    visit(observation_path(obs.id))
+    destroy_observation
+    make_sure_observation_is_not_in_log_index(obs)
   end
 
   def open_create_observation_form
@@ -85,10 +84,8 @@ class ObservationFormTest < CapybaraIntegrationTestCase
   end
 
   def submit_observation_form_without_errors
-    # File.stub(:rename, false) do
     submit_form_with_changes(create_observation_form_second_changes,
                              "#observation_form")
-    # end
     assert_flash_for_create_observation
     assert_selector("body.locations__new")
     assert_new_observation_is_correct(expected_values_after_create)
@@ -98,8 +95,8 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes,
-                             /create/, "#location_form")
-    assert_template(CREATE_LOCATION_TEMPLATE)
+                             "#location_form")
+    assert_selector("body.locations__create")
     assert_has_location_warning(/Contains unexpected character/)
     assert_form_has_correct_values(
       create_location_form_values_after_first_changes,
@@ -109,9 +106,9 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def submit_location_form_without_errors
     submit_form_with_changes(create_location_form_second_changes,
-                             /create/, "#location_form")
+                             "#location_form")
     assert_flash_for_create_location
-    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    assert_selector("body.observations__show")
     assert_new_location_is_correct(expected_values_after_location)
     assert_new_observation_is_correct(expected_values_after_location)
     assert_show_observation_page_has_important_info
@@ -119,17 +116,17 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def open_edit_observation_form
     new_obs = Observation.last
-    click_button(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
-    assert_template(EDIT_OBSERVATION_TEMPLATE)
+    click_link(class: "edit_observation_link_#{new_obs.id}")
+    assert_selector("body.observations__edit")
     assert_form_has_correct_values(edit_observation_form_initial_values,
                                    "#observation_form")
   end
 
   def submit_observation_form_with_changes
     submit_form_with_changes(edit_observation_form_changes,
-                             /edit/i, "#observation_form")
+                             "#observation_form")
     assert_flash_for_edit_observation
-    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    assert_selector("body.observations__show")
     assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
   end
@@ -155,25 +152,21 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def destroy_observation
     new_obs = Observation.last
-    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    assert_selector("body.observations__show")
     click_button(class: "destroy_observation_link_#{new_obs.id}")
     assert_flash_for_destroy_observation
-    assert_template(OBSERVATION_INDEX_TEMPLATE)
+    assert_selector("body.observations__index")
   end
 
   def make_sure_observation_is_in_log_index(obs)
-    open_session do
-      get(activity_logs_path)
-      assert_link(href: "/#{obs.id}?")
-    end
+    visit(activity_logs_path)
+    assert_link(href: %r{/#{obs.id}?})
   end
 
   def make_sure_observation_is_not_in_log_index(obs)
-    open_session do
-      get(activity_logs_path)
-      assert_no_link(href: "/#{obs.id}?")
-      assert_exists_deleted_item_log
-    end
+    visit(activity_logs_path)
+    assert_no_link(href: %r{/#{obs.id}?})
+    assert_link(href: /activity_logs/, text: /Agaricus campestris/)
   end
 
   def assert_new_observation_is_correct(expected_values)
@@ -237,28 +230,26 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     new_obs = Observation.last
     new_loc = Location.last
     new_img = Image.last
-    assert_match(new_obs.when.web_date, response.body)
-    assert_match(new_loc.name, response.body)
+    assert_text(new_obs.when.web_date)
+    assert_text(new_loc.name)
     if new_obs.is_collection_location
-      assert_match(:show_observation_collection_location.l, response.body)
+      assert_text(:show_observation_collection_location.l)
     else
-      assert_match(:show_observation_seen_at.l, response.body)
+      assert_text(:show_observation_seen_at.l)
     end
     if new_obs.specimen
-      assert_match(/herbarium_records/, response.body)
+      assert_text(/Fungarium records/)
     else
-      assert_no_match(/No specimen/, response.body)
+      assert_text(/No specimen/)
     end
-    assert_match(new_obs.notes_show_formatted, response.body)
-    assert_match(new_img.notes, response.body)
+    assert_text(new_obs.notes_show_formatted)
+    assert_text(new_img.notes)
     assert_no_link(href: "observations?where")
     assert_link(href: location_path(new_loc.id))
     assert_link(href: image_path(new_img.id))
   end
 
   def review_flash(patterns)
-    # notice = get_last_flash
-    # assert_flash_success(patterns)
     patterns.each { |pat| assert_flash_success(pat) }
   end
 
@@ -282,15 +273,6 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def assert_has_location_warning(regex)
     assert_selector(".alert-warning", text: regex)
-  end
-
-  def assert_exists_deleted_item_log
-    found = false
-    assert_selector("a[href*=activity_logs]") do |elems|
-      found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
-    end
-    assert(found,
-           'Expected to find a "destroyed" activity log somewhere on the page.')
   end
 
   def create_observation_form_values_after_first_changes
@@ -384,61 +366,68 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def create_location_form_first_changes
     {
-
       # "location_display_name" => "({[;:|]}), California, USA",
-      "location_display_name" =>
-        "Pasadena: Disneyland, Some Co., California, USA",
-      "location_high" => 8765,
-      "location_low" => 4321,
-      "location_notes" => "oops"
+      "location_display_name" => {
+        type: :text,
+        value: "Pasadena: Disneyland, Some Co., California, USA"
+      },
+      "location_high" => { type: :text, value: "8765" },
+      "location_low" => { type: :text, value: "4321" },
+      "location_notes" => { type: :text, value: "oops" }
     }
   end
 
   def create_location_form_second_changes
     {
-      "location_display_name" => "Pasadena, Some Co., California, USA",
-      "location_high" => 5678,
-      "location_low" => 1234,
-      "location_notes" => "Notes for location"
+      "location_display_name" => {
+        type: :text, value: "Pasadena, Some Co., California, USA"
+      },
+      "location_high" => { type: :text, value: "5678" },
+      "location_low" => { type: :text, value: "1234" },
+      "location_notes" => { type: :text, value: "Notes for location" }
     }
   end
 
   def edit_observation_form_initial_values
     img_id = Image.last.id
     {
-      "observation_when_1i" => 2010,
-      "observation_when_2i" => 3,
-      "observation_when_3i" => 14,
-      "observation_place_name" => "Pasadena, Some Co., California, USA",
-      "observation_lat" => "12.576",
-      "observation_long" => "-123.7519",
-      "observation_alt" => "17",
-      "observation_is_collection_location" => false,
-      "observation_specimen" => true,
-      other_notes_id => "Notes for observation",
-      "good_image_#{img_id}_when_1i" => 2010,
-      "good_image_#{img_id}_when_2i" => 3,
-      "good_image_#{img_id}_when_3i" => 14,
-      "good_image_#{img_id}_copyright_holder" => katrina.legal_name,
-      "good_image_#{img_id}_notes" => "Notes for image"
+      "observation_when_1i" => { type: :select, value: "2010" },
+      "observation_when_2i" => { type: :select, value: "March" },
+      "observation_when_3i" => { type: :select, value: "14" },
+      "observation_place_name" => {
+        type: :text, value: "Pasadena, Some Co., California, USA"
+      },
+      "observation_lat" => { type: :text, value: "12.576" },
+      "observation_long" => { type: :text, value: "-123.7519" },
+      "observation_alt" => { type: :text, value: "17" },
+      "observation_is_collection_location" => { type: :check, value: false },
+      "observation_specimen" => { type: :check, value: true },
+      other_notes_id => { type: :text, value: "Notes for observation" },
+      "good_image_#{img_id}_when_1i" => { type: :select, value: "2010" },
+      "good_image_#{img_id}_when_2i" => { type: :select, value: "March" },
+      "good_image_#{img_id}_when_3i" => { type: :select, value: "14" },
+      "good_image_#{img_id}_copyright_holder" => { type: :text,
+                                                   value: katrina.legal_name },
+      "good_image_#{img_id}_notes" => { type: :text, value: "Notes for image" }
     }
   end
 
   def edit_observation_form_changes
     img_id = Image.last.id
     {
-      "observation_when_1i" => "2011",
-      "observation_when_2i" => "4",
-      "observation_when_3i" => "15",
-      "observation_lat" => "23.4567",
-      "observation_long" => "-123.4567",
-      "observation_alt" => "987m",
-      "observation_is_collection_location" => true,
-      other_notes_id => "New notes for observation",
-      "good_image_#{img_id}_when_1i" => "2011",
-      "good_image_#{img_id}_when_2i" => "4",
-      "good_image_#{img_id}_when_3i" => "15",
-      "good_image_#{img_id}_notes" => "New notes for image"
+      "observation_when_1i" => { type: :select, value: "2011" },
+      "observation_when_2i" => { type: :select, value: "April" },
+      "observation_when_3i" => { type: :select, value: "15" },
+      "observation_lat" => { type: :text, value: "23.4567" },
+      "observation_long" => { type: :text, value: "-123.4567" },
+      "observation_alt" => { type: :text, value: "987m" },
+      "observation_is_collection_location" => { type: :check, value: true },
+      other_notes_id => { type: :text, value: "New notes for observation" },
+      "good_image_#{img_id}_when_1i" => { type: :select, value: "2011" },
+      "good_image_#{img_id}_when_2i" => { type: :select, value: "April" },
+      "good_image_#{img_id}_when_3i" => { type: :select, value: "15" },
+      "good_image_#{img_id}_notes" => { type: :text,
+                                        value: "New notes for image" }
     }
   end
 
