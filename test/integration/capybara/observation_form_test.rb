@@ -52,7 +52,7 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     setup_image_dirs # in general_extensions
     open_create_observation_form
     submit_observation_form_with_errors
-    # submit_observation_form_without_errors
+    submit_observation_form_without_errors
     # submit_location_form_with_errors
     # submit_location_form_without_errors
     # open_edit_observation_form
@@ -85,14 +85,15 @@ class ObservationFormTest < CapybaraIntegrationTestCase
   end
 
   def submit_observation_form_without_errors
-    File.stub(:rename, false) do
-      submit_form_with_changes(create_observation_form_second_changes,
-                               "#observation_form")
-    end
+    # File.stub(:rename, false) do
+    submit_form_with_changes(create_observation_form_second_changes,
+                             "#observation_form")
+    # end
     assert_flash_for_create_observation
     assert_selector("body.locations__new")
     assert_new_observation_is_correct(expected_values_after_create)
-    assert_form_has_correct_values(create_location_form_defaults)
+    assert_form_has_correct_values(create_location_form_defaults,
+                                   "#location_form")
   end
 
   def submit_location_form_with_errors
@@ -101,7 +102,8 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     assert_template(CREATE_LOCATION_TEMPLATE)
     assert_has_location_warning(/Contains unexpected character/)
     assert_form_has_correct_values(
-      create_location_form_values_after_first_changes
+      create_location_form_values_after_first_changes,
+      "#location_form"
     )
   end
 
@@ -119,7 +121,8 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     new_obs = Observation.last
     click_button(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
     assert_template(EDIT_OBSERVATION_TEMPLATE)
-    assert_form_has_correct_values(edit_observation_form_initial_values)
+    assert_form_has_correct_values(edit_observation_form_initial_values,
+                                   "#observation_form")
   end
 
   def submit_observation_form_with_changes
@@ -254,9 +257,9 @@ class ObservationFormTest < CapybaraIntegrationTestCase
   end
 
   def review_flash(patterns)
-    notice = get_last_flash
-    assert_flash_success
-    patterns.each { |pat| assert_match(pat, notice) }
+    # notice = get_last_flash
+    # assert_flash_success(patterns)
+    patterns.each { |pat| assert_flash_success(pat) }
   end
 
   def assert_flash_for_create_observation
@@ -338,38 +341,44 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def create_observation_form_second_changes
     {
-      "observation_when_1i" => 2010,
-      "observation_when_2i" => 3,
-      "observation_when_3i" => 14,
-      "observation_place_name" => "Pasadena, California, USA",
-      "observation_is_collection_location" => false,
-      "observation_specimen" => true,
-      other_notes_id => "Notes for observation",
-      "observation_lat" => " 12deg 34.56min N ",
-      "observation_long" => " 123 45 6.78 W ",
-      "observation_alt" => " 56 ft. ",
-      "naming_name" => " Agaricus  campestris ",
-      "naming_vote_value" => Vote.next_best_vote,
-      "image_0_image" =>
-        JpegUpload.new(Rails.root.join("test/images/Coprinus_comatus.jpg")),
-      "image_0_when_1i" => "2010",
-      "image_0_when_2i" => "3",
-      "image_0_when_3i" => "14",
-      "image_0_copyright_holder" => katrina.legal_name,
-      "image_0_notes" => "Notes for image"
+      "observation_when_1i" => { type: :select, value: "2010" },
+      "observation_when_2i" => { type: :select, value: "March" },
+      "observation_when_3i" => { type: :select, value: "14" },
+      "observation_place_name" => { type: :text, # user's preferred order
+                                    value: "Pasadena, California, USA" },
+      "observation_is_collection_location" => { type: :check, value: false },
+      "observation_specimen" => { type: :check, value: true },
+      other_notes_id => { type: :text, value: "Notes for observation" },
+      "observation_lat" => { type: :text, value: " 12deg 34.56min N " },
+      "observation_long" => { type: :text, value: " 123 45 6.78 W " },
+      "observation_alt" => { type: :text, value: " 56 ft. " },
+      "naming_name" => { type: :text, value: " Agaricus  campestris " },
+      "naming_vote_value" => { type: :select,
+                               value: Vote.confidence(Vote.next_best_vote) },
+      "image_0_image" => {
+        type: :file,
+        value: Rails.root.join("test/images/Coprinus_comatus.jpg")
+      },
+      "image_0_when_1i" => { type: :select, value: "2010", visible: false },
+      "image_0_when_2i" => { type: :select, value: "March", visible: false },
+      "image_0_when_3i" => { type: :select, value: "14", visible: false },
+      "image_0_copyright_holder" => { type: :text, value: katrina.legal_name,
+                                      visible: false },
+      "image_0_notes" => { type: :text, value: "Notes for image" }
     }
   end
 
   def create_location_form_defaults
     {
-      "location_display_name" => "Pasadena, California, USA",
-      "location_high" => "",
-      "location_low" => "",
-      "location_notes" => "",
-      "location_north" => PASADENA_EXTENTS[:north],
-      "location_south" => PASADENA_EXTENTS[:south],
-      "location_east" => PASADENA_EXTENTS[:east],
-      "location_west" => PASADENA_EXTENTS[:west]
+      "location_display_name" => { type: :text,
+                                   value: "Pasadena, California, USA" },
+      "location_high" => { type: :text, value: "" },
+      "location_low" => { type: :text, value: "" },
+      "location_notes" => { type: :text, value: "" },
+      "location_north" => { type: :text, value: PASADENA_EXTENTS[:north] },
+      "location_south" => { type: :text, value: PASADENA_EXTENTS[:south] },
+      "location_east" => { type: :text, value: PASADENA_EXTENTS[:east] },
+      "location_west" => { type: :text, value: PASADENA_EXTENTS[:west] }
     }
   end
 

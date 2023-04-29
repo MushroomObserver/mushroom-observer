@@ -159,8 +159,12 @@ module CapybaraSessionExtensions
   def submit_form_with_changes(changes, form_selector)
     within(form_selector) do
       changes.each do |key, change|
-        if change[:type] == :select
+        if change.key?(:visible)
+          set_hidden_field(key, change)
+        elsif change[:type] == :select
           select(change[:value], from: key)
+        elsif change[:type] == :file
+          attach_file(key, change[:value])
         elsif change[:type] == :check && change[:value] == true
           check(key)
         elsif change[:type] == :check && change[:value] == false
@@ -173,5 +177,10 @@ module CapybaraSessionExtensions
       end
       first(:button, type: "submit").click
     end
+  end
+
+  # change[:field] should be an ID, unless u wanna get fancy
+  def set_hidden_field(id, field)
+    first("##{id}", visible: false).set(field[:value])
   end
 end
