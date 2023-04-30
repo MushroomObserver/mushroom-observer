@@ -355,6 +355,8 @@ class SpeciesList < AbstractModel
       is_collection_location: args[:is_collection_location],
       specimen: args[:specimen]
     )
+    obs.log(:log_observation_created)
+
     args[:projects].each do |project|
       project.add_observation(obs)
     end
