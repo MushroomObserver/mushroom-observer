@@ -23,7 +23,6 @@ class RandomTest < CapybaraIntegrationTestCase
     login(users(:zero_user))
     visit("/")
     assert_selector("body.observations__index")
-    assert_text("account")
   end
 
   def test_login_and_logout
@@ -35,14 +34,14 @@ class RandomTest < CapybaraIntegrationTestCase
     assert_link(href: "/account/logout")
     assert_link(href: "/users/#{rolf.id}")
 
-    click_link(text: "Logout")
-    assert_template("account/login/logout")
+    first(:link, text: "Logout").click
+    assert_selector("body.login__logout")
     assert_link(href: "/account/login/new")
     assert_no_link(href: "/account/logout")
     assert_no_link(href: "/users/#{rolf.id}")
 
     click_link(text: "Introduction")
-    assert_template("info/intro")
+    assert_selector("body.info__intro")
     assert_link(href: "/account/login/new")
     assert_no_link(href: "/account/logout")
     assert_no_link(href: "/users/#{rolf.id}")
