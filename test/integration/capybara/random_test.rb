@@ -13,7 +13,6 @@ class RandomTest < CapybaraIntegrationTestCase
   # Test "/controller/action/type/id" route used by AJAX controller.
   def test_ajax_router
     visit("/ajax/auto_complete/name/Agaricus")
-    # assert_response(:success)
     lines = page.html.split("\n")
     assert_equal("A", lines.first)
     assert(lines.include?("Agaricus"))
