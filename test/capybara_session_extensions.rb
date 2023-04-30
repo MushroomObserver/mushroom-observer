@@ -8,20 +8,33 @@
 #  login::   Create a session with a given user logged in.
 #  login!::  Same thing,but raise an error if it is unsuccessful.
 #
+#  NOTE: these cannot actually extend a named session yet.
 #
 module CapybaraSessionExtensions
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
-            remember_me = true)
-    login = login.login if login.is_a?(User)
-    visit("/account/login/new")
+            remember_me = true, session: nil)
+    login = login.login if login.is_a?(User) # get the right user field
+    if session.is_a?(Capybara::Session)
+      session.visit("/account/login/new")
 
-    within("#account_login_form") do
-      fill_in("user_login", with: login)
-      fill_in("user_password", with: password)
-      check("user_remember_me") if remember_me == true
+      session.within("#account_login_form") do
+        session.fill_in("user_login", with: login)
+        session.fill_in("user_password", with: password)
+        session.check("user_remember_me") if remember_me == true
 
-      click_commit
+        session.first(:button, type: "submit").click
+      end
+    else
+      visit("/account/login/new")
+
+      within("#account_login_form") do
+        fill_in("user_login", with: login)
+        fill_in("user_password", with: password)
+        check("user_remember_me") if remember_me == true
+
+        click_commit
+      end
     end
   end
 
