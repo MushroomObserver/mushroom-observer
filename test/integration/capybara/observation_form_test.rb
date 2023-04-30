@@ -245,8 +245,8 @@ class ObservationFormTest < CapybaraIntegrationTestCase
     assert_text(new_obs.notes_show_formatted)
     assert_text(new_img.notes)
     assert_no_link(href: "observations?where")
-    assert_link(href: location_path(new_loc.id))
-    assert_link(href: image_path(new_img.id))
+    assert_link(href: /#{location_path(new_loc.id)}/)
+    assert_link(href: /#{image_path(new_img.id)}/)
   end
 
   def review_flash(patterns)
