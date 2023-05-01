@@ -54,7 +54,6 @@ class ExpertTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    # assert_response(:success)
     assert_selector("body.species_lists__create")
 
     assert_selector("#missing_names",
@@ -104,15 +103,15 @@ class ExpertTest < CapybaraIntegrationTestCase
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
-    click_link(href: /#{edit_species_list_path(spl.id)}/)
+    first(:link, href: /#{edit_species_list_path(spl.id)}/).click
     new_member_notes = "New member notes."
     within("#species_list_form") do
       assert_field("list_members", text: "")
-      assert_field("species_list_title", text: "List Title")
-      assert_field("species_list_place_name", text: albion_name_reverse)
-      assert_field("species_list_notes", text: "List notes.")
+      assert_field("species_list_title", with: "List Title")
+      assert_field("species_list_place_name", with: albion_name_reverse)
+      assert_field("species_list_notes", with: "List notes.")
       assert_field(SpeciesList.notes_part_id(Observation.other_notes_part),
-                   text: "Member notes.")
+                   with: "Member notes.")
       assert_checked_field("member_is_collection_location")
       assert_checked_field("member_specimen")
       fill_in("list_members", with: "Agaricus nova\r\nAmanita baccata\r\n")
@@ -126,8 +125,7 @@ class ExpertTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    assert_response(:success)
-    assert_selector("body.species_lists__edit")
+    assert_selector("body.species_lists__update")
 
     assert_selector("#missing_names", text: /Agaricus nova/)
     assert_selector("#ambiguous_names", text: /Amanita baccata.*sensu Arora/)
@@ -168,7 +166,7 @@ class ExpertTest < CapybaraIntegrationTestCase
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
     within("#location_form") do
-      assert_field("location_display_name", text: new_location_reverse)
+      assert_field("location_display_name", with: new_location_reverse)
       fill_in("location_display_name", with: newer_location_reverse)
       fill_in("location_north", with: "35.6622")
       fill_in("location_south", with: "35.6340")
@@ -179,7 +177,7 @@ class ExpertTest < CapybaraIntegrationTestCase
     assert_flash_success
     assert_selector("body.species_lists__show")
     assert_selector("#title", text: /#{spl.title}/)
-    assert_selector("a[href*=?]", edit_species_list_path(spl.id))
+    assert_link(href: edit_species_list_path(spl.id))
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
