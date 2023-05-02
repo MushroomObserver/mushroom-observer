@@ -659,9 +659,16 @@ class AbstractModel < ApplicationRecord
   #
   def log(tag, args = {})
     init_rss_log unless rss_log
-    touch unless new_record? ||
-                 args[:touch] == false
+    touch_when_logging unless new_record? ||
+                              args[:touch] == false
     rss_log.add_with_date(tag, args)
+  end
+
+  # This allows a model to override touch in this context only, e.g.,
+  # Observation caches a log_updated_at value so the activity index doesn't
+  # have to do a join to rss_logs
+  def touch_when_logging
+    touch
   end
 
   # Add message to RssLog if you're about to destroy this object, creating new

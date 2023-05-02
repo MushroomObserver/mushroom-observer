@@ -53,6 +53,7 @@
 #  notes::                  Arbitrary text supplied by User and serialized.
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
+#  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -62,6 +63,7 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
+#  touch_when_logging::     Override of AbstractModel's hook when updating log
 #  ---
 #  no_notes::               value of observation.notes if there are no notes
 #  no_notes_persisted::     no_notes persisted in the db
@@ -579,6 +581,13 @@ class Observation < AbstractModel
 
   def old_last_viewed_by(user)
     @old_last_viewed_by && @old_last_viewed_by[user&.id]
+  end
+
+  # This allows Observation to override AR `touch` in this context only,
+  # to cache a log_updated_at value
+  def touch_when_logging
+    self.log_updated_at = Time.zone.now
+    touch
   end
 
   ##############################################################################

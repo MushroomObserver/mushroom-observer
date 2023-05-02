@@ -193,8 +193,14 @@ module Query
       def sort_by_rss_log(model)
         return unless model.column_names.include?("rss_log_id")
 
-        add_join(:rss_logs)
-        "rss_logs.updated_at DESC"
+        # use cached column if exists, and don't join
+        # calling index method should include rss_logs
+        if model.column_names.include?("log_updated_at")
+          "#{model.table_name}.log_updated_at DESC"
+        else
+          add_join(:rss_logs)
+          "rss_logs.updated_at DESC"
+        end
       end
 
       def sort_by_summary(model)
