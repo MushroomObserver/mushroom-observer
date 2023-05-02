@@ -97,38 +97,72 @@ module CapybaraSessionExtensions
     URI.parse(href_value).request_uri
   end
 
-  def assert_flash_text(text = "")
-    assert_selector("#flash_notices")
-    assert_selector("#flash_notices", text: text)
+  def assert_flash_text(text = "", session: nil)
+    if session.is_a?(Capybara::Session)
+      assert_true(session.has_selector?("#flash_notices"))
+      assert_true(session.has_selector?("#flash_notices", text: text))
+    else
+      assert_selector("#flash_notices")
+      assert_selector("#flash_notices", text: text)
+    end
   end
 
-  def assert_no_flash_text(text = "")
-    refute_selector("#flash_notices", text: text)
+  def assert_no_flash_text(text = "", session: nil)
+    if session.is_a?(Capybara::Session)
+      assert_false(session.has_selector?("#flash_notices", text: text))
+    else
+      refute_selector("#flash_notices", text: text)
+    end
   end
 
-  def assert_no_flash
-    refute_selector("#flash_notices")
+  def assert_no_flash(session: nil)
+    if session.is_a?(Capybara::Session)
+      assert_false(session.has_selector?("#flash_notices"))
+    else
+      refute_selector("#flash_notices")
+    end
   end
 
-  def assert_flash_success(text = "")
-    assert_selector("#flash_notices.alert-success")
-    assert_flash_text(text) if text
+  def assert_flash_success(text = "", session: nil)
+    if session.is_a?(Capybara::Session)
+      assert_true(session.has_selector?("#flash_notices.alert-success"))
+      assert_flash_text(text, session: session) if text
+    else
+      assert_selector("#flash_notices.alert-success")
+      assert_flash_text(text) if text
+    end
   end
 
-  def assert_flash_error(text = "")
-    assert_any_of_selectors("#flash_notices.alert-error",
-                            "#flash_notices.alert-danger")
-    assert_flash_text(text) if text
+  def assert_flash_error(text = "", session: nil)
+    if session.is_a?(Capybara::Session)
+      session.assert_any_of_selectors("#flash_notices.alert-error",
+                                      "#flash_notices.alert-danger")
+      assert_flash_text(text, session: session) if text
+    else
+      assert_any_of_selectors("#flash_notices.alert-error",
+                              "#flash_notices.alert-danger")
+      assert_flash_text(text) if text
+    end
   end
 
-  def assert_no_flash_errors
-    assert_none_of_selectors("#flash_notices.alert-error",
-                             "#flash_notices.alert-danger")
+  def assert_no_flash_errors(session: nil)
+    if session.is_a?(Capybara::Session)
+      session.assert_none_of_selectors("#flash_notices.alert-error",
+                                       "#flash_notices.alert-danger")
+    else
+      assert_none_of_selectors("#flash_notices.alert-error",
+                               "#flash_notices.alert-danger")
+    end
   end
 
-  def assert_flash_warning(text = "")
-    assert_selector("#flash_notices.alert-warning")
-    assert_flash_text(text) if text
+  def assert_flash_warning(text = "", session: nil)
+    if session.is_a?(Capybara::Session)
+      session.has_selector?("#flash_notices.alert-warning")
+      assert_flash_text(text, session: session) if text
+    else
+      assert_selector("#flash_notices.alert-warning")
+      assert_flash_text(text) if text
+    end
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers
@@ -141,8 +175,12 @@ module CapybaraSessionExtensions
   end
 
   # Many forms have more than one submit button
-  def click_commit
-    first(:button, type: "submit").click
+  def click_commit(session: nil)
+    if session.is_a?(Capybara::Session)
+      session.first(:button, type: "submit").click
+    else
+      first(:button, type: "submit").click
+    end
   end
 
   # def string_value_is_number?(string)

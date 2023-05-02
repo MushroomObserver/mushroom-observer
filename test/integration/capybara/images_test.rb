@@ -3,6 +3,17 @@
 require("test_helper")
 
 class ImagesTest < CapybaraIntegrationTestCase
+  # ------------------------------------------------------------------------
+  #  Quick test to try to catch a bug that the functional tests can't seem
+  #  to catch.  (Functional tests can survive undefined local variables in
+  #  partials, but not integration tests.)
+  # ------------------------------------------------------------------------
+
+  def test_edit_image
+    login("mary")
+    visit("/images/1/edit")
+  end
+
   def test_show_image_edit_links
     img = images(:in_situ_image)
     proj = projects(:bolete_project)
