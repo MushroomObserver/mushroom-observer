@@ -93,8 +93,22 @@ class LookupsController < ApplicationController
   end
 
   def find_name_matches_and_suggestions(id, accepted)
-    matches = []
+    matches = find_name_matches(id, accepted)
+    return [matches, []] unless matches.empty?
+
     suggestions = []
+    begin
+      suggestions = Name.suggest_alternate_spellings(id)
+      suggestions = fix_name_matches(suggestions, accepted) if suggestions.any?
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [[], suggestions]
+  end
+
+  def find_name_matches(id, accepted)
+    matches = []
 
     begin
       parse = Name.parse_name(id)
@@ -103,16 +117,11 @@ class LookupsController < ApplicationController
         matches = Name.where(text_name: parse.text_name) if matches.empty?
         matches = fix_name_matches(matches, accepted)
       end
-      return [matches, []] unless matches.empty?
-
-      suggestions = Name.suggest_alternate_spellings(id)
-      suggestions = fix_name_matches(suggestions, accepted) if suggestions.any?
-      [[], suggestions]
     rescue StandardError => e
       flash_error(e.to_s) unless Rails.env.production?
     end
 
-    [matches, suggestions]
+    matches
   end
 
   def find_location_matches(id)
