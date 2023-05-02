@@ -74,13 +74,7 @@ class LookupsController < ApplicationController
       flash_error(e.to_s) unless Rails.env.production?
     end
 
-    if matches.empty? && suggestions.empty?
-      handle_no_match_error(id, type, model)
-    elsif matches.length == 1 || suggestions&.length == 1
-      handle_single_match_or_suggestion(matches, suggestions, id, type)
-    else
-      handle_multiple_matches_or_suggestions(matches, suggestions, id, type, model)
-    end
+    handle_matches_and_suggestions(id, type, model, matches, suggestions)
   end
 
   def find_matches_and_suggestions(model, id, accepted)
@@ -170,6 +164,16 @@ class LookupsController < ApplicationController
     end
 
     [matches, []]
+  end
+
+  def handle_matches_and_suggestions(id, type, model, matches, suggestions)
+    if matches.empty? && suggestions.empty?
+      handle_no_match_error(id, type, model)
+    elsif matches.length == 1 || suggestions&.length == 1
+      handle_single_match_or_suggestion(matches, suggestions, id, type)
+    else
+      handle_multiple_matches_or_suggestions(matches, suggestions, id, type, model)
+    end
   end
 
   def handle_no_match_error(id, type, model)
