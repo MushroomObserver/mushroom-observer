@@ -11,6 +11,11 @@
 #  NOTE: these cannot actually extend a named session yet.
 #
 module CapybaraSessionExtensions
+  # Open a trackable session. Not necessary unless testing parallel sessions.
+  def open_session(driver = :rack_test)
+    Capybara::Session.new(driver, Rails.application)
+  end
+
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true, session: nil)
@@ -39,9 +44,10 @@ module CapybaraSessionExtensions
   end
 
   # Login the given user, testing to make sure it was successful.
-  def login!(user, *args)
-    login(user, *args)
-    assert_flash_success
+  def login!(user, *args, **kwargs)
+    login(user, *args, **kwargs)
+    session = kwargs ? kwargs[:session] : nil
+    assert_flash_success(session: session)
     user = User.find_by(login: user) if user.is_a?(String)
     assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
   end
@@ -99,8 +105,8 @@ module CapybaraSessionExtensions
 
   def assert_flash_text(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      assert_true(session.has_selector?("#flash_notices"))
-      assert_true(session.has_selector?("#flash_notices", text: text))
+      assert(session.has_selector?("#flash_notices"))
+      assert(session.has_selector?("#flash_notices", text: text))
     else
       assert_selector("#flash_notices")
       assert_selector("#flash_notices", text: text)
@@ -109,7 +115,7 @@ module CapybaraSessionExtensions
 
   def assert_no_flash_text(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      assert_false(session.has_selector?("#flash_notices", text: text))
+      assert(session.has_no_selector?("#flash_notices", text: text))
     else
       refute_selector("#flash_notices", text: text)
     end
@@ -117,7 +123,7 @@ module CapybaraSessionExtensions
 
   def assert_no_flash(session: nil)
     if session.is_a?(Capybara::Session)
-      assert_false(session.has_selector?("#flash_notices"))
+      assert(session.has_no_selector?("#flash_notices"))
     else
       refute_selector("#flash_notices")
     end
@@ -125,7 +131,7 @@ module CapybaraSessionExtensions
 
   def assert_flash_success(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      assert_true(session.has_selector?("#flash_notices.alert-success"))
+      assert(session.has_selector?("#flash_notices.alert-success"))
       assert_flash_text(text, session: session) if text
     else
       assert_selector("#flash_notices.alert-success")
@@ -233,5 +239,10 @@ module CapybaraSessionExtensions
   # change[:field] should be an ID, unless u wanna get fancy
   def set_hidden_field(id, field)
     first("##{id}", visible: false).set(field[:value])
+  end
+
+  # Capybara can only select by text, but that's subject to translation
+  def select_by_value(id, option)
+    find_field(id.to_s).find("option[value='#{option}']").select_option
   end
 end

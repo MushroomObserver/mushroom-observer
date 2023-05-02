@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class NameDescriptionIntegrationTest < IntegrationTestCase
+class NameDescriptionIntegrationTest < CapybaraIntegrationTestCase
   def test_creating_public_description
     # We want to create an empty, default public description for a name that
     # doesn't have any descriptions yet -- simplest possible case.
@@ -33,6 +33,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     owner.should_not_be_reviewer
     random_user.should_not_be_reviewer
 
+    # sets (not checks) the abilities
     admin.should_be_able_to_do_anything
     reviewer.should_be_able_to_do_anything_but_change_permissions
     owner.should_be_able_to_edit_and_change_name
@@ -101,31 +102,32 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     user.admin = true
     user.save
     sess = open_session
-    sess.login!(user)
-    sess.click_mo_link(href: %r{admin/session})
+    login!(user, session: sess)
+    sess.first(:link, href: %r{admin/session}).click
     teach_about_name_descriptions(sess)
-    sess.user = user
+    sess.user = user # can't assign props to session with capybara?
     sess
   end
 
   def open_normal_session(user)
     sess = open_session
-    sess.login!(user)
+    login!(user, session: sess)
     teach_about_name_descriptions(sess)
-    sess.user = user
+    sess.user = user # can't assign props to session with capybara?
     sess
   end
 
   def open_lurker_session
     sess = open_session
     teach_about_name_descriptions(sess)
-    sess.user = nil
+    sess.user = nil # can't assign props to session with capybara
     sess
   end
 
   def teach_about_name_descriptions(sess)
     sess.extend(NameDescriptionDsl)
     sess.abilities = {}
+    sess.assertions = 0
     sess.name_we_are_working_on = @name
     sess.name_description_data = @description_data
     sess.group_expectations = @group_expectations
@@ -134,8 +136,12 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   ##############################################################################
 
   module NameDescriptionDsl
+    include Minitest::Assertions
+    include CapybaraSessionExtensions
+    include GeneralExtensions
     attr_accessor :user, :abilities, :name_we_are_working_on,
-                  :name_description_data, :group_expectations
+                  :name_description_data, :group_expectations,
+                  :assertions # needed by Minitest::Assertions
 
     def show_description_link_should_be(val)
       abilities[:show] = val
@@ -194,7 +200,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def should_not_be_reviewer
-      assert_not(UserGroup.reviewers.users.include?(user))
+      assert(UserGroup.reviewers.users.exclude?(user))
     end
 
     def should_be_able_to_do_anything
@@ -265,6 +271,11 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       "/names/descriptions/#{desc.id}"
     end
 
+    def new_name_description_uri
+      name = name_we_are_working_on
+      "/names/#{name.id}/descriptions/new"
+    end
+
     def edit_name_description_uri
       desc = name_description
       "/names/descriptions/#{desc.id}/edit"
@@ -276,42 +287,51 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def create_name_description
-      get(show_name_uri)
-      click_mo_link(href: %r{descriptions/new})
-      # assert_template("names/descriptions/new")
-      open_form("#name_description_form") do |form|
+      visit(show_name_uri)
+      click_link(href: new_name_description_uri)
+      assert_selector("body.descriptions__new")
+      within("#name_description_form") do |form|
         check_name_description_form_defaults(form)
         fill_in_name_description_form(form)
-        form.submit
+        form.first(:button, type: "submit").click
       end
-      assert_flash_success
-      # assert_template("names/descriptions/show")
+      assert_flash_success(session: self)
+      assert_selector("body.descriptions__show")
     end
 
     def check_name_description_form_defaults(form)
-      form.assert_value("source_type", "public")
-      form.assert_value("source_name", "")
-      form.assert_checked("public_write")
-      form.assert_checked("public")
-      form.assert_value("notes", "")
-      form.assert_enabled("source_type")
-      form.assert_enabled("source_name")
+      assert(form.has_field?("description_source_type",
+                             with: :public, disabled: false))
+      assert(form.has_field?("description_source_name",
+                             text: "", disabled: false))
       # (have to be enabled because user could switch to :source or :user,
-      # instead must use javascript to disable these when "public")
-      form.assert_enabled("public_write")
-      form.assert_enabled("public")
+      #  instead must use javascript to disable these when "public")
+      assert(form.has_checked_field?("description_public_write",
+                                     disabled: false))
+      assert(form.has_checked_field?("description_public", disabled: false))
+      assert(form.has_field?("description_notes", text: ""))
     end
 
     def fill_in_name_description_form(form)
       data = name_description_data
-      form.change("source_type", data[:source_type])
-      form.change("source_name", data[:source_name])
-      form.change("public_write", data[:writable])
-      form.change("public", data[:readable])
-      form.change("gen_desc", data[:gen_desc])
-      form.change("diag_desc", data[:diag_desc])
-      form.change("look_alikes", data[:look_alikes])
-      form.change("notes", data[:notes])
+      # form.select(value: data[:source_type], from: "description_source_type")
+      form.find_field("description_source_type").
+        find("option[value='#{data[:source_type]}']").select_option
+      form.fill_in("description_source_name", with: data[:source_name])
+      if data[:writable]
+        form.check("description_public_write")
+      else
+        form.uncheck("description_public_write")
+      end
+      if data[:readable]
+        form.check("description_public")
+      else
+        form.uncheck("description_public")
+      end
+      form.fill_in("description_gen_desc", with: data[:gen_desc])
+      form.fill_in("description_diag_desc", with: data[:diag_desc])
+      form.fill_in("description_look_alikes", with: data[:look_alikes])
+      form.fill_in("description_notes", with: data[:notes])
     end
 
     def check_name_description
@@ -323,7 +343,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       desc = name_description
       data = name_description_data
       assert_equal(data[:source_type], desc.source_type)
-      assert(data[:source_name] == desc.source_name)
+      assert_equal(data[:source_name].to_s, desc.source_name)
       assert_equal(data[:writable], desc.public_write)
       assert_equal(data[:readable], desc.public)
       assert_equal(data[:gen_desc].to_s, desc.gen_desc.to_s)
@@ -343,7 +363,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_abilities
-      get(show_name_uri)
+      visit(show_name_uri)
       # Apparently the show_desc link is present
       # even if not allowed to see text.
       # assert_link_exists(show_name_description_uri, can_see_description?)
@@ -355,36 +375,48 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_edit_description_link_behavior
-      click_mo_link(href: edit_name_description_uri)
+      click_link(href: edit_name_description_uri)
       if edit_description_requires_login?
-        assert_match(%r{account/login/new}, response.body)
+        assert_text(%r{account/login/new})
       else
         check_name_description_fields
       end
     end
 
+    # This is a convoluted little test. We're not checking for enabled fields;
+    # the form may not print with these fields at all. But that's how the o
+    # original test was written. It only **refuted** the presence of a disabled
+    # field. (In other words, !! !== ==)
     def check_name_description_fields
-      open_form("#name_description_form") do |form|
-        form.send("assert_#{source_name_field_state}", "source_type")
-        form.send("assert_#{source_type_field_state}", "source_name")
-        form.send("assert_#{permission_fields_state}", "public_write")
-        form.send("assert_#{permission_fields_state}", "public")
+      within("#name_description_form") do |form|
+        if source_type_field_state == :disabled
+          assert(form.has_field?("description_source_type", disabled: true))
+        else
+          assert(form.has_no_field?("description_source_type", disabled: true))
+        end
+        if permission_fields_state == :disabled
+          assert(form.has_field?("description_public_write", disabled: true))
+          assert(form.has_field?("description_public", disabled: true))
+        else
+          assert(form.has_no_field?("description_public_write", disabled: true))
+          assert(form.has_no_field?("description_public", disabled: true))
+        end
       end
     end
 
     def assert_link_exists(uri, val)
       if val
-        assert_select("a[href*='#{uri}']")
+        assert(has_link?(href: /#{uri}/))
       else
-        assert_select("a[href*='#{uri}']", 0)
+        assert(has_no_link?(href: /#{uri}/))
       end
     end
 
     def assert_form_exists(uri, val)
       if val
-        assert_select("form[action*='#{uri}']")
+        assert_selector("form[action*='#{uri}']")
       else
-        assert_select("form[action*='#{uri}']", 0)
+        assert_no_selector("form[action*='#{uri}']")
       end
     end
   end
