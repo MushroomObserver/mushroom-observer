@@ -124,6 +124,16 @@ class LookupsController < ApplicationController
     matches
   end
 
+  def fix_name_matches(matches, accepted)
+    matches.filter_map do |name|
+      if accepted && name.deprecated
+        name.approved_synonyms.first
+      else
+        name.correct_spelling || name
+      end
+    end
+  end
+
   def find_location_matches(id)
     pattern = "%#{id}%"
 
@@ -215,15 +225,5 @@ class LookupsController < ApplicationController
     redirect_to(add_query_param({ controller: obj.show_controller,
                                   action: obj.index_action },
                                 query))
-  end
-
-  def fix_name_matches(matches, accepted)
-    matches.filter_map do |name|
-      if accepted && name.deprecated
-        name.approved_synonyms.first
-      else
-        name.correct_spelling || name
-      end
-    end
   end
 end
