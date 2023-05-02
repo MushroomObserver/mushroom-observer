@@ -101,6 +101,21 @@ class AccountTest < CapybaraIntegrationTestCase
   #   end
   # end
 
+  # ------------------------------------------------------------------------
+  #  Tests to make sure that the proper links are rendered  on the  home page
+  #  when a user is logged in.
+  #  test_user_dropdown_avaiable:: tests for existence of dropdown bar & links
+  #
+  # ------------------------------------------------------------------------
+
+  def test_user_dropdown_avaiable
+    login("dick")
+    visit("/")
+    assert_selector("#user_drop_down")
+    links = find("#user_drop_down a")
+    assert_equal(links.length, 7)
+  end
+
   # ----------------------------
   #  Test signup verify login and logout.
   # ----------------------------

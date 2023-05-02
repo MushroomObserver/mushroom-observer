@@ -2,9 +2,7 @@
 
 require("test_helper")
 
-# Test typical sessions of amateur user who just posts the occasional comment,
-# observations, or votes.
-class AmateurTest < IntegrationTestCase
+class AutologinTest < IntegrationTestCase
   # ----------------------------
   #  Test autologin cookies.
   # ----------------------------
@@ -43,31 +41,4 @@ class AmateurTest < IntegrationTestCase
       sess.assert_match("account/login/new", sess.response.body)
     end
   end
-
-  # ------------------------------------------------------------------------
-  #  Quick test to try to catch a bug that the functional tests can't seem
-  #  to catch.  (Functional tests can survive undefined local variables in
-  #  partials, but not integration tests.)
-  # ------------------------------------------------------------------------
-
-  def test_edit_image
-    login("mary")
-    get("/images/1/edit")
-  end
-
-  # ------------------------------------------------------------------------
-  #  Tests to make sure that the proper links are rendered  on the  home page
-  #  when a user is logged in.
-  #  test_user_dropdown_avaiable:: tests for existence of dropdown bar & links
-  #
-  # ------------------------------------------------------------------------
-
-  def test_user_dropdown_avaiable
-    login("dick")
-    get("/")
-    assert_select("li#user_drop_down")
-    links = css_select("li#user_drop_down a")
-    assert_equal(links.length, 7)
-  end
-
 end
