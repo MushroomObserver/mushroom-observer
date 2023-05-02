@@ -112,7 +112,7 @@ class AccountTest < CapybaraIntegrationTestCase
     login("dick")
     visit("/")
     assert_selector("#user_drop_down")
-    links = find("#user_drop_down a")
+    links = find_all("#user_drop_down a")
     assert_equal(links.length, 7)
   end
 
