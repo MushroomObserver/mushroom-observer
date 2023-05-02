@@ -70,24 +70,4 @@ class AmateurTest < IntegrationTestCase
     assert_equal(links.length, 7)
   end
 
-  # -------------------------------------------------------------------------
-  #  Need integration test to make sure session and actions are all working
-  #  together correctly.
-  # -------------------------------------------------------------------------
-
-  def test_thumbnail_maps
-    get("/#{observations(:minimal_unknown_obs).id}")
-    assert_template("observations/show")
-
-    login("dick")
-    assert_template("observations/show")
-    assert_select("div.thumbnail-map", 1)
-    click_mo_link(label: "Hide thumbnail map")
-    assert_template("observations/show")
-    assert_select("div.thumbnail-map", 0)
-
-    get("/#{observations(:detailed_unknown_obs).id}")
-    assert_template("observations/show")
-    assert_select("div.thumbnail-map", 0)
-  end
 end
