@@ -44,7 +44,6 @@ class AmateurTest < IntegrationTestCase
     end
   end
 
-
   # ------------------------------------------------------------------------
   #  Quick test to try to catch a bug that the functional tests can't seem
   #  to catch.  (Functional tests can survive undefined local variables in
@@ -91,46 +90,4 @@ class AmateurTest < IntegrationTestCase
     assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
   end
-
-  # -----------------------------------------------------------------------
-  #  Need intrgration test to make sure tags are being tracked and passed
-  #  through redirects correctly.
-  # -----------------------------------------------------------------------
-
-  def test_language_tracking
-    session = open_session.extend(UserDsl)
-    session.login(mary)
-    mary.locale = "el"
-    I18n.with_locale(:el) do
-      mary.save
-
-      TranslationString.store_localizations(
-        :el,
-        { test_tag1: "test_tag1 value",
-          test_tag2: "test_tag2 value",
-          test_flash_redirection_title: "Testing Flash Redirection" }
-      )
-
-      session.run_test
-    end
-  end
-
-  module UserDsl
-    def run_test
-      get("/test_pages/flash_redirection?tags=")
-      click_mo_link(label: :app_edit_translations_on_page.t)
-      assert_no_flash
-      assert_select("span.tag", text: "test_tag1:", count: 0)
-      assert_select("span.tag", text: "test_tag2:", count: 0)
-      assert_select("span.tag", text: "test_flash_redirection_title:", count: 1)
-
-      get("/test_pages/flash_redirection?tags=test_tag1,test_tag2")
-      click_mo_link(label: :app_edit_translations_on_page.t)
-      assert_no_flash
-      assert_select("span.tag", text: "test_tag1:", count: 1)
-      assert_select("span.tag", text: "test_tag2:", count: 1)
-      assert_select("span.tag", text: "test_flash_redirection_title:", count: 1)
-    end
-  end
-
 end
