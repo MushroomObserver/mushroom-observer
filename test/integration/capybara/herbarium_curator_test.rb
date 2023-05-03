@@ -153,7 +153,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     )
     # strip query string
     first_herbarium_path = herbaria_show_links.first["href"].sub(/\?.*/, "")
-    first("#sorts a.btn", text: "Reverse Order").click
+    first("#sorts a", text: "Reverse Order").click
 
     reverse_herbaria_show_links = page.all("td > a[id*='show_herbarium_link']")
 
