@@ -5,7 +5,8 @@
   <div class="container-text">
     <%= submit_button(form: f, button: button.l, center: true) %>
 
-    <%= render(partial: "shared/fields_for_description", locals: {f: f}) %>
+    <%= render(partial: "descriptions/fields_for_description",
+               locals: {f: f}) %>
 
     <p><strong><%= :DESCRIPTION.t %>:</strong></p>
     <%= render(partial: "shared/textilize_help") %>
