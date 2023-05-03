@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Test a few representative sessions of a power-user.
-class ExpertTest < CapybaraIntegrationTestCase
+class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
   def empty_notes
     NameDescription.all_note_fields.index_with { |_f| nil }
   end

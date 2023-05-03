@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ImagesTest < CapybaraIntegrationTestCase
+class ImagesIntegrationTest < CapybaraIntegrationTestCase
   # ------------------------------------------------------------------------
   #  Quick test to try to catch a bug that the functional tests can't seem
   #  to catch.  (Functional tests can survive undefined local variables in

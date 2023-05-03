@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class CommentAmateurTest < CapybaraIntegrationTestCase
+class CommentsIntegrationTest < CapybaraIntegrationTestCase
   # ----------------------------------
   #  Test everything about comments.
   # ----------------------------------
