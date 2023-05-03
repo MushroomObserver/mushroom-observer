@@ -5,10 +5,12 @@
 #
 #  Methods in this class are available to Capybara integration tests.
 #
+
 #  login::   Create a session with a given user logged in.
 #  login!::  Same thing,but raise an error if it is unsuccessful.
 #
-#  NOTE: these cannot actually extend a named session yet.
+#  To use a method within a named session, pass the `session:` kwarg
+#  Just learning how to do this... methods are incomplete
 #
 module CapybaraSessionExtensions
   # Open a trackable session. Not necessary unless testing parallel sessions.
@@ -18,62 +20,50 @@ module CapybaraSessionExtensions
 
   # Login the given user in the current session.
   def login(login = users(:zero_user).login, password = "testpassword",
-            remember_me = true, session: nil)
+            remember_me = true, session: self)
     login = login.login if login.is_a?(User) # get the right user field
-    if session.is_a?(Capybara::Session)
-      session.visit("/account/login/new")
+    session.visit("/account/login/new")
 
-      session.within("#account_login_form") do
-        session.fill_in("user_login", with: login)
-        session.fill_in("user_password", with: password)
-        session.check("user_remember_me") if remember_me == true
+    session.within("#account_login_form") do
+      session.fill_in("user_login", with: login)
+      session.fill_in("user_password", with: password)
+      session.check("user_remember_me") if remember_me == true
 
-        session.first(:button, type: "submit").click
-      end
-    else
-      visit("/account/login/new")
-
-      within("#account_login_form") do
-        fill_in("user_login", with: login)
-        fill_in("user_password", with: password)
-        check("user_remember_me") if remember_me == true
-
-        click_commit
-      end
+      session.first(:button, type: "submit").click
     end
   end
 
   # Login the given user, testing to make sure it was successful.
   def login!(user, *args, **kwargs)
     login(user, *args, **kwargs)
-    session = kwargs ? kwargs[:session] : nil
+    session = kwargs[:session] || self
     assert_flash_success(session: session)
     user = User.find_by(login: user) if user.is_a?(String)
     assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
   end
 
-  def logout
-    visit("/account/logout")
+  def logout(session: self)
+    session.visit("/account/logout")
   end
 
-  def put_user_in_admin_mode(user = :zero_user)
+  def put_user_in_admin_mode(user = :zero_user, session: self)
     user.admin = true
     user.save!
-    login(user.login)
+    login(user.login, session: session)
     assert_equal(user.id, User.current_id)
 
-    click_on(id: "user_nav_admin_mode_link")
+    session.click_on(id: "user_nav_admin_mode_link")
     assert_match(/DANGER: You are in administrator mode/, page.html)
   end
 
   # The current_path plus the query, similar to @request.fullpath
   # URI.parse(current_url).request_uri gives same result but slower
-  def current_fullpath
-    current_url[current_host.size..]
+  def current_fullpath(session: self)
+    session.current_url[current_host.size..]
   end
 
-  def current_path_id
-    current_path.split("/").last
+  def current_path_id(session: self)
+    session.current_path.split("/").last
   end
 
   # Get string representing (our) query from the given URL.  Defaults to the
@@ -103,72 +93,38 @@ module CapybaraSessionExtensions
     URI.parse(href_value).request_uri
   end
 
-  def assert_flash_text(text = "", session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_selector("#flash_notices")
-      session.assert_selector("#flash_notices", text: text)
-    else
-      assert_selector("#flash_notices")
-      assert_selector("#flash_notices", text: text)
-    end
+  def assert_flash_text(text = "", session: self)
+    session.assert_selector("#flash_notices")
+    session.assert_selector("#flash_notices", text: text)
   end
 
-  def assert_no_flash_text(text = "", session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_no_selector("#flash_notices", text: text)
-    else
-      assert_no_selector("#flash_notices", text: text)
-    end
+  def assert_no_flash_text(text = "", session: self)
+    session.assert_no_selector("#flash_notices", text: text)
   end
 
-  def assert_no_flash(session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_no_selector("#flash_notices")
-    else
-      assert_no_selector("#flash_notices")
-    end
+  def assert_no_flash(session: self)
+    session.assert_no_selector("#flash_notices")
   end
 
-  def assert_flash_success(text = "", session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_selector("#flash_notices.alert-success")
-      assert_flash_text(text, session: session) if text
-    else
-      assert_selector("#flash_notices.alert-success")
-      assert_flash_text(text) if text
-    end
+  def assert_flash_success(text = "", session: self)
+    session.assert_selector("#flash_notices.alert-success")
+    assert_flash_text(text, session: session) if text
   end
 
-  def assert_flash_error(text = "", session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_any_of_selectors("#flash_notices.alert-error",
-                                      "#flash_notices.alert-danger")
-      assert_flash_text(text, session: session) if text
-    else
-      assert_any_of_selectors("#flash_notices.alert-error",
-                              "#flash_notices.alert-danger")
-      assert_flash_text(text) if text
-    end
+  def assert_flash_error(text = "", session: self)
+    session.assert_any_of_selectors("#flash_notices.alert-error",
+                                    "#flash_notices.alert-danger")
+    assert_flash_text(text, session: session) if text
   end
 
-  def assert_no_flash_errors(session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_none_of_selectors("#flash_notices.alert-error",
-                                       "#flash_notices.alert-danger")
-    else
-      assert_none_of_selectors("#flash_notices.alert-error",
-                               "#flash_notices.alert-danger")
-    end
+  def assert_no_flash_errors(session: self)
+    session.assert_none_of_selectors("#flash_notices.alert-error",
+                                     "#flash_notices.alert-danger")
   end
 
-  def assert_flash_warning(text = "", session: nil)
-    if session.is_a?(Capybara::Session)
-      session.assert_selector("#flash_notices.alert-warning")
-      assert_flash_text(text, session: session) if text
-    else
-      assert_selector("#flash_notices.alert-warning")
-      assert_flash_text(text) if text
-    end
+  def assert_flash_warning(text = "", session: self)
+    session.assert_selector("#flash_notices.alert-warning")
+    assert_flash_text(text, session: session) if text
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers
@@ -181,12 +137,8 @@ module CapybaraSessionExtensions
   end
 
   # Many forms have more than one submit button
-  def click_commit(session: nil)
-    if session.is_a?(Capybara::Session)
-      session.first(:button, type: "submit").click
-    else
-      first(:button, type: "submit").click
-    end
+  def click_commit(session: self)
+    session.first(:button, type: "submit").click
   end
 
   # def string_value_is_number?(string)
@@ -194,55 +146,57 @@ module CapybaraSessionExtensions
   # end
 
   # fields have to be { field => { type:, value: } }
-  def assert_form_has_correct_values(expected_fields, form_selector)
-    within(form_selector) do
+  # Not sure the assertions need `form` or `within() do` needs `|form|`
+  def assert_form_has_correct_values(expected_fields, form_selector,
+                                     session: self)
+    session.within(form_selector) do |form|
       expected_fields.each do |key, field|
         if field[:type] == :select
-          assert_select(key, selected: field[:value])
+          assert(form.has_select?(key, selected: field[:value]))
         elsif field[:type].in?([:check, :radio]) && field[:value] == true
-          assert_checked_field(key)
+          assert(form.has_checked_field?(key))
         elsif field[:type].in?([:check, :radio]) && field[:value] == false
-          assert_unchecked_field(key)
+          assert(form.has_unchecked_field?(key))
         elsif field[:type] == :text && field[:value] == ""
-          assert_field(key, text: field[:value])
+          assert(form.has_field?(key, text: field[:value]))
         else
-          assert_field(key, with: field[:value])
+          assert(form.has_field?(key, with: field[:value]))
         end
       end
     end
   end
 
   # fields have to be { field => { type:, value: } }
-  def submit_form_with_changes(changes, form_selector)
-    within(form_selector) do
+  def submit_form_with_changes(changes, form_selector, session: self)
+    session.within(form_selector) do |form|
       changes.each do |key, change|
         if change.key?(:visible)
-          set_hidden_field(key, change)
+          set_hidden_field(key, change, form)
         elsif change[:type] == :select
-          select(change[:value], from: key)
+          form.select(change[:value], from: key)
         elsif change[:type] == :file
-          attach_file(key, change[:value])
+          form.attach_file(key, change[:value])
         elsif change[:type] == :check && change[:value] == true
-          check(key)
+          form.check(key)
         elsif change[:type] == :check && change[:value] == false
-          uncheck(key)
+          form.uncheck(key)
         elsif change[:type] == :radio
-          choose(change[:value])
+          form.choose(change[:value])
         elsif change[:type] == :text
-          fill_in(key, with: change[:value])
+          form.fill_in(key, with: change[:value])
         end
       end
-      first(:button, type: "submit").click
+      form.first(:button, type: "submit").click
     end
   end
 
   # change[:field] should be an ID, unless u wanna get fancy
-  def set_hidden_field(id, field)
-    first("##{id}", visible: false).set(field[:value])
+  def set_hidden_field(id, field, form = self)
+    form.first("##{id}", visible: false).set(field[:value])
   end
 
   # Capybara can only select by text, but that's subject to translation
-  def select_by_value(id, option)
-    find_field(id.to_s).find("option[value='#{option}']").select_option
+  def select_by_value(id, option, form = self)
+    form.find_field(id.to_s).find("option[value='#{option}']").select_option
   end
 end
