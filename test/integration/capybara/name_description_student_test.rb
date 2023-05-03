@@ -7,6 +7,7 @@ class NameDescriptionStudentTest < CapybaraIntegrationTestCase
   # -----------------------------------
   #  Test creating draft for project.
   # -----------------------------------
+
   def test_creating_drafts
     name = Name.find_by(text_name: "Strobilurus diminutivus")
     gen_desc = "Mary wrote this draft text."

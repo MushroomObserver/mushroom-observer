@@ -105,8 +105,8 @@ module CapybaraSessionExtensions
 
   def assert_flash_text(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      assert(session.has_selector?("#flash_notices"))
-      assert(session.has_selector?("#flash_notices", text: text))
+      session.assert_selector("#flash_notices")
+      session.assert_selector("#flash_notices", text: text)
     else
       assert_selector("#flash_notices")
       assert_selector("#flash_notices", text: text)
@@ -115,23 +115,23 @@ module CapybaraSessionExtensions
 
   def assert_no_flash_text(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      assert(session.has_no_selector?("#flash_notices", text: text))
+      session.assert_no_selector("#flash_notices", text: text)
     else
-      refute_selector("#flash_notices", text: text)
+      assert_no_selector("#flash_notices", text: text)
     end
   end
 
   def assert_no_flash(session: nil)
     if session.is_a?(Capybara::Session)
-      assert(session.has_no_selector?("#flash_notices"))
+      session.assert_no_selector("#flash_notices")
     else
-      refute_selector("#flash_notices")
+      assert_no_selector("#flash_notices")
     end
   end
 
   def assert_flash_success(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      assert(session.has_selector?("#flash_notices.alert-success"))
+      session.assert_selector("#flash_notices.alert-success")
       assert_flash_text(text, session: session) if text
     else
       assert_selector("#flash_notices.alert-success")
@@ -163,7 +163,7 @@ module CapybaraSessionExtensions
 
   def assert_flash_warning(text = "", session: nil)
     if session.is_a?(Capybara::Session)
-      session.has_selector?("#flash_notices.alert-warning")
+      session.assert_selector("#flash_notices.alert-warning")
       assert_flash_text(text, session: session) if text
     else
       assert_selector("#flash_notices.alert-warning")
