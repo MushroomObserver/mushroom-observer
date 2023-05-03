@@ -48,11 +48,11 @@ class RandomTest < CapybaraIntegrationTestCase
   end
 
   def test_sessions
-    rolf_session = Capybara::Session.new(:rack_test, Rails.application)
+    rolf_session = open_session
     login(rolf, session: rolf_session)
-    mary_session = Capybara::Session.new(:rack_test, Rails.application)
+    mary_session = open_session
     login(mary, session: mary_session)
-    katrina_session = Capybara::Session.new(:rack_test, Rails.application)
+    katrina_session = open_session
     login(katrina, session: katrina_session)
 
     rolf_session.visit("/info/intro")
@@ -66,5 +66,26 @@ class RandomTest < CapybaraIntegrationTestCase
     katrina_session.visit("/info/intro")
     katrina_session.assert_text("katrina")
     katrina_session.assert_no_text("rolf") # mary too general
+  end
+
+  # -------------------------------------------------------------------------
+  #  Need integration test to make sure session and actions are all working
+  #  together correctly.
+  # -------------------------------------------------------------------------
+
+  def test_thumbnail_maps
+    visit("/#{observations(:minimal_unknown_obs).id}")
+    assert_selector("body.observations__show")
+
+    login("dick")
+    assert_selector("body.observations__show")
+    assert_selector("div.thumbnail-map")
+    click_link(text: "Hide thumbnail map")
+    assert_selector("body.observations__show")
+    assert_no_selector("div.thumbnail-map")
+
+    visit("/#{observations(:detailed_unknown_obs).id}")
+    assert_selector("body.observations__show")
+    assert_no_selector("div.thumbnail-map")
   end
 end

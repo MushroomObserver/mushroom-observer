@@ -2,14 +2,14 @@
 
 require("test_helper")
 
-class NamingAmateurTest < CapybaraIntegrationTestCase
+class NamingsIntegrationTest < CapybaraIntegrationTestCase
   # --------------------------------------
   #  Test proposing and voting on names.
   # --------------------------------------
 
   def test_proposing_names
-    namer_session = Capybara::Session.new(:rack_test, Rails.application)
-    voter_session = Capybara::Session.new(:rack_test, Rails.application)
+    namer_session = open_session
+    voter_session = open_session
     namer = katrina
     voter = rolf
 

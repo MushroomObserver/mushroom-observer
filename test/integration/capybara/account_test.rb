@@ -62,7 +62,7 @@ class AccountTest < CapybaraIntegrationTestCase
   end
 
   # ----------------------------
-  #  Test autologin cookies.
+  #  Test autologin cookies. To be converted to Capybara
   # ----------------------------
 
   # def test_autologin
@@ -76,7 +76,7 @@ class AccountTest < CapybaraIntegrationTestCase
   # end
 
   # def get_cookies(user, autologin)
-  #   sess = Capybara::Session.new(:rack_test, Rails.application)
+  #   sess = open_session
   #   login(user, "testpassword", autologin, session: sess)
   #   result = sess.driver.request.cookies.dup
   #   if autologin
@@ -88,7 +88,7 @@ class AccountTest < CapybaraIntegrationTestCase
   # end
 
   # def try_autologin(cookies, user)
-  #   sess = Capybara::Session.new(:rack_test, Rails.application)
+  #   sess = open_session
   #   sess.driver.request.cookies["mo_user"] = cookies["mo_user"]
   #   sess.visit("/account/preferences/edit")
   #   if user
