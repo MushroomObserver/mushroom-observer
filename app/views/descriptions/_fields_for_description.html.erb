@@ -6,19 +6,6 @@ admin       = new_record || desc.is_admin?(@user)
 author      = new_record || desc.author?(@user)
 owner       = desc.user == @user
 root        = in_admin_mode?
-
-source_types_all = [
-  [:form_description_source_public.l,  "public"],
-  [:form_description_source_foreign.l, "foreign"],
-  [:form_description_source_project.l, "project"],
-  [:form_description_source_source.l,  "source"],
-  [:form_description_source_user.l,    "user"],
-]
-source_types = [
-  [:form_description_source_public.l, "public"],
-  [:form_description_source_source.l, "source"],
-  [:form_description_source_user.l,   "user"],
-]
 %>
 
 <% if new_record || admin || author || owner || root %>
@@ -28,11 +15,12 @@ source_types = [
 
     <% need_help = false
     if root %>
-      <%= f.select(:source_type, source_types_all,
+      <%= f.select(:source_type, source_type_options_all,
                    {}, { class: "form-control" }) %>
     <% elsif new_record && ["public", "source", "user"].include?(source_type) %>
       <% need_help = true %>
-      <%= f.select(:source_type, source_types, {}, { class: "form-control" }) %>
+      <%= f.select(:source_type, source_type_options_basic,
+                   {}, { class: "form-control" }) %>
     <% else %>
       <%= f.hidden_field(:source_type, value: source_type) %>
       <%= :"form_description_source_#{source_type}".l %>

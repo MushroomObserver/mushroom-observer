@@ -39,6 +39,16 @@ module DescriptionsHelper
                     description.parent.show_link_args)
   end
 
+  # TODO: add icon
+  def create_description_link(object)
+    link_to(
+      :show_name_create_description.t,
+      { controller: "#{object.show_controller}/descriptions",
+        action: :new, id: object.id, q: get_query_param },
+      class: "create_description_link_#{object.id}"
+    )
+  end
+
   def edit_description_link(description)
     return unless writer?(description)
 
@@ -316,5 +326,24 @@ module DescriptionsHelper
 
     url = add_query_param(observations_path, query)
     content_tag(:p, link_to(title, url))
+  end
+
+  # Helpers for description forms
+
+  # Source type options for description forms.
+  def source_type_options_all
+    options = []
+    Description.all_source_types.each do |type|
+      options << [:"form_description_source_#{type}".l, type]
+    end
+    options
+  end
+
+  def source_type_options_basic
+    options = []
+    Description.basic_source_types.each do |type|
+      options << [:"form_description_source_#{type}".l, type]
+    end
+    options
   end
 end

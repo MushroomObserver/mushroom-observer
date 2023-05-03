@@ -4,7 +4,8 @@ require("test_helper")
 
 class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   # -----------------------------------
-  #  Test creating draft for project.
+  #  Test student creating draft for project.
+  #  This could be refactored to use the methods from the second test?
   # -----------------------------------
 
   def test_creating_drafts
@@ -282,6 +283,11 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   end
 
   ##############################################################################
+  # NOTE: When you extend the session with a module, you don't get anything
+  # but the Capybara::Session methods for free (unlike in rails-dom-testing).
+  # You have to manually include any classes that are otherwise available to
+  # this test via inheritance. Also, Minitest::Assertions requires adding the
+  # attr_accessor :assertions, an incrementable integer.
 
   module NameDescriptionDsl
     include Minitest::Assertions
