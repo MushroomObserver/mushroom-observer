@@ -1,19 +1,42 @@
 # frozen_string_literal: true
 
 #
-#  = Integration High-Level Test Helpers
+#  = Capybara Integration Test Helpers
 #
-#  Methods in this class are available to Capybara integration tests.
+#  open_session:: Create a separate named session (for testing concurrent
+#                 sessions). Not necessary for single session tests.
+#                 Pass a driver arg to change drivers (default is :rack_test)
 #
-
-#  login::   Create a session with a given user logged in.
-#  login!::  Same thing,but raise an error if it is unsuccessful.
+#  = Session-specific methods:
+#    To use a method within a named session, pass the `session:` kwarg
 #
-#  To use a method within a named session, pass the `session:` kwarg
-#  Just learning how to do this... methods are incomplete
+#  login::   Log user in to current session.
+#  login!::  Same thing, but raise an error if it is unsuccessful.
+#  logout
+#  put_user_in_admin_mode
+#  current_fullpath
+#  current_path_id
+#  parse_query_params
+#  delivered_mail
+#  delivered_mail_html
+#  delivered_mail_data
+#  first_link_in_mail
+#  assert_no_flash
+#  assert_flash_text
+#  assert_no_flash_text
+#  assert_flash_success
+#  assert_flash_error
+#  assert_no_flash_errors
+#  assert_flash_warning
+#  go_back_after
+#  click_commit
+#  assert_form_has_correct_values
+#  submit_form_with_changes
+#  set_hidden_field
+#  select_by_value
 #
 module CapybaraSessionExtensions
-  # Open a trackable session. Not necessary unless testing parallel sessions.
+  # Open a separate session. Not necessary unless testing parallel sessions.
   def open_session(driver = :rack_test)
     Capybara::Session.new(driver, Rails.application)
   end
@@ -93,6 +116,10 @@ module CapybaraSessionExtensions
     URI.parse(href_value).request_uri
   end
 
+  def assert_no_flash(session: self)
+    session.assert_no_selector("#flash_notices")
+  end
+
   def assert_flash_text(text = "", session: self)
     session.assert_selector("#flash_notices")
     session.assert_selector("#flash_notices", text: text)
@@ -100,10 +127,6 @@ module CapybaraSessionExtensions
 
   def assert_no_flash_text(text = "", session: self)
     session.assert_no_selector("#flash_notices", text: text)
-  end
-
-  def assert_no_flash(session: self)
-    session.assert_no_selector("#flash_notices")
   end
 
   def assert_flash_success(text = "", session: self)
