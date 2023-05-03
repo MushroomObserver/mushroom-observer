@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_30_000406) do
+ActiveRecord::Schema.define(version: 2023_04_30_044838) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -482,6 +482,7 @@ ActiveRecord::Schema.define(version: 2023_04_30_000406) do
     t.text "classification"
     t.boolean "gps_hidden", default: false, null: false
     t.integer "source"
+    t.datetime "log_updated_at"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
@@ -564,7 +565,6 @@ ActiveRecord::Schema.define(version: 2023_04_30_000406) do
     t.integer "glossary_term_id"
     t.integer "article_id"
     t.datetime "created_at", null: false
-    t.index ["observation_id"], name: "index_rss_logs_on_observation_id"
   end
 
   create_table "sequences", id: :integer, charset: "latin1", force: :cascade do |t|
