@@ -39,7 +39,6 @@ module DescriptionsHelper
                     description.parent.show_link_args)
   end
 
-  # TODO: add icon
   def create_description_link(object)
     link_to(
       :show_name_create_description.t,
