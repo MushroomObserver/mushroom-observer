@@ -7,7 +7,8 @@ presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
 
   <%= submit_button(form: f, button: presenter.button, center: true) %>
 
-  <%= render(partial: "shared/fields_for_description", locals: { f: f }) %>
+  <%= render(partial: "descriptions/fields_for_description",
+             locals: { f: f }) %>
 
   <hr/>
 
