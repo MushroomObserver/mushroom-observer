@@ -24,7 +24,7 @@ class SequencesIntegrationTest < CapybaraIntegrationTestCase
 
     new_sequence = Sequence.last
     new_locus = "Edited Locus"
-    find("#observation_sequences_#{obs.id}").click_link("Edit")
+    find("#observation_sequences").click_link("Edit")
     fill_in("sequence[locus]", with: new_locus)
     fill_in("sequence[bases]", with: "gag gag gag")
     click_on("Update")

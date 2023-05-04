@@ -258,7 +258,7 @@ class CollectionNumbersController < ApplicationController
     if name_and_number_free?
       update_collection_number_and_associations(old_format_name)
     else
-      flash_numbers_merged_and_update_associations
+      flash_numbers_merged_and_update_associations(old_format_name)
     end
   end
 
@@ -274,7 +274,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  def flash_numbers_merged_and_update_associations
+  def flash_numbers_merged_and_update_associations(old_format_name)
     flash_warning(
       :edit_collection_numbers_merged.t(
         this: old_format_name,
