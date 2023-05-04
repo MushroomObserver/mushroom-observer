@@ -1,10 +1,10 @@
 <%
   numbers  = observation.collection_numbers
   can_edit = in_admin_mode? || observation.can_edit?
-
+  obs_id = observation.id
   # This is passed in to show_collection_number, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
-  query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
+  cn_query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
 %>
 
 <% unless @user.try(&:hide_specimen_stuff?) ||
@@ -12,25 +12,29 @@
   <% if numbers.any? && can_edit %>
     <div>
       <%= :Collection_numbers.t %>: [<%=
-        link_with_query(:create_collection_number.t,
-          new_collection_number_path(observation_id: observation.id))
+        link_to(
+          :create_collection_number.t,
+          new_collection_number_path(observation_id: obs_id,
+                                     q: get_query_param),
+          { remote: true, onclick: "MOEvents.whirly();",
+            id: "create_collection_number_link_#{obs_id}" })
       %>]
     </div>
     <ul class="tight-list">
       <% numbers.each do |number| %>
         <li>
           <%= link_to("<i>#{number.format_name.t}</i>".html_safe,
-                      collection_number_path(id: number.id,
-                                             params: { q: query })) %>
-          [<%= link_with_query(:EDIT.t,
-                               edit_collection_number_path(
-                                 id: number.id,
-                                 params: { back: observation.id }
-                               )) %> |
+                      collection_number_path(id: number.id, q: cn_query)) %>
+          [<%= link_to(:EDIT.t,
+                       edit_collection_number_path(
+                         id: number.id, q: get_query_param, back: obs_id
+                       ),
+                       { remote: true, onclick: "MOEvents.whirly();",
+                         id: "edit_collection_number_link_#{obs_id}" }) %> |
            <%= patch_button(name: :REMOVE.t,
                             path: collection_number_remove_observation_path(
                               collection_number_id: number.id,
-                              observation_id: observation.id,
+                              observation_id: obs_id,
                               q: get_query_param,
                             ),
                             data: { confirm: :are_you_sure.t }) %>]
@@ -43,13 +47,17 @@
     <%= numbers.count > 1 ? :Collection_numbers.t : :Collection_number.t %>:
     <%= numbers.map do |number|
           link_to("<i>#{number.format_name.t}</i>".html_safe,
-                  collection_number_path(id: number.id, params: { q: query }))
+                  collection_number_path(id: number.id, q: cn_query))
         end.safe_join(", ") %>
 
   <% elsif numbers.none? && can_edit %>
     <%= :show_observation_no_collection_numbers.t %> [<%=
-      link_with_query(:create_collection_number.t,
-        new_collection_number_path(observation_id: observation.id))
+      link_to(
+        :create_collection_number.t,
+        new_collection_number_path(observation_id: obs_id,
+                                   q: get_query_param),
+        { remote: true, onclick: "MOEvents.whirly();",
+          id: "create_collection_number_link_#{obs_id}" })
     %>]
   <% end %>
 <% end %>
