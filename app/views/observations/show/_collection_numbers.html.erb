@@ -22,7 +22,7 @@
     </div>
     <ul class="tight-list">
       <% numbers.each do |number| %>
-        <li>
+        <li id="collection_number_<%= number.id %>">
           <%= link_to("<i>#{number.format_name.t}</i>".html_safe,
                       collection_number_path(id: number.id, q: cn_query)) %>
           [<%= link_to(:EDIT.t,
@@ -30,14 +30,18 @@
                          id: number.id, q: get_query_param, back: obs_id
                        ),
                        { remote: true, onclick: "MOEvents.whirly();",
-                         id: "edit_collection_number_link_#{obs_id}" }) %> |
-           <%= patch_button(name: :REMOVE.t,
-                            path: collection_number_remove_observation_path(
-                              collection_number_id: number.id,
-                              observation_id: obs_id,
-                              q: get_query_param,
-                            ),
-                            data: { confirm: :are_you_sure.t }) %>]
+                         class: "edit_collection_number_link" }) %> |
+           <%= patch_button(
+            name: :REMOVE.t,
+            path: collection_number_remove_observation_path(
+              collection_number_id: number.id, observation_id: obs_id,
+              q: get_query_param,
+            ),
+            data: { confirm: :are_you_sure.t },
+            remote: true,
+            onclick: "MOEvents.whirly();",
+            class: "remove_collection_number_link"
+           ) %>]
 
         </li>
       <% end %>

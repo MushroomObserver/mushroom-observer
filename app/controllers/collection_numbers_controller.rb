@@ -230,7 +230,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js # updates the page
+      format.js # updates the page. @back_object is set already
     end
   end
 
@@ -244,7 +244,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       format.js do
-        render("update_page") and return # renders the flash via js
+        render("update_observation") and return # renders the flash via js
       end
     end
   end
@@ -270,6 +270,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
+      @observation = @back_object # if we're here, currently, this is true
       format.js # updates the page
     end
   end
@@ -291,7 +292,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       format.js do
-        render("update_page") and return
+        render("update_observation") and return
       end
     end
     # redirect_to_back_object_or_object(@back_object, @collection_number)

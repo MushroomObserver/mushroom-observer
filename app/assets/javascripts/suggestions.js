@@ -3,12 +3,12 @@ var attach_suggestion_bindings;
 function SuggestionModule(ids, url, text) {
   attach_suggestion_bindings = function () {
     var button = $("[data-role='suggest_names']");
-    var whirly = " <span class='spinner-right mx-2'></span>";
+    // var whirly = " <span class='spinner-right mx-2'></span>";
 
     button.on('click', function (event) {
       button.attr("disabled", "disabled");
       var progress = $("#mo_ajax_progress_caption")
-        .html(text.suggestions_processing_images + "..." + whirly);
+        .html(text.suggestions_processing_images + "...");
       var progressModal = $("#mo_ajax_progress").modal("show");
       var resetModal = function () {
         progress.empty();
@@ -20,7 +20,7 @@ function SuggestionModule(ids, url, text) {
       var any_worked = false;
       var predict = function (i) {
         progress.html(text.suggestions_processing_image + " " +
-          (i + 1) + " / " + ids.length + "..." + whirly);
+          (i + 1) + " / " + ids.length + "...");
         $.ajax("https://images.mushroomobserver.org/model/predict", {
           method: "POST",
           data: { id: ids[i] },
@@ -34,8 +34,7 @@ function SuggestionModule(ids, url, text) {
             if (i + 1 < ids.length) {
               predict(i + 1);
             } else if (any_worked) {
-              progress.html(text.suggestions_processing_results + "..." +
-                whirly);
+              progress.html(text.suggestions_processing_results + "...");
               var out = JSON.stringify(results);
               url = url.replace("xxx", encodeURIComponent(out));
               resetModal();
