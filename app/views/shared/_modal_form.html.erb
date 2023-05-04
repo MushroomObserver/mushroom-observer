@@ -25,7 +25,7 @@ tag.div(
           [
             tag.button(
               type: :button, class: "close", data: { dismiss: "modal" },
-              aria: { label: "Close" }
+              aria: { label: :CLOSE.l }
             ) { tag.span(aria: { hidden: "true" }) { "&times;".html_safe } },
             tag.h4(title, class: "modal-title",
                    id: "modal_header_#{identifier}")
