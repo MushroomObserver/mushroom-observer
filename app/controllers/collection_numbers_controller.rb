@@ -211,7 +211,6 @@ class CollectionNumbersController < ApplicationController
       end
       respond_to do |format|
         format.html do
-          # TODO: render not redirect
           redirect_to(redirect_params) and return true
         end
         format.js do
@@ -230,7 +229,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js # updates the page. @back_object is set already
+      format.js # updates the observation. @back_object is set already
     end
   end
 
@@ -270,7 +269,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      @observation = @back_object # if we're here, currently, this is true
+      @observation = @back_object # if we're here, we're on an obs page
       format.js # updates the page
     end
   end
@@ -295,7 +294,6 @@ class CollectionNumbersController < ApplicationController
         render("update_observation") and return
       end
     end
-    # redirect_to_back_object_or_object(@back_object, @collection_number)
   end
 
   def permitted_collection_number_params

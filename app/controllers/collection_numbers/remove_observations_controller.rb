@@ -23,7 +23,6 @@ module CollectionNumbers
       @collection_number.remove_observation(@observation)
       respond_to do |format|
         format.html do
-          # TODO: render not redirect
           redirect_with_query(observation_path(@observation.id))
         end
         format.js do
