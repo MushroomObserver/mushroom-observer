@@ -10,7 +10,8 @@ when :update
 end
 %>
 
-<%= form_with(model: @collection_number, url: url_params) do |f| %>
+<%= form_with(model: @collection_number, url: url_params,
+              local: local) do |f| %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 
