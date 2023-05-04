@@ -1,13 +1,18 @@
 <%
 url_params = { action: action, q: get_query_param }
-url_params = url_params.merge(
-  { observation_id: @observation.id }) if action == :create
-url_params = url_params.merge({ back: back }) if action == :update
+case action
+when :create
+  url_params = url_params.merge({ observation_id: @observation.id })
+  button = :ADD.t
+when :update
+  url_params = url_params.merge({ back: back })
+  button = :SAVE.t
+end
 %>
 
 <%= form_with(model: @collection_number, url: url_params) do |f| %>
 
-  <%= submit_button(form: f, button: button_name.t, center: true) %>
+  <%= submit_button(form: f, button: button, center: true) %>
 
   <% if @collection_number.observations.count > 1 %>
     <%= alert_block(

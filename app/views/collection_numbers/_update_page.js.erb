@@ -1,17 +1,4 @@
-// Update page with results of update or create naming or vote
+// Update page with results of update or create collection number
 $('#mo_ajax_progress_caption').html('<%= j safe_spinner %>');
 $('#mo_ajax_progress').modal('hide');
-$("#namings_table").remove();
-
-// reset title of obs if necessary
-var title = '<%= content_tag(:div, show_obs_title(obs: @observation), title: show_obs_title(obs: @observation).strip_html.html_safe) %>';
-
-document.title = $(title).attr('title');
-$("#title").html(title);
-
-$("#observation_namings").prepend('<%= j render(partial: "observations/namings/table", locals: { observation: @observation.reload }, layout: false) %>');
-// Need to redo naming table bindings and hide cast vote buttons
-VoteByAjaxModule({
-  show_namings_lose_changes: '<%= j :show_namings_lose_changes.l.gsub("\n", " ") %>',
-  show_namings_saving: '<%= j :show_namings_saving.l %>'
-})
+$("#observation_collection_numbers").html(('<%= j render(partial: "observations/show/collection_numbers", locals: { observation: @observation.reload }, layout: false) %>');
