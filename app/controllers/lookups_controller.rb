@@ -199,7 +199,9 @@ class LookupsController < ApplicationController
     if matches.empty? && suggestions.empty?
       handle_no_match_error(id, model)
     elsif matches.length == 1 || suggestions&.length == 1
-      handle_single_match_or_suggestion(matches, suggestions, id, model)
+      handle_single_match_or_suggestion(
+        model: model, id: id, matches: matches, suggestions: suggestions
+      )
     else
       handle_multiple_matches_or_suggestions(matches, suggestions, id, model)
     end
@@ -214,7 +216,7 @@ class LookupsController < ApplicationController
     end
   end
 
-  def handle_single_match_or_suggestion(matches, suggestions, id, model)
+  def handle_single_match_or_suggestion(model:, id:, matches:, suggestions:)
     obj = matches.first || suggestions.first
     if suggestions.any?
       flash_warning(
