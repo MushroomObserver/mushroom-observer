@@ -31,7 +31,7 @@ class LookupsController < ApplicationController
   # it a name ID.  This is, of course, bizarre behavior, but we're ignoring it
   # because it should never be called that way in the first place. -JPH 1/2017
   def lookup_accepted_name
-    lookup_general(Name, true)
+    lookup_general(Name, accepted: true)
   end
 
   def lookup_observation
@@ -61,7 +61,7 @@ class LookupsController < ApplicationController
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
   # inputs: model Class, true/false
-  def lookup_general(model, accepted = false)
+  def lookup_general(model, accepted: false)
     # type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
 

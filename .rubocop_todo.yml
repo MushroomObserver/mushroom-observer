@@ -635,7 +635,6 @@ Style/OptionalBooleanParameter:
     - 'app/classes/query/modules/sql.rb'
     - 'app/classes/textile.rb'
     - 'app/controllers/application_controller.rb'
-    - 'app/controllers/lookups_controller.rb'
     - 'app/extensions/string_extensions.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'app/helpers/content_helper.rb'
