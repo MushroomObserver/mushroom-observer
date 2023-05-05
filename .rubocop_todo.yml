@@ -113,7 +113,6 @@ Metrics/BlockNesting:
   Exclude:
     - 'app/classes/map_set.rb'
     - 'app/classes/tree.rb'
-    - 'app/controllers/lookups_controller.rb'
     - 'app/controllers/observations_controller/form_helpers.rb'
     - 'lib/tasks/email.rake'
     - 'test/controller_extensions.rb'
