@@ -197,7 +197,7 @@ class LookupsController < ApplicationController
 
   def handle_matches_and_suggestions(model:, id:, matches:, suggestions:)
     if matches.empty? && suggestions.empty?
-      handle_no_match_error(id, model)
+      handle_no_match(model, id)
     elsif matches.length == 1 || suggestions&.length == 1
       handle_single_match_or_suggestion(
         model: model, id: id, matches: matches, suggestions: suggestions
@@ -210,7 +210,7 @@ class LookupsController < ApplicationController
     end
   end
 
-  def handle_no_match_error(id, model)
+  def handle_no_match(model, id)
     flash_error(:runtime_object_no_match.t(match: id, type: model.type_tag))
     if model == User
       redirect_to("/")
