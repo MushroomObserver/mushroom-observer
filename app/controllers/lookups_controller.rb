@@ -203,7 +203,10 @@ class LookupsController < ApplicationController
         model: model, id: id, matches: matches, suggestions: suggestions
       )
     else
-      handle_multiple_matches_or_suggestions(matches, suggestions, id, model)
+      handle_multiple_matches_or_suggestions(
+        model: model, id: id, matches: matches, suggestions: suggestions
+      )
+
     end
   end
 
@@ -228,7 +231,9 @@ class LookupsController < ApplicationController
                 id: obj.id)
   end
 
-  def handle_multiple_matches_or_suggestions(matches, suggestions, id, model)
+  def handle_multiple_matches_or_suggestions(
+    model:, id:, matches:, suggestions:
+  )
     obj = matches.first || suggestions.first
     query = Query.lookup(model, :in_set, ids: matches + suggestions)
     if suggestions.any?
