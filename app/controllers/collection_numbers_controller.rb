@@ -214,7 +214,7 @@ class CollectionNumbersController < ApplicationController
           redirect_to(redirect_params) and return true
         end
         format.js do
-          render("form_reload",
+          render(partial: "form_reload",
                  locals: { action: action_name.to_sym }) and return true
         end
       end
@@ -343,7 +343,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       format.js do
-        render("update_flash") and return # renders the flash via js
+        render(partial: "update_flash") and return # renders the flash via js
       end
     end
   end
