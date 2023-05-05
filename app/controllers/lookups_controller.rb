@@ -50,6 +50,10 @@ class LookupsController < ApplicationController
     lookup_general(User)
   end
 
+  ##############################################################################
+
+  private
+
   # Alternative to controller/show_object/id.  These were included for the
   # benefit of the textile wrapper: We don't want to be looking up all these
   # names and objects every time we display comments, etc.  Instead we make
@@ -57,7 +61,7 @@ class LookupsController < ApplicationController
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
   # inputs: model Class, true/false
-  def lookup_general (model, accepted = false)
+  def lookup_general(model, accepted = false)
     # type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
 
