@@ -57,18 +57,18 @@ class RssLogsControllerTest < FunctionalTestCase
     expect = rss_logs(:glossary_term_rss_log)
     login
     get(:index, params: { type: :glossary_term })
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
     assert_no_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name}/,
-      css_select(".rss-what").text
+      css_select(".log-what").text
     )
 
     # Without params[:type], it should display all logs
     get(:index)
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
     assert_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name.text_name}/,
-      css_select(".rss-what").text
+      css_select(".log-what").text
     )
 
     comments_for_path = comments_path(for_user: User.current_id)
