@@ -3,9 +3,9 @@
 
 // Are we on show_obs, or obs_needing_ids?
 if ($("#observation_namings").length) {
-  <%= render(partial: "observations/namings/update_page", format: :js) %>
+  <%= render(partial: "observations/namings/update_observation", format: :js) %>
 } else {
   // update matrix box
-  $('#mo_ajax_progress_caption').html('<%= j safe_spinner %>');
+  $('#mo_ajax_progress_caption').empty();
   $('#mo_ajax_progress').modal('hide');
 }

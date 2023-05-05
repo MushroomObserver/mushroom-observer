@@ -1,3 +1,3 @@
-$('body').append('<%= j render(partial: "observations/namings/modal", locals: { action: :create, title: :create_naming_title.t(id: @observation.id) }) %>');
+$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "naming", title: :create_naming_title.t(id: @observation.id), form: "observations/namings/form", action: :create, show_reasons: true }) %>');
 
 <%= render(partial: "observations/namings/form_bindings", format: :js) %>

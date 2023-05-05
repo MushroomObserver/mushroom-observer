@@ -45,6 +45,13 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_edit!(@observation)
 
     @collection_number = CollectionNumber.new(name: @user.legal_name)
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def create
@@ -54,7 +61,7 @@ class CollectionNumbersController < ApplicationController
     @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
-    create_collection_number
+    create_collection_number # response handled here
   end
 
   def edit
@@ -63,6 +70,13 @@ class CollectionNumbersController < ApplicationController
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@collection_number)
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def update
@@ -72,7 +86,7 @@ class CollectionNumbersController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@collection_number)
 
-    update_collection_number
+    update_collection_number # response handled here
   end
 
   def destroy
@@ -81,7 +95,12 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_delete!(@collection_number)
 
     @collection_number.destroy
-    redirect_with_query(action: :index)
+    respond_to do |format|
+      format.js
+      format.html do
+        redirect_with_query(action: :index)
+      end
+    end
   end
 
   ##############################################################################
@@ -169,41 +188,10 @@ class CollectionNumbersController < ApplicationController
     return if flash_error_and_reload_if_form_has_errors
 
     if name_and_number_free?
-      @collection_number.save
-      @collection_number.add_observation(@observation)
+      save_collection_number_and_update_associations
     else
-      flash_warning(:edit_collection_number_already_used.t) if
-        @other_number.observations.any?
-      @other_number.add_observation(@observation)
-      @collection_number = @other_number
+      flash_collection_number_already_used_and_return
     end
-    redirect_to_back_object_or_object(@back_object, @collection_number)
-  end
-
-  def update_collection_number
-    old_format_name = @collection_number.format_name
-    @collection_number.attributes = permitted_collection_number_params
-    normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
-
-    if name_and_number_free?
-      @collection_number.save
-      @collection_number.change_corresponding_herbarium_records(old_format_name)
-    else
-      flash_warning(
-        :edit_collection_numbers_merged.t(
-          this: old_format_name,
-          that: @other_number.format_name
-        )
-      )
-      @collection_number.change_corresponding_herbarium_records(old_format_name)
-      @other_number.observations += @collection_number.observations -
-                                    @other_number.observations
-      @collection_number.destroy
-      @collection_number = @other_number
-    end
-
-    redirect_to_back_object_or_object(@back_object, @collection_number)
   end
 
   def flash_error_and_reload_if_form_has_errors
@@ -215,14 +203,97 @@ class CollectionNumbersController < ApplicationController
                       end
     redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
-      redirect_to(redirect_params) and return true
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      redirect_to(redirect_params) and return true
+    if @collection_number.name.blank? || @collection_number.number.blank?
+      if @collection_number.name.blank?
+        flash_error(:create_collection_number_missing_name.t)
+      elsif @collection_number.number.blank?
+        flash_error(:create_collection_number_missing_number.t)
+      end
+      respond_to do |format|
+        format.html do
+          redirect_to(redirect_params) and return true
+        end
+        format.js do
+          render("form_reload",
+                 locals: { action: action_name.to_sym }) and return
+        end
+      end
     end
     false
+  end
+
+  def save_collection_number_and_update_associations
+    @collection_number.save
+    @collection_number.add_observation(@observation)
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @collection_number)
+      end
+      format.js # updates the observation. @back_object is set already
+    end
+  end
+
+  def flash_collection_number_already_used_and_return
+    flash_warning(:edit_collection_number_already_used.t) if
+      @other_number.observations.any?
+    @other_number.add_observation(@observation)
+    @collection_number = @other_number
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @collection_number)
+      end
+      format.js do
+        render("update_observation") and return # renders the flash via js
+      end
+    end
+  end
+
+  def update_collection_number
+    old_format_name = @collection_number.format_name
+    @collection_number.attributes = permitted_collection_number_params
+    normalize_parameters
+    return if flash_error_and_reload_if_form_has_errors
+
+    if name_and_number_free?
+      update_collection_number_and_associations(old_format_name)
+    else
+      flash_numbers_merged_and_update_associations(old_format_name)
+    end
+  end
+
+  def update_collection_number_and_associations(old_format_name)
+    @collection_number.save
+    @collection_number.change_corresponding_herbarium_records(old_format_name)
+
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @collection_number)
+      end
+      @observation = @back_object # if we're here, we're on an obs page
+      format.js # updates the page
+    end
+  end
+
+  def flash_numbers_merged_and_update_associations(old_format_name)
+    flash_warning(
+      :edit_collection_numbers_merged.t(
+        this: old_format_name,
+        that: @other_number.format_name
+      )
+    )
+    @collection_number.change_corresponding_herbarium_records(old_format_name)
+    @other_number.observations += @collection_number.observations -
+                                  @other_number.observations
+    @collection_number.destroy
+    @collection_number = @other_number
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @collection_number)
+      end
+      format.js do
+        render("update_observation") and return
+      end
+    end
   end
 
   def permitted_collection_number_params
