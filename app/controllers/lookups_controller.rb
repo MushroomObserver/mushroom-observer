@@ -58,13 +58,13 @@ class LookupsController < ApplicationController
   # controller/action after looking up the object.
   # inputs: model Class, true/false
   def lookup_general (model, accepted = false)
-    type = model.type_tag
+    # type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
 
     matches, suggestions = find_matches_and_suggestions(model, id, accepted)
     return if /^\d+$/.match?(id) && !matches
 
-    handle_matches_and_suggestions(id, type, model, matches, suggestions)
+    handle_matches_and_suggestions(id, model, matches, suggestions)
   end
 
   def find_matches_and_suggestions(model, id, accepted)
@@ -189,18 +189,18 @@ class LookupsController < ApplicationController
     [matches, []]
   end
 
-  def handle_matches_and_suggestions(id, type, model, matches, suggestions)
+  def handle_matches_and_suggestions(id, model, matches, suggestions)
     if matches.empty? && suggestions.empty?
-      handle_no_match_error(id, type, model)
+      handle_no_match_error(id, model)
     elsif matches.length == 1 || suggestions&.length == 1
-      handle_single_match_or_suggestion(matches, suggestions, id, type)
+      handle_single_match_or_suggestion(matches, suggestions, id, model)
     else
-      handle_multiple_matches_or_suggestions(matches, suggestions, id, type, model)
+      handle_multiple_matches_or_suggestions(matches, suggestions, id, model)
     end
   end
 
-  def handle_no_match_error(id, type, model)
-    flash_error(:runtime_object_no_match.t(match: id, type: type))
+  def handle_no_match_error(id, model)
+    flash_error(:runtime_object_no_match.t(match: id, type: model.type_tag))
     if model == User
       redirect_to("/")
     else
@@ -208,23 +208,29 @@ class LookupsController < ApplicationController
     end
   end
 
-  def handle_single_match_or_suggestion(matches, suggestions, id, type)
+  def handle_single_match_or_suggestion(matches, suggestions, id, model)
     obj = matches.first || suggestions.first
     if suggestions.any?
-      flash_warning(:runtime_suggest_one_alternate.t(match: id, type: type))
+      flash_warning(
+        :runtime_suggest_one_alternate.t(match: id, type: model.type_tag)
+      )
     end
     redirect_to(controller: obj.show_controller,
                 action: obj.show_action,
                 id: obj.id)
   end
 
-  def handle_multiple_matches_or_suggestions(matches, suggestions, id, type, model)
+  def handle_multiple_matches_or_suggestions(matches, suggestions, id, model)
     obj = matches.first || suggestions.first
     query = Query.lookup(model, :in_set, ids: matches + suggestions)
     if suggestions.any?
-      flash_warning(:runtime_suggest_multiple_alternates.t(match: id, type: type))
+      flash_warning(
+        :runtime_suggest_multiple_alternates.t(match: id, type: model.type_tag)
+      )
     else
-      flash_warning(:runtime_object_multiple_matches.t(match: id, type: type))
+      flash_warning(
+        :runtime_object_multiple_matches.t(match: id, type: model.type_tag)
+      )
     end
     redirect_to(add_query_param({ controller: obj.show_controller,
                                   action: obj.index_action },
