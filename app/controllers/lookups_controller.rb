@@ -68,7 +68,9 @@ class LookupsController < ApplicationController
     matches, suggestions = find_matches_and_suggestions(model, id, accepted)
     return if /^\d+$/.match?(id) && !matches
 
-    handle_matches_and_suggestions(id, model, matches, suggestions)
+    handle_matches_and_suggestions(
+      model: model, id: id, matches: matches, suggestions: suggestions
+    )
   end
 
   def find_matches_and_suggestions(model, id, accepted)
@@ -193,7 +195,7 @@ class LookupsController < ApplicationController
     [matches, []]
   end
 
-  def handle_matches_and_suggestions(id, model, matches, suggestions)
+  def handle_matches_and_suggestions(model:, id:, matches:, suggestions:)
     if matches.empty? && suggestions.empty?
       handle_no_match_error(id, model)
     elsif matches.length == 1 || suggestions&.length == 1
