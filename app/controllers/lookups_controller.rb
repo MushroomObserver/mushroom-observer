@@ -61,6 +61,7 @@ class LookupsController < ApplicationController
     type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
 
+=begin
     begin
       if /^\d+$/.match?(id)
         obj = find_or_goto_index(model, id)
@@ -73,11 +74,16 @@ class LookupsController < ApplicationController
     rescue StandardError => e
       flash_error(e.to_s) unless Rails.env.production?
     end
+=end
+    matches, suggestions = find_matches_and_suggestions(model, id, accepted)
+    return if /^\d+$/.match?(id) && !matches
 
     handle_matches_and_suggestions(id, type, model, matches, suggestions)
   end
 
   def find_matches_and_suggestions(model, id, accepted)
+    return find_integer_matches(model, id) if /^\d+$/.match?(id)
+
     case model.to_s
     when "Name"
       find_name_matches_and_suggestions(id, accepted)
@@ -90,6 +96,18 @@ class LookupsController < ApplicationController
     when "User"
       find_user_matches(id)
     end
+  end
+
+  def find_integer_matches(model, id)
+    begin
+      obj = find_or_goto_index(model, id)
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    return unless obj
+
+    [[obj], nil]
   end
 
   def find_name_matches_and_suggestions(id, accepted)
