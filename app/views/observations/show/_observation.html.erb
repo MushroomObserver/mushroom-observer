@@ -4,11 +4,11 @@ obs_id = observation.id
 caption ||= false
 %>
 
-<p class="obs-when card-text" id="observation_when_<%= obs_id %>">
+<p class="obs-when card-text" id="observation_when">
   <%= tag.b(:WHEN.t + ":") %> <%= observation.when.web_date %>
 </p>
 
-<p class="obs-where card-text" id="observation_where_<%= obs_id %>">
+<p class="obs-where card-text" id="observation_where">
   <%= label = observation.is_collection_location ?
         :show_observation_collection_location.t :
         :show_observation_seen_at.t
@@ -17,7 +17,7 @@ caption ||= false
                     observation.location, nil, true) %>
 </p>
 
-<p class="obs-lat-lng card-text" id="observation_lat_lng_<%= obs_id %>">
+<p class="obs-lat-lng card-text" id="observation_lat_lng">
   <%=
     hidden = "<i>(#{:show_observation_gps_hidden.t})</i>".html_safe
     if observation.lat &&
@@ -39,13 +39,13 @@ caption ||= false
   %>
 </p>
 
-<p class="obs-who card-text" id="observation_who_<%= obs_id %>">
+<p class="obs-who card-text" id="observation_who">
   <%= tag.b(:WHO.t + ":") %> <%= user_link(observation.user) %>
 </p>
 
 <% if !caption %>
   <% if @user %>
-    <div class="obs-projects" id="observation_projects_<%= obs_id %>">
+    <div class="obs-projects" id="observation_projects">
       <% observation.projects.each do |project| %>
         <%= tag.p(class: "card-text") do
           [
@@ -58,33 +58,33 @@ caption ||= false
   <% end %>
 
   <div class="obs-specimen card-text"
-       id="observation_specimen_available_<%= obs_id %>">
+       id="observation_specimen_available">
     <%= observation.specimen ? :show_observation_specimen_available.t :
                                 :show_observation_specimen_not_available.t %>
   </div>
 
   <% if @user %>
     <div class="obs-collection card-text"
-        id="observation_collection_numbers_<%= obs_id %>">
+        id="observation_collection_numbers">
       <%= render(partial: "observations/show/collection_numbers",
                  locals: { observation: observation }) %>
     </div>
 
     <div class="obs-herbarium card-text"
-         id="observation_herbarium_records_<%= obs_id %>">
+         id="observation_herbarium_records">
       <%= render(partial: "observations/show/herbarium_records",
-                locals: { observation: observation }) %>
+                 locals: { observation: observation }) %>
     </div>
 
     <div class="obs-sequence card-text"
-         id="observation_sequences_<%= obs_id %>">
+         id="observation_sequences">
       <%= render(partial: "observations/show/sequences",
-                locals: { observation: observation }) %>
+                 locals: { observation: observation }) %>
     </div>
   <% end %>
 <% end %>
 
-<div class="obs-notes card-text" id="observation_notes_<%= obs_id %>">
+<div class="obs-notes card-text" id="observation_notes">
   <%= if observation.notes?
     Textile.clear_textile_cache
     Textile.register_name(observation.name)

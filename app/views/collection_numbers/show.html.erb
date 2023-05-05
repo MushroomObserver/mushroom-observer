@@ -3,13 +3,12 @@
 
   tabs = []
   if in_admin_mode? || @collection_number.can_edit?
-    tabs << link_with_query(:edit_collection_number.t,
-                            action: :edit_collection_number,
-                            id: @collection_number.id, back: :show)
-    tabs << link_with_query(:delete_collection_number.t,
-                            { action: :destroy_collection_number,
-                              id: @collection_number.id },
-                            data: { confirm: :are_you_sure.t })
+    tabs << link_to(:edit_collection_number.t,
+                    edit_collection_number_path(
+                      id: @collection_number.id, back: :show, q: get_query_param
+                    ))
+    tabs << destroy_button(name: :delete_collection_number.t,
+                           target: @collection_number)
   end
 
   @tabsets = {

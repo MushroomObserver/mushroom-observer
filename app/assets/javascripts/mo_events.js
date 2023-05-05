@@ -6,16 +6,8 @@ MOEvents.alert = function (element) {
   alert(JSON.stringify(element));
 }
 
-MOEvents.whirly = function () {
-  $("#mo_ajax_progress").modal('show');
-}
-
-MOEvents.savingWhirly = function () {
-  // $('#mo_ajax_progress_caption').empty().append(
-  //   $("<span>").text(translations.show_namings_saving + "... "),
-  //   $("<i class="fa-solid fa-loader fa-spin fa-2xl"></i>")
-  // );
-
+MOEvents.whirly = function (text) {
+  $('#mo_ajax_progress_caption').html(text);
   $("#mo_ajax_progress").modal('show');
 }
 

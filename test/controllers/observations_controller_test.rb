@@ -1210,10 +1210,10 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
-  def assert_show_obs(types, id, items, can_add)
+  def assert_show_obs(types, _id, items, can_add)
     type = types.to_s.chop
     selector = types == :collection_numbers && !can_add ? "i" : "li"
-    assert_select("#observation_#{types}_#{id} #{selector}",
+    assert_select("#observation_#{types} #{selector}",
                   items.count,
                   "Wrong number of #{types} shown.")
     if can_add

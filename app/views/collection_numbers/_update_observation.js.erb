@@ -1,0 +1,6 @@
+// Update page with results of update or create collection number
+$('#mo_ajax_progress_caption').empty();
+$('#mo_ajax_progress').modal('hide');
+$("#observation_collection_numbers").html('<%= j render(partial: "observations/show/collection_numbers", locals: { observation: @observation.reload }, layout: false) %>');
+// Collection numbers may have flash warnings that still update the coll. num.
+$("#flash_notices").html("<%= j render(partial: 'layouts/app/flash_notices', locals: { id: 'modal_flash' }) if flash_notices? %>");
