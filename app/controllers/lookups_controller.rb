@@ -61,20 +61,6 @@ class LookupsController < ApplicationController
     type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
 
-=begin
-    begin
-      if /^\d+$/.match?(id)
-        obj = find_or_goto_index(model, id)
-        return unless obj
-
-        matches = [obj]
-      else
-        matches, suggestions = find_matches_and_suggestions(model, id, accepted)
-      end
-    rescue StandardError => e
-      flash_error(e.to_s) unless Rails.env.production?
-    end
-=end
     matches, suggestions = find_matches_and_suggestions(model, id, accepted)
     return if /^\d+$/.match?(id) && !matches
 
