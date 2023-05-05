@@ -215,7 +215,7 @@ class CollectionNumbersController < ApplicationController
         end
         format.js do
           render("form_reload",
-                 locals: { action: action_name.to_sym }) and return
+                 locals: { action: action_name.to_sym }) and return true
         end
       end
     end
@@ -238,14 +238,7 @@ class CollectionNumbersController < ApplicationController
       @other_number.observations.any?
     @other_number.add_observation(@observation)
     @collection_number = @other_number
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
-      end
-      format.js do
-        render("update_observation") and return # renders the flash via js
-      end
-    end
+    flash_and_return
   end
 
   def update_collection_number
@@ -286,14 +279,8 @@ class CollectionNumbersController < ApplicationController
                                   @other_number.observations
     @collection_number.destroy
     @collection_number = @other_number
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
-      end
-      format.js do
-        render("update_observation") and return
-      end
-    end
+
+    flash_and_return
   end
 
   def permitted_collection_number_params
@@ -306,7 +293,7 @@ class CollectionNumbersController < ApplicationController
     return true if in_admin_mode? || obj.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_back_object_or_object(@back_object, @collection_number)
+    flash_and_return
     false
   end
 
@@ -347,6 +334,17 @@ class CollectionNumbersController < ApplicationController
                      else
                        @collection_number
                      end
+    end
+  end
+
+  def flash_and_return
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @collection_number)
+      end
+      format.js do
+        render("update_flash") and return # renders the flash via js
+      end
     end
   end
 end

@@ -33,8 +33,10 @@ body_class = whos_calling + theme_class
       <%= render(partial: "layouts/search_bar") %>
 
       <% if flash_notices? %>
-        <%= render(partial: "layouts/app/flash_notices",
-                   locals: { id: "flash_notices"}) %>
+        <div class="container-text hidden-print">
+          <%= render(partial: "layouts/app/flash_notices",
+                     locals: { id: "flash_notices"}) %>
+        </div><!--.container-text-->
       <% end %>
       <% flash_clear %>
 
