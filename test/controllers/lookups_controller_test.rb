@@ -101,13 +101,23 @@ class LookupsControllerTest < FunctionalTestCase
                                                              match: "Verpab"))
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/names})
+  end
 
-    # Prove that lookup_name adds flash message when it hits an error,
-    # stubbing a method called by lookup_name in order to provoke an error.
+  def test_lookup_name_with_error
+    # Stub a private method called by lookup_name in order to provoke an error.
     LookupsController.any_instance.stubs(:fix_name_matches).
       raises(RuntimeError)
+    login
+
+    get(:lookup_name, params: { id: names(:fungi).id })
+    assert_no_flash("Errors should be ignored if looking up by integer")
+    assert_response(nil, "Errors should be ignored if looking up by integer")
+
     get(:lookup_name, params: { id: names(:fungi).text_name })
-    assert_flash_text("RuntimeError")
+    assert_flash_text(
+      "RuntimeError",
+      "Error should provoke a flash if looking up by non-integer"
+    )
   end
 
   def test_lookup_observation
