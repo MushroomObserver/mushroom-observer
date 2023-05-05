@@ -104,7 +104,7 @@ class LookupsControllerTest < FunctionalTestCase
   end
 
   def test_lookup_name_with_error
-    # Stub a private method called by lookup_name in order to provoke an error.
+    # Stub a method called by lookup_name in order to provoke an error.
     LookupsController.any_instance.stubs(:fix_name_matches).
       raises(RuntimeError)
     login
