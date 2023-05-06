@@ -79,15 +79,12 @@ module VersionsHelper
 
   def link_to_version(text, ver, obj)
     if ver == obj.versions.last
-      link_with_query(text,
-                      controller: obj.show_controller,
-                      action: obj.show_action,
-                      id: obj.id)
+      link_with_query(text, obj.show_link_args)
     else
       link_with_query(text,
-                      controller: "#{obj.show_controller}/versions",
-                      action: :show, id: obj.id,
-                      version: ver.version)
+                      { controller: "#{obj.show_controller}/versions",
+                        action: :show, id: obj.id,
+                        version: ver.version })
     end
   end
 
