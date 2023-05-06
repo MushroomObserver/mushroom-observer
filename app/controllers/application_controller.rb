@@ -298,21 +298,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Slowly converting redirects to renders everywhere:
-  def render_back_object_or_object(back_obj, obj)
-    if back_obj
-      render(add_query_param(back_obj.show_link_args),
-             location: send("#{back_obj.type_tag}_path",
-                            { id: back_obj.id, q: get_query_param }))
-    elsif obj
-      render(add_query_param(obj.index_link_args),
-             location: send("#{obj.type_tag.pluralize}_path",
-                            { id: obj.id, q: get_query_param }))
-    else
-      render("/", location: observations_path(q: get_query_param))
-    end
-  end
-
   # Redirect from www.mo.org to mo.org.
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this
