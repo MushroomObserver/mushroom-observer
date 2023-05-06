@@ -50,7 +50,8 @@ form.button_to {
     display: inline;
   }
 
-  input[type=submit]:not(.btn) {
+  input[type=submit]:not(.btn),
+  button[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
     -webkit-appearance: caret;
