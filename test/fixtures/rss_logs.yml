@@ -123,12 +123,12 @@ peltigera_obs_rss_log:
   created_at: 2014-04-04 04:04:03
   notes: "20140404040406 log_observation_created user rolf\n"
 
-peltigera_rolf_obs_rss_log:
+peltigera_mary_obs_rss_log:
   <<: *DEFAULTS
-  observation: peltigera_rolf_obs
-  updated_at: 2014-04-04 04:04:05
-  created_at: 2014-04-04 04:04:04
-  notes: "20140404040405 log_observation_created user mary\n"
+  observation: peltigera_mary_obs
+  updated_at: 2014-05-04 05:05:05
+  created_at: 2014-05-04 05:05:05
+  notes: "20140504050505 log_observation_created user mary\n"
 
 fungi_obs_rss_log:
   <<: *DEFAULTS

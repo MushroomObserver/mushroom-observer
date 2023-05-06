@@ -75,7 +75,7 @@ module ThumbnailHelper
   end
 
   def stretched_link_classes
-    "image-link stretched-link"
+    "image-link ab-fab stretched-link"
   end
 
   def image_original_name(original, image)
