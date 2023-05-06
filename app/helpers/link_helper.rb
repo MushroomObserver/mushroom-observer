@@ -79,7 +79,7 @@ module LinkHelper
       data: { confirm: :are_you_sure.t }
     }.merge(args)
 
-    button_to(name, path, html_options)
+    button_to(path, html_options) { name }
   end
 
   # POST to a path; used instead of a link because POST link requires js
@@ -92,7 +92,7 @@ module LinkHelper
       class: ""
     }.merge(args)
 
-    button_to(name, path, html_options)
+    button_to(path, html_options) { name }
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
@@ -105,7 +105,7 @@ module LinkHelper
       class: ""
     }.merge(args)
 
-    button_to(name, path, html_options)
+    button_to(path, html_options) { name }
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
@@ -118,6 +118,6 @@ module LinkHelper
       class: ""
     }.merge(args)
 
-    button_to(name, path, html_options)
+    button_to(path, html_options) { name }
   end
 end
