@@ -993,6 +993,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Search: legacy action redirects ---------------------------------
   get("/observer/pattern_search", to: redirect("/search/pattern"))
+  get("/observer/observation_search", to: redirect("/observations"))
   get("/observer/advanced_search_form", to: redirect("/search/advanced"))
 
   ###
