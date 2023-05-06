@@ -32,11 +32,14 @@ body_class = whos_calling + theme_class
 
       <%= render(partial: "layouts/search_bar") %>
 
-      <% if flash_notices? %>
-        <%= render(partial: "layouts/app/flash_notices",
-                   locals: { id: "flash_notices"}) %>
-      <% end %>
-      <% flash_clear %>
+      <%# need to print a `#page_flash` div no matter what, so js can add %>
+      <div class="container-text hidden-print" id="page_flash">
+        <% if flash_notices? %>
+          <%= render(partial: "layouts/app/flash_notices",
+                     locals: { id: "flash_notices"}) %>
+        <% end %>
+        <% flash_clear %>
+      </div><!--.container-text-->
 
       <header id="header">
         <%= render(partial: "layouts/content/title_and_tab_sets") %>
