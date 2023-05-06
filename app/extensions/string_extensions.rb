@@ -20,6 +20,11 @@
 #  strip_html::         Remove HTML tags (not entities) from string.
 #  truncate_html::      Truncate an HTML string to N display characters.
 #  html_to_ascii::      Convert HTML into plain text.
+#  gsub_html_special_chars:: auxiliary to html_to_ascii
+#  unescape_html::
+#  as_displayed::
+#  break_name::
+#  small_author::
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
 #  rand_char::          Pick a single random character from the string.
@@ -525,9 +530,10 @@ class String
     CGI.unescapeHTML(self)
   end
 
-  # For integration test comparisons: the whole string as rendered in browser
+  # For integration test comparisons: no tags and no special char encodings
+  # i.e., the whole string as a human would encounter it in the browser
   def as_displayed
-    unescape_html.strip_squeeze
+    strip_html.unescape_html.strip_squeeze
   end
 
   # Insert a line break between the scientific name and the author
