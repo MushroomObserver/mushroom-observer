@@ -929,7 +929,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Observations: legacy action redirects ----------------------------
   get("/observer/create_observation", to: redirect("/observations/new"))
-  get("/observer/observation_search", to: redirect("/observations"))
+  get("/observer/observation_search", to: redirect(path: "/observations"))
   get("/observer/advanced_search", to: redirect("/observations"))
   get("/observer/index_observation/:id", to: redirect("/observations?id=%{id}"))
   get("/observer/index_observation", to: redirect("/observations"))
