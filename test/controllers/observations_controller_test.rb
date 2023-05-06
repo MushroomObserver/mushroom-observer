@@ -90,7 +90,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # ----------------------------
 
   def test_show_observation_noteless_image
-    obs = observations(:peltigera_rolf_obs)
+    obs = observations(:peltigera_mary_obs)
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
     assert(obs.images.member?(img))
