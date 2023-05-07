@@ -111,7 +111,7 @@ module ImageHelper
   end
 
   def stretched_link_classes
-    "image-link stretched-link"
+    "image-link ab-fab stretched-link"
   end
 
   def visual_group_status_link(visual_group, image_id, state, link)
