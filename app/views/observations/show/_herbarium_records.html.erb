@@ -14,12 +14,14 @@
     <div>
       <%= :Herbarium_records.t %>: [<%=
         link_with_query(:create_herbarium_record.t,
-          new_herbarium_record_path(observation_id: observation.id))
+          new_herbarium_record_path(observation_id: observation.id),
+          { remote: true, onclick: "MOEvents.whirly();",
+            id: "create_herbarium_record_link_#{obs_id}" })
       %>]
     </div>
     <ul class="tight-list">
       <% records.each do |record| %>
-        <li>
+        <li id="herbarium_record_<%= record.id %>>
           <%= link_to(record.accession_at_herbarium.t,
                       herbarium_record_path(id: record.id,
                                             params: { q: get_query_param })) %>
@@ -27,13 +29,18 @@
             [<%= link_to(:EDIT.t,
                          edit_herbarium_record_path(id: record.id,
                                                     back: observation.id,
-                                                    q: get_query_param)) %> |
+                                                    q: get_query_param),
+                         { remote: true, onclick: "MOEvents.whirly();",
+                           class: "edit_herbarium_record_link" }) %> |
              <%= patch_button(name: :REMOVE.t,
                     path: herbarium_record_remove_observation_path(
                       herbarium_record_id: record.id,
                       observation_id: observation.id, q: get_query_param,
                     ),
-                    data: { confirm: :are_you_sure.t }) %>]
+                    data: { confirm: :are_you_sure.t },
+                    remote: true,
+                    onclick: "MOEvents.whirly();",
+                    class: "remove_herbarium_record_link") %>]
           <% end %>
         </li>
       <% end %>
@@ -57,7 +64,9 @@
     <%= :show_observation_no_herbarium_records.t %> [<%=
       link_to(:create_herbarium_record.t,
               new_herbarium_record_path(observation_id: observation.id,
-                                        q: get_query_param))
+                                        q: get_query_param),
+              { remote: true, onclick: "MOEvents.whirly();",
+                id: "create_herbarium_record_link_#{obs_id}" })
     %>]
   <% end %>
 <% end %>
