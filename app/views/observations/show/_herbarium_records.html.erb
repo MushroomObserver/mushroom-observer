@@ -21,17 +21,18 @@
     </div>
     <ul class="tight-list">
       <% records.each do |record| %>
-        <li id="herbarium_record_<%= record.id %>>
+        <li id="herbarium_record_<%= record.id %>">
           <%= link_to(record.accession_at_herbarium.t,
                       herbarium_record_path(id: record.id,
-                                            params: { q: get_query_param })) %>
+                                            params: { q: get_query_param }),
+                      class: "show_herbarium_record_link_#{record.id}") %>
           <% if record.can_edit? || in_admin_mode? %>
             [<%= link_to(:EDIT.t,
                          edit_herbarium_record_path(id: record.id,
                                                     back: obs_id,
                                                     q: get_query_param),
                          remote: true, onclick: "MOEvents.whirly();",
-                         class: "edit_herbarium_record_link") %> |
+                         class: "edit_herbarium_record_link_#{record.id}") %> |
              <%= patch_button(name: :REMOVE.t,
                     path: herbarium_record_remove_observation_path(
                       herbarium_record_id: record.id,
@@ -40,7 +41,7 @@
                     data: { confirm: :are_you_sure.t },
                     remote: true,
                     onclick: "MOEvents.whirly();",
-                    class: "remove_herbarium_record_link") %>]
+                    class: "remove_herbarium_record_link_#{record.id}") %>]
           <% end %>
         </li>
       <% end %>
@@ -54,8 +55,8 @@
       <% records.each do |record| %>
         <li>
           <%= link_to(record.accession_at_herbarium.t,
-                      herbarium_record_path(id: record.id,
-                                            q: get_query_param)) %>
+                      herbarium_record_path(id: record.id, q: get_query_param),
+                      class: "show_herbarium_record_link_#{record.id}") %>
         </li>
       <% end %>
     </ul>
