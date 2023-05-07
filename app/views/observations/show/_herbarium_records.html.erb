@@ -2,7 +2,7 @@
   records = observation.herbarium_records
   can_add = in_admin_mode? || observation.can_edit? ||
             @user && @user.curated_herbaria.any?
-
+  obs_id = observation.id
   # This is passed in to show_herbarium_record, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
   query = Query.lookup(:HerbariumRecord, :all, observations: observation.id)
@@ -14,7 +14,7 @@
     <div>
       <%= :Herbarium_records.t %>: [<%=
         link_with_query(:create_herbarium_record.t,
-          new_herbarium_record_path(observation_id: observation.id),
+          new_herbarium_record_path(observation_id: obs_id),
           { remote: true, onclick: "MOEvents.whirly();",
             id: "create_herbarium_record_link_#{obs_id}" })
       %>]
@@ -28,14 +28,14 @@
           <% if record.can_edit? || in_admin_mode? %>
             [<%= link_to(:EDIT.t,
                          edit_herbarium_record_path(id: record.id,
-                                                    back: observation.id,
+                                                    back: obs_id,
                                                     q: get_query_param),
                          { remote: true, onclick: "MOEvents.whirly();",
                            class: "edit_herbarium_record_link" }) %> |
              <%= patch_button(name: :REMOVE.t,
                     path: herbarium_record_remove_observation_path(
                       herbarium_record_id: record.id,
-                      observation_id: observation.id, q: get_query_param,
+                      observation_id: obs_id, q: get_query_param,
                     ),
                     data: { confirm: :are_you_sure.t },
                     remote: true,
@@ -63,7 +63,7 @@
   <% elsif records.none? && can_add %>
     <%= :show_observation_no_herbarium_records.t %> [<%=
       link_to(:create_herbarium_record.t,
-              new_herbarium_record_path(observation_id: observation.id,
+              new_herbarium_record_path(observation_id: obs_id,
                                         q: get_query_param),
               { remote: true, onclick: "MOEvents.whirly();",
                 id: "create_herbarium_record_link_#{obs_id}" })
