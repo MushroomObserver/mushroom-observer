@@ -16,8 +16,8 @@
           :create_collection_number.t,
           new_collection_number_path(observation_id: obs_id,
                                      q: get_query_param),
-          { remote: true, onclick: "MOEvents.whirly();",
-            id: "create_collection_number_link_#{obs_id}" })
+          remote: true, onclick: "MOEvents.whirly();",
+          id: "create_collection_number_link_#{obs_id}")
       %>]
     </div>
     <ul class="tight-list">
@@ -29,8 +29,8 @@
                        edit_collection_number_path(
                          id: number.id, q: get_query_param, back: obs_id
                        ),
-                       { remote: true, onclick: "MOEvents.whirly();",
-                         class: "edit_collection_number_link" }) %> |
+                       remote: true, onclick: "MOEvents.whirly();",
+                       class: "edit_collection_number_link") %> |
            <%= patch_button(
             name: :REMOVE.t,
             path: collection_number_remove_observation_path(
@@ -60,8 +60,8 @@
         :create_collection_number.t,
         new_collection_number_path(observation_id: obs_id,
                                    q: get_query_param),
-        { remote: true, onclick: "MOEvents.whirly();",
-          id: "create_collection_number_link_#{obs_id}" })
+        remote: true, onclick: "MOEvents.whirly();",
+        id: "create_collection_number_link_#{obs_id}")
     %>]
   <% end %>
 <% end %>

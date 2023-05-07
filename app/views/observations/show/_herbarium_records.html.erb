@@ -15,8 +15,8 @@
       <%= :Herbarium_records.t %>: [<%=
         link_with_query(:create_herbarium_record.t,
           new_herbarium_record_path(observation_id: obs_id),
-          { remote: true, onclick: "MOEvents.whirly();",
-            id: "create_herbarium_record_link_#{obs_id}" })
+          remote: true, onclick: "MOEvents.whirly();",
+          id: "create_herbarium_record_link_#{obs_id}")
       %>]
     </div>
     <ul class="tight-list">
@@ -30,8 +30,8 @@
                          edit_herbarium_record_path(id: record.id,
                                                     back: obs_id,
                                                     q: get_query_param),
-                         { remote: true, onclick: "MOEvents.whirly();",
-                           class: "edit_herbarium_record_link" }) %> |
+                         remote: true, onclick: "MOEvents.whirly();",
+                         class: "edit_herbarium_record_link") %> |
              <%= patch_button(name: :REMOVE.t,
                     path: herbarium_record_remove_observation_path(
                       herbarium_record_id: record.id,
@@ -65,8 +65,8 @@
       link_to(:create_herbarium_record.t,
               new_herbarium_record_path(observation_id: obs_id,
                                         q: get_query_param),
-              { remote: true, onclick: "MOEvents.whirly();",
-                id: "create_herbarium_record_link_#{obs_id}" })
+              remote: true, onclick: "MOEvents.whirly();",
+              id: "create_herbarium_record_link_#{obs_id}")
     %>]
   <% end %>
 <% end %>
