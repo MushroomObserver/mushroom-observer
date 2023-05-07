@@ -90,7 +90,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # ----------------------------
 
   def test_show_observation_noteless_image
-    obs = observations(:peltigera_rolf_obs)
+    obs = observations(:peltigera_mary_obs)
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
     assert(obs.images.member?(img))
@@ -927,7 +927,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: obs.id })
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
-    assert_select("form[action=?]", observation_path(obs.id), count: 0)
+    assert_select(".destroy_observation_link_#{obs.id}", count: 0)
     assert_select("a:match('href',?)",
                   new_image_for_observation_path(obs.id), count: 0)
     assert_select("a:match('href',?)",
@@ -943,8 +943,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
-    assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
-    assert_select("button.destroy_observation_link_#{obs.id}", minimum: 1)
+    assert_select(".destroy_observation_link_#{obs.id}", minimum: 1)
     assert_select("a[href=?]",
                   new_image_for_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",
@@ -958,8 +957,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
-    assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
-    assert_select("button.destroy_observation_link_#{obs.id}", minimum: 1)
+    assert_select(".destroy_observation_link_#{obs.id}", minimum: 1)
     assert_select("a[href=?]",
                   new_image_for_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",

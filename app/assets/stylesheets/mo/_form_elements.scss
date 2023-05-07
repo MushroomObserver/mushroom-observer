@@ -52,9 +52,8 @@ form.button_to {
     display: inline;
   }
 
-  // button_to with block generates a button not an input
-  button[type=submit]:not(.btn),
-  input[type=submit]:not(.btn) {
+  input[type=submit]:not(.btn),
+  button[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
     appearance: caret;

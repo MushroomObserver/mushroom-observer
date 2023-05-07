@@ -120,7 +120,7 @@ module LinkHelper
       class: ""
     }.merge(args)
 
-    button_to(name, path, html_options)
+    button_to(path, html_options) { name }
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
@@ -133,7 +133,6 @@ module LinkHelper
       method: :put,
       class: ""
     }.merge(args)
-    # Must pass a block in case the button has an icon or html.
     button_to(path, html_options) { name }
   end
 
@@ -148,6 +147,6 @@ module LinkHelper
       class: ""
     }.merge(args)
 
-    button_to(name, path, html_options)
+    button_to(path, html_options) { name }
   end
 end
