@@ -1,3 +1,3 @@
-$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "collection_number", title: :edit_collection_number_title.l(name: @collection_number.format_name), form: "collection_numbers/form", action: :update, back: @back }) %>');
+$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "collection_number", title: :edit_collection_number_title.l(name: @collection_number.format_name), form: "collection_numbers/form", action: :update }) %>');
 
 <%= render(partial: "collection_numbers/form_bindings", format: :js) %>
