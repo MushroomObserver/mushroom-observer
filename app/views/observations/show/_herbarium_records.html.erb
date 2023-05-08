@@ -2,7 +2,7 @@
   records = observation.herbarium_records
   can_add = in_admin_mode? || observation.can_edit? ||
             @user && @user.curated_herbaria.any?
-
+  obs_id = observation.id
   # This is passed in to show_herbarium_record, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
   query = Query.lookup(:HerbariumRecord, :all, observations: observation.id)
@@ -13,27 +13,38 @@
   <% if records.any? && can_add %>
     <div>
       <%= :Herbarium_records.t %>: [<%=
-        link_with_query(:create_herbarium_record.t,
-          new_herbarium_record_path(observation_id: observation.id))
+        link_to(
+          :create_herbarium_record.t,
+          new_herbarium_record_path(observation_id: obs_id,
+                                    q: get_query_param),
+          remote: true, onclick: "MOEvents.whirly();",
+          id: "create_herbarium_record_link_#{obs_id}"
+        )
       %>]
     </div>
     <ul class="tight-list">
       <% records.each do |record| %>
-        <li>
+        <li id="herbarium_record_<%= record.id %>">
           <%= link_to(record.accession_at_herbarium.t,
                       herbarium_record_path(id: record.id,
-                                            params: { q: get_query_param })) %>
+                                            params: { q: get_query_param }),
+                      class: "show_herbarium_record_link_#{record.id}") %>
           <% if record.can_edit? || in_admin_mode? %>
             [<%= link_to(:EDIT.t,
                          edit_herbarium_record_path(id: record.id,
-                                                    back: observation.id,
-                                                    q: get_query_param)) %> |
+                                                    back: obs_id,
+                                                    q: get_query_param),
+                         remote: true, onclick: "MOEvents.whirly();",
+                         class: "edit_herbarium_record_link_#{record.id}") %> |
              <%= patch_button(name: :REMOVE.t,
                     path: herbarium_record_remove_observation_path(
                       herbarium_record_id: record.id,
-                      observation_id: observation.id, q: get_query_param,
+                      observation_id: obs_id, q: get_query_param,
                     ),
-                    data: { confirm: :are_you_sure.t }) %>]
+                    data: { confirm: :are_you_sure.t },
+                    remote: true,
+                    onclick: "MOEvents.whirly();",
+                    class: "remove_herbarium_record_link_#{record.id}") %>]
           <% end %>
         </li>
       <% end %>
@@ -47,8 +58,8 @@
       <% records.each do |record| %>
         <li>
           <%= link_to(record.accession_at_herbarium.t,
-                      herbarium_record_path(id: record.id,
-                                            q: get_query_param)) %>
+                      herbarium_record_path(id: record.id, q: get_query_param),
+                      class: "show_herbarium_record_link_#{record.id}") %>
         </li>
       <% end %>
     </ul>
@@ -56,8 +67,10 @@
   <% elsif records.none? && can_add %>
     <%= :show_observation_no_herbarium_records.t %> [<%=
       link_to(:create_herbarium_record.t,
-              new_herbarium_record_path(observation_id: observation.id,
-                                        q: get_query_param))
+              new_herbarium_record_path(observation_id: obs_id,
+                                        q: get_query_param),
+              remote: true, onclick: "MOEvents.whirly();",
+              id: "create_herbarium_record_link_#{obs_id}")
     %>]
   <% end %>
 <% end %>
