@@ -33,8 +33,34 @@ class ImagesControllerTest < FunctionalTestCase
     check_index_sorted_by("user")
   end
 
+  def test_index_sorted_by_confidence
+    by = "confidence"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
+    assert_displayed_title("Images by Confidence Level")
+  end
+
   def test_index_sorted_by_copyright_holder
     check_index_sorted_by("copyright_holder")
+  end
+
+  def test_index_sorted_by_image_quality
+    check_index_sorted_by("image_quality")
+  end
+
+  def test_index_sorted_by_owners_quality
+    by = "owners_quality"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
+    assert_displayed_title("Images by Owner’s Quality")
   end
 
   def test_index_too_many_pages

@@ -6,6 +6,7 @@
 
   .panel {
     min-height: 200px;
+    margin-bottom: $grid-gutter-width;
 
     .thumbnail-container {
       min-height: 30px;
@@ -26,18 +27,51 @@
   }
 }
 
+.rss-box-details {
+
+  a {
+    color: inherit !important;
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: $link-color !important;
+    }
+  }
+}
+
+// To make way for floating ID
+.rss-heading {
+
+  .rss-name {
+    margin-right: 7.5rem;
+  }
+
+  // Standardize the size of the ID
+  small.rss-id {
+    font-size: 1.05rem !important;
+  }
+  // small {
+  //   font-size: 81%;
+  // }
+}
+
+h5.rss-heading {
+  font-size: 14px;
+}
+
 .rss-detail {
   margin-top: 5px;
   margin-bottom: 5px;
-  text-align: center;
+  // text-align: center;
 }
 
-.rss-where,
-.rss-what,
-.rss-when,
-.rss-fancy-time {
-  text-align: center;
-}
+// .rss-where,
+// .rss-what,
+// .rss-when,
+// .rss-fancy-time {
+  // text-align: center;
+// }
 
 .rss-what,
 .rss-when,
@@ -49,5 +83,37 @@
 @media screen and (max-width: 767px) {
   .rss-box-details {
     height: auto !important;
+  }
+}
+
+.theme-amanita {
+
+  .panel,
+  .table,
+  .list-group:not(.sidebar-nav) .list-group-item {
+    background: rgba($panel-bg, 0.45);
+  }
+
+  .panel-footer {
+    background: none;
+  }
+
+  .rss-box-details,
+  .panel {
+
+    h5 small,
+    a {
+      color: lighten($link-color, 12%) !important;
+
+      &:hover,
+      &:active,
+      &:focus {
+        color: lighten($link-color, 21%) !important;
+      }
+    }
+  }
+
+  .help-block {
+    color: $text-color;
   }
 }

@@ -21,7 +21,14 @@ module HerbariumRecords
       return unless make_sure_can_delete!(@herbarium_record)
 
       @herbarium_record.remove_observation(@observation)
-      redirect_with_query(observation_path(@observation.id))
+      respond_to do |format|
+        format.html do
+          redirect_with_query(observation_path(@observation.id))
+        end
+        format.js do
+          render(partial: "herbarium_records/update_observation") and return
+        end
+      end
     end
 
     private

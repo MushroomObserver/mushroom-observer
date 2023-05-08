@@ -3,6 +3,123 @@
 require("test_helper")
 
 class AccountTest < CapybaraIntegrationTestCase
+  # -------------------------------
+  #  Test basic login.
+  # -------------------------------
+
+  def test_login
+    # Start at index.
+    visit("/")
+
+    # Login.
+    first(:link, text: "Login").click
+    assert_selector("body.login__new")
+
+    # Try to login without a password.
+    within("#account_login_form") do
+      assert_field("user_login", text: "")
+      assert_field("user_password", text: "")
+      assert_checked_field("user_remember_me")
+      fill_in("user_login", with: "rolf")
+      click_commit
+    end
+    assert_selector("body.login__create")
+    assert_flash_text(/unsuccessful/)
+
+    # Try again with incorrect password.
+    within("#account_login_form") do
+      assert_field("user_login", with: "rolf")
+      assert_field("user_password", text: "")
+      assert_checked_field("user_remember_me")
+      fill_in("user_password", with: "boguspassword")
+      uncheck("user_remember_me")
+      click_commit
+    end
+    assert_selector("body.login__create")
+    assert_flash_text(/unsuccessful/)
+
+    # Try yet again with correct password.
+    within("#account_login_form") do
+      assert_field("user_login", with: "rolf")
+      assert_field("user_password", text: "")
+      assert_unchecked_field("user_remember_me")
+      fill_in("user_password", with: "testpassword")
+      click_commit
+    end
+    assert_selector("body.observations__index")
+    assert_flash_text(/success/)
+
+    # This should only be accessible if logged in.
+    first(:link, text: "Preferences").click
+    assert_selector("body.preferences__edit")
+
+    # Log out and try again.
+    first(:link, text: "Logout").click
+    assert_selector("body.login__logout")
+    assert_no_link(text: "Preferences")
+    visit("/account/preferences/edit")
+    assert_selector("body.login__new")
+  end
+
+  # ----------------------------
+  #  Test autologin cookies. To be converted to Capybara
+  # ----------------------------
+
+  # def test_autologin
+  #   rolf_cookies = get_cookies(rolf, true)
+  #   mary_cookies = get_cookies(mary, true)
+  #   # Test not working with autologin false
+  #   dick_cookies = get_cookies(dick, false)
+  #   try_autologin(rolf_cookies, rolf)
+  #   try_autologin(mary_cookies, mary)
+  #   try_autologin(dick_cookies, false)
+  # end
+
+  # def get_cookies(user, autologin)
+  #   sess = open_session
+  #   login(user, "testpassword", autologin, session: sess)
+  #   result = sess.driver.request.cookies.dup
+  #   if autologin
+  #     assert_match(/^#{user.id}/, result["mo_user"])
+  #   else
+  #     assert_equal("", result["mo_user"].to_s)
+  #   end
+  #   result
+  # end
+
+  # def try_autologin(cookies, user)
+  #   sess = open_session
+  #   sess.driver.request.cookies["mo_user"] = cookies["mo_user"]
+  #   sess.visit("/account/preferences/edit")
+  #   if user
+  #     sess.assert_selector("body.preferences__edit")
+  #     sess.assert_no_selector("body.login__new")
+  #     # assert_users_equal(user, sess.assigns(:user))
+  #   else
+  #     sess.assert_no_selector("body.preferences__edit")
+  #     sess.assert_selector("body.login__new")
+  #   end
+  # end
+
+  # ------------------------------------------------------------------------
+  #  Tests to make sure that the proper links are rendered  on the  home page
+  #  when a user is logged in.
+  #  test_user_dropdown_avaiable:: tests for existence of dropdown bar & links
+  #
+  # ------------------------------------------------------------------------
+
+  def test_user_dropdown_avaiable
+    login("dick")
+    visit("/")
+    assert_selector("#user_drop_down")
+    links = find_all("#user_drop_down a")
+    assert_equal(links.length, 7)
+  end
+
+  # ----------------------------
+  #  Test signup verify login and logout.
+  # ----------------------------
+
   def test_signup_verify_login_and_logout
     visit(account_signup_path)
     assert_selector("body.account__new")

@@ -46,6 +46,13 @@ class HerbariumRecordsController < ApplicationController
 
     @back_object = @observation
     @herbarium_record = default_herbarium_record
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def create
@@ -53,7 +60,7 @@ class HerbariumRecordsController < ApplicationController
     return unless @observation
 
     @back_object = @observation
-    create_herbarium_record
+    create_herbarium_record # response handled here
   end
 
   def edit
@@ -64,6 +71,13 @@ class HerbariumRecordsController < ApplicationController
     return unless make_sure_can_edit!
 
     @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def update
@@ -73,7 +87,7 @@ class HerbariumRecordsController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!
 
-    update_herbarium_record
+    update_herbarium_record # response handled here
   end
 
   def destroy
@@ -83,7 +97,13 @@ class HerbariumRecordsController < ApplicationController
 
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
-    redirect_with_query(herbarium_records_path)
+
+    respond_to do |format|
+      format.js
+      format.html do
+        redirect_with_query(action: :index)
+      end
+    end
   end
 
   ##############################################################################
@@ -201,19 +221,37 @@ class HerbariumRecordsController < ApplicationController
     return if flash_error_and_reload_if_form_has_errors
 
     if herbarium_label_free?
-      @herbarium_record.save
-      @herbarium_record.add_observation(@observation)
-    elsif @other_record.can_edit?
-      flash_warning(:create_herbarium_record_already_used.t) if
-        @other_record.observations.any?
-      @other_record.add_observation(@observation)
-    else
-      flash_error(:create_herbarium_record_already_used_by_someone_else.
-        t(herbarium_name: @herbarium_record.herbarium.name))
-      return
+      save_herbarium_record_and_update_associations and return
     end
 
-    redirect_to_back_object_or_object(@back_object, @herbarium_record)
+    if @other_record.can_edit?
+      flash_herbarium_record_already_used_and_add_observation
+    else
+      flash_herbarium_record_already_used_by_someone_else
+    end
+    show_flash_and_send_back
+  end
+
+  def save_herbarium_record_and_update_associations
+    @herbarium_record.save
+    @herbarium_record.add_observation(@observation)
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @herbarium_record)
+      end
+      format.js # updates the observation. @back_object is set already
+    end
+  end
+
+  def flash_herbarium_record_already_used_and_add_observation
+    flash_warning(:create_herbarium_record_already_used.t) if
+      @other_record.observations.any?
+    @other_record.add_observation(@observation)
+  end
+
+  def flash_herbarium_record_already_used_by_someone_else
+    flash_error(:create_herbarium_record_already_used_by_someone_else.
+      t(herbarium_name: @herbarium_record.herbarium.name))
   end
 
   def update_herbarium_record
@@ -223,15 +261,25 @@ class HerbariumRecordsController < ApplicationController
     return if flash_error_and_reload_if_form_has_errors
 
     if herbarium_label_free?
-      @herbarium_record.save
-      @herbarium_record.notify_curators if
-        @herbarium_record.herbarium != old_herbarium
+      update_herbarium_record_and_notify_curators(old_herbarium)
     else
       flash_warning(:edit_herbarium_record_already_used.t)
-      return
+      show_flash_and_send_back
     end
+  end
 
-    redirect_to_back_object_or_object(@back_object, @herbarium_record)
+  def update_herbarium_record_and_notify_curators(old_herbarium)
+    @herbarium_record.save
+    @herbarium_record.notify_curators if
+      @herbarium_record.herbarium != old_herbarium
+
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @herbarium_record)
+      end
+      @observation = @back_object # if we're here, we're on an obs page
+      format.js # updates the page
+    end
   end
 
   def flash_error_and_reload_if_form_has_errors
@@ -243,11 +291,21 @@ class HerbariumRecordsController < ApplicationController
                       end
     redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
-    redirect_to(redirect_params) and return true unless validate_herbarium_name!
+    unless validate_herbarium_name! # may add flashes
+      respond_to do |format|
+        format.html do
+          redirect_to(redirect_params) and return true
+        end
+        format.js do
+          render(partial: "form_reload",
+                 locals: { action: action_name.to_sym }) and return true
+        end
+      end
+    end
 
     unless can_add_record_to_herbarium?
-      redirect_to_back_object_or_object(@back_object, @herbarium_record) and
-        return true
+      show_flash_and_send_back
+      return true
     end
 
     false
@@ -338,6 +396,19 @@ class HerbariumRecordsController < ApplicationController
                      else
                        @herbarium_record
                      end
+    end
+  end
+
+  def show_flash_and_send_back
+    respond_to do |format|
+      format.html do
+        redirect_to_back_object_or_object(@back_object, @herbarium_record) and
+          return
+      end
+      format.js do
+        # renders the flash in the modal via js
+        render(partial: "shared/update_modal_flash") and return
+      end
     end
   end
 end

@@ -3,6 +3,8 @@
 # Gather details for items in matrix-style ndex pages.
 class MatrixBoxPresenter < BasePresenter
   attr_accessor \
+    :id,         # id of the target or log object
+    :type,       # what kind of box is this
     :image_data, # data passed to thumbnail_presenter
     :when,       # when object or target was created
     :who,        # owner of object or target
@@ -31,12 +33,16 @@ class MatrixBoxPresenter < BasePresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log)
     target = rss_log.target
+    self.id = target&.id || rss_log.id
+    self.type = rss_log.target_type || :rss_log
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = target.user if target&.user
-    self.name = if target
+    self.name = if rss_log.target_type == :image
                   target.unique_format_name.t
+                elsif target
+                  target.format_name.t.break_name.small_author
                 else
-                  rss_log.unique_format_name.t
+                  rss_log.format_name.t.break_name.small_author
                 end
     self.what = target || rss_log
     if target&.respond_to?(:location)
@@ -49,7 +55,8 @@ class MatrixBoxPresenter < BasePresenter
       self.image_data = {
         image: target.thumb_image,
         image_link: target.show_link_args,
-        obs_data: obs_data_hash(target)
+        obs_data: obs_data_hash(target),
+        context: :matrix_box
       }
     end
     return unless (temp = rss_log.detail)
@@ -63,6 +70,8 @@ class MatrixBoxPresenter < BasePresenter
 
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image)
+    self.id = image.id
+    self.type = :image
     self.when = begin
                   image.when.web_date
                 rescue StandardError
@@ -73,15 +82,18 @@ class MatrixBoxPresenter < BasePresenter
     self.what = image
     self.image_data = {
       image: image,
-      image_link: image.show_link_args
+      image_link: image.show_link_args,
+      context: :matrix_box
     }
   end
 
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation)
+    self.id         = observation.id
+    self.type       = :observation
     self.when       = observation.when.web_date
     self.who        = observation.user if observation.user
-    self.name       = observation.unique_format_name.t
+    self.name       = observation.format_name.t.break_name.small_author
     self.what       = observation
     self.place_name = observation.place_name
     self.where      = observation.location
@@ -94,12 +106,15 @@ class MatrixBoxPresenter < BasePresenter
     self.image_data = {
       image: observation.thumb_image,
       image_link: obs_or_other_link(observation),
-      obs_data: obs_data_hash(observation)
+      obs_data: obs_data_hash(observation),
+      context: :matrix_box
     }
   end
 
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user)
+    self.id = user.id
+    self.type = :user
     # rubocop:disable Rails/OutputSafety
     # The results of .t and web_date are guaranteed to be safe, and both
     # user.contribution and observations.count are just numbers.
@@ -116,7 +131,8 @@ class MatrixBoxPresenter < BasePresenter
     self.image_data = {
       image: user.image_id,
       image_link: user.show_link_args,
-      votes: false
+      votes: false,
+      context: :matrix_box
     }
   end
 

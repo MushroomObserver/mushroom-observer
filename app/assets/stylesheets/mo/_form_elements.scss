@@ -50,7 +50,8 @@ form.button_to {
     display: inline;
   }
 
-  input[type=submit]:not(.btn) {
+  input[type=submit]:not(.btn),
+  button[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
     -webkit-appearance: caret;
@@ -61,7 +62,14 @@ form.button_to {
     font-weight: normal;
     cursor: pointer;
     // Note: Use a text-info type utility class to color the button text
-    // color: #2050E0;
+
+    &:not(.text-danger) {
+      color: $link-color;
+
+      &:hover {
+        color: $link-hover-color;
+      }
+    }
   }
 
   input[type=submit]:hover {

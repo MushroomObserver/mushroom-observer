@@ -294,8 +294,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   #     resources :products
   #   end
 
-  # Default page is /rss_logs
-  root "rss_logs#index"
+  # Default page "/" is /observations ordered by: :rss_log
+  root "observations#index"
 
   # Route /123 to /observations/123.
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
@@ -922,6 +922,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Names: legacy action redirects -----------------------------------
   get("name/eol", to: redirect("names/eol_data#show"))
+  get("name/name_search", to: redirect(path: "names"))
 
   # ----- Lookups: legacy action redirects ---------------------------
   # The only legacy lookup that was ok'd for use by external sites
@@ -929,7 +930,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Observations: legacy action redirects ----------------------------
   get("/observer/create_observation", to: redirect("/observations/new"))
-  get("/observer/observation_search", to: redirect("/observations"))
+  get("/observer/observation_search", to: redirect(path: "/observations"))
   get("/observer/advanced_search", to: redirect("/observations"))
   get("/observer/index_observation/:id", to: redirect("/observations?id=%{id}"))
   get("/observer/index_observation", to: redirect("/observations"))

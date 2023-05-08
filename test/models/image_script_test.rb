@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ScriptTest < UnitTestCase
+class ImageScriptTest < UnitTestCase
   DATABASE_CONFIG = YAML.safe_load(
     Rails.root.join("config/database.yml").read
   )["test"]

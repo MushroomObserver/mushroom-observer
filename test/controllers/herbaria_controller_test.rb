@@ -134,6 +134,16 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_by_code
+    by = "code"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_response(:success)
+    assert_displayed_title("Fungaria by Code")
+  end
+
   def test_index_all_merge_source_links_presence_rolf
     assert_true(nybg.can_edit?(rolf)) # rolf is a curator
     assert_true(fundis.can_edit?(rolf)) # herbarium has no curators

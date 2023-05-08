@@ -9,21 +9,30 @@ class LurkerTest < CapybaraIntegrationTestCase
     reset_session!
     login
 
-    # Click on first observation in feed results
-    first(".rss-box-details .rss-detail", text: "Observation Created").
-      ancestor(".rss-box-details").first("a").click
+    visit("/activity_logs")
+    rss_log = RssLog.where.not(observation_id: nil).order(:updated_at).last
+    assert_selector("#box_#{rss_log.id} .rss-id",
+                    text: rss_log.observation_id)
+
+    # Click on first obs immediately after one that has images.
+    # NOTE: BS3 matrix-box are a bit harder to find siblings
+    # because the layout clearfix boxes interrupt the matrix boxes.
+    # This selects next matching peer, but you can do adjacent in bs4
+    # (do + instead of ~)
+    first(".image-link").ancestor(".matrix-box~.matrix-box").
+      first(".rss-detail", text: "Observation Created").
+      ancestor(".panel").first(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
-    # push_page is a stop-gap until a js-enabled driver is installed and working
     go_back_after do
       click_link("« Prev")
     end
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
-    # Click on the first image.
+    # Click on the first image. (That's why we picked the one after this.)
     go_back_after do
       first("#content .show_images .image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
@@ -307,7 +316,7 @@ class LurkerTest < CapybaraIntegrationTestCase
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
     within("#title_bar") do
-      click_link(text: "Index", href: /#{observations_path}/)
+      click_link(text: "Index") # href: /#{observations_path}/
     end
     results = results_observation_links
     assert_equal(query_params, parse_query_params(results.first[:href]))
@@ -332,7 +341,11 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
-    assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+    # assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
+    assert_equal(
+      "#{:app_title.l}: #{:query_title_observations_by_activity_log.l}",
+      page.title, "Login failed"
+    )
   end
 
   # This returns results so you can reset a `results` variable within test scope

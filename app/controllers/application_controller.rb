@@ -1494,8 +1494,22 @@ class ApplicationController < ActionController::Base
     @timer_start = Time.current
     @num_results = query.num_results
     @timer_end = Time.current
-    @num_results.zero? ? @title = args[:no_hits_title] : @title ||= query.title
+    if @num_results.zero?
+      @title = args[:no_hits_title]
+    else
+      @title ||= index_default_title(query)
+    end
     @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
+  end
+
+  # Special title for new obs default home page query
+  def index_default_title(query)
+    if query.title_args[:type] == :observation &&
+       query.title_args[:order] == :sort_by_rss_log
+      return :query_title_observations_by_activity_log.l
+    end
+
+    query.title
   end
 
   def show_action_redirect(query)
@@ -1581,7 +1595,7 @@ class ApplicationController < ActionController::Base
 
   def link_or_grayed_text(link_all, this_by, label, query, by)
     if !link_all && (by.to_s == this_by)
-      label.t
+      [label.t, nil]
     else
       sort_link(label.t, query, by)
     end

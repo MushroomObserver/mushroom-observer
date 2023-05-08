@@ -1,40 +1,19 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require("fastimage")
+require("stringio")
 #
-#  Read width and height of JPEG image from header.  (ImageMagick loads the
-#  entire image into memory!)
+#  Uses FastImage gem to read width and height of JPEG image from header.
+#  We could use ImageMagick identify to do the same thing. This script was
+#  originally written because ImageMagick loaded the entire image into memory.
+#  That is no longer true, but gem is probably faster and used for consistency.
 #
 ################################################################################
 
 # ------------------------------------
 #  Grab dimensions from JPEG header.
 # ------------------------------------
-
-def get_size(file)
-  w = h = nil
-  File.open(file) do |fh|
-    x = fh.sysread(2).unpack1("n")
-    if x != 0xFFD8
-      warn("#{file}: not jpeg")
-      break
-    end
-    baseline_dct_or_progressive_dct = [0xFFC0, 0xFFC2].freeze
-    while (str = fh.sysread(4))
-      x, l = str.unpack("nn")
-      if baseline_dct_or_progressive_dct.include?(x)
-        h, w = fh.sysread(5).unpack("xnn")
-        break
-      # elsif x < 0xFF00
-      #   $stderr.puts('Invalid header!')
-      #   exit 1
-      else
-        fh.sysseek(l - 2, IO::SEEK_CUR)
-      end
-    end
-  end
-  [w, h]
-end
 
 # ----------------------------
 #  Main program.
@@ -52,7 +31,7 @@ when "-f", "--file"
   any = false
   File.readlines(file).each do |line|
     file2 = line.chomp
-    w, h = get_size(file2)
+    w, h = FastImage.size(file2)
     if w
       $stdout.puts("#{file2}: #{w} #{h}")
       any = true
@@ -64,7 +43,7 @@ when "-f", "--file"
 else
   if (ARGV.length == 1) && !ARGV[0].start_with?("-")
     file = ARGV[0]
-    w, h = get_size(file)
+    w, h = FastImage.size(file)
     if w
       $stdout.puts("#{w} #{h}")
       exit(0)

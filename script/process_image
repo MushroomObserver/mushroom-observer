@@ -121,7 +121,7 @@ if (( !$development && !$errors && $transferred_any )); then
 fi
 
 if (( !$development && $errors )); then
-  send_mail -s "[MO] process_image" $webmaster_email < $log_file 
+  send_mail -s "[MO] process_image" $webmaster_email < $log_file
 fi
 
 exit $errors

@@ -32,23 +32,8 @@ module Query::Modules::HighLevelQueries
   INSTANTIATE_ARGS = [:include].freeze
 
   # Number of results the query returns.
-  def num_results(args = {})
-    @num_results ||=
-      if @result_ids
-        @result_ids.count
-      else
-        # Explicitly disable GROUP BY and ORDER clauses for the purposes of
-        # simply counting the number of results.  This is important because
-        # GROUP BY in particular will mess up the COUNT(*) spec.  Passing in
-        # empty strings for group and order will tell it to explicitly override
-        # anything in self.group and self.order.
-        rows = select_rows(args.merge(select: "COUNT(*)", group: "", order: ""))
-        begin
-          rows[0][0].to_i
-        rescue StandardError
-          0
-        end
-      end
+  def num_results(_args = {})
+    @num_results ||= result_ids&.count || 0
   end
 
   # Array of all results, just ids.

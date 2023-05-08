@@ -9,7 +9,7 @@
     tabs += [
       link_with_query(:species_list_show_set_source.t,
                       species_list_path(@species_list.id, set_source: 1),
-                      { help: :species_list_show_set_source_help.l }),
+                      help: :species_list_show_set_source_help.l),
       link_with_query(:species_list_show_clone_list.t,
                       new_species_list_path(clone: @species_list.id)),
       link_to(:species_list_show_add_remove_from_another_list.t,
@@ -22,7 +22,7 @@
     tabs += [
       link_with_query(:species_list_show_manage_projects.t,
                       edit_species_list_projects_path(@species_list.id),
-                      { help: :species_list_show_manage_projects_help.l }),
+                      help: :species_list_show_manage_projects_help.l),
       link_with_query(:species_list_show_edit.t,
                       edit_species_list_path(@species_list.id)),
       put_button(name: :species_list_show_clear_list.t,

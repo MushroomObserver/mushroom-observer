@@ -82,7 +82,7 @@ class IpStats
 
     def blocked?(ip)
       populate_blocked_ips unless blocked_ips_current?
-      @@blocked_ips.include?(ip) && !@@okay_ips.include?(ip)
+      @@blocked_ips.include?(ip) && @@okay_ips.exclude?(ip)
     end
 
     def blocked_ips
@@ -107,11 +107,11 @@ class IpStats
     end
 
     def remove_blocked_ips(ips)
-      rewrite_blocked_ips { |ip, _time| !ips.include?(ip) }
+      rewrite_blocked_ips { |ip, _time| ips.exclude?(ip) }
     end
 
     def remove_okay_ips(ips)
-      rewrite_okay_ips { |ip, _time| !ips.include?(ip) }
+      rewrite_okay_ips { |ip, _time| ips.exclude?(ip) }
     end
 
     def clear_blocked_ips

@@ -1,13 +1,17 @@
 <%
 url_params = { action: action, q: get_query_param }
-url_params = url_params.merge(
-  { observation_id: @observation.id }) if action == :create
-url_params = url_params.merge({ back: back }) if action == :update
+case action
+when :create
+  url_params = url_params.merge({ observation_id: @observation.id })
+  button = :ADD.t
+when :update
+  url_params = url_params.merge({ back: @back }) if @back.present?
+  button = :SAVE.t
+end
 %>
 
-<%= form_with(model: @collection_number, url: url_params) do |f| %>
-
-  <%= submit_button(form: f, button: button_name.t, center: true) %>
+<%= form_with(model: @collection_number, url: url_params,
+              local: local, id: "collection_number_form") do |f| %>
 
   <% if @collection_number.observations.count > 1 %>
     <%= alert_block(
@@ -22,6 +26,6 @@ url_params = url_params.merge({ back: back }) if action == :update
   <%= text_field_with_label(form: f, field: :number, between: :required,
                             label: :collection_number_number.t + ":") %>
 
-  <%= submit_button(form: f, button: button_name.t, center: true) %>
+  <%= submit_button(form: f, button: button, center: true) %>
 
 <% end %>

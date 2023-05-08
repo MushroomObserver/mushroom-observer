@@ -1,14 +1,9 @@
 # frozen_string_literal: true
 
 require("test_helper")
-# require("capybara_helper")
 
 # Test adding, editing, and deleting a Sequence
-# Uses Capybara; MO SessionFormExtensions don't work on form_with forms
-# Use an integration test because click_mo_link needs an id, and
-# there's no  id (at least by default) for a form_with resource-oriented
-# form field.
-class SequencerTest < CapybaraIntegrationTestCase
+class SequencesIntegrationTest < CapybaraIntegrationTestCase
   def test_sequence
     obs = observations(:detailed_unknown_obs)
     sequence_original_count = Sequence.count
@@ -29,7 +24,7 @@ class SequencerTest < CapybaraIntegrationTestCase
 
     new_sequence = Sequence.last
     new_locus = "Edited Locus"
-    find("#observation_sequences_#{obs.id}").click_link("Edit")
+    find("#observation_sequences").click_link("Edit")
     fill_in("sequence[locus]", with: new_locus)
     fill_in("sequence[bases]", with: "gag gag gag")
     click_on("Update")

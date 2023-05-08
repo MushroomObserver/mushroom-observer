@@ -1,0 +1,4 @@
+// Update page with results of update or create herbarium_record
+$('#mo_ajax_progress_caption').empty();
+$('#mo_ajax_progress').modal('hide');
+$("#observation_herbarium_records").html('<%= j render(partial: "observations/show/herbarium_records", locals: { observation: @observation.reload }, layout: false) %>');

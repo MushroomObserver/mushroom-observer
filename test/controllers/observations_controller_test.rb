@@ -90,7 +90,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # ----------------------------
 
   def test_show_observation_noteless_image
-    obs = observations(:peltigera_rolf_obs)
+    obs = observations(:peltigera_mary_obs)
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
     assert(obs.images.member?(img))
@@ -175,7 +175,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title("Observations by Date")
+    assert_displayed_title(:query_title_observations_by_activity_log.l)
   end
 
   def test_index_sorted_by_name
@@ -196,6 +196,18 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_displayed_title("Observations by #{by.capitalize}")
   end
 
+  def test_index_sorted_by_invalid_order
+    by = "edibility"
+
+    login
+
+    exception = assert_raise(RuntimeError) do
+      get(:index, params: { by: by })
+    end
+    assert_equal("Can't figure out how to sort Observations by :#{by}.",
+                 exception.message)
+  end
+
   def test_index_with_id
     obs = observations(:agaricus_campestris_obs)
 
@@ -205,8 +217,9 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_displayed_title("Observation Index")
     assert_select(
-      "#results a[href ^= '/#{obs.id}']", { text: obs.unique_text_name },
-      "Index should open at the page that includes #{obs.unique_text_name}"
+      "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
+      { text: obs.format_name.t.strip_html },
+      "Index should open at the page that includes #{obs.format_name}"
     )
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
@@ -221,7 +234,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations by Date")
+    assert_displayed_title(:query_title_observations_by_activity_log.l)
   end
 
   def test_index_useless_param_page2
@@ -230,7 +243,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations by Date")
+    assert_displayed_title(:query_title_observations_by_activity_log.l)
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -595,7 +608,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_index_user_by_known_user
     # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
-    assert_nil(obs.rss_log_id)
+    assert_not_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
     user = rolf
     assert(
@@ -920,7 +933,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: obs.id })
     assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
-    assert_select("form[action=?]", observation_path(obs.id), count: 0)
+    assert_select(".destroy_observation_link_#{obs.id}", count: 0)
     assert_select("a:match('href',?)",
                   new_image_for_observation_path(obs.id), count: 0)
     assert_select("a:match('href',?)",
@@ -936,8 +949,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
-    assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
-    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
+    assert_select(".destroy_observation_link_#{obs.id}", minimum: 1)
     assert_select("a[href=?]",
                   new_image_for_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",
@@ -951,8 +963,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
     # Destroy button is in a form, not a link_to
-    assert_select("form[action=?]", observation_path(obs.id), minimum: 1)
-    assert_select("input[value='#{:DESTROY.t}']", minimum: 1)
+    assert_select(".destroy_observation_link_#{obs.id}", minimum: 1)
     assert_select("a[href=?]",
                   new_image_for_observation_path(obs.id), minimum: 1)
     assert_select("a[href=?]",
@@ -1203,10 +1214,10 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
-  def assert_show_obs(types, id, items, can_add)
+  def assert_show_obs(types, _id, items, can_add)
     type = types.to_s.chop
     selector = types == :collection_numbers && !can_add ? "i" : "li"
-    assert_select("#observation_#{types}_#{id} #{selector}",
+    assert_select("#observation_#{types} #{selector}",
                   items.count,
                   "Wrong number of #{types} shown.")
     if can_add
@@ -1230,17 +1241,19 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_prev_and_next_observation
-    # Uses default observation query
-    o_chron = Observation.order(:created_at)
+  def test_prev_and_next_observation_simple
+    # Uses non-default observation query. :when is the default order
+    o_chron = Observation.order(created_at: :desc, id: :desc)
     login
-    get(:show, params: { id: o_chron.fourth.id, flow: "next" })
-    assert_redirected_to(action: :show, id: o_chron.third.id,
-                         params: @controller.query_params(QueryRecord.last))
+    # need to save a query here to get :next in a non-standard order
+    Query.lookup_and_save(:Observation, :all, by: :created_at)
+    qr = QueryRecord.last.id.alphabetize
 
-    get(:show, params: { id: o_chron.fourth.id, flow: "prev" })
-    assert_redirected_to(action: :show, id: o_chron.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
+    get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
+    assert_redirected_to(action: :show, id: o_chron.fifth.id, q: qr)
+
+    get(:show, params: { id: o_chron.fourth.id, flow: :prev, q: qr })
+    assert_redirected_to(action: :show, id: o_chron.third.id, q: qr)
   end
 
   def test_prev_and_next_observation_with_fancy_query

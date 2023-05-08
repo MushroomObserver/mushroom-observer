@@ -25,6 +25,7 @@
     text-overflow: ellipsis;
     padding: 4px;
 
+    &.active,
     &:hover,
     &:focus,
     &:hover a.dropdown-toggle,

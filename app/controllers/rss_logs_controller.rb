@@ -19,12 +19,8 @@ class RssLogsController < ApplicationController
     # POST requests with param `type` potentially show an array of types
     # of objects. The array comes from the checkboxes in tabset
     if params[:type].present?
-      types = Array(params[:type])
-      types = RssLog.all_types.intersection(types)
-      types = "all" if types.length == RssLog.all_types.length
-      types = "none" if types.empty?
-      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-      query = find_or_create_query(:RssLog, type: types)
+      query = find_or_create_query(:RssLog,
+                                   type: types_query_string_from_params)
     # Previously saved query, incorporating type and other params
     elsif params[:q].present?
       query = find_query(:RssLog)
@@ -37,6 +33,24 @@ class RssLogsController < ApplicationController
     end
     show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
   end
+
+  private
+
+  def types_query_string_from_params
+    types = params[:type]
+    if types.is_a?(Array)
+      if types.empty?
+        types = "none"
+      else
+        types = RssLog.all_types.intersection(types)
+        types = "all" if types.length == RssLog.all_types.length
+        types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+      end
+    end
+    types
+  end
+
+  public
 
   # Show a single RssLog.
   def show
@@ -60,8 +74,6 @@ class RssLogsController < ApplicationController
 
     render_xml(layout: false)
   end
-
-  private
 
   # Show selected search results as a matrix with "index" template.
   def show_selected_rss_logs(query, args = {})

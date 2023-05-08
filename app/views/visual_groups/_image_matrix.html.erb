@@ -3,9 +3,10 @@
     <ul class="row list-unstyled mt-3">
       <%= render(layout: "shared/matrix_table",
                locals: {objects: @subset}) do |row| %>
-        <li class="matrix-box col-xs-12 col-sm-6 col-md-4">
+        <%= matrix_box(id: row[0]) do %>
           <%= panel_block do %>
-            <%= thumbnail(row[0], original: true, votes: false) %>
+            <%= thumbnail(row[0], original: true, votes: false,
+                                  context: :matrix_box) %>
             <%= render(partial: "visual_group_status_links",
                        locals: {
                          visual_group: visual_group,
@@ -13,7 +14,7 @@
                          status: row[1]
                        }) %>
           <% end %>
-        </li><!-- .matrix-box -->
+        <% end %><!-- .matrix-box -->
       <% end %>
     </ul>
   <% end %>

@@ -31,7 +31,7 @@ class RssLogTest < UnitTestCase
   def test_detail_for_complexly_created_observation
     # Observation is created then an image is immediately uploaded.
     # We want it to return "observation created" not "image added".
-    log = rss_logs(:observation_rss_log)
+    log = rss_logs(:detailed_unknown_obs_rss_log)
     detail = log.detail
     assert_equal(:rss_created_at.t(type: :observation), detail)
   end

@@ -47,6 +47,23 @@ class SequencesControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_by_observation
+    by = "observation"
+
+    login
+    get(:index, params: { by: by })
+
+    assert_response(:success)
+    assert_displayed_title("Sequences by Observation")
+
+    Sequence.find_each do |sequence|
+      assert_select(
+        "a[href *= '#{sequence_path(sequence)}']", true,
+        "Sequence Index missing link to #{sequence.format_name})"
+      )
+    end
+  end
+
   def test_show
     login
     # Prove sequence displayed if called with id of sequence in db

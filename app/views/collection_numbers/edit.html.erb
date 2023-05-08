@@ -4,7 +4,7 @@
   tabs = []
   if @back == "index"
     tabs << link_with_query(:edit_collection_number_back_to_index.t,
-                            action: :index)
+                            @collection_number.index_link_args)
   else
     tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
                             @back_object.show_link_args)
@@ -16,8 +16,7 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "form",
-               locals: { action: :update, button_name: :SAVE, back: @back }) %>
+    <%= render(partial: "form", locals: { action: :update, local: true }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

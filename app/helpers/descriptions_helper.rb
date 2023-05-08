@@ -36,16 +36,22 @@ module DescriptionsHelper
 
   def show_parent_link(description, type)
     link_with_query(:show_object.t(type: type),
-                    { controller: description.parent.show_controller,
-                      action: :show, id: description.parent_id })
+                    description.parent.show_link_args)
+  end
+
+  def create_description_link(object)
+    link_to(
+      :show_name_create_description.t,
+      { controller: "#{object.show_controller}/descriptions",
+        action: :new, id: object.id, q: get_query_param },
+      class: "create_description_link_#{object.id}"
+    )
   end
 
   def edit_description_link(description)
     return unless writer?(description)
 
-    link_with_query(:show_description_edit.t,
-                    { controller: description.show_controller,
-                      action: :edit, id: description.id })
+    link_with_query(:show_description_edit.t, description.edit_link_args)
   end
 
   def destroy_description_link(description, admin)
@@ -149,7 +155,7 @@ module DescriptionsHelper
     # Filter out empty descriptions (unless it's public or one you own).
     list = object.descriptions.includes(:user).select do |desc|
       desc.notes? || (desc.user == user) ||
-        reviewer? || (desc.source_type == :public)
+        reviewer? || (desc.source_type == :public) || in_admin_mode?
     end
 
     list = sort_description_list(object, list)
@@ -319,5 +325,24 @@ module DescriptionsHelper
 
     url = add_query_param(observations_path, query)
     content_tag(:p, link_to(title, url))
+  end
+
+  # Helpers for description forms
+
+  # Source type options for description forms.
+  def source_type_options_all
+    options = []
+    Description.all_source_types.each do |type|
+      options << [:"form_description_source_#{type}".l, type]
+    end
+    options
+  end
+
+  def source_type_options_basic
+    options = []
+    Description.basic_source_types.each do |type|
+      options << [:"form_description_source_#{type}".l, type]
+    end
+    options
   end
 end

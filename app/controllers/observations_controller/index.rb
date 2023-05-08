@@ -14,14 +14,11 @@ class ObservationsController
       list_all
     end
 
-    # Displays matrix of all Observation's, sorted by date.
+    # Displays home matrix of all Observation's, sorted by :rss_log
+    # Note all other filters of the obs index are sorted by date.
     def list_all
-      query = create_query(:Observation, :all, by: default_sort_order)
+      query = create_query(:Observation, :all, by: :rss_log)
       show_selected_observations(query)
-    end
-
-    def default_sort_order
-      ::Query::ObservationBase.default_order
     end
 
     # Displays matrix of selected Observations (based on current Query).
@@ -206,12 +203,13 @@ class ObservationsController
 
       # Add some alternate sorting criteria.
       links = [
-        ["name", :sort_by_name.t],
+        ["rss_log", :sort_by_activity.t],
         ["date", :sort_by_date.t],
-        ["user", :sort_by_user.t],
         ["created_at", :sort_by_posted.t],
-        [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-         :sort_by_updated_at.t],
+        # kind of redundant to sort by rss_logs, though not strictly ===
+        # ["updated_at", :sort_by_updated_at.t],
+        ["name", :sort_by_name.t],
+        ["user", :sort_by_user.t],
         ["confidence", :sort_by_confidence.t],
         ["thumbnail_quality", :sort_by_thumbnail_quality.t],
         ["num_views", :sort_by_num_views.t]

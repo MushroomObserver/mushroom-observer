@@ -3,8 +3,7 @@
 module Report
   # Default CSV report.
   class Raw < CSV
-    # rubocop:disable Metrics/MethodLength
-    def labels
+    def labels # rubocop:disable Metrics/MethodLength
       %w[
         observation_id
         user_id
@@ -39,7 +38,7 @@ module Report
       ]
     end
 
-    def format_row(row)
+    def format_row(row) # rubocop:disable Metrics/MethodLength
       [
         row.obs_id,
         row.user_id,

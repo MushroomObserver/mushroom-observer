@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+#  custom_file_field            # stylable file input field with
+#                               # client-side size validation
+#  date_select_opts
+
 # helpers for form tags
 module FormsHelper
   # Bootstrap submit button

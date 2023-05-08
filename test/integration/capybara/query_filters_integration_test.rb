@@ -3,7 +3,27 @@
 require("test_helper")
 
 # Test user filters
-class FilterTest < CapybaraIntegrationTestCase
+class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
+  # Test deserialization of non-ascii characters
+  # Observation and Show Location title include
+  #               `             and ’
+  # as            &#8216        and &#8217;
+  # serialized as %26%238216%3B and %26%238217%3B
+  # They are deserialized and displayed as pat of Map Locations title.
+  def test_deserialize
+    obs = observations(:boletus_edulis_obs)
+
+    login
+    fill_in("search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :search_type)
+    click_button("Search")
+    click_link("Show Locations")
+    click_link("Map Locations")
+
+    title = page.find("#title")
+    title.assert_text("‘#{obs.name.text_name}’")
+  end
+
   def test_user_content_filter
     ### :has_images filter
     ### Prove that :has_images filter excludes imageless Observations

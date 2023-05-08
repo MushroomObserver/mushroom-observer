@@ -22,7 +22,7 @@ DESCRIPTION
   This grabs the original image from the image server if it's already
   been moved, rotates or flips the original as requested, updates the
   database, then transfers execution to script/process_image.  It aborts at
-  the first sign of trouble. 
+  the first sign of trouble.
 
 OPERATIONS
   0     No transformation, just reprocess the image.

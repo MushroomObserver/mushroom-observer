@@ -8,7 +8,8 @@ message ||= ""
      aria-labelledby="mo_ajax_progress_caption">
   <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content">
-      <div class="modal-body text-center" id="mo_ajax_progress_caption">
+      <div class="modal-body text-center">
+        <%= tag.span("", id: "mo_ajax_progress_caption") %>
         <%= safe_spinner(message) %>
       </div>
     </div>

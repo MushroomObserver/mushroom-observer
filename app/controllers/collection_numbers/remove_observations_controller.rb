@@ -21,7 +21,14 @@ module CollectionNumbers
       return unless make_sure_can_delete!(@collection_number)
 
       @collection_number.remove_observation(@observation)
-      redirect_with_query(observation_path(@observation.id))
+      respond_to do |format|
+        format.html do
+          redirect_with_query(observation_path(@observation.id))
+        end
+        format.js do
+          render(partial: "collection_numbers/update_observation") and return
+        end
+      end
     end
 
     private

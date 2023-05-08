@@ -18,8 +18,6 @@ class ThumbnailPresenter < BasePresenter
   def initialize(image, view, args = {})
     super
 
-    # TODO: pass a matrix_box arg so we know whether to constrain width or not.
-
     # Sometimes it's prohibitive to do the extra join to images table,
     # so we only have image_id. It's still possible to render the image with
     # nothing but the image_id. (But not votes, original name, etc.)
@@ -37,7 +35,8 @@ class ThumbnailPresenter < BasePresenter
       link_method: :get,
       votes: true,
       original: false,
-      is_set: true
+      is_set: true,
+      context: false # false to constrain width
     }
     args = default_args.merge(args)
     img_urls = Image.all_urls(image_id)
@@ -94,16 +93,20 @@ class ThumbnailPresenter < BasePresenter
     img_width = image&.width ? BigDecimal(image&.width) : 100
     img_height = image&.height ? BigDecimal(image&.height) : 100
     img_proportion = BigDecimal(img_height / img_width)
-    # Limit proportion 2:1 h/w for thumbnail
-    # img_proportion = "200" if img_proportion.to_i > 200 # default for tall
+    img_padding = (img_proportion * 100).to_f.truncate(1)
+    # Limit proportion 1.3:1 h/w for thumbnail
+    img_padding = "133.33" if img_padding.to_i > 133 # default for tall
+    self.proportion = img_padding
 
-    # Constrain width to currently expected dimensions for img size (not layout)
-    # NOTE: can get rid of self.width if switching to full-width images
-    size = Image.all_sizes_index[args[:size]]
-    container_width = img_width > img_height ? size : size / img_proportion
-
-    self.proportion = (img_proportion * 100).to_f.truncate(1)
-    self.width = container_width.to_f.truncate(0)
+    if args[:context] == :matrix_box
+      self.width = false
+    else
+      # Constrain width to expected dimensions for img size (not layout)
+      # NOTE: delete self.width if switching to full-width images everywhere
+      size = Image.all_sizes_index[args[:size]]
+      container_width = img_width > img_height ? size : size / img_proportion
+      self.width = container_width.to_f.truncate(0)
+    end
   end
 
   def lightbox_args_to_presenter(image_id, img_urls, args)

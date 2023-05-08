@@ -3,7 +3,27 @@
 require("test_helper")
 
 # Tests which supplement controller/name_controller_test.rb
-class NameControllerSupplementalTest < CapybaraIntegrationTestCase
+class NamesIntegrationTest < CapybaraIntegrationTestCase
+  def test_name_show_previous_version
+    # a name with versions
+    name = names(:coprinellus_micaceus)
+    # current_version_number = name.version
+    previous_version = name.versions.reverse[1]
+    login
+    visit("/names/#{name.id}")
+    click_on(class: "previous_version_link")
+    assert_selector("body.versions__show")
+    title = :show_past_name_title.t(
+      num: previous_version.version,
+      name: previous_version.display_name
+    )
+    assert_selector("#title", text: title.as_displayed)
+    # go back to the name page
+    click_on(class: "latest_version_link")
+    title = :show_name_title.t(name: name.display_name)
+    assert_selector("#title", text: title.as_displayed)
+  end
+
   # Email tracking template should not contain ":mailing_address"
   # because, when email is sent, that will be interpreted as
   # recipient's mailing_address

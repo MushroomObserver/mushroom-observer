@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests which supplement controller/observations_controller_test.rb
-class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
+class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
@@ -44,12 +44,28 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
     # Show first Observation from Your Observations search.
     click_link(first_obs.id.to_s)
     # Destroy it.
-    within("#right_tabs") { click_button("Destroy") }
+    click_button(class: "destroy_observation_link_#{first_obs.id}")
 
     # MO should show next Observation.
     page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
+  end
+
+  # Prevent reversion of the bug that was fixed in PR #1479
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1479
+  def test_edit_observation_with_query
+    user = users(:dick)
+    obs = observations(:collected_at_obs)
+    assert_equal(user, obs.user,
+                 "Test needs an Observation fixture owned by user")
+    q_id = "123abc" # Can be anything, but is need to expose the bug
+
+    login(user)
+    # Throws an error pre-PR #1479
+    visit(edit_observation_path(obs.id, params: { q: q_id }))
+
+    assert_current_path(edit_observation_path(obs.id, params: { q: q_id }))
   end
 
   # Prove that unchecking a Project as part of editing an Observation
@@ -100,7 +116,7 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
     login(user)
     visit(observation_path(obs.id))
     assert_difference("obs.collection_numbers.count", -1) do
-      page.find("#observation_collection_numbers_#{obs.id}").click_on("Remove")
+      page.find("#observation_collection_numbers").click_on("Remove")
     end
   end
 
@@ -164,5 +180,18 @@ class ObservationsControllerSupplementalTest < CapybaraIntegrationTestCase
     assert_no_selector("#content div.alert-warning")
     assert_selector("#title",
                     text: "Observation #{obs.id}: #{obs.name.search_name}")
+  end
+
+  # Tests of show_name_helper module
+  # Prove that all these links appear under "Observations of"
+  def test_links_to_observations_of
+    login
+    # on ShowObservation page
+    visit("/names/#{names(:chlorophyllum_rachodes).id}")
+    assert_text(:obss_of_this_name.l)
+    assert_text(:taxon_obss_other_names.l)
+    assert_text(:obss_of_taxon.l)
+    assert_text(:obss_taxon_proposed.l)
+    assert_text(:obss_name_proposed.l)
   end
 end

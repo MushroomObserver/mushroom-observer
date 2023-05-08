@@ -21,15 +21,12 @@ class SearchControllerTest < FunctionalTestCase
         }
       )
       assert_response(:redirect)
-      if model.controller_normalized?
-        assert_match(
-          "http://test.host/#{model.to_s.downcase.pluralize}?advanced_search=1",
-          redirect_to_url
-        )
-      else
-        assert_match(%r{#{model.show_controller}/advanced_search},
-                     redirect_to_url)
-      end
+      # Account for Observations being the home page
+      route = model == Observation ? "" : model.to_s.downcase.pluralize
+      assert_match(
+        "http://test.host/#{route}?advanced_search=1",
+        redirect_to_url
+      )
     end
   end
 
