@@ -26,6 +26,6 @@ class Query::ObservationAll < Query::ObservationBase
 
   def title
     default = super
-    with_observations_query_description || default
+    observation_query_description || default
   end
 end
