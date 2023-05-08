@@ -221,15 +221,15 @@ class HerbariumRecordsController < ApplicationController
     return if flash_error_and_reload_if_form_has_errors
 
     if herbarium_label_free?
-      save_herbarium_record_and_update_associations
-    else
-      if @other_record.can_edit?
-        flash_herbarium_record_already_used_and_add_observation
-      else
-        flash_herbarium_record_already_used_by_someone_else
-      end
-      show_flash_and_send_back
+      save_herbarium_record_and_update_associations and return
     end
+
+    if @other_record.can_edit?
+      flash_herbarium_record_already_used_and_add_observation
+    else
+      flash_herbarium_record_already_used_by_someone_else
+    end
+    show_flash_and_send_back
   end
 
   def save_herbarium_record_and_update_associations
@@ -303,7 +303,10 @@ class HerbariumRecordsController < ApplicationController
       end
     end
 
-    show_flash_and_send_back and return true unless can_add_record_to_herbarium?
+    unless can_add_record_to_herbarium?
+      show_flash_and_send_back
+      return true
+    end
 
     false
   end
