@@ -97,7 +97,7 @@ class LookupsController < ApplicationController
       flash_error(e.to_s) unless Rails.env.production?
     end
 
-    return unless obj
+    return nil unless obj
 
     [[obj], nil]
   end
