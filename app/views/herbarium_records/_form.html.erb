@@ -11,7 +11,7 @@ end
 %>
 
 <%= form_with(model: @herbarium_record, url: url_params,
-              id: "herbarium_record_form") do |f| %>
+              local: local, id: "herbarium_record_form") do |f| %>
 
   <% if @herbarium_record.observations.count > 1 %>
     <%= alert_block(

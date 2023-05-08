@@ -13,10 +13,13 @@
   <% if records.any? && can_add %>
     <div>
       <%= :Herbarium_records.t %>: [<%=
-        link_with_query(:create_herbarium_record.t,
-          new_herbarium_record_path(observation_id: obs_id),
+        link_to(
+          :create_herbarium_record.t,
+          new_herbarium_record_path(observation_id: obs_id,
+                                    q: get_query_param),
           remote: true, onclick: "MOEvents.whirly();",
-          id: "create_herbarium_record_link_#{obs_id}")
+          id: "create_herbarium_record_link_#{obs_id}"
+        )
       %>]
     </div>
     <ul class="tight-list">

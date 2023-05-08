@@ -11,7 +11,7 @@ end
 %>
 
 <%= form_with(model: @collection_number, url: url_params,
-              local: local) do |f| %>
+              local: local, id: "collection_number_form") do |f| %>
 
   <% if @collection_number.observations.count > 1 %>
     <%= alert_block(

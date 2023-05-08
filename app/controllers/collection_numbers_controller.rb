@@ -340,10 +340,12 @@ class CollectionNumbersController < ApplicationController
   def show_flash_and_send_back
     respond_to do |format|
       format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
+        redirect_to_back_object_or_object(@back_object, @collection_number) and
+          return
       end
       format.js do
-        render(partial: "update_flash") and return # renders the flash via js
+        # renders the flash in the modal via js
+        render(partial: "shared/update_modal_flash") and return
       end
     end
   end
