@@ -17,7 +17,7 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7">
     <span class="text-larger mb-3"><%= :Observation.t %> #<%= @observation.id %></span><!-- .text-larger -->
-    <%= render(partial: "form", locals: { action: :create }) %>
+    <%= render(partial: "form", locals: { action: :create, local: true }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">
