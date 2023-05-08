@@ -922,6 +922,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Names: legacy action redirects -----------------------------------
   get("name/eol", to: redirect("names/eol_data#show"))
+  get("name/name_search", to: redirect(path: "names"))
 
   # ----- Lookups: legacy action redirects ---------------------------
   # The only legacy lookup that was ok'd for use by external sites
