@@ -53,7 +53,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
 
     # The remove button is a rails form patch submit input, not a link
-    click_on(".remove_herbarium_record_link_#{rec.id}")
+    click_on(class: "remove_herbarium_record_link_#{rec.id}")
 
     assert_selector("body.observations__show")
     assert_selector("a[href*='#{edit_observation_path(id: obs.id)}']")
