@@ -238,7 +238,7 @@ class CollectionNumbersController < ApplicationController
       @other_number.observations.any?
     @other_number.add_observation(@observation)
     @collection_number = @other_number
-    flash_and_return
+    show_flash_and_send_back
   end
 
   def update_collection_number
@@ -280,7 +280,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number.destroy
     @collection_number = @other_number
 
-    flash_and_return
+    show_flash_and_send_back
   end
 
   def permitted_collection_number_params
@@ -293,7 +293,7 @@ class CollectionNumbersController < ApplicationController
     return true if in_admin_mode? || obj.can_edit?
 
     flash_error(:permission_denied.t)
-    flash_and_return
+    show_flash_and_send_back
     false
   end
 
@@ -337,13 +337,15 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  def flash_and_return
+  def show_flash_and_send_back
     respond_to do |format|
       format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
+        redirect_to_back_object_or_object(@back_object, @collection_number) and
+          return
       end
       format.js do
-        render(partial: "update_flash") and return # renders the flash via js
+        # renders the flash in the modal via js
+        render(partial: "shared/update_modal_flash") and return
       end
     end
   end

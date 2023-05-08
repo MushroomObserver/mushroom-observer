@@ -156,6 +156,17 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
+  # Name ---------------------------------
+
+  def test_name_search_get
+    name = names(:tremella_mesenterica)
+
+    login
+    get("/name/name_search?pattern=#{name.text_name}")
+
+    assert_equal(name_path(name.id), @response.request.path)
+  end
+
   # SpecisList/show  ---------------------------------
   def test_show_species_list
     spl = species_lists(:first_species_list)
