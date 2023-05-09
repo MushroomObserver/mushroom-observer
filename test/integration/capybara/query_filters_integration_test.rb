@@ -21,7 +21,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     click_link("Map Locations")
 
     title = page.find("#title")
-    title.assert_text("‘#{obs.name.text_name}’")
+    title.assert_text(obs.name.text_name)
   end
 
   def test_user_content_filter
@@ -42,7 +42,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     click_button("Search")
 
     assert_match(
-      /#{:app_title.l}: Observations Matching ‘#{obs.name.text_name}/,
+      /#{:app_title.l}: Observations of #{obs.name.text_name}/,
       page.title, "Wrong page"
     )
     page.find("#title_bar").assert_text(:filtered.t)

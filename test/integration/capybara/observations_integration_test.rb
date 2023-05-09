@@ -20,9 +20,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     name = names(:boletus_edulis)
     visit("/names/#{name.id}/map")
     click_link("Show Observations")
+    title = page.find_by_id("title")
+    title.assert_text("Observations of #{name.text_name}")
+
     click_link("Show Map")
     title = page.find("#title")
-    title.assert_text("Map of Observation Index")
+    title.assert_text("Map of Observations of #{name.text_name}")
   end
 
   # Prove that if a user clicks an Observation in Observation search results
