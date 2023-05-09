@@ -12,9 +12,8 @@ module Query
           :query_title_with_observations_filtered.t(type: model.type_tag,
                                                     subtitle: description)
         else
-          :query_title_with_observations_by_user.t(type: :name,
+          :query_title_with_observations_by_user.t(type: model.type_tag,
                                                    user: description)
-          #  subtitle: description)
         end
       end
 
