@@ -31,11 +31,11 @@
             if sequence.deposit?
               link_to("#{locus} - #{sequence.archive} ##{sequence.accession}".t,
                       add_query_param(sequence.show_link_args, query),
-                      class: "show_sequence_link_#{number.id}")
+                      class: "show_sequence_link_#{sequence.id}")
             else
               link_to("#{locus} - MO ##{sequence.id}".t,
                       add_query_param(sequence.show_link_args, query),
-                      class: "show_sequence_link_#{number.id}")
+                      class: "show_sequence_link_#{sequence.id}")
             end %>
           <%=
             links = []
@@ -49,7 +49,7 @@
                 edit_sequence_path(id: sequence.id,
                                    params: { back: observation.id },
                 remote: true, onclick: "MOEvents.whirly();",
-                class: "edit_sequence_link_#{number.id}")
+                class: "edit_sequence_link_#{sequence.id}")
               )
               links << destroy_button(
                 name: :destroy_object.t(type: :sequence),
@@ -57,7 +57,7 @@
                                       back: url_after_delete(sequence),
                 remote: true,
                 onclick: "MOEvents.whirly();",
-                class: "destroy_sequence_link_#{number.id}")
+                class: "destroy_sequence_link_#{sequence.id}")
               )
             end
             if sequence.blastable?
