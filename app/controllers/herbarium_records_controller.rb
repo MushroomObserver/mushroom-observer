@@ -221,7 +221,8 @@ class HerbariumRecordsController < ApplicationController
     return if flash_error_and_reload_if_form_has_errors
 
     if herbarium_label_free?
-      save_herbarium_record_and_update_associations and return
+      save_herbarium_record_and_update_associations
+      return
     end
 
     if @other_record.can_edit?
