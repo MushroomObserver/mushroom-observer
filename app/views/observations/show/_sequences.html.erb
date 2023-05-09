@@ -15,8 +15,8 @@
       <%=
           add_sequence_link = link_with_query(
             :show_observation_add_sequence.t,
-            new_sequence_path(params: { observation_id: observation.id },
-            class: "create_sequence_link_#{observation.id}")
+            new_sequence_path(params: { observation_id: observation.id }),
+            class: "create_sequence_link_#{observation.id}"
           )
           "[#{add_sequence_link}]".html_safe if @user
       %>

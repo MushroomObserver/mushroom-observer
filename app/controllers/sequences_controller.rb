@@ -189,7 +189,8 @@ class SequencesController < ApplicationController
     false
   end
 
-  def build_sequence # create
+  # create
+  def build_sequence
     @sequence = @observation.sequences.new
     @sequence.attributes = sequence_params
     @sequence.user = @user
@@ -214,7 +215,8 @@ class SequencesController < ApplicationController
     end
   end
 
-  def save_edits # update
+  # update
+  def save_edits
     @sequence.attributes = sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
