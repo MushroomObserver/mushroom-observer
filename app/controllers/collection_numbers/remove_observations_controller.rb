@@ -21,6 +21,8 @@ module CollectionNumbers
       return unless make_sure_can_delete!(@collection_number)
 
       @collection_number.remove_observation(@observation)
+      flash_notice(:runtime_removed.t(type: :collection_number))
+
       respond_to do |format|
         format.html do
           redirect_with_query(observation_path(@observation.id))

@@ -15,7 +15,9 @@
       <%=
           add_sequence_link = link_with_query(
             :show_observation_add_sequence.t,
-            new_sequence_path(params: { observation_id: observation.id })
+            new_sequence_path(params: { observation_id: observation.id }),
+            remote: true, onclick: "MOEvents.whirly();",
+            class: "create_sequence_link_#{observation.id}"
           )
           "[#{add_sequence_link}]".html_safe if @user
       %>
@@ -25,14 +27,16 @@
   <% if sequences.any? %>
     <ul class="tight-list">
       <% sequences.each do |sequence| %>
-        <li>
+        <li id="sequence_<%= sequence.id %>">
           <%= locus = sequence.locus.truncate(sequence.locus_width)
             if sequence.deposit?
               link_to("#{locus} - #{sequence.archive} ##{sequence.accession}".t,
-                      add_query_param(sequence.show_link_args, query))
+                      add_query_param(sequence.show_link_args, query),
+                      class: "show_sequence_link_#{sequence.id}")
             else
               link_to("#{locus} - MO ##{sequence.id}".t,
-                      add_query_param(sequence.show_link_args, query))
+                      add_query_param(sequence.show_link_args, query),
+                      class: "show_sequence_link_#{sequence.id}")
             end %>
           <%=
             links = []
@@ -42,13 +46,17 @@
             end
             if in_admin_mode? || sequence.can_edit?(@user)
               links << link_with_query(
-                :EDIT.t, edit_sequence_path(id: sequence.id,
-                                            params: { back: observation.id })
+                :EDIT.t,
+                edit_sequence_path(id: sequence.id, back: observation.id),
+                remote: true, onclick: "MOEvents.whirly();",
+                class: "edit_sequence_link_#{sequence.id}"
               )
               links << destroy_button(
                 name: :destroy_object.t(type: :sequence),
-                target: sequence_path(sequence,
-                                      back: url_after_delete(sequence))
+                target: sequence_path(id: sequence.id,
+                                      back: url_after_delete(sequence)),
+                remote: true, onclick: "MOEvents.whirly();",
+                class: "destroy_sequence_link_#{sequence.id}"
               )
             end
             if sequence.blastable?

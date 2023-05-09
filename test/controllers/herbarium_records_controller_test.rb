@@ -247,7 +247,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params: params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     assert_response(:redirect)
-    assert_no_flash
+    assert_flash_success
   end
 
   def test_create_herbarium_record_redirect

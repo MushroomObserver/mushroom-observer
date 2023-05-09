@@ -225,6 +225,9 @@ class CollectionNumbersController < ApplicationController
   def save_collection_number_and_update_associations
     @collection_number.save
     @collection_number.add_observation(@observation)
+    flash_notice(
+      :runtime_added_to.t(type: :collection_number, name: :observation)
+    )
     respond_to do |format|
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
@@ -257,6 +260,7 @@ class CollectionNumbersController < ApplicationController
   def update_collection_number_and_associations(old_format_name)
     @collection_number.save
     @collection_number.change_corresponding_herbarium_records(old_format_name)
+    flash_notice(:runtime_updated_at.t(type: :collection_number))
 
     respond_to do |format|
       format.html do

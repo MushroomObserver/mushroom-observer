@@ -206,7 +206,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
-    assert_no_flash
+    assert_flash_success
     assert_response(:redirect)
 
     number = CollectionNumber.last
@@ -232,7 +232,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
-    assert_no_flash
+    assert_flash_success
     number = CollectionNumber.last
     assert_obj_arrays_equal([number], obs.reload.collection_numbers)
 
@@ -358,7 +358,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     patch(:update,
           params: { id: number.id, collection_number: params })
-    assert_no_flash
+    assert_flash_success
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
     assert_equal("69-abc", number.number)
@@ -370,7 +370,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     make_admin("mary")
     patch(:update,
           params: { id: number.id, collection_number: params })
-    assert_no_flash
+    assert_flash_success
   end
 
   def test_update_collection_number_merge
