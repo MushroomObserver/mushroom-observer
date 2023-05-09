@@ -131,6 +131,8 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
+    @observation = @sequence.observation # needed for js to update obs page
+
     @sequence.destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
     show_flash_and_send_to_back_object
@@ -220,6 +222,7 @@ class SequencesController < ApplicationController
     @sequence.attributes = sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
+      @observation = @sequence.observation # needed for js to update obs page
       respond_to do |format|
         format.html do
           redirect_with_query(@back_object.show_link_args)
@@ -262,8 +265,8 @@ class SequencesController < ApplicationController
         end
       end
       format.js do
-        # renders the flash in the modal via js
-        render(partial: "shared/update_modal_flash") and return
+        # renders the flash in the obs page via js
+        render(partial: "update_observation") and return
       end
     end
   end
