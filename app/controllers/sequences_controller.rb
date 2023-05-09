@@ -76,6 +76,13 @@ class SequencesController < ApplicationController
     return unless @observation
 
     @sequence = Sequence.new
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def create
@@ -90,10 +97,14 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    return if check_permission(@sequence)
+    return unless make_sure_can_edit!(@sequence)
 
-    flash_warning(:permission_denied.t)
-    redirect_with_query(@sequence.observation.show_link_args)
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
+    end
   end
 
   def update
@@ -101,11 +112,15 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if check_permission(@sequence)
-      save_edits
-    else
-      flash_warning(:permission_denied.t)
-      redirect_with_query(@sequence.observation.show_link_args)
+    return unless make_sure_can_edit!(@sequence)
+
+    save_edits
+
+    respond_to do |format|
+      format.html
+      format.js do
+        render(layout: false)
+      end
     end
   end
 
@@ -114,17 +129,11 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if check_permission(@sequence)
-      @sequence.destroy
-      flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
-    else
-      flash_warning(:permission_denied.t)
-    end
-    if @back == "index"
-      redirect_with_query(action: :index)
-    else
-      redirect_with_query(@back_object.show_link_args)
-    end
+    return unless make_sure_can_delete!(@sequence)
+
+    @sequence.destroy
+    flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
+    show_flash_and_send_to_back_object
   end
 
   ##############################################################################
@@ -164,27 +173,96 @@ class SequencesController < ApplicationController
 
   # ---------- Create, Edit ----------------------------------------------------
 
-  def build_sequence
+  def make_sure_can_edit!(obj)
+    return true if check_permission(obj)
+
+    flash_warning(:permission_denied.t)
+    show_flash_and_send_back
+    false
+  end
+
+  def make_sure_can_delete!(sequence)
+    return true if check_permission(sequence)
+
+    flash_error(:permission_denied.t)
+    show_flash_and_send_to_back_object
+    false
+  end
+
+  def build_sequence # create
     @sequence = @observation.sequences.new
     @sequence.attributes = sequence_params
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@observation.show_link_args)
+      respond_to do |format|
+        format.html do
+          redirect_with_query(@observation.show_link_args)
+        end
+        format.js # updates the observation.
+      end
     else
       flash_object_errors(@sequence)
-      render("new")
+      respond_to do |format|
+        format.html do
+          render("new")
+        end
+        format.js do
+          render(partial: "shared/update_modal_flash") and return
+        end
+      end
     end
   end
 
-  def save_edits
+  def save_edits # update
     @sequence.attributes = sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
-      redirect_with_query(@back_object.show_link_args)
+      respond_to do |format|
+        format.html do
+          redirect_with_query(@back_object.show_link_args)
+        end
+        format.js # updates the observation.
+      end
     else
       flash_object_errors(@sequence)
-      render("edit")
+      respond_to do |format|
+        format.html do
+          render("edit")
+        end
+        format.js do
+          render(partial: "shared/update_modal_flash") and return
+        end
+      end
+    end
+  end
+
+  def show_flash_and_send_back
+    respond_to do |format|
+      format.html do
+        redirect_with_query(@sequence.observation.show_link_args) and
+          return
+      end
+      format.js do
+        # renders the flash in the modal via js
+        render(partial: "shared/update_modal_flash") and return
+      end
+    end
+  end
+
+  def show_flash_and_send_to_back_object
+    respond_to do |format|
+      format.html do
+        if @back == "index"
+          redirect_with_query(action: :index)
+        else
+          redirect_with_query(@back_object.show_link_args)
+        end
+      end
+      format.js do
+        # renders the flash in the modal via js
+        render(partial: "shared/update_modal_flash") and return
+      end
     end
   end
 

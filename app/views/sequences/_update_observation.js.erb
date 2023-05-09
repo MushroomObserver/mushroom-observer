@@ -1,0 +1,4 @@
+// Update page with results of update or create sequence
+$('#mo_ajax_progress_caption').empty();
+$('#mo_ajax_progress').modal('hide');
+$("#observation_sequences").html('<%= j render(partial: "observations/show/sequences", locals: { observation: @observation.reload }, layout: false) %>');
