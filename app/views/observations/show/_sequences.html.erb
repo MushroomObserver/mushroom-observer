@@ -47,17 +47,16 @@
             if in_admin_mode? || sequence.can_edit?(@user)
               links << link_with_query(
                 :EDIT.t,
-                edit_sequence_path(id: sequence.id,
-                                   params: { back: observation.id },
+                edit_sequence_path(id: sequence.id, back: observation.id),
                 remote: true, onclick: "MOEvents.whirly();",
-                class: "edit_sequence_link_#{sequence.id}")
+                class: "edit_sequence_link_#{sequence.id}"
               )
               links << destroy_button(
                 name: :destroy_object.t(type: :sequence),
-                target: sequence_path(sequence,
-                                      back: url_after_delete(sequence),
+                target: sequence_path(id: sequence.id,
+                                      back: url_after_delete(sequence)),
                 remote: true, onclick: "MOEvents.whirly();",
-                class: "destroy_sequence_link_#{sequence.id}")
+                class: "destroy_sequence_link_#{sequence.id}"
               )
             end
             if sequence.blastable?

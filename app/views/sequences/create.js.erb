@@ -1,4 +1,6 @@
 // What to do on ajax create
 
 <%= render(partial: "sequences/update_observation", format: :js) %>
-<%= render(partial: "shared/update_modal_flash", format: :js) %>
+$("#page_flash").html("<%= j render(partial: 'layouts/app/flash_notices', locals: { id: 'flash_notices' }) if flash_notices? %>");
+
+$(".modal").modal('hide');

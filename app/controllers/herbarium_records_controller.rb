@@ -235,6 +235,10 @@ class HerbariumRecordsController < ApplicationController
   def save_herbarium_record_and_update_associations
     @herbarium_record.save
     @herbarium_record.add_observation(@observation)
+    flash_notice(
+      :runtime_added_to.t(type: :herbarium_record, name: :observation)
+    )
+
     respond_to do |format|
       format.html do
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
@@ -272,6 +276,7 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.save
     @herbarium_record.notify_curators if
       @herbarium_record.herbarium != old_herbarium
+    flash_notice(:runtime_updated_at.t(type: :herbarium_record))
 
     respond_to do |format|
       format.html do
