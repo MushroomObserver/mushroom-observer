@@ -16,6 +16,7 @@
           add_sequence_link = link_with_query(
             :show_observation_add_sequence.t,
             new_sequence_path(params: { observation_id: observation.id }),
+            remote: true, onclick: "MOEvents.whirly();",
             class: "create_sequence_link_#{observation.id}"
           )
           "[#{add_sequence_link}]".html_safe if @user
@@ -55,8 +56,7 @@
                 name: :destroy_object.t(type: :sequence),
                 target: sequence_path(sequence,
                                       back: url_after_delete(sequence),
-                remote: true,
-                onclick: "MOEvents.whirly();",
+                remote: true, onclick: "MOEvents.whirly();",
                 class: "destroy_sequence_link_#{sequence.id}")
               )
             end
