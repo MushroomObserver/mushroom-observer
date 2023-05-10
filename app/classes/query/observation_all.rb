@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Query::ObservationAll < Query::ObservationBase
+  include Query::Initializers::ObservationQueryDescriptions
+
   def initialize_flavor
     add_sort_order_to_title
     super
@@ -20,5 +22,10 @@ class Query::ObservationAll < Query::ObservationBase
 
   def do_coerce(new_model)
     Query.lookup(new_model, :with_observations, params_plus_old_by)
+  end
+
+  def title
+    default = super
+    observation_query_description || default
   end
 end

@@ -12,8 +12,7 @@
   <div class="col-xs-12 col-sm-7">
     <%= render(partial: "observation_title",
                locals: { observation: @observation }) %>
-    <%= render(partial: "form",
-               locals: { action: :create, button_name: :ADD }) %>
+    <%= render(partial: "form", locals: { action: :create, local: true }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

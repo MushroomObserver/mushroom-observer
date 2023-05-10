@@ -76,6 +76,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { q: q })
 
     assert_displayed_title("Names with Observations created by #{user.name}")
+    # assert_displayed_title("Names with Matching Observations")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.joins(:observations).with_correct_spelling.

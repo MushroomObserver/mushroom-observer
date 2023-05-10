@@ -1,13 +1,16 @@
 <%
 url_params = { action: action, q: get_query_param }
-url_params = url_params.merge(
-  { observation_id: @observation.id }) if action == :create
-if action == :update && @back.present?
-  url_params = url_params.merge({ back: @back })
+case action
+when :create
+  url_params = url_params.merge({ observation_id: @observation.id })
+  button = :ADD.t
+when :update
+  url_params = url_params.merge({ back: @back }) if @back.present?
+  button = :UPDATE.t
 end
 %>
 
-<%= form_with(model: @sequence, url: url_params,
+<%= form_with(model: @sequence, url: url_params, local: local,
               id: "sequence_form") do |f| %>
 
   <%# locus %>
@@ -56,6 +59,6 @@ end
     <%= :field_textile_link.t %>
   <% end %>
 
-  <%= submit_button(form: f, button: button_name.t, center: true) %>
+  <%= submit_button(form: f, button: button, center: true) %>
 
 <% end %>

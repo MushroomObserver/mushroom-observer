@@ -21,6 +21,8 @@ module HerbariumRecords
       return unless make_sure_can_delete!(@herbarium_record)
 
       @herbarium_record.remove_observation(@observation)
+      flash_notice(:runtime_removed.t(type: :herbarium_record))
+
       respond_to do |format|
         format.html do
           redirect_with_query(observation_path(@observation.id))

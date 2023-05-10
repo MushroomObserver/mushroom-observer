@@ -431,7 +431,9 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_displayed_title("Observations Matching ‘#{pattern}’")
+    # Because this pattern is a name, the title will reflect that Query is
+    # assuming this is a search by name with synonyms and subtaxa.
+    assert_displayed_title("Observations of #{pattern}")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
       { text: /#{pattern}/i,
@@ -458,7 +460,10 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_displayed_title("Observations Matching ‘#{pattern}’")
+    # assert_displayed_title("Observations Matching ‘#{pattern}’")
+    assert_displayed_title(
+      :query_title_of_name.t(types: "Observations", name: pattern)
+    )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
@@ -468,7 +473,10 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern, page: 2 })
 
-    assert_displayed_title("Observations Matching ‘#{pattern}’")
+    # assert_displayed_title("Observations Matching ‘#{pattern}’")
+    assert_displayed_title(
+      :query_title_of_name.t(types: "Observations", name: pattern)
+    )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
@@ -531,7 +539,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { look_alikes: "1", name: name.id })
 
-    assert_displayed_title("Observations by Confidence Level")
+    assert_displayed_title("Observations of #{name.text_name}")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
       { count: look_alikes },
@@ -571,8 +579,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { related_taxa: "1", name: name.text_name })
-
-    assert_displayed_title("Observations by Confidence Level")
+    assert_displayed_title("Observations of #{parent.text_name}")
     assert_select(
       "#results a:match('href', ?)", %r{^/\d+},
       { count: obss_of_related_taxa.count },
@@ -590,7 +597,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_displayed_title("Observations by Confidence Level")
+    assert_displayed_title("Observations of #{name.text_name}")
     ids.each do |id|
       assert_select(
         "a:match('href', ?)", %r{^/#{id}}, true,
