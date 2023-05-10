@@ -60,12 +60,14 @@ svg.placeholder {
   @extend .ab-bottom, .text-center;
   padding: 0.5em 0.25em;
 
-  a {
-    color: white;
+  a,
+  button[type=submit]:not(.btn) {
+    color: white !important;
+    transition: color 0.3s ease;
 
     &:hover,
     &:focus {
-      color: $text-color;
+      color: lighten($link-color, 21%) !important;
       text-decoration: none;
     }
   }
