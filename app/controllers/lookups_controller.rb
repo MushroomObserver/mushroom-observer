@@ -62,7 +62,6 @@ class LookupsController < ApplicationController
   # controller/action after looking up the object.
   # inputs: model Class, true/false
   def lookup_general(model, accepted: false)
-    # type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
 
     matches, suggestions = find_matches_and_suggestions(model, id, accepted)
