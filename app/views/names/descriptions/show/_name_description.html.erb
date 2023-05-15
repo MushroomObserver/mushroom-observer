@@ -51,7 +51,7 @@ NameDescription.all_note_fields.each do |field|
 <%= :show_description_empty.tpl if !any %>
 
 <div class="text-center">
-  <%= show_authors_and_editors(desc) %>
+  <%= show_authors_and_editors(obj: desc, user: @user) %>
   <% if desc.license %>
     <%= render(partial: "shared/form_#{desc.license.form_name}") %>
   <% end %>

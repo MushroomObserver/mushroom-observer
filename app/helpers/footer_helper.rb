@@ -4,7 +4,7 @@ module FooterHelper
   # Show list of authors and editors at the bottom of a show_object page, with
   # the appropriate links for making requests and/or reviewing authors.
   #
-  #   <%= show_authors_and_editors(name) %>
+  #   <%= show_authors_and_editors(obj: name, user: @user) %>
   #
   #   # Renders something like this:
   #   <p>
@@ -12,12 +12,12 @@ module FooterHelper
   #     Editors: <user>, <user>, ..., <user>
   #   </p>
   #
-  def show_authors_and_editors(obj)
+  def show_authors_and_editors(obj:, user:)
     type = obj.type_tag
 
     # Descriptions.
     authors, editors = if /description/.match?(type.to_s)
-                         html_description_authors_and_editors(obj)
+                         html_description_authors_and_editors(obj, user)
                        else
                          html_undescribed_obj_authors_and_editors(obj)
                        end
@@ -29,13 +29,13 @@ module FooterHelper
 
   private
 
-  def html_description_authors_and_editors(obj)
+  def html_description_authors_and_editors(obj, user)
     type = obj.type_tag
 
     authors   = obj.authors
     editors   = obj.editors
-    is_admin  = @user && obj.is_admin?(@user)
-    is_author = @user && authors.include?(@user)
+    is_admin  = user && obj.is_admin?(user)
+    is_author = user && authors.include?(user)
 
     authors = user_list(:show_name_description_author, authors)
     editors = user_list(:show_name_description_editor, editors)
