@@ -16,37 +16,59 @@ module FooterHelper
     type = obj.type_tag
 
     # Descriptions.
-    if /description/.match?(type.to_s)
-      authors   = obj.authors
-      editors   = obj.editors
-      is_admin  = @user && obj.is_admin?(@user)
-      is_author = @user && authors.include?(@user)
-
-      authors = user_list(:show_name_description_author, authors)
-      editors = user_list(:show_name_description_editor, editors)
-
-      if is_admin
-        authors += safe_nbsp
-        authors += link_with_query("(#{:review_authors_review_authors.t})",
-                                   authors_review_path(id: obj.id, type: type))
-      elsif !is_author
-        authors += safe_nbsp
-        authors += link_with_query("(#{:show_name_author_request.t})",
-                                   new_authors_email_requests_path(
-                                     id: obj.id, type: type
-                                   ))
-      end
-
-    # Locations and names.
-    else
-      editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
-      editors = User.where(id: editors).to_a
-      authors = user_list(:"show_#{type}_creator", [obj.user])
-      editors = user_list(:"show_#{type}_editor", editors)
-    end
+    authors, editors = if /description/.match?(type.to_s)
+                         html_description_authors_and_editors(obj)
+                       else
+                         html_undescribed_obj_authors_and_editors(obj)
+                       end
 
     content_tag(:p, authors + safe_br + editors)
   end
+
+  ###############################################################
+
+  private
+
+  def html_description_authors_and_editors(obj)
+    type = obj.type_tag
+
+    authors   = obj.authors
+    editors   = obj.editors
+    is_admin  = @user && obj.is_admin?(@user)
+    is_author = @user && authors.include?(@user)
+
+    authors = user_list(:show_name_description_author, authors)
+    editors = user_list(:show_name_description_editor, editors)
+
+    if is_admin
+      authors += safe_nbsp
+      authors += link_with_query("(#{:review_authors_review_authors.t})",
+                                 authors_review_path(id: obj.id, type: type))
+    elsif !is_author
+      authors += safe_nbsp
+      authors += link_with_query("(#{:show_name_author_request.t})",
+                                 new_authors_email_requests_path(
+                                   id: obj.id, type: type
+                                 ))
+    end
+
+    [authors, editors]
+  end
+
+  def html_undescribed_obj_authors_and_editors(obj)
+    type = obj.type_tag
+
+    editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
+    editors = User.where(id: editors).to_a
+    authors = user_list(:"show_#{type}_creator", [obj.user])
+    editors = user_list(:"show_#{type}_editor", editors)
+
+    [authors, editors]
+  end
+
+  ###############################################################
+
+  public
 
   # Renders the little footer at the bottom of show_object pages.
   #
