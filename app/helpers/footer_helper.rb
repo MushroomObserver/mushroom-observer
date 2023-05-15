@@ -172,9 +172,11 @@ module FooterHelper
   end
 
   def html_for_latest_version_or_non_versioned_object(obj, num_versions)
-    html = []
+    # html = []
 
     if num_versions.positive?
+      html = html_for_latest_version(obj, num_versions)
+=begin
       latest_user = User.safe_find(obj.versions.latest.user_id)
       if obj.created_at
         html << :footer_created_by.t(user: user_link(obj.user),
@@ -186,8 +188,10 @@ module FooterHelper
       elsif obj.updated_at
         html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
       end
+=end
 
     else
+      html = []
       if obj.created_at
         html << :footer_created_at.t(date: obj.created_at.web_time)
       end
@@ -212,6 +216,48 @@ module FooterHelper
       html << :footer_last_you_viewed.t(date: time)
     end
 
+    html
+  end
+
+  def html_for_latest_version(obj, num_versions)
+    latest_user = User.safe_find(obj.versions.latest.user_id)
+=begin
+    html = []
+    if obj.created_at
+      html << :footer_created_by.t(user: user_link(obj.user),
+                                   date: obj.created_at.web_time)
+    end
+=end
+    html = html_created_by(obj)
+
+    if latest_user && obj.updated_at
+      html << :footer_last_updated_by.t(user: user_link(latest_user),
+                                        date: obj.updated_at.web_time)
+    elsif obj.updated_at
+      html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
+    end
+
+    html
+  end
+
+  def html_created_by(obj)
+    if obj.created_at
+      [:footer_created_by.t(user: user_link(obj.user),
+                            date: obj.created_at.web_time)]
+    else
+      []
+    end
+  end
+
+  def html_updated_at(obj)
+    latest_user = User.safe_find(obj.versions.latest.user_id)
+    html = []
+    if latest_user && obj.updated_at
+      html << :footer_last_updated_by.t(user: user_link(latest_user),
+                                        date: obj.updated_at.web_time)
+    elsif obj.updated_at
+      html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
+    end
     html
   end
 end
