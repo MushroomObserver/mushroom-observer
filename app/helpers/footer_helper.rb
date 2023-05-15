@@ -82,70 +82,14 @@ module FooterHelper
   #   </p>
   #
   def show_object_footer(obj)
-    # html = []
     num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
-
-=begin
-    # Old version of versioned object.
-    if num_versions.positive? && obj.version < num_versions
-      html << :footer_version_out_of.t(num: obj.version, total: num_versions)
-      if obj.updated_at
-        html << :footer_updated_by.t(user: user_link(obj.user),
-                                     date: obj.updated_at.web_time)
-      end
-=end
 
     html = if num_versions.positive? && obj.version < num_versions
              html_for_old_version_of_versioned_object(obj, num_versions)
-=begin
-     # Latest version of non-versioned object.
-    else
-      if num_versions.positive?
-        latest_user = User.safe_find(obj.versions.latest.user_id)
-        if obj.created_at
-          html << :footer_created_by.t(user: user_link(obj.user),
-                                       date: obj.created_at.web_time)
-        end
-        if latest_user && obj.updated_at
-          html << :footer_last_updated_by.t(user: user_link(latest_user),
-                                            date: obj.updated_at.web_time)
-        elsif obj.updated_at
-          html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
-        end
-      else
-        if obj.created_at
-          html << :footer_created_at.t(date: obj.created_at.web_time)
-        end
-        if obj.updated_at
-          html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
-        end
-      end
-      if obj.respond_to?(:num_views) && obj.last_view
-        times = if obj.old_num_views == 1
-                  :one_time.l
-                else
-                  :many_times.l(num: obj.old_num_views)
-                end
-        date = obj.old_last_view&.web_time || :footer_never.l
-        html << :footer_viewed.t(date: date, times: times)
-      end
-      if User.current && obj.respond_to?(:last_viewed_by)
-        time = obj.old_last_viewed_by(User.current)&.web_time || :footer_never.l
-        html << :footer_last_you_viewed.t(date: time)
-      end
-    end
-=end
            else
              html_for_latest_version_or_non_versioned_object(obj, num_versions)
            end
 
-=begin
-    # Show RSS log for all of the above.
-    if obj.respond_to?(:rss_log_id) && obj.rss_log_id
-      html << link_to(:show_object.t(type: :log),
-                      activity_log_path(obj.rss_log_id))
-    end
-=end
     html.concat(link_to_rss_log(obj))
     html = html.safe_join(safe_br)
     tag.p(html, class: "small footer-view-stats mt-3")
@@ -176,20 +120,6 @@ module FooterHelper
 
     if num_versions.positive?
       html = html_for_latest_version(obj, num_versions)
-=begin
-      latest_user = User.safe_find(obj.versions.latest.user_id)
-      if obj.created_at
-        html << :footer_created_by.t(user: user_link(obj.user),
-                                     date: obj.created_at.web_time)
-      end
-      if latest_user && obj.updated_at
-        html << :footer_last_updated_by.t(user: user_link(latest_user),
-                                          date: obj.updated_at.web_time)
-      elsif obj.updated_at
-        html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
-      end
-=end
-
     else
       html = []
       if obj.created_at
@@ -221,13 +151,6 @@ module FooterHelper
 
   def html_for_latest_version(obj, num_versions)
     latest_user = User.safe_find(obj.versions.latest.user_id)
-=begin
-    html = []
-    if obj.created_at
-      html << :footer_created_by.t(user: user_link(obj.user),
-                                   date: obj.created_at.web_time)
-    end
-=end
     html = html_created_by(obj)
 
     if latest_user && obj.updated_at
