@@ -119,7 +119,7 @@ module FooterHelper
     # html = []
 
     if num_versions.positive?
-      html = html_for_latest_version(obj, num_versions)
+      html = html_for_latest_version(obj)
     else
       html = []
       if obj.created_at
@@ -149,10 +149,11 @@ module FooterHelper
     html
   end
 
-  def html_for_latest_version(obj, num_versions)
+  def html_for_latest_version(obj)
     latest_user = User.safe_find(obj.versions.latest.user_id)
     html = html_created_by(obj)
 
+    # TODO: extract following into method returning array or nil; concat to html
     if latest_user && obj.updated_at
       html << :footer_last_updated_by.t(user: user_link(latest_user),
                                         date: obj.updated_at.web_time)
