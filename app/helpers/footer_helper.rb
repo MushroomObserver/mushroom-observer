@@ -15,7 +15,6 @@ module FooterHelper
   def show_authors_and_editors(obj:, user:)
     type = obj.type_tag
 
-    # Descriptions.
     authors, editors = if /description/.match?(type.to_s)
                          html_description_authors_and_editors(obj, user)
                        else
@@ -30,8 +29,6 @@ module FooterHelper
   private
 
   def html_description_authors_and_editors(obj, user)
-    type = obj.type_tag
-
     authors   = obj.authors
     editors   = obj.editors
     is_admin  = user && obj.is_admin?(user)
@@ -41,18 +38,30 @@ module FooterHelper
     editors = user_list(:show_name_description_editor, editors)
 
     if is_admin
-      authors += safe_nbsp
-      authors += link_with_query("(#{:review_authors_review_authors.t})",
-                                 authors_review_path(id: obj.id, type: type))
+      authors = authors_plus_review_authors(obj, authors)
     elsif !is_author
-      authors += safe_nbsp
-      authors += link_with_query("(#{:show_name_author_request.t})",
-                                 new_authors_email_requests_path(
-                                   id: obj.id, type: type
-                                 ))
+      authors = authors_plus_author_request(obj, authors)
     end
 
     [authors, editors]
+  end
+
+  def authors_plus_review_authors(obj, authors)
+    authors += safe_nbsp
+    authors += link_with_query(
+      "(#{:review_authors_review_authors.t})",
+      authors_review_path(id: obj.id, type: obj.type_tag)
+    )
+    authors
+  end
+
+  def authors_plus_author_request(obj, authors)
+    authors += safe_nbsp
+    authors += link_with_query(
+      "(#{:review_authors_review_authors.t})",
+      authors_review_path(id: obj.id, type: obj.type_tag)
+    )
+    authors
   end
 
   def html_undescribed_obj_authors_and_editors(obj)
