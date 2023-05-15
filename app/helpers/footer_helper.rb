@@ -122,15 +122,7 @@ module FooterHelper
              html_for_non_versioned_object(obj)
            end
 
-    if obj.respond_to?(:num_views) && obj.last_view
-      times = if obj.old_num_views == 1
-                :one_time.l
-              else
-                :many_times.l(num: obj.old_num_views)
-              end
-      date = obj.old_last_view&.web_time || :footer_never.l
-      html << :footer_viewed.t(date: date, times: times)
-    end
+    html << html_num_views(obj) if obj.respond_to?(:num_views) && obj.last_view
 
     if User.current && obj.respond_to?(:last_viewed_by)
       time = obj.old_last_viewed_by(User.current)&.web_time || :footer_never.l
@@ -186,5 +178,15 @@ module FooterHelper
       html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
     end
     html
+  end
+
+  def html_num_views(obj)
+    times = if obj.old_num_views == 1
+              :one_time.l
+            else
+              :many_times.l(num: obj.old_num_views)
+            end
+    date = obj.old_last_view&.web_time || :footer_never.l
+    :footer_viewed.t(date: date, times: times)
   end
 end
