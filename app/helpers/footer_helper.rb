@@ -116,20 +116,11 @@ module FooterHelper
   end
 
   def html_for_latest_version_or_non_versioned_object(obj, num_versions)
-    # html = []
-
-    if num_versions.positive?
-      html = html_for_latest_version(obj)
-    else
-      html = []
-      if obj.created_at
-        html << :footer_created_at.t(date: obj.created_at.web_time)
-      end
-      # following condition is not covered
-      if obj.updated_at
-        html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
-      end
-    end
+    html = if num_versions.positive?
+             html_for_latest_version(obj)
+           else
+             html_for_non_versioned_object(obj)
+           end
 
     if obj.respond_to?(:num_views) && obj.last_view
       times = if obj.old_num_views == 1
@@ -180,6 +171,18 @@ module FooterHelper
       html << :footer_last_updated_by.t(user: user_link(latest_user),
                                         date: obj.updated_at.web_time)
     elsif obj.updated_at
+      html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
+    end
+    html
+  end
+
+  def html_for_non_versioned_object(obj)
+    html = []
+    if obj.created_at
+      html << :footer_created_at.t(date: obj.created_at.web_time)
+    end
+    # following condition is not covered
+    if obj.updated_at
       html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
     end
     html
