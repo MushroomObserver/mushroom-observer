@@ -185,18 +185,6 @@ module FooterHelper
     end
   end
 
-  def html_updated_at(obj)
-    latest_user = User.safe_find(obj.versions.latest.user_id)
-    html = []
-    if latest_user && obj.updated_at
-      html << :footer_last_updated_by.t(user: user_link(latest_user),
-                                        date: obj.updated_at.web_time)
-    elsif obj.updated_at
-      html << :footer_last_updated_at.t(date: obj.updated_at.web_time)
-    end
-    html
-  end
-
   def html_for_non_versioned_object(obj)
     html = []
     if obj.created_at
