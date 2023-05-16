@@ -40,7 +40,7 @@ module DescriptionsHelper
                     description.parent.show_link_args)
   end
 
-  # TODO: add icon
+  # TODO: make create button helper in link helpers
   def create_description_link(object)
     link_to(
       :show_name_create_description.t,
@@ -98,7 +98,6 @@ module DescriptionsHelper
     end
   end
 
-  # TODO: add icon
   def move_description_link(description, admin)
     return unless admin
 
@@ -112,11 +111,10 @@ module DescriptionsHelper
               title: :show_description_move.t }
     ) do
       # concat(:show_description_move.t)
-      icon("fa-regular", "move", class: "fa-lg")
+      icon("fa-regular", "file-export", class: "fa-lg")
     end
   end
 
-  # TODO: add icon
   def adjust_permissions_link(description, type, admin)
     return unless admin && type == :name
 
@@ -127,11 +125,10 @@ module DescriptionsHelper
       help: :show_description_adjust_permissions_help.l
     ) do
       # concat(:show_description_adjust_permissions.t)
-      icon("fa-regular", "adjust", class: "fa-lg")
+      icon("fa-regular", "arrows-down-to-people", class: "fa-lg")
     end
   end
 
-  # TODO: add icon
   def make_default_link(description)
     return unless description.public && User.current &&
                   (description.parent.description_id != description.id)
@@ -143,12 +140,11 @@ module DescriptionsHelper
       class: "make_description_default_link_#{description.id}",
       help: :show_description_make_default_help.l
     ) do
-      # concat(:show_description_adjust_permissions.t)
-      icon("fa-regular", "default", class: "fa-lg")
+      # concat(:show_description_make_default.t)
+      icon("fa-regular", "star", class: "fa-lg")
     end
   end
 
-  # TODO: add icon
   def project_link(description)
     return unless (description.source_type == :project) &&
                   (project = description.source_object)
@@ -157,11 +153,10 @@ module DescriptionsHelper
       add_query_param(project.show_link_args)
     ) do
       # concat(:show_object.t(type: :project))
-      icon("fa-regular", "project", class: "fa-lg")
+      icon("fa-regular", "people-arrows", class: "fa-lg")
     end
   end
 
-  # TODO: add icon
   def publish_draft_link(description, type, admin)
     return unless admin && (type == :name) &&
                   (description.source_type != :public)
@@ -173,7 +168,10 @@ module DescriptionsHelper
               q: get_query_param },
       class: "publish_description_draft_link_#{description.id}",
       help: :show_description_publish_help.l
-    )
+    ) do
+      # concat(:show_description_publish.t
+      icon("fa-regular", "check-to-slot", class: "fa-lg")
+    end
   end
 
   # Header of the embedded description within a show_object page.
