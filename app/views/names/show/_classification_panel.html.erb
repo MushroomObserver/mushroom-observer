@@ -1,11 +1,14 @@
 <%
-header = [
-  tag.h6(:show_name_classification.t),
-  tag.div do
-    link_to(:EDIT.t,
-            add_query_param(edit_name_classification_path(@name.id)))
-  end
-].safe_join
+header = [tag.h6(:show_name_classification.t)]
+if @user
+  header << tag.div do
+              edit_button(
+                name: :EDIT.t,
+                target: add_query_param(edit_name_classification_path(@name.id))
+              )
+            end
+end
+header = header.safe_join
 %>
 
 <%= tag.div(id: "name_classification") do
