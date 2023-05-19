@@ -87,6 +87,19 @@ module LinkHelper
   end
 
   # Not a <button> element, but an <a> because it's a GET
+  def add_button(path:, name: :ADD.t, **args, &block)
+    content = block ? capture(&block) : ""
+    html_options = {
+      class: "", # usually also btn
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.merge(args)
+
+    link_to(path, html_options) do
+      [content, icon("fa-regular", "square-plus", class: "fa-lg")].safe_join
+    end
+  end
+
+  # Not a <button> element, but an <a> because it's a GET
   def edit_button(target:, name: :EDIT.t, **args, &block)
     content = block ? capture(&block) : ""
     path = if target.is_a?(String)

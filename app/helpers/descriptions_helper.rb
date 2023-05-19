@@ -40,13 +40,12 @@ module DescriptionsHelper
                     description.parent.show_link_args)
   end
 
-  # TODO: make create button helper in link helpers
-  def create_description_link(object)
-    link_to(
-      :show_name_create_description.t,
-      { controller: "#{object.show_controller}/descriptions",
-        action: :new, id: object.id, q: get_query_param },
-      class: "create_description_link_#{object.id}"
+  def new_description_link(object)
+    add_button(
+      name: :show_name_create_description.t,
+      path: send("new_#{object.type_tag}_description_path",
+                 params: { id: object.id, q: get_query_param }),
+      class: "new_description_link_#{object.id}"
     )
   end
 
@@ -65,6 +64,9 @@ module DescriptionsHelper
       target: description, name: :show_description_destroy.t
     )
   end
+
+  # The following need all the bells and whistles, because they're
+  # special to descriptions and not built with the icon link helpers.
 
   # Clone is #new with parameters :clone, :id (name_id)
   def clone_description_link(description)
@@ -94,7 +96,7 @@ module DescriptionsHelper
               title: :show_description_merge.t }
     ) do
       # concat(:show_description_merge.t)
-      icon("fa-regular", "merge", class: "fa-lg")
+      icon("fa-regular", "code-merge", class: "fa-lg")
     end
   end
 
@@ -122,7 +124,9 @@ module DescriptionsHelper
       { controller: "#{description.show_controller}/permissions",
         action: :edit, id: description.id, q: get_query_param },
       class: "adjust_description_permissions_link_#{description.id}",
-      help: :show_description_adjust_permissions_help.l
+      help: :show_description_adjust_permissions_help.l,
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_description_adjust_permissions.t }
     ) do
       # concat(:show_description_adjust_permissions.t)
       icon("fa-regular", "arrows-down-to-people", class: "fa-lg")
@@ -138,7 +142,9 @@ module DescriptionsHelper
       path: { controller: "#{description.show_controller}/defaults",
               action: :update, id: description.id, q: get_query_param },
       class: "make_description_default_link_#{description.id}",
-      help: :show_description_make_default_help.l
+      help: :show_description_make_default_help.l,
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_description_make_default.t }
     ) do
       # concat(:show_description_make_default.t)
       icon("fa-regular", "star", class: "fa-lg")
@@ -150,7 +156,9 @@ module DescriptionsHelper
                   (project = description.source_object)
 
     link_to(
-      add_query_param(project.show_link_args)
+      add_query_param(project.show_link_args),
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_object.t(type: :project) }
     ) do
       # concat(:show_object.t(type: :project))
       icon("fa-regular", "people-arrows", class: "fa-lg")
@@ -167,7 +175,9 @@ module DescriptionsHelper
               action: :update, id: description.id,
               q: get_query_param },
       class: "publish_description_draft_link_#{description.id}",
-      help: :show_description_publish_help.l
+      help: :show_description_publish_help.l,
+      data: { toggle: "tooltip", placement: "top",
+              title: :show_description_publish.t }
     ) do
       # concat(:show_description_publish.t
       icon("fa-regular", "check-to-slot", class: "fa-lg")
@@ -277,7 +287,7 @@ module DescriptionsHelper
 
     # Show existing drafts, with link to create new one.
     head = content_tag(:b, :show_name_descriptions.t) + ": "
-    head += create_description_link(object)
+    head += new_description_link(object)
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object).map { |link| indent + link }
