@@ -36,8 +36,11 @@ module DescriptionsHelper
   end
 
   def show_parent_link(description, type)
-    link_with_query(:show_object.t(type: type),
-                    description.parent.show_link_args)
+    back_button(
+      name: :show_object.t(type: type),
+      path: description.parent.show_link_args.merge(q: get_query_param),
+      class: "back_to_parent_link_#{description.id}"
+    )
   end
 
   def new_description_link(object)
