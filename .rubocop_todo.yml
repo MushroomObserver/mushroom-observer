@@ -114,7 +114,6 @@ Metrics/BlockNesting:
   Exclude:
     - 'app/classes/map_set.rb'
     - 'app/classes/tree.rb'
-    - 'app/controllers/lookups_controller.rb'
     - 'app/controllers/observations_controller/form_helpers.rb'
     - 'lib/tasks/email.rake'
     - 'test/controller_extensions.rb'
@@ -628,7 +627,6 @@ Style/OptionalBooleanParameter:
     - 'app/classes/query/modules/sql.rb'
     - 'app/classes/textile.rb'
     - 'app/controllers/application_controller.rb'
-    - 'app/controllers/lookups_controller.rb'
     - 'app/extensions/string_extensions.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'app/helpers/content_helper.rb'

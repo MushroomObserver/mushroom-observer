@@ -62,6 +62,14 @@ class LookupsControllerTest < FunctionalTestCase
     get(:lookup_name, params: { id: n_id })
     assert_redirected_to(name_path(n_id))
 
+    get(:lookup_name, params: { id: images(:in_situ_image).id.to_s })
+    assert_redirected_to(
+      names_path,
+      "Should redirect to index if looking up by integer " \
+      "and object doesn't exist"
+    )
+    assert_flash_error
+
     get(:lookup_name, params: { id: names(:coprinus_comatus).id })
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/names/#{names(:coprinus_comatus).id}})
@@ -101,13 +109,19 @@ class LookupsControllerTest < FunctionalTestCase
                                                              match: "Verpab"))
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/names})
+  end
 
-    # Prove that lookup_name adds flash message when it hits an error,
-    # stubbing a method called by lookup_name in order to provoke an error.
+  def test_lookup_name_with_error
+    # Stub a method called by lookup_name in order to provoke an error.
     LookupsController.any_instance.stubs(:fix_name_matches).
       raises(RuntimeError)
+    login
+
     get(:lookup_name, params: { id: names(:fungi).text_name })
-    assert_flash_text("RuntimeError")
+    assert_flash_text(
+      "RuntimeError",
+      "Error should provoke a flash if looking up by non-integer"
+    )
   end
 
   def test_lookup_observation
