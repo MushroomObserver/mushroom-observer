@@ -93,8 +93,9 @@ module Report
 
     def clean_notes(str)
       str.strip.
-        # Compress conssecutive whitespaces before (not after) Textilizing
+        # Compress consecutive whitespaces before (not after) Textilizing
         # because some whitespace combinations can confuse Textile
+        # Example: `\r\n \r\n`
         gsub(/\s+/, " ").
         t.html_to_ascii
     end
