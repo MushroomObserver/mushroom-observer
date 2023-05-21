@@ -345,13 +345,13 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
-  def test_symbiota_compress_consecutive_newlines
+  def test_symbiota_compress_consecutive_whitespace
     obs = observations(:detailed_unknown_obs)
     obs.notes = {
       Substrate: "wood\tchips",
       Habitat: "lawn",
       Host: "_Agaricus_",
-      Other: "First line.\r\n\r\nSecond line."
+      Other: "1st line.\r\n\r\n2nd line.\r\n \r\n3rd line."
     }
     obs.save!
 
@@ -382,7 +382,7 @@ class ReportTest < UnitTestCase
       "#{obs.updated_at.api_time} UTC",
       "wood chips",
       "Agaricus",
-      "Habitat: lawn Other: First line. Second line.",
+      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
       obs.id.to_s,
       "https://mushroomobserver.org/#{obs.id}",
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \

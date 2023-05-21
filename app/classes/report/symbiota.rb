@@ -93,9 +93,11 @@ module Report
 
     def clean_notes(str)
       str.strip.
-        # Compress conssecutive newlines because they confuse Textile
-        gsub(/(\r|\n)+/, "\n").
-        t.html_to_ascii.gsub(/\s+/, " ")
+        # Compress consecutive whitespaces before (not after) Textilizing
+        # because some whitespace combinations can confuse Textile
+        # Example: `\r\n \r\n`
+        gsub(/\s+/, " ").
+        t.html_to_ascii
     end
 
     def image_urls(row)
