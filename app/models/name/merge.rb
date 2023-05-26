@@ -99,19 +99,26 @@ module Name::Merge
     # Update the identifier if it's blank
     self.icn_id = old_name.icn_id if icn_id.blank?
 
-    # Save any notes the old name had.
-    if old_name.has_notes? && (old_name.notes != notes)
-      if has_notes?
-        self.notes += "\n\nThese notes come from #{old_name.format_name} " \
-                      "when it was merged with this name:\n\n #{old_name.notes}"
-      else
-        self.notes = old_name.notes
-      end
-      log(:log_name_updated, touch: true)
-      save
+    update_taxonomy_attributes(old_name)
+
+    old_name.destroy
+  end
+
+  #######################
+
+  private
+
+  def update_taxonomy_attributes(old_name)
+    return unless old_name.has_notes? && (old_name.notes != notes)
+
+    if has_notes?
+      self.notes += "\n\nThese notes come from #{old_name.format_name} " \
+                    "when it was merged with this name:\n\n #{old_name.notes}"
+    else
+      self.notes = old_name.notes
     end
 
-    # Finally destroy the name.
-    old_name.destroy
+    log(:log_name_updated, touch: true)
+    save
   end
 end
