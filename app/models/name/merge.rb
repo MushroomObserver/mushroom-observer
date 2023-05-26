@@ -51,6 +51,18 @@ module Name::Merge
     # Move over any notifications on the old name.
     NameTracker.where(name: old_name).update_all(name_id: id)
 
+    update_descriptions(old_name)
+    update_nomenclature_attributes(old_name)
+    update_taxonomy_attributes(old_name)
+
+    old_name.destroy
+  end
+
+  #######################
+
+  private
+
+  def update_descriptions(old_name)
     #     # Merge the two "main" descriptions if it can.
     #     if self.description and old_name.description and
     #        (self.description.source_type == :public) and
@@ -90,16 +102,7 @@ module Name::Merge
     editors.uniq.each do |user_id|
       SiteData.update_contribution(:del, :names_versions, user_id)
     end
-
-    update_nomenclature_attributes(old_name)
-    update_taxonomy_attributes(old_name)
-
-    old_name.destroy
   end
-
-  #######################
-
-  private
 
   def update_nomenclature_attributes(old_name)
     self.icn_id = old_name.icn_id if icn_id.blank?
