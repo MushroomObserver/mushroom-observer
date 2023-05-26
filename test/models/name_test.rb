@@ -3244,6 +3244,26 @@ class NameTest < UnitTestCase
     Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
   end
 
+  def test_merge_editors
+    old_name = names(:peltigera)
+    editors = old_name.versions.each_with_object([]) do |version, editors|
+      editors << version.user_id
+    end.uniq
+    assert(editors.many?,
+           "Test needs Name fixture edited by multiple users")
+    user = User.find(old_name.versions.second.user_id)
+    old_contribution = user.contribution
+
+    names(:lichen).merge(old_name)
+
+    assert_equal(
+      old_contribution - SiteData::FIELD_WEIGHTS[:names_versions],
+      user.reload.contribution,
+      "Merging a Name edited by a user should reduce user's contribution " \
+      "by #{SiteData::FIELD_WEIGHTS[:names_versions]}"
+    )
+  end
+
   def test_merge_interests
     old_name = names(:agaricus_campestros)
     interests = old_name.interests
