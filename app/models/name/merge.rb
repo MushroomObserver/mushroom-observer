@@ -91,14 +91,7 @@ module Name::Merge
       SiteData.update_contribution(:del, :names_versions, user_id)
     end
 
-    # Fill in citation if new name is missing one.
-    if citation.blank? && old_name.citation.present?
-      self.citation = old_name.citation.strip_squeeze
-    end
-
-    # Update the identifier if it's blank
-    self.icn_id = old_name.icn_id if icn_id.blank?
-
+    update_nomenclature_attributes(old_name)
     update_taxonomy_attributes(old_name)
 
     old_name.destroy
@@ -107,6 +100,13 @@ module Name::Merge
   #######################
 
   private
+
+  def update_nomenclature_attributes(old_name)
+    self.icn_id = old_name.icn_id if icn_id.blank?
+    return unless citation.blank? && old_name.citation.present?
+
+    self.citation = old_name.citation.strip_squeeze
+  end
 
   def update_taxonomy_attributes(old_name)
     return unless old_name.has_notes? && (old_name.notes != notes)
