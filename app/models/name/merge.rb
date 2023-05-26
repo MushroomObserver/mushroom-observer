@@ -52,6 +52,7 @@ module Name::Merge
     NameTracker.where(name: old_name).update_all(name_id: id)
 
     update_descriptions(old_name)
+    update_versions(old_name)
     update_nomenclature_attributes(old_name)
     update_taxonomy_attributes(old_name)
 
@@ -89,19 +90,18 @@ module Name::Merge
     old_name.rss_log&.orphan(old_name.display_name, :log_name_merged,
                              this: old_name.display_name, that: display_name)
     old_name.rss_log = nil
+  end
 
-    # Destroy past versions.
-    editors = []
-    old_name.versions.each do |ver|
-      editors << ver.user_id
-      ver.destroy
+  def update_versions(old_name)
+    editors = old_name.versions.each_with_object([]) do |ver, e|
+      e << ver.user_id
     end
-
-    # Update contributions for editors.
     editors.delete(old_name.user_id)
     editors.uniq.each do |user_id|
       SiteData.update_contribution(:del, :names_versions, user_id)
     end
+
+    old_name.versions.each(&:destroy)
   end
 
   def update_nomenclature_attributes(old_name)
