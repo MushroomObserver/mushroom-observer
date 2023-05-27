@@ -495,7 +495,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("a", text: "3", count: 0)
   end
 
-  def test_pagination_letter_with_page_2
+  def test_pagination_letter_with_page2
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
               order("text_name, author").to_a
@@ -842,7 +842,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(name_path(name12.id, params: q))
   end
 
-  def test_next_and_prev_2
+  def test_next_and_prev2
     query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
     q = @controller.query_params(query)
 
@@ -2506,7 +2506,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   # Test merge two names where the old name had notes.
-  def test_update_name_merge_matching_notes_2
+  def test_update_name_merge_matching_notes2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)
     old_citation = old_name.citation
