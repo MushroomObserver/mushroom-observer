@@ -40,17 +40,8 @@ module Name::Merge
       name.save
     end
 
-    # Move over any interest in the old name.
-    Interest.where(
-      target_type: "Name", target_id: old_name.id
-    ).find_each do |int|
-      int.target = self
-      int.save
-    end
-
-    # Move over any notifications on the old name.
-    NameTracker.where(name: old_name).update_all(name_id: id)
-
+    # update any Interest and Tracking
+    update_followings(old_name)
     update_descriptions(old_name)
     update_versions(old_name)
     update_nomenclature_attributes(old_name)
@@ -62,6 +53,19 @@ module Name::Merge
   #######################
 
   private
+
+  def update_followings(old_name)
+    # Move over any interest in the old name.
+    Interest.where(
+      target_type: "Name", target_id: old_name.id
+    ).find_each do |int|
+      int.target = self
+      int.save
+    end
+
+    # Move over any notifications on the old name.
+    NameTracker.where(name: old_name).update_all(name_id: id)
+  end
 
   def update_descriptions(old_name)
     #     # Merge the two "main" descriptions if it can.
