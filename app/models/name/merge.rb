@@ -25,12 +25,7 @@ module Name::Merge
   def merge(old_name)
     return if old_name == self
 
-    # Move all observations over to the new name.
-    old_name.observations.each do |obs|
-      obs.name = self
-      obs.save
-    end
-
+    move_observations(old_name)
     move_namings(old_name)
     move_mispellings(old_name)
     move_followings(old_name)  # shift Interest and Tracking
@@ -45,6 +40,13 @@ module Name::Merge
   #######################
 
   private
+
+  def move_observations(old_name)
+    old_name.observations.each do |obs|
+      obs.name = self
+      obs.save
+    end
+  end
 
   def move_namings(old_name)
     old_name.namings.each do |name|
