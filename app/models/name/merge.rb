@@ -76,25 +76,7 @@ module Name::Merge
   end
 
   def move_descriptions(old_name)
-    #     # Merge the two "main" descriptions if it can.
-    #     if self.description and old_name.description and
-    #        (self.description.source_type == :public) and
-    #        (old_name.description.source_type == :public)
-    #       self.description.merge(old_name.description, true)
-    #     end
-
-    # If this one doesn't have a primary description and the other does,
-    # then make it this one's.
-    if !description && old_name.description
-      self.description = old_name.description
-    end
-
-    # Update the classification cache if that changed in the process.
-    if description &&
-       (classification != description.classification)
-      self.classification = description.classification
-    end
-
+    move_primary_description(old_name)
     # Move over any remaining descriptions.
     NameDescription.where(name_id: old_name.id).update_all(name_id: id)
 
@@ -102,6 +84,18 @@ module Name::Merge
     old_name.rss_log&.orphan(old_name.display_name, :log_name_merged,
                              this: old_name.display_name, that: display_name)
     old_name.rss_log = nil
+  end
+
+  def move_primary_description(old_name)
+    return unless !description && old_name.description
+
+    # Move old_name's description to self if self lacks one
+    self.description = old_name.description
+    # Update the classification cache if that changed in the process.
+    if description &&
+       (classification != description.classification)
+      self.classification = description.classification
+    end
   end
 
   def move_versions(old_name)
