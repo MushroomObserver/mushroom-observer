@@ -28,7 +28,7 @@ module Name::Merge
     move_observations(old_name)
     move_namings(old_name)
     move_mispellings(old_name)
-    move_followings(old_name)  # shift Interest and Tracking
+    move_followings(old_name) # move Interest and Tracking
     move_descriptions(old_name)
     move_versions(old_name)
     move_nomenclature_attributes(old_name)
