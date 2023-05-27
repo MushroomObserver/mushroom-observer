@@ -17,7 +17,7 @@ jobs:
     # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
     # https://github.com/actions/checkout
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # https://github.com/ruby/setup-ruby
     - name: Set up Ruby
