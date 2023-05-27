@@ -123,12 +123,9 @@ class Name
     def move_taxonomy_attributes(old_name)
       return unless old_name.has_notes? && (old_name.notes != notes)
 
-      if has_notes?
-        self.notes += "\n\nThese notes come from #{old_name.format_name} " \
-                      "when it was merged with this name:\n\n #{old_name.notes}"
-      else
-        self.notes = old_name.notes
-      end
+      notes << "\n\n" if has_notes?
+      self.notes += "These notes come from #{old_name.format_name} " \
+                    "when it was merged with this name:\n\n #{old_name.notes}"
 
       log(:log_name_updated, touch: true)
       save

@@ -2319,7 +2319,8 @@ class NamesControllerTest < FunctionalTestCase
     reload_name = Name.find(good_id)
     assert(reload_name)
     assert_equal(good_author, reload_name.author)
-    assert_equal(bad_notes, reload_name.notes)
+    assert_match(/#{bad_notes}\Z/, reload_name.notes,
+                 "old_name notes should be appended to target name's notes")
   end
 
   # Make sure misspelling gets transferred when new name merges away.
@@ -2532,7 +2533,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
     assert_equal("", new_name.author) # user explicitly set author to ""
     assert_equal(old_citation, new_name.citation)
-    assert_equal(old_notes, new_name.notes)
+    assert_match(/#{old_notes}\Z/, new_name.notes,
+                 "old_name notes should be appended to target name's notes")
     assert_not_nil(new_name.description)
     assert_equal(old_desc, new_name.description.notes)
   end
