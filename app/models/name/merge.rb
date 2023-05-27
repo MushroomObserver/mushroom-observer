@@ -31,12 +31,7 @@ module Name::Merge
       obs.save
     end
 
-    # Move all namings over to the new name.
-    old_name.namings.each do |name|
-      name.name = self
-      name.save
-    end
-
+    move_namings(old_name)
     move_mispellings(old_name)
     move_followings(old_name)  # shift Interest and Tracking
     move_descriptions(old_name)
@@ -50,6 +45,13 @@ module Name::Merge
   #######################
 
   private
+
+  def move_namings(old_name)
+    old_name.namings.each do |name|
+      name.name = self
+      name.save
+    end
+  end
 
   def move_mispellings(old_name)
     old_name.misspellings.each do |name|
