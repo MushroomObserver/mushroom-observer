@@ -41,11 +41,11 @@ module Name::Merge
     end
 
     # update any Interest and Tracking
-    update_followings(old_name)
-    update_descriptions(old_name)
-    update_versions(old_name)
-    update_nomenclature_attributes(old_name)
-    update_taxonomy_attributes(old_name)
+    shift_followings(old_name)
+    shift_descriptions(old_name)
+    shift_versions(old_name)
+    shift_nomenclature_attributes(old_name)
+    shift_taxonomy_attributes(old_name)
 
     old_name.destroy
   end
@@ -54,7 +54,7 @@ module Name::Merge
 
   private
 
-  def update_followings(old_name)
+  def shift_followings(old_name)
     # Move over any interest in the old name.
     Interest.where(
       target_type: "Name", target_id: old_name.id
@@ -67,7 +67,7 @@ module Name::Merge
     NameTracker.where(name: old_name).update_all(name_id: id)
   end
 
-  def update_descriptions(old_name)
+  def shift_descriptions(old_name)
     #     # Merge the two "main" descriptions if it can.
     #     if self.description and old_name.description and
     #        (self.description.source_type == :public) and
@@ -96,7 +96,7 @@ module Name::Merge
     old_name.rss_log = nil
   end
 
-  def update_versions(old_name)
+  def shift_versions(old_name)
     editors = old_name.versions.each_with_object([]) do |ver, e|
       e << ver.user_id
     end
@@ -108,14 +108,14 @@ module Name::Merge
     old_name.versions.each(&:destroy)
   end
 
-  def update_nomenclature_attributes(old_name)
+  def shift_nomenclature_attributes(old_name)
     self.icn_id = old_name.icn_id if icn_id.blank?
     return unless citation.blank? && old_name.citation.present?
 
     self.citation = old_name.citation.strip_squeeze
   end
 
-  def update_taxonomy_attributes(old_name)
+  def shift_taxonomy_attributes(old_name)
     return unless old_name.has_notes? && (old_name.notes != notes)
 
     if has_notes?
