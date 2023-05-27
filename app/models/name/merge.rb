@@ -37,12 +37,7 @@ module Name::Merge
       name.save
     end
 
-    # Move all misspellings over to the new name.
-    old_name.misspellings.each do |name|
-      name.correct_spelling = name == self ? nil : self
-      name.save
-    end
-
+    move_mispellings(old_name)
     move_followings(old_name)  # shift Interest and Tracking
     move_descriptions(old_name)
     move_versions(old_name)
@@ -55,6 +50,13 @@ module Name::Merge
   #######################
 
   private
+
+  def move_mispellings(old_name)
+    old_name.misspellings.each do |name|
+      name.correct_spelling = (name == self ? nil : self)
+      name.save
+    end
+  end
 
   def move_followings(old_name)
     # Move over any interest in the old name.
