@@ -14,11 +14,14 @@ module Name::Merge
     namings.any? || interests.any?
   end
 
-  # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
-  # changes are made to +self+, however it might update the +classification+
-  # cache if the old name had a better one -- NOT SAVED!!  Then +old_name+ is
-  # destroyed; all the things that referred to +old_name+ are updated and
-  # saved.
+  # Merge all the stuff that refers to old_name into self.
+  # Usually, no changes are made to self attributes.
+  # But it might the following if old_name had better ones:
+  #  classification cache NOT SAVED!!
+  #  icn_id
+  #  citation
+  # All things that referred to old_name are moved to self and saved.
+  # Finally, +old_name+ destroyed.
   def merge(old_name)
     return if old_name == self
 
@@ -40,12 +43,11 @@ module Name::Merge
       name.save
     end
 
-    # update any Interest and Tracking
-    shift_followings(old_name)
-    shift_descriptions(old_name)
-    shift_versions(old_name)
-    shift_nomenclature_attributes(old_name)
-    shift_taxonomy_attributes(old_name)
+    move_followings(old_name)  # shift Interest and Tracking
+    move_descriptions(old_name)
+    move_versions(old_name)
+    move_nomenclature_attributes(old_name)
+    move_taxonomy_attributes(old_name)
 
     old_name.destroy
   end
@@ -54,7 +56,7 @@ module Name::Merge
 
   private
 
-  def shift_followings(old_name)
+  def move_followings(old_name)
     # Move over any interest in the old name.
     Interest.where(
       target_type: "Name", target_id: old_name.id
@@ -67,7 +69,7 @@ module Name::Merge
     NameTracker.where(name: old_name).update_all(name_id: id)
   end
 
-  def shift_descriptions(old_name)
+  def move_descriptions(old_name)
     #     # Merge the two "main" descriptions if it can.
     #     if self.description and old_name.description and
     #        (self.description.source_type == :public) and
@@ -96,7 +98,7 @@ module Name::Merge
     old_name.rss_log = nil
   end
 
-  def shift_versions(old_name)
+  def move_versions(old_name)
     editors = old_name.versions.each_with_object([]) do |ver, e|
       e << ver.user_id
     end
@@ -108,14 +110,14 @@ module Name::Merge
     old_name.versions.each(&:destroy)
   end
 
-  def shift_nomenclature_attributes(old_name)
+  def move_nomenclature_attributes(old_name)
     self.icn_id = old_name.icn_id if icn_id.blank?
     return unless citation.blank? && old_name.citation.present?
 
     self.citation = old_name.citation.strip_squeeze
   end
 
-  def shift_taxonomy_attributes(old_name)
+  def move_taxonomy_attributes(old_name)
     return unless old_name.has_notes? && (old_name.notes != notes)
 
     if has_notes?
