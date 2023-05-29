@@ -3246,8 +3246,8 @@ class NameTest < UnitTestCase
 
   def test_merge_editors
     old_name = names(:peltigera)
-    editors = old_name.versions.each_with_object([]) do |version, editors|
-      editors << version.user_id
+    editors = old_name.versions.each_with_object([]) do |version, e|
+      e << version.user_id
     end.uniq
     assert(editors.many?,
            "Test needs Name fixture edited by multiple users")
