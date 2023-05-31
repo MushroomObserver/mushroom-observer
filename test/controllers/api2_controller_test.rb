@@ -155,6 +155,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal(Observation.no_notes, obs.notes)
+    assert(obs.log_updated_at.is_a?(ActiveSupport::TimeWithZone),
+           "Observation should have log_updated_at time")
     assert_obj_arrays_equal([], obs.images)
     assert_nil(obs.thumb_image)
     assert_obj_arrays_equal([], obs.projects)
