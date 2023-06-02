@@ -36,7 +36,7 @@
           license_id = datum["license_id"].to_i
           copyright_holder = datum["copyright_holder"].to_s %>
 
-          <%= fields_for("#{row}") do |f_r| %>
+          <%= f.fields_for("#{row}") do |f_r| %>
             <tr>
               <td>
                 <%= datum["license_count"].to_s %>
