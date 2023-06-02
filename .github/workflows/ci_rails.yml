@@ -90,3 +90,9 @@ jobs:
     #   env:
     #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
     #     REPORT_PATH: brakeman.json
+
+    - name: Brakemam
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      run: |
+        bundle exec brakeman -o brakeman.json
