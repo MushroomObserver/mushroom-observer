@@ -10,7 +10,7 @@ module Images
 
       assert_form_action(action: :update)
       assert_select(
-        "select[name='updates[1][new_id]']", count = 1,
+        "select[name='updates[1][new_id]']", { count: 1 },
         "Form should have numerical selectors nested under `updates`"
       )
     end
