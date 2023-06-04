@@ -495,7 +495,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("a", text: "3", count: 0)
   end
 
-  def test_pagination_letter_with_page_2
+  def test_pagination_letter_with_page2
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
               order("text_name, author").to_a
@@ -842,7 +842,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(name_path(name12.id, params: q))
   end
 
-  def test_next_and_prev_2
+  def test_next_and_prev2
     query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
     q = @controller.query_params(query)
 
@@ -2319,7 +2319,8 @@ class NamesControllerTest < FunctionalTestCase
     reload_name = Name.find(good_id)
     assert(reload_name)
     assert_equal(good_author, reload_name.author)
-    assert_equal(bad_notes, reload_name.notes)
+    assert_match(/#{bad_notes}\Z/, reload_name.notes,
+                 "old_name notes should be appended to target name's notes")
   end
 
   # Make sure misspelling gets transferred when new name merges away.
@@ -2505,7 +2506,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   # Test merge two names where the old name had notes.
-  def test_update_name_merge_matching_notes_2
+  def test_update_name_merge_matching_notes2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)
     old_citation = old_name.citation
@@ -2532,7 +2533,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
     assert_equal("", new_name.author) # user explicitly set author to ""
     assert_equal(old_citation, new_name.citation)
-    assert_equal(old_notes, new_name.notes)
+    assert_match(/#{old_notes}\Z/, new_name.notes,
+                 "old_name notes should be appended to target name's notes")
     assert_not_nil(new_name.description)
     assert_equal(old_desc, new_name.description.notes)
   end
