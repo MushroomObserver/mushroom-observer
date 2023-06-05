@@ -81,7 +81,8 @@ jobs:
     # https://github.com/devmasx/brakeman-linter-action
     # Temporarily disable brakeman in CI because it causes an error
     # See https://github.com/MushroomObserver/mushroom-observer/issues/1514
-    # JDC 2023-05-27
+    # Instead use brakeman's plugin. See .codeclimate.yml
+    # JDC 2023-06-05
     # - name: brakeman report
     #   run: |
     #     bundle exec brakeman -f json > brakeman.json || exit 0
