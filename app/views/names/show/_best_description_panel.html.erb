@@ -1,5 +1,5 @@
-<div id="name_best_description">
-  <strong><%= :show_name_brief_description.t %>:</strong>
+<div id="name_general_description">
+  <strong><%= :show_name_general_description.t %>:</strong>
     [<%= link_with_query(:show_name_see_more.t,
           name_description_path(@name.description.id)) %> |
       <%= link_with_query(:EDIT.t,
@@ -7,4 +7,4 @@
   <%= panel_block do %>
     <%= @best_description.tpl %>
   <% end %>
-</div><!--#name_best_description-->
+</div>
