@@ -79,11 +79,14 @@ jobs:
         path-to-lcov: ./coverage/lcov/lcov.info
 
     # https://github.com/devmasx/brakeman-linter-action
-    - name: brakeman report
-      run: |
-        bundle exec brakeman -f json > brakeman.json || exit 0
-    - name: Brakeman
-      uses: devmasx/brakeman-linter-action@v1.0.0
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        REPORT_PATH: brakeman.json
+    # Temporarily disable brakeman in CI because it causes an error
+    # See https://github.com/MushroomObserver/mushroom-observer/issues/1514
+    # JDC 2023-05-27
+    # - name: brakeman report
+    #   run: |
+    #     bundle exec brakeman -f json > brakeman.json || exit 0
+    # - name: Brakeman
+    #   uses: devmasx/brakeman-linter-action@v1.0.0
+    #   env:
+    #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    #     REPORT_PATH: brakeman.json
