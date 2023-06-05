@@ -59,16 +59,17 @@ checks:
 
 # CodeClimate will run these plugins when CodeClimate is triggered.
 # For configuration of specific plugins, see CodeClimate documentation
-#   for that engine.
+# for that engine.
 
 plugins:
 # check Rails apps for security vulnerabilities
   brakeman:
-    # Do not use Codeclimate's version of Brakeman as of 2022-06-18
-    # It is dated and throws many false positives
-    # Instead run brakeman locally or in CI rely on Github action plugin
-    # https://github.com/devmasx/brakeman-linter-action
-    enabled: false
+    # Use highest available channel https://docs.codeclimate.com/docs/brakeman
+    # because Github actions linter is broken
+    # See .github/workflows/ci_rails.yml
+    # JDC 2023-06-04
+    channel: beta
+    enabled: true
 
 # helps find security vulnerabilities in Ruby dependencies
   bundler-audit:
