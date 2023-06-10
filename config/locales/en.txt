@@ -1537,7 +1537,7 @@
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
-  form_names_gen_desc_help: Describe the general appearance of this taxon.
+  form_names_gen_desc_help: "Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here."
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
   form_names_habitat_help: What habitats has taxon has been found in?
@@ -2083,7 +2083,7 @@
   show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
-  show_name_brief_description: Brief Description
+  show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   index_fungorum: Index Fungorum
