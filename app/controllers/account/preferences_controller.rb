@@ -25,10 +25,9 @@ module Account
     # It does write to the DB.
     def no_email
       user = User.safe_find(params[:id])
-      type = params[:type]
-      if user && check_permission!(user) && EMAIL_TYPES.include?(type)
-        method  = "email_#{type}="
-        prefix  = "no_email_#{type}"
+      if user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
+        method  = "email_#{email_type}="
+        prefix  = "no_email_#{email_type}"
         success = "#{prefix}_success".to_sym
         @note   = "#{prefix}_note".to_sym
         @user.send(method, false)
@@ -178,6 +177,10 @@ module Account
       ContentFilter.all.map do |fltr|
         [fltr.sym, :content_filter]
       end
+    end
+
+    def email_type
+      params[:type]
     end
   end
 end
