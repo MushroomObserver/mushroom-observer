@@ -27,9 +27,7 @@ module Account
       user = User.safe_find(params[:id])
       return redirect_to("/") unless permitted_user_with_valid_email_type?(user)
 
-      prefix  = "no_email_#{email_type}"
-      success = "#{prefix}_success".to_sym
-      @note   = "#{prefix}_note".to_sym
+      @note = "#{email_msg_prefix}_note".to_sym
       @user.send(email_type_setter, false)
       if @user.save
         flash_notice(success.t(name: @user.unique_text_name))
@@ -182,6 +180,14 @@ module Account
 
     def email_type_setter
       "email_#{email_type}="
+    end
+
+    def email_msg_prefix
+      "no_email_#{email_type}"
+    end
+
+    def success
+      "#{email_msg_prefix}_success".to_sym
     end
 
     def email_type
