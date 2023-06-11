@@ -25,20 +25,18 @@ module Account
     # It does write to the DB.
     def no_email
       user = User.safe_find(params[:id])
-      if permitted_user_with_valid_email_type?(user)
-        prefix  = "no_email_#{email_type}"
-        success = "#{prefix}_success".to_sym
-        @note   = "#{prefix}_note".to_sym
-        @user.send(email_type_setter, false)
-        if @user.save
-          flash_notice(success.t(name: @user.unique_text_name))
-          render(action: :no_email)
-        else
-          # Probably should write a better error message here...
-          flash_object_errors(@user)
-          redirect_to("/")
-        end
+      return redirect_to("/") unless permitted_user_with_valid_email_type?(user)
+
+      prefix  = "no_email_#{email_type}"
+      success = "#{prefix}_success".to_sym
+      @note   = "#{prefix}_note".to_sym
+      @user.send(email_type_setter, false)
+      if @user.save
+        flash_notice(success.t(name: @user.unique_text_name))
+        render(action: :no_email)
       else
+        # Probably should write a better error message here...
+        flash_object_errors(@user)
         redirect_to("/")
       end
     end
@@ -178,16 +176,16 @@ module Account
       end
     end
 
-    def email_type
-      params[:type]
-    end
-
     def permitted_user_with_valid_email_type?(user)
       user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
     end
 
     def email_type_setter
       "email_#{email_type}="
+    end
+
+    def email_type
+      params[:type]
     end
   end
 end
