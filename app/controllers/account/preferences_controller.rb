@@ -25,7 +25,7 @@ module Account
     # It does write to the DB.
     def no_email
       user = User.safe_find(params[:id])
-      if user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
+      if permitted_user_with_valid_email_type?(user)
         method  = "email_#{email_type}="
         prefix  = "no_email_#{email_type}"
         success = "#{prefix}_success".to_sym
@@ -181,6 +181,10 @@ module Account
 
     def email_type
       params[:type]
+    end
+
+    def permitted_user_with_valid_email_type?(user)
+      user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
     end
   end
 end
