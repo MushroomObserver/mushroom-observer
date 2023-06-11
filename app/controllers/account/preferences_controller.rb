@@ -27,7 +27,7 @@ module Account
       user = User.safe_find(params[:id])
       return redirect_to("/") unless permitted_user_with_valid_email_type?(user)
 
-      @note = "#{email_msg_prefix}_note".to_sym
+      @note = email_note
       @user.send(email_type_setter, false)
       if @user.save
         flash_notice(success.t(name: @user.unique_text_name))
@@ -116,7 +116,7 @@ module Account
     def prefs_changed_successfully
       result = false
       if !@user.changed
-        flash_notice(:runtime_no_changes.t)
+         flash_notice(:runtime_no_changes.t)
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
       else
@@ -188,6 +188,10 @@ module Account
 
     def success
       "#{email_msg_prefix}_success".to_sym
+    end
+
+    def email_note
+      "#{email_msg_prefix}_note".to_sym
     end
 
     def email_type
