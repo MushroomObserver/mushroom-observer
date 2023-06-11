@@ -116,7 +116,11 @@ module Account
     def prefs_changed_successfully
       result = false
       if !@user.changed
-         flash_notice(:runtime_no_changes.t)
+        # NOTE: The next line appears to be unreachable
+        # because @user.changed is always truthy. (It's at least `[]`.)
+        # Perhaps `!@user.changed?` was intended, but it breaks tests.
+        # 2023-06-11 JDC
+        flash_notice(:runtime_no_changes.t)
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
       else
