@@ -26,11 +26,10 @@ module Account
     def no_email
       user = User.safe_find(params[:id])
       if permitted_user_with_valid_email_type?(user)
-        method  = "email_#{email_type}="
         prefix  = "no_email_#{email_type}"
         success = "#{prefix}_success".to_sym
         @note   = "#{prefix}_note".to_sym
-        @user.send(method, false)
+        @user.send(email_type_setter, false)
         if @user.save
           flash_notice(success.t(name: @user.unique_text_name))
           render(action: :no_email)
@@ -185,6 +184,10 @@ module Account
 
     def permitted_user_with_valid_email_type?(user)
       user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
+    end
+
+    def email_type_setter
+      "email_#{email_type}="
     end
   end
 end
