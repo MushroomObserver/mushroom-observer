@@ -17,6 +17,10 @@ class LookupsController < ApplicationController
     lookup_general(Image)
   end
 
+  def lookup_glossary_term
+
+  end
+
   def lookup_location
     lookup_general(Location)
   end
