@@ -154,6 +154,7 @@ LOOKUP_ACTIONS = %w[
   lookup_accepted_name
   lookup_comment
   lookup_image
+  lookup_glossary_term
   lookup_location
   lookup_name
   lookup_observation
