@@ -18,7 +18,7 @@ class LookupsController < ApplicationController
   end
 
   def lookup_glossary_term
-
+    lookup_general(GlossaryTerm)
   end
 
   def lookup_location
