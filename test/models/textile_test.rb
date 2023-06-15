@@ -105,6 +105,14 @@ class TextileTest < UnitTestCase
     assert_equal({ "A" => "Amanita", "F" => "Fungi" }, Textile.name_lookup)
   end
 
+  def test_textile_name_size
+    Textile.clear_textile_cache
+    assert_equal(0, Textile.textile_name_size)
+
+    assert_name_link_matches("_Agaricus_", "Agaricus", "Agaricus")
+    assert_equal(1, Textile.textile_name_size)
+  end
+
   def test_expand_infra_specific_names
     # Expand subspecies after Textile is told about species
     assert_name_link_matches("_Hydnum album_", "Hydnum album", "Hydnum album")
