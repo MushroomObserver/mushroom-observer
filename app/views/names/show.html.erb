@@ -14,7 +14,7 @@
 
     <%= render(partial: "names/show/observations_menu") %>
     <%= render(partial: "names/show/nomenclature",
-              locals: { name: @name, synonyms: true }) %>
+               locals: { name: @name, synonyms: true }) %>
 
     <div class="row">
       <div class="col-md-6">
@@ -61,7 +61,7 @@
     </div>
 
     <%= card_block(id: "name_authors_editors") do %>
-      <%= show_authors_and_editors(@name) %>
+      <%= show_authors_and_editors(obj: @name, user: @user) %>
     <% end %>
 
   </div><!--RIGHT COLUMN-->

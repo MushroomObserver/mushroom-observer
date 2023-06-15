@@ -587,7 +587,7 @@ class Observation < AbstractModel
   # to cache a log_updated_at value
   def touch_when_logging
     self.log_updated_at = Time.zone.now
-    touch
+    save
   end
 
   ##############################################################################

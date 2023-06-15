@@ -1407,6 +1407,20 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_true(@response.body.include?("California, Mendocino Co., Albion"))
   end
 
+  def test_create_log_updated_at
+    params = {
+      naming: { name: "", vote: { value: "" } },
+      user: rolf,
+      where: locations.first.name
+    }
+
+    users(:rolf).login
+    post_requires_login(:create, params)
+
+    assert(Observation.last.log_updated_at.is_a?(Time),
+           "Observation should have log_updated_at time")
+  end
+
   def test_create_observation_with_unrecognized_name
     text_name = "Elfin saddle"
     params = { naming: { name: text_name },

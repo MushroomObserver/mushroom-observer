@@ -31,7 +31,7 @@ class LookupsController < ApplicationController
   # it a name ID.  This is, of course, bizarre behavior, but we're ignoring it
   # because it should never be called that way in the first place. -JPH 1/2017
   def lookup_accepted_name
-    lookup_general(Name, true)
+    lookup_general(Name, accepted: true)
   end
 
   def lookup_observation
@@ -50,6 +50,10 @@ class LookupsController < ApplicationController
     lookup_general(User)
   end
 
+  ##############################################################################
+
+  private
+
   # Alternative to controller/show_object/id.  These were included for the
   # benefit of the textile wrapper: We don't want to be looking up all these
   # names and objects every time we display comments, etc.  Instead we make
@@ -57,82 +61,76 @@ class LookupsController < ApplicationController
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
   # inputs: model Class, true/false
-  def lookup_general(model, accepted = false)
-    matches = []
-    suggestions = []
-    type = model.type_tag
+  def lookup_general(model, accepted: false)
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
+
+    matches, suggestions = find_matches_and_suggestions(model, id, accepted)
+    return if /^\d+$/.match?(id) && !matches
+
+    handle_matches_and_suggestions(
+      model: model, id: id, matches: matches, suggestions: suggestions
+    )
+  end
+
+  def find_matches_and_suggestions(model, id, accepted)
+    return find_integer_matches(model, id) if /^\d+$/.match?(id)
+
+    case model.to_s
+    when "Name"
+      find_name_matches_and_suggestions(id, accepted)
+    when "Location"
+      find_location_matches(id)
+    when "Project"
+      find_project_matches(id)
+    when "SpeciesList"
+      find_species_list_matches(id)
+    when "User"
+      find_user_matches(id)
+    end
+  end
+
+  def find_integer_matches(model, id)
     begin
-      if /^\d+$/.match?(id)
-        obj = find_or_goto_index(model, id)
-        return unless obj
+      obj = find_or_goto_index(model, id)
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
 
-        matches = [obj]
-      else
-        case model.to_s
-        when "Name"
-          if (parse = Name.parse_name(id))
-            matches = Name.where(search_name: parse.search_name)
-            matches = Name.where(text_name: parse.text_name) if matches.empty?
-            matches = fix_name_matches(matches, accepted)
-          end
-          if matches.empty?
-            suggestions = Name.suggest_alternate_spellings(id)
-            suggestions = fix_name_matches(suggestions, accepted)
-          end
-        when "Location"
-          pattern = "%#{id}%"
-          matches = Location.limit(100).
-                    where(Location[:name].matches(pattern).
-                      or(Location[:scientific_name].matches(pattern)))
-        when "Project"
-          pattern = "%#{id}%"
-          matches = Project.limit(100).
-                    where(Project[:title].matches(pattern))
+    return nil unless obj
 
-        when "SpeciesList"
-          pattern = "%#{id}%"
-          matches = SpeciesList.limit(100).
-                    where(SpeciesList[:title].matches(pattern))
-        when "User"
-          matches = User.where(login: id)
-          matches = User.where(name: id) if matches.empty?
-        end
+    [[obj], nil]
+  end
+
+  def find_name_matches_and_suggestions(id, accepted)
+    matches = find_name_matches(id, accepted)
+    return [matches, []] unless matches.empty?
+
+    suggestions = []
+    begin
+      suggestions = Name.suggest_alternate_spellings(id)
+      suggestions = fix_name_matches(suggestions, accepted) if suggestions.any?
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [[], suggestions]
+  end
+
+  def find_name_matches(id, accepted)
+    matches = []
+
+    begin
+      parse = Name.parse_name(id)
+      if parse
+        matches = Name.where(search_name: parse.search_name)
+        matches = Name.where(text_name: parse.text_name) if matches.empty?
+        matches = fix_name_matches(matches, accepted)
       end
     rescue StandardError => e
       flash_error(e.to_s) unless Rails.env.production?
     end
 
-    if matches.empty? && suggestions.empty?
-      flash_error(:runtime_object_no_match.t(match: id, type: type))
-      if model == User
-        redirect_to("/") # (no public index for users)
-      else
-        redirect_to(controller: model.show_controller,
-                    action: model.index_action)
-      end
-    elsif matches.length == 1 || suggestions.length == 1
-      obj = matches.first || suggestions.first
-      if suggestions.any?
-        flash_warning(:runtime_suggest_one_alternate.t(match: id, type: type))
-      end
-      redirect_to(controller: obj.show_controller,
-                  action: obj.show_action,
-                  id: obj.id)
-    else
-      obj = matches.first || suggestions.first
-      query = Query.lookup(model, :in_set, ids: matches + suggestions)
-      if suggestions.any?
-        flash_warning(:runtime_suggest_multiple_alternates.t(match: id,
-                                                             type: type))
-      else
-        flash_warning(:runtime_object_multiple_matches.t(match: id,
-                                                         type: type))
-      end
-      redirect_to(add_query_param({ controller: obj.show_controller,
-                                    action: obj.index_action },
-                                  query))
-    end
+    matches
   end
 
   def fix_name_matches(matches, accepted)
@@ -143,5 +141,111 @@ class LookupsController < ApplicationController
         name.correct_spelling || name
       end
     end
+  end
+
+  def find_location_matches(id)
+    pattern = "%#{id}%"
+
+    begin
+      matches = Location.limit(100).
+                where(Location[:name].matches(pattern).
+                or(Location[:scientific_name].matches(pattern)))
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [matches, []]
+  end
+
+  def find_project_matches(id)
+    pattern = "%#{id}%"
+
+    begin
+      matches = Project.limit(100).
+                where(Project[:title].matches(pattern))
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [matches, []]
+  end
+
+  def find_species_list_matches(id)
+    pattern = "%#{id}%"
+
+    begin
+      matches = SpeciesList.limit(100).
+                where(SpeciesList[:title].matches(pattern))
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [matches, []]
+  end
+
+  def find_user_matches(id)
+    begin
+      matches = User.where(login: id)
+      matches = User.where(name: id) if matches.empty?
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [matches, []]
+  end
+
+  def handle_matches_and_suggestions(model:, id:, matches:, suggestions:)
+    if matches.empty? && suggestions.empty?
+      handle_no_match(model, id)
+    elsif matches.length == 1 || suggestions&.length == 1
+      handle_single_match_or_suggestion(
+        model: model, id: id, matches: matches, suggestions: suggestions
+      )
+    else
+      handle_multiple_matches_or_suggestions(
+        model: model, id: id, matches: matches, suggestions: suggestions
+      )
+
+    end
+  end
+
+  def handle_no_match(model, id)
+    flash_error(:runtime_object_no_match.t(match: id, type: model.type_tag))
+    if model == User
+      redirect_to("/")
+    else
+      redirect_to(controller: model.show_controller, action: model.index_action)
+    end
+  end
+
+  def handle_single_match_or_suggestion(model:, id:, matches:, suggestions:)
+    obj = matches.first || suggestions.first
+    if suggestions.any?
+      flash_warning(
+        :runtime_suggest_one_alternate.t(match: id, type: model.type_tag)
+      )
+    end
+    redirect_to(controller: obj.show_controller,
+                action: obj.show_action,
+                id: obj.id)
+  end
+
+  def handle_multiple_matches_or_suggestions(
+    model:, id:, matches:, suggestions:
+  )
+    obj = matches.first || suggestions.first
+    query = Query.lookup(model, :in_set, ids: matches + suggestions)
+    if suggestions.any?
+      flash_warning(
+        :runtime_suggest_multiple_alternates.t(match: id, type: model.type_tag)
+      )
+    else
+      flash_warning(
+        :runtime_object_multiple_matches.t(match: id, type: model.type_tag)
+      )
+    end
+    redirect_to(add_query_param({ controller: obj.show_controller,
+                                  action: obj.index_action },
+                                query))
   end
 end

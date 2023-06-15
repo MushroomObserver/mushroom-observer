@@ -1,6 +1,6 @@
 <%
 header = [
-  tag.h6(:show_name_brief_description.t),
+  tag.h6(:show_name_general_description.t),
   tag.div do
     [
       link_to(
@@ -17,6 +17,6 @@ header = [
 ].safe_join
 %>
 
-<%= card_block(header: header, id: "name_best_description") do
+<%= card_block(header: header, id: "name_general_description") do
   @best_description.tpl
 end %>

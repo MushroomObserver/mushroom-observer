@@ -495,7 +495,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_select("a", text: "3", count: 0)
   end
 
-  def test_pagination_letter_with_page_2
+  def test_pagination_letter_with_page2
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
               order("text_name, author").to_a
@@ -698,6 +698,81 @@ class NamesControllerTest < FunctionalTestCase
     assert_synonym_links(name, 1, 0, 1)
   end
 
+  def test_show_missing_created_at
+    name = names(:coprinus_comatus)
+
+    footer_created_by =
+      # I'd like to do something like the commented out lines,
+      # but they thhrow an error at
+      # app/helpers/object_link_helper.rb:124:in `user_link'
+      # footer_created_by = :footer_created_by.t(
+      #   user: user_link(name.user),
+      #   date: name.created_at.web_time
+      # ).to_s
+      "<strong>Created:</strong> #{name.created_at.web_time} " \
+      "<strong>by</strong> #{name.user.name} (#{name.user.login}"
+
+    # zap created_at directly in the db, else Rails will also change updated_at
+    name.update_columns(created_at: nil)
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_no_match(
+      footer_created_by, @response.body,
+      "Footer should omit `#{:Created.l} line if created_at is absent"
+    )
+  end
+
+  def test_show_new_version_missing_updated_at
+    name = names(:coprinus_comatus)
+    assert_operator(name.version, :>, 1,
+                    "Test needs a fixture with multiple versions")
+    footer_updated_at =
+      :footer_last_updated_at.t(date: name.updated_at.web_time).to_s
+
+    # bork updated_at directly in the db, else Rails will add it
+    name.update_columns(updated_at: nil)
+    login
+    get(:show, params: { id: name.id })
+
+    assert_no_match(
+      footer_updated_at, @response.body,
+      "Footer should omit #{:modified.l} date if updated_at absent"
+    )
+  end
+
+  def test_show_new_version_missing_user
+    name = names(:coprinus_comatus)
+    name_last_version = name.versions.last
+    assert_operator(name_last_version.version, :>, 1,
+                    "Test needs a fixture with multiple versions")
+    last_user = User.find(name_last_version.user_id)
+    footer_last_updated_by =
+      # I'd like to do something like the commented out lines,
+      # but they thhrow an error at
+      #    app/helpers/object_link_helper.rb:124:in `user_link'
+      # -- jdc 2023-05-17
+      # (:footer_last_updated_by.t(
+      #    user: user_link(last_user),
+      #    date: name_last_version.updated_at.web_time)
+      # ).to_s
+      "<strong>Last modified:</strong> " \
+      "#{name_last_version.updated_at.web_time} " \
+      "<strong>by</strong> #{last_user.name} (#{last_user.login})"
+
+    # bork user directly in the db, else Rails will also change updated_at
+    name_last_version.update_columns(user_id: nil)
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_no_match(
+      footer_last_updated_by, @response.body,
+      "Footer should omit #{:modified.l} by if updated_at absent"
+    )
+  end
+
   def assert_synonym_links(name, approve, deprecate, edit)
     assert_select("a[href*=?]", approve_name_synonym_form_path(name.id),
                   count: approve)
@@ -767,7 +842,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(name_path(name12.id, params: q))
   end
 
-  def test_next_and_prev_2
+  def test_next_and_prev2
     query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
     q = @controller.query_params(query)
 
@@ -2244,7 +2319,8 @@ class NamesControllerTest < FunctionalTestCase
     reload_name = Name.find(good_id)
     assert(reload_name)
     assert_equal(good_author, reload_name.author)
-    assert_equal(bad_notes, reload_name.notes)
+    assert_match(/#{bad_notes}\Z/, reload_name.notes,
+                 "old_name notes should be appended to target name's notes")
   end
 
   # Make sure misspelling gets transferred when new name merges away.
@@ -2430,7 +2506,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   # Test merge two names where the old name had notes.
-  def test_update_name_merge_matching_notes_2
+  def test_update_name_merge_matching_notes2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)
     old_citation = old_name.citation
@@ -2457,7 +2533,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
     assert_equal("", new_name.author) # user explicitly set author to ""
     assert_equal(old_citation, new_name.citation)
-    assert_equal(old_notes, new_name.notes)
+    assert_match(/#{old_notes}\Z/, new_name.notes,
+                 "old_name notes should be appended to target name's notes")
     assert_not_nil(new_name.description)
     assert_equal(old_desc, new_name.description.notes)
   end

@@ -1539,7 +1539,7 @@
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
-  form_names_gen_desc_help: Describe the general appearance of this taxon.
+  form_names_gen_desc_help: "Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here."
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
   form_names_habitat_help: What habitats has taxon has been found in?
@@ -2088,7 +2088,7 @@
   show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
-  show_name_brief_description: Brief Description
+  show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   index_fungorum: Index Fungorum
@@ -2276,7 +2276,7 @@
   signup_preferred_theme: Preferred Theme (optional)
   signup_random: Random
   signup_button: Signup
-  signup_email_help: "A working email address is required to verify your account.  This helps us keep the spammers out.\n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences.\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information."
+  signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\n When you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\n Once you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
   # species_list/create_species_list
   species_list_create_title: "[:create_object(type=:species_list)]"
