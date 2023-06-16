@@ -80,6 +80,8 @@ class LookupsController < ApplicationController
     return find_integer_matches(model, id) if /^\d+$/.match?(id)
 
     case model.to_s
+    when "GlossaryTerm"
+      find_glossary_term_matches(id)
     when "Name"
       find_name_matches_and_suggestions(id, accepted)
     when "Location"
@@ -103,6 +105,16 @@ class LookupsController < ApplicationController
     return nil unless obj
 
     [[obj], nil]
+  end
+
+  def find_glossary_term_matches(id)
+    begin
+      matches = GlossaryTerm.where(name: id)
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [matches, []]
   end
 
   def find_name_matches_and_suggestions(id, accepted)

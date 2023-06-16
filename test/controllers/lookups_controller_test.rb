@@ -182,11 +182,17 @@ class LookupsControllerTest < FunctionalTestCase
                       "/lookups/lookup_user/I.+G.+Saponov")
   end
 
-  def test_lookup_glossary_term_by_id
+  def test_lookup_glossary_term_by_number
+    term = glossary_terms(:conic_glossary_term)
+
+    login
+    get(:lookup_glossary_term, params: { id: term.id })
+
+    assert_redirected_to(/#{glossary_term_path(term.id)}/)
+  end
+
+  def test_lookup_glossary_term_by_name
 =begin
-    p_id = projects(:eol_project).id
-    get(:lookup_project, params: { id: p_id })
-    assert_redirected_to(/#{project_path(p_id)}/)
     get(:lookup_project, params: { id: "Bolete" })
     assert_redirected_to(/#{project_path(projects(:bolete_project).id)}/)
     get(:lookup_project, params: { id: "Bogus" })
@@ -200,7 +206,7 @@ class LookupsControllerTest < FunctionalTestCase
     term = glossary_terms(:conic_glossary_term)
 
     login
-    get(:lookup_glossary_term, params: { id: term.id })
+    get(:lookup_glossary_term, params: { id: term.name })
 
     assert_redirected_to(/#{glossary_term_path(term.id)}/)
   end
