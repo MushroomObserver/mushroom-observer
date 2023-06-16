@@ -22,12 +22,6 @@ class TextileTest < UnitTestCase
     assert_equal(str, obj.to_s)
   end
 
-  def do_other_links(str)
-    obj = Textile.new(str)
-    obj.send_private(:check_other_links!)
-    obj.to_s
-  end
-
   def assert_href_equal(url, str)
     result = str.tl
     assert_match(/href=.([^"']*)/, result,
@@ -188,6 +182,12 @@ class TextileTest < UnitTestCase
                  do_other_links("_iMg 765_"))
     assert_equal("x{USER __phooey__ }{ phooey }x x{NAME __gar__ }{ gar }x",
                  do_other_links("_user phooey_ _name gar_"))
+  end
+
+  def do_other_links(str)
+    obj = Textile.new(str)
+    obj.send_private(:check_other_links!)
+    obj.to_s
   end
 
   def test_location_lookup
