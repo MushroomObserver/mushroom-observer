@@ -41,6 +41,20 @@ class TextileTest < UnitTestCase
                  "actual: #{actual}\n")
   end
 
+  def test_glossary_term_lookup
+    skip("Skip until OTHER_LINK_PATTERN is")
+    term = glossary_terms(:conic_glossary_term).name
+
+    textile = "_glossary_term #{term}_".tpl
+
+    assert_match(
+      "#{MO.http_domain}/lookups/lookup_glossary_term/#{CGI.escape(term)}",
+      textile,
+      "Wrong URL"
+    )
+    assert_match("<i>#{term}</i>", textile, "Wrong anchor text")
+  end
+
   def test_name_lookup
     Textile.clear_textile_cache
     assert_equal({}, Textile.name_lookup)
