@@ -176,6 +176,8 @@ class TextileTest < UnitTestCase
 
   def test_other_links
     assert_equal("", do_other_links(""))
+    assert_equal("x{GLOSSARY_TERM __term 123__ }{ 123 }x",
+                 do_other_links("_term 123_"))
     assert_equal("x{OBSERVATION __obs 123__ }{ 123 }x",
                  do_other_links("_obs 123_"))
     assert_equal("x{IMAGE __iMg 765__ }{ 765 }x",

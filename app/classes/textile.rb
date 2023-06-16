@@ -312,6 +312,7 @@ class Textile < String
       id = Regexp.last_match(3)
       matches = [
         ["comment"],
+        %w[glossary_term term],
         %w[image img],
         %w[location loc],
         ["name"],
