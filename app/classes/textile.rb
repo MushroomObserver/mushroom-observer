@@ -210,8 +210,14 @@ class Textile < String
     (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
   /x
   OTHER_LINK_PATTERN = /
-   (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
+    (^|\W) # prefix
+    (?:_+)
+    ([a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
+    \s+
+    ([^_\s](?:[^_\n]+[^_\s])?) # id -- interger or string
+    (?:_+) (?!\w)
   /x
+
 
   # Convert __Names__ to links in a textile string.
   def check_name_links!
