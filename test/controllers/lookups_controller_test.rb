@@ -188,7 +188,7 @@ class LookupsControllerTest < FunctionalTestCase
     login
     get(:lookup_glossary_term, params: { id: term.id })
 
-    assert_redirected_to(/#{glossary_term_path(term.id)}/)
+    assert_redirected_to(glossary_term_path(term.id))
   end
 
   def test_lookup_glossary_term_by_name
@@ -197,7 +197,7 @@ class LookupsControllerTest < FunctionalTestCase
     login
     get(:lookup_glossary_term, params: { id: term.name })
 
-    assert_redirected_to(/#{glossary_term_path(term.id)}/)
+    assert_redirected_to(glossary_term_path(term.id))
   end
 
   def test_lookup_glossary_term_by_name_no_match
@@ -208,7 +208,7 @@ class LookupsControllerTest < FunctionalTestCase
     login
     get(:lookup_glossary_term, params: { id: name })
 
-    assert_redirected_to(/#{glossary_term_path}/)
+    assert_redirected_to(glossary_terms_path)
     assert_flash_error
   end
 end
