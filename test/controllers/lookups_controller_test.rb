@@ -192,22 +192,23 @@ class LookupsControllerTest < FunctionalTestCase
   end
 
   def test_lookup_glossary_term_by_name
-=begin
-    get(:lookup_project, params: { id: "Bolete" })
-    assert_redirected_to(/#{project_path(projects(:bolete_project).id)}/)
-    get(:lookup_project, params: { id: "Bogus" })
-    assert_redirected_to(/#{projects_path}/)
-    assert_flash_error
-    get(:lookup_project, params: { id: "project" })
-    # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{/projects})
-    assert_flash_warning
-=end
     term = glossary_terms(:conic_glossary_term)
 
     login
     get(:lookup_glossary_term, params: { id: term.name })
 
     assert_redirected_to(/#{glossary_term_path(term.id)}/)
+  end
+
+  def test_lookup_glossary_term_by_name_no_match
+    name = "Mxyzptlk"
+    assert_empty(GlossaryTerm.where(GlossaryTerm[:name] =~ name),
+                 "Test needs phrase that doesn't match any Glossary Term")
+
+    login
+    get(:lookup_glossary_term, params: { id: name })
+
+    assert_redirected_to(/#{glossary_term_path}/)
+    assert_flash_error
   end
 end
