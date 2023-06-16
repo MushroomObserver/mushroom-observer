@@ -200,6 +200,15 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(glossary_term_path(term.id))
   end
 
+  def test_lookup_glossary_term_by_multiple_word_name
+    term = glossary_terms(:multiple_word_glossary_term)
+
+    login
+    get(:lookup_glossary_term, params: { id: term.name })
+
+    assert_redirected_to(glossary_term_path(term.id))
+  end
+
   def test_lookup_glossary_term_by_name_no_match
     name = "Mxyzptlk"
     assert_empty(GlossaryTerm.where(GlossaryTerm[:name] =~ name),
