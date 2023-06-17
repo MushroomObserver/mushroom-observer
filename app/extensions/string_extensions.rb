@@ -385,11 +385,13 @@ class String
   ### Textile-related methods ###
 
   def t(sanitize = true)
-    Textile.textilize_without_paragraph_safe(self, false, sanitize)
+    Textile.textilize_without_paragraph_safe(self, do_object_links: false,
+                                                   sanitize: sanitize)
   end
 
   def tl(sanitize = true)
-    Textile.textilize_without_paragraph_safe(self, true, sanitize)
+    Textile.textilize_without_paragraph_safe(self, do_object_links: true,
+                                                   sanitize: sanitize)
   end
 
   # Textilize string, wrapped in a <div>, making it all safe for output

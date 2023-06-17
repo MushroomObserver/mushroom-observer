@@ -40,15 +40,17 @@ class Textile < String
   ########## Class methods #####################################################
 
   # Convenience wrapper on instance method Textile#textilize_without_paragraph.
-  def self.textilize_without_paragraph(str, do_object_links = false,
-                                       sanitize = true)
-    new(str).textilize_without_paragraph(do_object_links, sanitize)
+  def self.textilize_without_paragraph(str, do_object_links: false,
+                                       sanitize: true)
+    new(str).textilize_without_paragraph(do_object_links: do_object_links,
+                                         sanitize: sanitize)
   end
 
   # Wrap self.textilize_without_paragraph, marking output trusted safe
-  def self.textilize_without_paragraph_safe(str, do_object_links = false,
-                                            sanitize = true)
-    textilize_without_paragraph(str, do_object_links, sanitize).
+  def self.textilize_without_paragraph_safe(str, do_object_links: false,
+                                            sanitize: true)
+    textilize_without_paragraph(str, do_object_links: do_object_links,
+                                     sanitize: sanitize).
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -76,7 +78,7 @@ class Textile < String
 
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
-  def textilize_without_paragraph(do_object_links = false, sanitize = true)
+  def textilize_without_paragraph(do_object_links: false, sanitize: true)
     textilize(do_object_links, sanitize).sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
   end
 
