@@ -400,10 +400,22 @@ class Textile < String
     url.length > URL_TRUNCATION_LENGTH && !url.starts_with?(MO.http_domain)
   end
 
+  OBJECT_TAG_PATTERN = /
+    x\{
+       ([A-Z]+_?[A-Z]+) # type
+       \s+
+       ([^{}]+?) # label
+       \s+
+     \}
+     \{
+       \s+
+       ([^{}]+?) # id
+       \s+
+     \}x
+  /x
+
   def convert_object_tags_to_proper_links!
-    gsub!(/
-      x\{([A-Z]+) \s+ ([^{}]+?) \s+\}\{\s+ ([^{}]+?) \s+\}x
-    /x) do |_orig|
+    gsub!(OBJECT_TAG_PATTERN) do |_orig|
       type = Regexp.last_match(1)
       label = Regexp.last_match(2)
       id = Regexp.last_match(3)

@@ -36,7 +36,6 @@ class TextileTest < UnitTestCase
   end
 
   def test_glossary_term_lookup
-    skip("Skip until OTHER_LINK_PATTERN is")
     term = glossary_terms(:conic_glossary_term).name
 
     textile = "_glossary_term #{term}_".tpl
