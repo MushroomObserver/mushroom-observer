@@ -299,11 +299,11 @@ class Textile < String
   end
 
   OTHER_LINK_PATTERN = /
-    (^|\W) # prefix
+    (?<prefix> ^|\W) # prefix
     (?:_+)
-    ([a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
+    (?<type> [a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
     \s+
-    ([^_\s](?:[^_\n]+[^_\s])?) # id -- interger or string
+    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- interger or string
     (?:_+) (?!\w)
   /x
 
@@ -322,16 +322,22 @@ class Textile < String
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
     gsub!(OTHER_LINK_PATTERN) do |orig|
-      prefix = Regexp.last_match(1)
-      type = Regexp.last_match(2)
-      id = Regexp.last_match(3)
+      # NOTE: `type` and `id` must be defined before `label`
+      # because label creates a new match
+      type = $LAST_MATCH_INFO[:type]
       matches = OTHER_LINK_TYPES.
                 select { |x| x[0] == type.downcase || x[1] == type.downcase }
       return orig unless matches.length == 1
 
-      label = (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
-      "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
+      id = $LAST_MATCH_INFO[:id]
+
+      "#{$LAST_MATCH_INFO[:prefix]}x{#{matches.first.first.upcase} " \
+      "__#{label(type, id)}__ }{ #{id} }x"
     end
+  end
+
+  def label(type, id)
+    (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
   end
 
   # Convert !image 12345! in a textile string.
