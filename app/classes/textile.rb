@@ -207,7 +207,12 @@ class Textile < String
   private
 
   NAME_LINK_PATTERN = /
-    (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
+    (?<prefix>^|\W)
+    (?:\**_+)
+    (?<formatted_label>[^_]+)
+    (?:_+\**)
+    (?= (?:s|ish|like)?
+    (?:\W|\Z) )
   /x
 
   # Convert __Names__ to links in a textile string.
@@ -218,10 +223,12 @@ class Textile < String
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     gsub!(NAME_LINK_PATTERN) do |orig_str|
-      prefix = Regexp.last_match(1)
-      label = remove_formatting(Regexp.last_match(2))
-      name = expand_genus_abbreviation(label)
-      name = supply_implicit_species(name)
+      prefix = $LAST_MATCH_INFO[:prefix]
+      label = remove_formatting($LAST_MATCH_INFO[:formatted_label])
+      # name = expand_genus_abbreviation(label)
+      name = supply_implicit_species(
+        expand_genus_abbreviation(label)
+      )
       name = strip_out_sp_cfr_and_sensu(name)
       if (parse = Name.parse_name(name)) &&
          # Allowing arbitrary authors on Genera and higher makes it impossible
@@ -332,11 +339,11 @@ class Textile < String
       id = $LAST_MATCH_INFO[:id]
 
       "#{$LAST_MATCH_INFO[:prefix]}x{#{matches.first.first.upcase} " \
-      "__#{label(type, id)}__ }{ #{id} }x"
+      "__#{tagged_object_label(type, id)}__ }{ #{id} }x"
     end
   end
 
-  def label(type, id)
+  def tagged_object_label(type, id)
     (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
   end
 
