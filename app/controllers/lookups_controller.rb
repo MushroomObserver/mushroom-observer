@@ -227,7 +227,10 @@ class LookupsController < ApplicationController
 
   def handle_no_match(model, id)
     flash_error(:runtime_object_no_match.t(match: id, type: model.type_tag))
-    if model == User
+    if model == Name
+      # Assume user meant a glossary term
+      lookup_general(GlossaryTerm, accepted: false)
+    elsif model == User
       redirect_to("/")
     else
       redirect_to(controller: model.show_controller, action: model.index_action)

@@ -111,6 +111,15 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(%r{/names})
   end
 
+  def test_lookup_name_matching_only_glossary_term
+    term = glossary_terms(:multiple_word_glossary_term)
+
+    login
+    get(:lookup_name, params: { id: term.name })
+
+    assert_redirected_to(glossary_term_path(term.id))
+  end
+
   def test_lookup_name_with_error
     # Stub a method called by lookup_name in order to provoke an error.
     LookupsController.any_instance.stubs(:fix_name_matches).
