@@ -225,11 +225,12 @@ class Textile < String
     gsub!(NAME_LINK_PATTERN) do |orig_str|
       prefix = $LAST_MATCH_INFO[:prefix]
       label = remove_formatting($LAST_MATCH_INFO[:formatted_label])
-      # name = expand_genus_abbreviation(label)
-      name = supply_implicit_species(
-        expand_genus_abbreviation(label)
+      name = strip_out_sp_cfr_and_sensu(
+        supply_implicit_species(
+          expand_genus_abbreviation(label)
+        )
       )
-      name = strip_out_sp_cfr_and_sensu(name)
+      # name = strip_out_sp_cfr_and_sensu(name)
       if (parse = Name.parse_name(name)) &&
          # Allowing arbitrary authors on Genera and higher makes it impossible
          # to distinguish between publication titles and taxa, e.g.,
@@ -238,7 +239,7 @@ class Textile < String
          # very infrequent (I don't see it in current tests). -JPH
          (parse.author.blank? || parse.rank != "Genus")
         Textile.private_register_name(parse.real_text_name, parse.rank)
-        prefix + "x{NAME __#{label}__ }{ #{name} }x"
+        "#{prefix}x{NAME __#{label}__ }{ #{name} }x"
       else
         orig_str
       end
