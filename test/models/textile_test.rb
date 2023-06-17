@@ -12,13 +12,13 @@ end
 class TextileTest < UnitTestCase
   def assert_name_link_matches(str, label = nil, name = nil)
     obj = Textile.new(str)
-    obj.send_private(:convert_name_links_to_object_tags!)
+    obj.send_private(:convert_name_links_to_tagged_objects!)
     assert_equal("x{NAME __#{label}__ }{ #{name} }x", obj.to_s)
   end
 
   def assert_name_link_fails(str)
     obj = Textile.new(str)
-    obj.send_private(:convert_name_links_to_object_tags!)
+    obj.send_private(:convert_name_links_to_tagged_objects!)
     assert_equal(str, obj.to_s)
   end
 
@@ -187,7 +187,7 @@ class TextileTest < UnitTestCase
 
   def do_other_links(str)
     obj = Textile.new(str)
-    obj.send_private(:convert_other_links_to_object_tags!)
+    obj.send_private(:convert_other_links_to_tagged_objects!)
     obj.to_s
   end
 

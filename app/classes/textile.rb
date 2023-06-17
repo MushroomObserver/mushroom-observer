@@ -105,8 +105,8 @@ class Textile < String
     # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
     # (The "x"s prevent Textile from interpreting the curlies as style info.)
     if do_object_links
-      convert_name_links_to_object_tags!
-      convert_other_links_to_object_tags!
+      convert_name_links_to_tagged_objects!
+      convert_other_links_to_tagged_objects!
       convert_image_links_to_textile!
     end
 
@@ -135,7 +135,7 @@ class Textile < String
     # by the following lines, saving the links so we can restore them later.
     saved_links = pre_existing_links_replaced_by_placeholders!(do_object_links)
     convert_bare_urls_to_links!
-    convert_object_tags_to_proper_links!
+    convert_tagged_objects_to_proper_links!
     fully_qualify_links!
     restore_pre_existing_links!(saved_links)
 
@@ -211,7 +211,7 @@ class Textile < String
   /x
 
   # Convert __Names__ to links in a textile string.
-  def convert_name_links_to_object_tags!
+  def convert_name_links_to_tagged_objects!
     @@name_lookup ||= {}
 
     # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
@@ -319,8 +319,8 @@ class Textile < String
     ["user"]
   ].freeze
 
-  # Convert _object name_ and _object id_ in a textile string.
-  def convert_other_links_to_object_tags!
+  # Convert _object name_ and _object id_ to a textile string.
+  def convert_other_links_to_tagged_objects!
     gsub!(OTHER_LINK_PATTERN) do |orig|
       prefix = Regexp.last_match(1)
       type = Regexp.last_match(2)
@@ -412,7 +412,7 @@ class Textile < String
      \}x
   /x
 
-  def convert_object_tags_to_proper_links!
+  def convert_tagged_objects_to_proper_links!
     gsub!(OBJECT_TAG_PATTERN) do |_orig|
       type = Regexp.last_match(1)
       label = Regexp.last_match(2)
