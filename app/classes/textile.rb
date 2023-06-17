@@ -307,30 +307,30 @@ class Textile < String
     (?:_+) (?!\w)
   /x
 
+  OTHER_LINK_TYPES = [
+    ["comment"],
+    %w[glossary_term term],
+    %w[image img],
+    %w[location loc],
+    ["name"],
+    %w[observation obs ob],
+    %w[project proj],
+    %w[species_list spl],
+    ["user"]
+  ].freeze
+
   # Convert _object name_ and _object id_ in a textile string.
   def convert_other_links_to_object_tags!
     gsub!(OTHER_LINK_PATTERN) do |orig|
-      result = orig
       prefix = Regexp.last_match(1)
       type = Regexp.last_match(2)
       id = Regexp.last_match(3)
-      matches = [
-        ["comment"],
-        %w[glossary_term term],
-        %w[image img],
-        %w[location loc],
-        ["name"],
-        %w[observation obs ob],
-        %w[project proj],
-        %w[species_list spl],
-        ["user"]
-      ].select { |x| x[0] == type.downcase || x[1] == type.downcase }
-      if matches.length == 1
-        label = (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
-        result =
-          "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
-      end
-      result
+      matches = OTHER_LINK_TYPES.
+                select { |x| x[0] == type.downcase || x[1] == type.downcase }
+      return orig unless matches.length == 1
+
+      label = (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
+      "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
     end
   end
 
