@@ -56,13 +56,13 @@ class Textile < String
   end
 
   # Convenience wrapper on the instance method Textile#textilize.
-  def self.textilize(str, do_object_links = false, sanitize = true)
-    new(str).textilize(do_object_links, sanitize)
+  def self.textilize(str, do_object_links: false, sanitize: true)
+    new(str).textilize(do_object_links: do_object_links, sanitize: sanitize)
   end
 
   # Wrap self.textilize_without_paragraph, marking output trusted safe
   def self.textilize_safe(str, do_object_links: false, sanitize: true)
-    textilize(str, do_object_links, sanitize).
+    textilize(str, do_object_links: do_object_links, sanitize: sanitize).
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -79,7 +79,8 @@ class Textile < String
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
   def textilize_without_paragraph(do_object_links: false, sanitize: true)
-    textilize(do_object_links, sanitize).sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
+    textilize(do_object_links: do_object_links, sanitize: sanitize).
+      sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
   end
 
   # Textilizes the string using RedCloth, doing a little extra processing:
@@ -101,7 +102,7 @@ class Textile < String
   # tl::   Do 't' and check for links.
   # tp::   Wrap 't' in a <p> block.
   # tpl::  Wrap 't' in a <p> block AND do links.
-  def textilize(do_object_links = false, sanitize = true)
+  def textilize(do_object_links: false, sanitize: true)
     # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
     # (The "x"s prevent Textile from interpreting the curlies as style info.)
     if do_object_links
