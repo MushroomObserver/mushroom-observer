@@ -218,7 +218,6 @@ class Textile < String
     (?:_+) (?!\w)
   /x
 
-
   # Convert __Names__ to links in a textile string.
   def check_name_links!
     @@name_lookup ||= {}
