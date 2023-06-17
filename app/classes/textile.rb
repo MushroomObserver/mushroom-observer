@@ -105,9 +105,9 @@ class Textile < String
     # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
     # (The "x"s prevent Textile from interpreting the curlies as style info.)
     if do_object_links
-      check_name_links!
-      check_other_links!
-      check_our_images!
+      convert_name_links_to_object_tags!
+      convert_other_links_to_object_tags!
+      convert_image_links_to_textile!
     end
 
     # Textile will screw with "@John Doe@".  We need to protect at signs now.
@@ -209,17 +209,9 @@ class Textile < String
   NAME_LINK_PATTERN = /
     (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
   /x
-  OTHER_LINK_PATTERN = /
-    (^|\W) # prefix
-    (?:_+)
-    ([a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
-    \s+
-    ([^_\s](?:[^_\n]+[^_\s])?) # id -- interger or string
-    (?:_+) (?!\w)
-  /x
 
   # Convert __Names__ to links in a textile string.
-  def check_name_links!
+  def convert_name_links_to_object_tags!
     @@name_lookup ||= {}
 
     # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
@@ -306,8 +298,17 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
+  OTHER_LINK_PATTERN = /
+    (^|\W) # prefix
+    (?:_+)
+    ([a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
+    \s+
+    ([^_\s](?:[^_\n]+[^_\s])?) # id -- interger or string
+    (?:_+) (?!\w)
+  /x
+
   # Convert _object name_ and _object id_ in a textile string.
-  def check_other_links!
+  def convert_other_links_to_object_tags!
     gsub!(OTHER_LINK_PATTERN) do |orig|
       result = orig
       prefix = Regexp.last_match(1)
@@ -334,7 +335,7 @@ class Textile < String
   end
 
   # Convert !image 12345! in a textile string.
-  def check_our_images!
+  def convert_image_links_to_textile!
     gsub!(%r{!image (?:(\w+)/)?(\d+)!}) do
       size = Regexp.last_match[1] || "thumb"
       id   = Regexp.last_match[2]
