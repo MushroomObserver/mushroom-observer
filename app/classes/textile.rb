@@ -59,7 +59,7 @@ class Textile < String
   end
 
   # Wrap self.textilize_without_paragraph, marking output trusted safe
-  def self.textilize_safe(str, do_object_links = false, sanitize = true)
+  def self.textilize_safe(str, do_object_links: false, sanitize: true)
     textilize(str, do_object_links, sanitize).
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety

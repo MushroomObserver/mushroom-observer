@@ -404,11 +404,11 @@ class String
   end
 
   def tp_nodiv(sanitize = true)
-    Textile.textilize_safe(self, false, sanitize)
+    Textile.textilize_safe(self, do_object_links: false, sanitize: sanitize)
   end
 
   def tpl_nodiv(sanitize = true)
-    Textile.textilize_safe(self, true, sanitize)
+    Textile.textilize_safe(self, do_object_links: true, sanitize: sanitize)
   end
 
   ### String transformations ###
