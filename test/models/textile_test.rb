@@ -164,13 +164,19 @@ class TextileTest < UnitTestCase
   end
 
   # These should not be interpreted as names.
+  SHOULD_NOT_BE_INTERPRETED_AS_NAMES = [
+    "_amanita_",
+    "_arriba!_",
+    "_blah blah blah_",
+    "_A 5-6 inch_",
+    "_This should be close_",
+    "_Sonoran Flora_",
+    "_A. H. Smith_"
+  ]
   def test_name_lookup_failures
-    assert_name_link_fails("__arriba!__")
-    assert_name_link_fails("__blah blah blah__")
-    assert_name_link_fails("__A 5-6 inch__")
-    assert_name_link_fails("__This should be close__")
-    assert_name_link_fails("__Sonoran Flora__")
-    assert_name_link_fails("__A. H. Smith__")
+    SHOULD_NOT_BE_INTERPRETED_AS_NAMES.each do |phrase|
+      assert_name_link_fails(phrase)
+    end
   end
 
   def test_other_links
