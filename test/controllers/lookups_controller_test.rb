@@ -78,7 +78,10 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(name_path(names(:agaricus_campestris).id))
 
     get(:lookup_name, params: { id: "Agaricus newname" })
-    assert_redirected_to(names_path)
+    assert_redirected_to(
+      glossary_terms_path,
+      "It should go to Glossary index when there's no Name or Glossary match"
+    )
     assert_flash_error
 
     get(:lookup_name, params: { id: "Amanita baccata sensu Borealis" })
