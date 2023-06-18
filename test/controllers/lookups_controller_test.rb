@@ -234,4 +234,33 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(glossary_terms_path)
     assert_flash_error
   end
+
+  def test_ambiguous_lookup_phrase_matching_both_name_and_term
+    assert_equal(glossary_terms(:fungi_glossary_term).name,
+                 names(:fungi).text_name,
+                 "Test needs fixtures GlossaryTerm name == Name text_name")
+
+    login
+    # lookup_name is ambiguous because it will lookup term if Name lookup fails
+    get(:lookup_name, params: { id: names(:fungi).text_name })
+
+    assert_redirected_to(
+      name_path(names(:fungi).id),
+      "Lookup should show Name although it's also a GlossaryTerm"
+    )
+  end
+
+  def test_disambiguated_lookup_phrase_matching_both_name_and_term
+    assert_equal(glossary_terms(:fungi_glossary_term).name,
+                 names(:fungi).text_name,
+                 "Test needs fixtures GlossaryTerm name == Name text_name")
+
+    login
+    get(:lookup_glossary_term, params: { id: names(:fungi).text_name })
+
+    assert_redirected_to(
+      glossary_term_path(glossary_terms(:fungi_glossary_term).id),
+      "Explicit `term` lookup should show GlossaryTerm though it's also a Name"
+    )
+  end
 end
