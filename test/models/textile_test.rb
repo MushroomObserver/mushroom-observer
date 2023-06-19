@@ -187,11 +187,11 @@ class TextileTest < UnitTestCase
     "_Adnate-Decurrent_" # hyphens ok
   ].freeze
 
-  NON_IMPLICIT_TERMS = [
+  NON_NAME_NON_TERMS = [
     "_arriba!_", # no exclamations
     "_A 5-6 inch_", # no numbers
     "_{bad punctation chars}_" # only allowed punctuation are comma, hyphen
-  ]
+  ].freeze
 
   def test_implicit_glossary_terms
     IMPLICIT_TERMS.each do |str|
@@ -213,9 +213,21 @@ class TextileTest < UnitTestCase
     end
   end
 
-  def strip_leading_and_trailing_underscores(str)
-    str =~ (/^_+(?<inside>.*)_+$/)
-    $LAST_MATCH_INFO[:inside]
+  def test_non_name_non_glossary_terms
+    NON_NAME_NON_TERMS.each do |str|
+      inside = strip_leading_and_trailing_underscores(str)
+
+      textile = "_#{inside}_".tpl
+
+      assert_no_match(
+        "https?://", textile,
+        "_#{str}_ should not generate URL"
+      )
+      assert_match(
+        "<p><em>#{inside}</em></p>", textile,
+        "_#{str}_ should render italized text"
+      )
+    end
   end
 
   def test_other_links
@@ -288,5 +300,12 @@ class TextileTest < UnitTestCase
       "[#{fn}]".tl,
       "Textilized non-year integers should render as footnote calls"
     )
+  end
+
+  private
+
+  def strip_leading_and_trailing_underscores(str)
+    str =~ (/^_+(?<inside>.*)_+$/)
+    $LAST_MATCH_INFO[:inside]
   end
 end
