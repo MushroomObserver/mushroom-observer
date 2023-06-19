@@ -184,7 +184,8 @@ class TextileTest < UnitTestCase
     "_blah blah blah_", # multiple words
     "_Sonoran Flora_", # title case
     "_A. H. Smith_", # abbreviations ok
-    "_Adnate-Decurrent_" # hyphens ok
+    "_Adnate-Decurrent_", # hyphens ok
+    "_amanita_ followed by non-italized stuff"
   ].freeze
 
   NON_NAME_NON_TERMS = [
@@ -195,37 +196,37 @@ class TextileTest < UnitTestCase
 
   def test_implicit_glossary_terms
     IMPLICIT_TERMS.each do |str|
-      inside = strip_leading_and_trailing_underscores(str)
+      inside = within_underscores(str)
 
-      textile = "_#{inside}_".tpl
+      textile = str.tpl
 
       assert_match(
         "#{MO.http_domain}/lookups/lookup_glossary_term/#{CGI.escape(inside)}",
         textile,
         "Wrong URL: " \
-        "String '#{str}' can't be a Name so should be looked up as a Term"
+        "'_#{inside}_' not interpreted as a Name; look it up as a Term"
       )
       assert_match(
         "<i>#{inside}</i>", textile,
         "Wrong anchor text: " \
-        "String '#{str}' can't be a Name so should be looked up as a Term"
+        "'_#{inside}_' not interpreted as a Name; look it up as a Term"
       )
     end
   end
 
-  def test_non_name_non_glossary_terms
+  def test_plain_italics
     NON_NAME_NON_TERMS.each do |str|
-      inside = strip_leading_and_trailing_underscores(str)
+      inside = within_underscores(str)
 
-      textile = "_#{inside}_".tpl
+      textile = str.tpl
 
       assert_no_match(
         "https?://", textile,
-        "_#{str}_ should not generate URL"
+        "#{str} should not generate a URL"
       )
       assert_match(
         "<p><em>#{inside}</em></p>", textile,
-        "_#{str}_ should render italized text"
+        "#{str} should render italized text"
       )
     end
   end
@@ -304,8 +305,8 @@ class TextileTest < UnitTestCase
 
   private
 
-  def strip_leading_and_trailing_underscores(str)
-    str =~ (/^_+(?<inside>.*)_+$/)
+  def within_underscores(str)
+    str =~ (/^_+(?<inside>.*)_+/)
     $LAST_MATCH_INFO[:inside]
   end
 end
