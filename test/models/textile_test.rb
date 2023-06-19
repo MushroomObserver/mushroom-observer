@@ -163,7 +163,6 @@ class TextileTest < UnitTestCase
     )
   end
 
-  # These should not be interpreted as names.
   SHOULD_NOT_BE_INTERPRETED_AS_NAMES = [
     "_amanita_",
     "_arriba!_",
@@ -172,11 +171,51 @@ class TextileTest < UnitTestCase
     "_This should be close_",
     "_Sonoran Flora_",
     "_A. H. Smith_"
-  ]
+  ].freeze
+
   def test_name_lookup_failures
     SHOULD_NOT_BE_INTERPRETED_AS_NAMES.each do |phrase|
       assert_name_link_fails(phrase)
     end
+  end
+
+  IMPLICIT_TERMS = [
+    "_amanita_", # lower-case name
+    "_blah blah blah_", # multiple words
+    "_Sonoran Flora_", # title case
+    "_A. H. Smith_", # abbreviations ok
+    "_Adnate-Decurrent_" # hyphens ok
+  ].freeze
+
+  NON_IMPLICIT_TERMS = [
+    "_arriba!_", # no exclamations
+    "_A 5-6 inch_", # no numbers
+    "_{bad punctation chars}_" # only allowed punctuation are comma, hyphen
+  ]
+
+  def test_implicit_glossary_terms
+    IMPLICIT_TERMS.each do |str|
+      inside = strip_leading_and_trailing_underscores(str)
+
+      textile = "_#{inside}_".tpl
+
+      assert_match(
+        "#{MO.http_domain}/lookups/lookup_glossary_term/#{CGI.escape(inside)}",
+        textile,
+        "Wrong URL: " \
+        "String '#{str}' can't be a Name so should be looked up as a Term"
+      )
+      assert_match(
+        "<i>#{inside}</i>", textile,
+        "Wrong anchor text: " \
+        "String '#{str}' can't be a Name so should be looked up as a Term"
+      )
+    end
+  end
+
+  def strip_leading_and_trailing_underscores(str)
+    str =~ (/^_+(?<inside>.*)_+$/)
+    $LAST_MATCH_INFO[:inside]
   end
 
   def test_other_links

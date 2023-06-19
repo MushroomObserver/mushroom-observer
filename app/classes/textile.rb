@@ -109,6 +109,7 @@ class Textile < String
       convert_name_links_to_tagged_objects!
       convert_other_links_to_tagged_objects!
       convert_image_links_to_textile!
+      convert_implicit_terms_to_tagged_glossary_terms!
     end
 
     # Textile will screw with "@John Doe@".  We need to protect at signs now.
@@ -312,7 +313,7 @@ class Textile < String
     (?:_+)
     (?<type> [a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
     \s+
-    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- interger or string
+    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
     (?:_+) (?!\w)
   /x
 
@@ -336,7 +337,7 @@ class Textile < String
       type = $LAST_MATCH_INFO[:type]
       matches = OTHER_LINK_TYPES.
                 select { |x| x[0] == type.downcase || x[1] == type.downcase }
-      return orig unless matches.length == 1
+      return orig unless matches.one?
 
       id = $LAST_MATCH_INFO[:id]
 
@@ -381,6 +382,23 @@ class Textile < String
     end
     saved_links
   end
+
+  IMPLICIT_TERM_PATTERN = /
+    (?<prefix> ^|\W) # prefix
+    (?:_+)
+    (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
+    (?:_+$)
+  /x
+
+  def convert_implicit_terms_to_tagged_glossary_terms!
+    gsub!(IMPLICIT_TERM_PATTERN) do
+      id = $LAST_MATCH_INFO[:id]
+      "#{$LAST_MATCH_INFO[:prefix]}" \
+      "x{GLOSSARY_TERM __#{tagged_object_label("term", id)}__ }{ #{id} }x"
+    end
+  end
+
+  ###############################
 
   def restore_pre_existing_links!(saved_links)
     gsub!(/<XXX(\d+)>/) do
