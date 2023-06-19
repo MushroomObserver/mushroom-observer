@@ -14,11 +14,11 @@ module Account
       update_password
       update_prefs_from_form
 
-      # render to get the errors to display
-      render(action: :edit) and return unless prefs_changed_successfully
-
-      update_copyright_holder(@user.legal_name_change)
-      redirect_to(action: :edit) and return
+      if prefs_changed_successfully
+        redirect_to(action: :edit)
+      else
+        render(action: :edit) # render to get the errors to display
+      end
     end
 
     # This action handles GET requests from email links.
@@ -105,12 +105,6 @@ module Account
         else
           val.to_s
         end
-    end
-
-    def update_copyright_holder(legal_name_change = nil)
-      return unless legal_name_change
-
-      Image.update_copyright_holder(*legal_name_change, @user)
     end
 
     def prefs_changed_successfully
