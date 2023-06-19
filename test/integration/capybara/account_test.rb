@@ -296,47 +296,47 @@ class AccountTest < CapybaraIntegrationTestCase
 
     mary.reload
     assert_equal(mary.login, "yabba dabba doo")
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     within("#account_preferences_form") do
       fill_in("user_email", with: "yabba dabba doo")
       click_commit
     end
-
     assert_flash_error
     assert_flash_text(:validate_user_email_missing.t)
+
     within("#account_preferences_form") do
       fill_in("user_email", with: "yabba@dabba.doo")
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       click_commit
     end
-
     assert_flash_error
     assert_flash_text(:runtime_prefs_password_no_match.t.as_displayed)
+
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       fill_in("user_password_confirmation", with: "beverly")
       click_commit
     end
-
     assert_flash_error
     assert_flash_text(:runtime_prefs_password_no_match.t.as_displayed)
+
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
       fill_in("user_password_confirmation", with: "wanda")
       click_commit
     end
-    # End Login settings
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+    # End Login settings
+
     # Privacy settings
     within("#account_preferences_form") do
       select("Always anonymous", from: "user_votes_anonymous")
@@ -344,9 +344,9 @@ class AccountTest < CapybaraIntegrationTestCase
       select("Public Domain", from: "user_license_id")
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     # Appearance settings
     within("#account_preferences_form") do
       select("hide author for genus and higher ranks",
@@ -362,9 +362,9 @@ class AccountTest < CapybaraIntegrationTestCase
       fill_in("user_layout_count", with: 45)
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     # Content filters
     within("#account_preferences_form") do
       check("user_has_images")
@@ -372,9 +372,9 @@ class AccountTest < CapybaraIntegrationTestCase
       select("Show only lichens", from: "user_lichen")
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     # Content filters
     within("#account_preferences_form") do
       # Region filter - must be end of location string to work,
@@ -383,43 +383,42 @@ class AccountTest < CapybaraIntegrationTestCase
       fill_in("user_region", with: "Gloucester, Massachusetts")
       click_commit
     end
-
     assert_flash_error
     assert_flash_text(:advanced_search_filter_region.t.as_displayed)
+
     within("#account_preferences_form") do
       fill_in("user_region", with: "Massachusetts, USA")
       click_commit
     end
-
     mary.reload
     assert_equal(mary.content_filter[:region], "Massachusetts, USA")
-
     assert_flash_success
+
     assert_selector("body.preferences__edit")
     within("#account_preferences_form") do
       fill_in("user_region", with: "")
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     # Notes - Try a reserved word:
     within("#account_preferences_form") do
       fill_in("user_notes_template", with: "Smells, Textures, Other")
       click_commit
     end
-
     assert_flash_error
     assert_flash_text(
       :prefs_notes_template_no_other.t(part: "Other").as_displayed
     )
+
     within("#account_preferences_form") do
       fill_in("user_notes_template", with: "Smells, Textures, Impressions")
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
+
     # Email prefs - flip them all
     within("#account_preferences_form") do
       uncheck("user_email_html")
@@ -448,7 +447,6 @@ class AccountTest < CapybaraIntegrationTestCase
       uncheck("user_email_general_question")
       click_commit
     end
-
     assert_flash_success
     assert_selector("body.preferences__edit")
 
