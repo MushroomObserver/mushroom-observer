@@ -214,6 +214,13 @@ class TextileTest < UnitTestCase
     end
   end
 
+  def test_tagging_tagged_object
+    textile = "_Amanita_".tpl
+
+    assert_no_match(/x{NAME /, textile,
+                    "Textile should not tag an already tagged object")
+  end
+
   def test_plain_italics
     NON_NAME_NON_TERMS.each do |str|
       inside = within_underscores(str)
