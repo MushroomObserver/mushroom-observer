@@ -383,12 +383,25 @@ class Textile < String
     saved_links
   end
 
-  IMPLICIT_TERM_PATTERN = /
-    (?<prefix> ^|\W) # prefix
-    (?:_+)
-    (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
-    (?:_+)
-  /x
+  IMPLICIT_TERM_PATTERN =
+    # Discard matches that start with "x{NAME" etc., in order to
+    # prevent tagging previously tagged objects
+    /
+      (?<! x{NAME)
+      (?<! X{LOCATION)
+      (?<! X{OBSERVATION)
+      (?<! x{GLOSSARY_TERM)
+      (?<! X{USER)
+      (?<! x{COMMENT)
+      (?<! x{IMAGE)
+      (?<! X{PROJECT)
+      (?<! X{SPECIES_LIST)
+
+      (?<prefix> ^|\W) # prefix
+      (?:_+)
+      (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
+      (?:_+)
+    /x
 
   def convert_implicit_terms_to_tagged_glossary_terms!
     gsub!(IMPLICIT_TERM_PATTERN) do
