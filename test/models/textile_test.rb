@@ -238,19 +238,21 @@ class TextileTest < UnitTestCase
     end
   end
 
-  def test_other_links
-    assert_equal("", do_other_links(""))
+  def test_other_link_object_tags
+    assert_equal("", do_other_link_object_tag(""))
     assert_equal("x{GLOSSARY_TERM __term 123__ }{ 123 }x",
-                 do_other_links("_term 123_"))
+                 do_other_link_object_tag("_term 123_"))
     assert_equal("x{OBSERVATION __obs 123__ }{ 123 }x",
-                 do_other_links("_obs 123_"))
+                 do_other_link_object_tag("_obs 123_"))
     assert_equal("x{IMAGE __iMg 765__ }{ 765 }x",
-                 do_other_links("_iMg 765_"))
+                 do_other_link_object_tag("_iMg 765_"))
     assert_equal("x{USER __phooey__ }{ phooey }x x{NAME __gar__ }{ gar }x",
-                 do_other_links("_user phooey_ _name gar_"))
+                 do_other_link_object_tag("_user phooey_ _name gar_"))
+    assert_equal("x{SPECIES_LIST __spl 321__ }{ 321 }x",
+                 do_other_link_object_tag("_spl 321_"))
   end
 
-  def do_other_links(str)
+  def do_other_link_object_tag(str)
     obj = Textile.new(str)
     obj.send_private(:convert_other_links_to_tagged_objects!)
     obj.to_s
