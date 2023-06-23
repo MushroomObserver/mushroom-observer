@@ -387,7 +387,7 @@ class Textile < String
     (?<prefix> ^|\W) # prefix
     (?:_+)
     (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
-    (?:_+$)
+    (?:_+)
   /x
 
   def convert_implicit_terms_to_tagged_glossary_terms!
