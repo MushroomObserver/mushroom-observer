@@ -311,10 +311,14 @@ class Textile < String
   OTHER_LINK_PATTERN = /
     (?<prefix> ^|\W) # prefix
     (?:_+)
-    (?<type> [a-zA-Z]+_?[a-zA-Z]+) # type -- underscored model name
+    (?<type> # type
+      [a-zA-Z]+ # model name
+      (?: _[a-zA-Z]+)? # optionally including underscores
+    )
     \s+
     (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
-    (?:_+) (?!\w)
+    (?:_+)
+    (?!\w)
   /x
 
   OTHER_LINK_TYPES = [
@@ -332,17 +336,18 @@ class Textile < String
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
     gsub!(OTHER_LINK_PATTERN) do |orig|
-      # NOTE: `type` and `id` must be defined before `label`
-      # because label creates a new match
+      prefix = $LAST_MATCH_INFO[:prefix]
       type = $LAST_MATCH_INFO[:type]
+      id = $LAST_MATCH_INFO[:id]
       matches = OTHER_LINK_TYPES.
                 select { |x| x[0] == type.downcase || x[1] == type.downcase }
-      return orig unless matches.one?
 
-      id = $LAST_MATCH_INFO[:id]
-
-      "#{$LAST_MATCH_INFO[:prefix]}x{#{matches.first.first.upcase} " \
-      "__#{tagged_object_label(type, id)}__ }{ #{id} }x"
+      if matches.one?
+        "#{prefix}x{#{matches.first.first.upcase} " \
+        "__#{tagged_object_label(type, id)}__ }{ #{id} }x"
+      else
+        orig
+      end
     end
   end
 
@@ -396,11 +401,11 @@ class Textile < String
       (?<! x{PROJECT)
       (?<! x{SPECIES_LIST)
       (?<! x{COMMENT)
-
-      (?<prefix> ^|\W) # prefix
-      (?:_+)
-      (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
-      (?:_+)
+        (?<prefix> ^|\W) # prefix
+        (?:_+)
+        (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
+        (?:_+)
+      (?!\w)
     /x
 
   def convert_implicit_terms_to_tagged_glossary_terms!
