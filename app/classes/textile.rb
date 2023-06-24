@@ -388,14 +388,14 @@ class Textile < String
     # prevent tagging previously tagged objects
     /
       (?<! x{NAME)
-      (?<! X{LOCATION)
-      (?<! X{OBSERVATION)
       (?<! x{GLOSSARY_TERM)
-      (?<! X{USER)
-      (?<! x{COMMENT)
+      (?<! x{OBSERVATION)
+      (?<! x{LOCATION)
+      (?<! x{USER)
       (?<! x{IMAGE)
-      (?<! X{PROJECT)
-      (?<! X{SPECIES_LIST)
+      (?<! x{PROJECT)
+      (?<! x{SPECIES_LIST)
+      (?<! x{COMMENT)
 
       (?<prefix> ^|\W) # prefix
       (?:_+)
