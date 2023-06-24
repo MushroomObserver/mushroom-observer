@@ -103,14 +103,7 @@ class Textile < String
   # tp::   Wrap 't' in a <p> block.
   # tpl::  Wrap 't' in a <p> block AND do links.
   def textilize(do_object_links: false, sanitize: true)
-    # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
-    # (The "x"s prevent Textile from interpreting the curlies as style info.)
-    if do_object_links
-      convert_name_links_to_tagged_objects!
-      convert_other_links_to_tagged_objects!
-      convert_image_links_to_textile!
-      convert_implicit_terms_to_tagged_glossary_terms!
-    end
+    preprocess_object_links if do_object_links
 
     # Textile will screw with "@John Doe@".  We need to protect at signs now.
     gsub!("@", "&#64;")
@@ -207,6 +200,15 @@ class Textile < String
   ##############################################################################
 
   private
+
+  # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
+  # (The "x"s prevent Textile from interpreting the curlies as style info.)
+  def preprocess_object_links
+    convert_name_links_to_tagged_objects!
+    convert_other_links_to_tagged_objects!
+    convert_embedded_image_links_to_textile!
+    convert_implicit_terms_to_tagged_glossary_terms!
+  end
 
   NAME_LINK_PATTERN = /
     (?<prefix>^|\W)
@@ -356,7 +358,7 @@ class Textile < String
   end
 
   # Convert !image 12345! in a textile string.
-  def convert_image_links_to_textile!
+  def convert_embedded_image_links_to_textile!
     gsub!(%r{!image (?:(\w+)/)?(\d+)!}) do
       size = Regexp.last_match[1] || "thumb"
       id   = Regexp.last_match[2]
