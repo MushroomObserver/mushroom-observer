@@ -210,6 +210,8 @@ class Textile < String
     convert_implicit_terms_to_tagged_glossary_terms!
   end
 
+  # rubocop:disable Style/RegexpLiteral
+  # cop gives false positive
   NAME_LINK_PATTERN = /
     (?<prefix> ^|\W)
     (?: \**_+)
@@ -220,6 +222,7 @@ class Textile < String
 
     (?! (?: <\/[a-z]+>)) # discard match if followed by html closing tag
   /x
+  # rubocop:enable Style/RegexpLiteral
 
   # Convert __Names__ to links in a textile string.
   def convert_name_links_to_tagged_objects!
@@ -312,6 +315,8 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
+  # rubocop:disable Style/RegexpLiteral
+  # cop gives false positive
   OTHER_LINK_PATTERN = /
     (?<prefix> ^|\W)
     (?: _+)
@@ -325,6 +330,7 @@ class Textile < String
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or html close tag
   /x
+  # rubocop:enable Style/RegexpLiteral
 
   OTHER_LINK_TYPES = [
     ["comment"],
@@ -393,6 +399,8 @@ class Textile < String
     saved_links
   end
 
+  # rubocop:disable Style/RegexpLiteral
+  # cop gives false positive
   IMPLICIT_TERM_PATTERN = /
     (?<! x{NAME) # discard match if preceded by an MO object tag
     (?<! x{GLOSSARY_TERM)
@@ -411,6 +419,7 @@ class Textile < String
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
   /x
+  # rubocop:enable Style/RegexpLiteral
 
   def convert_implicit_terms_to_tagged_glossary_terms!
     gsub!(IMPLICIT_TERM_PATTERN) do
@@ -477,7 +486,7 @@ class Textile < String
       id = CGI.escape(id)
       url = "#{MO.http_domain}/lookups/lookup_#{type.downcase}/#{id}"
 
-      %("<a href="#{url}">#{label}</a>")
+      "<a href=\"#{url}\">#{label}</a>"
     end
   end
 
