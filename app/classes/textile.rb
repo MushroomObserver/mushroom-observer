@@ -217,6 +217,7 @@ class Textile < String
     (?:_+\**)
     (?= (?:s|ish|like)?
     (?:\W|\Z) )
+    (?! (?: <\/[a-z]+>)) # discard match if followed by html closing tag
   /x
 
   # Convert __Names__ to links in a textile string.
@@ -320,7 +321,7 @@ class Textile < String
     \s+
     (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
     (?:_+)
-    (?!\w)
+    (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or html close tag
   /x
 
   OTHER_LINK_TYPES = [
@@ -407,7 +408,7 @@ class Textile < String
         (?:_+)
         (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
         (?:_+)
-      (?!\w)
+      (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
     /x
 
   def convert_implicit_terms_to_tagged_glossary_terms!
