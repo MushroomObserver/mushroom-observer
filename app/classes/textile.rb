@@ -211,12 +211,13 @@ class Textile < String
   end
 
   NAME_LINK_PATTERN = /
-    (?<prefix>^|\W)
-    (?:\**_+)
-    (?<formatted_label>[^_]+)
-    (?:_+\**)
-    (?= (?:s|ish|like)?
-    (?:\W|\Z) )
+    (?<prefix> ^|\W)
+    (?: \**_+)
+    (?<formatted_label> [^_]+)
+    (?: _+\**)
+    (?= (?: s|ish|like)?
+    (?: \W|\Z) )
+
     (?! (?: <\/[a-z]+>)) # discard match if followed by html closing tag
   /x
 
@@ -312,15 +313,16 @@ class Textile < String
   end
 
   OTHER_LINK_PATTERN = /
-    (?<prefix> ^|\W) # prefix
-    (?:_+)
-    (?<type> # type
+    (?<prefix> ^|\W)
+    (?: _+)
+    (?<type>
       [a-zA-Z]+ # model name
       (?: _[a-zA-Z]+)? # optionally including underscores
     )
     \s+
     (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
-    (?:_+)
+    (?: _+)
+
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or html close tag
   /x
 
@@ -391,25 +393,24 @@ class Textile < String
     saved_links
   end
 
-  IMPLICIT_TERM_PATTERN =
-    # Discard matches that start with "x{NAME" etc., in order to
-    # prevent tagging previously tagged objects
-    /
-      (?<! x{NAME)
-      (?<! x{GLOSSARY_TERM)
-      (?<! x{OBSERVATION)
-      (?<! x{LOCATION)
-      (?<! x{USER)
-      (?<! x{IMAGE)
-      (?<! x{PROJECT)
-      (?<! x{SPECIES_LIST)
-      (?<! x{COMMENT)
-        (?<prefix> ^|\W) # prefix
-        (?:_+)
-        (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
-        (?:_+)
-      (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
-    /x
+  IMPLICIT_TERM_PATTERN = /
+    (?<! x{NAME) # discard match if preceded by an MO object tag
+    (?<! x{GLOSSARY_TERM)
+    (?<! x{OBSERVATION)
+    (?<! x{LOCATION)
+    (?<! x{USER)
+    (?<! x{IMAGE)
+    (?<! x{PROJECT)
+    (?<! x{SPECIES_LIST)
+    (?<! x{COMMENT)
+
+    (?<prefix> ^|\W) # prefix
+    (?: _+)
+    (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
+    (?: _+)
+
+    (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
+  /x
 
   def convert_implicit_terms_to_tagged_glossary_terms!
     gsub!(IMPLICIT_TERM_PATTERN) do
@@ -454,28 +455,29 @@ class Textile < String
 
   OBJECT_TAG_PATTERN = /
     x\{
-       ([A-Z]+_?[A-Z]+) # type
-       \s+
-       ([^{}]+?) # label
-       \s+
-     \}
-     \{
-       \s+
-       ([^{}]+?) # id
-       \s+
-     \}x
+        (?<type> [A-Z]+_?[A-Z]+)
+        \s+
+        (?<label> [^{}]+?)
+        \s+
+      \}
+      \{
+        \s+
+        (?<id> [^{}]+?) # id
+        \s+
+      \}x
   /x
 
   def convert_tagged_objects_to_proper_links!
     gsub!(OBJECT_TAG_PATTERN) do |_orig|
-      type = Regexp.last_match(1)
-      label = Regexp.last_match(2)
-      id = Regexp.last_match(3)
+      type = $LAST_MATCH_INFO[:type]
+      label = $LAST_MATCH_INFO[:label]
+      id = $LAST_MATCH_INFO[:id]
       id.gsub!(/&#822[01];/, '"')
       id = CGI.unescapeHTML(id)
       id = CGI.escape(id)
       url = "#{MO.http_domain}/lookups/lookup_#{type.downcase}/#{id}"
-      "<a href=\"#{url}\">#{label}</a>"
+
+      %("<a href="#{url}">#{label}</a>")
     end
   end
 
