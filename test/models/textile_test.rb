@@ -238,6 +238,17 @@ class TextileTest < UnitTestCase
     end
   end
 
+  def test_html
+    html = "<code>_Amanita_</code>"
+    assert_match(/#{html}/, html.tl)
+
+    html = "<code>_term foo_</code>"
+    assert_match(/#{html}/, html.tl)
+
+    html = "<code>_foo_</code>"
+    assert_match(/#{html}/, html.tl)
+  end
+
   def test_other_link_object_tags
     assert_equal("", do_other_link_object_tag(""))
     assert_equal("x{GLOSSARY_TERM __term 123__ }{ 123 }x",
