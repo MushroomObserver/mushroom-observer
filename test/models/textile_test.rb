@@ -212,6 +212,11 @@ class TextileTest < UnitTestCase
         "'_#{inside}_' not interpreted as a Name; look it up as a Term"
       )
     end
+
+    assert_match(
+      "#{MO.http_domain}/lookups/lookup_glossary_term/rpb2", "rpb2".tpl,
+      "'_rpb2_' should create a link that looks up a GlossaryTerm."
+    )
   end
 
   def test_tagging_tagged_object
