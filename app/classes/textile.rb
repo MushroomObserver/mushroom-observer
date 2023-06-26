@@ -414,7 +414,7 @@ class Textile < String
 
     (?<prefix> ^|\W) # prefix
     (?: _+)
-    (?<id> [\p{Alpha}\-.\ ]+) # alpha chrs, hyphens, periods, spaces
+    (?<id> [\p{Alpha}\d\-.\ ]+) # alphanumeric, hyphens, periods, spaces
     (?: _+)
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
