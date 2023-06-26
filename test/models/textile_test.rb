@@ -216,8 +216,15 @@ class TextileTest < UnitTestCase
 
   def test_tagging_tagged_object
     textile = "_Amanita_".tpl
-
     assert_no_match(/x{NAME /, textile,
+                    "Textile should not tag an already tagged object")
+
+    textile = "_observation 123_".tpl
+    assert_no_match(/x{OBSERVATION /, textile,
+                    "Textile should not tag an already tagged object")
+
+    textile = "_term bar code_".tpl
+    assert_no_match(/x{GLOSSARY_TERM /, textile,
                     "Textile should not tag an already tagged object")
   end
 
