@@ -214,7 +214,7 @@ class TextileTest < UnitTestCase
     end
 
     assert_match(
-      "#{MO.http_domain}/lookups/lookup_glossary_term/rpb2", "rpb2".tpl,
+      "#{MO.http_domain}/lookups/lookup_glossary_term/rpb2", "_rpb2_".tpl,
       "'_rpb2_' should create a link that looks up a GlossaryTerm."
     )
   end
