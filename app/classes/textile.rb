@@ -320,8 +320,8 @@ class Textile < String
   OTHER_LINK_PATTERN = /
     (?<prefix> ^|\W)
     (?: _+)
-    (?<type>
-      [a-zA-Z]+ # model name
+    (?<marked_type>
+      [a-zA-Z]+ # model name or abbr
       (?: _[a-zA-Z]+)? # optionally including underscores
     )
     \s+
@@ -344,21 +344,36 @@ class Textile < String
     ["user"]
   ].freeze
 
+  MARKED_TYPE_TO_TAGGED_TYPE = {
+    comment: "COMMENT",
+    glossary_term: "GLOSSARY_TERM",
+    image: "IMAGE",
+    img: "IMAGE",
+    location: "LOCATION",
+    loc: "LOCATION",
+    name: "NAME",
+    term: "GLOSSARY_TERM",
+    ob: "OBSERVATION",
+    obs: "OBSERVATION",
+    observation: "OBSERVATION",
+    project: "PROJECT",
+    species_list: "SPECIES_LIST",
+    spl: "SPECIES_LIST",
+    user: "USER"
+  }.freeze
+
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
     gsub!(OTHER_LINK_PATTERN) do |orig|
       prefix = $LAST_MATCH_INFO[:prefix]
-      type = $LAST_MATCH_INFO[:type]
+      marked_type = $LAST_MATCH_INFO[:marked_type]
       id = $LAST_MATCH_INFO[:id]
-      matches = OTHER_LINK_TYPES.
-                select { |x| x[0] == type.downcase || x[1] == type.downcase }
 
-      if matches.one?
-        "#{prefix}x{#{matches.first.first.upcase} " \
-        "__#{tagged_object_label(type, id)}__ }{ #{id} }x"
-      else
-        orig
-      end
+      tagged_type = MARKED_TYPE_TO_TAGGED_TYPE[marked_type.downcase.to_sym]
+      next(orig) unless tagged_type
+
+      label = tagged_object_label(marked_type, id)
+      "#{prefix}x{#{tagged_type} __#{label}__ }{ #{id} }x"
     end
   end
 
