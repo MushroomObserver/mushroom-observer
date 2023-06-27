@@ -251,6 +251,13 @@ class TextileTest < UnitTestCase
   end
 
   def test_plain_italics
+    # NOTE: Because any string can be a GlossaryTerm, _<anything>_
+    # implies a GlossaryTerms.
+    # (Users can force plain italics with ??blah??)
+    # The test is skipped in case we want to limit GlossaryTerm's
+    # and therefore also limit implicit links. JDC 2023-06-23
+    skip("Any string can be a link")
+
     PLAIN_ITALICS.each do |str|
       inside = within_underscores(str)
 
