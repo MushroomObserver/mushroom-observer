@@ -28,12 +28,12 @@ class TextileTest < UnitTestCase
     "_{bad punctation chars}_" # only allowed Name punctuation is comma, hyphen
   ].freeze
 
-  ############################################################
+  ###################################################################
   #
-  # NOTE: The test in this section use Textile private methods
+  # NOTE: Tests in this section call and test Textile private methods
   # (directly or indirectly). JDC 2023-06-07
   #
-  ############################################################
+  ###################################################################
 
   def test_name_lookup
     Textile.clear_textile_cache
