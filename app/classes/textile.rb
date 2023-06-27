@@ -399,6 +399,10 @@ class Textile < String
     saved_links
   end
 
+  # NOTE: (JDC 2023-06-23) Multiple lookbehinds are required because
+  # Ruby does not allow variable length lookbehinds.
+  # They could be avoided via the (nontrivial) changes suggested here:
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1528#issuecomment-1608114858
   # rubocop:disable Style/RegexpLiteral
   # cop gives false positive
   IMPLICIT_TERM_PATTERN = /
