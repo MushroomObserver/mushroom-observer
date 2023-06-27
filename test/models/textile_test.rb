@@ -15,14 +15,13 @@ class TextileTest < UnitTestCase
     "_blah blah blah_", # multiple words
     "_Sonoran Flora_", # title case
     "_This should be close_",
-    "_A. H. Smith_", # abbreviations ok
-    "_Adnate-Decurrent_", # hyphens ok
+    "_A. H. Smith_", # abbreviations
+    "_Adnate-Decurrent_", # hyphen
     "_amanita_ followed by non-italized stuff",
-    "_RPB2_", # digits preceded by numbers ok
+    "_RPB2_", # digit
     "_NH4OH_",
-    "_arriba!_", # no exclamations
-    "_A 5-6 inch_", # no numbers
-    "_{bad punctation chars}_" # only allowed Name punctuation is comma, hyphen
+    "_arriba!_", # exclamations
+    "_A 5-6 inch_"
   ].freeze
 
   ###################################################################
@@ -157,7 +156,7 @@ class TextileTest < UnitTestCase
   end
 
   def test_name_lookup_failures
-    IMPLICIT_TERMS.each do |phrase|
+    (IMPLICIT_TERMS + ["_{bad punctation chars}_"]).each do |phrase|
       assert_name_link_fails(phrase)
     end
   end
