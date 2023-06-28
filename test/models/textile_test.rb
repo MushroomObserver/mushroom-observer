@@ -201,7 +201,7 @@ class TextileTest < UnitTestCase
   def test_glossary_term_lookup
     term = glossary_terms(:conic_glossary_term).name
 
-    textile = "_glossary_term #{term}_".tpl
+    textile = "_glossary_term #{term}_".tl
 
     assert_match(
       "#{MO.http_domain}/lookups/lookup_glossary_term/#{CGI.escape(term)}",
@@ -215,7 +215,7 @@ class TextileTest < UnitTestCase
     IMPLICIT_TERMS.each do |str|
       inside = within_underscores(str)
 
-      textile = str.tpl
+      textile = str.tl
 
       assert_match(
         "#{MO.http_domain}/lookups/lookup_glossary_term/#{CGI.escape(inside)}",
@@ -234,29 +234,29 @@ class TextileTest < UnitTestCase
     PLAIN_ITALICS.each do |str|
       inside = within_underscores(str)
 
-      textile = str.tpl
+      textile = str.tl
 
       assert_no_match(
         "https?://", textile,
         "#{str} should not generate a URL"
       )
       assert_match(
-        "<p><em>#{inside}</em></p>", textile,
+        "<em>#{inside}</em>", textile,
         "#{str} should render italized text"
       )
     end
   end
 
   def test_tagging_tagged_object
-    textile = "_Amanita_".tpl
+    textile = "_Amanita_".tl
     assert_no_match(/x{NAME /, textile,
                     "Textile should not tag an already tagged object")
 
-    textile = "_observation 123_".tpl
+    textile = "_observation 123_".tl
     assert_no_match(/x{OBSERVATION /, textile,
                     "Textile should not tag an already tagged object")
 
-    textile = "_term bar code_".tpl
+    textile = "_term bar code_".tl
     assert_no_match(/x{GLOSSARY_TERM /, textile,
                     "Textile should not tag an already tagged object")
   end
@@ -276,7 +276,7 @@ class TextileTest < UnitTestCase
     # This loc has 2 all-caps words to insure we're stripping
     # some tags added by Redcloth
     loc = "OSU, Corvallis, Oregon, USA"
-    textile = "_location #{loc}_".tpl
+    textile = "_location #{loc}_".tl
     assert_match(
       "#{MO.http_domain}/lookups/lookup_location/#{CGI.escape(loc)}", # href
       textile
