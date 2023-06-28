@@ -10,6 +10,12 @@ class Textile
 end
 
 class TextileTest < UnitTestCase
+  EXPLICIT_OBJECT_MARKUP = [
+    "_Amanita_",
+    "_observation 123_",
+    "_term bar code_"
+  ].freeze
+
   IMPLICIT_TERMS = [
     "_amanita_", # lower-case name
     "_blah blah blah_", # multiple words
@@ -25,7 +31,7 @@ class TextileTest < UnitTestCase
 
   PLAIN_ITALICS = [
     "_Transition Between Hymeniderm And Epithelium_" # too many words
-  ]
+  ].freeze
 
   ###################################################################
   #
@@ -248,17 +254,12 @@ class TextileTest < UnitTestCase
   end
 
   def test_tagging_tagged_object
-    textile = "_Amanita_".tl
-    assert_no_match(/x{NAME /, textile,
-                    "Textile should not tag an already tagged object")
-
-    textile = "_observation 123_".tl
-    assert_no_match(/x{OBSERVATION /, textile,
-                    "Textile should not tag an already tagged object")
-
-    textile = "_term bar code_".tl
-    assert_no_match(/x{GLOSSARY_TERM /, textile,
-                    "Textile should not tag an already tagged object")
+    EXPLICIT_OBJECT_MARKUP.each do |markup|
+      textile = markup.tl
+      assert_no_match(/x{[A-Z_]+ /, # start of tagged object
+                      textile,
+                      "Textile should not tag an already tagged object")
+    end
   end
 
   def test_html

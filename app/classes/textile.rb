@@ -92,10 +92,10 @@ class Textile < String
   # textilize::                   The general case.
   # textilize_without_paragraph:: Just returns body of first paragraph.
   # ---
-  # String#t::                    Same as textilize_without_paragraph(false).
-  # String#tl::                   Same as textilize_without_paragraph(true).
-  # String#tp::                   Same as textilize(false).
-  # String#tpl::                  Same as textilize(true).
+  # String#t::   Same as textilize_without_paragraph(do_object_links: false)
+  # String#tl::  Same as textilize_without_paragraph(do_object_links: true)
+  # String#tp::  Same as textilize(do_object_links: false).
+  # String#tpl:: Same as textilize(do_object_links: true).
   #
   # Here are some mnemonics for the aliases:
   # t::    Just textilize: no paragraphs or links or anything fancy.
