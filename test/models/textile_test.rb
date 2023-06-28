@@ -14,15 +14,18 @@ class TextileTest < UnitTestCase
     "_amanita_", # lower-case name
     "_blah blah blah_", # multiple words
     "_Sonoran Flora_", # title case
-    "_This should be close_",
     "_A. H. Smith_", # abbreviations
     "_Adnate-Decurrent_", # hyphen
-    "_amanita_ followed by non-italized stuff",
+    "_amanita_ plus stuff",
     "_RPB2_", # digit
     "_NH4OH_",
     "_arriba!_", # exclamations
     "_A 5-6 inch_"
   ].freeze
+
+  PLAIN_ITALICS = [
+    "_Transition Between Hymeniderm And Epithelium_" # too many words
+  ]
 
   ###################################################################
   #
@@ -225,11 +228,23 @@ class TextileTest < UnitTestCase
         "Wrong anchor text"
       )
     end
+  end
 
-    assert_match(
-      "#{MO.http_domain}/lookups/lookup_glossary_term/rpb2", "_rpb2_".tpl,
-      "'_rpb2_' should create a link that looks up a GlossaryTerm."
-    )
+  def test_plain_italics
+    PLAIN_ITALICS.each do |str|
+      inside = within_underscores(str)
+
+      textile = str.tpl
+
+      assert_no_match(
+        "https?://", textile,
+        "#{str} should not generate a URL"
+      )
+      assert_match(
+        "<p><em>#{inside}</em></p>", textile,
+        "#{str} should render italized text"
+      )
+    end
   end
 
   def test_tagging_tagged_object

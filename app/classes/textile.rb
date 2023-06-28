@@ -433,7 +433,7 @@ class Textile < String
 
     (?<prefix> ^|\W) # prefix
     (?: _+)
-    (?<id> (?: \S+\ ?)+) # any number of words
+    (?<id> (?: \S+\ ?){1,3}) # any number of words
     (?: _+)
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
