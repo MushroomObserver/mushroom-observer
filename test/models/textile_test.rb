@@ -332,10 +332,6 @@ class TextileTest < UnitTestCase
     $LAST_MATCH_INFO[:inside]
   end
 
-  def with_smart_apostrophes(str)
-    str.gsub(/'/, "’")
-  end
-
   def assert_href_equal(url, str)
     result = str.tl
     assert_match(/href=.([^"']*)/, result,
