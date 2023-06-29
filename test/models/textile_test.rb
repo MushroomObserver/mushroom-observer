@@ -27,6 +27,7 @@ class TextileTest < UnitTestCase
     "_NH4OH_",
     "_Buller’s Drop_", # apostrophe
     "_Buller's Drop_", # single quote
+    "_Clémençon's Solution_", # diacritical
     "_A 5-6 inch_"
   ].freeze
 
