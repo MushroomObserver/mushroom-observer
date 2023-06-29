@@ -33,6 +33,12 @@ class TextileTest < UnitTestCase
     "_Transition Between Hymeniderm And Epithelium_" # too many words
   ].freeze
 
+  HTML_MARKUP =[
+    "<code>_Amanita_</code>",
+    "<code>_term foo_</code>",
+    "<code>_foo_</code>"
+  ].freeze
+
   ###################################################################
   #
   # NOTE: Tests in this section call and test Textile private methods
@@ -263,14 +269,12 @@ class TextileTest < UnitTestCase
   end
 
   def test_html
-    html = "<code>_Amanita_</code>"
-    assert_match(/#{html}/, html.tl)
+    HTML_MARKUP.each do |str|
+      textile = str.tl
 
-    html = "<code>_term foo_</code>"
-    assert_match(/#{html}/, html.tl)
-
-    html = "<code>_foo_</code>"
-    assert_match(/#{html}/, html.tl)
+      assert_match(/#{str}/, textile)
+      assert_no_match("https?://", textile, "#{str} should not generate a URL")
+    end
   end
 
   def test_location_lookup
