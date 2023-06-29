@@ -17,6 +17,10 @@ class LookupsController < ApplicationController
     lookup_general(Image)
   end
 
+  def lookup_glossary_term
+    lookup_general(GlossaryTerm)
+  end
+
   def lookup_location
     lookup_general(Location)
   end
@@ -76,6 +80,8 @@ class LookupsController < ApplicationController
     return find_integer_matches(model, id) if /^\d+$/.match?(id)
 
     case model.to_s
+    when "GlossaryTerm"
+      find_glossary_term_matches(id)
     when "Name"
       find_name_matches_and_suggestions(id, accepted)
     when "Location"
@@ -99,6 +105,16 @@ class LookupsController < ApplicationController
     return nil unless obj
 
     [[obj], nil]
+  end
+
+  def find_glossary_term_matches(id)
+    begin
+      matches = GlossaryTerm.where(name: id)
+    rescue StandardError => e
+      flash_error(e.to_s) unless Rails.env.production?
+    end
+
+    [matches, []]
   end
 
   def find_name_matches_and_suggestions(id, accepted)
@@ -211,7 +227,10 @@ class LookupsController < ApplicationController
 
   def handle_no_match(model, id)
     flash_error(:runtime_object_no_match.t(match: id, type: model.type_tag))
-    if model == User
+    if model == Name
+      # Assume user meant a glossary term
+      lookup_general(GlossaryTerm, accepted: false)
+    elsif model == User
       redirect_to("/")
     else
       redirect_to(controller: model.show_controller, action: model.index_action)
