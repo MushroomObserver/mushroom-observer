@@ -33,7 +33,7 @@ class TextileTest < UnitTestCase
     "_Transition Between Hymeniderm And Epithelium_" # too many words
   ].freeze
 
-  HTML_MARKUP =[
+  HTML_MARKUP = [
     "<code>_Amanita_</code>",
     "<code>_term foo_</code>",
     "<code>_foo_</code>"
