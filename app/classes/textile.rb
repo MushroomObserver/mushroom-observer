@@ -416,7 +416,7 @@ class Textile < String
 
   # NOTE: (JDC 2023-06-23) Multiple lookbehinds are required because
   # Ruby does not allow variable length lookbehinds.
-  # They could be avoided via the (nontrivial) changes suggested here:
+  # They might be avoided via the (nontrivial) changes suggested here:
   # https://github.com/MushroomObserver/mushroom-observer/pull/1528#issuecomment-1608114858
   # rubocop:disable Style/RegexpLiteral
   # cop gives false positive
@@ -433,7 +433,7 @@ class Textile < String
 
     (?<prefix> ^|\W) # prefix
     (?: _+)
-    (?<id> (?: \S+\ ?){1,3}) # any number of words
+    (?<id> (?: [a-zA-Z0-9\-\.]+ \ ?){1,3}) # 1-3 words
     (?: _+)
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
@@ -490,7 +490,7 @@ class Textile < String
       \}
       \{
         \s+
-        (?<id> [^{}]+?) # id
+        (?<id> [^{}]+?)
         \s+
       \}x
   /x

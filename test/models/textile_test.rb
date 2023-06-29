@@ -25,11 +25,11 @@ class TextileTest < UnitTestCase
     "_amanita_ plus stuff",
     "_RPB2_", # digit
     "_NH4OH_",
-    "_arriba!_", # exclamations
     "_A 5-6 inch_"
   ].freeze
 
   PLAIN_ITALICS = [
+    "_arriba!_", # exclamation
     "_Transition Between Hymeniderm And Epithelium_" # too many words
   ].freeze
 
