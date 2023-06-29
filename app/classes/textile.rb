@@ -433,7 +433,7 @@ class Textile < String
 
     (?<prefix> ^|\W) # prefix
     (?: _+)
-    (?<id> (?: [a-zA-Z0-9\-.]+ \ ?){1,3}) # 1-3 words
+    (?<id> (?: [a-zA-Z0-9\-.'’]+ \ ?){1,3}) # 1-3 words
     (?: _+)
 
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
@@ -500,6 +500,7 @@ class Textile < String
       type = $LAST_MATCH_INFO[:type]
       label = $LAST_MATCH_INFO[:label]
       id = $LAST_MATCH_INFO[:id]
+      id.gsub!(/&#821[6789];/, "'")
       id.gsub!(/&#822[01];/, '"')
       id = CGI.unescapeHTML(id)
       id = CGI.escape(id)

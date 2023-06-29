@@ -18,13 +18,15 @@ class TextileTest < UnitTestCase
 
   IMPLICIT_TERMS = [
     "_amanita_", # lower-case name
+    "_amanita_ plus stuff",
     "_blah blah blah_", # multiple words
     "_Sonoran Flora_", # title case
     "_A. H. Smith_", # abbreviations
     "_Adnate-Decurrent_", # hyphen
-    "_amanita_ plus stuff",
     "_RPB2_", # digit
     "_NH4OH_",
+    "_Buller’s Drop_", # apostrophe
+    "_Buller's Drop_", # single quote
     "_A 5-6 inch_"
   ].freeze
 
@@ -226,19 +228,21 @@ class TextileTest < UnitTestCase
   def test_implicit_glossary_terms
     IMPLICIT_TERMS.each do |str|
       inside = within_underscores(str)
+      id = CGI.escape(
+        CGI.unescapeHTML(inside)
+      )
+      # right single quote renders as apostrophe
+      anchor = "<i>#{inside.sub(/'/, "&#8217;")}</i>"
 
       textile = str.tl
 
       assert_match(
-        "#{MO.http_domain}/lookups/lookup_glossary_term/#{CGI.escape(inside)}",
+        "#{MO.http_domain}/lookups/lookup_glossary_term/#{id}",
         textile,
         "Missing or wrong URL: " \
         "'_#{inside}_' should create a link that looks up a GlossaryTerm"
       )
-      assert_match(
-        "<i>#{inside}</i>", textile,
-        "Wrong anchor text"
-      )
+      assert_match(anchor, textile, "Wrong anchor text")
     end
   end
 
@@ -325,6 +329,10 @@ class TextileTest < UnitTestCase
   def within_underscores(str)
     str =~ (/^_+(?<inside>.*)_+/)
     $LAST_MATCH_INFO[:inside]
+  end
+
+  def with_smart_apostrophes(str)
+    str.gsub(/'/, "’")
   end
 
   def assert_href_equal(url, str)
