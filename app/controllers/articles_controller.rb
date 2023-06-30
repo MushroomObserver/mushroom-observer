@@ -134,7 +134,7 @@ class ArticlesController < ApplicationController
 
   # add flash message if title missing
   def flash_missing_title?
-    return if params[:article][:title].present?
+    return false if params[:article][:title].present?
 
     flash_error(:article_title_required.t)
     true

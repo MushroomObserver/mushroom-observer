@@ -52,7 +52,7 @@ module PaginationHelper
   end
 
   def need_letter_pagination_links?(pages)
-    return unless pages
+    return false unless pages
 
     pages.letter_arg &&
       (pages.letter || pages.num_total > pages.num_per_page) &&
