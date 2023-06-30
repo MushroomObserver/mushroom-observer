@@ -3306,7 +3306,7 @@ class NameTest < UnitTestCase
     c_rachodes.merge_synonyms(c_comatus)
     c_rachodes.update(deprecated: true)
     c_comatus.update(deprecated: false)
-    wrong_class = c_rachodes.classification.sub(/Agaricaceae/, "Boletaceae")
+    wrong_class = c_rachodes.classification.sub("Agaricaceae", "Boletaceae")
     c_rachodes.update(classification: wrong_class)
     c_rachodes.reload
     c_comatus.reload

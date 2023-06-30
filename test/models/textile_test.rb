@@ -233,7 +233,7 @@ class TextileTest < UnitTestCase
         CGI.unescapeHTML(inside)
       )
       # right single quote renders as apostrophe
-      anchor = "<i>#{inside.sub(/'/, "&#8217;")}</i>"
+      anchor = "<i>#{inside.sub("'", "&#8217;")}</i>"
 
       textile = str.tl
 

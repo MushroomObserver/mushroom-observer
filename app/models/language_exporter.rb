@@ -166,7 +166,7 @@ module LanguageExporter
   # Clean excess whitespace out of a string.
   def clean_string(val)
     val.to_s.gsub(/\\r|\r/, "").
-      gsub(/\\n/, "\n").
+      gsub("\\n", "\n").
       gsub(/[ \t]+\n/, "\n").
       gsub(/\n[ \t]+/, "\n").
       sub(/\A\s+/, "").
@@ -287,7 +287,7 @@ module LanguageExporter
   end
 
   def format_multiline_string(val)
-    val.gsub(/\n/, '\n')
+    val.gsub("\n", '\n')
   end
 
   def escape_string(val)
