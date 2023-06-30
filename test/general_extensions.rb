@@ -524,7 +524,7 @@ module GeneralExtensions
     template.split("\n").each do |line|
       next unless line.include?("IGNORE")
 
-      pattern = Regexp.escape(line).gsub(/IGNORE/, ".*")
+      pattern = Regexp.escape(line).gsub("IGNORE", ".*")
       str.sub!(/^#{pattern}$/, line)
     end
     str == template

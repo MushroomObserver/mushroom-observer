@@ -157,7 +157,7 @@ class TranslationController < ApplicationController
 
   def preview_string(str, limit = 250)
     str = @lang.clean_string(str)
-    str = str.gsub(/\n/, " / ")
+    str = str.gsub("\n", " / ")
     str = str[0..limit] + "..." if str.length > limit
     str
   end

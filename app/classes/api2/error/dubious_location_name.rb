@@ -5,7 +5,7 @@ class API2
   class DubiousLocationName < Error
     def initialize(reasons)
       super()
-      args.merge!(reasons: reasons.join("; ").gsub(/\.;/, ";"))
+      args.merge!(reasons: reasons.join("; ").gsub(".;", ";"))
     end
   end
 end
