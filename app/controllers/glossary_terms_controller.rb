@@ -163,10 +163,10 @@ class GlossaryTermsController < ApplicationController
     return @glossary_term.save unless upload_specified?
 
     # return false if image processing fails
-    return unless (saved_image = process_upload(image_args))
+    return false unless (saved_image = process_upload(image_args))
 
     @glossary_term.add_image(saved_image)
-    return if @glossary_term.save # happy path
+    return false if @glossary_term.save # happy path
 
     # term failed, so clean up the orphaned (unassociated) image
     # and its flash notice ("Successfully uploaded image ...")

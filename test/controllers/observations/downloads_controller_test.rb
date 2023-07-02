@@ -160,7 +160,7 @@ module Observations
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
-      assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+      assert_equal(query.num_results, @response.body.scan("\\pard").size)
       assert_match(/314159/, @response.body) # make sure fundis id in there!
       assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
@@ -172,7 +172,7 @@ module Observations
           commit: "Print Labels"
         }
       )
-      assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+      assert_equal(query.num_results, @response.body.scan("\\pard").size)
     end
 
     # Print labels for all observations just to be sure all cases (more or less)

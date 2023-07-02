@@ -46,13 +46,13 @@ module ContentHelper
   # Override Rails method of the same name.  Just calls our
   # Textile#textilize_without_paragraph method on the given string.
   def textilize_without_paragraph(str, do_object_links = false)
-    Textile.textilize_without_paragraph(str, do_object_links)
+    Textile.textilize_without_paragraph(str, do_object_links: do_object_links)
   end
 
   # Override Rails method of the same name.  Just calls our Textile#textilize
   # method on the given string.
-  def textilize(str, do_object_links = false)
-    Textile.textilize(str, do_object_links)
+  def textilize(str, do_object_links: false)
+    Textile.textilize(str, do_object_links: do_object_links)
   end
 
   # ----------------------------------------------------------------------------
