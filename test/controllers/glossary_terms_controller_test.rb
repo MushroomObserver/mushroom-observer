@@ -247,14 +247,20 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ***** update *****
   def test_update
     term = glossary_terms(:conic_glossary_term)
+    creator = term.user
+    user = mary
+    assert_not_equal(user, creator,
+                     "Test needs user who didn't create the term.")
     params = changes_to_conic
-    login
 
+    login(user.login)
     assert_difference("term.versions.count") do
       post(:update, params: params)
     end
     assert_equal(params[:glossary_term][:name], term.reload.name)
     assert_equal(params[:glossary_term][:description], term.description)
+    assert_equal(creator, term.user,
+                 "Editing a Term should not change term.user")
     assert_redirected_to(glossary_term_path(term.id))
   end
 
