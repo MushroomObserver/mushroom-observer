@@ -50,7 +50,6 @@ class GlossaryTermsController < ApplicationController
 
     @glossary_term.attributes = params[:glossary_term].
                                 permit(:name, :description)
-    @glossary_term.user = @user
 
     return reload_form("edit") unless @glossary_term.save
 
