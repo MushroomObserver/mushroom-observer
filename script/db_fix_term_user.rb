@@ -5,12 +5,16 @@
 # In particular, it fixes values that were created by the bug that was fixed
 # in PR 1530. https://github.com/MushroomObserver/mushroom-observer/pull/1530
 #
+# NOTE: This file should not be merged into the main branch.
+#
 # The script should be run once on any machine having those incorrect values.
 # (It's useless, but not harmful, to run twice.)
 # It should then be be deleted from that machine.
 #
 # USAGE
-# rails runner script/db_fix_term_user.rb
+# copy this file to the machine where you want to run it
+# run it:
+#   rails runner script/db_fix_term_user.rb
 
 GlossaryTerm.where.not(version: 1).each do |term|
   original = term.versions.first
