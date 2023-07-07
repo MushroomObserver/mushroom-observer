@@ -342,6 +342,19 @@ class GlossaryTermsControllerTest < FunctionalTestCase
            "Non-admin should not be able to destroy glossary term")
   end
 
+  def test_destroy_fails
+    term = glossary_terms(:no_images_glossary_term)
+    GlossaryTerm.any_instance.stubs(:destroy).returns(false)
+
+    login
+    make_admin
+    delete(:destroy, params: { id: term.id })
+
+    assert_redirected_to(glossary_term_path(term.id),
+                         "It should redisplay a Term it fails to destroy")
+  end
+
+
   # ---------- helpers ---------------------------------------------------------
 
   def create_term_params
