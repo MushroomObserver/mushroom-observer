@@ -301,7 +301,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     login
     make_admin
-    get(:destroy, params: { id: term.id })
+    delete(:destroy, params: { id: term.id })
 
     assert_flash_success
     assert_response(:redirect)
@@ -319,7 +319,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     login
     make_admin
-    get(:destroy, params: { id: term.id })
+    delete(:destroy, params: { id: term.id })
 
     assert_flash_success
     assert_response(:redirect)
@@ -334,7 +334,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_destroy_no_login
     term = GlossaryTerm.first
     login(users(:zero_user).login)
-    get(:destroy, params: { id: term.id })
+    delete(:destroy, params: { id: term.id })
 
     assert_flash_text(:permission_denied.l)
     assert_response(:redirect)
