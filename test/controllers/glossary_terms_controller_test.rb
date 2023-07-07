@@ -116,6 +116,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_edit
     login
     term = GlossaryTerm.first
+    assert(term.can_edit?)
+
     get(:edit, params: { id: term.id })
 
     assert_response(:success)
