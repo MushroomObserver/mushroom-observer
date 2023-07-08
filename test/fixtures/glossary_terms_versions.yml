@@ -1,6 +1,13 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 # glossary term association must be referenced by id
 
+DEFAULTS: &DEFAULTS
+  updated_at: <%= Time.current %>
+  version: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
+  name: $LABEL
+  description: Description of Term $LABEL
+
 plane_glossary_term_v1:
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:plane_glossary_term) %>
   version: 1
@@ -43,3 +50,8 @@ square_glossary_term_v3:
   name: Square
   description: equilateral
 
+locked_glossary_term_v1:
+  <<: *DEFAULTS
+  glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:locked_glossary_term) %>
+  name: complex
+  description: A _monophyletic_ group of species that are indistinguishable from each other in the field.
