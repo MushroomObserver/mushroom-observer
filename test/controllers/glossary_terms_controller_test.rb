@@ -55,15 +55,24 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** show *****
-  def test_show
+  def test_show_public
     term = glossary_terms(:square_glossary_term)
-    # make sure public can access
+
     get(:show, params: { id: term.id })
 
-    assert_response(:success)
-    prior_version_path = glossary_term_versions_path(
-      term.id, version: term.version - 1
+    assert_response(
+      :success,
+      "Public should be able to view Glossary Terms without logging in"
     )
+  end
+
+  def test_show_logged_in
+    term = glossary_terms(:square_glossary_term)
+    assert_operator(term.version, :>, 1,
+                    "Test needs a GlossaryTerm fixture with multiple versions")
+    prior_version_path =
+      glossary_term_versions_path(term.id, version: term.version - 1)
+
     login
     get(:show, params: { id: term.id })
 
