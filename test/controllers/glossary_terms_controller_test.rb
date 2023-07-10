@@ -141,9 +141,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                   "Edit GlossaryTerm form should omit upload image field")
     assert_select(
       "#glossary_term_locked", false,
-      "GlossaryTerm form should not show show `Locked` input to non-admin user"
+      "GlossaryTerm form should not show `Locked` input to non-admin user"
     )
-
   end
 
   def test_edit_no_login
@@ -421,7 +420,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_redirected_to(glossary_term_path(term.id),
                          "It should redisplay a Term it fails to destroy")
   end
-
 
   # ---------- helpers ---------------------------------------------------------
 
