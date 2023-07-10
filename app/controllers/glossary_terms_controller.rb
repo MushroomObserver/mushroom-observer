@@ -32,7 +32,7 @@ class GlossaryTermsController < ApplicationController
     return unless find_glossary_term!
 
     if @glossary_term.locked? && !in_admin_mode?
-      flash_error(:edit_glossary_term_locked.t)
+      flash_error(:edit_glossary_term_not_allowed.t)
       redirect_to(glossary_term_path(@glossary_term))
     end
   end
@@ -55,6 +55,7 @@ class GlossaryTermsController < ApplicationController
 
     @glossary_term.attributes = params[:glossary_term].
                                 permit(:name, :description)
+    @glossary_term.locked = params[:glossary_term][:locked] if in_admin_mode?
 
     return reload_form("edit") unless @glossary_term.save
 

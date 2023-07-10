@@ -8,6 +8,7 @@ DEFAULTS: &DEFAULTS
   user: rolf
   name: $LABEL
   description: Description of Term $LABEL
+  locked: false
 
 conic_glossary_term:
   <<: *DEFAULTS

@@ -118,7 +118,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     term = GlossaryTerm.first
     assert(term.can_edit?)
 
-    get(:edit, params: { id: term.id })
+    post(:edit, params: { id: term.id })
 
     assert_response(:success)
     assert_head_title(:edit_glossary_term_title.l(name: term.name))
@@ -139,15 +139,34 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
     assert_select("input#upload_image", false,
                   "Edit GlossaryTerm form should omit upload image field")
+    assert_select(
+      "#glossary_term_locked", false,
+      "GlossaryTerm form should not show show `Locked` input to non-admin user"
+    )
+
   end
 
   def test_edit_no_login
-    get(:edit, params: { id: GlossaryTerm.first.id })
+    post(:edit, params: { id: GlossaryTerm.first.id })
     assert_response(:redirect,
                     "Unlogged-in user should not be able to edit term")
   end
 
-  def test_edit_locked_by_non_admin
+  def test_edit_in_admin_mode
+    term = glossary_terms(:conic_glossary_term)
+
+    login
+    make_admin
+    post(:edit, params: { id: term.id })
+
+    assert_response(:success)
+    assert_select(
+      "#glossary_term_locked", { count: 1 },
+      "GlossaryTerm form should show `Locked` input when in admin mode"
+    )
+  end
+
+  def test_edit_locked_term_by_non_admin
     term = glossary_terms(:locked_glossary_term)
 
     login
@@ -274,6 +293,43 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(creator, term.user,
                  "Editing a Term should not change term.user")
     assert_redirected_to(glossary_term_path(term.id))
+  end
+
+  def test_update_lock_by_admin
+    term = glossary_terms(:conic_glossary_term)
+    assert_not(term.locked?, "Test needs an unlocked GlossaryTerm fixture")
+
+    login
+    make_admin
+    post(:update,
+         params: { id: glossary_terms(:conic_glossary_term).id,
+                   glossary_term: { locked: true } })
+
+    assert_equal(true, term.reload.locked)
+  end
+
+  def test_update_lock_by_non_admin
+    term = glossary_terms(:conic_glossary_term)
+    assert_not(term.locked?, "Test needs an unlocked GlossaryTerm fixture")
+
+    login
+    post(:update,
+         params: { id: glossary_terms(:conic_glossary_term).id,
+                   glossary_term: { locked: true } })
+
+    assert_equal(false, term.reload.locked)
+  end
+
+  def test_update_unlock_by_admin
+    term = glossary_terms(:locked_glossary_term)
+
+    login
+    make_admin
+    post(:update,
+         params: { id: glossary_terms(:locked_glossary_term).id,
+                   glossary_term: { locked: false } })
+
+    assert_equal(false, term.reload.locked)
   end
 
   def test_update_no_name
