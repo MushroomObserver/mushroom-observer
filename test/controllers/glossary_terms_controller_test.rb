@@ -114,8 +114,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** edit *****
   def test_edit
+    term = glossary_terms(:conic_glossary_term)
+
     login
-    term = GlossaryTerm.first
     assert(term.can_edit?)
 
     post(:edit, params: { id: term.id })
@@ -146,7 +147,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_edit_no_login
-    post(:edit, params: { id: GlossaryTerm.first.id })
+    term = glossary_terms(:conic_glossary_term)
+
+    post(:edit, params: { id: term.id })
     assert_response(:redirect,
                     "Unlogged-in user should not be able to edit term")
   end
