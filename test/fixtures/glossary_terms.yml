@@ -57,3 +57,4 @@ locked_glossary_term:
   <<: *DEFAULTS
   name: complex
   description: A _monophyletic_ group of species that are indistinguishable from each other in the field.
+  locked: true

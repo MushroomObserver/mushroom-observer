@@ -2424,6 +2424,8 @@
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
+  edit_glossary_term_locked: This Glossary Term has been locked by the site admins.
+
 
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.

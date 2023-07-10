@@ -147,6 +147,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                     "Unlogged-in user should not be able to edit term")
   end
 
+  def test_edit_locked_by_non_admin
+    term = glossary_terms(:locked_glossary_term)
+
+    login
+    post(:edit, params: { id: term.id })
+
+    assert_flash_error
+    assert_redirected_to(glossary_term_path(term))
+  end
+
   # ---------- Test actions that Modify data: (create, update, destroy, etc.) --
 
   # ***** create *****

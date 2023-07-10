@@ -30,6 +30,11 @@ class GlossaryTermsController < ApplicationController
 
   def edit
     return unless find_glossary_term!
+
+    if @glossary_term.locked? && !in_admin_mode?
+      flash_error(:edit_glossary_term_locked.t)
+      redirect_to(glossary_term_path(@glossary_term))
+    end
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
