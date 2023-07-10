@@ -85,7 +85,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     end
     assert_select("a[href='#{prior_version_path}']", true,
                   "Page should have link to prior version")
-    assert_select("name_authors_editors", { count: 1 },
+    assert_select("#glossary_term_authors_editors", { count: 1 },
                   "GlossaryTerm page should show creator and editors")
   end
 
