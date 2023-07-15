@@ -190,7 +190,7 @@ The glossary entries are created and edited by members of the MO community.
     "Rotula"]
    -->
 
-### Titles
+## Titles
 
 1. Titles (the "Name" field) should be lowercase, except for proper nouns or
    other terms that are capilitalized in ordinary use.
@@ -206,11 +206,11 @@ The glossary entries are created and edited by members of the MO community.
    </div>
    </details>
 
-### Descriptions
+## Descriptions
 
 Each term must have a Description and/or Illustration(s).
 
-#### Definitions
+### Definitions
 
 A Description may include a definition.
 
@@ -286,26 +286,26 @@ A Description may include a definition.
 
    </details>
 
-6. Optionally follow the defintion with ***short*** examples
+- Optionally follow the defintion with ***short*** examples
    ***only if needed to show context***.
 
-### Illustrations
+## Illustrations
 
-1. Preferably include an illustration.
-2. Use only illustrations that:
+- Preferably include an illustration.
+- Use only illustrations that:
    you created,
    are in the public domain, or
    are licensed.
    Comply with the license terms if you use licensed illustrations.
-3. Limit the number and size of illustrations
+- Limit the number and size of illustrations
    to those that are necessary to define the term.
 
 ## Internal Links to the Glossary
 
-1. Use all lower-case words exactly matching the term, surrounded by underscores.
+- Use all lower-case words exactly matching the term, surrounded by underscores.
 
 >`_bolete_` (renders as ***bolete***)
 
-1. To render the link in different cases use this format:
+- To render the link in different cases use this format:
 
 >`_term Bolete_` (renders as ***Bolete***)
