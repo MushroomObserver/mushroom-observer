@@ -5,7 +5,7 @@ The Glossary is a community-maintained list of mycological terms.
 <details>
 <summary>Background</summary>
 
-The MO Glossary began in 2015 as a collaboration with the Rhode Island School of Design;
+The MO Glossary began in 2015 in collaboration with the Rhode Island School of Design;
 students from Jean Blackburn’s Scientific Illustration class created
 high-quality Creative Commons licensed scientific illustrations
 of fungal anatomy terms.
@@ -24,12 +24,6 @@ You are also welcome to leave comments on the
 [unofficial Mushroom Observer Facebook page](https://www.facebook.com/groups/mushroomobserver).
 (But note that the facebook page is not monitored by the MO Development Team.)
 </details>
-
-## TODO
-
-- Single Word
-- Example of term to fix. Bird's Nest Fungi.
-- Separate remarks from definition.
 
 <!-- ``````
 ##Pulk
@@ -104,12 +98,27 @@ The glossary entries are created and edited by members of the MO community.
    <details>
    <summary>Examples</summary>
 
-   <div style="background-color: rgb(70, 70, 70);">
+   bad: `Calcareous`
 
-   bad:  `rhombus`
+   bad: `Cell`
+
+   bad: `Cell Biology`
+
+   bad: `Chemical Species`
+
+   bad: `Chirality`
+
+   bad: `Climate Change`
+
+   bad: `rhombus`
+
+   bad: `Science`
+
+   bad: `Scientific Methodology`
 
    good: `character`
-   </div>
+
+   good: `club fungi`
    </details>
 
 3. Terms that are straightforward modifications or combinations of other terms
@@ -118,7 +127,6 @@ The glossary entries are created and edited by members of the MO community.
 
    <details>
    <summary>Examples</summary>
-   <div style="background-color: rgb(50, 50, 50);">
 
    bad:  `Transition Between Hymeniderm And Epithelium`
 
@@ -128,11 +136,14 @@ The glossary entries are created and edited by members of the MO community.
 
    good: `adnate`
    (plus exampble showing adnate gills)
-   </div>
    </details>
 
-4. Avoid terms that are scientific names of taxa.
-   (These are best described on their own Name pages.)
+4. Prefer shorter terms.
+   (This improves the functionality and performance of Glossary links and
+   searches, and is kinder to users with small screens.)
+
+5. Avoid terms that are scientific names of taxa.
+   Instead, add a Description to the taxon Name.
 
    <details>
    <summary>Examples</summary>
@@ -185,7 +196,7 @@ The glossary entries are created and edited by members of the MO community.
    other terms that are capilitalized in ordinary use.
    <details>
    <summary>Examples</summary>
-   <div style="background-color: rgb(50, 50, 50);">
+   <div style="background-color: rgb(80, 80, 80);">
 
    bad:  `Bolete`
 
@@ -203,26 +214,77 @@ Each term must have a Description and/or Illustration(s).
 
 A Description may include a definition.
 
-1. Definitions should be original (not copied).
+- Definitions should be original (not copied).
 
-2. Definitions should be complete sentences or
-   (preferably) match the part-of-speech of the term they define.
+- Definitions should be complete sentences or
+   (preferably) match the part of speech of the term they define.
    E.g., a definition for a noun might begin with "A sterile cell that..." and
    one for an adjective might begin with "Bearing cystidia that..."
 
-3. Number definitions if (and only if) multiple definitions are included.
-
-4. Optionally precede the definition with a parenthesized list of cognates,
-   alternate spellings, and synonyms.
-
-5. Don't repeat definitions. Instead link to an existing term
-   that includes that definition.
+- Make it a definition, rather than history, background, everything you found out
+   when researching the topic, etc.
 
    <details>
    <summary>Examples</summary>
-   NEED EXAMPLE
+   <div style="background-color: rgb(80, 80, 80);">
+
+   ```text
+      bad:  Casing Layer
+            1. When mushrooms are cultivated indoors or outdoors,
+            they are often developed using a layered system involving a variety of
+            potential materials. The casing layer is the top-most layer which
+            covers all of the layers. It can be composed of moist materials such
+            as peat, gypsum, vermiculite, and/or several other optional materials.
+            This moisture-promoting layer dramatically enhances mushroom formation
+            as well as more abundant mushroom growth in most cultivated species.
+            Some mushroom species require a casing layer in order to fruit,
+            or to fruit with any significance.
+
+      good: Casing Layer
+            The top-most layer of material used in indoor mushroom cultivation.
+   ```
+
+   </div>
    </details>
 
+- Number definitions if (and only if) multiple definitions are included.
+
+- Optionally precede the definition with a parenthesized list of cognates,
+   alternate spellings, and synonyms.
+
+- Don't repeat definitions. Instead link to an existing term
+   that includes that definition.
+
+   <details>
+   <summary>Example</summary>
+
+   bad:
+
+      Spiciform:
+
+         1. Exhibiting spike-shaped projections.
+
+      Spicules:
+
+      (Spiculate, Spiculose, Spiculum)
+
+         1. Exhibiting many small spines.
+
+         2. Small spikes.
+
+   good:
+
+      spiciform:
+
+         Having _spicules_.
+
+      spicules:
+
+         (spiculate, spiculose, spiculum, spiciform)
+
+         Small spikes or spines.
+
+   </details>
 
 6. Optionally follow the defintion with ***short*** examples
    ***only if needed to show context***.
