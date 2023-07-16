@@ -2423,7 +2423,9 @@
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
-  edit_glossary_term_not_allowed: Only admins can edit glossary terms
+  edit_glossary_term_not_allowed: This Glossary Term has been locked by the site admins
+  edit_glossary_term_locked: Lock this Glossary Term?
+
 
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
