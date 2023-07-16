@@ -91,10 +91,10 @@ The glossary entries are created and edited by members of the MO community.
 
 ### Terms to Include
 
-1. Mycology-specific terms are welcome, especially terms relating to
+- Mycology-specific terms are welcome, especially terms relating to
    the identification, taxonomy, nomenclature, and ecology of macrofungi.
 
-2. Avoid terms that lack a mycology-specific definition.
+- Avoid terms that lack a mycology-specific definition.
    <details>
    <summary>Examples</summary>
 
@@ -121,28 +121,28 @@ The glossary entries are created and edited by members of the MO community.
    good: `club fungi`
    </details>
 
-3. Terms that are straightforward modifications or combinations of other terms
+- Terms that are straightforward modifications or combinations of other terms
    should not have their own definitions,
    but are welcome to be given entries with illustration(s).
 
    <details>
    <summary>Examples</summary>
 
+   bad:  `Lamellae Edge With Gelatinous, Separable Layer`
+
+   bad:  `Oblong With Median Constriction`
+
+   bad:  `Round To Angular Pores`
+
    bad:  `Transition Between Hymeniderm And Epithelium`
 
    good: `Lugol's Solution`
-
-   bad:  `adnate gill connection`
 
    good: `adnate`
    (plus exampble showing adnate gills)
    </details>
 
-4. Prefer shorter terms.
-   (This improves the functionality and performance of Glossary links and
-   searches, and is kinder to users with small screens.)
-
-5. Avoid terms that are scientific names of taxa.
+- Avoid terms that are scientific names of taxa.
    Instead, add a Description to the taxon Name.
 
    <details>
@@ -192,7 +192,7 @@ The glossary entries are created and edited by members of the MO community.
 
 ## Titles
 
-1. Titles (the "Name" field) should be lowercase, except for proper nouns or
+- Titles (the "Name" field) should be lowercase, except for proper nouns or
    other terms that are capilitalized in ordinary use.
    <details>
    <summary>Examples</summary>
@@ -205,6 +205,10 @@ The glossary entries are created and edited by members of the MO community.
    good: `RPB2`
    </div>
    </details>
+
+- Prefer shorter terms.
+  (This improves the functionality and performance of Glossary links and
+  searches, and is kinder to users with small screens.)
 
 ## Descriptions
 
@@ -309,3 +313,7 @@ A Description may include a definition.
 - To render the link in different cases use this format:
 
 >`_term Bolete_` (renders as ***Bolete***)
+
+## Glossary Searches
+
+The Glossary can be searched via the
