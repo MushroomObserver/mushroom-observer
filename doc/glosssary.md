@@ -215,7 +215,7 @@ A Description may include a definition.
 4. Optionally precede the definition with a parenthesized list of cognates,
    alternate spellings, and synonyms.
 
-5. Don't repeat definitions. Instead link to an existing term
+5. Don't repeat definitions. Instead link to an existing Glossary Term
    that includes that definition.
 
    <details>
