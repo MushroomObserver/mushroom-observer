@@ -48,3 +48,9 @@ square_glossary_term_v3:
   version: 3
   name: Square
   description: equilateral
+
+locked_glossary_term_v1:
+  <<: *DEFAULTS
+  glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:locked_glossary_term) %>
+  name: complex
+  description: A _monophyletic_ group of species that are indistinguishable from each other in the field.
