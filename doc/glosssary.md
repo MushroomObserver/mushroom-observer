@@ -263,7 +263,7 @@ A Description may include a definition.
    <summary>Example</summary>
 
    bad:
-
+```text
       Spiciform:
 
          1. Exhibiting spike-shaped projections.
@@ -275,9 +275,9 @@ A Description may include a definition.
          1. Exhibiting many small spines.
 
          2. Small spikes.
-
-   good:
-
+```
+         good:
+```text
       spiciform:
 
          Having _spicules_.
@@ -287,7 +287,7 @@ A Description may include a definition.
          (spiculate, spiculose, spiculum, spiciform)
 
          Small spikes or spines.
-
+``````
    </details>
 
 - Optionally follow the defintion with ***short*** examples
@@ -316,4 +316,6 @@ A Description may include a definition.
 
 ## Glossary Searches
 
-The Glossary can be searched via the
+The Glossary can be searched via the search bar at the top of the screen.
+Searches do not require and exact match. They will return a list of all
+Glossary Terms matching the search criteria.
