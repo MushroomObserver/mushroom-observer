@@ -2404,6 +2404,10 @@
   show_glossary_term_title: "Glossary Term: [name]"
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
+  show_glossary_term_creator: Creator of this Glossary Term
+  show_glossary_term_editor: "[:Editors]"
+  show_glossary_term_editors: "[:Editors]"
+
 
   # glossary_term#show_past_glossary_term
   show_past_glossary_term_title: "[:VERSION] [num]: [name]"
@@ -2423,7 +2427,9 @@
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
-  edit_glossary_term_not_allowed: Only admins can edit glossary terms
+  edit_glossary_term_not_allowed: This Glossary Term has been locked by the site admins
+  edit_glossary_term_locked: Lock this Glossary Term?
+
 
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
