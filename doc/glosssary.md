@@ -211,7 +211,7 @@ A Description may include a definition.
 - Optionally precede the definition with a parenthesized list of cognates,
    alternate spellings, and synonyms.
 
-5. Don't repeat definitions. Instead link to an existing Glossary Term
+- Don't repeat definitions. Instead link to an existing Glossary Term
    that includes that definition.
 
    <details>
@@ -219,32 +219,32 @@ A Description may include a definition.
 
    bad:
 
-```text
-      Spiciform:
+   ```text
+         Spiciform:
 
-         1. Exhibiting spike-shaped projections.
+            1. Exhibiting spike-shaped projections.
 
-      Spicules:
+         Spicules:
 
-      (Spiculate, Spiculose, Spiculum)
+         (Spiculate, Spiculose, Spiculum)
 
-         1. Exhibiting many small spines.
+            1. Exhibiting many small spines.
 
-         2. Small spikes.
-```
-         good:
+            2. Small spikes.
+   ```
+   good:
 
-```text
-      spiciform:
+   ```text
+         spiciform:
 
-         Having _spicules_.
+            Having _spicules_.
 
-      spicules:
+         spicules:
 
-         (spiculate, spiculose, spiculum, spiciform)
+            (spiculate, spiculose, spiculum, spiciform)
 
-         Small spikes or spines.
-```
+            Small spikes or spines.
+   ```
    </details>
 
 - Optionally follow the defintion with ***short*** examples
@@ -260,7 +260,6 @@ A Description may include a definition.
    ![Alt text](glossary_text_only_illustration.png)
 
   </details>
-
 - Use only illustrations that:
    you created,
    are in the public domain, or
