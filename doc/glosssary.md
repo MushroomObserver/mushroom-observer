@@ -247,9 +247,6 @@ A Description may include a definition.
    ```
    </details>
 
-- Optionally follow the defintion with ***short*** examples
-   ***only if needed to show context***.
-
 ## Illustrations
 
 - Preferably include an illustration.
