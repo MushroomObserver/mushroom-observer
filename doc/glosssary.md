@@ -25,61 +25,6 @@ You are also welcome to leave comments on the
 (But note that the facebook page is not monitored by the MO Development Team.)
 </details>
 
-<!-- ``````
-##Pulk
-
-1. Everyone is welcome to contribute to the glossary.
-   Any mycology-specific terms are welcome in the glossary, e
-   specially terms relating to the identification, taxonomy, nomenclature, and
-   ecology of macrofungi.
-
-2. Terms that lack a mycology-specific definition should be avoided.
-
-3. Terms that are scientific names of fungi should be avoided (better described
-   on their own name pages).
-
-4. Terms that are straightforward modifications or combinations of other terms
-   should not have their own definitions, but are welcome to be given entries
-   with illustrations.
-
-5. Entry titles (terms) should be lowercase, except for proper nouns.
-
-6. Definitions should be original (not copied) text.
-
-7. Definitions should be formed of complete sentences or (preferably) match the
-   part-of-speech of the term they define. E.g., a definition for a noun might
-   begin with "A sterile cell that..." and one for an adjective might begin with
-   "Bearing cystidia that..."
-
-8. Definitions should be numbered when (and only when) multiple definitions are included.
-
-Two other things I'm thinking could be useful -
-
-(A) a model glossary entry, with all the extra little parts included (plural,
-alternate spellings, links to other terms to compare...) formatted in the way
-other entries should follow
-
-(B) ability to propose deletion of an entry
-
-# Index
-
-In collaboration with the Rhode Island School of Design, students from
-Jean Blackburn’s Scientific Illustration class to create high-quality
-Creative Commons licensed scientific illustrations of fungal anatomy terms.
-To share these works, this new glossary feature for Mushroom Observer was created.
-This release provides the bare minimum of functionality to be able to discover
-and view these illustrations. New glossary terms can also be created by anyone
-in the community. Currently these terms are illustrated by single images,
-but my intent is to add support for multiple images including both scientific
-illustrations and example photographs. There will also be a search feature,
-the ability to add links to terms as part of any Mushroom Observer markup.
-A particular feature that needs discussion is how best to handle translations
-of these terms and their definitions.
-Discussion of these features including additional desired terms are welcome
-on either the Mushroom Observer mailing list (mo-general@googlegroups.com) or
-the unofficial Mushroom Observer Facebook page.
-``````
--->
 ## Guidelines
 
 Please follow these Guidelines when creating or editing Glossary Terms.
@@ -97,6 +42,14 @@ The glossary entries are created and edited by members of the MO community.
 - Avoid terms that lack a mycology-specific definition.
    <details>
    <summary>Examples</summary>
+
+   bad: `Acrid`
+
+   bad: `Acute`
+
+   bad: `Agar`
+
+   bad: `Alkaloid`
 
    bad: `Calcareous`
 
@@ -127,6 +80,8 @@ The glossary entries are created and edited by members of the MO community.
 
    <details>
    <summary>Examples</summary>
+
+   bad:  `Academic Mycology`
 
    bad:  `Lamellae Edge With Gelatinous, Separable Layer`
 
@@ -225,7 +180,7 @@ A Description may include a definition.
    E.g., a definition for a noun might begin with "A sterile cell that..." and
    one for an adjective might begin with "Bearing cystidia that..."
 
-- Make it a definition, rather than history, background, everything you found out
+- Stick to the definition, avoiding history, background, everything you found out
    when researching the topic, etc.
 
    <details>
@@ -263,6 +218,7 @@ A Description may include a definition.
    <summary>Example</summary>
 
    bad:
+
 ```text
       Spiciform:
 
@@ -277,6 +233,7 @@ A Description may include a definition.
          2. Small spikes.
 ```
          good:
+
 ```text
       spiciform:
 
@@ -287,7 +244,7 @@ A Description may include a definition.
          (spiculate, spiculose, spiculum, spiciform)
 
          Small spikes or spines.
-``````
+```
    </details>
 
 - Optionally follow the defintion with ***short*** examples
@@ -296,13 +253,21 @@ A Description may include a definition.
 ## Illustrations
 
 - Preferably include an illustration.
+- Omit "illustrations" which are simply text.
+  <details>
+  <summary>Example</summary>
+
+   ![Alt text](glossary_text_only_illustration.png)
+
+  </details>
+
 - Use only illustrations that:
    you created,
    are in the public domain, or
    are licensed.
    Comply with the license terms if you use licensed illustrations.
 - Limit the number and size of illustrations
-   to those that are necessary to define the term.
+  to those that are necessary to define the term.
 
 ## Internal Links to the Glossary
 
@@ -317,5 +282,5 @@ A Description may include a definition.
 ## Glossary Searches
 
 The Glossary can be searched via the search bar at the top of the screen.
-Searches do not require and exact match. They will return a list of all
+Searches do not require an exact match; they return a list of all
 Glossary Terms matching the search criteria.
