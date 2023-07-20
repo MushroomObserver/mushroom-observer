@@ -98,7 +98,8 @@ The glossary entries are created and edited by members of the MO community.
    </details>
 
 - Avoid terms that are scientific names of taxa.
-   Instead, add a Description to the taxon Name.
+  Instead, add a Description to the taxon Name or
+  (preferably) edit an existing taxon descripion.
 
    <details>
    <summary>Examples</summary>
@@ -175,42 +176,6 @@ A Description may include a definition.
 
 - Definitions should be original (not copied).
 
-- Definitions should be complete sentences or
-   (preferably) match the part of speech of the term they define.
-   E.g., a definition for a noun might begin with "A sterile cell that..." and
-   one for an adjective might begin with "Bearing cystidia that..."
-
-- Stick to the definition, avoiding history, background, everything you found out
-   when researching the topic, etc.
-
-   <details>
-   <summary>Examples</summary>
-   <div style="background-color: rgb(80, 80, 80);">
-
-   ```text
-      bad:  Casing Layer
-            1. When mushrooms are cultivated indoors or outdoors,
-            they are often developed using a layered system involving a variety of
-            potential materials. The casing layer is the top-most layer which
-            covers all of the layers. It can be composed of moist materials such
-            as peat, gypsum, vermiculite, and/or several other optional materials.
-            This moisture-promoting layer dramatically enhances mushroom formation
-            as well as more abundant mushroom growth in most cultivated species.
-            Some mushroom species require a casing layer in order to fruit,
-            or to fruit with any significance.
-
-      good: Casing Layer
-            The top-most layer of material used in indoor mushroom cultivation.
-   ```
-
-   </div>
-   </details>
-
-- Number definitions if (and only if) multiple definitions are included.
-
-- Optionally precede the definition with a parenthesized list of cognates,
-   alternate spellings, and synonyms.
-
 - Don't repeat definitions. Instead link to an existing Glossary Term
    that includes that definition.
 
@@ -247,10 +212,48 @@ A Description may include a definition.
    ```
    </details>
 
+- Stick to the definition, avoiding history, background, everything you found out
+   when researching the topic, etc.
+
+   <details>
+   <summary>Examples</summary>
+   <div style="background-color: rgb(80, 80, 80);">
+
+   ```text
+      bad:  Casing Layer
+            1. When mushrooms are cultivated indoors or outdoors,
+            they are often developed using a layered system involving a variety of
+            potential materials. The casing layer is the top-most layer which
+            covers all of the layers. It can be composed of moist materials such
+            as peat, gypsum, vermiculite, and/or several other optional materials.
+            This moisture-promoting layer dramatically enhances mushroom formation
+            as well as more abundant mushroom growth in most cultivated species.
+            Some mushroom species require a casing layer in order to fruit,
+            or to fruit with any significance.
+
+      good: Casing Layer
+            The top-most layer of material used in indoor mushroom cultivation.
+   ```
+
+   </div>
+   </details>
+
+- Definitions should be complete sentences or
+   (preferably) match the part of speech of the term they define.
+   E.g., a definition for a noun might begin with "A sterile cell that..." and
+   one for an adjective might begin with "Bearing cystidia that..."
+
+- Number definitions if (and only if) multiple definitions are included.
+
+- Optionally precede the definition with a parenthesized list of cognates,
+   alternate spellings, and synonyms.
+
+- Preferably follow the definition with reference(s), including links to the reference(s).
+
 ## Illustrations
 
 - Preferably include an illustration.
-- Omit "illustrations" which are simply text.
+- Omit "illustrations" that are simply text.
   <details>
   <summary>Example</summary>
 
@@ -264,6 +267,7 @@ A Description may include a definition.
    Comply with the license terms if you use licensed illustrations.
 - Limit the number and size of illustrations
   to those that are necessary to define the term.
+- Annotate illustrations to point out the relevant part(s).
 
 ## Internal Links to the Glossary
 
