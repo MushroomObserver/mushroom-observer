@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_30_044838) do
+ActiveRecord::Schema.define(version: 2023_07_09_202131) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -99,6 +99,7 @@ ActiveRecord::Schema.define(version: 2023_04_30_044838) do
     t.integer "rss_log_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean "locked", default: false, null: false
   end
 
   create_table "glossary_terms_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
