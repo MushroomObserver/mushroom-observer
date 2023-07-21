@@ -4,7 +4,6 @@ The Glossary is a community-maintained list of mycological terms.
 
 <details>
 <summary>Background</summary>
-
 The MO Glossary began in 2015 in collaboration with the Rhode Island School of Design;
 students from Jean Blackburn’s Scientific Illustration class created
 high-quality Creative Commons licensed scientific illustrations
@@ -22,7 +21,7 @@ Discussion is welcome on the
 [Mushroom Observer Google Group]([mo-general@googlegroups.com](https://groups.google.com/g/mo-general)).
 You are also welcome to leave comments on the
 [unofficial Mushroom Observer Facebook page](https://www.facebook.com/groups/mushroomobserver).
-(But note that the facebook page is not monitored by the MO Development Team.)
+(But note that the Facebook page is not monitored by the MO Development Team.)
 </details>
 
 ## Guidelines
@@ -37,72 +36,82 @@ The glossary entries are created and edited by members of the MO community.
 ### Terms to Include
 
 - Mycology-specific terms are welcome, especially terms relating to
-   the identification, taxonomy, nomenclature, and ecology of macrofungi.
+  the identification, taxonomy, nomenclature, and ecology of macrofungi.
 
 - Avoid terms that lack a mycology-specific definition.
-   <details>
-   <summary>Examples</summary>
 
-   bad: `Acrid`
+  <details>
+  <summary>Examples, explanation</summary>
 
-   bad: `Acute`
+  This improves performance, reduces robot spidering,
+  maintains website and glossary focus, etc.
 
-   bad: `Agar`
+  bad: `Acrid`
 
-   bad: `Alkaloid`
+  bad: `Acute`
 
-   bad: `Calcareous`
+  bad: `Agar`
 
-   bad: `Cell`
+  bad: `Alkaloid`
 
-   bad: `Cell Biology`
+  bad: `Calcareous`
 
-   bad: `Chemical Species`
+  bad: `Cell`
 
-   bad: `Chirality`
+  bad: `Cell Biology`
 
-   bad: `Climate Change`
+  bad: `Chemical Species`
 
-   bad: `rhombus`
+  bad: `Chirality`
 
-   bad: `Science`
+  bad: `Climate Change`
 
-   bad: `Scientific Methodology`
+  bad: `rhombus`
 
-   good: `character`
+  bad: `Science`
 
-   good: `club fungi`
-   </details>
+  bad: `Scientific Methodology`
+
+  good: `character`
+
+  good: `club fungi`
+  </details>
 
 - Terms that are straightforward modifications or combinations of other terms
-   should not have their own definitions,
-   but are welcome to be given entries with illustration(s).
+  should not have their own definitions,
+  but are welcome to be given entries with illustration(s).
 
-   <details>
-   <summary>Examples</summary>
+  <details>
+  <summary>Examples, explanation</summary>
 
-   bad:  `Academic Mycology`
+  Improves website consistency and Glossary search results.
 
-   bad:  `Lamellae Edge With Gelatinous, Separable Layer`
+  bad:  `Academic Mycology`
 
-   bad:  `Oblong With Median Constriction`
+  bad:  `Lamellae Edge With Gelatinous, Separable Layer`
 
-   bad:  `Round To Angular Pores`
+  bad:  `Oblong With Median Constriction`
 
-   bad:  `Transition Between Hymeniderm And Epithelium`
+  bad:  `Round To Angular Pores`
 
-   good: `Lugol's Solution`
+  bad:  `Transition Between Hymeniderm And Epithelium`
 
-   good: `adnate`
-   (plus exampble showing adnate gills)
-   </details>
+  good: `Lugol's Solution`
+
+  good: `adnate`
+  (plus exampble showing adnate gills)
+  </details>
 
 - Avoid terms that are scientific names of taxa.
   Instead, add a Description to the taxon Name or
   (preferably) edit an existing taxon descripion.
 
    <details>
-   <summary>Examples</summary>
+
+   <summary>Explanation and examples</summary>
+   This keeps the description in one place,
+   avoids inconsistent explanations, and
+   facilitations updating.
 
    bad:  `Agaricales`
 
@@ -111,6 +120,7 @@ The glossary entries are created and edited by members of the MO community.
    bad: `Eukarya`
 
    good: `bolete`
+
    </details>
 
    <!--
@@ -149,18 +159,19 @@ The glossary entries are created and edited by members of the MO community.
 ## Titles
 
 - Titles (the "Name" field) should be lowercase, except for proper nouns or
-   other terms that are capilitalized in ordinary use.
-   <details>
-   <summary>Examples</summary>
-   <div style="background-color: rgb(80, 80, 80);">
+  other terms that are capilitalized in ordinary use.
+  <details>
+  <summary>Examples, explanation</summary>
 
-   bad:  `Bolete`
+  Clarifies which terms require capitalization; best fits
+  the format used in [internal links to the Glossary](#internal-links-to-the-glossary).
 
-   good: `bolete`
+  bad:  `Bolete`
 
-   good: `RPB2`
-   </div>
-   </details>
+  good: `bolete`
+
+  good: `RPB2`
+  </details>
 
 - Prefer shorter terms.
   (This improves the functionality and performance of Glossary links and
@@ -177,71 +188,80 @@ A Description may include a definition.
 - Definitions should be original (not copied).
 
 - Don't repeat definitions. Instead link to an existing Glossary Term
-   that includes that definition.
+  that includes that definition or to a Name.
 
-   <details>
-   <summary>Example</summary>
+  <details>
+  <summary>Example</summary>
 
-   bad:
+  bad:
 
-   ```text
-         Spiciform:
+  ```text
+      Spiciform:
 
-            1. Exhibiting spike-shaped projections.
+        1. Exhibiting spike-shaped projections.
 
-         Spicules:
+      Spicules:
 
-         (Spiculate, Spiculose, Spiculum)
+      (Spiculate, Spiculose, Spiculum)
 
-            1. Exhibiting many small spines.
+        1. Exhibiting many small spines.
 
-            2. Small spikes.
-   ```
-   good:
+        2. Small spikes.
+  ```
 
-   ```text
-         spiciform:
+  good:
 
-            Having _spicules_.
+  ```text
+        spiciform:
 
-         spicules:
+          Having _spicules_.
 
-            (spiculate, spiculose, spiculum, spiciform)
+        spicules:
 
-            Small spikes or spines.
-   ```
-   </details>
+          (spiculate, spiculose, spiculum, spiciform)
 
-- Stick to the definition, avoiding history, background, everything you found out
-   when researching the topic, etc.
+          Small spikes or spines.
+  ```
 
-   <details>
-   <summary>Examples</summary>
-   <div style="background-color: rgb(80, 80, 80);">
+  </details>
 
-   ```text
-      bad:  Casing Layer
-            1. When mushrooms are cultivated indoors or outdoors,
-            they are often developed using a layered system involving a variety of
-            potential materials. The casing layer is the top-most layer which
-            covers all of the layers. It can be composed of moist materials such
-            as peat, gypsum, vermiculite, and/or several other optional materials.
-            This moisture-promoting layer dramatically enhances mushroom formation
-            as well as more abundant mushroom growth in most cultivated species.
-            Some mushroom species require a casing layer in order to fruit,
-            or to fruit with any significance.
+- Stick to the definition, avoiding: history, background, opinions,
+  everything you found out when researching the topic, etc.
 
-      good: Casing Layer
-            The top-most layer of material used in indoor mushroom cultivation.
-   ```
+  <details>
+  <summary>Explanations, examples</summary>
 
-   </div>
-   </details>
+  Improves readibility, maintains glossary focus, reduces controversy and errors,
+  reduces needless duplication of the internet.
+
+  bad:
+
+  ```text
+  Casing Layer
+    1. When mushrooms are cultivated indoors or outdoors,
+    they are often developed using a layered system involving a variety of
+    potential materials. The casing layer is the top-most layer which
+    covers all of the layers. It can be composed of moist materials such
+    as peat, gypsum, vermiculite, and/or several other optional materials.
+    This moisture-promoting layer dramatically enhances mushroom formation
+    as well as more abundant mushroom growth in most cultivated species.
+    Some mushroom species require a casing layer in order to fruit,
+    or to fruit with any significance.
+  ```
+
+  good:
+
+  ```text
+  casing layer
+     The top-most layer of material used in indoor mushroom cultivation.
+  ```
+
+  </details>
 
 - Definitions should be complete sentences or
-   (preferably) match the part of speech of the term they define.
-   E.g., a definition for a noun might begin with "A sterile cell that..." and
-   one for an adjective might begin with "Bearing cystidia that..."
+(preferably) match the part of speech of the term they define.
+E.g., a definition for a noun might begin with "A sterile cell that..." and
+one for an adjective might begin with "Bearing cystidia that..."
 
 - Number definitions if (and only if) multiple definitions are included.
 
@@ -266,7 +286,7 @@ A Description may include a definition.
    are licensed.
    Comply with the license terms if you use licensed illustrations.
 - Limit the number and size of illustrations
-  to those that are necessary to define the term.
+  to those necessary to define the term.
 - Annotate illustrations to point out the relevant part(s).
 
 ## Internal Links to the Glossary
