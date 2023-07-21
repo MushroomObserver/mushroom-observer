@@ -30,7 +30,7 @@ Please follow these Guidelines when creating or editing Glossary Terms.
 
 ### Who can contribute?
 
-The glossary entries are created and edited by members of the MO community.
+The Glossary entries are created and edited by members of the MO community.
 (No individual member owns any entry.) Everyone is welcome to contribute.
 
 ### Terms to Include
@@ -43,7 +43,7 @@ The glossary entries are created and edited by members of the MO community.
   <details>
   <summary>Examples, explanation</summary>
 
-  This improves performance, reduces robot spidering,
+  Improves performance, reduces robot spidering,
   maintains website and glossary focus, etc.
 
   bad: `Acrid`
@@ -104,14 +104,13 @@ The glossary entries are created and edited by members of the MO community.
 
 - Avoid terms that are scientific names of taxa.
   Instead, add a Description to the taxon Name or
-  (preferably) edit an existing taxon descripion.
+  (preferably) edit an existing taxon Descripion.
 
    <details>
 
    <summary>Explanation and examples</summary>
-   This keeps the description in one place,
-   avoids inconsistent explanations, and
-   facilitations updating.
+   Keeps the description in one place,
+   avoids inconsistency, facilitates updating.
 
    bad:  `Agaricales`
 
@@ -199,7 +198,7 @@ A Description may include a definition.
   <summary>Explanations, examples</summary>
 
   Improves readibility, maintains glossary focus, reduces controversy and errors,
-  reduces needless duplication of the internet.
+  reduces needless duplication of the internet, etc.
 
   bad:
 
@@ -226,14 +225,14 @@ A Description may include a definition.
   </details>
 
 - Definitions should be complete sentences or
-(preferably) match the part of speech of the term they define.
-E.g., a definition for a noun might begin with "A sterile cell that..." and
-one for an adjective might begin with "Bearing cystidia that..."
+  (preferably) match the part of speech of the term they define.
+  E.g., a definition for a noun might begin with "A sterile cell that..." and
+  one for an adjective might begin with "Bearing cystidia that..."
 
 - Number definitions if (and only if) multiple definitions are included.
 
 - Optionally precede the definition with a parenthesized list of cognates,
-   alternate spellings, and synonyms.
+  alternate spellings, and synonyms.
 
 - Preferably follow the definition with reference(s), including links to the reference(s).
 
