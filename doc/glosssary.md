@@ -289,6 +289,32 @@ one for an adjective might begin with "Bearing cystidia that..."
   to those necessary to define the term.
 - Annotate illustrations to point out the relevant part(s).
 
+## Sample Terms
+
+Examples following these Guidelines.
+
+<details>
+  <summary>Example with single definition</summary>
+
+  ![Alt text](glossary_sample_entry_glandular_dots_rendered.png)
+
+</details>
+
+<details>
+  <summary>Example with multiple definitions, showing both markup and result</summary>
+
+### Textile markup
+
+  ![Alt text](glossary_sample_entry_bolete_textile.png)
+
+### Rendered result
+
+![Alt text](glossary_sample_entry_bolete_rendered.png)
+
+</details>
+
+
+
 ## Internal Links to the Glossary
 
 - Use all lower-case words exactly matching the term, surrounded by underscores.
