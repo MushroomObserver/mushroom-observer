@@ -123,39 +123,6 @@ The glossary entries are created and edited by members of the MO community.
 
    </details>
 
-   <!--
-   ["Agaricales",
-    "Basidiomycota",
-    "Lichen",
-    "Subulicystidium",
-    "Eukarya",
-    "Agaricomycetes",
-    "Myxomycetes",
-    "Conifer",
-    "Plasmodium",
-    "Gloeocystidium",
-    "Hypha",
-    "Oidium",
-    "Ozonium",
-    "Ascomycete",
-    "Bacteria",
-    "Dermatophyte",
-    "Agaricales",
-    "Chytridiomycota",
-    "Flora",
-    "Slime mold",
-    "Glomeromycota",
-    "Cyanobacteria",
-    "Lepiotoid",
-    "Lichenicolous",
-    "Mold",
-    "Fungus",
-    "Agaricales",
-    "Foliose",
-    "Crustose",
-    "Rotula"]
-   -->
-
 ## Titles
 
 - Titles (the "Name" field) should be lowercase, except for proper nouns or
@@ -309,11 +276,9 @@ Examples following these Guidelines.
 
 ### Rendered result
 
-![Alt text](glossary_sample_entry_bolete_rendered.png)
+  ![Alt text](glossary_sample_entry_bolete_rendered.png)
 
 </details>
-
-
 
 ## Internal Links to the Glossary
 
