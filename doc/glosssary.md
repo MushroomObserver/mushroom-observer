@@ -36,17 +36,23 @@ The glossary entries are created and edited by members of the MO community.
 
 ### Terms to Include
 
-- Include mycology-specific terms, especially those relating to
-   the identification, taxonomy, nomenclature, and ecology of macrofungi --
-   avoid terms lacking a mycology-specific definition.
+- Include mycology-specific terms,
+   especially those relating to
+   the identification, taxonomy, nomenclature, and ecology of macrofungi.
+   Avoid terms lacking a mycology-specific definition, other than
+   Latin technical terms commonly used in mycology.
    <details>
    <summary>Examples</summary>
 
-   good: `character`. (Has a special meaning in mycology.)
+   good: `aborts`. (Mycological definition differs from the ordinary English meaning.)
+
+   good: `abaxial`. (Latin technical term commonly used in mycology)
+
+   good: `character`.
 
    good: `club fungi`
 
-   bad: `Calcareous`. (Lacks mycology-specific definition.)
+   bad: `abraded` (An  English word lacking a mycology-specific definition.)
 
    bad: `Cell`
 
@@ -135,8 +141,8 @@ Each term must have a Description and/or Illustration(s).
 
 A Description may include a definition.
 
-- Make it a definition, rather than history, background, stuff you found out
-   when researching the topic, etc.
+- Make it a definition, rather than history, background, purpose,
+  stuff you found out when researching the topic, etc.
 
    <details>
    <summary>Examples</summary>
@@ -155,7 +161,7 @@ A Description may include a definition.
             or to fruit with any significance.
 
       good: Casing Layer
-            The top-most layer of material used in indoor mushroom cultivation.
+            The top layer of material used in indoor mushroom cultivation.
    ```
 
    </div>
@@ -177,9 +183,6 @@ A Description may include a definition.
   One for an adjective might begin with "Bearing cystidia that..."
    </details>
 - Number definitions if (and only if) multiple definitions are included.
-
-- Optionally precede the definition with a parenthesized list of cognates,
-   alternate spellings, and synonyms.
 
 - Don't repeat definitions. Instead link to an existing Glossary Term
   that includes that definition.
