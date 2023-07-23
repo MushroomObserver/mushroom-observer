@@ -224,6 +224,14 @@ A Description may include a definition.
 ## Illustrations
 
 - Preferably include an illustration.
+- Omit "illustrations" that are simply rendered text.
+  <details>
+  <summary>Example</summary>
+
+   ![Alt text](glossary_text_only_illustration.png)
+
+  </details>
+
 - Use only illustrations that:
    you created,
    are in the public domain, or
