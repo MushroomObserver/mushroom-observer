@@ -240,6 +240,30 @@ A Description may include a definition.
 - Limit the number and size of illustrations
    to those that are necessary to define the term.
 
+## Sample Terms
+
+Examples following these Guidelines.
+
+<details>
+  <summary>Example with single definition</summary>
+
+  ![Alt text](glossary_sample_entry_glandular_dots_rendered.png)
+
+</details>
+
+<details>
+  <summary>Example with multiple definitions, showing both markup and result</summary>
+
+### Textile markup
+
+  ![Alt text](glossary_sample_entry_bolete_textile.png)
+
+### Rendered result
+
+![Alt text](glossary_sample_entry_bolete_rendered.png)
+
+</details>
+
 ## Internal Links to the Glossary
 
 - Use all lower-case words whose spelling exactly matching the term,
