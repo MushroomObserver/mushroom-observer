@@ -40,19 +40,19 @@ The glossary entries are created and edited by members of the MO community.
    especially those relating to
    the identification, taxonomy, nomenclature, and ecology of macrofungi.
    Avoid terms lacking a mycology-specific definition, other than
-   Latin technical terms commonly used in mycology.
+   Latin/technical terms commonly used in mycology.
    <details>
    <summary>Examples</summary>
 
    good: `aborts`. (Mycological definition differs from the ordinary English meaning.)
 
-   good: `abaxial`. (Latin technical term commonly used in mycology)
+   good: `abaxial`. (Latin/technical term commonly used in mycology)
 
    good: `character`.
 
    good: `club fungi`
 
-   bad: `abraded` (An  English word lacking a mycology-specific definition.)
+   bad: `abraded` (An English word lacking a mycology-specific definition.)
 
    bad: `Cell`
 
