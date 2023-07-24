@@ -8,8 +8,14 @@ tabs = User.current ? [
 @container = :text_image
 %>
 
-<%= content_tag(:div, :glossary_term_index_intro.tp, class: "container-text") %>
-
+<%=
+  content_tag(
+    :div,
+    link_to(:glossary_term_index_documentation.tp,
+    "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glosssary.md"),
+    class: "container-text"
+  )
+%>
 <%= paginate_block(@pages) do %>
   <div class="list-group">
     <%= render(partial: "object", collection: @objects) %>
