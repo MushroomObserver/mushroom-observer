@@ -90,7 +90,7 @@ The glossary entries are created and edited by members of the MO community.
    good: `Lugol's Solution`
 
    good: `adnate`
-   (plus exampble showing adnate gills)
+   (plus example showing adnate gills)
    </details>
 
 - Avoid terms that are scientific names of taxa.
@@ -108,7 +108,7 @@ The glossary entries are created and edited by members of the MO community.
    good: `bolete`
    </details>
 
-- Include terms that are actually used in mycology -- don't make stuff up.
+- Include only terms that are actually used in mycology -- don't make stuff up.
 
 ## Titles
 
@@ -142,8 +142,7 @@ Each term must have a Description and/or Illustration(s).
 A Description may include a definition.
 
 - Make it a definition, rather than history, background, purpose,
-  stuff you found out when researching the topic, etc.
-
+  other stuff you found out when researching the topic, etc.
    <details>
    <summary>Examples</summary>
    <div style="background-color: rgb(80, 80, 80);">
@@ -166,15 +165,12 @@ A Description may include a definition.
 
    </div>
    </details>
-
 - Keep definitions concise.
-
    <details>
    <summary>Explanation</summary>
   Improves readibility, functionality, and performance, and
   is kinder to users with small screens.
    </details>
-
 - Match the part of speech of the term, or use a complete sentence.
 
    <details>
@@ -182,8 +178,6 @@ A Description may include a definition.
   A definition for a noun might begin with "A sterile cell that..."
   One for an adjective might begin with "Bearing cystidia that..."
    </details>
-- Number definitions if (and only if) multiple definitions are included.
-
 - Don't repeat definitions. Instead link to an existing Glossary Term
   that includes that definition.
   <details>
@@ -220,18 +214,18 @@ A Description may include a definition.
   ```
 
   </details>
+- Number definitions if (and only if) multiple definitions are included.
 
 ## Illustrations
 
 - Preferably include an illustration.
-- Omit "illustrations" that are simply rendered text.
+- Omit "illustrations" that are rendered text.
   <details>
   <summary>Example</summary>
 
    ![Alt text](glossary_text_only_illustration.png)
 
   </details>
-
 - Use only illustrations that:
    you created,
    are in the public domain, or
@@ -243,16 +237,15 @@ A Description may include a definition.
 ## Sample Terms
 
 Examples following these Guidelines.
-
 <details>
-  <summary>Example with single definition</summary>
+  <summary>Example having one definition</summary>
 
   ![Alt text](glossary_sample_entry_glandular_dots_rendered.png)
 
 </details>
 
 <details>
-  <summary>Example with multiple definitions, showing both markup and result</summary>
+  <summary>Example having multiple definitions</summary>
 
 ### Textile markup
 
