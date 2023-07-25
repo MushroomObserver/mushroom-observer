@@ -14,18 +14,13 @@
 %>
 
 <div class="row mt-3">
+  <div class="col-sm-8">
+    <%= @glossary_term.description.tpl %>
+    <p><%= search_link_to(:Wikipedia, @glossary_term.name)%></p>
+  </div>
   <% if @glossary_term.thumb_image %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-      <%= search_link_to(:Wikipedia, @glossary_term.name)%>
-    </div>
     <div class="col-sm-4">
       <%= thumbnail(@glossary_term.thumb_image, size: :medium, votes: true) %>
-    </div>
-  <% else %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-      <%= search_link_to(:Wikipedia, @glossary_term.name)%>
     </div>
   <% end %>
 </div><!--.row-->
