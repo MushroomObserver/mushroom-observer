@@ -1496,8 +1496,8 @@
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
   # glossary
-  form_glossary_name_help: "A mycology-specific term. Avoid Terms that are: (a) modifications or combinations of other Terms, or (b) Names of taxa. Term should be lower case except if capitalized in ordinary use. See link to [:glossary_term_index_documentation]."
-  form_glossary_description_help: "Keep definitions concise. Match the part of speech of the Term. Don't repeat definitions; instead link to an existing Term that includes that definition. See link to [:glossary_term_index_documentation]. \n [:field_textile_link]"
+  form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use. \n Avoid (a) variations of other Terms, or (b) Names of taxa. Details:"
+  form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
 
   # location/_form_location
   form_locations_locked: Lock this location so users cannot change the name or coordinates?

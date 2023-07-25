@@ -5,23 +5,20 @@
                             label: :edit_glossary_term_locked.t) %>
   <% end %>
 
-  <%=
-    content_tag(
-      :div,
-      link_to(:glossary_term_index_documentation.tp,
-      "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glosssary.md"),
-      class: "container-text"
-    )
-  %>
-
   <%= text_field_with_label(form: f, field: :name,
                             label: :glossary_term_name.t + ":",
                             data: { autofocus: true },
-                            append: help_block(:p, :form_glossary_name_help.t)) %>
+                            append: help_block(:p, :form_glossary_name_help.t + " " +
+                            link_to(:glossary_term_index_documentation.t,
+      "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glosssary.md"))) %>
 
   <%= text_area_with_label(form: f, field: :description, rows: 16,
                            label: :glossary_term_description.t + ":",
-                           append: help_block(:p, :form_glossary_description_help.t)) %>
+                           append: help_block(:p, :form_glossary_description_help.t + " " +
+                           link_to(:glossary_term_index_documentation.t,
+      "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glosssary.md") +
+                           ". " + :field_textile_link.t)) %>
+
 
   <%= yield f %>
 
