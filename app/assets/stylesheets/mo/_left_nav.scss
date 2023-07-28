@@ -13,6 +13,7 @@
   padding-left: 0px;
   padding-right: 0px;
   margin-bottom: 2px;
+  align-items: normal;
 
   a {
     font-weight: normal;
@@ -33,21 +34,23 @@
     &:focus a.dropdown-toggle,
     a.dropdown-toggle:hover {
       color: $navbar-dark-hover-color;
-      // background-color: $navbar-inverse-link-hover-bg;
+      // background-color: $navbar-dark-hover-bg;
     }
 
     // These are the headers
     &.disabled,
     &.disabled:hover,
     &.disabled:focus {
-      color: $navbar-dark-disabled-color;
-      // background-color: $navbar-inverse-link-disabled-bg;
+      color: $secondary;
+      text-align: left;
+      // background-color: $secondary;
       cursor: default;
       padding-left: 5px;
     }
 
     &#nav_bug_report_link {
       color: $navbar-dark-disabled-color;
+
       &:hover,
       &:focus {
         color: $navbar-dark-color;
