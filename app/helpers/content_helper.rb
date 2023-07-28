@@ -103,7 +103,7 @@ module ContentHelper
 
   # draw a help block with an arrow
   def help_block_with_arrow(direction = nil, **args, &block)
-    div_class = "card p-2 form-text position-relative"
+    div_class = "card p-2 help-note form-text position-relative"
     div_class += " my-3" # if direction == "up"
     div_class += " " + args[:class] if args[:class]
 
