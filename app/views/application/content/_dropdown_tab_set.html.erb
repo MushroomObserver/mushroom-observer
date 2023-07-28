@@ -1,7 +1,23 @@
-<%# The new one. Called from application_helper#dropdown_tab_set %>
-<%# TODO: these need aria nav attributes %>
-<%# TODO: Make it so if there's only one link, it's a button, not a dropdown. %>
-<% # Requires two locals: title and tabs
+<%# The new one.
+Called from application_helper#dropdown_tab_set
+
+Requires two locals: `title` and `tabs`
+
+The difference between the `tabs` required here and the `links` required in
+`draw_tab_set` is the latter takes a simple array of rails `link_to` links:
+  [link, link, link]
+while this takes an array of hashes with specific attributes, formatted like:
+  [{name:, link:, class:}, {name:, list:, class:}]
+It creates additional options from any extra attributes sent in the object.
+
+In one sense, this means writing more verbose tabs, but it avoids a lot of
+repetition by adding all dropdown classes and ARIA attributes here, rather than
+in every tab helper for every view (and there are >100 of those)
+
+If there's only one tab, it prints a button, not a dropdown.
+%>
+
+<%
 title ||= "Links"
 tabs ||= []
 
@@ -18,19 +34,23 @@ if tabs&.count == 1
 
 <% elsif tabs %>
 
-  <%= tag.div(class: "dropdown", id: "dropdown-tabs") do %>
+  <%= tag.div(class: "dropdown") do %>
     <%= tag.button(
       class: "btn btn-outline-secondary font-weight-bold dropdown-toggle",
-      type: "button",
+      type: "button", id: "dropdown-label",
       data: { toggle: "dropdown" },
-      aria: { expanded: "false" }
+      aria: { expanded: "false", haspopup: "true", controls: "dropdown-tabs" }
     ) { title } %>
-    <%= tag.div(class: "dropdown-menu dropdown-menu-right") do %>
+    <%= tag.div(class: "dropdown-menu dropdown-menu-right",
+                role: "menu", id: "dropdown-tabs",
+                aria: { labelledby: "dropdown-label" }) do %>
       <%# Changed to accept tab hash. %>
       <% tabs.each do |tab|
         opts = dropdown_link_options(tab) %>
         <%= link_to(tab[:link],
-                    class: class_names("dropdown-item", tab[:class]), **opts) do
+                    class: class_names("dropdown-item", tab[:class]),
+                    role: "menuitem",
+                    **opts) do
           tab[:name]
         end %>
       <% end %>
