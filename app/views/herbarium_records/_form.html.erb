@@ -29,7 +29,7 @@ end
 
   <%= text_field_with_label(form: f, field: :accession_number,
                             label: :herbarium_record_accession_number.t + ":",
-                            append: :required) %>
+                            between: :required) %>
 
   <%= help_block_with_arrow("up") do %>
     <%= :create_herbarium_record_accession_number_help.t %>
