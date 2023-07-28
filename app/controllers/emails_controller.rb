@@ -31,17 +31,17 @@ class EmailsController < ApplicationController
     redirect_to(user_path(@target.id))
   end
 
-  def ask_observation_question
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation &&
-                  can_email_user_question?(@observation) &&
-                  request.method == "POST"
+  # def ask_observation_question
+  #   @observation = find_or_goto_index(Observation, params[:id].to_s)
+  #   return unless @observation &&
+  #                 can_email_user_question?(@observation) &&
+  #                 request.method == "POST"
 
-    question = params[:question][:content]
-    ObservationMailer.build(@user, @observation, question).deliver_now
-    flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(observation_path(@observation.id))
-  end
+  #   question = params[:question][:content]
+  #   ObservationMailer.build(@user, @observation, question).deliver_now
+  #   flash_notice(:runtime_ask_observation_question_success.t)
+  #   redirect_with_query(observation_path(@observation.id))
+  # end
 
   def commercial_inquiry
     return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&

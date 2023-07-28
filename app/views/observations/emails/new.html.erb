@@ -1,0 +1,9 @@
+<%
+@title = :ask_observation_question_title.t(
+            name: @observation.unique_format_name
+          )
+
+url = add_query_param({ action: :create, id: @observation.id })
+%>
+
+<%= render(partial: "observations/emails/form", locals: { url: url }) %>

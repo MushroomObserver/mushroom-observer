@@ -1,0 +1,11 @@
+<%= form_with(url: url, scope: :question) do |f| %>
+
+  <%= text_area_with_label(form: f, field: :content, rows: 6,
+                           data: { autofocus: true },
+                           label: :ask_observation_question_label.tp(
+                                    user: @observation.user.legal_name
+                                  )) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>
