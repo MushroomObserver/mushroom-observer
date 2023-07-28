@@ -1,21 +1,28 @@
 <%
 # called from observations/namings/table
+# nested rows/columns parallel those in the row partial
 header = observation_naming_header_row(observation, logged_in)
 behavior = " flex-column justify-content-end"
 %>
 
-<div class="card-header pb-2 namings-table-header">
+<div class="card-header namings-table-header">
   <div class="row">
-    <div class="col-md-3 d-flex<%= behavior %>"><%= header[:heading] %></div>
-    <div class="col-md-3 d-none d-md-flex<%= behavior %>">
-      <%= header[:user_name] %>
-    </div>
-    <div class="col-md-2 d-none d-md-flex<%= behavior %>">
-      <%= header[:consensus_vote] %>
-    </div>
-    <div class="col-md-3 d-none d-md-flex<%= behavior %>">
-      <%= header[:your_vote] %>
-    </div>
+    <div class="col-12 col-md-11">
+      <div class="row">
+        <div class="col-md-4 d-flex<%= behavior %>">
+          <%= header[:heading] %>
+        </div>
+        <div class="col-md-3 d-none d-md-flex<%= behavior %>">
+          <%= header[:user_name] %>
+        </div>
+        <div class="col-md-2 d-none d-md-flex<%= behavior %>">
+          <%= header[:consensus_vote] %>
+        </div>
+        <div class="col-md-3 d-none d-md-flex<%= behavior %>">
+          <%= header[:your_vote] %>
+        </div>
+      </div><!-- .row -->
+    </div><!-- .col -->
     <div class="col-md-1 d-none d-md-flex<%= behavior %>"></div>
   </div>
 </div>

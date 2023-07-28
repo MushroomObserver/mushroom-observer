@@ -67,8 +67,10 @@ module NamingsHelper
 
   def naming_name_link(naming)
     link_with_query(name_path(id: naming.name)) do
-      content_tag(:h6, naming.display_name_brief_authors.t.
-                              break_name.small_author)
+      tag.h6(
+        naming.display_name_brief_authors.t.break_name.small_author,
+        class: "mb-0"
+      )
     end
   end
 
@@ -78,11 +80,9 @@ module NamingsHelper
     reasons = reasons_html(naming)
 
     # row props have mobile-friendly labels
-    [content_tag(:small, "#{:show_namings_user.t}: ",
-                 class: "d-inline d-md-none mr-4"),
-     user_link,
-     content_tag(:div, reasons,
-                 class: "d-none d-md-block small naming-reasons")].safe_join
+    [tag.small("#{:show_namings_user.t}: ",
+               class: "d-inline d-md-none mr-4"),
+     user_link].safe_join
   end
 
   def consensus_vote_html(naming)
@@ -94,9 +94,9 @@ module NamingsHelper
        end).html_safe # has links
 
     # row props have mobile-friendly labels
-    [content_tag(:small, "#{:show_namings_consensus.t}: ",
-                 class: "d-inline d-md-none mr-4"),
-     content_tag(:span, consensus_votes)].safe_join
+    [tag.small("#{:show_namings_consensus.t}: ",
+               class: "d-inline d-md-none mr-4"),
+     tag.span(consensus_votes)].safe_join
   end
 
   # Makes a link to naming_vote_path for no-js.
@@ -114,16 +114,15 @@ module NamingsHelper
   def num_votes_html(naming)
     content_tag(:span, class: "vote-number-text") do
       ["(",
-       content_tag(:span, naming.votes&.length,
-                   { class: "vote-number", data: { id: naming.id } }),
+       tag.span(naming.votes&.length,
+                class: "vote-number", data: { id: naming.id }),
        ")"].safe_join
     end
   end
 
   def your_vote_html(naming)
     # row props have mobile-friendly labels
-    [content_tag(:small, "#{:show_namings_your_vote.t}: ",
-                 class: "d-block d-md-none"),
+    [tag.small("#{:show_namings_your_vote.t}: ", class: "d-block d-md-none"),
      render(partial: "observations/namings/votes/form",
             locals: { naming: naming, classes: "form-control-sm" })].safe_join
   end
@@ -153,13 +152,13 @@ module NamingsHelper
   end
 
   def vote_legend_yours
-    content_tag(:div, class: "d-flex flex-row align-items-center small") do
+    tag.div(class: "d-flex flex-row align-items-center small") do
       [vote_icon_yours, " = ", :show_namings_eye_help.t].safe_join
     end
   end
 
   def vote_legend_consensus
-    content_tag(:div, class: "d-flex flex-row align-items-center small") do
+    tag.div(class: "d-flex flex-row align-items-center small") do
       [vote_icon_consensus, " = ", :show_namings_eyes_help.t].safe_join
     end
   end

@@ -3,6 +3,8 @@
 # Shows a proposed naming for this observation, with a tiny vote form.
 # Also naming edit and delete buttons if the current user owns the naming.
 # @vote is used by observations/namings/votes/form
+# Note the nested grid: the reasons are packed under the left 11 cols,
+# with the "eyes" graphic in the right 1 col for vertical space
 @vote = votes[naming.id]
 row = observation_naming_row(observation, naming, logged_in)
 %>
@@ -10,16 +12,17 @@ row = observation_naming_row(observation, naming, logged_in)
 <div class="list-group-item">
   <div class="row align-items-center naming-row"
        id="observation_naming_<%= naming.id %>">
-    <div class="col-12 col-md-3"><%= row[:name] %></div>
-    <div class="col-12 col-md-3"><%= row[:proposer] %></div>
-    <div class="col-12 col-md-2"><%= row[:consensus_vote] %></div>
-    <div class="col-12 col-md-3"><%= row[:your_vote] %></div>
-    <div class="col-12 col-md-1 d-none d-md-block px-md-0"><%= row[:eyes] %></div>
-  </div>
-
-  <div class="row d-flex d-md-none" id="naming_reasons_<%= naming.id %>">
-    <div class="col-12 naming-reasons">
-      <%= row[:reasons] %>
+    <div class="col-12 col-md-11">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-4"><%= row[:name] %></div>
+        <div class="col-12 col-md-3"><%= row[:proposer] %></div>
+        <div class="col-12 col-md-2"><%= row[:consensus_vote] %></div>
+        <div class="col-12 col-md-3"><%= row[:your_vote] %></div>
+      </div><!-- .row -->
+      <div class="naming-reasons small mt-1"><%= row[:reasons] %></div>
+    </div><!-- .col -->
+    <div class="col-md-1 d-none d-md-block px-md-0">
+      <%= row[:eyes] %>
     </div>
   </div>
 </div>

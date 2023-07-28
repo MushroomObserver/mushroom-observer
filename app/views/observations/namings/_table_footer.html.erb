@@ -1,5 +1,6 @@
 <%
 # called from observations/namings/table
+# nested rows/columns parallel those in the row partial
 
 suggest = logged_in && observation.thumb_image_id.present? &&
           (@user.admin || MO.image_model_beta_testers.include?(@user.id))
@@ -11,13 +12,21 @@ help = content_tag(:div, help_text, class: "card-text small")
 
 <div class="card-footer d-none d-md-block">
   <div class="row">
-    <div class="col-6 col-lg-4"><%= buttons %></div>
-    <div class="col-6 col-lg-8"><%= help %></div>
+    <div class="col-12 col-md-11">
+      <div class="row">
+        <div class="col-6 col-lg-4"><%= buttons %></div>
+        <div class="col-6 col-lg-8"><%= help %></div>
+      </div><!-- .row -->
+    </div><!-- .col -->
   </div>
 </div>
 <div class="card-footer d-none d-md-block py-2">
   <div class="row">
-    <div class="col-4 offset-3"><%= vote_legend_yours %></div>
-    <div class="col-5"><%= vote_legend_consensus %></div>
+    <div class="col-12 col-md-11">
+      <div class="row">
+        <div class="col-4 offset-4"><%= vote_legend_yours %></div>
+        <div class="col-4"><%= vote_legend_consensus %></div>
+      </div><!-- .row -->
+    </div><!-- .col -->
   </div>
 </div>
