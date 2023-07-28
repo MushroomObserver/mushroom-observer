@@ -25,10 +25,10 @@
 
   <div class="card-footer d-flex justify-content-between">
     <%= link_with_query(:show_comments_add_comment.t,
-                      new_comment_path(target: object.id,
-                                      type: object.class.name),
-                      class: "btn btn-primary",
-                      remote: true) if controls %>
+                        new_comment_path(target: object.id,
+                                        type: object.class.name),
+                        class: "btn btn-primary btn-sm",
+                        remote: true) if controls %>
 
     <%= if limit && and_more > 0
       link_to(:show_comments_and_more.t(num: and_more),
