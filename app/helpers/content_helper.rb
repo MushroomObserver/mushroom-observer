@@ -105,9 +105,9 @@ module ContentHelper
   def help_block_with_arrow(direction = nil, **args, &block)
     div_class = "card p-2 form-text position-relative"
     div_class += " my-3" # if direction == "up"
+    div_class += " " + args[:class] if args[:class]
 
-    content_tag(:div, class: div_class,
-                      id: args[:id]) do
+    content_tag(:div, class: div_class, id: args[:id]) do
       concat(capture(&block).to_s)
       if direction
         arrow_class = "arrow-#{direction}"
