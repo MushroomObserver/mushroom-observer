@@ -1,0 +1,11 @@
+$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "observation_email", title: :ask_observation_question_title.t(name: @observation.unique_format_name), form: "observations/emails/form"}) %>');
+
+// common form bindings
+$("#mo_ajax_progress").modal('hide');
+
+$('#modal_observation_email').on('hidden.bs.modal', function () {
+  $(this).remove();
+});
+
+$('#modal_observation_email').modal('show');
+

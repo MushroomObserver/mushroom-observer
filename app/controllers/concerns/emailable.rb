@@ -23,8 +23,7 @@ module Emailable
     #
     ############################################################################
 
-    # TODO: Method needs to route to a js handler that flashes and removes
-    # modal if permission denied.
+    # TODO: Method could respond to a js handler that flashes directly on page.
     def can_email_user_question?(target, method: :email_general_question)
       user = target.is_a?(User) ? target : target.user
       return true if user.send(method) && !user.no_emails

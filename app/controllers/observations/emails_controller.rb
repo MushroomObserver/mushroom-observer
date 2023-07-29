@@ -19,7 +19,23 @@ module Observations
       question = params.dig(:question, :content)
       ObservationMailer.build(@user, @observation, question).deliver_now
       flash_notice(:runtime_ask_observation_question_success.t)
-      redirect_with_query(observation_path(@observation.id))
+
+      show_flash_and_send_back
     end
+
+    private
+
+    def show_flash_and_send_back
+      respond_to do |format|
+        format.html do
+          redirect_with_query(observation_path(@observation.id)) and return
+        end
+        format.js do
+          # renders the flash in the modal via js
+          render(partial: "shared/update_modal_flash") and return
+        end
+      end
+    end
+
   end
 end
