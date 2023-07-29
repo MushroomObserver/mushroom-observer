@@ -36,6 +36,5 @@ module Observations
         end
       end
     end
-
   end
 end

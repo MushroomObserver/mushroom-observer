@@ -4,7 +4,6 @@ require("test_helper")
 
 module Observations
   class EmailsControllerTest < FunctionalTestCase
-
     def test_access_form
       obs = observations(:coprinus_comatus_obs)
       requires_login(:new, id: obs.id)
@@ -17,7 +16,6 @@ module Observations
       requires_login(:new, id: mary_obs.id)
       assert_redirected_to(permanent_observation_path(mary_obs.id))
     end
-
 
     def test_send_observation_question
       obs = observations(:minimal_unknown_obs)

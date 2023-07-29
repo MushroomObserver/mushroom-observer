@@ -23,16 +23,15 @@ module Emailable
     #
     ############################################################################
 
-    # TODO: Method could respond to a js handler that flashes directly on page.
     def can_email_user_question?(target, method: :email_general_question)
       user = target.is_a?(User) ? target : target.user
       return true if user.send(method) && !user.no_emails
 
       flash_error(:permission_denied.t)
+      # Method could also respond to a js handler that flashes directly on page
       redirect_with_query(controller: target.show_controller,
                           action: target.show_action, id: target.id)
       false
     end
-
   end
 end
