@@ -1,11 +1,23 @@
-$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "observation_email", title: :ask_observation_question_title.t(name: @observation.unique_format_name), form: "observations/emails/form"}) %>');
+// check for an existing modal to open, in case form is in progress
+var this_modal = $('#modal_observation_email');
+console.log(this_modal.length);
 
-// common form bindings
-$("#mo_ajax_progress").modal('hide');
+if(this_modal.length > 0) {
+  this_modal.modal('show');
+} else {
+  console.log("rollin");
+  $('body').append('<%= j render(
+    partial: "shared/modal_form",
+    locals: {
+      identifier: "observation_email",
+      title: :ask_observation_question_title.t(
+        name: @observation.unique_format_name
+      ),
+      form: "observations/emails/form"
+    }
+  ) %>'
+  );
+}
 
-$('#modal_observation_email').on('hidden.bs.modal', function () {
-  $(this).remove();
-});
-
-$('#modal_observation_email').modal('show');
-
+<%= render(partial: "shared/modal_form_bindings", format: :js,
+           locals: { identifier: "observation_email" }) %>
