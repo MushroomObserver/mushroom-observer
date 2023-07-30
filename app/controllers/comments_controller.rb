@@ -248,7 +248,10 @@ class CommentsController < ApplicationController
       respond_to do |format|
         format.html { render(:new) and return }
         format.js do
-          render("form_reload", locals: { action: :create }) and return
+          render(partial: "shared/modal_form_reload",
+                 locals: { action: :create, # ivar in partial?
+                           identifier: "comment",
+                           form: "comments/form" }) and return true
         end
       end
     end
@@ -303,7 +306,10 @@ class CommentsController < ApplicationController
     unless comment_updated?
       respond_to do |format|
         format.js do
-          render(partial: "form_reload", locals: { action: :update })
+          render(partial: "shared/modal_form_reload",
+                 locals: { action: :update, # ivar in partial?
+                           identifier: "comment",
+                           form: "comments/form" }) and return true
         end
         format.html { render(:edit) and return }
       end

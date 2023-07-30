@@ -303,8 +303,10 @@ class HerbariumRecordsController < ApplicationController
           redirect_to(redirect_params) and return true
         end
         format.js do
-          render(partial: "form_reload",
-                 locals: { action: action_name.to_sym }) and return true
+          render(partial: "shared/modal_form_reload",
+                 locals: { action: action_name.to_sym, # ivar in partial?
+                           identifier: "collection_number",
+                           form: "collection_numbers/form" }) and return true
         end
       end
     end

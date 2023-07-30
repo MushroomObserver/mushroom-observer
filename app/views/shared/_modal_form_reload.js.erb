@@ -1,6 +1,7 @@
-// What to do if create or update doesn't save
-
-// var modal_body = $("#modal_body_sequence");
+<%
+# What to do if a form submit doesn't succeed
+# Takes locals: { identifier:, form:}
+%>
 
 // replace the flash notices in the modal
 $("#modal_flash").replaceWith("<%= j render(
@@ -8,8 +9,8 @@ $("#modal_flash").replaceWith("<%= j render(
   locals: { id: 'modal_flash' }
 ) if flash_notices? %>");
 
-// replace the form, should show
-$("#sequence_form").replaceWith('<%= j render(
-  partial: "sequences/form",
+// re-render the form in the modal
+$("#<%= identifier %>_form").replaceWith('<%= j render(
+  partial: form,
   locals: { action: @action, local: false }
 ) %>')
