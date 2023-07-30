@@ -1,3 +1,4 @@
 $('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "herbarium_record", title: :create_herbarium_record_title.l, form: "herbarium_records/form", action: :create }) %>');
 
-<%= render(partial: "herbarium_records/form_bindings", format: :js) %>
+<%= render(partial: "shared/modal_form_bindings", format: :js,
+           locals: { identifier: "herbarium_record" }) %>

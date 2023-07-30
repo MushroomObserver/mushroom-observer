@@ -1,3 +1,12 @@
-$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "collection_number", title: :create_collection_number_title.l, form: "collection_numbers/form", action: :create }) %>');
+$('body').append('<%= j render(
+  partial: "shared/modal_form",
+  locals: {
+    identifier: "collection_number",
+    title: :create_collection_number_title.l,
+    form: "collection_numbers/form",
+    action: :create
+  }
+) %>');
 
-<%= render(partial: "collection_numbers/form_bindings", format: :js) %>
+<%= render(partial: "shared/modal_form_bindings", format: :js,
+           locals: { identifier: "collection_number" }) %>

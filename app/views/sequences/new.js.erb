@@ -1,3 +1,12 @@
-$('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "sequence", title: :sequence_add_title.l, form: "sequences/form", action: :create }) %>');
+$('body').append('<%= j render(
+  partial: "shared/modal_form",
+  locals: {
+    identifier: "sequence",
+    title: :sequence_add_title.l,
+    form: "sequences/form",
+    action: :create
+  }
+) %>');
 
-<%= render(partial: "sequences/form_bindings", format: :js) %>
+<%= render(partial: "shared/modal_form_bindings", format: :js,
+           locals: { identifier: "sequence" }) %>

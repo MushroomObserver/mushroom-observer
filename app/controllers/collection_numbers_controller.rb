@@ -349,7 +349,7 @@ class CollectionNumbersController < ApplicationController
       end
       format.js do
         # renders the flash in the modal via js
-        render(partial: "shared/update_modal_flash") and return
+        render(partial: "shared/modal_update_flash") and return
       end
     end
   end
