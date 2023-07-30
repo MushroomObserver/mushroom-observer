@@ -1,3 +1,7 @@
 // What to do on ajax update. Eventually needs to handle other @back_object
 
-<%= render(partial: "sequences/update_observation", format: :js) %>
+<%= render(
+  partial: "observations/show/update_section",
+  locals: { identifier: "sequences" },
+  format: :js
+) %>

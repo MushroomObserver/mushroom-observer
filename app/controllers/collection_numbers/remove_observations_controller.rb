@@ -28,7 +28,10 @@ module CollectionNumbers
           redirect_with_query(observation_path(@observation.id))
         end
         format.js do
-          render(partial: "collection_numbers/update_observation") and return
+          render(
+            partial: "observations/show/update_section",
+            locals: { identifier: "collection_numbers" }
+          ) and return
         end
       end
     end

@@ -266,7 +266,10 @@ class SequencesController < ApplicationController
       end
       format.js do
         # renders the flash in the obs page via js
-        render(partial: "update_observation") and return
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "sequences" }
+        ) and return
       end
     end
   end
