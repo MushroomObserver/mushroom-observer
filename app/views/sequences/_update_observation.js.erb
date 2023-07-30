@@ -1,8 +1,17 @@
 // Update page with results of update or create sequence
 $('#mo_ajax_progress_caption').empty();
 $('#mo_ajax_progress').modal('hide');
-$("#observation_sequences").html('<%= j render(partial: "observations/show/sequences", locals: { observation: @observation.reload }, layout: false) %>');
+$("#observation_sequences").html('<%= j render(
+  partial: "observations/show/sequences",
+  locals: { observation: @observation.reload },
+  layout: false
+) %>');
 
-$("#page_flash").html("<%= j render(partial: 'layouts/app/flash_notices', locals: { id: 'flash_notices' }) if flash_notices? %>");
+// Update the page flash, not the modal flash
+$("#page_flash").html("<%= j render(
+  partial: 'layouts/app/flash_notices',
+  locals: { id: 'flash_notices' }
+) if flash_notices? %>");
 
+// Hide the modal
 $(".modal").modal('hide');

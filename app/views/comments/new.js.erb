@@ -1,3 +1,4 @@
 $('body').append('<%= j render(partial: "shared/modal_form", locals: { identifier: "comment", title: :comment_add_title.t(name: @target.unique_format_name), form: "comments/form", action: :create }) %>');
 
-<%= render(partial: "comments/form_bindings", format: :js) %>
+<%= render(partial: "shared/modal_form_bindings", format: :js,
+           locals: { identifier: "comment" }) %>
