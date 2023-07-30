@@ -1,5 +1,7 @@
-// Actions may give flash warnings that don't interrupt flow.
-// Show the message in the modal to maintain attention on the msg, if any
+// Update the modal_flash div.
+// Actions in modals may give flash warnings that don't interrupt flow.
+// This shows the message in the modal to maintain attention on the msg, if any
+
 // Check these now, becuase rendering the flash_notices partial clears the flash
 <% had_flash_messages = flash_notices? %>
 <% submit_success = (flash_notice_level == 0) %>
