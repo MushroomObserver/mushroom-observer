@@ -76,11 +76,13 @@ class SequencesController < ApplicationController
     return unless @observation
 
     @sequence = Sequence.new
+    @title = :sequence_add_title.t
 
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "observations/show/section_modal_form",
+               locals: { identifier: "sequence" }) and return
       end
     end
   end
@@ -99,10 +101,13 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
 
+    @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
+
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "observations/show/section_modal_form",
+               locals: { identifier: "sequence" }) and return
       end
     end
   end
@@ -120,7 +125,7 @@ class SequencesController < ApplicationController
       format.html
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "sequences" }
         ) and return
       end
@@ -207,7 +212,7 @@ class SequencesController < ApplicationController
         end
         format.js do
           render(
-            partial: "observations/show/update_section",
+            partial: "observations/show/section_update",
             locals: { identifier: "sequences" }
           )
         end
@@ -275,7 +280,7 @@ class SequencesController < ApplicationController
       format.js do
         # renders the flash in the obs page via js
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "sequences" }
         ) and return
       end

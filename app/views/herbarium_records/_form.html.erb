@@ -1,10 +1,12 @@
 <%
-url_params = { action: action, q: get_query_param }
-case action
-when :create
-  url_params = url_params.merge({ observation_id: @observation.id })
+case action_name
+when "new"
+  url_params = add_query_param(
+    { action: :create, observation_id: @observation.id }
+  )
   button = :ADD.t
-when :update
+when "edit"
+  url_params = add_query_param({ action: :update })
   url_params = url_params.merge({ back: @back }) if @back.present?
   button = :SAVE.t
 end

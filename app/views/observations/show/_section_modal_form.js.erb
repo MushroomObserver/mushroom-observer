@@ -1,0 +1,24 @@
+// Generalized JS handler to either open or generate new modal for
+// create/edit a section of an observation (resource)
+// checks for an existing modal to open, in case form is in progress
+// requires locals: identifier.  action_name (rails var)
+// TODO: make cases for namings and comments
+
+var identifier = "<%= identifier %>";
+var this_modal = $('#modal_' + identifier);
+
+if(this_modal.length > 0) {
+  this_modal.modal('show');
+} else {
+  $('body').append('<%= j render(
+    partial: "shared/modal_form",
+    locals: {
+      identifier: identifier,
+      title: @title,
+      form: "#{identifier}s/form",
+    }
+  ) %>');
+}
+
+<%= render(partial: "shared/modal_form_bindings", format: :js,
+           locals: { identifier: identifier }) %>

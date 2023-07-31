@@ -50,7 +50,8 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "observations/show/section_modal_form",
+               locals: { identifier: "herbarium_record" }) and return
       end
     end
   end
@@ -75,7 +76,8 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "observations/show/section_modal_form",
+               locals: { identifier: "herbarium_record" }) and return
       end
     end
   end
@@ -104,7 +106,7 @@ class HerbariumRecordsController < ApplicationController
       end
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "herbarium_records" }
         ) and return
       end
@@ -118,11 +120,15 @@ class HerbariumRecordsController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @title = :create_herbarium_record_title.l
   end
 
   def set_ivars_for_edit
     @layout = calc_layout_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    @title = :edit_herbarium_record_title.l(
+      herbarium_label: @herbarium_record.herbarium_label
+    )
   end
 
   def default_index_subaction
@@ -253,7 +259,7 @@ class HerbariumRecordsController < ApplicationController
       end
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "herbarium_records" }
         ) and return
       end
@@ -302,7 +308,7 @@ class HerbariumRecordsController < ApplicationController
       @observation = @back_object # if we're here, we're on an obs page
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "herbarium_records" }
         ) and return
       end

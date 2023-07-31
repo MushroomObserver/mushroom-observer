@@ -17,6 +17,7 @@ module Observations
 
       @observation = @params.observation
       @reasons = @params.reasons
+      @title = :create_naming_title.t(id: @observation.id)
 
       respond_to do |format|
         format.html
@@ -55,6 +56,7 @@ module Observations
 
       @observation = @params.observation
       @reasons = @params.reasons
+      @title = :edit_naming_title.t(id: @observation.id)
     end
 
     def update

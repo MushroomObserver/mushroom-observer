@@ -49,7 +49,8 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "observations/show/section_modal_form",
+               locals: { identifier: "collection_number" }) and return
       end
     end
   end
@@ -74,7 +75,8 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "observations/show/section_modal_form",
+               locals: { identifier: "collection_number" }) and return
       end
     end
   end
@@ -101,7 +103,7 @@ class CollectionNumbersController < ApplicationController
       end
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "collection_numbers" }
         ) and return
       end
@@ -179,11 +181,15 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @title = :create_collection_number_title.l
   end
 
   def set_ivars_for_edit
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @title = :edit_collection_number_title.l(
+      name: @collection_number.format_name
+    )
   end
 
   # create
@@ -244,7 +250,7 @@ class CollectionNumbersController < ApplicationController
       end
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "collection_numbers" }
         ) and return
       end
@@ -287,7 +293,7 @@ class CollectionNumbersController < ApplicationController
       @observation = @back_object # if we're here, we're on an obs page
       format.js do
         render(
-          partial: "observations/show/update_section",
+          partial: "observations/show/section_update",
           locals: { identifier: "collection_numbers" }
         ) and return
       end
