@@ -32,7 +32,7 @@ module Observations
         end
         format.js do
           # renders the flash in the modal via js
-          render(partial: "shared/modal_update_flash") and return
+          render(partial: "shared/modal_flash_update") and return
         end
       end
     end

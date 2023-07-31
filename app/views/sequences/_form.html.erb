@@ -28,7 +28,8 @@ end
                 "(#{:form_sequence_bases_or_deposit_required.t})") +
       link_to("(#{:form_sequence_bases_format.t})",
                 WebSequenceArchive.blast_format_help,
-                class: "d-inline-block float-right") %>
+                class: "d-inline-block float-right",
+                target: "_blank") %>
   <%= text_area_with_label(form: f, field: :bases, cols: 80, rows: 5,
                            label: :BASES.t + ":", monospace: true,
                            between: between) %>

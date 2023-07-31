@@ -99,9 +99,14 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.destroy
 
     respond_to do |format|
-      format.js
       format.html do
         redirect_with_query(action: :index)
+      end
+      format.js do
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "herbarium_records" }
+        ) and return
       end
     end
   end
@@ -214,6 +219,7 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
+  # create
   def create_herbarium_record
     @herbarium_record =
       HerbariumRecord.new(permitted_herbarium_record_params)
@@ -233,6 +239,7 @@ class HerbariumRecordsController < ApplicationController
     show_flash_and_send_back
   end
 
+  # create
   def save_herbarium_record_and_update_associations
     @herbarium_record.save
     @herbarium_record.add_observation(@observation)
@@ -244,21 +251,29 @@ class HerbariumRecordsController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
-      format.js # updates the observation. @back_object is set already
+      format.js do
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "herbarium_records" }
+        ) and return
+      end
     end
   end
 
+  # create
   def flash_herbarium_record_already_used_and_add_observation
     flash_warning(:create_herbarium_record_already_used.t) if
       @other_record.observations.any?
     @other_record.add_observation(@observation)
   end
 
+  # create
   def flash_herbarium_record_already_used_by_someone_else
     flash_error(:create_herbarium_record_already_used_by_someone_else.
       t(herbarium_name: @herbarium_record.herbarium.name))
   end
 
+  # update
   def update_herbarium_record
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = permitted_herbarium_record_params
@@ -273,6 +288,7 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
+  # update
   def update_herbarium_record_and_notify_curators(old_herbarium)
     @herbarium_record.save
     @herbarium_record.notify_curators if
@@ -284,10 +300,16 @@ class HerbariumRecordsController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
       @observation = @back_object # if we're here, we're on an obs page
-      format.js # updates the page
+      format.js do
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "herbarium_records" }
+        ) and return
+      end
     end
   end
 
+  # create, update
   def flash_error_and_reload_if_form_has_errors
     redirect_params = case action_name # this is a rails var
                       when "create"
@@ -415,7 +437,7 @@ class HerbariumRecordsController < ApplicationController
       end
       format.js do
         # renders the flash in the modal via js
-        render(partial: "shared/modal_update_flash") and return
+        render(partial: "shared/modal_flash_update") and return
       end
     end
   end
