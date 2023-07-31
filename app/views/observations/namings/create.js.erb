@@ -2,7 +2,15 @@
 
 // Are we on show_obs, or obs_needing_ids?
 if ($("#observation_namings").length) {
-  <%= render(partial: "observations/namings/update_observation", format: :js) %>
+  <%= render(
+    partial: "observations/show/update_section",
+    locals: { identifier: "namings" },
+    format: :js
+  ) %>
+  <%= render(
+    partial: "observations/namings/update_observation",
+    format: :js
+  ) %>
 } else {
   var obs_id = '<%= @observation.id %>';
   var lightbox = $("#lightbox")
@@ -17,6 +25,3 @@ if ($("#observation_namings").length) {
     $(".lb-next").first().focus()
   }
 }
-
-// Finally, remove the modal
-$("#modal_naming").attr('data-busy', 'false').modal('hide');

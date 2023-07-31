@@ -2,8 +2,18 @@
 $('#mo_ajax_progress_caption').empty();
 $('#mo_ajax_progress').modal('hide');
 
-$("#observation_<%= identifier %>").html('<%= j render(
-  partial: "observations/show/#{identifier}",
+<% # The namings table is in another folder
+if( identifier === "namings" ) {
+  id = "namings_table"
+  partial = "observations/namings/table"
+} else {
+  id = "observation_#{identifier}"
+  partial = "observations/show/#{identifier}"
+}
+%>
+
+$("#<%= identifier %>").html('<%= j render(
+  partial: partial,
   locals: { observation: @observation.reload },
   layout: false
 ) %>');
@@ -14,5 +24,5 @@ $("#page_flash").html("<%= j render(
   locals: { id: 'flash_notices' }
 ) if flash_notices? %>");
 
-// Hide the modal, because results on page
-$(".modal").modal('hide');
+// Remove the modal, because results on page
+$(".modal").attr('data-busy', 'false').modal('hide');

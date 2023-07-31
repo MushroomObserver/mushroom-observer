@@ -1,8 +1,12 @@
 // Update page with results of update or create naming or vote
-// Differs from observations/show/update_section because it
-// updates the title and redoes bindings.
-$('#mo_ajax_progress_caption').empty();
-$('#mo_ajax_progress').modal('hide');
+// Has additional functionality to observations/show/update_section
+// it updates the obs title and redoes form bindings.
+
+<%= render(
+  partial: "observations/show/update_section",
+  locals: { identifier: "namings" },
+  format: :js
+) %>
 
 // reset title of obs if necessary
 var title = '<%= tag.div(
@@ -12,12 +16,6 @@ var title = '<%= tag.div(
 
 document.title = $(title).attr('title');
 $("#title").html(title);
-
-$("#namings_table").replaceWith('<%= j render(
-  partial: "observations/namings/table",
-  locals: { observation: @observation.reload },
-  layout: false
-) %>');
 
 // Need to redo naming table bindings and hide cast vote buttons
 VoteByAjaxModule({
