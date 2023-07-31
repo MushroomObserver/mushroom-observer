@@ -119,7 +119,10 @@ class SequencesController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "sequences" }
+        ) and return
       end
     end
   end
@@ -202,7 +205,12 @@ class SequencesController < ApplicationController
         format.html do
           redirect_with_query(@observation.show_link_args)
         end
-        format.js # updates the observation.
+        format.js do
+          render(
+            partial: "observations/show/update_section",
+            locals: { identifier: "sequences" }
+          )
+        end
       end
     else
       flash_object_errors(@sequence)

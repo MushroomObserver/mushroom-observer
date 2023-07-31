@@ -1,15 +1,17 @@
-// Update page with results of update or create herbarium_record
+// Update observation view with results of update or create
+// Needs locals: identifier
+
 $('#mo_ajax_progress_caption').empty();
 $('#mo_ajax_progress').modal('hide');
 
 <% # The namings table is in another folder
-if( identifier === "namings" ) {
+if identifier == "namings"
   id = "namings_table"
   partial = "observations/namings/table"
-} else {
+else
   id = "observation_#{identifier}"
   partial = "observations/show/#{identifier}"
-}
+end
 %>
 
 $("#<%= identifier %>").html('<%= j render(

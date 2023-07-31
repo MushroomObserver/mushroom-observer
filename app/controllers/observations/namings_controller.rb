@@ -84,6 +84,7 @@ module Observations
         format.html { default_redirect(naming.observation) }
         format.js do
           @observation = naming.observation
+          render(partial: "update_observation") and return
         end
       end
     end
@@ -101,6 +102,9 @@ module Observations
         save_changes
         respond_to do |format|
           format.html { default_redirect(@params.observation, :show) }
+          # js template figures out if request is from lightbox or show obs
+          # via js. could send a param instead, parse here and dry up that
+          # template.
           format.js
         end
       else # If anything failed reload the form.
@@ -175,7 +179,9 @@ module Observations
         @params.need_new_naming? ? create_new_naming : change_naming
         respond_to do |format|
           format.html { default_redirect(@params.observation) }
-          format.js
+          format.js do
+            render(partial: "update_observation") and return
+          end
         end
       else
         @params.add_reasons(param_lookup([:naming, :reasons]))

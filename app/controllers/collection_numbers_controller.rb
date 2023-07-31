@@ -96,9 +96,14 @@ class CollectionNumbersController < ApplicationController
 
     @collection_number.destroy
     respond_to do |format|
-      format.js
       format.html do
         redirect_with_query(action: :index)
+      end
+      format.js do
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "collection_numbers" }
+        ) and return
       end
     end
   end
@@ -181,6 +186,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
+  # create
   def create_collection_number
     @collection_number =
       CollectionNumber.new(permitted_collection_number_params)
@@ -194,6 +200,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # create, update
   def flash_error_and_reload_if_form_has_errors
     redirect_params = case action_name # this is a rails var
                       when "create"
@@ -224,6 +231,7 @@ class CollectionNumbersController < ApplicationController
     false
   end
 
+  # create
   def save_collection_number_and_update_associations
     @collection_number.save
     @collection_number.add_observation(@observation)
@@ -234,10 +242,16 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js # updates the observation. @back_object is set already
+      format.js do
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "collection_numbers" }
+        ) and return
+      end
     end
   end
 
+  # create
   def flash_collection_number_already_used_and_return
     flash_warning(:edit_collection_number_already_used.t) if
       @other_number.observations.any?
@@ -246,6 +260,7 @@ class CollectionNumbersController < ApplicationController
     show_flash_and_send_back
   end
 
+  # update
   def update_collection_number
     old_format_name = @collection_number.format_name
     @collection_number.attributes = permitted_collection_number_params
@@ -259,6 +274,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # update
   def update_collection_number_and_associations(old_format_name)
     @collection_number.save
     @collection_number.change_corresponding_herbarium_records(old_format_name)
@@ -269,10 +285,16 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       @observation = @back_object # if we're here, we're on an obs page
-      format.js # updates the page
+      format.js do
+        render(
+          partial: "observations/show/update_section",
+          locals: { identifier: "collection_numbers" }
+        ) and return
+      end
     end
   end
 
+  # update
   def flash_numbers_merged_and_update_associations(old_format_name)
     flash_warning(
       :edit_collection_numbers_merged.t(

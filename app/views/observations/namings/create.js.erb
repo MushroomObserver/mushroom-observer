@@ -3,23 +3,22 @@
 // Are we on show_obs, or obs_needing_ids?
 if ($("#observation_namings").length) {
   <%= render(
-    partial: "observations/show/update_section",
-    locals: { identifier: "namings" },
-    format: :js
-  ) %>
-  <%= render(
     partial: "observations/namings/update_observation",
     format: :js
   ) %>
 } else {
+  // update the lightbox caption
   var obs_id = '<%= @observation.id %>';
   var lightbox = $("#lightbox")
+
   // update the caption title in the lightbox
   var caption_what = $("#observation_what_" + obs_id);
   caption_what.html('<%= show_obs_title(obs: @observation) %>');
+
   // update the matrix box title in the page
   var matrix_what = $("#box_" + obs_id).find(".rss-what h5");
   matrix_what.html('<%= link_to(@observation.unique_format_name.t, observation_path(@observation.id, q: get_query_param)) %>');
+
   // move focus to "lightbox-next"
   if(lightbox.length && (lightbox.css('display') == 'block')) {
     $(".lb-next").first().focus()
