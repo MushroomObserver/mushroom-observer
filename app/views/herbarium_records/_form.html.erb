@@ -1,11 +1,11 @@
 <%
 case action_name
-when "new"
+when "new", "create"
   url_params = add_query_param(
     { action: :create, observation_id: @observation.id }
   )
   button = :ADD.t
-when "edit"
+when "edit", "update"
   url_params = add_query_param({ action: :update })
   url_params = url_params.merge({ back: @back }) if @back.present?
   button = :SAVE.t
