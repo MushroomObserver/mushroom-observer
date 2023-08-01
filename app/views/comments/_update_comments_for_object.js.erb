@@ -7,3 +7,9 @@ $("#comments_for_object").replaceWith('<%= j render(
   locals: { object: @target, controls: true, limit: nil },
   layout: false
 ) %>');
+
+// Finally, remove the modal if present (not in delete)
+var modal = $("#modal_comment")
+if(modal.length) {
+  $(".modal").attr('data-busy', 'false').modal('hide');
+}

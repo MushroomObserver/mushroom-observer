@@ -265,7 +265,9 @@ class CommentsController < ApplicationController
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
       end
-      format.js
+      format.js do
+        render(partial: "comments/update_comments_for_object", format: :js)
+      end
     end
   end
 
@@ -318,7 +320,9 @@ class CommentsController < ApplicationController
     end
 
     respond_to do |format|
-      format.js
+      format.js do
+        render(partial: "comments/update_comments_for_object", format: :js)
+      end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -344,7 +348,9 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      format.js
+      format.js do
+        render(partial: "comments/update_comments_for_object", format: :js)
+      end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
