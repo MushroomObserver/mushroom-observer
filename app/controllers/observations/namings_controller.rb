@@ -25,7 +25,7 @@ module Observations
           render(partial: "shared/modal_form_show",
                  locals: {
                    identifier: "naming",
-                   form_bindings: "observations/namings/form_bindings"
+                   form_bindings: "observations/namings/form_bindings",
                    form_locals: { show_reasons: true }
                  }) and return
         end
@@ -69,7 +69,7 @@ module Observations
           render(partial: "shared/modal_form_show",
                  locals: {
                    identifier: "naming",
-                   form_bindings: "observations/namings/form_bindings"
+                   form_bindings: "observations/namings/form_bindings",
                    form_locals: { show_reasons: true }
                  }) and return
         end
@@ -112,8 +112,7 @@ module Observations
 
     def default_redirect(obs, action = :show)
       redirect_with_query(controller: "/observations",
-                          action: action,
-                          id: obs.id)
+                          action: action, id: obs.id)
     end
 
     def create_post

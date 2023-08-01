@@ -27,11 +27,7 @@ class CommentsController < ApplicationController
   # index::
   # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
-    :target,
-    :pattern,
-    :by_user,
-    :for_user,
-    :by
+    :target, :pattern, :by_user, :for_user, :by
   ].freeze
 
   @index_subaction_dispatch_table = {
@@ -251,8 +247,7 @@ class CommentsController < ApplicationController
         format.html { render(:new) and return }
         format.js do
           render(partial: "shared/modal_form_reload",
-                 locals: { action: :create, # ivar in partial?
-                           identifier: "comment",
+                 locals: { identifier: "comment",
                            form: "comments/form" }) and return true
         end
       end
@@ -315,8 +310,7 @@ class CommentsController < ApplicationController
       respond_to do |format|
         format.js do
           render(partial: "shared/modal_form_reload",
-                 locals: { action: :update, # ivar in partial?
-                           identifier: "comment",
+                 locals: { identifier: "comment",
                            form: "comments/form" }) and return true
         end
         format.html { render(:edit) and return }

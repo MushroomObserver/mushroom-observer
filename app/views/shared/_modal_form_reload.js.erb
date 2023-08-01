@@ -13,5 +13,5 @@ $("#modal_flash").replaceWith("<%= j render(
 // re-render the form in the modal
 $("#<%= identifier %>_form").replaceWith('<%= j render(
   partial: form,
-  locals: { action: @action, local: false }.merge(form_locals)
+  locals: { local: false }.merge(form_locals)
 ) %>')
