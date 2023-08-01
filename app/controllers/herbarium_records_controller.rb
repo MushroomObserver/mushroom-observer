@@ -50,7 +50,7 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(partial: "observations/show/section_modal_form",
+        render(partial: "shared/modal_form_show",
                locals: { identifier: "herbarium_record" }) and return
       end
     end
@@ -76,7 +76,7 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(partial: "observations/show/section_modal_form",
+        render(partial: "shared/modal_form_show",
                locals: { identifier: "herbarium_record" }) and return
       end
     end

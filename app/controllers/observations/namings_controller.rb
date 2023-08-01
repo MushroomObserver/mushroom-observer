@@ -22,7 +22,12 @@ module Observations
       respond_to do |format|
         format.html
         format.js do
-          render(layout: false)
+          render(partial: "shared/modal_form_show",
+                 locals: {
+                   identifier: "naming",
+                   form_bindings: "observations/namings/form_bindings"
+                   form_locals: { show_reasons: true }
+                 }) and return
         end
       end
     end
@@ -57,6 +62,18 @@ module Observations
       @observation = @params.observation
       @reasons = @params.reasons
       @title = :edit_naming_title.t(id: @observation.id)
+
+      respond_to do |format|
+        format.html
+        format.js do
+          render(partial: "shared/modal_form_show",
+                 locals: {
+                   identifier: "naming",
+                   form_bindings: "observations/namings/form_bindings"
+                   form_locals: { show_reasons: true }
+                 }) and return
+        end
+      end
     end
 
     def update
@@ -115,8 +132,7 @@ module Observations
         respond_to do |format|
           format.html { render(action: :new) and return }
           format.js do
-            @action = :create
-            render("form_reload") and return
+            render(partial: "observations/namings/form_reload") and return
           end
         end
       end
@@ -190,8 +206,7 @@ module Observations
         respond_to do |format|
           format.html { render(action: :edit) and return }
           format.js do
-            @action = :update
-            render("form_reload") and return
+            render(partial: "observations/namings/form_reload") and return
           end
         end
       end

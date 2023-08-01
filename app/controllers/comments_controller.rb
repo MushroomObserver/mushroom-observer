@@ -222,7 +222,8 @@ class CommentsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render(partial: "shared/modal_form_show",
+               locals: { identifier: "comment" }) and return
       end
     end
   end
@@ -293,7 +294,10 @@ class CommentsController < ApplicationController
 
     @title = :comment_edit_title.t(name: @target.unique_format_name)
     respond_to do |format|
-      format.js
+      format.js do
+        render(partial: "shared/modal_form_show",
+               locals: { identifier: "comment" }) and return
+      end
       format.html
     end
   end
