@@ -25,7 +25,7 @@ feedback_locals = {
 }
 
 confidences = options_for_select(Vote.confidence_menu, vote&.value)
-select_opts = { include_blank: (action == :create) }
+select_opts = { include_blank: ["new", "create"].include?(action_name) }
 %>
 
 <div class="row">

@@ -23,7 +23,7 @@ end
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/namings/fields",
-             locals: { f: f, action: action, button_name: button_name,
+             locals: { f: f, button_name: button_name,
                        show_reasons: true }) %>
 
 <% end # form %>
