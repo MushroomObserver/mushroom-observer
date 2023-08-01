@@ -2,10 +2,14 @@
 
 # buttons (forms) for observation identify UI
 module IdentifyHelper
-  def propose_naming_link(id, btn_class = "btn-primary my-3")
+  def propose_naming_link(id, btn_class: "btn-primary my-3", context: "")
     render(partial: "observations/namings/propose_button",
-           locals: { obs_id: id, text: :create_naming.t,
-                     btn_class: "#{btn_class} d-inline-block" },
+           locals: {
+             obs_id: id,
+             text: :create_naming.t,
+             btn_class: "#{btn_class} d-inline-block",
+             context: context
+           },
            layout: false)
   end
 

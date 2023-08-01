@@ -26,7 +26,8 @@ module Observations
                  locals: {
                    identifier: "naming",
                    form_bindings: "observations/namings/form_bindings",
-                   form_locals: { show_reasons: true }
+                   form_locals: { show_reasons: true,
+                                  context: params[:context] }
                  }) and return
         end
       end
@@ -70,7 +71,8 @@ module Observations
                  locals: {
                    identifier: "naming",
                    form_bindings: "observations/namings/form_bindings",
-                   form_locals: { show_reasons: true }
+                   form_locals: { show_reasons: true,
+                                  context: params[:context] }
                  }) and return
         end
       end
@@ -118,21 +120,40 @@ module Observations
     def create_post
       if rough_draft && can_save?
         save_changes
-        respond_to do |format|
-          format.html { default_redirect(@params.observation, :show) }
-          # js template figures out if request is from lightbox or show obs
-          # via js. could send a param instead, parse here and dry up that
-          # template.
-          format.js
-        end
+        respond_to_successful_create
       else # If anything failed reload the form.
         flash_object_errors(@params.naming) if @params.name_missing?
         @params.add_reasons(param_lookup([:naming, :reasons]))
-        respond_to do |format|
-          format.html { render(action: :new) and return }
-          format.js do
-            render(partial: "observations/namings/form_reload") and return
+        respond_to_form_errors
+      end
+    end
+
+    def respond_to_successful_create
+      respond_to do |format|
+        format.html { default_redirect(@params.observation, :show) }
+        format.js do
+          case params[:context]
+          when "lightbox"
+            render(partial: "observations/namings/update_lightbox")
+          else
+            render(partial: "observations/namings/update_observation")
           end
+          return
+        end
+      end
+    end
+
+    def respond_to_form_errors
+      form_action = case action_name
+                    when "create"
+                      :new
+                    when "update"
+                      :edit
+                    end
+      respond_to do |format|
+        format.html { render(action: form_action) and return }
+        format.js do
+          render(partial: "observations/namings/form_reload") and return
         end
       end
     end
@@ -194,19 +215,18 @@ module Observations
           unproposed_name(:runtime_edit_naming_someone_else) &&
           valid_use_of_imageless(@params.name, @params.observation))
         @params.need_new_naming? ? create_new_naming : change_naming
-        respond_to do |format|
-          format.html { default_redirect(@params.observation) }
-          format.js do
-            render(partial: "update_observation") and return
-          end
-        end
+        respond_to_successful_update
       else
         @params.add_reasons(param_lookup([:naming, :reasons]))
-        respond_to do |format|
-          format.html { render(action: :edit) and return }
-          format.js do
-            render(partial: "observations/namings/form_reload") and return
-          end
+        respond_to_form_errors
+      end
+    end
+
+    def respond_to_successful_update
+      respond_to do |format|
+        format.html { default_redirect(@params.observation) }
+        format.js do
+          render(partial: "update_observation") and return
         end
       end
     end

@@ -15,6 +15,8 @@ when "edit", "update"
                     q: get_query_param)
 end
 
+show_reasons ||= true
+context ||= "page"
 %>
 
 <%= form_with(model: @naming, url: url, method: method, local: local,
@@ -24,6 +26,6 @@ end
 
   <%= render(partial: "observations/namings/fields",
              locals: { f: f, button_name: button_name,
-                       show_reasons: true }) %>
+                       show_reasons: show_reasons, context: context }) %>
 
 <% end # form %>

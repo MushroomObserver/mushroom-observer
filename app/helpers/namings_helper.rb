@@ -41,7 +41,8 @@ module NamingsHelper
     buttons << render(partial: "observations/namings/propose_button",
                       locals: { obs_id: observation.id,
                                 text: :show_namings_propose_new_name.t,
-                                btn_class: "btn-default" },
+                                btn_class: "btn-default",
+                                context: "namings_table" },
                       layout: false)
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
