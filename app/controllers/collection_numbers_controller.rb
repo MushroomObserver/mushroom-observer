@@ -49,7 +49,7 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_collection_number_form
       end
     end
   end
@@ -74,7 +74,7 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_collection_number_form
       end
     end
   end
@@ -100,10 +100,7 @@ class CollectionNumbersController < ApplicationController
         redirect_with_query(action: :index)
       end
       format.js do
-        render(
-          partial: "observations/show/update_section",
-          locals: { identifier: "collection_numbers" }
-        ) and return
+        render_collection_numbers_section_update
       end
     end
   end
@@ -111,6 +108,18 @@ class CollectionNumbersController < ApplicationController
   ##############################################################################
 
   private
+
+  def render_modal_collection_number_form
+    render(partial: "shared/modal_form_show",
+           locals: { identifier: "collection_number" }) and return
+  end
+
+  def render_collection_numbers_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "collection_numbers" }
+    ) and return
+  end
 
   def default_index_subaction
     list_all
@@ -179,11 +188,15 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @title = :create_collection_number_title.l
   end
 
   def set_ivars_for_edit
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @title = :edit_collection_number_title.l(
+      name: @collection_number.format_name
+    )
   end
 
   # create
@@ -222,8 +235,7 @@ class CollectionNumbersController < ApplicationController
         end
         format.js do
           render(partial: "shared/modal_form_reload",
-                 locals: { action: action_name.to_sym, # ivar in partial?
-                           identifier: "collection_number",
+                 locals: { identifier: "collection_number",
                            form: "collection_numbers/form" }) and return true
         end
       end
@@ -243,10 +255,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       format.js do
-        render(
-          partial: "observations/show/update_section",
-          locals: { identifier: "collection_numbers" }
-        ) and return
+        render_collection_numbers_section_update
       end
     end
   end
@@ -286,10 +295,7 @@ class CollectionNumbersController < ApplicationController
       end
       @observation = @back_object # if we're here, we're on an obs page
       format.js do
-        render(
-          partial: "observations/show/update_section",
-          locals: { identifier: "collection_numbers" }
-        ) and return
+        render_collection_numbers_section_update
       end
     end
   end

@@ -29,7 +29,7 @@ module CollectionNumbers
         end
         format.js do
           render(
-            partial: "observations/show/update_section",
+            partial: "observations/show/section_update",
             locals: { identifier: "collection_numbers" }
           ) and return
         end

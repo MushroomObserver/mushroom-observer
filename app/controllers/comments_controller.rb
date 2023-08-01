@@ -27,11 +27,7 @@ class CommentsController < ApplicationController
   # index::
   # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
-    :target,
-    :pattern,
-    :by_user,
-    :for_user,
-    :by
+    :target, :pattern, :by_user, :for_user, :by
   ].freeze
 
   @index_subaction_dispatch_table = {
@@ -217,11 +213,12 @@ class CommentsController < ApplicationController
                   allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
+    @title = :comment_add_title.t(name: @target.unique_format_name)
 
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_comment_form
       end
     end
   end
@@ -238,6 +235,21 @@ class CommentsController < ApplicationController
 
   private
 
+  def render_modal_comment_form
+    render(partial: "shared/modal_form_show",
+           locals: { identifier: "comment" }) and return
+  end
+
+  def render_modal_form_reload
+    render(partial: "shared/modal_form_reload",
+           locals: { identifier: "comment",
+                     form: "comments/form" }) and return true
+  end
+
+  def render_update_comments_for_object
+    render(partial: "comments/update_comments_for_object")
+  end
+
   def permitted_comment_params
     params[:comment].permit([:summary, :comment])
   end
@@ -248,10 +260,7 @@ class CommentsController < ApplicationController
       respond_to do |format|
         format.html { render(:new) and return }
         format.js do
-          render(partial: "shared/modal_form_reload",
-                 locals: { action: :create, # ivar in partial?
-                           identifier: "comment",
-                           form: "comments/form" }) and return true
+          render_modal_form_reload
         end
       end
     end
@@ -264,7 +273,9 @@ class CommentsController < ApplicationController
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
       end
-      format.js
+      format.js do
+        render_update_comments_for_object
+      end
     end
   end
 
@@ -288,9 +299,12 @@ class CommentsController < ApplicationController
     return unless allowed_to_see!(@target)
     return unless check_permission_or_redirect!(@comment, @target)
 
+    @title = :comment_edit_title.t(name: @target.unique_format_name)
     respond_to do |format|
-      format.js
       format.html
+      format.js do
+        render_modal_comment_form
+      end
     end
   end
 
@@ -306,17 +320,16 @@ class CommentsController < ApplicationController
     unless comment_updated?
       respond_to do |format|
         format.js do
-          render(partial: "shared/modal_form_reload",
-                 locals: { action: :update, # ivar in partial?
-                           identifier: "comment",
-                           form: "comments/form" }) and return true
+          render_modal_form_reload
         end
         format.html { render(:edit) and return }
       end
     end
 
     respond_to do |format|
-      format.js
+      format.js do
+        render_update_comments_for_object
+      end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
@@ -342,7 +355,9 @@ class CommentsController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
     end
     respond_to do |format|
-      format.js
+      format.js do
+        render_update_comments_for_object
+      end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)

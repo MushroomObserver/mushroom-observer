@@ -29,7 +29,7 @@ module HerbariumRecords
         end
         format.js do
           render(
-            partial: "observations/show/update_section",
+            partial: "observations/show/section_update",
             locals: { identifier: "herbarium_records" }
           ) and return
         end

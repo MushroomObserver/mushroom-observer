@@ -1,0 +1,35 @@
+// Generalized JS handler to either open or generate new modal for
+// create/edit a section of an observation (resource)
+// checks for an existing modal to open, in case form is in progress
+<% # requires locals: identifier, form_bindings(opt), form_locals(opt)
+form_bindings ||= false
+form_locals ||= {}
+form_partial =  case identifier
+                when "naming"
+                  "observations/#{identifier}s/form"
+                else # top level view folder
+                  "#{identifier}s/form"
+                end
+%>
+
+var identifier = "<%= identifier %>";
+var this_modal = $('#modal_' + identifier);
+
+if(this_modal.length > 0) {
+  this_modal.modal('show');
+} else {
+  $('body').append('<%= j render(
+    partial: "shared/modal_form",
+    locals: {
+      identifier: identifier,
+      title: @title,
+      form: form_partial,
+    }.merge(form_locals)
+  ) %>');
+}
+
+<%= render(partial: form_bindings,
+           locals: { identifier: identifier }) if form_bindings %>
+
+<%= render(partial: "shared/modal_form_bindings",
+           locals: { identifier: identifier }) %>
