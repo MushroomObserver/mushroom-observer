@@ -208,6 +208,7 @@ GEM
     raindrops (0.20.1)
     rake (13.0.6)
     rbtree (0.4.6)
+    redcarpet (3.6.0)
     regexp_parser (2.8.1)
     reline (0.3.5)
       io-console (~> 0.5)
@@ -355,6 +356,7 @@ DEPENDENCIES
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties (~> 6.1)
+  redcarpet
   rtf
   rubocop
   rubocop-graphql

@@ -106,6 +106,9 @@ gem("i18n")
 # https://textile-lang.com/doc/insertions-and-deletions
 gem("RedCloth")
 
+# Use redcarpet to parse and render markdown
+gem("redcarpet")
+
 # Provide abstract base class for classes that depend upon method_missing
 gem("blankslate")
 
