@@ -15,7 +15,10 @@ when "edit", "update"
                     q: get_query_param)
 end
 
+# the form needs these two locals.
+# Note: i can't find where show_reasons is ever false - AN 20230801
 show_reasons ||= true
+# if modal, context provided by propose_naming_button
 context ||= "page"
 %>
 

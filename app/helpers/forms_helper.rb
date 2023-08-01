@@ -393,14 +393,4 @@ module FormsHelper
       selected: obj.try(&:when) || Time.zone.today,
       order: [:day, :month, :year] }
   end
-
-  # Rails can often figure this out, but for js forms maybe not
-  def form_commit_action
-    case action_name
-    when "new"
-      :create
-    when "edit"
-      :update
-    end
-  end
 end

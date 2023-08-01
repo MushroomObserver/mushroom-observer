@@ -50,8 +50,7 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(partial: "shared/modal_form_show",
-               locals: { identifier: "herbarium_record" }) and return
+        render_modal_herbarium_record_form
       end
     end
   end
@@ -76,8 +75,7 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(partial: "shared/modal_form_show",
-               locals: { identifier: "herbarium_record" }) and return
+        render_modal_herbarium_record_form
       end
     end
   end
@@ -105,10 +103,7 @@ class HerbariumRecordsController < ApplicationController
         redirect_with_query(action: :index)
       end
       format.js do
-        render(
-          partial: "observations/show/section_update",
-          locals: { identifier: "herbarium_records" }
-        ) and return
+        render_herbarium_records_section_update
       end
     end
   end
@@ -129,6 +124,18 @@ class HerbariumRecordsController < ApplicationController
     @title = :edit_herbarium_record_title.l(
       herbarium_label: @herbarium_record.herbarium_label
     )
+  end
+
+  def render_modal_herbarium_record_form
+    render(partial: "shared/modal_form_show",
+           locals: { identifier: "herbarium_record" }) and return
+  end
+
+  def render_herbarium_records_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "herbarium_records" }
+    ) and return
   end
 
   def default_index_subaction
@@ -258,10 +265,7 @@ class HerbariumRecordsController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
       format.js do
-        render(
-          partial: "observations/show/section_update",
-          locals: { identifier: "herbarium_records" }
-        ) and return
+        render_herbarium_records_section_update
       end
     end
   end
@@ -307,10 +311,7 @@ class HerbariumRecordsController < ApplicationController
       end
       @observation = @back_object # if we're here, we're on an obs page
       format.js do
-        render(
-          partial: "observations/show/section_update",
-          locals: { identifier: "herbarium_records" }
-        ) and return
+        render_herbarium_records_section_update
       end
     end
   end
@@ -332,8 +333,7 @@ class HerbariumRecordsController < ApplicationController
         end
         format.js do
           render(partial: "shared/modal_form_reload",
-                 locals: { action: action_name.to_sym, # ivar in partial?
-                           identifier: "collection_number",
+                 locals: { identifier: "collection_number",
                            form: "collection_numbers/form" }) and return true
         end
       end

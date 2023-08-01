@@ -218,8 +218,7 @@ class CommentsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(partial: "shared/modal_form_show",
-               locals: { identifier: "comment" }) and return
+        render_modal_comment_form
       end
     end
   end
@@ -236,6 +235,21 @@ class CommentsController < ApplicationController
 
   private
 
+  def render_modal_comment_form
+    render(partial: "shared/modal_form_show",
+           locals: { identifier: "comment" }) and return
+  end
+
+  def render_modal_form_reload
+    render(partial: "shared/modal_form_reload",
+           locals: { identifier: "comment",
+                     form: "comments/form" }) and return true
+  end
+
+  def render_update_comments_for_object
+    render(partial: "comments/update_comments_for_object")
+  end
+
   def permitted_comment_params
     params[:comment].permit([:summary, :comment])
   end
@@ -246,9 +260,7 @@ class CommentsController < ApplicationController
       respond_to do |format|
         format.html { render(:new) and return }
         format.js do
-          render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "comment",
-                           form: "comments/form" }) and return true
+          render_modal_form_reload
         end
       end
     end
@@ -262,7 +274,7 @@ class CommentsController < ApplicationController
                             action: @target.show_action, id: @target.id)
       end
       format.js do
-        render(partial: "comments/update_comments_for_object", format: :js)
+        render_update_comments_for_object
       end
     end
   end
@@ -289,11 +301,10 @@ class CommentsController < ApplicationController
 
     @title = :comment_edit_title.t(name: @target.unique_format_name)
     respond_to do |format|
-      format.js do
-        render(partial: "shared/modal_form_show",
-               locals: { identifier: "comment" }) and return
-      end
       format.html
+      format.js do
+        render_modal_comment_form
+      end
     end
   end
 
@@ -309,9 +320,7 @@ class CommentsController < ApplicationController
     unless comment_updated?
       respond_to do |format|
         format.js do
-          render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "comment",
-                           form: "comments/form" }) and return true
+          render_modal_form_reload
         end
         format.html { render(:edit) and return }
       end
@@ -319,7 +328,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.js do
-        render(partial: "comments/update_comments_for_object", format: :js)
+        render_update_comments_for_object
       end
       format.html do
         redirect_with_query(controller: @target.show_controller,
@@ -347,7 +356,7 @@ class CommentsController < ApplicationController
     end
     respond_to do |format|
       format.js do
-        render(partial: "comments/update_comments_for_object", format: :js)
+        render_update_comments_for_object
       end
       format.html do
         redirect_with_query(controller: @target.show_controller,

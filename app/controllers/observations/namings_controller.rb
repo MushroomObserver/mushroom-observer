@@ -22,13 +22,7 @@ module Observations
       respond_to do |format|
         format.html
         format.js do
-          render(partial: "shared/modal_form_show",
-                 locals: {
-                   identifier: "naming",
-                   form_bindings: "observations/namings/form_bindings",
-                   form_locals: { show_reasons: true,
-                                  context: params[:context] }
-                 }) and return
+          render_modal_naming_form
         end
       end
     end
@@ -67,13 +61,7 @@ module Observations
       respond_to do |format|
         format.html
         format.js do
-          render(partial: "shared/modal_form_show",
-                 locals: {
-                   identifier: "naming",
-                   form_bindings: "observations/namings/form_bindings",
-                   form_locals: { show_reasons: true,
-                                  context: params[:context] }
-                 }) and return
+          render_modal_naming_form
         end
       end
     end
@@ -112,6 +100,16 @@ module Observations
 
     private
 
+    def render_modal_naming_form
+      render(partial: "shared/modal_form_show",
+             locals: {
+               identifier: "naming",
+               form_bindings: "observations/namings/form_bindings",
+               form_locals: { show_reasons: true,
+                              context: params[:context] }
+             }) and return
+    end
+
     def default_redirect(obs, action = :show)
       redirect_with_query(controller: "/observations",
                           action: action, id: obs.id)
@@ -133,7 +131,7 @@ module Observations
         format.html { default_redirect(@params.observation, :show) }
         format.js do
           case params[:context]
-          when "lightbox"
+          when "lightbox", "matrix_box"
             render(partial: "observations/namings/update_lightbox")
           else
             render(partial: "observations/namings/update_observation")
@@ -144,14 +142,14 @@ module Observations
     end
 
     def respond_to_form_errors
-      form_action = case action_name
+      redo_action = case action_name
                     when "create"
                       :new
                     when "update"
                       :edit
                     end
       respond_to do |format|
-        format.html { render(action: form_action) and return }
+        format.html { render(action: redo_action) and return }
         format.js do
           render(partial: "observations/namings/form_reload") and return
         end
