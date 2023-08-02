@@ -7,6 +7,8 @@ form_locals ||= {}
 form_partial =  case identifier
                 when "naming"
                   "observations/#{identifier}s/form"
+                when "observation_email" # because there are other emails
+                  "observations/emails/form"
                 else # top level view folder
                   "#{identifier}s/form"
                 end
