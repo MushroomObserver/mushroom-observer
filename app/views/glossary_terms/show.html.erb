@@ -14,21 +14,16 @@
 %>
 
 <div class="row mt-3">
+  <div class="col-sm-8">
+    <%= @glossary_term.description.tpl %>
+    <%= tag.p(search_link_to(:Wikipedia, @glossary_term.name)) %>
+  </div>
   <% if @glossary_term.thumb_image %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-    </div>
     <div class="col-sm-4">
       <%= interactive_image(@glossary_term.thumb_image, size: :medium,
                             votes: true) %>
     </div>
-  <% else %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-    </div>
   <% end %>
-  <%# Form should have links to MycoBank thesaurus and maybe Wikipedia
-      See https://www.pivotaltracker.com/story/show/76992734 %>
 </div><!--.row-->
 
 <div class="mb-3">

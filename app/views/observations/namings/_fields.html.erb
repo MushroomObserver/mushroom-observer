@@ -25,7 +25,8 @@ feedback_locals = {
 }
 
 confidences = options_for_select(Vote.confidence_menu, vote&.value)
-select_opts = { include_blank: (action == :create) }
+select_opts = { include_blank: ["new", "create"].include?(action_name) }
+context ||= "blank"
 %>
 
 <div class="row">
@@ -96,7 +97,10 @@ select_opts = { include_blank: (action == :create) }
 
     </div><!--.col-->
   </div><!--.row-->
+
 <% end # fields_for(:naming) do %>
+
+<%= hidden_field_tag(:context, context) %>
 
 <%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
 <% inject_javascript_at_end %(

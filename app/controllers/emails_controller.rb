@@ -2,6 +2,8 @@
 
 # Send emails directly to webmaster and users via the application
 class EmailsController < ApplicationController
+  include ::Emailable
+
   before_action :login_required, except: [
     :ask_webmaster_question
   ]
@@ -29,18 +31,6 @@ class EmailsController < ApplicationController
     redirect_to(user_path(@target.id))
   end
 
-  def ask_observation_question
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation &&
-                  can_email_user_question?(@observation) &&
-                  request.method == "POST"
-
-    question = params[:question][:content]
-    ObservationMailer.build(@user, @observation, question).deliver_now
-    flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(observation_path(@observation.id))
-  end
-
   def commercial_inquiry
     return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&
                   can_email_user_question?(@image,
@@ -51,16 +41,6 @@ class EmailsController < ApplicationController
     CommercialMailer.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
     redirect_with_query(image_path(@image.id))
-  end
-
-  def can_email_user_question?(target, method: :email_general_question)
-    user = target.is_a?(User) ? target : target.user
-    return true if user.send(method) && !user.no_emails
-
-    flash_error(:permission_denied.t)
-    redirect_with_query(controller: target.show_controller,
-                        action: target.show_action, id: target.id)
-    false
   end
 
   def merge_request

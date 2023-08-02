@@ -1497,6 +1497,10 @@
   form_list_feedback_missing_names: The following names could not be found.
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
+  # glossary
+  form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use. \n Avoid (a) variations of other Terms, or (b) Names of taxa. Details:"
+  form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
+
   # location/_form_location
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
@@ -2429,7 +2433,7 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_intro: "In collaboration with the Rhode Island School of Design, students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, this new glossary feature for Mushroom Observer was created.\nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-general\">mo-general@googlegroups.com</a>) or the <a href=\"https://www.facebook.com/groups/105230049528087/\">unofficial Mushroom Observer Facebook page</a>."
+  glossary_term_index_documentation: "Glossary Documentation and Guidelines"
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"

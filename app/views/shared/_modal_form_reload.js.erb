@@ -1,0 +1,17 @@
+<%
+# What to do if a form submit doesn't succeed
+# Takes locals: { identifier:, form:, form_locals: }
+form_locals ||= {}
+%>
+
+// replace the flash notices in the modal
+$("#modal_flash").replaceWith("<%= j render(
+  partial: 'layouts/app/flash_notices',
+  locals: { id: 'modal_flash' }
+) if flash_notices? %>");
+
+// re-render the form in the modal
+$("#<%= identifier %>_form").replaceWith('<%= j render(
+  partial: form,
+  locals: { local: false }.merge(form_locals)
+) %>')

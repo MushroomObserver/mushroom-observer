@@ -9,6 +9,11 @@
 #   (locals) anything else you want to send to the body partial.
 #      { local: false } gets merged so that form sends via js
 
+# In order to keep form progress if the modal is closed and opened again,
+# we're setting the data attribute "busy" as "true".
+# Successful submit sets it "false".
+# Modals that are "busy" are not destroyed when closed.
+
 locals = local_assigns.except(:identifier, :title, :partial).
                        merge({ local: false })
 %>
@@ -16,7 +21,8 @@ locals = local_assigns.except(:identifier, :title, :partial).
 <%=
 tag.div(
   class: "modal", id: "modal_#{identifier}", role: "dialog",
-  aria: { labelledby: "modal_header_#{identifier}" }
+  aria: { labelledby: "modal_header_#{identifier}" },
+  data: { busy: "true" }
 ) do
   tag.div(class: "modal-dialog modal-lg", role: "document") do
     tag.div(class: "modal-content") do

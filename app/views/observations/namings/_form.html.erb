@@ -1,13 +1,13 @@
 <%
 # Fields must be separate because they're included in the obs form too.
-case action
-when :create
+case action_name
+when "new", "create"
   button_name = :CREATE.l
   method = :post
   url = observation_namings_path(observation_id: @observation.id,
                                   approved_name: @params.what,
                                   q: get_query_param)
-else
+when "edit", "update"
   button_name = :SAVE_EDITS.l
   method = :patch
   url = naming_path(id: @params.naming.id,
@@ -15,6 +15,11 @@ else
                     q: get_query_param)
 end
 
+# the form needs these two locals.
+# Note: i can't find where show_reasons is ever false - AN 20230801
+show_reasons ||= true
+# if modal, context provided by propose_naming_button
+context ||= "page"
 %>
 
 <%= form_with(model: @naming, url: url, method: method, local: local,
@@ -23,7 +28,7 @@ end
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <%= render(partial: "observations/namings/fields",
-             locals: { f: f, action: action, button_name: button_name,
-                       show_reasons: true }) %>
+             locals: { f: f, button_name: button_name,
+                       show_reasons: show_reasons, context: context }) %>
 
 <% end # form %>
