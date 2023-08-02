@@ -1,6 +1,9 @@
 // Update lightbox caption and matrix box title
 // with results of update or create naming, or vote
 
+$('#mo_ajax_progress_caption').empty();
+$('#mo_ajax_progress').modal('hide');
+
 var obs_id = '<%= @observation.id %>';
 var lightbox = $("#lightbox")
 
