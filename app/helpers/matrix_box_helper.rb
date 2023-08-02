@@ -27,7 +27,8 @@ module MatrixBoxHelper
                locals: { naming: nam })
       end
     else
-      propose_naming_link(object.id, "btn-default mb-3")
+      propose_naming_link(object.id, btn_class: "btn-default mb-3",
+                                     context: "matrix_box")
     end
   end
 

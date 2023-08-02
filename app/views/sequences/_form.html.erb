@@ -1,10 +1,12 @@
 <%
-url_params = { action: action, q: get_query_param }
-case action
-when :create
-  url_params = url_params.merge({ observation_id: @observation.id })
+case action_name
+when "new", "create"
+  url_params = add_query_param(
+    { action: :create, observation_id: @observation.id }
+  )
   button = :ADD.t
-when :update
+when "edit", "update"
+  url_params = add_query_param({ action: :update })
   url_params = url_params.merge({ back: @back }) if @back.present?
   button = :UPDATE.t
 end
@@ -28,7 +30,8 @@ end
                 "(#{:form_sequence_bases_or_deposit_required.t})") +
       link_to("(#{:form_sequence_bases_format.t})",
                 WebSequenceArchive.blast_format_help,
-                class: "d-inline-block float-right") %>
+                class: "d-inline-block float-right",
+                target: "_blank") %>
   <%= text_area_with_label(form: f, field: :bases, cols: 80, rows: 5,
                            label: :BASES.t + ":", monospace: true,
                            between: between) %>

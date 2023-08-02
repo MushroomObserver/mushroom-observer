@@ -1,11 +1,17 @@
 <%
-# locals: { obs_id:, text:, btn_class: }
+# locals: { obs_id:, text:, btn_class: lightbox: }
+context ||= "namings_table"
 %>
-<%= link_to(text,
-            new_observation_naming_path(
-              observation_id: obs_id,
-              q: get_query_param
-            ),
-            { remote: true, onclick: "MOEvents.whirly();",
-              class: "btn #{btn_class} propose-naming-button",
-              id: "propose_naming_button_#{obs_id}" }) %>
+<%=
+link_to(
+  text,
+  new_observation_naming_path(
+    observation_id: obs_id,
+    q: get_query_param,
+    context: context
+  ),
+  { remote: true, onclick: "MOEvents.whirly();",
+    class: "btn #{btn_class} propose-naming-button",
+    id: "propose_naming_button_#{obs_id}" }
+)
+%>

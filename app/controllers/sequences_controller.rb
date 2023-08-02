@@ -76,11 +76,12 @@ class SequencesController < ApplicationController
     return unless @observation
 
     @sequence = Sequence.new
+    @title = :sequence_add_title.t
 
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_sequence_form
       end
     end
   end
@@ -99,10 +100,12 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
 
+    @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
+
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_sequence_form
       end
     end
   end
@@ -115,13 +118,6 @@ class SequencesController < ApplicationController
     return unless make_sure_can_edit!(@sequence)
 
     save_edits
-
-    respond_to do |format|
-      format.html
-      format.js do
-        render(layout: false)
-      end
-    end
   end
 
   def destroy
@@ -145,6 +141,22 @@ class SequencesController < ApplicationController
   def figure_out_where_to_go_back_to
     @back = params[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
+  end
+
+  def render_modal_sequence_form
+    render(partial: "shared/modal_form_show",
+           locals: { identifier: "sequence" }) and return
+  end
+
+  def render_sequences_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "sequences" }
+    ) and return
+  end
+
+  def render_modal_flash_update
+    render(partial: "shared/modal_flash_update") and return
   end
 
   # ---------- Index -----------------------------------------------------------
@@ -198,22 +210,10 @@ class SequencesController < ApplicationController
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      respond_to do |format|
-        format.html do
-          redirect_with_query(@observation.show_link_args)
-        end
-        format.js # updates the observation.
-      end
+      respond_to_successful_form_submit
     else
       flash_object_errors(@sequence)
-      respond_to do |format|
-        format.html do
-          render("new")
-        end
-        format.js do
-          render(partial: "shared/update_modal_flash") and return
-        end
-      end
+      respond_to_form_errors
     end
   end
 
@@ -223,21 +223,42 @@ class SequencesController < ApplicationController
     if @sequence.save
       flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
       @observation = @sequence.observation # needed for js to update obs page
-      respond_to do |format|
-        format.html do
-          redirect_with_query(@back_object.show_link_args)
-        end
-        format.js # updates the observation.
-      end
+      respond_to_successful_form_submit
     else
       flash_object_errors(@sequence)
-      respond_to do |format|
-        format.html do
-          render("edit")
-        end
-        format.js do
-          render(partial: "shared/update_modal_flash") and return
-        end
+      respond_to_form_errors
+    end
+  end
+
+  def respond_to_successful_form_submit
+    redirect_to = case action_name
+                  when "create"
+                    @observation.show_link_args
+                  when "update"
+                    @back_object.show_link_args
+                  end
+
+    respond_to do |format|
+      format.html do
+        redirect_with_query(redirect_to)
+      end
+      format.js do
+        render_sequences_section_update
+      end
+    end
+  end
+
+  def respond_to_form_errors
+    redo_action = case action_name
+                  when "create"
+                    :new
+                  when "update"
+                    :edit
+                  end
+    respond_to do |format|
+      format.html { render(action: redo_action) and return }
+      format.js do
+        render_modal_flash_update
       end
     end
   end
@@ -249,8 +270,7 @@ class SequencesController < ApplicationController
           return
       end
       format.js do
-        # renders the flash in the modal via js
-        render(partial: "shared/update_modal_flash") and return
+        render_modal_flash_update
       end
     end
   end
@@ -266,7 +286,7 @@ class SequencesController < ApplicationController
       end
       format.js do
         # renders the flash in the obs page via js
-        render(partial: "update_observation") and return
+        render_sequences_section_update
       end
     end
   end

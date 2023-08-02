@@ -1,6 +1,4 @@
 <%
-  @title = :comment_add_title.t(name: @target.unique_format_name)
-
   target_type = @comment.target_type.underscore.upcase.to_sym
   tabs = [
     link_with_query(:cancel_and_show.t(type: target_type),

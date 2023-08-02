@@ -1,11 +1,7 @@
-// Bindings for both new.js.erb and edit.js.erb
-$("#mo_ajax_progress").modal('hide');
+// This must be rendered before the standard bindings in
+// shared/modal_form_bindings because that shows the modal already.
+// Attaches all the bindings on shown
 
-$('#modal_naming').on('hidden.bs.modal', function () {
-  $(this).remove();
-});
-
-// attach all the bindings on shown
 $('#modal_naming').on('shown.bs.modal', function() {
   var naming_input = $("#naming_name");
   var naming_form = $("#naming_form");
@@ -17,7 +13,7 @@ $('#modal_naming').on('shown.bs.modal', function() {
 
   naming_input.focus();
 
-  // Success now handled in create.js.erb or form_reload.js.erb
+  // Success now handled in create.js.erb or modal_form_reload.js.erb
   naming_form.on("ajax:success", (event) => {
     // const [_data, _status, xhr] = event.detail;
     // namings_table.remove();
@@ -31,5 +27,3 @@ $('#modal_naming').on('shown.bs.modal', function() {
     naming_form.append($("<h4>Error</h4>"));
   });
 });
-
-$('#modal_naming').modal('show');
