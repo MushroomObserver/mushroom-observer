@@ -11,10 +11,6 @@ class EmailsControllerTest < FunctionalTestCase
   end
 
   def test_ask_questions
-    # id = observations(:coprinus_comatus_obs).id
-    # requires_login(:ask_observation_question, id: id)
-    # assert_form_action(action: :ask_observation_question, id: id)
-
     id = mary.id
     requires_login(:ask_user_question, id: id)
     assert_form_action(action: :ask_user_question, id: id)
@@ -104,19 +100,6 @@ class EmailsControllerTest < FunctionalTestCase
     post_requires_login(:commercial_inquiry, params)
     assert_redirected_to(image_path(image.id))
   end
-
-  # def test_send_ask_observation_question
-  #   obs = observations(:minimal_unknown_obs)
-  #   params = {
-  #     id: obs.id,
-  #     question: {
-  #       content: "Testing question"
-  #     }
-  #   }
-  #   post_requires_login(:ask_observation_question, params)
-  #   assert_redirected_to(observation_path(obs.id))
-  #   assert_flash_text(:runtime_ask_observation_question_success.t)
-  # end
 
   def test_send_ask_user_question
     user = mary

@@ -383,9 +383,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :contributors, only: [:index]
 
   # ----- Emails: no resources, just forms ------------------------------------
-  # match("/emails/ask_observation_question(/:id)",
-  #       to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
-  #       as: "emails_ask_observation_question")
   match("/emails/ask_user_question(/:id)",
         to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_user_question")
