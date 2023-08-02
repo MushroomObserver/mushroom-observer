@@ -43,7 +43,6 @@ module Observations
           redirect_with_query(observation_path(@observation.id)) and return
         end
         format.js do
-          # renders the flash in the modal via js
           render(partial: "shared/modal_flash_update") and return
         end
       end
