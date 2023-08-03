@@ -344,4 +344,18 @@ class TextileTest < UnitTestCase
                  "url: #{url.inspect}\n" \
                  "actual: #{actual}\n")
   end
+
+  ###########################################################
+  # Tests for using redcarpet with MOFT (MO Flavored Textile)
+
+  # MOFT uses ??ital?? to display italics because underscores are
+  # used by links to MO Objects
+  # MOFT renders ??x?? as <cite>
+  # redcarpet should instead render if as <i>
+  def test_double_question_marks
+    assert_equal(
+      "<cite>abc</cite>",
+      "??abc??".t
+    )
+  end
 end

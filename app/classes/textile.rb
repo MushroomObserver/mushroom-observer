@@ -2,6 +2,7 @@
 
 require("cgi")
 require("redcloth")
+require("redcarpet")
 
 #  == Textile Parser
 #
@@ -116,7 +117,10 @@ class Textile < String
     gsub!(BRACKETED_YEAR, '==[==\1]') if match?(BRACKETED_YEAR)
 
     # Let Textile munge the thing up now.
+
+    debugger
     red = RedCloth.new(self)
+    markdown = markdown(self)
 
     red.sanitize_html = sanitize
     replace(red.to_html)
@@ -135,6 +139,23 @@ class Textile < String
     restore_pre_existing_links!(saved_links)
 
     self
+  end
+
+  # redcarpet markdown
+  def markdown(text)
+    options = {
+    }
+    extensions = {
+    }
+
+    renderer = ::Redcarpet::Render::HTML.new(options)
+    markdown = ::Redcarpet::Markdown.new(renderer, extensions)
+    markdown.render(text)
+  end
+
+  # MOFT uses ??xxx?? for italics
+  def convert_moft_double_question_marks_to_markdown_italics(text)
+    text.gsub(/\?\?(?<inner_text>.*)\?\?/, '_\k<inner_text>_')
   end
 
   # Register one or more names (instances) so that subsequent textile strings
