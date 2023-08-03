@@ -1,16 +1,27 @@
-<%= form_tag(add_query_param(activity_logs_path), { method: :get, class: "filter-form" }) %>
-  <div class="btn-group pb-1 hidden-xs text-nowrap">
-    <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
+<%# bs3 %>
 
-    <!-- The "Everything" tab -->
-    <span class="btn btn-default btn-sm <%= "active" if @types == ['all'] %>">
-      <%= tab_for_everything %>
-    </span>
+<%= form_with(url: add_query_param(activity_logs_path),
+              method: :get, scope: :type,
+              class: "filter-form", id: "log_filter_form") do |f|
 
-    <!-- Checkboxes and Tabs for each type of RssLog -->
-    <%= render(partial: "type", collection: types) %>
+  tag.div(class: "btn-group pb-1 hidden-xs text-nowrap") do
+    [
+      tag.span(:rss_show.t, class: "btn btn-default btn-sm disabled"),
 
-    <%= submit_tag(:SUBMIT.t, class: "btn btn-default btn-sm") %>
-  </div>
-</form>
+      # Everything tab
+      tag.span(
+        log_tab_for_everything(@types),
+        class: class_names("btn btn-default btn-sm",
+                           { active: @types == ['all'] })
+      ),
+
+      # Tab for each type of log
+      render(partial: "type", collection: RssLog.all_types(&:to_s),
+             locals: { f: f }),
+
+      f.submit(:SUBMIT.t, class: "btn btn-default btn-sm")
+    ].safe_join
+  end
+
+end %>
 <% javascript_include("rss_feed_select_helper")%>
