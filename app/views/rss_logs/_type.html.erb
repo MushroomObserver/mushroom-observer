@@ -1,14 +1,46 @@
 <%# bs3 %>
 
-<!-- A single checkbox and tab in Activity Feed tabset -->
 <%=
 tag.span(
   class: class_names("btn btn-default btn-sm", { active: @types == [type] }),
   data: { toggle: "checkbox" }
 ) do
-  check_box_with_label(form: f, field: type, # type,
+  check_box_with_label(form: f, field: type,
                        checked: @types.include?(type) || @types == ['all'],
                        label: log_tab_for_type(@types, type),
                        checked_value: type,
                        id: "type_#{type}", class: "filter-checkbox my-0")
-end %>
+end
+%>
+
+<%# A single checkbox and tab in Activity Feed tabset %>
+<%#
+tag.span(
+  class: class_names("btn btn-default btn-sm", { active: @types == [type] }),
+  data: { toggle: "checkbox" }
+) do
+  tag.div(class: "checkbox my-0") do
+    tag.label(for: "type_#{type}") do
+      [
+        check_box_tag(
+          "type[]",
+          value = type,
+          checked = @types.include?(type) || @types == ['all'],
+          class: "filter-checkbox",
+          id: "type_#{type}"
+        ),
+        log_tab_for_type(@types, type)
+      ].safe_join
+    end
+  end
+end
+%>
+
+<%#
+GOTCHA: Cannot use our `check_box_with_label` helper, because Rails'
+`check_box` helper sends duplicate shadow params with value "0" for array
+fields like type[], in order that all fields send at least one value.
+https://api.rubyonrails.org/classes/ActionView/Helpers/FormHelper.html#method-i-check_box-label-Gotcha
+
+This does not work due to the above Rails behavior for fhe check_box helper:
+%>

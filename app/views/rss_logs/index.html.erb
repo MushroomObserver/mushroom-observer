@@ -1,14 +1,9 @@
 <%
   @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
+  @tabsets = rss_logs_index_tabset(@user, @types) # turns into block of links
+  @full_width_tab_set = render(partial: "rss_log_type_filters")
+
   @container = :full
-
-  # there maybe one link to make selected rss_log_tabset the default types
-  if @links.any? # @links is just an array of text, path
-    tabs = create_links(@links) # this turns those into link_to HTML
-    @tabsets = { right: draw_tab_set(tabs) } # turns into block of links
-  end
-
-  @full_width_tab_set = render(partial: "rss_log_tabset")
 
   flash_error(@error) if @error && @objects.empty?
 %>

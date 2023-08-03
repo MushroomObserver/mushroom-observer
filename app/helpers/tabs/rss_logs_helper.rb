@@ -4,6 +4,25 @@
 #
 module Tabs
   module RssLogsHelper
+    # TABSET
+    def rss_logs_index_tabset(user, types)
+      tabs = [
+        default_rss_types_for_user_tab(user, types)
+      ]
+      { right: draw_tab_set(tabs) }
+    end
+
+    def default_rss_types_for_user_tab(user, types)
+      return unless params[:make_default] != "1"
+
+      return unless user&.default_rss_type.to_s.split.sort != types
+
+      link_to(:rss_make_default.t,
+              add_query_param(action: :index, make_default: 1),
+              class: "default_rss_types_for_user_link")
+    end
+
+    # FULL WIDTH TAB SET
     # The "Everything" tab in Activity Feed full_width_tab_set
     def log_tab_for_everything(types)
       label = :rss_all.t
