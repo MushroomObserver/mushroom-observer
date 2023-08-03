@@ -37,15 +37,15 @@ class RssLogsController < ApplicationController
   private
 
   def types_query_string_from_params
-    types = ""
-    if params[:type].is_a?(ActionController::Parameters)
-      types = params[:type].values
-      types = RssLog.all_types.intersection(types)
-      types = "all" if types.length == RssLog.all_types.length
-      types = "none" if types.empty?
-      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-    elsif params[:type].is_a?(String)
-      types = params[:type]
+    types = params[:type]
+    if types.is_a?(Array)
+      if types.empty?
+        types = "none"
+      else
+        types = RssLog.all_types.intersection(types)
+        types = "all" if types.length == RssLog.all_types.length
+        types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+      end
     end
     types
   end
@@ -106,14 +106,11 @@ class RssLogsController < ApplicationController
         @user.default_rss_type = @types.join(" ")
         @user.save_without_our_callbacks
       elsif @user.default_rss_type.to_s.split.sort != @types
-        # TODO: Split this condition off into the tabs helper
         @links << [:rss_make_default.t,
                    add_query_param(action: :index, make_default: 1)]
       end
     end
 
-    # NOTE: AFAICT this helper never generates additional or default @links,
-    # but maybe it used to. Notes suggest it did.
     show_index_of_objects(query, args)
   end
 end
