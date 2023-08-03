@@ -100,18 +100,12 @@ class RssLogsController < ApplicationController
 
     @types = query.params[:type].to_s.split.sort
 
-    puts("*" * 80)
-    puts(@types)
-    puts("*" * 80)
-
     # Let the user make this their default and fine tune.
     if @user && params[:make_default] == "1"
       @user.default_rss_type = @types.join(" ")
       @user.save_without_our_callbacks
     end
 
-    # NOTE: AFAICT this helper never generates additional or default @links,
-    # but maybe it used to. Notes suggest it did.
     show_index_of_objects(query, args)
   end
 end
