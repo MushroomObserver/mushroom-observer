@@ -1,7 +1,14 @@
+<%# bs3 %>
+
 <!-- A single checkbox and tab in Activity Feed tabset -->
-<% checked = @types.include?(type) || @types == ['all'] %>
-<span class="btn btn-default btn-sm<%= " active" if @types == [type] %>"
-      data-toggle="checkbox" class="">
-  <%= check_box_tag("type[]", "#{type}", checked, class: "filter-checkbox") %>
-  <%= tab_for_type(type) %>
-</span>
+<%=
+tag.span(
+  class: class_names("btn btn-default btn-sm", { active: @types == [type] }),
+  data: { toggle: "checkbox" }
+) do
+  check_box_with_label(form: f, field: type, # type,
+                       checked: @types.include?(type) || @types == ['all'],
+                       label: log_tab_for_type(@types, type),
+                       checked_value: type,
+                       id: "type_#{type}", class: "filter-checkbox")
+end %>

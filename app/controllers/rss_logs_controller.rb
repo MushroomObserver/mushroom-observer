@@ -37,15 +37,15 @@ class RssLogsController < ApplicationController
   private
 
   def types_query_string_from_params
-    types = params[:type]
-    if types.is_a?(Array)
-      if types.empty?
-        types = "none"
-      else
-        types = RssLog.all_types.intersection(types)
-        types = "all" if types.length == RssLog.all_types.length
-        types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-      end
+    types = ""
+    if params[:type].is_a?(ActionController::Parameters)
+      types = params[:type].values
+      types = RssLog.all_types.intersection(types)
+      types = "all" if types.length == RssLog.all_types.length
+      types = "none" if types.empty?
+      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+    elsif params[:type].is_a?(String)
+      types = params[:type]
     end
     types
   end
