@@ -1,7 +1,7 @@
 /**
- * This script simply makes it so that if someone clicks on the span that it
- * checks the checkbox. Makes it easier to check / uncheck the filter
- * checkboxes on _rss_log_type_filters
+ * This script simply makes it so that if someone clicks on the span, it
+ * checks the checkbox. Makes it easier to check or uncheck the filter
+ * checkboxes on rss_logs/_type_filters
  */
 
 jQuery(document).ready(function () {
