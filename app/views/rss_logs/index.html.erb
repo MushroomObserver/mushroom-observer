@@ -2,10 +2,9 @@
   @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
   @container = :full
 
-  # there maybe one link to make selected rss_log_tabset the default types
-  if @links.any? # @links is just an array of text, path
-    tabs = create_links(@links) # this turns those into link_to HTML
-    @tabsets = { right: draw_tab_set(tabs) } # turns into block of links
+  if @links.any?
+    tabs = create_links(@links)
+    @tabsets = { right: draw_tab_set(tabs) }
   end
 
   @full_width_tab_set = render(partial: "rss_log_tabset")
