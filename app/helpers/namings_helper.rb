@@ -123,7 +123,8 @@ module NamingsHelper
     # row props have mobile-friendly labels
     [tag.small("#{:show_namings_your_vote.t}: ", class: "d-block d-md-none"),
      render(partial: "observations/namings/votes/form",
-            locals: { naming: naming, classes: "form-control-sm" })].safe_join
+            locals: { naming: naming, classes: "form-control-sm",
+                      context: "namings_table" })].safe_join
   end
 
   # May show both user and consensus icons
