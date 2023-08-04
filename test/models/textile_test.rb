@@ -444,14 +444,32 @@ class TextileTest < UnitTestCase
     assert_equal("&#64;jason", "@jason".t)
   end
 
-=begin
-  horizontal rule
-  "--- or
-  ___"
-  textile escape
-  ==[==1]
+  # HTML tags, unreferenced **c************************************
 
-  header
+  # MOFT "---" => <hr />
+  # RCMD "---" => <hr>
+  # TODO: use <hr> https://html.spec.whatwg.org/multipage/grouping-content.html#the-hr-element
+  def test_moft_horizontal_rule
+    assert_equal("<hr />", "---".t)
+    assert_equal("<hr />", "___".t)
+  end
+
+  # Textile uses bracketed integers for footnote calls, so must escape them to get bracket
+  # MOFT "==[==1]" => [1]
+  # RCMD
+  # TODO: Evenutally get rid of this quoting.
+  # But it's a pain because I used it in lots of places
+  # > Name.where(Name[:citation] =~ /==/).count
+  #   => 412
+  # > Comment.where(Comment[:comment] =~ /==/).count
+  #   => 88
+  # plus Name.description all text fields
+  def test_moft_textile_escape
+    assert_equal("[1]", "==[==1]".t)
+  end
+
+=begin
+  headings
   h1. hdr
   Block quote
   bq. blah
