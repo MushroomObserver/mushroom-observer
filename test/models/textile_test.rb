@@ -516,8 +516,12 @@ class TextileTest < UnitTestCase
   !href!
   internal inline
   !image 640/12345!
-  MO internal link
+  MO explicit internal link
   _name 371_
+  MO implicit internal namee link
+  _Boletus
+  MO implicit internal glossary link
+  _term_
 
   # misc
   style
