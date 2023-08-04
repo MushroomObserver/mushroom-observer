@@ -6,9 +6,9 @@ module Tabs
     # link attribute arrays (coerced_query_link returns array)
     def locations_index_tabs(query)
       tabs = [
-        [:show_location_create.t, get_query_param(new_location_path),
+        [:show_location_create.t, add_query_param(new_location_path),
          { id: "new_location_link" }],
-        [:list_place_names_map.t, get_query_param(map_locations_path),
+        [:list_place_names_map.t, add_query_param(map_locations_path),
          { id: "map_locations_link" }],
         [:list_countries.t, location_countries_path,
          { id: "location_countries_link" }]
