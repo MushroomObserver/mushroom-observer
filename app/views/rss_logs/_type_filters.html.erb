@@ -1,17 +1,17 @@
-<%# bs4 %>
+<%# bs3 %>
 
 <%= form_with(url: add_query_param(activity_logs_path),
               method: :get, scope: :type,
               class: "filter-form", id: "log_filter_form") do |f|
 
-  tag.div(class: "btn-group pb-1 d-none d-sm-block text-nowrap") do
+  tag.div(class: "btn-group pb-1 hidden-xs text-nowrap") do
     [
-      tag.span(:rss_show.t, class: "btn btn-outline-secondary btn-sm disabled"),
+      tag.span(:rss_show.t, class: "btn btn-default btn-sm disabled"),
 
       # Everything tab
       tag.span(
         log_tab_for_everything(@types),
-        class: class_names("btn btn-outline-secondary btn-sm",
+        class: class_names("btn btn-default btn-sm",
                            { active: @types == ['all'] })
       ),
 
@@ -19,9 +19,10 @@
       render(partial: "type", collection: RssLog.all_types(&:to_s),
              locals: { f: f }),
 
-      f.submit(:SUBMIT.t, class: "btn btn-outline-secondary btn-sm")
+      f.submit(:SUBMIT.t, class: "btn btn-default btn-sm")
     ].safe_join
   end
 
 end %>
-<% javascript_include("rss_feed_select_helper")%>
+
+<% javascript_include("rss_log_type_filter_helper")%>

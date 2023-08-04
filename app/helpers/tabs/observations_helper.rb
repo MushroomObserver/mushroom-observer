@@ -69,7 +69,7 @@ module Tabs
       return unless obs.user.email_general_question && obs.user != user
 
       link_with_query(:show_observation_send_question.t,
-                      emails_ask_observation_question_path(obs.id),
+                      new_question_for_observation_path(obs.id),
                       remote: true, onclick: "MOEvents.whirly();")
     end
 

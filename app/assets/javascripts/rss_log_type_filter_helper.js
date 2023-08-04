@@ -1,6 +1,7 @@
 /**
- * This script simply makes it so that if someone clicks on the span that it checks the checkbox
- * Makes it easier to check and uncheck the filter checkboxes on _rss_log_tabset
+ * This script simply makes it so that if someone clicks on the span, it
+ * checks the checkbox. Makes it easier to check or uncheck the filter
+ * checkboxes on rss_logs/_type_filters
  */
 
 jQuery(document).ready(function () {
@@ -16,5 +17,4 @@ jQuery(document).ready(function () {
   jQuery("[data-toggle='checkbox'] a").on('click', function (e) {
     e.stopPropagation();
   });
-
 });
