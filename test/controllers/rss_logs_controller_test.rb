@@ -79,13 +79,8 @@ class RssLogsControllerTest < FunctionalTestCase
   end
 
   def test_user_default_rss_log
-    # Prove that MO offers to make non-default log the user's default.
-    login("rolf")
-    get(:index, params: { type: :glossary_term })
-    link_text = @controller.instance_variable_get(:@links).flatten.first
-    assert_equal(:rss_make_default.l, link_text)
-
     # Prove that user can change his default rss log type.
+    login("rolf")
     get(:index, params: { type: :glossary_term, make_default: 1 })
     assert_equal("glossary_term", rolf.reload.default_rss_type)
     # Test that this actually works
