@@ -359,6 +359,7 @@ class TextileTest < UnitTestCase
   # We typically use italics for scientific names, not emphasis
   def test_moft_italics
     assert_equal("<cite>abc</cite>", "??abc??".t)
+    assert_equal("<cite>abc</cite>", "??abc??".tl)
   end
 
   # MOFT **bf** => <b>
