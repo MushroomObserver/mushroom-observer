@@ -118,9 +118,9 @@ class Textile < String
 
     # Let Textile munge the thing up now.
 
-    debugger
+    # debugger
     red = RedCloth.new(self)
-    markdown = markdown(self)
+    # markdown = markdown(self)
 
     red.sanitize_html = sanitize
     replace(red.to_html)
