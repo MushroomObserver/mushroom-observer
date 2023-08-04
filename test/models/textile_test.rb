@@ -345,17 +345,105 @@ class TextileTest < UnitTestCase
                  "actual: #{actual}\n")
   end
 
-  ###########################################################
-  # Tests for using redcarpet with MOFT (MO Flavored Textile)
+  ##############################################################################
+  # Prove that RCMD (redcarpet markdown) yields same html
+  # as MOFT (MO Flavored Textile)
+  # TODO: change tests to expect better html, as indicated in individual tests
 
-  # MOFT uses ??ital?? to display italics because underscores are
-  # used by links to MO Objects
-  # MOFT renders ??x?? as <cite>
-  # redcarpet should instead render if as <i>
-  def test_double_question_marks
-    assert_equal(
-      "<cite>abc</cite>",
-      "??abc??".t
-    )
+  # html formatting
+
+  # In MOFT underscores are taken by links to MO Objects, so
+  # MOFT ??ital?? => <cite>
+  # RCMD *ital* (single asterisk) => <em>
+  # TODO: use <i> https://developer.mozilla.org/en-US/docs/Web/HTML/Element/em#i_vs._em
+  # We typically use italics for scientific names, not emphasis
+  def test_moft_italics
+    assert_equal("<cite>abc</cite>", "??abc??".t)
   end
+
+  # MOFT **bf** => <b>
+  # RCMD **bf** => <strong>
+  # TODO: use <strong> https://developer.mozilla.org/en-US/docs/Web/HTML/Element/strong#b_vs._strong
+  # We typcially use bf to stress part of instructions
+  def test_moft_boldface
+    assert_equal("<b>bf</b>", "**bf**".t)
+  end
+
+  # MOFT +ul+ => <ins>
+  # RCMD native - <ul>
+  # RCMD "underline" extension - _ul_ => <ul>ul</ul>; note conflict with MOFT Object links
+  # TODO: use <ul>
+  def test_moft_underline
+    assert_equal("<ins>ul</ins>", "+ul+".t)
+  end
+
+  # MOFT ~sub~ => <sub>
+  # RCMD <sub>
+  def test_moft_subscript
+    assert_equal("<sub>sub</sub>", "~sub~".t)
+  end
+
+  # MOFT ^super^ => <sup>
+  # RCMD  <sup>
+  # RCMD "superscript" extension single carat - H^(2)O => H<sup>2</sup>O
+  # TODO: use "superscript" extension
+  def test_moft_superscript
+    assert_equal("<sup>sup</sup>", "^sup^".t)
+  end
+
+=begin
+  # chars and symbols
+  trademark
+  (tm)
+  copyright
+  (c)
+  registered
+  (r)
+  microns
+  &micro;
+  degrees
+  &deg;
+  atsign
+  @jason
+  horizontal rule
+  "--- or
+  ___"
+  textile escape
+  ==[==1]
+
+  header
+  h1. hdr
+  Block quote
+  bq. blah
+
+  # lists
+  unordered list
+  * item
+  ordered list
+  # first
+
+  # footnotes and tables
+  fn ref
+  ref[1]
+  fn
+  fn1.
+  table
+  | c1 | c2 |
+
+  # links and inlines
+  autolink
+  https://google.com
+  external link
+  "text":href
+  external inline?
+  !href!
+  internal inline
+  !image 640/12345!
+  MO internal link
+  _name 371_
+
+  # misc
+  style
+  p{display: none;}. Invisible
+=end
 end
