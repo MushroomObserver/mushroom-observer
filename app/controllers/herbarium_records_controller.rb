@@ -185,12 +185,6 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:observation_id].to_s,
                          by: :herbarium_label)
-    # @links = [
-    #   [:show_object.l(type: :observation),
-    #    observation_path(params[:observation_id])],
-    #   [:create_herbarium_record.l,
-    #    new_herbarium_record_path(id: params[:id])]
-    # ]
     show_selected_herbarium_records(query, always_index: true)
   end
 
@@ -201,9 +195,6 @@ class HerbariumRecordsController < ApplicationController
       num_per_page: 100,
       include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(args)
-
-    # @links ||= []
-    # @links << [:create_herbarium.l, new_herbarium_path]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [

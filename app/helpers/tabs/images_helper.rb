@@ -3,6 +3,13 @@
 # html used in tabsets
 module Tabs
   module ImagesHelper
+    # link attribute arrays
+    def images_index_tabs(query)
+      # Add "show observations" link if this query can be coerced into an
+      # observation query. (coerced_query_link returns array)
+      [coerced_query_link(query, Observation)]
+    end
+
     # assemble HTML for "tabset" for show_image
     # actually a list of links and the interest icons
     def show_image_tabset(image:)

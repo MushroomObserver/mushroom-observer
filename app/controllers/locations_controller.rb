@@ -138,8 +138,6 @@ class LocationsController < ApplicationController
 
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_locations(query, args = {})
-    @links ||= []
-
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
       ["name",        :sort_by_name.t],
@@ -148,10 +146,6 @@ class LocationsController < ApplicationController
        :sort_by_updated_at.t],
       ["num_views", :sort_by_num_views.t]
     ]
-
-    # Add "show observations" link if this query can be coerced into an
-    # observation query.
-    @links << coerced_query_link(query, Observation)
 
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).

@@ -1,7 +1,7 @@
 <%
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
+  links = create_links(images_index_tabs(@query))
+  if links.any?
+    @tabsets = { right: draw_tab_set(links) }
   end
 
   @container = :full
