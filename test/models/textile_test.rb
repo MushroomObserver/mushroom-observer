@@ -350,7 +350,7 @@ class TextileTest < UnitTestCase
   # as MOFT (MO Flavored Textile)
   # TODO: change tests to expect better html, as indicated in individual tests
 
-  # html formatting
+  # HTML formatting
 
   # In MOFT underscores are taken by links to MO Objects, so
   # MOFT ??ital?? => <cite>
@@ -385,14 +385,33 @@ class TextileTest < UnitTestCase
   end
 
   # MOFT ^super^ => <sup>
-  # RCMD  <sup>
+  # RCMD <sup>
   # RCMD "superscript" extension single carat - H^(2)O => H<sup>2</sup>O
   # TODO: use "superscript" extension
   def test_moft_superscript
     assert_equal("<sup>sup</sup>", "^sup^".t)
   end
 
+  # MOFT ^-strike-^ => <del>strike</del>
+  # RCMD <del>strike</del>
+  # RCMD "strikethrough" extension - ~~strike~~ => <del>strike</del>
+  # TODO: use "strikethrough" extension
+  def test_moft_strikethrough
+    assert_equal("<del>strike</del>", "-strike-".t)
+  end
+
 =begin
+  # HTML chars and symbols *********************************************
+
+  # MOFT ^(tm)^ => &#8482;
+  # RCMD  <sup>
+  # RCMD "superscript" extension single carat - H^(2)O => H<sup>2</sup>O
+  # TODO: use "superscript" extension
+  def test_moft_trademark
+    assert_equal("<sup>sup</sup>", "^sup^".t)
+  end
+
+
   # chars and symbols
   trademark
   (tm)
