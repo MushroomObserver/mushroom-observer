@@ -476,10 +476,14 @@ class TextileTest < UnitTestCase
     assert_equal("<h6>heading</h6>", "h6. heading".t)
   end
 
-=begin
-  Block quote
-  bq. blah
+  # MOFT "bq. blockquote" => <blockquote> <p>blah</p> </blockquote>
+  # RCMD "> blockquote" => <blockquote>\n<p>blah</p>\n</blockquote>
+  # 1-6 (or 1-6 hashmarks)
+  def test_blockquote
+    assert_equal("<blockquote> <p>blah</p> </blockquote>", "bq. blockquote".t)
+  end
 
+=begin
   # lists
   unordered list
   * item
