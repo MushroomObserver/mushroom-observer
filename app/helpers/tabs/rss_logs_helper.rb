@@ -4,7 +4,22 @@
 #
 module Tabs
   module RssLogsHelper
-    # TABSET @links already produced by controller
+    # TABSET
+    def rss_logs_index_tabset(user, types)
+      [
+        default_rss_types_for_user_tab(user, types)
+      ]
+    end
+
+    def default_rss_types_for_user_tab(user, types)
+      return unless params[:make_default] != "1"
+
+      return unless user&.default_rss_type.to_s.split.sort != types
+
+      [:rss_make_default.t,
+       add_query_param(action: :index, make_default: 1),
+       { class: "default_log_types_link" }]
+    end
 
     # type filters full_width_tab_set in #index
     # The "Everything" tab

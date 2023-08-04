@@ -99,18 +99,11 @@ class RssLogsController < ApplicationController
     }.merge(args)
 
     @types = query.params[:type].to_s.split.sort
-    @links = []
 
     # Let the user make this their default and fine tune.
-    if @user
-      if params[:make_default] == "1"
-        @user.default_rss_type = @types.join(" ")
-        @user.save_without_our_callbacks
-      elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [:rss_make_default.t,
-                   add_query_param(action: :index, make_default: 1),
-                   { class: "default_rss_types_for_user_link" }]
-      end
+    if @user && params[:make_default] == "1"
+      @user.default_rss_type = @types.join(" ")
+      @user.save_without_our_callbacks
     end
 
     show_index_of_objects(query, args)
