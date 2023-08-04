@@ -45,7 +45,6 @@
 # See https://tinyurl.com/ynapvpt7
 
 # View and modify Herbaria (displayed as "Fungaria")
-# rubocop:disable Metrics/ClassLength
 class HerbariaController < ApplicationController
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
@@ -181,7 +180,7 @@ class HerbariaController < ApplicationController
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
     @merge = Herbarium.safe_find(params[:merge])
-    @links = right_tab_links(query, @links)
+    # @links = right_tab_links(query, @links)
     show_index_of_objects(query, args)
   end
 
@@ -201,20 +200,20 @@ class HerbariaController < ApplicationController
                             ["updated_at",  :sort_by_updated_at.t]])
   end
 
-  def right_tab_links(query, links)
-    links ||= []
-    unless query.flavor == :all
-      links << [:herbarium_index_list_all_herbaria.l,
-                herbaria_path(flavor: :all), { id: "all_herbaria_link" }]
-    end
-    unless query.flavor == :nonpersonal
-      links << [:herbarium_index_nonpersonal_herbaria.l,
-                herbaria_path(flavor: :nonpersonal),
-                { id: "all_nonpersonal_herbaria_link" }]
-    end
-    links << [:create_herbarium.l, new_herbarium_path,
-              { id: "new_herbarium_link" }]
-  end
+  # def right_tab_links(query, links)
+  #   links ||= []
+  #   unless query.flavor == :all
+  #     links << [:herbarium_index_list_all_herbaria.l,
+  #               herbaria_path(flavor: :all), { id: "all_herbaria_link" }]
+  #   end
+  #   unless query.flavor == :nonpersonal
+  #     links << [:herbarium_index_nonpersonal_herbaria.l,
+  #               herbaria_path(flavor: :nonpersonal),
+  #               { id: "all_nonpersonal_herbaria_link" }]
+  #   end
+  #   links << [:create_herbarium.l, new_herbarium_path,
+  #             { id: "new_herbarium_link" }]
+  # end
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?
@@ -377,4 +376,3 @@ class HerbariaController < ApplicationController
              :place_name, :personal, :personal_user_name)
   end
 end
-# rubocop:enable Metrics/ClassLength

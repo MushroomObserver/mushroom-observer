@@ -1,8 +1,8 @@
 <%
   @title ||= :list_herbaria_title.t
 
-  tabs = create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  links = create_links(herbaria_index_tabs(@query))
+  @tabsets = { right: draw_tab_set(links) }
   @container = :wide
 
   flash_error(@error) if @error && @objects.empty?
