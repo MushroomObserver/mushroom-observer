@@ -400,31 +400,51 @@ class TextileTest < UnitTestCase
     assert_equal("<del>strike</del>", "-strike-".t)
   end
 
-=begin
-  # HTML chars and symbols *********************************************
+  # HTML chars, entities, symbols **************************************
 
-  # MOFT ^(tm)^ => &#8482;
-  # RCMD  <sup>
-  # RCMD "superscript" extension single carat - H^(2)O => H<sup>2</sup>O
-  # TODO: use "superscript" extension
-  def test_moft_trademark
-    assert_equal("<sup>sup</sup>", "^sup^".t)
+  # MOFT ^(c)^ => &#8482;
+  # RCMD
+  # TODO: output &trade;
+  def test_moft_copyright
+    assert_equal("&#169;", "(c)".t)
   end
 
+  # MOFT ^(r)^ => &#174;;
+  # RCMD
+  # TODO: output &reg;
+  def test_moft_registered
+    assert_equal("&#174;", "(r)".t)
+  end
 
-  # chars and symbols
-  trademark
-  (tm)
-  copyright
-  (c)
-  registered
-  (r)
-  microns
-  &micro;
-  degrees
-  &deg;
-  atsign
-  @jason
+  # MOFT ^(tm)^ => &#8482;
+  # RCMD
+  # TODO: output &trade;
+  def test_moft_trademark
+    assert_equal("&#8482;", "(tm)".t)
+  end
+
+  # MOFT ^&deg;^ => &deg;
+  # RCMD
+  def test_moft_degree
+    assert_equal("&deg;", "&deg;".t)
+  end
+
+  # MOFT ^&micro;^ => &micro;
+  # RCMD
+  def test_moft_micron
+    assert_equal("&micro;", "&micro;".t)
+  end
+
+  # MOFT ^@jason^ => @jason>
+  # Redcloth @code@" => <code>code</code>
+  # RCMD
+  # TODO: Ditch sepcial treatment of @
+  # In redcarpet it's just a @ literal
+  def test_moft_atsign
+    assert_equal("&#64;jason", "@jason".t)
+  end
+
+=begin
   horizontal rule
   "--- or
   ___"
