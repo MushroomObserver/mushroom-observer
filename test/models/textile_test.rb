@@ -468,9 +468,15 @@ class TextileTest < UnitTestCase
     assert_equal("[1]", "==[==1]".t)
   end
 
+  # MOFT "h1. heading" => <h1>heading</h1>
+  # RCMD "# heading" => <h1>heading</h1>
+  # 1-6 (or 1-6 hashmarks)
+  def test_moft_headings
+    assert_equal("<h1>heading</h1>", "h1. heading".t)
+    assert_equal("<h6>heading</h6>", "h6. heading".t)
+  end
+
 =begin
-  headings
-  h1. hdr
   Block quote
   bq. blah
 
