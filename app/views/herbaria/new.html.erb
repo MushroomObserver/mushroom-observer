@@ -2,10 +2,8 @@
 <%
   @title = :create_herbarium_title.l
 
-  tabs = [link_with_query(
-            :herbarium_index.t, herbaria_path(flavor: :nonpersonal)
-         )]
-  @tabsets = { right: draw_tab_set(tabs) }
+  links = create_links(herbarium_form_new_tabs)
+  @tabsets = { right: draw_tab_set(links) }
 %>
 
 <%= render(partial: "form", locals: { button_name: :CREATE }) %>

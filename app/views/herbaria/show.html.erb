@@ -1,27 +1,10 @@
 <%
   @title = @herbarium.format_name.t
 
-  tabs = []
-  if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
-    tabs += [
-      link_with_query(:edit_herbarium.t, edit_herbarium_path(@herbarium.id)),
-      destroy_button(
-        name: :destroy_object.t(type: :herbarium),
-        target: herbarium_path(@herbarium, back: url_after_delete(@herbarium)),
-        id: "delete_herbarium_link"
-      )
-    ]
-  end
-  tabs += [
-    link_with_query(:create_herbarium.t, new_herbarium_path,
-                    id: "new_herbarium_link"),
-    link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                    id: "herbarium_index_link")
-  ]
 
   @tabsets = {
     pager_for: @herbarium,
-    right: draw_tab_set(tabs)
+    right: draw_tab_set(herbarium_show_tabs(@herbarium, @user))
   }
 
   map = @herbarium.location ? true : false

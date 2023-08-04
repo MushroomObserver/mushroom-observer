@@ -1,9 +1,8 @@
 <%
   @title ||= :list_herbarium_records_title.t
 
-  tabs = create_links(@links)
-  tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
-  @tabsets = { right: draw_tab_set(tabs) }
+  links = create_links(herbarium_records_index_tabs)
+  @tabsets = { right: draw_tab_set(links) }
   @container = :wide
 
   flash_error(@error) if @error && @objects.empty?
