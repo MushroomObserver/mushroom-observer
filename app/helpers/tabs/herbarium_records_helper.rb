@@ -20,10 +20,10 @@ module Tabs
       links << [:create_herbarium.l, new_herbarium_path,
                 { id: "new_herbarium_link" }]
       links << [:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                { id: "nonpersonal_herbaria_link" }]
+                { id: "all_nonpersonal_herbaria_link" }]
     end
 
-    # Composed links because there's a destroy_button
+    # HTML links because there's a destroy_button
     def herbarium_record_show_tabs(herbarium_record)
       tabs = []
       if in_admin_mode? || herbarium_record.can_edit?
@@ -55,7 +55,7 @@ module Tabs
          { id: "new_herbarium_link" }],
         [:herbarium_index.t,
          add_query_param(herbaria_path(flavor: :nonpersonal)),
-         { id: "nonpersonal_herbaria_link" }]
+         { id: "all_nonpersonal_herbaria_link" }]
       ]
     end
 
@@ -82,7 +82,7 @@ module Tabs
                 { id: "new_herbarium_link" }]
       links << [:herbarium_index.t,
                 herbaria_path(flavor: :nonpersonal),
-                { id: "herbaria_index_link" }]
+                { id: "all_nonpersonal_herbaria_link" }]
     end
   end
 end

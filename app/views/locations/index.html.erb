@@ -1,5 +1,5 @@
 <%
-  links = create_links(locations_index_tabs(query))
+  links = create_links(locations_index_tabs(@query))
   @tabsets = { right: draw_tab_set(links) }
   @container = :wide
 
