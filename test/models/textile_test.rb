@@ -444,7 +444,7 @@ class TextileTest < UnitTestCase
     assert_equal("&#64;jason", "@jason".t)
   end
 
-  # HTML tags, unreferenced **c************************************
+  # HTML tags, unreferenced **************************************
 
   # MOFT "---" => <hr />
   # RCMD "---" => <hr>
@@ -469,27 +469,36 @@ class TextileTest < UnitTestCase
   end
 
   # MOFT "h1. heading" => <h1>heading</h1>
-  # RCMD "# heading" => <h1>heading</h1>
+  # RCMD "# heading" =>   <h1>heading</h1>
   # 1-6 (or 1-6 hashmarks)
   def test_moft_headings
     assert_equal("<h1>heading</h1>", "h1. heading".t)
     assert_equal("<h6>heading</h6>", "h6. heading".t)
   end
 
-  # MOFT "bq. blockquote" => <blockquote> <p>blah</p> </blockquote>
-  # RCMD "> blockquote" => <blockquote>\n<p>blah</p>\n</blockquote>
+  # MOFT "bq. blockquote" => <blockquote>\n<p>blockquote</p>\n</blockquote>
+  # RCMD "> blockquote" =>   <blockquote>\n<p>blockquote</p>\n</blockquote>
   # 1-6 (or 1-6 hashmarks)
-  def test_blockquote
-    assert_equal("<blockquote> <p>blah</p> </blockquote>", "bq. blockquote".t)
+  def test_moft_blockquote
+    assert_equal("<blockquote>\n<p>blockquote</p>\n</blockquote>", "bq. blockquote".t)
+  end
+
+  # HTML lists **************************************
+
+  # MOFT "# first" =>  <ol>\n\t<li>first</li>\n</ol>
+  # RCMD "1. first" => <ol>\n<li>first</li>\n</ol>
+  # In RCMD the integers don't matter
+  def test_moft_ordered_list
+    assert_equal("<ol>\n\t<li>first</li>\n</ol>", "# first".t)
+  end
+
+  # MOFT "* first" => <ul>\n\t<li>first</li>\n</ul>
+  # RCMD "* first" => <ul>\n<li>first</li>\n</ul>
+  def test_moft_unordered_list
+    assert_equal("<ul>\n\t<li>first</li>\n</ul>", "* first".t)
   end
 
 =begin
-  # lists
-  unordered list
-  * item
-  ordered list
-  # first
-
   # footnotes and tables
   fn ref
   ref[1]
