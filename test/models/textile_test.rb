@@ -372,7 +372,8 @@ class TextileTest < UnitTestCase
 
   # MOFT +ul+ => <ins>
   # RCMD native - <ul>
-  # RCMD underline extension - _ul_ => <ul>ul</ul>; note conflict with MOFT Object links
+  # RCMD underline extension - _ul_ => <ul>ul</ul>;
+  # conflicts with MOFT Object links
   # TODO: use <ul>
   def test_moft_underline
     assert_equal("<ins>ul</ins>", "+ul+".t)
@@ -454,11 +455,11 @@ class TextileTest < UnitTestCase
     assert_equal("<hr />", "___".t)
   end
 
-  # Textile uses bracketed integers for footnote calls, so must escape them to get bracket
+  # Textile uses [integer] for footnote calls; escape them for brackets
   # MOFT "==[==1]" => [1]
   # RCMD
   # TODO: Evenutally get rid of this quoting.
-  # But it's a pain because I used it in lots of places
+  # But it's a pain because it's used it in lots of places
   # > Name.where(Name[:citation] =~ /==/).count
   #   => 412
   # > Comment.where(Comment[:comment] =~ /==/).count
@@ -480,7 +481,9 @@ class TextileTest < UnitTestCase
   # RCMD "> blockquote" =>   <blockquote>\n<p>blockquote</p>\n</blockquote>
   # 1-6 (or 1-6 hashmarks)
   def test_moft_blockquote
-    assert_equal("<blockquote>\n<p>blockquote</p>\n</blockquote>", "bq. blockquote".t)
+    assert_equal(
+      "<blockquote>\n<p>blockquote</p>\n</blockquote>", "bq. blockquote".t
+    )
   end
 
   # HTML lists **************************************
