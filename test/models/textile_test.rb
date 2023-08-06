@@ -486,7 +486,7 @@ class TextileTest < UnitTestCase
     )
   end
 
-  # HTML lists **************************************
+  # HTML lists and tables **************************************
 
   # MOFT "# first" =>  <ol>\n\t<li>first</li>\n</ol>
   # RCMD "1. first" => <ol>\n<li>first</li>\n</ol>
@@ -501,8 +501,22 @@ class TextileTest < UnitTestCase
     assert_equal("<ul>\n\t<li>first</li>\n</ul>", "* first".t)
   end
 
+  # MOFT "| hdr 1 | hdr 2 |\n| --- | --- |\n| cell 1 | cell 2 | " =>
+  #   <table>\n\t<tr>\n\t\t<td> hdr 1 </td>\n\t\t<td> hdr 2 </td>\n\t</tr>\n\t<tr>\n\t\t<td> <del>-</del> </td>\n\t\t<td> <del>-</del> </td>\n\t</tr>\n\t<tr>\n\t\t<td> cell 1 </td>\n\t\t<td> cell 2 </td>\n\t</tr>\n</table>
+  # RCMD tables extension (requires header row) =>
+  #   <table><thead>\n<tr>\n<th>hdr 1</th>\n<th>hdr 2</th>\n</tr>\n</thead><tbody>\n<tr>\n<td>cell 1</td>\n<td>cell 2</td>\n</tr>\n</tbody></table>\n
+  def test_moft_tables
+    expect =
+      "<table>\n\t<tr>\n\t\t<td> hdr 1 </td>\n\t\t<td> hdr 2 </td>\n\t</tr>\n\t<tr>\n\t\t<td> <del>-</del> </td>\n\t\t<td> <del>-</del> </td>\n\t</tr>\n\t<tr>\n\t\t<td> cell 1 </td>\n\t\t<td> cell 2 </td>\n\t</tr>\n</table>" # rubocop:disable Layout/LineLength
+    assert_equal(
+      expect, "| hdr 1 | hdr 2 |\n| --- | --- |\n| cell 1 | cell 2 |".t
+    )
+  end
+
+  # HTML anchored: footnotes, links, other ********************
+
   # MOFT "ref[1]\n\nfn1. note\n" => ...ref<sup class="footnote" id="fnr1"><a href="#fn1">1</a></sup>... # rubocop:disable Layout/LineLength
-  # RCMD footnotes extenstion "ref[^1]:\n\n[^1]: fn" => ordered list
+  # RCMD footnotes extension "ref[^1]:\n\n[^1]: fn" => ordered list
   def test_moft_footnotes
     expect =
       "<div class=\"textile\"><p>ref<sup class=\"footnote\" id=\"fnr1\"><a href=\"#fn1\">1</a></sup></p>\n<p class=\"footnote\" id=\"fn1\"><a href=\"#fnr1\"><sup>1</sup></a> note</p></div>" # rubocop:disable Layout/LineLength
@@ -510,9 +524,6 @@ class TextileTest < UnitTestCase
   end
 
 =begin
-  table
-  | c1 | c2 |
-
   # links and inlines
   autolink
   https://google.com
