@@ -372,7 +372,7 @@ class TextileTest < UnitTestCase
 
   # MOFT +ul+ => <ins>
   # RCMD native - <ul>
-  # RCMD "underline" extension - _ul_ => <ul>ul</ul>; note conflict with MOFT Object links
+  # RCMD underline extension - _ul_ => <ul>ul</ul>; note conflict with MOFT Object links
   # TODO: use <ul>
   def test_moft_underline
     assert_equal("<ins>ul</ins>", "+ul+".t)
@@ -386,7 +386,7 @@ class TextileTest < UnitTestCase
 
   # MOFT ^super^ => <sup>
   # RCMD <sup>
-  # RCMD "superscript" extension single carat - H^(2)O => H<sup>2</sup>O
+  # RCMD superscript extension single carat - H^(2)O => H<sup>2</sup>O
   # TODO: use "superscript" extension
   def test_moft_superscript
     assert_equal("<sup>sup</sup>", "^sup^".t)
@@ -498,12 +498,15 @@ class TextileTest < UnitTestCase
     assert_equal("<ul>\n\t<li>first</li>\n</ul>", "* first".t)
   end
 
+  # MOFT "ref[1]\n\nfn1. note\n" => ...ref<sup class="footnote" id="fnr1"><a href="#fn1">1</a></sup>... # rubocop:disable Layout/LineLength
+  # RCMD footnotes extenstion "ref[^1]:\n\n[^1]: fn" => ordered list
+  def test_moft_footnotes
+    expect =
+      "<div class=\"textile\"><p>ref<sup class=\"footnote\" id=\"fnr1\"><a href=\"#fn1\">1</a></sup></p>\n<p class=\"footnote\" id=\"fn1\"><a href=\"#fnr1\"><sup>1</sup></a> note</p></div>" # rubocop:disable Layout/LineLength
+    assert_equal(expect, "ref[1]\n\nfn1. note\n".tp)
+  end
+
 =begin
-  # footnotes and tables
-  fn ref
-  ref[1]
-  fn
-  fn1.
   table
   | c1 | c2 |
 
