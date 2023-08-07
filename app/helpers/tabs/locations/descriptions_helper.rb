@@ -29,6 +29,15 @@ module Tabs
         ]
       end
 
+      def location_description_form_permissions_links(description)
+        [
+          [:show_object.t(type: :location),
+           add_query_param(location_path(description.location_id))],
+          [:show_object.t(type: :location_description),
+           add_query_param(location_description_path(description.id))]
+        ]
+      end
+
       def location_description_version_links(description, desc_title)
         [:show_location_description.t(description: desc_title),
          add_query_param(location_description_path(description.id))]

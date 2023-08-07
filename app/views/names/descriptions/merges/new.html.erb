@@ -1,12 +1,7 @@
 <%
   @title ||= :merge_descriptions_title.t(object: @description.format_name)
 
-  tabs = [
-    link_with_query(:show_object.t(type: :name),
-                    name_path(@description.parent_id)),
-    link_with_query(:show_object.t(type: :name_description),
-                    name_description_path(@description.id))
-  ]
+  tabs = create_links(name_description_form_permissions_links(@description))
   @tabsets = { right: draw_tab_set(tabs) }
   action = { controller: "/names/descriptions/merges", action: :create,
              id: @description.id }

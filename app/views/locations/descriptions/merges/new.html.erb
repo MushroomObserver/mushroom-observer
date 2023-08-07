@@ -1,7 +1,7 @@
 <%
   @title ||= :merge_descriptions_title.t(object: @description.format_name)
 
-  tabs = create_links(location_description_form_edit_links(@description))
+  tabs = create_links(location_description_form_permissions_links(@description))
   @tabsets = { right: draw_tab_set(tabs) }
   action = { controller: "/names/descriptions/merges", action: :create,
              id: @description.id, q: get_query_param }

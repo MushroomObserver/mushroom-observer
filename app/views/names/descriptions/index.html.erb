@@ -1,8 +1,6 @@
 <%
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+  tabs = create_links(name_description_index_links)
+  @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?
 %>
