@@ -348,6 +348,8 @@ class TextileTest < UnitTestCase
   ##############################################################################
   # Prove that RCMD (redcarpet markdown) yields same html
   # as MOFT (MO Flavored Textile)
+  # For convenience, all tests named "test_moft..." to allow
+  #   $ rails t test/models/textile_test.rb -n /test_moft/
   # TODO: change tests to expect better html, as indicated in individual tests
 
   # HTML formatting
@@ -521,6 +523,12 @@ class TextileTest < UnitTestCase
     expect =
       "<div class=\"textile\"><p>ref<sup class=\"footnote\" id=\"fnr1\"><a href=\"#fn1\">1</a></sup></p>\n<p class=\"footnote\" id=\"fn1\"><a href=\"#fnr1\"><sup>1</sup></a> note</p></div>" # rubocop:disable Layout/LineLength
     assert_equal(expect, "ref[1]\n\nfn1. note\n".tp)
+  end
+
+  # MOFT https://google.com" =>    <a href=\"https://google.com\">https://google.com</a>
+  # RCMD autolinks extension => <p><a href=\"https://google.com\">https://google.com</a></p>\n
+  def test_moft_autolink
+    assert_equal("<a href=\"https://google.com\">https://google.com</a>", "https://google.com".t)
   end
 
 =begin
