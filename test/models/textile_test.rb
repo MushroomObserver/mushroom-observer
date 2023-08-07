@@ -361,7 +361,6 @@ class TextileTest < UnitTestCase
   # We typically use italics for scientific names, not emphasis
   def test_moft_italics
     assert_equal("<cite>abc</cite>", "??abc??".t)
-    assert_equal("<cite>abc</cite>", "??abc??".tl)
   end
 
   # MOFT **bf** => <b>
@@ -471,6 +470,15 @@ class TextileTest < UnitTestCase
     assert_equal("[1]", "==[==1]".t)
   end
 
+  # MOFT _Name_ => p{display: none;}. Invisible
+  # RCMD
+  def test_moft_style
+    assert_equal(
+      %(<div class="textile"><p style="display: none;">Invisible</p></div>),
+      "p{display: none;}. Invisible".tp
+    )
+  end
+
   # MOFT "h1. heading" => <h1>heading</h1>
   # RCMD "# heading" =>   <h1>heading</h1>
   # 1-6 (or 1-6 hashmarks)
@@ -504,9 +512,9 @@ class TextileTest < UnitTestCase
   end
 
   # MOFT "| hdr 1 | hdr 2 |\n| --- | --- |\n| cell 1 | cell 2 | " =>
-  #   <table>\n\t<tr>\n\t\t<td> hdr 1 </td>\n\t\t<td> hdr 2 </td>\n\t</tr>\n\t<tr>\n\t\t<td> <del>-</del> </td>\n\t\t<td> <del>-</del> </td>\n\t</tr>\n\t<tr>\n\t\t<td> cell 1 </td>\n\t\t<td> cell 2 </td>\n\t</tr>\n</table>
+  #   <table>\n\t<tr>\n\t\t<td> hdr 1 </td>\n\t\t<td> hdr 2 </td>\n\t</tr>\n\t<tr>\n\t\t<td> <del>-</del> </td>\n\t\t<td> <del>-</del> </td>\n\t</tr>\n\t<tr>\n\t\t<td> cell 1 </td>\n\t\t<td> cell 2 </td>\n\t</tr>\n</table> # rubocop:disable Layout/LineLength
   # RCMD tables extension (requires header row) =>
-  #   <table><thead>\n<tr>\n<th>hdr 1</th>\n<th>hdr 2</th>\n</tr>\n</thead><tbody>\n<tr>\n<td>cell 1</td>\n<td>cell 2</td>\n</tr>\n</tbody></table>\n
+  #   <table><thead>\n<tr>\n<th>hdr 1</th>\n<th>hdr 2</th>\n</tr>\n</thead><tbody>\n<tr>\n<td>cell 1</td>\n<td>cell 2</td>\n</tr>\n</tbody></table>\n # rubocop:disable Layout/LineLength
   def test_moft_tables
     expect =
       "<table>\n\t<tr>\n\t\t<td> hdr 1 </td>\n\t\t<td> hdr 2 </td>\n\t</tr>\n\t<tr>\n\t\t<td> <del>-</del> </td>\n\t\t<td> <del>-</del> </td>\n\t</tr>\n\t<tr>\n\t\t<td> cell 1 </td>\n\t\t<td> cell 2 </td>\n\t</tr>\n</table>" # rubocop:disable Layout/LineLength
@@ -528,17 +536,11 @@ class TextileTest < UnitTestCase
   # MOFT https://google.com =>    <a href=\"https://google.com\">https://google.com</a>
   # RCMD autolinks extension => <p><a href=\"https://google.com\">https://google.com</a></p>\n
   def test_moft_autolink
-    assert_equal("<a href=\"https://google.com\">https://google.com</a>", "https://google.com".t)
+    assert_equal('<a href="https://google.com">https://google.com</a>', "https://google.com".t)
   end
 
   # MOFT "text":href =>     <a href=\"href\">text</a>
   # RCMD [text](href) => <p><a href=\"href\">text</a></p>\n
-  def test_moft_external_link
-    assert_equal("<a href=\"href\">text</a>", %("text":href).t)
-  end
-
-  # MOFT "text":href =>     <a href=\"href\">text</a>
-  # RCMD ![text](href) => <p><a href=\"href\">text</a></p>\n
   def test_moft_external_link
     assert_equal("<a href=\"href\">text</a>", %("text":href).t)
   end
@@ -549,22 +551,37 @@ class TextileTest < UnitTestCase
     assert_equal(%(<img src="href" alt="" />), "!href!".t)
   end
 
+  # MOFT !image 640/12345! => <img src="https://mushroomobserver.org/images/640/12345.jpg" alt="" /></a> # rubocop:disable Layout/LineLength
+  # RCMD n.a.
+  def test_moft_internal_inline
+    assert_equal(%(<img src="href" alt="" />), "!href!".t)
+  end
 
-=begin
-  # links and inlines
-  external inline?
-  !href!
-  internal inline
-  !image 640/12345!
-  MO explicit internal link
-  _name 371_
-  MO implicit internal namee link
-  _Boletus
-  MO implicit internal glossary link
-  _term_
+  FQ_DOMAIN = "https://mushroomobserver.org" # Fully Qualified domain
+  # MOFT _name 371_ => <a href="https://mushroomobserver.org/lookups/lookup_name/371"><i>name 371</i></a> # rubocop:disable Layout/LineLength
+  # RCMD n.a.
+  def test_moft_explicit_internal_link
+    assert_equal(
+      %(<a href="#{FQ_DOMAIN}/lookups/lookup_name/371"><i>name 371</i></a>),
+      "_name 371_".tl
+    )
+  end
 
-  # misc
-  style
-  p{display: none;}. Invisible
-=end
+  # MOFT _Name_ => <a href="#{domain}/lookups/lookup_name/Name"><i>Name</i></a>
+  # RCMD
+  def test_moft_implicit_name_link
+    assert_equal(
+      %(<a href="#{FQ_DOMAIN}/lookups/lookup_name/Name"><i>Name</i></a>),
+      "_Name_".tl
+    )
+  end
+
+  # MOFT _Name_ => <a href="#{domain}/lookup_glossary_term/term"><i>term</i></a>
+  # RCMD
+  def test_moft_implicit_term_link
+    assert_equal(
+      %(<a href="#{FQ_DOMAIN}/lookups/lookup_glossary_term/term"><i>term</i></a>), # rubocop:disable Layout/LineLength
+      "_term_".tl
+    )
+  end
 end
