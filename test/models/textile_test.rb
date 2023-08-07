@@ -525,18 +525,33 @@ class TextileTest < UnitTestCase
     assert_equal(expect, "ref[1]\n\nfn1. note\n".tp)
   end
 
-  # MOFT https://google.com" =>    <a href=\"https://google.com\">https://google.com</a>
+  # MOFT https://google.com =>    <a href=\"https://google.com\">https://google.com</a>
   # RCMD autolinks extension => <p><a href=\"https://google.com\">https://google.com</a></p>\n
   def test_moft_autolink
     assert_equal("<a href=\"https://google.com\">https://google.com</a>", "https://google.com".t)
   end
 
+  # MOFT "text":href =>     <a href=\"href\">text</a>
+  # RCMD [text](href) => <p><a href=\"href\">text</a></p>\n
+  def test_moft_external_link
+    assert_equal("<a href=\"href\">text</a>", %("text":href).t)
+  end
+
+  # MOFT "text":href =>     <a href=\"href\">text</a>
+  # RCMD ![text](href) => <p><a href=\"href\">text</a></p>\n
+  def test_moft_external_link
+    assert_equal("<a href=\"href\">text</a>", %("text":href).t)
+  end
+
+  # MOFT !href! =>          <img src="href" alt="" />
+  # RCMD ![alt](href) => <p><img src="href" alt="alt"></p>\n
+  def test_moft_external_inline
+    assert_equal(%(<img src="href" alt="" />), "!href!".t)
+  end
+
+
 =begin
   # links and inlines
-  autolink
-  https://google.com
-  external link
-  "text":href
   external inline?
   !href!
   internal inline
