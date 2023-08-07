@@ -1,15 +1,12 @@
 <%
+  desc_title = description_title(@description)
+
   @title = :show_past_location_description_title.t(
     num: @description.version,
-    name: description_title(@description)
+    name: desc_title
   )
 
-  desc = description_title(@description)
-
-  tabs = [
-    link_with_query(:show_location_description.t(description: desc),
-                    location_description_path(@description.id))
-  ]
+  tabs = create_links(location_description_version_links(description, desc_title))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
