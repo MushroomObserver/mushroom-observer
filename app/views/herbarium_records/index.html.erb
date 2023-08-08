@@ -1,11 +1,11 @@
 <%
-  @title ||= :list_herbarium_records_title.t
+@title ||= :list_herbarium_records_title.t
 
-  tabs = create_links(herbarium_record_index_links)
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+tabs = create_links(herbarium_record_index_links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :wide
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>

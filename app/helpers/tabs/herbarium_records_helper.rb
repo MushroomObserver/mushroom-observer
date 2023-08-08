@@ -24,7 +24,7 @@ module Tabs
     end
 
     # HTML links because there's a destroy_button
-    def herbarium_record_show_tabs(herbarium_record)
+    def herbarium_record_show_tabs(herbarium_record:)
       tabs = []
       if in_admin_mode? || herbarium_record.can_edit?
         tabs << link_to(
@@ -45,7 +45,7 @@ module Tabs
     end
 
     # link attribute arrays
-    def herbarium_record_form_new_links(observation)
+    def herbarium_record_form_new_links(observation:)
       [
         [:cancel_and_show.t(type: :observation),
          add_query_param(observation_path(observation.id)),
@@ -60,7 +60,7 @@ module Tabs
     end
 
     # link attribute arrays
-    def herbarium_record_form_edit_links(back, back_object)
+    def herbarium_record_form_edit_links(back:, back_object:)
       links = []
       if back == "index"
         links << [:edit_herbarium_record_back_to_index.t,
