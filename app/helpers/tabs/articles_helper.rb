@@ -30,7 +30,7 @@ module Tabs
     end
 
     # Can user modify all articles
-    def permitted?(user:)
+    def permitted?(user)
       Article.can_edit?(user)
     end
 
