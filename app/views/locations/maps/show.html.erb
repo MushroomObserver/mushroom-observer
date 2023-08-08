@@ -1,11 +1,8 @@
 <%
-  tabs = [
-    link_to(:all_objects.t(type: :location), locations_path),
-    link_to_coerced_query(@query, Observation),
-    link_to_coerced_query(@query, Location)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :text_image
+links = location_map_links(query: @query)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :text_image
 %>
 
 <div class="text-center">

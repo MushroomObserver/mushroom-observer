@@ -1,8 +1,9 @@
 <%
-  @title ||= :edit_location_description_title.t(name: @description.format_name)
+@title ||= :edit_location_description_title.t(name: @description.format_name)
 
-  tabs = create_links(location_description_form_edit_links(@description))
-  @tabsets = { right: draw_tab_set(tabs) }
+links = location_description_form_edit_links(description: @description)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= render(partial: "form", locals: { action: :update }) %>

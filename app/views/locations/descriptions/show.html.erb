@@ -1,8 +1,8 @@
 <%
-  @title ||= @description.format_name.t
+@title ||= @description.format_name.t
 
-  @tabsets = show_description_tabset(description: @description, pager: true)
-  @container = :wide
+@tabsets = show_description_tabset(description: @description, pager: true)
+@container = :wide
 %>
 
 <div class="row">
