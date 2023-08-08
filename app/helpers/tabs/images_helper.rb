@@ -34,14 +34,15 @@ module Tabs
         link_with_query(:show_object.t(type: :name),
                         name_path(obs.name.id)),
         link_to(:google_images.t,
-                "http://images.google.com/images?q=#{obs.name.search_name}")
+                "http://images.google.com/images?q=#{obs.name.search_name}",
+                target: "_blank", rel: "noopener")
       ]
     end
 
     def eol_link(image)
       return unless (eol_url = image.eol_url)
 
-      link_to("EOL", eol_url)
+      link_to("EOL", eol_url, target: "_blank", rel: "noopener")
     end
 
     def edit_and_destroy_links(image)
