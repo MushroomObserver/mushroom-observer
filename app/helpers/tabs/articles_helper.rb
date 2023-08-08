@@ -8,10 +8,13 @@
 #
 module Tabs
   module ArticlesHelper
-    def index_tabs_for_user(user)
+    def index_links_for_user(user)
       return [] unless permitted?(user)
 
-      [link_to(:create_article_title.t, new_article_path)]
+      [
+        [:create_article_title.t, new_article_path,
+         { class: "new_article_link" }]
+      ]
     end
 
     def show_tabs_for_user(article, user)
