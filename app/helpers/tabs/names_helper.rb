@@ -101,5 +101,20 @@ module Tabs
        add_query_param(name_descriptions_path),
        { class: "descriptions_of_these_names_link" }]
     end
+
+    ### Forms
+    def name_form_new_links
+      [
+        [:all_objects.t(type: :name), names_path, { class: "names_link" }]
+      ]
+    end
+
+    def name_form_edit_links(name)
+      [
+        [:cancel_and_show.t(type: :name),
+         add_query_param(name_path(name.id)), { class: "name_link" }],
+        [:all_objects.t(type: :name), names_path, { class: "names_link" }]
+      ]
+    end
   end
 end
