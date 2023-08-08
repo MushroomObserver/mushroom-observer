@@ -3,10 +3,9 @@
 # html used in tabsets
 module Tabs
   module NamesHelper
-    # assemble HTML for "tabset" for show_name
-    # NOTE: "interest_icons" are part of this tabset, it still works as links
-    def show_name_tabset(name:, user:)
-      links = [
+    # assemble links for "tabset" for show_name
+    def name_show_links(name:, user:)
+      [
         [:show_name_edit_name.t, add_query_param(edit_name_path(name.id)),
          { class: "edit_name_link" }],
         [:show_name_add_name.t, add_query_param(new_name_path),
@@ -16,9 +15,6 @@ module Tabs
         deprecate_synonym_form_link(name),
         name_tracker_form_link(name, user)
       ].reject(&:empty?)
-      tabs = create_links(links)
-      tabs << draw_interest_icons(name)
-      { pager_for: name, right: draw_tab_set(tabs) }
     end
 
     def basic_name_form_links(_name)
@@ -65,15 +61,13 @@ module Tabs
     #
     #    Index:
 
-    def index_names_tabset(query:)
-      links = [
+    def names_index_links(query:)
+      [
         new_name_link,
         names_with_observations_link(query),
         observations_of_these_names_link(query),
         descriptions_of_these_names_link(query)
       ].reject(&:empty?)
-      tabs = create_links(links)
-      { right: draw_tab_set(tabs) }
     end
 
     def new_name_link

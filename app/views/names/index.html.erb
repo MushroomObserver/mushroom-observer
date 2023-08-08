@@ -1,8 +1,10 @@
 <%
-  @tabsets = index_names_tabset(query: @query)
-  @container = :full
+links = names_index_links(query: @query)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :full
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?

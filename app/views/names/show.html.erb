@@ -1,10 +1,14 @@
 <%
-  @title = :show_name_title.t(name: @name.display_name)
+@title = :show_name_title.t(name: @name.display_name)
 
-  Textile.register_name(@name)
+Textile.register_name(@name)
 
-  @tabsets = show_name_tabset(name: @name, user: @user)
-  @container = :wide
+links = name_show_links(name: @name, user: @user)
+tabs = create_links(links)
+tabs << draw_interest_icons(name)
+@tabsets = { pager_for: name, right: draw_tab_set(tabs) }
+
+@container = :wide
 %>
 
 <div class="row">
