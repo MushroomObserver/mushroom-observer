@@ -14,10 +14,10 @@ module Tabs
         edit_synonym_form_link(name),
         approve_synonym_form_link(name),
         deprecate_synonym_form_link(name),
-        name_tracker_form_link(name, user),
-        draw_interest_icons(name)
+        name_tracker_form_link(name, user)
       ].reject(&:empty?)
       tabs = create_links(links)
+      tabs << draw_interest_icons(name)
       { pager_for: name, right: draw_tab_set(tabs) }
     end
 
@@ -111,9 +111,23 @@ module Tabs
 
     def name_form_edit_links(name)
       [
-        [:cancel_and_show.t(type: :name),
-         add_query_param(name_path(name.id)), { class: "name_link" }],
+        [:cancel_and_show.t(type: :name), add_query_param(name_path(name.id)),
+         { class: "name_link" }],
         [:all_objects.t(type: :name), names_path, { class: "names_link" }]
+      ]
+    end
+
+    def name_versions_tabs(name)
+      [
+        [:show_name.t(name: name.display_name), name_path(name.id),
+         { class: "name_link" }]
+      ]
+    end
+
+    def name_return_tab(name)
+      [
+        [:cancel_and_show.t(type: :name), add_query_param(name_path(name.id)),
+         { class: "name_link" }]
       ]
     end
   end
