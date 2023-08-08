@@ -1,7 +1,7 @@
 <%
   @title = :edit_herbarium_title.l
 
-  tabs = create_links(herbarium_form_edit_links(@herbarium))
+  tabs = create_links(herbarium_form_edit_links(herbarium: @herbarium))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
