@@ -1,12 +1,12 @@
 <%
-  @title = :edit_lifeform_title.t(name: @name.display_name)
+@title = :edit_lifeform_title.t(name: @name.display_name)
 
-  tabs = create_links(name_return_link(name: @name))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :text_image
+tabs = create_links(name_return_link(name: @name))
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :text_image
 
-  action = { controller: "/names/lifeforms", action: :update,
-            id: @name.id, q: get_query_param }
+action = { controller: "/names/lifeforms", action: :update,
+           id: @name.id, q: get_query_param }
 %>
 
 <%= form_with(url: action, scope: :lifeform, id: "name_lifeform_form") do |f| %>

@@ -1,10 +1,11 @@
 <%
-  @title ||= :merge_descriptions_title.t(object: @description.format_name)
+@title ||= :merge_descriptions_title.t(object: @description.format_name)
 
-  tabs = create_links(name_description_form_permissions_links(@description))
-  @tabsets = { right: draw_tab_set(tabs) }
-  action = { controller: "/names/descriptions/merges", action: :create,
-             id: @description.id }
+links = name_description_form_permissions_links(description: @description)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
+action = { controller: "/names/descriptions/merges", action: :create,
+            id: @description.id }
 %>
 
 <%= render(partial: "descriptions/form_merge",

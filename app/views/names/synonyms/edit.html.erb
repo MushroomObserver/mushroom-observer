@@ -1,16 +1,16 @@
 <%
-  @title = :name_change_synonyms_title.t(name: @name.display_name)
+@title = :name_change_synonyms_title.t(name: @name.display_name)
 
-  tabs = create_links(name_return_link(name: @name))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :text_image
+tabs = create_links(name_return_link(name: @name))
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :text_image
 
-  url = { controller: "/names/synonyms", action: :update, id: @name.id,
-          approved_names: @new_names, approved_synonyms: @synonym_name_ids }
+url = { controller: "/names/synonyms", action: :update, id: @name.id,
+        approved_names: @new_names, approved_synonyms: @synonym_name_ids }
 
-  # this cannot be an ivar, somehow. Fails here if so:
-  # Names::SynonymsControllerTest#test_transfer_synonyms_n_1_nc line 303
-  current_synonyms = @name.synonyms
+# this cannot be an ivar, somehow. Fails here if so:
+# Names::SynonymsControllerTest#test_transfer_synonyms_n_1_nc line 303
+current_synonyms = @name.synonyms
 %>
 
 <%= form_with(url: url, method: :put, id: "name_edit_synonym_form") do |f| %>

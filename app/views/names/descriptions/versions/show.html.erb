@@ -1,15 +1,15 @@
 <%
-  desc_title = description_title(@description)
+desc_title = description_title(@description)
 
-  @title = :show_past_name_description_title.t(
-    num:  @description.version,
-    name: desc_title
-  )
+@title = :show_past_name_description_title.t(
+  num:  @description.version,
+  name: desc_title
+)
 
-  tabs = create_links(name_description_version_links(@description, desc_title))
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = create_links(name_description_version_links(@description, desc_title))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  Textile.register_name(@name)
+Textile.register_name(@name)
 %>
 
 <%= show_past_versions(@description) %>
