@@ -5,7 +5,7 @@
 module Tabs
   module HerbariumRecordsHelper
     # link attribute arrays
-    def herbarium_records_index_tabs
+    def herbarium_record_index_links
       links = []
       if params[:observation_id].present?
         links = [
@@ -45,7 +45,7 @@ module Tabs
     end
 
     # link attribute arrays
-    def herbarium_record_form_new_tabs(observation)
+    def herbarium_record_form_new_links(observation)
       [
         [:cancel_and_show.t(type: :observation),
          add_query_param(observation_path(observation.id)),
@@ -60,7 +60,7 @@ module Tabs
     end
 
     # link attribute arrays
-    def herbarium_record_form_edit_tabs(back, back_object)
+    def herbarium_record_form_edit_links(back, back_object)
       links = []
       if back == "index"
         links << [:edit_herbarium_record_back_to_index.t,

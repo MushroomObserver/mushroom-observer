@@ -1,12 +1,11 @@
 <%
-  @title = :HERBARIUM_RECORD.t + " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
+@title = :HERBARIUM_RECORD.t + " '".html_safe +
+         @herbarium_record.format_name.t + "'".html_safe
 
-  @tabsets = {
-    pager_for: @herbarium_record,
-    right: draw_tab_set(herbarium_record_show_tabs(@herbarium_record))
-  }
+tabs = herbarium_record_show_tabs(@herbarium_record)
+@tabsets = { pager_for: @herbarium_record, right: draw_tab_set(tabs) }
 
-  herbarium = @herbarium_record.herbarium
+herbarium = @herbarium_record.herbarium
 %>
 
 <div class="mt-3" id="herbarium_record_details">
