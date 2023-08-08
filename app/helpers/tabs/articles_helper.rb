@@ -8,7 +8,7 @@
 #
 module Tabs
   module ArticlesHelper
-    def index_links_for_user(user)
+    def index_links_for_user(user:)
       return [] unless permitted?(user)
 
       [
@@ -17,7 +17,7 @@ module Tabs
       ]
     end
 
-    def show_tabs_for_user(article, user)
+    def show_tabs_for_user(article:, user:)
       tabs = [link_to(:index_article.t, articles_path,
                       { class: "articles_link" })]
       return tabs unless permitted?(user)
@@ -30,7 +30,7 @@ module Tabs
     end
 
     # Can user modify all articles
-    def permitted?(user)
+    def permitted?(user:)
       Article.can_edit?(user)
     end
 
@@ -40,7 +40,7 @@ module Tabs
       ]
     end
 
-    def article_form_edit_links(article)
+    def article_form_edit_links(article:)
       [
         [:cancel_and_show.t(type: :article),
          article_path(article.id), { class: "article_link" }],
