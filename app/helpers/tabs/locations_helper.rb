@@ -4,19 +4,18 @@
 module Tabs
   module LocationsHelper
     # link attribute arrays (coerced_query_link returns array)
-    def locations_index_tabs(query)
-      tabs = [
+    def locations_index_links(query)
+      [
         [:show_location_create.t, add_query_param(new_location_path),
          { id: "new_location_link" }],
         [:list_place_names_map.t, add_query_param(map_locations_path),
          { id: "map_locations_link" }],
         [:list_countries.t, location_countries_path,
-         { id: "location_countries_link" }]
+         { id: "location_countries_link" }],
+        # Add "show observations" link if this query can be coerced into an
+        # observation query. (coerced_query_link returns array)
+        coerced_query_link(query, Observation)
       ]
-
-      # Add "show observations" link if this query can be coerced into an
-      # observation query. (coerced_query_link returns array)
-      tabs << coerced_query_link(query, Observation)
     end
 
     # Composed links because there's interest_icons
@@ -36,7 +35,6 @@ module Tabs
                           location_reverse_name_order_path(location.id))
         ]
       end
-      tabs << draw_interest_icons(location)
     end
 
     # link attribute arrays
