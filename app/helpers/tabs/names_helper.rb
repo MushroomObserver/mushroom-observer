@@ -103,7 +103,7 @@ module Tabs
       ]
     end
 
-    def name_form_edit_links(name)
+    def name_form_edit_links(name:)
       [
         [:cancel_and_show.t(type: :name), add_query_param(name_path(name.id)),
          { class: "name_link" }],
@@ -111,14 +111,14 @@ module Tabs
       ]
     end
 
-    def name_versions_tabs(name)
+    def name_versions_links(name:)
       [
         [:show_name.t(name: name.display_name), name_path(name.id),
          { class: "name_link" }]
       ]
     end
 
-    def name_return_tab(name)
+    def name_return_link(name:)
       [
         [:cancel_and_show.t(type: :name), add_query_param(name_path(name.id)),
          { class: "name_link" }]

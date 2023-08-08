@@ -1,11 +1,11 @@
 <%
-  @title = :name_approve_title.t(name: @name.display_name)
+@title = :name_approve_title.t(name: @name.display_name)
 
-  tabs = create_links(name_return_tab(@name))
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = create_links(name_return_link(name: @name))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  action = { controller: "/names/synonyms/approve", action: :create,
-             id: @name.id }
+action = { controller: "/names/synonyms/approve", action: :create,
+            id: @name.id }
 %>
 
 <%= form_with(url: action, id: "name_approve_synonym_form") do |f| %>

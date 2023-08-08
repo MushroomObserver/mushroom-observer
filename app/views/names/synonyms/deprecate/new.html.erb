@@ -1,20 +1,20 @@
 <%
-  @title = :name_deprecate_title.t(name: @name.display_name)
+@title = :name_deprecate_title.t(name: @name.display_name)
 
-  tabs = create_links(name_return_tab(@name))
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = create_links(name_return_link(name: @name))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  action = { controller: "/names/synonyms/deprecate", action: :create,
-             id: @name.id, approved_name: @what }
+action = { controller: "/names/synonyms/deprecate", action: :create,
+            id: @name.id, approved_name: @what }
 
-  feedback_locals = {
-    button_name: :SUBMIT.l,
-    what: @what,
-    valid_names: @valid_names,
-    suggest_corrections: @suggest_corrections,
-    parent_deprecated: @parent_deprecated,
-    names: @names
-  }
+feedback_locals = {
+  button_name: :SUBMIT.l,
+  what: @what,
+  valid_names: @valid_names,
+  suggest_corrections: @suggest_corrections,
+  parent_deprecated: @parent_deprecated,
+  names: @names
+}
 %>
 
 <%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
