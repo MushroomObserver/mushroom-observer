@@ -18,11 +18,14 @@ module Tabs
     end
 
     def show_tabs_for_user(article, user)
-      tabs = [link_to(:index_article.t, articles_path)]
+      tabs = [link_to(:index_article.t, articles_path,
+                      { class: "articles_link" })]
       return tabs unless permitted?(user)
 
-      tabs.push(link_to(:create_article_title.t, new_article_path),
-                link_to(:EDIT.t, edit_article_path(article.id)),
+      tabs.push(link_to(:create_article_title.t, new_article_path,
+                        { class: "new_article_link" }),
+                link_to(:EDIT.t, edit_article_path(article.id),
+                        { class: "edit_article_link" }),
                 destroy_button(target: article))
     end
 
