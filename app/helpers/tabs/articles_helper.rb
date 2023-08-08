@@ -28,6 +28,20 @@ module Tabs
       Article.can_edit?(user)
     end
 
+    def article_form_new_links
+      [
+        [:index_article.t, articles_path, { class: "articles_link" }]
+      ]
+    end
+
+    def article_form_edit_links(article)
+      [
+        [:cancel_and_show.t(type: :article),
+         article_path(article.id), { class: "article_link" }],
+        [:index_article.t, articles_path, { class: "articles_link" }]
+      ]
+    end
+
     # "Title (#nnn)" textilized
     def show_title(article)
       capture do
