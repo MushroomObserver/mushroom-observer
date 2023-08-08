@@ -5,7 +5,7 @@ module Tabs
   module NamesHelper
     # assemble HTML for "tabset" for show_name
     def show_name_tabset(name:, user:)
-      tabs = [
+      links = [
         basic_name_form_links(name),
         edit_synonym_form_link(name),
         approve_synonym_form_link(name),
@@ -13,44 +13,52 @@ module Tabs
         name_tracker_form_link(name, user),
         draw_interest_icons(name)
       ].flatten.reject(&:empty?)
+      tabs = create_links(links)
       { pager_for: name, right: draw_tab_set(tabs) }
     end
 
     def basic_name_form_links(name)
       [
-        link_with_query(:show_name_edit_name.t, edit_name_path(name.id)),
-        link_with_query(:show_name_add_name.t, new_name_path)
+        [:show_name_edit_name.t, add_query_param(edit_name_path(name.id)),
+         { class: "edit_name_link" }],
+        [:show_name_add_name.t, add_query_param(new_name_path),
+         { class: "new_name_link" }]
       ]
     end
 
     def edit_synonym_form_link(name)
       return unless in_admin_mode? || !name.locked
 
-      link_with_query(:show_name_change_synonyms.t,
-                      edit_name_synonyms_path(name.id))
+      [:show_name_change_synonyms.t,
+       add_query_param(edit_name_synonyms_path(name.id)),
+       { class: "edit_name_synonym_link" }]
     end
 
     def approve_synonym_form_link(name)
       return unless name.deprecated && (in_admin_mode? || !name.locked)
 
-      link_with_query(:APPROVE.t, approve_name_synonym_form_path(name.id))
+      [:APPROVE.t, add_query_param(approve_name_synonym_form_path(name.id)),
+       { class: "approve_name_synonym_link" }]
     end
 
     def deprecate_synonym_form_link(name)
       return unless !name.deprecated && (in_admin_mode? || !name.locked)
 
-      link_with_query(:DEPRECATE.t, deprecate_name_synonym_form_path(name.id))
+      [:DEPRECATE.t, add_query_param(deprecate_name_synonym_form_path(name.id)),
+       { class: "deprecate_name_link" }]
     end
 
     def name_tracker_form_link(name, user)
       existing_name_tracker = NameTracker.find_by(name_id: name.id,
                                                   user_id: user.id)
       if existing_name_tracker
-        link_with_query(:show_name_email_tracking.t,
-                        edit_name_tracker_path(name.id))
+        [:show_name_email_tracking.t,
+         add_query_param(edit_name_tracker_path(name.id)),
+         { class: "edit_name_tracker_link" }]
       else
-        link_with_query(:show_name_email_tracking.t,
-                        new_name_tracker_path(name.id))
+        [:show_name_email_tracking.t,
+         add_query_param(new_name_tracker_path(name.id)),
+         { class: "new_name_tracker_link" }]
       end
     end
 
@@ -59,36 +67,40 @@ module Tabs
     #    Index:
 
     def index_names_tabset(query:)
-      tabs = [
+      links = [
         new_name_link,
         names_with_observations_link(query),
         observations_of_these_names_link(query),
         descriptions_of_these_names_link(query)
       ].flatten.reject(&:empty?)
+      tabs = create_links(links)
       { right: draw_tab_set(tabs) }
     end
 
     def new_name_link
-      link_to(:name_index_add_name.t, new_name_path)
+      [:name_index_add_name.t, new_name_path, { class: "new_name_link" }]
     end
 
     def names_with_observations_link(query)
       return unless query&.flavor == :with_observations
 
-      link_to(:all_objects.t(type: :name), names_path(with_observations: true))
+      [:all_objects.t(type: :name), names_path(with_observations: true),
+       { class: "names_with_observations_link" }]
     end
 
     def observations_of_these_names_link(query)
       return unless query
 
-      coerced_query_link(query, Observation)
+      [*coerced_query_link(query, Observation),
+       { class: "observations_of_these_names_link" }]
     end
 
     def descriptions_of_these_names_link(query)
       return unless query&.coercable?(:NameDescription)
 
-      link_to(:show_objects.t(type: :description),
-              name_descriptions_path(q: get_query_param(query)))
+      [:show_objects.t(type: :description),
+       add_query_param(name_descriptions_path),
+       { class: "descriptions_of_these_names_link" }]
     end
   end
 end
