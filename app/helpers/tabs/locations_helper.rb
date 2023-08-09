@@ -20,30 +20,28 @@ module Tabs
     end
 
     # Composed links because there's interest_icons
-    def location_show_tabs(location:)
-      tabs = [
-        link_to(show_obs_link_title_with_count(location),
-                add_query_param(observations_path(location: location.id)),
-                class: "location_observations_link"),
-        link_to(:all_objects.t(type: :location), locations_path,
-                class: "locations_index_link"),
-        link_to(:show_location_create.t, add_query_param(new_location_path),
-                class: "new_location_link"),
-        link_to(:show_location_edit.t,
-                add_query_param(edit_location_path(location.id)),
-                class: "edit_location_link")
+    def location_show_links(location:)
+      links = [
+        [show_obs_link_title_with_count(location),
+         add_query_param(observations_path(location: location.id)),
+         { class: "location_observations_link" }],
+        [:all_objects.t(type: :location), locations_path,
+         { class: "locations_index_link" }],
+        [:show_location_create.t, add_query_param(new_location_path),
+         { class: "new_location_link" }],
+        [:show_location_edit.t,
+         add_query_param(edit_location_path(location.id)),
+         { class: "edit_location_link" }]
       ]
       if in_admin_mode?
-        tabs += [
-          destroy_button(name: :show_location_destroy.t, target: location),
-          link_to(
-            :show_location_reverse.t,
-            add_query_param(location_reverse_name_order_path(location.id)),
-            class: "location_reverse_order_link"
-          )
+        links += [
+          [:show_location_destroy.t, location, { button: :destroy }],
+          [:show_location_reverse.t,
+           add_query_param(location_reverse_name_order_path(location.id)),
+           { class: "location_reverse_order_link" }]
         ]
       end
-      tabs
+      links
     end
 
     def location_version_links(location:)

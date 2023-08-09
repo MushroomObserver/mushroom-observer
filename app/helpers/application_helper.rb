@@ -119,7 +119,7 @@ module ApplicationHelper
   def create_tabs(links)
     return [] unless links
 
-    links.compact.each do |str, url, args|
+    links.compact.map do |str, url, args|
       case args[:button]
       when :destroy
         destroy_button(name: str, target: url, **args)

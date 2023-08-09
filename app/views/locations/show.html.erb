@@ -1,7 +1,7 @@
 <%
 @title = :show_location_title.t(name: @location.display_name)
 
-tabs = location_show_tabs(location: @location)
+tabs = create_tabs(location_show_links(location: @location))
 tabs << draw_interest_icons(@location)
 @tabsets = { pager_for: @location, right: draw_tab_set(tabs) }
 @container = :wide
