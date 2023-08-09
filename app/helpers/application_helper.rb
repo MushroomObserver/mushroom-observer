@@ -107,11 +107,32 @@ module ApplicationHelper
     link_with_query("« #{:BACK.t}", path)
   end
 
-  # Convert @links in index views into a list of tabs for RHS tab set.
+  # Convert @links in index views into a list of HTML links for RHS tab set.
   def create_links(links)
     return [] unless links
 
     links.compact.map { |str, url, args| link_to(str, url, args) }
+  end
+
+  # Convert an array (of arrays) of link attributes into an array of HTML tabs
+  # that may be either links or CRUD button_to's, for RHS tab set
+  def create_tabs(links)
+    return [] unless links
+
+    links.compact.each do |str, url, args|
+      case args[:button]
+      when :destroy
+        destroy_button(name: str, target: url, **args)
+      when :post
+        post_button(name: str, path: url, **args)
+      when :put
+        put_button(name: str, path: url, **args)
+      when :patch
+        patch_button(name: str, path: url, **args)
+      else
+        link_to(str, url, args)
+      end
+    end
   end
 
   # Short-hand to render shared tab_set partial for a given set of links.
