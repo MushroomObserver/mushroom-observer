@@ -7,11 +7,11 @@ module Tabs
     def locations_index_links(query:)
       [
         [:show_location_create.t, add_query_param(new_location_path),
-         { id: "new_location_link" }],
+         { class: "new_location_link" }],
         [:list_place_names_map.t, add_query_param(map_locations_path),
-         { id: "map_locations_link" }],
+         { class: "map_locations_link" }],
         [:list_countries.t, location_countries_path,
-         { id: "location_countries_link" }],
+         { class: "location_countries_link" }],
         # Add "show observations" link if this query can be coerced into an
         # observation query. (coerced_query_link returns array)
         [*coerced_query_link(query, Observation),
@@ -22,18 +22,25 @@ module Tabs
     # Composed links because there's interest_icons
     def location_show_tabs(location:)
       tabs = [
-        link_with_query(show_obs_link_title_with_count(location),
-                        observations_path(location: location.id)),
-        link_to(:all_objects.t(type: :location), locations_path),
-        link_with_query(:show_location_create.t, new_location_path),
-        link_with_query(:show_location_edit.t,
-                        edit_location_path(location.id))
+        link_to(show_obs_link_title_with_count(location),
+                add_query_param(observations_path(location: location.id)),
+                class: "location_observations_link"),
+        link_to(:all_objects.t(type: :location), locations_path,
+                class: "locations_index_link"),
+        link_to(:show_location_create.t, add_query_param(new_location_path),
+                class: "new_location_link"),
+        link_to(:show_location_edit.t,
+                add_query_param(edit_location_path(location.id)),
+                class: "edit_location_link")
       ]
       if in_admin_mode?
         tabs += [
           destroy_button(name: :show_location_destroy.t, target: location),
-          link_with_query(:show_location_reverse.t,
-                          location_reverse_name_order_path(location.id))
+          link_to(
+            :show_location_reverse.t,
+            add_query_param(location_reverse_name_order_path(location.id)),
+            class: "location_reverse_order_link"
+          )
         ]
       end
       tabs
@@ -77,7 +84,7 @@ module Tabs
         locations_index_link,
         [:cancel_and_show.t(type: :location),
          add_query_param(location.show_link_args),
-         { id: "location_link" }]
+         { class: "location_link" }]
       ]
       tabs += location_search_links(location.name)
       tabs
@@ -85,7 +92,7 @@ module Tabs
 
     def locations_index_link
       [:all_objects.t(type: :location), locations_path,
-       { id: "locations_index_link" }]
+       { class: "locations_index_link" }]
     end
 
     # Dictionary of urls for searches on external sites

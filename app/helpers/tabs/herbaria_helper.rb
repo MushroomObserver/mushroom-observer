@@ -26,8 +26,8 @@ module Tabs
       if herbarium.curators.empty? ||
          herbarium.curator?(user) || in_admin_mode?
         tabs += [
-          link_with_query(:edit_herbarium.t,
-                          edit_herbarium_path(herbarium.id)),
+          link_to(:edit_herbarium.t,
+                  add_query_param(edit_herbarium_path(herbarium.id))),
           destroy_button(
             name: :destroy_object.t(type: :herbarium),
             target: herbarium_path(herbarium,
@@ -37,10 +37,12 @@ module Tabs
         ]
       end
       tabs += [
-        link_with_query(:create_herbarium.t, new_herbarium_path,
-                        id: "new_herbarium_link"),
-        link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                        id: "herbarium_index_link")
+        link_to(:create_herbarium.t,
+                add_query_param(new_herbarium_path),
+                id: "new_herbarium_link"),
+        link_to(:herbarium_index.t,
+                add_query_param(herbaria_path(flavor: :nonpersonal)),
+                id: "herbarium_index_link")
       ]
       tabs
     end

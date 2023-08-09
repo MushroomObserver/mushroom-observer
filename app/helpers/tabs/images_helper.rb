@@ -39,28 +39,32 @@ module Tabs
 
       obs = image.observations.first
       [
-        link_with_query(:show_object.t(type: :observation),
-                        permanent_observation_path(obs.id)),
-        link_with_query(:show_object.t(type: :name),
-                        name_path(obs.name.id)),
+        link_to(:show_object.t(type: :observation),
+                add_query_param(permanent_observation_path(obs.id)),
+                class: "image_observation_link"),
+        link_to(:show_object.t(type: :name),
+                add_query_param(name_path(obs.name.id)),
+                class: "image_name_link"),
         link_to(:google_images.t,
                 "http://images.google.com/images?q=#{obs.name.search_name}",
-                target: "_blank", rel: "noopener")
+                target: "_blank", rel: "noopener", class: "image_google_link")
       ]
     end
 
     def eol_link(image)
       return unless (eol_url = image.eol_url)
 
-      link_to("EOL", eol_url, target: "_blank", rel: "noopener")
+      link_to("EOL", eol_url, target: "_blank", rel: "noopener",
+                              class: "image_eol_link")
     end
 
     def edit_and_destroy_links(image)
       return unless check_permission(image)
 
       [
-        link_with_query(:edit_object.t(type: :image),
-                        edit_image_path(image.id)),
+        link_to(:edit_object.t(type: :image),
+                add_query_param(edit_image_path(image.id)),
+                class: "image_edit_link"),
         destroy_button(name: :destroy_object.t(type: :image),
                        target: image)
       ]
@@ -69,8 +73,9 @@ module Tabs
     def email_commercial_inquiry_link(image)
       return unless image.user.email_general_commercial && !image.user.no_emails
 
-      link_with_query(:image_show_inquiry.t,
-                      emails_commercial_inquiry_path(image.id))
+      link_to(:image_show_inquiry.t,
+              add_query_param(emails_commercial_inquiry_path(image.id)),
+              class: "image_commercial_inquiry_link")
     end
   end
 end

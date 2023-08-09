@@ -25,8 +25,9 @@ module Tabs
     end
 
     def show_parent_link(description, type)
-      link_with_query(:show_object.t(type: type),
-                      description.parent.show_link_args)
+      link_to(:show_object.t(type: type),
+              add_query_param(description.parent.show_link_args),
+              { class: "description_parent_link_#{description.id}" })
     end
 
     def create_description_link(object)
@@ -41,9 +42,9 @@ module Tabs
     def edit_description_link(description)
       return unless writer?(description)
 
-      link_with_query(
-        :show_description_edit.t, description.edit_link_args
-      )
+      link_to(:show_description_edit.t,
+              add_query_param(description.edit_link_args),
+              class: "description_edit_link_#{description.id}")
     end
 
     def destroy_description_link(description, admin)
@@ -54,23 +55,25 @@ module Tabs
     end
 
     def clone_description_link(description)
-      link_with_query(
+      link_to(
         :show_description_clone.t,
         { controller: description.show_controller,
           action: :new, id: description.parent_id,
-          clone: description.id },
-        help: :show_description_clone_help.l
+          clone: description.id, q: get_query_param },
+        help: :show_description_clone_help.l,
+        class: "description_clone_link_#{description.id}"
       )
     end
 
     def merge_description_link(description, admin)
       return unless admin
 
-      link_with_query(
+      link_to(
         :show_description_merge.t,
         { controller: "#{description.show_controller}/merges",
-          action: :new, id: description.id },
-        help: :show_description_merge_help.l
+          action: :new, id: description.id, q: get_query_param },
+        help: :show_description_merge_help.l,
+        class: "description_merge_link_#{description.id}"
       )
     end
 
@@ -78,22 +81,24 @@ module Tabs
       return unless admin
 
       parent_type = description.parent.type_tag.to_s
-      link_with_query(
+      link_to(
         :show_description_move.t,
         { controller: "#{description.show_controller}/moves",
-          action: :new, id: description.id },
-        help: :show_description_move_help.l(parent: parent_type)
+          action: :new, id: description.id, q: get_query_param },
+        help: :show_description_move_help.l(parent: parent_type),
+        class: "description_move_link_#{description.id}"
       )
     end
 
     def adjust_permissions_link(description, type, admin)
       return unless admin && type == :name
 
-      link_with_query(
+      link_to(
         :show_description_adjust_permissions.t,
         { controller: "#{description.show_controller}/permissions",
-          action: :edit, id: description.id },
-        help: :show_description_adjust_permissions_help.l
+          action: :edit, id: description.id, q: get_query_param },
+        help: :show_description_adjust_permissions_help.l,
+        class: "description_permissions_link_#{description.id}"
       )
     end
 
@@ -106,7 +111,8 @@ module Tabs
         path: { controller: "#{description.show_controller}/defaults",
                 action: :update, id: description.id,
                 q: get_query_param },
-        help: :show_description_make_default_help.l
+        help: :show_description_make_default_help.l,
+        class: "description_make_default_link_#{description.id}"
       )
     end
 
@@ -114,8 +120,10 @@ module Tabs
       return unless (description.source_type == :project) &&
                     (project = description.source_object)
 
-      link_with_query(
-        :show_object.t(type: :project), project.show_link_args
+      link_to(
+        :show_object.t(type: :project),
+        add_query_param(project.show_link_args),
+        class: "description_project_link"
       )
     end
 
@@ -128,7 +136,8 @@ module Tabs
         path: { controller: "#{description.show_controller}/publish",
                 action: :update, id: description.id,
                 q: get_query_param },
-        help: :show_description_publish_help.l
+        help: :show_description_publish_help.l,
+        class: "description_publish_draft_link"
       )
     end
   end

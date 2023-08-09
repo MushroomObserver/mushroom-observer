@@ -39,7 +39,8 @@ module Tabs
           id: "destroy_herbarium_record_link"
         )
       end
-      tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
+      tabs << link_to(:herbarium_index.t,
+                      add_query_param(herbaria_path(flavor: :nonpersonal)),
                       id: "herbarium_index_link")
       tabs
     end
