@@ -92,7 +92,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     end
 
     assert_selector("body.herbarium_records__show")
-    click_on(class: "destroy_herbarium_record_link")
+    click_on(class: "destroy_herbarium_record_link_#{rec.id}")
 
     assert_selector("body.herbarium_records__index")
     assert_not(obs.reload.herbarium_records.include?(rec))
