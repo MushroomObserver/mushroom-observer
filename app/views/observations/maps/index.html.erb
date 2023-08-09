@@ -1,8 +1,5 @@
 <%
-  tabs = [
-    link_to_coerced_query(@query, Observation),
-    link_to_coerced_query(@query, Location)
-  ]
+  tabs = create_link(observation_maps_links(query: @query))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
