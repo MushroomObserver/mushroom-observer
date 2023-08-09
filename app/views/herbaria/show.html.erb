@@ -1,14 +1,11 @@
 <%
-  @title = @herbarium.format_name.t
+@title = @herbarium.format_name.t
 
+tabs = herbarium_show_tabs(herbarium: @herbarium, user: @user)
+@tabsets = { pager_for: @herbarium, right: draw_tab_set(tabs) }
 
-  @tabsets = {
-    pager_for: @herbarium,
-    right: draw_tab_set(herbarium_show_tabs(@herbarium, @user))
-  }
-
-  map = @herbarium.location ? true : false
-  @container = :wide
+map = @herbarium.location ? true : false
+@container = :wide
 %>
 
 <div class="row">

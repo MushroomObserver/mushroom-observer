@@ -1,7 +1,7 @@
 <%
-  links = create_links(herbarium_record_form_new_tabs(@observation))
-  @tabsets = { right: draw_tab_set(links) }
-  @container = :full
+tabs = create_links(herbarium_record_form_new_links(observation: @observation))
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :full
 %>
 
 <div class="row">

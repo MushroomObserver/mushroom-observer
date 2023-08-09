@@ -127,7 +127,6 @@ class ArticlesController < ApplicationController
                       ["user",        :sort_by_user.t],
                       ["title",       :sort_by_title.t]].freeze
     }.merge(args)
-    @links ||= []
 
     show_index_of_objects(query, args)
   end

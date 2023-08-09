@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Custom Tabset Helpers for Herbaria views
-#
+# NOTE: this uses ids not classes for identifiers, change this
 module Tabs
   module HerbariaHelper
     # link attribute arrays
-    def herbaria_index_tabs(query)
+    def herbaria_index_links(query:)
       links ||= []
       unless query&.flavor == :all
         links << [:herbarium_index_list_all_herbaria.l,
@@ -21,7 +21,7 @@ module Tabs
     end
 
     # Composed links because there's a destroy_button
-    def herbarium_show_tabs(herbarium, user)
+    def herbarium_show_tabs(herbarium:, user:)
       tabs = []
       if herbarium.curators.empty? ||
          herbarium.curator?(user) || in_admin_mode?
@@ -46,14 +46,14 @@ module Tabs
     end
 
     # link attribute arrays
-    def herbarium_form_new_tabs
+    def herbarium_form_new_links
       [[:herbarium_index.t,
         add_query_param(herbaria_path(flavor: :nonpersonal)),
         { id: "herbarium_index_link" }]]
     end
 
     # link attribute arrays
-    def herbarium_form_edit_tabs(herbarium)
+    def herbarium_form_edit_links(herbarium:)
       [
         [:cancel_and_show.t(type: :herbarium),
          add_query_param(herbarium_path(herbarium)),

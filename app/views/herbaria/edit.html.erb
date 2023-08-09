@@ -1,8 +1,8 @@
 <%
   @title = :edit_herbarium_title.l
 
-  links = create_links(herbarium_form_edit_tabs(@herbarium))
-  @tabsets = { right: draw_tab_set(links) }
+  tabs = create_links(herbarium_form_edit_links(herbarium: @herbarium))
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= render(partial: "form", locals: { button_name: :SAVE }) %>

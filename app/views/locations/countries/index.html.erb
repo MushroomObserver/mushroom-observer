@@ -1,11 +1,9 @@
 <%
-  @title = :list_countries_title.t
+@title = :list_countries_title.t
 
-  tabs = [
-    link_to(:all_objects.t(type: :location), locations_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+tabs = create_links(location_countries_links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :wide
 %>
 
 <div class="row">

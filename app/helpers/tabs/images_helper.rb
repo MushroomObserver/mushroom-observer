@@ -4,22 +4,32 @@
 module Tabs
   module ImagesHelper
     # link attribute arrays
-    def images_index_tabs(query)
+    def images_index_links(query:)
       # Add "show observations" link if this query can be coerced into an
       # observation query. (coerced_query_link returns array)
-      [coerced_query_link(query, Observation)]
+      [
+        [*coerced_query_link(query, Observation),
+         { class: "images_with_observations_link" }]
+      ]
     end
 
     # assemble HTML for "tabset" for show_image
     # actually a list of links and the interest icons
     def show_image_tabset(image:)
-      tabs = [
+      [
         show_image_obs_links(image),
         eol_link(image),
         edit_and_destroy_links(image),
         email_commercial_inquiry_link(image)
       ].flatten.reject(&:empty?)
-      { pager_for: image, right: draw_tab_set(tabs) }
+    end
+
+    def images_exif_show_links(image:)
+      [
+        [:cancel_and_show.t(type: :image),
+         add_query_param(image.show_link_args),
+         { class: "image_return_link" }]
+      ]
     end
 
     private
@@ -34,14 +44,15 @@ module Tabs
         link_with_query(:show_object.t(type: :name),
                         name_path(obs.name.id)),
         link_to(:google_images.t,
-                "http://images.google.com/images?q=#{obs.name.search_name}")
+                "http://images.google.com/images?q=#{obs.name.search_name}",
+                target: "_blank", rel: "noopener")
       ]
     end
 
     def eol_link(image)
       return unless (eol_url = image.eol_url)
 
-      link_to("EOL", eol_url)
+      link_to("EOL", eol_url, target: "_blank", rel: "noopener")
     end
 
     def edit_and_destroy_links(image)

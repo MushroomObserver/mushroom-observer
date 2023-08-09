@@ -1,10 +1,10 @@
 <%
   @title ||= :edit_location_title.t(name: @location.display_name)
 
-  links = create_links(location_form_edit_links(@location))
+  tabs = create_links(location_form_edit_links(location: @location))
   @tabsets = {
     pager_for: @image,
-    right: draw_tab_set(links),
+    right: draw_tab_set(tabs),
   }
   @container = :full
   action = { action: :update, id: @location.id,

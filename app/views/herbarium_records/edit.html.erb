@@ -1,7 +1,8 @@
 <%
-  links = create_links(herbarium_record_form_edit_tabs(@back, @back_object))
-  @tabsets = { right: draw_tab_set(links) }
-  @container = :wide
+links = herbarium_record_form_edit_links(back: @back, back_object: @back_object)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :wide
 %>
 
 <div class="row">

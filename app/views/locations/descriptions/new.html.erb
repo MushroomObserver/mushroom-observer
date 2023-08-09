@@ -1,11 +1,9 @@
 <%
-  @title ||= :create_location_description_title.t(name: @location.display_name)
+@title ||= :create_location_description_title.t(name: @location.display_name)
 
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :location),
-                    @description.location.show_link_args)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+links = location_description_form_new_links(description: @description)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= render(partial: "form", locals: { action: :create }) %>

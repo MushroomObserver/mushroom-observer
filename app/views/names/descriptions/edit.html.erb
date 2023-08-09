@@ -1,22 +1,12 @@
 <%
-  @title ||= :edit_name_description_title.t(name: @description.format_name)
+@title ||= :edit_name_description_title.t(name: @description.format_name)
 
-  tabs = [
-    link_with_query(:show_object.t(type: :name),
-                    name_path(@description.name_id)),
-    link_with_query(:cancel_and_show.t(type: :name_description),
-                    name_description_path(@description.id))
-  ]
-  if @description.is_admin?(@user) || in_admin_mode?
-    tabs += [
-      link_with_query(:show_description_adjust_permissions.t,
-        edit_name_description_permissions_path(@description.id))
-    ]
-  end
-  @tabsets = { right: draw_tab_set(tabs) }
+links = name_description_form_edit_links(description: @description, user: @user)
+tabs = create_links(links)
+@tabsets = { right: draw_tab_set(tabs) }
 
-  action = { controller: "/names/descriptions", action: :update,
-             id: @description.id, q: get_query_param }
+action = { controller: "/names/descriptions", action: :update,
+            id: @description.id, q: get_query_param }
 %>
 
 <%= render(partial: "names/descriptions/form",

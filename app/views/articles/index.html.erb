@@ -1,6 +1,6 @@
 <%
   @title ||= :ARTICLES.t
-  tabs = index_tabs_for_user(@user) + create_links(@links)
+  tabs = create_links(index_links_for_user(user: @user))
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
 

@@ -1,8 +1,8 @@
 <%
   @title ||= :create_location_title.t
 
-  links = create_links(location_form_new_links(@location))
-  @tabsets = { right: draw_tab_set(links) }
+  tabs = create_links(location_form_new_links(location: @location))
+  @tabsets = { right: draw_tab_set(tabs) }
   @container = :full
 
   action = {

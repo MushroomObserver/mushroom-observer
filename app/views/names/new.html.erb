@@ -1,10 +1,8 @@
 <%
-  @title ||= :create_name_title.t
-  tabs = [
-      link_to(:all_objects.t(type: :name), names_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  action = add_query_param({ controller: "/names", action: :create })
+@title ||= :create_name_title.t
+tabs = create_links(name_form_new_links)
+@tabsets = { right: draw_tab_set(tabs) }
+action = add_query_param({ controller: "/names", action: :create })
 %>
 
 <%= render(partial: "names/form",

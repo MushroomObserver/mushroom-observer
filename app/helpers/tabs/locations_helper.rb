@@ -4,23 +4,23 @@
 module Tabs
   module LocationsHelper
     # link attribute arrays (coerced_query_link returns array)
-    def locations_index_tabs(query)
-      tabs = [
+    def locations_index_links(query:)
+      [
         [:show_location_create.t, add_query_param(new_location_path),
          { id: "new_location_link" }],
         [:list_place_names_map.t, add_query_param(map_locations_path),
          { id: "map_locations_link" }],
         [:list_countries.t, location_countries_path,
-         { id: "location_countries_link" }]
+         { id: "location_countries_link" }],
+        # Add "show observations" link if this query can be coerced into an
+        # observation query. (coerced_query_link returns array)
+        [*coerced_query_link(query, Observation),
+         { class: "location_observations_link" }]
       ]
-
-      # Add "show observations" link if this query can be coerced into an
-      # observation query. (coerced_query_link returns array)
-      tabs << coerced_query_link(query, Observation)
     end
 
     # Composed links because there's interest_icons
-    def location_show_tabs(location)
+    def location_show_tabs(location:)
       tabs = [
         link_with_query(show_obs_link_title_with_count(location),
                         observations_path(location: location.id)),
@@ -36,11 +36,35 @@ module Tabs
                           location_reverse_name_order_path(location.id))
         ]
       end
-      tabs << draw_interest_icons(location)
+      tabs
+    end
+
+    def location_version_links(location:)
+      [
+        [:show_location.t(location: location.display_name),
+         location_path(location.id),
+         { class: "location_versions_link" }]
+      ]
+    end
+
+    def location_map_links(query:)
+      [
+        locations_index_link,
+        [*coerced_query_link(query, Observation),
+         { class: "location_observations_link" }],
+        [*coerced_query_link(query, Location),
+         { class: "location_locations_link" }]
+      ]
+    end
+
+    def location_countries_links
+      [
+        locations_index_link
+      ]
     end
 
     # link attribute arrays
-    def location_form_new_links(location)
+    def location_form_new_links(location:)
       tabs = [
         locations_index_link
       ]
@@ -48,7 +72,7 @@ module Tabs
       tabs
     end
 
-    def location_form_edit_links(location)
+    def location_form_edit_links(location:)
       tabs = [
         locations_index_link,
         [:cancel_and_show.t(type: :location),
