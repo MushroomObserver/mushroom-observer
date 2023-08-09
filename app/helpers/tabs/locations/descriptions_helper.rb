@@ -16,12 +16,12 @@ module Tabs
       end
 
       def location_description_form_new_links(description:)
-        [location_return_link(description)]
+        [description_location_return_link(description)]
       end
 
       def location_description_form_edit_links(description:)
         [
-          location_return_link(description),
+          description_location_return_link(description),
           [:cancel_and_show.t(type: :location_description),
            add_query_param(description.show_link_args),
            { class: "location_description_return_link" }]
@@ -30,7 +30,7 @@ module Tabs
 
       def location_description_form_permissions_links(description:)
         [
-          location_return_link(description),
+          description_location_return_link(description),
           [:show_object.t(type: :location_description),
            add_query_param(location_description_path(description.id)),
            { class: "location_description_return_link" }]
@@ -45,7 +45,7 @@ module Tabs
         ]
       end
 
-      def location_return_link(description)
+      def description_location_return_link(description)
         [:cancel_and_show.t(type: :location),
          add_query_param(location_path(description.location_id)),
          { class: "location_return_link" }]
