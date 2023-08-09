@@ -14,7 +14,7 @@ module TitleAndTabsetHelper
   # contents of the <title> in html header
   def title_tag_contents(title:, action_name:)
     if title.present?
-      title.strip_html
+      title.strip_html.unescape_html # removes tags and special chars
     elsif TranslationString.where(tag: "title_for_#{action_name}").present?
       :"title_for_#{action_name}".t
     else
