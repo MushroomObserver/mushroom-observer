@@ -146,8 +146,8 @@ module Tabs
         { class: "new_herbarium_link" }]]
     end
 
-    def edit_observation_links(observation:)
-      [observation_return_link(observation)]
+    def edit_observation_links(obs:)
+      [observation_return_link(obs)]
     end
 
     def observation_maps_links(query:)
@@ -159,20 +159,20 @@ module Tabs
       ]
     end
 
-    def new_naming_links(observation:)
-      [observation_return_link(observation)]
+    def new_naming_links(obs:)
+      [observation_return_link(obs)]
     end
 
-    def edit_naming_links(observation:)
-      [observation_return_link(observation)]
+    def edit_naming_links(obs:)
+      [observation_return_link(obs)]
     end
 
-    def naming_suggestion_links(observation:)
-      [observation_return_link(observation)]
+    def naming_suggestion_links(obs:)
+      [observation_return_link(obs)]
     end
 
-    def observation_list_links(observation:)
-      [observation_return_link(observation)]
+    def observation_list_links(obs:)
+      [observation_return_link(obs)]
     end
 
     def observation_images_edit_links(image:)
@@ -188,10 +188,11 @@ module Tabs
       ]
     end
 
+    # Note this takes `obj:` not `obs:`
     def observation_images_remove_links(obj:)
       [
-        observation_return_link(obs),
-        edit_observation_link(obs)
+        observation_return_link(obj),
+        edit_observation_link(obj)
       ]
     end
 
