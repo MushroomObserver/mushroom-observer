@@ -84,7 +84,7 @@ module Tabs
         coerced_query_links(query),
         add_to_list_link(query),
         download_as_csv_link(query)
-      ].reject(&:empty?)
+      ].flatten.reject(&:empty?)
     end
 
     def at_where_links(query)
@@ -183,6 +183,5 @@ module Tabs
     def observation_list_links(observation:)
       [observation_return_link(observation)]
     end
-
   end
 end
