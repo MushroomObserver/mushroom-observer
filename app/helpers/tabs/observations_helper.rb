@@ -78,19 +78,19 @@ module Tabs
     # INDEX
 
     def index_observation_links(query:)
-      [
-        at_where_links(query),
-        index_map_link(query),
-        coerced_query_links(query),
-        add_to_list_link(query),
-        download_as_csv_link(query)
-      ].flatten.reject(&:empty?)
+      links = []
+      links += at_where_links(query) # maybe multiple links
+      links << index_map_link(query)
+      links += coerced_query_links(query) # multiple links
+      links << add_to_list_link(query)
+      links << download_as_csv_link(query)
+      links.reject(&:empty?)
     end
 
     def at_where_links(query)
       # Add some extra links to the index user is sent to if they click on an
       # undefined location.
-      return unless query.flavor == :at_where
+      return [] unless query.flavor == :at_where
 
       [
         [:list_observations_location_define.l,
