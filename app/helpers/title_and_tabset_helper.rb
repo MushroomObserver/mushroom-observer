@@ -67,7 +67,7 @@ module TitleAndTabsetHelper
     return [] unless links
 
     links.compact.map do |str, url, args|
-      kwargs = args.except(:button, :target)
+      kwargs = args&.except(:button, :target)
       case args[:button]
       when :destroy
         destroy_button(name: str, target: args[:target] || url, **kwargs)
