@@ -66,17 +66,18 @@ module TitleAndTabsetHelper
     return [] unless links
 
     links.compact.map do |str, url, args|
+      kwargs = args.except(:button, :target)
       case args[:button]
       when :destroy
-        destroy_button(name: str, target: url, **args)
+        destroy_button(name: str, target: args[:target] || url, **kwargs)
       when :post
-        post_button(name: str, path: url, **args)
+        post_button(name: str, path: url, **kwargs)
       when :put
-        put_button(name: str, path: url, **args)
+        put_button(name: str, path: url, **kwargs)
       when :patch
-        patch_button(name: str, path: url, **args)
+        patch_button(name: str, path: url, **kwargs)
       else
-        link_to(str, url, args)
+        link_to(str, url, kwargs)
       end
     end
   end

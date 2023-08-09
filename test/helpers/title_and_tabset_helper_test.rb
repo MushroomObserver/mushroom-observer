@@ -4,6 +4,8 @@ require("test_helper")
 
 # test the application-wide helpers
 class TitleAndTabsetHelperTest < ActionView::TestCase
+  include LinkHelper
+
   def test_title_tag_contents
     # Prove that if @title is present, <title> contents are @title
     @title = "@title present"
@@ -26,5 +28,31 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
     action_name = "blah_blah"
     assert_equal("Blah Blah",
                  title_tag_contents(action_name))
+  end
+
+  # destroy_button tab tested in articles_controller_test
+  # That method calls `add_query_param` and others unavailable to helper tests
+  # put_button is not used for articles, but we're just testing HTML output
+  def test_create_tabs
+    article = Article.last
+    links = [[:create_article_title.t, new_article_path,
+              { class: "new_article_link" }],
+             [:EDIT.t, edit_article_path(article.id),
+              { class: "edit_article_link" }],
+             ["merge", article_path(article.id), { button: :put }]]
+
+    tabs = create_tabs(links)
+
+    tab1 = link_to(
+      :create_article_title.t, new_article_path, { class: "new_article_link" }
+    )
+    tab2 = link_to(
+      :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
+    )
+    tab3 = put_button(name: "merge", path: article_path(article.id))
+
+    assert_includes(tabs, tab1)
+    assert_includes(tabs, tab2)
+    assert_includes(tabs, tab3)
   end
 end

@@ -60,7 +60,8 @@ module LinkHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
-  def destroy_button(name: :DESTROY.t, target:, **args)
+  def destroy_button(target:, name: :DESTROY.t, **args)
+    name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
     path = if target.is_a?(String)
              target
            else
