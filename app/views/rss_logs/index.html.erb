@@ -1,6 +1,6 @@
 <%
   @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
-  links = rss_logs_index_tabset(@user, @types)
+  links = rss_logs_index_links(user: @user, types: @types)
   @tabsets = { right: draw_tab_set(create_links(links)) }
   @full_width_tab_set = render(partial: "type_filters")
 
