@@ -11,16 +11,16 @@ module Tabs
         links = [
           [:show_object.l(type: :observation),
            observation_path(params[:observation_id]),
-           { id: "herbarium_observation_link" }],
+           { class: "herbarium_observation_link" }],
           [:create_herbarium_record.l,
            new_herbarium_record_path(id: params[:id]),
-           { id: "new_herbarium_record_link" }]
+           { class: "new_herbarium_record_link" }]
         ]
       end
       links << [:create_herbarium.l, new_herbarium_path,
-                { id: "new_herbarium_link" }]
+                { class: "new_herbarium_link" }]
       links << [:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                { id: "all_nonpersonal_herbaria_link" }]
+                { class: "nonpersonal_herbaria_index_link" }]
     end
 
     # HTML links because there's a destroy_button
@@ -31,17 +31,17 @@ module Tabs
           :edit_herbarium_record.t,
           edit_herbarium_record_path(id: herbarium_record.id,
                                      back: :show, q: get_query_param),
-          id: "edit_herbarium_record_link"
+          class: "edit_herbarium_record_link"
         )
         tabs << destroy_button(
           name: :destroy_object.t(type: :herbarium_record),
           target: herbarium_record_path(herbarium_record.id),
-          id: "destroy_herbarium_record_link"
+          class: "destroy_herbarium_record_link"
         )
       end
       tabs << link_to(:herbarium_index.t,
                       add_query_param(herbaria_path(flavor: :nonpersonal)),
-                      id: "herbarium_index_link")
+                      class: "herbaria_index_link")
       tabs
     end
 
@@ -50,13 +50,13 @@ module Tabs
       [
         [:cancel_and_show.t(type: :observation),
          add_query_param(observation_path(observation.id)),
-         { id: "show_observation_link" }],
+         { class: "show_observation_link" }],
         [:create_herbarium.t,
          add_query_param(new_herbarium_path),
-         { id: "new_herbarium_link" }],
+         { class: "new_herbarium_link" }],
         [:herbarium_index.t,
          add_query_param(herbaria_path(flavor: :nonpersonal)),
-         { id: "all_nonpersonal_herbaria_link" }]
+         { class: "nonpersonal_herbaria_index_link" }]
       ]
     end
 
@@ -66,24 +66,24 @@ module Tabs
       if back == "index"
         links << [:edit_herbarium_record_back_to_index.t,
                   herbarium_records_path(q: get_query_param),
-                  { id: "herbarium_records_link" }]
+                  { class: "herbarium_records_link" }]
       elsif back_object&.type_tag == :observation
         links << [:cancel_and_show.t(type: back_object.type_tag),
                   observation_path(id: back_object.id,
                                    q: get_query_param),
-                  { id: "herbarium_record_observation_link" }]
+                  { class: "herbarium_record_observation_link" }]
       elsif back_object&.type_tag == :herbarium_record
         links << [:cancel_and_show.t(type: back_object.type_tag),
                   herbarium_record_path(id: back_object.id,
                                         q: get_query_param),
-                  { id: "herbarium_record_link" }]
+                  { class: "herbarium_record_link" }]
       end
       links << [:create_herbarium.t,
                 new_herbarium_path(q: get_query_param),
-                { id: "new_herbarium_link" }]
+                { class: "new_herbarium_link" }]
       links << [:herbarium_index.t,
                 herbaria_path(flavor: :nonpersonal),
-                { id: "all_nonpersonal_herbaria_link" }]
+                { class: "nonpersonal_herbaria_index_link" }]
     end
   end
 end
