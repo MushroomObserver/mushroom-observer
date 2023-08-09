@@ -3,18 +3,16 @@
 # html used in tabsets
 module Tabs
   module ObservationsHelper
-    # assemble HTML for "tabset" for show_observation
+    # assemble links for "tabset" for show_observation
     # actually a list of links and the interest icons
-    def show_observation_tabset(obs:, user:, mappable:)
-      tabs = [
-        show_obs_google_links_for(obs.name),
+    def show_observation_links(obs:, user:, mappable:)
+      [
+        *show_obs_google_links_for(obs.name),
         general_questions_link(obs, user),
         manage_lists_link(obs, user),
         map_link(mappable),
-        obs_change_links(obs),
-        draw_interest_icons(obs)
-      ].flatten.reject(&:empty?)
-      { pager_for: obs, right: draw_tab_set(tabs) }
+        *obs_change_links(obs)
+      ].reject(&:empty?)
     end
 
     def show_obs_google_links_for(obs_name)
@@ -24,8 +22,8 @@ module Tabs
     end
 
     def google_images_for(obs_name)
-      link_to(:google_images.t, google_images_link(obs_name),
-              class: "google_images_link")
+      [:google_images.t, google_images_link(obs_name),
+       { class: "google_images_link" }]
     end
 
     def google_images_link(obs_name)
@@ -33,44 +31,44 @@ module Tabs
     end
 
     def google_distribution_map_for(obs_name)
-      link_to(:show_name_distribution_map.t,
-              add_query_param(map_name_path(id: obs_name.id)),
-              class: "google_name_distribution_map_link")
+      [:show_name_distribution_map.t,
+       add_query_param(map_name_path(id: obs_name.id)),
+       { class: "google_name_distribution_map_link" }]
     end
 
     def general_questions_link(obs, user)
       return if obs.user.no_emails
       return unless obs.user.email_general_question && obs.user != user
 
-      link_to(:show_observation_send_question.t,
-              add_query_param(new_question_for_observation_path(obs.id)),
-              remote: true, onclick: "MOEvents.whirly();",
-              class: "send_observer_question_link")
+      [:show_observation_send_question.t,
+       add_query_param(new_question_for_observation_path(obs.id)),
+       { remote: true, onclick: "MOEvents.whirly();",
+         class: "send_observer_question_link" }]
     end
 
     def manage_lists_link(obs, user)
       return unless user
 
-      link_to(:show_observation_manage_species_lists.t,
-              add_query_param(edit_observation_species_lists_path(obs.id)),
-              class: "manage_lists_link")
+      [:show_observation_manage_species_lists.t,
+       add_query_param(edit_observation_species_lists_path(obs.id)),
+       { class: "manage_lists_link" }]
     end
 
     def map_link(mappable)
       return unless mappable
 
-      link_to(:MAP.t, add_query_param(map_locations_path),
-              class: "map_locations_link")
+      [:MAP.t, add_query_param(map_locations_path),
+       { class: "map_locations_link" }]
     end
 
     def obs_change_links(obs)
       return unless check_permission(obs)
 
       [
-        link_to(:show_observation_edit_observation.t,
-                add_query_param(edit_observation_path(obs.id)),
-                class: "edit_observation_link_#{obs.id}"),
-        destroy_button(target: obs)
+        [:show_observation_edit_observation.t,
+         add_query_param(edit_observation_path(obs.id)),
+         { class: "edit_observation_link_#{obs.id}" }],
+        [nil, obs, { button: :destroy }]
       ]
     end
 

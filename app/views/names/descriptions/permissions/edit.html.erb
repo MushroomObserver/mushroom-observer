@@ -2,7 +2,7 @@
 @title ||= @description.format_name.t
 
 links = name_description_form_permissions_links(description: @description)
-tabs = create_links(links)
+tabs = create_tabs(links)
 @tabsets = { right: draw_tab_set(tabs) }
 action = { controller: "/names/descriptions/permissions", action: :update,
             id: @description.id, q: get_query_param }

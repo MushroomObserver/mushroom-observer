@@ -1,5 +1,5 @@
 <%
-  tabs = create_links(observation_maps_links(query: @query))
+  tabs = create_tabs(observation_maps_links(query: @query))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

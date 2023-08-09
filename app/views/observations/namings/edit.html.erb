@@ -1,5 +1,5 @@
 <%
-  tabs = create_links(edit_naming_links(observation: @observation))
+  tabs = create_tabs(edit_naming_links(observation: @observation))
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :double
 %>

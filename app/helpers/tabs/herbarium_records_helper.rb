@@ -4,14 +4,14 @@
 #
 module Tabs
   module HerbariumRecordsHelper
-    # link attribute arrays
+    include HerbariaHelper
     def herbarium_record_index_links
       links = []
       if params[:observation_id].present?
         links = [
           [:show_object.l(type: :observation),
            observation_path(params[:observation_id]),
-           { class: "herbarium_observation_link" }],
+           { class: "observation_link" }],
           [:create_herbarium_record.l,
            new_herbarium_record_path(id: params[:id]),
            { class: "new_herbarium_record_link" }]
@@ -23,55 +23,45 @@ module Tabs
                 { class: "nonpersonal_herbaria_index_link" }]
     end
 
-    # HTML links because there's a destroy_button
-    def herbarium_record_show_tabs(herbarium_record:)
-      tabs = []
+    def herbarium_record_show_links(herbarium_record:)
+      links = []
       if in_admin_mode? || herbarium_record.can_edit?
-        tabs << link_to(
-          :edit_herbarium_record.t,
-          edit_herbarium_record_path(id: herbarium_record.id,
-                                     back: :show, q: get_query_param),
-          class: "edit_herbarium_record_link"
-        )
-        tabs << destroy_button(
-          name: :destroy_object.t(type: :herbarium_record),
-          target: herbarium_record_path(herbarium_record.id),
-          class: "destroy_herbarium_record_link"
+        links.push(
+          [:edit_herbarium_record.t,
+           edit_herbarium_record_path(id: herbarium_record.id,
+                                      back: :show, q: get_query_param),
+           { class: "edit_herbarium_record_link" }],
+          [:destroy_object.t(type: :herbarium_record),
+           herbarium_record, { button: :destroy }]
         )
       end
-      tabs << link_to(:herbarium_index.t,
-                      add_query_param(herbaria_path(flavor: :nonpersonal)),
-                      class: "herbaria_index_link")
-      tabs
+      links << nonpersonal_herbaria_index_link_unlabeled
+      links
     end
 
-    # link attribute arrays
     def herbarium_record_form_new_links(observation:)
       [
         [:cancel_and_show.t(type: :observation),
          add_query_param(observation_path(observation.id)),
-         { class: "show_observation_link" }],
+         { class: "observation_link" }],
         [:create_herbarium.t,
          add_query_param(new_herbarium_path),
          { class: "new_herbarium_link" }],
-        [:herbarium_index.t,
-         add_query_param(herbaria_path(flavor: :nonpersonal)),
-         { class: "nonpersonal_herbaria_index_link" }]
+        nonpersonal_herbaria_index_link_unlabeled
       ]
     end
 
-    # link attribute arrays
     def herbarium_record_form_edit_links(back:, back_object:)
       links = []
       if back == "index"
         links << [:edit_herbarium_record_back_to_index.t,
                   herbarium_records_path(q: get_query_param),
-                  { class: "herbarium_records_link" }]
+                  { class: "herbarium_records_index_link" }]
       elsif back_object&.type_tag == :observation
         links << [:cancel_and_show.t(type: back_object.type_tag),
                   observation_path(id: back_object.id,
                                    q: get_query_param),
-                  { class: "herbarium_record_observation_link" }]
+                  { class: "observation_link" }]
       elsif back_object&.type_tag == :herbarium_record
         links << [:cancel_and_show.t(type: back_object.type_tag),
                   herbarium_record_path(id: back_object.id,
@@ -81,9 +71,7 @@ module Tabs
       links << [:create_herbarium.t,
                 new_herbarium_path(q: get_query_param),
                 { class: "new_herbarium_link" }]
-      links << [:herbarium_index.t,
-                herbaria_path(flavor: :nonpersonal),
-                { class: "nonpersonal_herbaria_index_link" }]
+      links << nonpersonal_herbaria_index_link_unlabeled
     end
   end
 end

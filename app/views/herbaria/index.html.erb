@@ -1,7 +1,7 @@
 <%
   @title ||= :list_herbaria_title.t
 
-  links = create_links(herbaria_index_links(query: @query))
+  links = create_tabs(herbaria_index_links(query: @query))
   @tabsets = { right: draw_tab_set(links) }
   @container = :wide
 

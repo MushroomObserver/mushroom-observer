@@ -1,7 +1,8 @@
 <%
 @title ||= @description.format_name.t
 
-@tabsets = show_description_tabset(description: @description, pager: true)
+tabs = create_tabs(show_description_links(description: @description))
+tabsets = { right: draw_tab_set(tabs), pager_for: @description }
 @container = :wide
 %>
 

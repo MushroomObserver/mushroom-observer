@@ -1,5 +1,5 @@
 <%
-tabs = create_links(images_index_links(query: @query))
+tabs = create_tabs(images_index_links(query: @query))
 if tabs.any?
   @tabsets = { right: draw_tab_set(tabs) }
 end

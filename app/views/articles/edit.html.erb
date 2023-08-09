@@ -1,6 +1,6 @@
 <%
 @title = edit_title(@article)
-tabs = create_links(article_form_edit_links(article: @article))
+tabs = create_tabs(article_form_edit_links(article: @article))
 @tabsets = { right: draw_tab_set(tabs) }
 %>
 

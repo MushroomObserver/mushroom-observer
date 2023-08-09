@@ -8,7 +8,7 @@ desc_title = description_title(@description)
 
 links = location_description_version_links(description: @description,
                                            desc_title: desc_title)
-tabs = create_links(links)
+tabs = create_tabs(links)
 @tabsets = { right: draw_tab_set(tabs) }
 %>
 

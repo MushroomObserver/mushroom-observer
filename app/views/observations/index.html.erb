@@ -1,7 +1,7 @@
 <%
 if @objects.any?
   links = index_observation_links(query: @query)
-  tabs = create_links(links)
+  tabs = create_tabs(links)
   @tabsets = { right: draw_tab_set(tabs) }
 end
 

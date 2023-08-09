@@ -52,16 +52,17 @@ module TitleAndTabsetHelper
     link_with_query("« #{:BACK.t}", path)
   end
 
-  # Convert @links in index views into a list of HTML links for RHS tab set.
-  # Obsolete - does not handle CRUD button_to. Switch to create_tabs
-  def create_links(links)
-    return [] unless links
-
-    links.compact.map { |str, url, args| link_to(str, url, args) }
-  end
-
   # Convert an array (of arrays) of link attributes into an array of HTML tabs
   # that may be either links or CRUD button_to's, for RHS tab set
+  # Example
+  # links = [
+  #   ["text", "url", { class: "edit_form_link" }],
+  #   [nil, article, { button: :destroy }]
+  # ]
+  # create_tabs(links) will make an array of the following HTML
+  #   "<a href="url" class="edit_form_link">text</a>",
+  #   "(an HTML form)" via destroy_button, gives default button text and class
+  #
   def create_tabs(links)
     return [] unless links
 

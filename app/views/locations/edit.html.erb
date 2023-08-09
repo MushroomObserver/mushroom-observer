@@ -1,7 +1,7 @@
 <%
   @title ||= :edit_location_title.t(name: @location.display_name)
 
-  tabs = create_links(location_form_edit_links(location: @location))
+  tabs = create_tabs(location_form_edit_links(location: @location))
   @tabsets = {
     pager_for: @image,
     right: draw_tab_set(tabs),
