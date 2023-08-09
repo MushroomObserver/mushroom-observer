@@ -76,12 +76,13 @@ module Tabs
     # INDEX
 
     def index_observation_links(query:)
-      links = []
-      links += at_where_links(query) # maybe multiple links
-      links << index_map_link(query)
-      links += coerced_query_links(query) # multiple links
-      links << add_to_list_link(query)
-      links << download_as_csv_link(query)
+      links = [
+        *at_where_links(query), # maybe multiple links
+        index_map_link(query),
+        *coerced_query_links(query), # multiple links
+        add_to_list_link(query),
+        download_as_csv_link(query)
+      ]
       links.reject(&:empty?)
     end
 
@@ -141,20 +142,12 @@ module Tabs
     # FORMS
 
     def new_observation_links
-      [
-        [:create_herbarium.t, add_query_param(new_herbarium_path),
-         { class: "new_herbarium_link" }]
-      ]
+      [[:create_herbarium.t, add_query_param(new_herbarium_path),
+        { class: "new_herbarium_link" }]]
     end
 
     def edit_observation_links(observation:)
       [observation_return_link(observation)]
-    end
-
-    def observation_return_link(observation)
-      [:cancel_and_show.t(type: :observation),
-       add_query_param(observation.show_link_args),
-       { class: "observation_return_link" }]
     end
 
     def observation_maps_links(query:)
@@ -180,6 +173,45 @@ module Tabs
 
     def observation_list_links(observation:)
       [observation_return_link(observation)]
+    end
+
+    def observation_images_edit_links(image:)
+      [[:cancel_and_show.t(type: :image),
+        add_query_param(image.show_link_args),
+        { class: "image_return_link" }]]
+    end
+
+    def observation_images_new_links(obs:)
+      [
+        observation_return_link(obs),
+        edit_observation_link(obs)
+      ]
+    end
+
+    def observation_images_remove_links(obj:)
+      [
+        observation_return_link(obs),
+        edit_observation_link(obs)
+      ]
+    end
+
+    def observation_images_reuse_links(obs:)
+      [
+        observation_return_link(obs),
+        edit_observation_link(obs)
+      ]
+    end
+
+    def observation_return_link(obs)
+      [:cancel_and_show.t(type: :observation),
+       add_query_param(obs.show_link_args),
+       { class: "observation_return_link" }]
+    end
+
+    def edit_observation_link(obs)
+      [:edit_object.t(type: Observation),
+       add_query_param(edit_observation_path(obs.id)),
+       { class: "edit_observation_link" }]
     end
   end
 end
