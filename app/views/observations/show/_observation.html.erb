@@ -56,21 +56,14 @@ caption ||= false
   </div>
 
   <% if @user %>
-    <div class="obs-collection"
-         id="observation_collection_numbers">
-      <%= render(partial: "observations/show/collection_numbers",
-                 locals: { observation: observation }) %>
-    </div>
+    <%= render(partial: "observations/show/collection_numbers",
+               locals: { observation: observation }) %>
 
-    <div class="obs-herbarium" id="observation_herbarium_records">
-      <%= render(partial: "observations/show/herbarium_records",
-                 locals: { observation: observation }) %>
-    </div>
+    <%= render(partial: "observations/show/herbarium_records",
+               locals: { observation: observation }) %>
 
-    <div class="obs-sequence" id="observation_sequences">
-      <%= render(partial: "observations/show/sequences",
-                 locals: { observation: observation }) %>
-    </div>
+    <%= render(partial: "observations/show/sequences",
+               locals: { observation: observation }) %>
   <% end %>
 <% end %>
 

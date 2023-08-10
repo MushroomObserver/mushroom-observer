@@ -8,6 +8,7 @@
   query = Query.lookup(:HerbariumRecord, :all, observations: observation.id)
 %>
 
+<div class="obs-herbarium" id="observation_herbarium_records">
 <% unless @user.try(&:hide_specimen_stuff?) ||
           observation.user.try(&:hide_specimen_stuff?) %>
   <% if records.any? && can_add %>
@@ -74,3 +75,4 @@
     %>]
   <% end %>
 <% end %>
+</div>

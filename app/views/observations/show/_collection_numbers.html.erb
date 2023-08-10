@@ -7,6 +7,7 @@
   cn_query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
 %>
 
+<div class="obs-collection" id="observation_collection_numbers">
 <% unless @user.try(&:hide_specimen_stuff?) ||
           observation.user.try(&:hide_specimen_stuff?) %>
   <% if numbers.any? && can_edit %>
@@ -68,3 +69,4 @@
     %>]
   <% end %>
 <% end %>
+</div>
