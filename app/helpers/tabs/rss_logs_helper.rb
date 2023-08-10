@@ -5,13 +5,13 @@
 module Tabs
   module RssLogsHelper
     # TABSET
-    def rss_logs_index_tabset(user, types)
+    def rss_logs_index_links(user:, types:)
       [
-        default_rss_types_for_user_tab(user, types)
+        default_rss_types_for_user_link(user, types)
       ]
     end
 
-    def default_rss_types_for_user_tab(user, types)
+    def default_rss_types_for_user_link(user, types)
       return unless params[:make_default] != "1"
 
       return unless user&.default_rss_type.to_s.split.sort != types

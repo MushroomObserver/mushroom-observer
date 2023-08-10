@@ -2,7 +2,7 @@
 @title ||= :merge_descriptions_title.t(object: @description.format_name)
 
 links = name_description_form_permissions_links(description: @description)
-tabs = create_links(links)
+tabs = create_tabs(links)
 @tabsets = { right: draw_tab_set(tabs) }
 action = { controller: "/names/descriptions/moves", action: :create,
             id: @description.id }

@@ -13,15 +13,14 @@ module Tabs
       ]
     end
 
-    # assemble HTML for "tabset" for show_image
-    # actually a list of links and the interest icons
-    def show_image_tabset(image:)
+    # assemble links for show_image
+    def show_image_links(image:)
       [
-        show_image_obs_links(image),
+        *show_image_obs_links(image),
         eol_link(image),
-        edit_and_destroy_links(image),
+        *edit_and_destroy_links(image),
         email_commercial_inquiry_link(image)
-      ].flatten.reject(&:empty?)
+      ].reject(&:empty?)
     end
 
     def images_exif_show_links(image:)
@@ -39,38 +38,42 @@ module Tabs
 
       obs = image.observations.first
       [
-        link_with_query(:show_object.t(type: :observation),
-                        permanent_observation_path(obs.id)),
-        link_with_query(:show_object.t(type: :name),
-                        name_path(obs.name.id)),
-        link_to(:google_images.t,
-                "http://images.google.com/images?q=#{obs.name.search_name}",
-                target: "_blank", rel: "noopener")
+        [:show_object.t(type: :observation),
+         add_query_param(permanent_observation_path(obs.id)),
+         { class: "image_observation_link" }],
+        [:show_object.t(type: :name),
+         add_query_param(name_path(obs.name.id)),
+         { class: "image_name_link" }],
+        [:google_images.t,
+         "http://images.google.com/images?q=#{obs.name.search_name}",
+         { target: "_blank", rel: "noopener", class: "image_google_link" }]
       ]
     end
 
     def eol_link(image)
       return unless (eol_url = image.eol_url)
 
-      link_to("EOL", eol_url, target: "_blank", rel: "noopener")
+      ["EOL", eol_url, { target: "_blank", rel: "noopener",
+                         class: "image_eol_link" }]
     end
 
     def edit_and_destroy_links(image)
       return unless check_permission(image)
 
       [
-        link_with_query(:edit_object.t(type: :image),
-                        edit_image_path(image.id)),
-        destroy_button(name: :destroy_object.t(type: :image),
-                       target: image)
+        [:edit_object.t(type: :image),
+         add_query_param(edit_image_path(image.id)),
+         { class: "image_edit_link" }],
+        [:destroy_object.t(type: :image), image, { button: :destroy }]
       ]
     end
 
     def email_commercial_inquiry_link(image)
       return unless image.user.email_general_commercial && !image.user.no_emails
 
-      link_with_query(:image_show_inquiry.t,
-                      emails_commercial_inquiry_path(image.id))
+      [:image_show_inquiry.t,
+       add_query_param(emails_commercial_inquiry_path(image.id)),
+       { class: "commercial_inquiry_link" }]
     end
   end
 end

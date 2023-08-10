@@ -2,7 +2,7 @@
 @title ||= :edit_name_description_title.t(name: @description.format_name)
 
 links = name_description_form_edit_links(description: @description, user: @user)
-tabs = create_links(links)
+tabs = create_tabs(links)
 @tabsets = { right: draw_tab_set(tabs) }
 
 action = { controller: "/names/descriptions", action: :update,

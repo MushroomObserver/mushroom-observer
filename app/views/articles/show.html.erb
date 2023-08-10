@@ -1,6 +1,6 @@
 <%
   @title = show_title(@article)
-  tabs = show_tabs_for_user(article: @article, user: @user)
+  tabs = create_tabs(article_show_links(article: @article, user: @user))
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
 %>

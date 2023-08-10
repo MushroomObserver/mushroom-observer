@@ -1,6 +1,6 @@
 <%
 @title = :exif_data_for_image.t(image: @image.id)
-tabs = create_links(images_exif_show_links(image: @image))
+tabs = create_tabs(images_exif_show_links(image: @image))
 @tabsets = { right: draw_tab_set(tabs) }
 @container = :text
 %>

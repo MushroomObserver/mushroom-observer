@@ -1636,7 +1636,6 @@
   # images/new
   image_set_default: Set as default thumbnail
   image_add_title: Add an Image for [name]
-  image_add_edit: "[:edit_object(type=:observation)]"
   image_add_default: Default thumbnail
   image_add_image: "[:Image]"
   image_add_optional: "[:optional]"
@@ -1651,13 +1650,11 @@
   image_edit_title: "Editing Image: [name]"
 
   # observations/images/remove
-  image_remove_edit: "[:edit_object(type=:observation)]"
   image_remove_remove: Remove
   image_remove_title: Remove Images from [name]
 
   # observations/images/reuse
   image_reuse_title: Reuse Image for [name]
-  image_reuse_edit: "[:edit_object(type=:observation)]"
   image_reuse_id: Image ID
   image_reuse_reuse: Reuse
   image_reuse_id_help: Either click one of the images below, or if you know the image ID, just enter it here and click '[:image_reuse_reuse]'.
@@ -2350,7 +2347,7 @@
 
   # sequence/add_sequence
   sequence_add_title: Add [:SEQUENCE]
-  sequence_add_edit: "[:image_add_edit]"
+  sequence_add_edit: "[:edit_object(type=:observation)]"
   sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence

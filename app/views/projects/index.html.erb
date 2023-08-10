@@ -4,7 +4,7 @@
   tabs = [
     link_with_query(:list_projects_add_project.t, new_project_path)
   ]
-  tabs += create_links(@links)
+  tabs += create_tabs(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?

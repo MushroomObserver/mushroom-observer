@@ -1,7 +1,7 @@
 <%
 @title ||= :list_herbarium_records_title.t
 
-tabs = create_links(herbarium_record_index_links)
+tabs = create_tabs(herbarium_record_index_links)
 @tabsets = { right: draw_tab_set(tabs) }
 @container = :wide
 

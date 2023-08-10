@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module DescriptionsHelper
+  include Tabs::DescriptionsHelper
+
   def writer?(desc)
     desc.writer?(User.current) || in_admin_mode?
   end
@@ -21,19 +23,16 @@ module DescriptionsHelper
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
   def show_embedded_description_title(desc)
-    parent_type = desc.parent.type_tag
     title = description_title(desc)
+    links = description_mod_links(desc)
+    tag.p(tag.span(title, class: "text-lg") + links.safe_join(" | "))
+  end
+
+  def description_mod_links(desc)
     links = []
-    if writer?(desc)
-      links << link_with_query(:EDIT.t,
-                               { controller: "/#{parent_type}s/descriptions",
-                                 action: :edit, id: desc.id })
-    end
-    if is_admin?(desc)
-      links << destroy_button(name: :show_description_destroy.t, target: desc,
-                              q: get_query_param)
-    end
-    content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
+    links << link_to(*edit_description_link(desc)) if writer?(desc)
+    links << destroy_button(target: desc) if is_admin?(desc)
+    links
   end
 
   # Show list of name/location descriptions.
@@ -72,31 +71,15 @@ module DescriptionsHelper
   def make_list_links(list, fake_default)
     list.map! do |desc|
       item = description_link(desc)
-      writer = writer?(desc)
-      admin  = is_admin?(desc)
-      if writer || admin
-        links = []
-        if writer
-          links << link_with_query(:EDIT.t,
-                                   { controller: desc.show_controller,
-                                     action: :edit,
-                                     id: desc.id })
-        end
-        if admin
-          links << destroy_button(name: :show_description_destroy.t,
-                                  target: desc, q: get_query_param)
-        end
-        item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
-      end
+      links = description_mod_links(desc)
+      item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
       item
     end
 
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, { controller: desc.show_controller,
-                                          action: :new,
-                                          id: obj.id })
+      link = link_to(*create_description_link(obj))
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
@@ -126,13 +109,8 @@ module DescriptionsHelper
     type = object.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = content_tag(:b, :show_name_descriptions.t) + ": "
-    head += link_with_query(
-      :show_name_create_description.t,
-      { controller: "#{object.show_controller}/descriptions",
-        action: :new,
-        id: object.id }
-    )
+    head = tag.b(:show_name_descriptions.t) + ": "
+    head += link_to(*create_description_link(object))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object).map { |link| indent + link }
@@ -140,7 +118,7 @@ module DescriptionsHelper
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t unless any
     html = list.safe_join(safe_br)
-    html = content_tag(:div, html)
+    html = tag.div(html)
 
     add_list_of_projects(object, html, projects) if projects.present?
     html
@@ -152,18 +130,11 @@ module DescriptionsHelper
 
     head2 = :show_name_create_draft.t + ": "
     list = [head2] + projects.map do |project|
-      item = link_with_query(
-        project.title,
-        { controller: "#{object.show_controller}/descriptions",
-          action: :new,
-          id: object.id,
-          project: project.id,
-          source: "project" }
-      )
+      item = link_to(*new_description_for_project_link(object, project))
       indent + item
     end
     html2 = list.safe_join(safe_br)
-    html += content_tag(:p, html2)
+    html += tag.p(html2)
     html
   end
 
@@ -177,9 +148,8 @@ module DescriptionsHelper
   #
   def notes_panel(msg = nil, &block)
     msg = capture(&block) if block
-    result = content_tag(:div, msg, class: "panel-body")
-    wrapper = content_tag(:div, result,
-                          class: "panel panel-default dotted-border")
+    result = tag.div(msg, class: "panel-body")
+    wrapper = tag.div(result, class: "panel panel-default dotted-border")
     if block
       concat(wrapper)
     else
@@ -211,7 +181,7 @@ module DescriptionsHelper
     return unless data && data != 0
 
     url = add_query_param(observations_path, query)
-    content_tag(:p, link_to(title, url))
+    tag.p(link_to(title, url))
   end
 
   # Helpers for description forms

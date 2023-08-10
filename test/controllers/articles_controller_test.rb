@@ -62,6 +62,32 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Partly duplicates the title_and_tabset_helper_test `test_create_tabs`.
+  # But we want to test a `destroy_button` tab too.
+  # That method calls `add_query_param` and others unavailable to helper tests
+  def test_create_tabs_helper
+    article = Article.last
+    links = [[:create_article_title.t, new_article_path,
+              { class: "new_article_link" }],
+             [:EDIT.t, edit_article_path(article.id),
+              { class: "edit_article_link" }],
+             [nil, article, { button: :destroy }]]
+
+    tabs = @controller.helpers.create_tabs(links)
+
+    tab1 = @controller.helpers.link_to(
+      :create_article_title.t, new_article_path, { class: "new_article_link" }
+    )
+    tab2 = @controller.helpers.link_to(
+      :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
+    )
+    tab3 = @controller.helpers.destroy_button(target: article)
+
+    assert_includes(tabs, tab1)
+    assert_includes(tabs, tab2)
+    assert_includes(tabs, tab3)
+  end
+
   ############ test Actions that Display forms -- (new, edit, etc.)
 
   def test_new

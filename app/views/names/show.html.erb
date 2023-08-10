@@ -3,7 +3,7 @@
 
 Textile.register_name(@name)
 
-tabs = create_links(name_show_links(name: @name, user: @user))
+tabs = create_tabs(name_show_links(name: @name, user: @user))
 tabs << draw_interest_icons(@name)
 @tabsets = { pager_for: @name, right: draw_tab_set(tabs) }
 

@@ -2,7 +2,7 @@
 @title ||= :edit_location_description_title.t(name: @description.format_name)
 
 links = location_description_form_edit_links(description: @description)
-tabs = create_links(links)
+tabs = create_tabs(links)
 @tabsets = { right: draw_tab_set(tabs) }
 %>
 

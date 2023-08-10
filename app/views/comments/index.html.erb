@@ -3,7 +3,7 @@
 # comments for a particular object is in the partial "comments_for_object"
 
 if @links.any?
-  tabs = create_links(@links)
+  tabs = create_tabs(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 end
 @container = :text_image
