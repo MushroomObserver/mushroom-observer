@@ -2,7 +2,7 @@
 if @objects.any?
   tab_title = "Show As:" # TODO: make new translation string
   links = index_observation_links(query: @query)
-  tabs = create_tabs(links)
+  tabs = create_dropdown_tabs(links)
   @tabsets = { right: dropdown_tab_set(title: tab_title, tabs: tabs) }
 end
 

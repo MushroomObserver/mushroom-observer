@@ -53,15 +53,17 @@ module TitleAndTabsetHelper
   #   "<a href="url" class="edit_form_link">text</a>",
   #   "(an HTML form)" via destroy_button, gives default button text and class
   #
-  def create_tabs(links)
+  def create_tabs(links, xtrargs = {})
     return [] unless links
 
     links.compact.map do |str, url, args|
       args ||= {}
       kwargs = args&.except(:button, :target)
+      kwargs[:class] = class_names(kwargs[:class], xtrargs[:class])
+      kwargs.merge(xtrargs&.except(:class))
       case args[:button]
       when :destroy
-        destroy_button(name: str, target: args[:target] || url, **kwargs)
+        destroy_button(name: str, target: url, **kwargs)
       when :post
         post_button(name: str, path: url, **kwargs)
       when :put
@@ -74,9 +76,17 @@ module TitleAndTabsetHelper
     end
   end
 
+  def create_dropdown_tabs(links)
+    xtrargs = {
+      role: "menuitem",
+      class: "dropdown-item"
+    }
+    create_tabs(links, xtrargs)
+  end
+
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "layouts/content/tab_set", locals: { links: links })
+    render(partial: "application/content/tab_set", locals: { links: links })
   end
 
   # New style dropdown tabsets take array of tabs as hash of args,
@@ -88,12 +98,12 @@ module TitleAndTabsetHelper
   end
 
   def dropdown_link_options(args = {})
-    args.except(:name, :link, :button, :class) # prolly delete name and link
+    args&.except(:name, :link, :button, :class) # prolly delete name and link
   end
 
   def index_sorter(sorts)
     return "" unless sorts
 
-    render(partial: "layouts/content/sorter", locals: { sorts: sorts })
+    render(partial: "application/content/sorter", locals: { sorts: sorts })
   end
 end
