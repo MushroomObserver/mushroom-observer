@@ -1,41 +1,9 @@
 <%
   @title = :species_list_show_title.t(name: @species_list.unique_format_name)
 
-  tabs = [
-    link_with_query(:species_list_show_download.t,
-                    new_species_list_download_path(@species_list.id))
-  ]
-  if @user
-    tabs += [
-      link_with_query(:species_list_show_set_source.t,
-                      species_list_path(@species_list.id, set_source: 1),
-                      help: :species_list_show_set_source_help.l),
-      link_with_query(:species_list_show_clone_list.t,
-                      new_species_list_path(clone: @species_list.id)),
-      link_to(:species_list_show_add_remove_from_another_list.t,
-              edit_species_list_observations_path(
-                species_list: @species_list.id, q: get_query_param(@query))
-              )
-    ]
-  end
-  if check_permission(@species_list)
-    tabs += [
-      link_with_query(:species_list_show_manage_projects.t,
-                      edit_species_list_projects_path(@species_list.id),
-                      help: :species_list_show_manage_projects_help.l),
-      link_with_query(:species_list_show_edit.t,
-                      edit_species_list_path(@species_list.id)),
-      put_button(name: :species_list_show_clear_list.t,
-                 path: clear_species_list_path(@species_list.id),
-                 class: "text-danger", data: { confirm: :are_you_sure.l }),
-      destroy_button(name: :species_list_show_destroy.t, target: @species_list)
-    ]
-  end
+  tabs = create_tabs(species_list_show_links(list: @species_list, user: @user))
   tabs << draw_interest_icons(@species_list) if @user
-  @tabsets = {
-    pager_for: @species_list,
-    right: draw_tab_set(tabs)
-  }
+  @tabsets = { pager_for: @species_list, right: draw_tab_set(tabs) }
   @container = :text_image
 %>
 

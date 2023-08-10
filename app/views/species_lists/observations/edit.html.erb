@@ -4,9 +4,7 @@
 # for adding or removing a *query* of obs (not 1 by 1)
 @title = :species_list_add_remove_title.t
 
-tabs = [
-  link_with_query(:species_list_add_remove_cancel.t, observations_path)
-]
+tabs = create_tabs(species_list_form_observations_links)
 @tabsets = { right: draw_tab_set(tabs) }
 
 # action = species_list_observations_path(q: get_query_param)
