@@ -79,6 +79,18 @@ module TitleAndTabsetHelper
     render(partial: "layouts/content/tab_set", locals: { links: links })
   end
 
+  # New style dropdown tabsets take array of tabs as hash of args,
+  #   { name:, link:, class:, id:, etc. }
+  #   not fully-formed `link_to` or `link_with_query`
+  def dropdown_tab_set(tabs:, title: :LINKS.t)
+    render(partial: "application/content/dropdown_tab_set",
+           locals: { title: title, tabs: tabs })
+  end
+
+  def dropdown_link_options(args)
+    args.except(:name, :link, :button, :class) # prolly delete name and link
+  end
+
   def index_sorter(sorts)
     return "" unless sorts
 

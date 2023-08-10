@@ -8,6 +8,7 @@ The difference between the `tabs` required here and the `links` required in
   [link, link, link]
 while this takes an array of hashes with specific attributes, formatted like:
   [{name:, link:, class:}, {name:, list:, class:}]
+  err, [[name, link, args], [name, link, args]]
 It creates additional options from any extra attributes sent in the object.
 
 In one sense, this means writing more verbose tabs, but it avoids a lot of
@@ -24,12 +25,12 @@ tabs ||= []
 if tabs&.count == 1
 
   tab = tabs[0]
-  opts = dropdown_link_options(tab) %>
+  opts = dropdown_link_options(tab[2]) %>
 
-  <%= link_to(tab[:link],
-              class: class_names("btn btn-outline-secondary", tab[:class]),
+  <%= link_to(tab[1],
+              class: class_names("btn btn-outline-secondary", tab[2][:class]),
               **opts) do
-    tab[:name]
+    tab[0]
   end %>
 
 <% elsif tabs %>
@@ -46,12 +47,12 @@ if tabs&.count == 1
                 aria: { labelledby: "dropdown-label" }) do %>
       <%# Changed to accept tab hash. %>
       <% tabs.each do |tab|
-        opts = dropdown_link_options(tab) %>
-        <%= link_to(tab[:link],
-                    class: class_names("dropdown-item", tab[:class]),
+        opts = dropdown_link_options(tab[2]) %>
+        <%= link_to(tab[1],
+                    class: class_names("dropdown-item", tab[2][:class]),
                     role: "menuitem",
                     **opts) do
-          tab[:name]
+          tab[0]
         end %>
       <% end %>
     <% end %>
