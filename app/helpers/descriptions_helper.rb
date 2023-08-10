@@ -30,7 +30,7 @@ module DescriptionsHelper
 
   def description_mod_links(desc)
     links = []
-    links << link_to(*edit_description_link(desc)) if writer?(desc)
+    links << edit_button(target: desc) if writer?(desc)
     links << destroy_button(target: desc) if is_admin?(desc)
     links
   end

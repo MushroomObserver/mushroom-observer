@@ -51,10 +51,8 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = link_to(:EDIT.t,
-                          add_query_param(edit_naming_path(id: naming.id)),
-                          class: "edit_naming_link_#{naming.id}",
-                          remote: true, onclick: "MOEvents.whirly();")
+      edit_link = edit_button(name: :EDIT.t, target: naming, remote: true,
+                              onclick: "MOEvents.whirly();")
       delete_link = destroy_button(target: naming, remote: true)
       proposer_links = ["[", edit_link, " | ", delete_link, "]"].safe_join
     else
