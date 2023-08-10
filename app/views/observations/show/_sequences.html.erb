@@ -7,7 +7,7 @@
   query = Query.lookup(:Sequence, :all, observations: observation.id)
 %>
 
-<div class="obs-sequence" id="observation_sequences">
+<div class="obs-sequence card-text" id="observation_sequences">
 <% unless @user.try(&:hide_specimen_stuff?) ||
           observation.user.try(&:hide_specimen_stuff?) %>
   <% if @user || sequences.any? %>
