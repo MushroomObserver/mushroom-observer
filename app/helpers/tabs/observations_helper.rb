@@ -15,48 +15,6 @@ module Tabs
       ].reject(&:empty?)
     end
 
-    def name_links_on_mo(name:, mappable:)
-      [
-        tag.p(link_to(:show_name.t(name: name.display_name_brief_authors),
-                      name_path(name.id))),
-        tag.p(link_to(:show_observation_more_like_this.t,
-                      observations_path(name: name.id))),
-        tag.p(link_to(:show_observation_look_alikes.t,
-                      observations_path(name: name.id,
-                                        look_alikes: "1"))),
-        tag.p(link_to(:show_observation_related_taxa.t,
-                      observations_path(name: name.id,
-                                        related_taxa: "1"))),
-        list_descriptions(object: name)&.map do |link|
-          tag.div(link)
-        end,
-        tag.p(link_to(map_link(mappable)))
-      ].flatten.reject(&:empty?)
-    end
-
-    def name_links_web(name:)
-      [
-        tag.p(link_to("MyCoPortal", mycoportal_url(name),
-                      target: :_blank, rel: :noopener)),
-        tag.p(link_to("Mycobank", mycobank_name_search_url(name),
-                      target: :_blank, rel: :noopener)),
-        tag.p(link_to(*google_images_for(name))),
-        tag.p(link_to(*google_distribution_map_for(name)))
-      ].flatten.reject(&:empty?)
-    end
-
-    def google_images_for(name)
-      [:google_images.t,
-       format("https://images.google.com/images?q=%s", name.real_text_name),
-       { class: "google_images_link" }]
-    end
-
-    def google_distribution_map_for(name)
-      [:show_name_distribution_map.t,
-       add_query_param(map_name_path(id: name.id)),
-       { class: "google_name_distribution_map_link" }]
-    end
-
     def general_questions_link(obs, user)
       return if obs.user.no_emails
       return unless obs.user.email_general_question && obs.user != user
@@ -75,11 +33,64 @@ module Tabs
        { class: "manage_lists_link" }]
     end
 
+    # generates HTML using create_tabs with xtrargs { class: "d-block" }
+    # the hiccup is that list_descriptions is already HTML
+    def name_links_on_mo(name:, mappable:)
+      tabs = create_tabs(obs_related_name_links(name), { class: "d-block" })
+      tabs += obs_name_description_links(name)
+      tabs += create_tabs([map_link(mappable)], { class: "d-block" })
+      tabs.reject(&:empty?)
+    end
+
+    def obs_related_name_links(name)
+      [
+        [:show_name.t(name: name.display_name_brief_authors),
+         name_path(name.id), { class: "observation_name_link" }],
+        [:show_observation_more_like_this.t,
+         observations_path(name: name.id),
+         { class: "observations_of_name_link" }],
+        [:show_observation_look_alikes.t,
+         observations_path(name: name.id, look_alikes: "1"),
+         { class: "observations_of_look_alikes_link" }],
+        [:show_observation_related_taxa.t,
+         observations_path(name: name.id, related_taxa: "1"),
+         { class: "observations_of_related_taxa_link" }]
+      ]
+    end
+
+    # from descriptions_helper
+    def obs_name_description_links(name)
+      list_descriptions(object: name)&.map do |link|
+        tag.div(link)
+      end
+    end
+
     def map_link(mappable)
       return unless mappable
 
       [:MAP.t, add_query_param(map_locations_path),
-       { class: "map_locations_link" }]
+       { class: "observation_map_locations_link" }]
+    end
+
+    # generates HTML
+    def name_links_web(name:)
+      tabs = create_tabs(obs_web_name_links(name), { class: "d-block" })
+      tabs.reject(&:empty?)
+    end
+
+    def obs_web_name_links(name)
+      [
+        ["MyCoPortal", mycoportal_url(name),
+         { target: :_blank, rel: :noopener, class: "mycoportal_name_link" }],
+        ["Mycobank", mycobank_name_search_url(name),
+         { target: :_blank, rel: :noopener, class: "mycobank_name_search_link" }],
+        [:google_images.t,
+         format("https://images.google.com/images?q=%s", name.real_text_name),
+         { class: "google_images_link" }],
+        [:show_name_distribution_map.t,
+         add_query_param(map_name_path(id: name.id)),
+         { class: "google_name_distribution_map_link" }]
+      ]
     end
 
     def obs_icon_size
