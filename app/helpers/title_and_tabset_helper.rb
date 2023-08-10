@@ -24,30 +24,20 @@ module TitleAndTabsetHelper
 
   # link to next object in query results
   def link_next(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "next")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "next")
-             end
+    path = if object.type_tag == :rss_log
+             send(:activity_log_path, object.id, flow: "next")
            else
-             { controller: object.show_controller,
-               action: :show, id: object.id }
+             send("#{object.type_tag}_path", object.id, flow: "next")
            end
     link_with_query("#{:FORWARD.t} »", path)
   end
 
   # link to previous object in query results
   def link_prev(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "prev")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "prev")
-             end
+    path = if object.type_tag == :rss_log
+             send(:activity_log_path, object.id, flow: "prev")
            else
-             { controller: object.show_controller,
-               action: :show, id: object.id }
+             send("#{object.type_tag}_path", object.id, flow: "prev")
            end
     link_with_query("« #{:BACK.t}", path)
   end
