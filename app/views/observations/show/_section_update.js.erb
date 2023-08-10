@@ -14,7 +14,7 @@ else
 end
 %>
 
-$("#<%= id %>").html('<%= j render(
+$("#<%= id %>").replaceWith('<%= j render(
   partial: partial,
   locals: { observation: @observation.reload },
   layout: false
