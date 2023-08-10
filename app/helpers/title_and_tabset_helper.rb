@@ -87,7 +87,7 @@ module TitleAndTabsetHelper
            locals: { title: title, tabs: tabs })
   end
 
-  def dropdown_link_options(args)
+  def dropdown_link_options(args = {})
     args.except(:name, :link, :button, :class) # prolly delete name and link
   end
 
