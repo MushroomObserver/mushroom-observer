@@ -1,10 +1,7 @@
 <%
   @title = :edit_observation_title.t(name: @observation.unique_format_name)
 
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    @observation.show_link_args)
-  ]
+  tabs = create_tabs(edit_observation_links(obs: @observation))
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
 %>

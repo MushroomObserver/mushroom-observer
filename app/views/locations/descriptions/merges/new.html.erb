@@ -1,15 +1,11 @@
 <%
-  @title ||= :merge_descriptions_title.t(object: @description.format_name)
+@title ||= :merge_descriptions_title.t(object: @description.format_name)
 
-  tabs = [
-    link_with_query(:show_object.t(type: :location),
-                    location_path(@description.location.id)),
-    link_with_query(:show_object.t(type: :location_description),
-                    location_description_path(@description.id))
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  action = { controller: "/names/descriptions/merges", action: :create,
-             id: @description.id, q: get_query_param }
+links = location_description_form_permissions_links(description: @description)
+tabs = create_tabs(links)
+@tabsets = { right: draw_tab_set(tabs) }
+action = { controller: "/names/descriptions/merges", action: :create,
+            id: @description.id, q: get_query_param }
 %>
 
 <%= render(partial: "descriptions/form_merge",

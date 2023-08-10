@@ -1,15 +1,13 @@
 <%
 # Form to edit or delete a tracker, via params[:commit]
 
-  @title = :email_tracking_title.t(name: @name.display_name)
+@title = :email_tracking_title.t(name: @name.display_name)
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :name), name_path(@name.id))
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = create_tabs(name_return_link(name: @name))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  action = { controller: "/names/trackers", action: :update, id: @name.id,
-             q: get_query_param }
+action = { controller: "/names/trackers", action: :update, id: @name.id,
+            q: get_query_param }
 %>
 
 <div class="mt-5 mb-5">

@@ -135,7 +135,6 @@ class ImagesController < ApplicationController
   def show_selected_images(query, args = {})
     store_query_in_session(query)
     @view = view_context ## Needed for matrix view helepr
-    @links ||= []
 
     # I can't figure out why ActiveRecord is not eager-loading all the names.
     # When I do an explicit test (load the first 100 images) it eager-loads
@@ -150,10 +149,6 @@ class ImagesController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = SORTING_LINKS
-
-    # Add "show observations" link if this query can be coerced into an
-    # observation query.
-    @links << coerced_query_link(query, Observation)
 
     # Paginate by letter if sorting by user.
     case query.params[:by]

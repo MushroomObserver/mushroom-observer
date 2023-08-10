@@ -1,13 +1,14 @@
 <%
-  if @objects.any?
-    tab_title = "Show As:" # TODO: make new translation string
-    tabs = index_observation_tabs(query: @query)
-    @tabsets = { right: dropdown_tab_set(title: tab_title, tabs: tabs) }
-  end
+if @objects.any?
+  tab_title = "Show As:" # TODO: make new translation string
+  links = index_observation_links(query: @query)
+  tabs = create_tabs(links)
+  @tabsets = { right: dropdown_tab_set(title: tab_title, tabs: tabs) }
+end
 
-  @container = :full
+@container = :full
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?

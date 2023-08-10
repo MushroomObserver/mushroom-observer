@@ -102,7 +102,7 @@ module Names
     #              'names/descriptions/index' template ???
     def show_selected_name_descriptions(query, args = {})
       store_query_in_session(query)
-      @links ||= []
+
       args = {
         controller: "/names/descriptions",
         action: :index,
@@ -116,10 +116,6 @@ module Names
         ["updated_at",  :sort_by_updated_at.t],
         ["num_views",   :sort_by_num_views.t]
       ]
-
-      # Add "show names" link if this query can be coerced into an
-      # observation query.
-      @links << coerced_query_link(query, Name)
 
       show_index_of_objects(query, args)
     end

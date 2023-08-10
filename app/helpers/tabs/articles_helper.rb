@@ -8,24 +8,40 @@
 #
 module Tabs
   module ArticlesHelper
-    def index_tabs_for_user(user)
+    def articles_index_links(user:)
       return [] unless permitted?(user)
 
-      [link_to(:create_article_title.t, new_article_path)]
+      [[:create_article_title.t, new_article_path,
+        { class: "new_article_link" }]]
     end
 
-    def show_tabs_for_user(article, user)
-      tabs = [link_to(:index_article.t, articles_path)]
-      return tabs unless permitted?(user)
+    def article_show_links(article:, user:)
+      links = [[:index_article.t, articles_path,
+                { class: "articles_index_link" }]]
+      return links unless permitted?(user)
 
-      tabs.push(link_to(:create_article_title.t, new_article_path),
-                link_to(:EDIT.t, edit_article_path(article.id)),
-                destroy_button(target: article))
+      links.push([:create_article_title.t, new_article_path,
+                  { class: "new_article_link" }],
+                 [:EDIT.t, edit_article_path(article.id),
+                  { class: "edit_article_link" }],
+                 [nil, article, { button: :destroy }])
     end
 
     # Can user modify all articles
     def permitted?(user)
       Article.can_edit?(user)
+    end
+
+    def article_form_new_links
+      [[:index_article.t, articles_path, { class: "articles_index_link" }]]
+    end
+
+    def article_form_edit_links(article:)
+      [
+        [:cancel_and_show.t(type: :article),
+         article_path(article.id), { class: "article_link" }],
+        [:index_article.t, articles_path, { class: "articles_index_link" }]
+      ]
     end
 
     # "Title (#nnn)" textilized

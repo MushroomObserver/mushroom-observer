@@ -1,12 +1,7 @@
 <%
   @title ||= :edit_location_title.t(name: @location.display_name)
 
-  tabs = [
-    link_to(:all_objects.t(type: :location), locations_path),
-    link_with_query(:cancel_and_show.t(type: :location),
-                    @location.show_link_args)
-  ]
-  tabs += location_search_links(@location.name)
+  tabs = create_tabs(location_form_edit_links(location: @location))
   @tabsets = {
     pager_for: @image,
     right: draw_tab_set(tabs),

@@ -8,14 +8,6 @@
 #  css_theme
 #  container_class
 #
-#  --- template navigation ----
-#
-#  title_tag_contents           # text to put in html header <title>
-#  link_next                    # link to next object
-#  link_prev                    # link to prev object
-#  create_links                 # convert links into list of tabs
-#  draw_tab_set
-#
 #  --------------------------
 #
 #  indent                       # in-lined white-space element of n pixels
@@ -62,84 +54,6 @@ module ApplicationHelper
     else
       "container-full"
     end
-  end
-
-  # --------- template nav ------------------------------------------------
-
-  # contents of the <title> in html header
-  def title_tag_contents(action_name)
-    if @title.present?
-      @title.strip_html.html_safe
-    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
-      :"title_for_#{action_name}".t
-    else
-      action_name.tr("_", " ").titleize
-    end
-  end
-
-  # link to next object in query results
-  def link_next(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "next")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "next")
-             end
-           else
-             { controller: object.show_controller,
-               action: :show, id: object.id }
-           end
-    link_with_query("#{:FORWARD.t} »", path)
-  end
-
-  # link to previous object in query results
-  def link_prev(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "prev")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "prev")
-             end
-           else
-             { controller: object.show_controller,
-               action: :show, id: object.id }
-           end
-    link_with_query("« #{:BACK.t}", path)
-  end
-
-  # Convert @links in index views into a list of tabs for RHS tab set.
-  # TODO: Convert into a dropdown instead
-  def create_links(links)
-    return [] unless links
-
-    links.compact.map { |str, url, args| link_to(str, url, args) }
-  end
-
-  # Short-hand to render shared tab_set partial for a given set of links.
-  def draw_tab_set(links)
-    render(partial: "application/content/tab_set",
-           locals: { links: links })
-  end
-
-  # New style dropdown tabsets take array of tabs as hash of args,
-  #   { name:, link:, class:, id:, etc. }
-  #   not fully-formed `link_to` or `link_with_query`
-  def dropdown_tab_set(tabs:, title: :LINKS.t)
-    render(partial: "application/content/dropdown_tab_set",
-           locals: { title: title, tabs: tabs })
-  end
-
-  def dropdown_link_options(args)
-    args.except(:name, :link, :class)
-  end
-
-  # TODO: Rearrange sorts so active sort is removed from array
-  # and assigned as toggle text. Then we can have
-  #    Sort by: [ Active sort ^ ]
-  def index_sorter(sorts)
-    return "" unless sorts
-
-    render(partial: "application/content/sorter", locals: { sorts: sorts })
   end
 
   # ----------------------------------------------------------------------------

@@ -64,6 +64,7 @@ module LinkHelper
   #
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
     content = block ? capture(&block) : ""
+    name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
     path = if target.is_a?(String)
              target
            else
