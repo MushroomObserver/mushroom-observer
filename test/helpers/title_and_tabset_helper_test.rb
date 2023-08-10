@@ -39,7 +39,9 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
               { class: "new_article_link" }],
              [:EDIT.t, edit_article_path(article.id),
               { class: "edit_article_link" }],
-             ["merge", article_path(article.id), { button: :put }]]
+             ["merge", article_path(article.id), { button: :put }],
+             ["move", article_path(article.id), { button: :patch }],
+             ["celebrate", article_path(article.id), { button: :post }]]
 
     tabs = create_tabs(links)
 
@@ -50,9 +52,13 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
       :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
     )
     tab3 = put_button(name: "merge", path: article_path(article.id))
+    tab4 = patch_button(name: "move", path: article_path(article.id))
+    tab5 = post_button(name: "celebrate", path: article_path(article.id))
 
     assert_includes(tabs, tab1)
     assert_includes(tabs, tab2)
     assert_includes(tabs, tab3)
+    assert_includes(tabs, tab4)
+    assert_includes(tabs, tab5)
   end
 end
