@@ -1,8 +1,5 @@
 <%
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :comment),
-                    @comment.show_link_args)
-  ]
+  tabs = create_tabs(comment_form_edit_links(comment: @comment))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
