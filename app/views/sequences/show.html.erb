@@ -1,25 +1,9 @@
 <%
-  @title = @sequence.unique_format_name
+@title = @sequence.unique_format_name
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :observation),
-            @sequence.observation.show_link_args)
-  ]
-  if check_permission(@sequence)
-    tabs << link_with_query(:edit_object.t(type: :sequence),
-                            @sequence.edit_link_args,
-                            back: :show)
-    tabs << destroy_button(
-        name: :destroy_object.t(type: :sequence),
-        target: sequence_path(@sequence, back: url_after_delete(@sequence))
-      )
-  end
-
-  @tabsets = {
-    pager_for: @sequence,
-    right: draw_tab_set(tabs)
-  }
-  @container = :wide
+tabs = create_tabs(sequence_show_links(seq: @sequence))
+@tabsets = { pager_for: @sequence, right: draw_tab_set(tabs) }
+@container = :wide
 %>
 
 <div class="container-text">

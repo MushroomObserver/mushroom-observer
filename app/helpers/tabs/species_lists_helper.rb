@@ -2,9 +2,9 @@
 
 module Tabs
   module SpeciesListsHelper
+    # Moved download link into logged_in_show_links and nixed user: kwarg
+    # Can't access this page unless logged in as of 2023
     def species_list_show_links(list:)
-      # Moving download link into logged_in_show_links
-      # Can't access this page unless logged in as of 2023
       links = species_list_logged_in_show_links(list)
       return links unless check_permission(list)
 
