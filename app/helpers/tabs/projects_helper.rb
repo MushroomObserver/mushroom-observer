@@ -30,7 +30,7 @@ module Tabs
         projects_index_link,
         project_return_link(project)
       ]
-      links << project_destroy_link(project) if check_permission(project)
+      links << destroy_project_link(project) if check_permission(project)
       links
     end
 
