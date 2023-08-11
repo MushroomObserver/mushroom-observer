@@ -2,14 +2,11 @@
 
 module Tabs
   module SpeciesListsHelper
-    def species_list_show_links(list:, user:)
-      links = [
-        [:species_list_show_download.t,
-         add_query_param(new_species_list_download_path(list.id)),
-         { class: "species_list_download_link" }]
-      ]
-      links += species_list_logged_in_show_links(list) if user
-      return unless check_permission(list)
+    def species_list_show_links(list:)
+      # Moving download link into logged_in_show_links
+      # Can't access this page unless logged in as of 2023
+      links = species_list_logged_in_show_links(list)
+      return links unless check_permission(list)
 
       links += species_list_user_show_links(list)
       links
@@ -17,6 +14,9 @@ module Tabs
 
     def species_list_logged_in_show_links(list)
       [
+        [:species_list_show_download.t,
+         add_query_param(new_species_list_download_path(list.id)),
+         { class: "species_list_download_link" }],
         [:species_list_show_set_source.t,
          add_query_param(species_list_path(list.id, set_source: 1)),
          { class: "species_list_set_source_link",
