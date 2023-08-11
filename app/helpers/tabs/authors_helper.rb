@@ -7,7 +7,7 @@ module Tabs
         [:show_object.t(type: obj.parent.type_tag),
          obj.parent.show_link_args,
          { class: "show_parent_link" }],
-        [:show_object.t(type: type),
+        [:show_object.t(type: obj.type_tag),
          obj.show_link_args,
          { class: "show_object_link" }]
       ]
