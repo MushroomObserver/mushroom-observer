@@ -8,7 +8,7 @@ module Tabs
       collection_number_mod_links(c_n)
     end
 
-    def collection_number_index_links(obs:)
+    def collection_numbers_index_links(obs:)
       [
         [:show_object.l(type: :observation),
          add_query_param(observation_path(obs)),
