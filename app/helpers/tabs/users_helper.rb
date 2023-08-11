@@ -5,6 +5,7 @@ module Tabs
     def user_show_links(show_user:, user:)
       name = show_user.unique_text_name
       id = show_user.id
+      # in user_stats_helper
       paths = user_stats_link_paths(show_user)
 
       links = [

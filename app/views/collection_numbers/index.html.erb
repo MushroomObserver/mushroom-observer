@@ -1,7 +1,8 @@
 <%
   @title ||= :list_collection_numbers_title.t
 
-  tabs = create_tabs(@links)
+  obs = params[:observation_id]
+  tabs = obs ? create_tabs(collection_numbers_index_links(obs: obs)) : []
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?
