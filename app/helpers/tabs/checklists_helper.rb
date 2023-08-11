@@ -53,10 +53,8 @@ module Tabs
 
     def checklist_for_site_links
       [
-        [:app_contributors.t, contributors_path,
-         { class: "contributors_link" }],
-        [:app_site_stats.t, info_site_stats_path,
-         { class: "info_site_stats_link" }]
+        contributors_link,
+         info_site_stats_link
       ]
     end
   end

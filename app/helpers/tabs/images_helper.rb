@@ -24,7 +24,7 @@ module Tabs
     end
 
     def images_exif_show_links(image:)
-      [image_return_link(image)]
+      [object_return_link(image)]
     end
 
     private
@@ -44,12 +44,6 @@ module Tabs
          "http://images.google.com/images?q=#{obs.name.search_name}",
          { target: "_blank", rel: "noopener", class: "image_google_link" }]
       ]
-    end
-
-    def image_return_link(image)
-      [:cancel_and_show.t(type: :image),
-       add_query_param(image.show_link_args),
-       { class: __method__.to_s }]
     end
 
     def image_eol_link(image)

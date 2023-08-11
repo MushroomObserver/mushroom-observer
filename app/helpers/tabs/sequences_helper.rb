@@ -14,11 +14,7 @@ module Tabs
     end
 
     def sequence_form_links(obj:)
-      [
-        [:cancel_and_show.t(type: obj.type_tag),
-         add_query_param(obj.show_link_args),
-         { class: "observation_return_link" }]
-      ]
+      [object_return_link(obj)]
     end
 
     def sequence_mod_links(seq)

@@ -3,9 +3,7 @@
 module Tabs
   module EmailsHelper
     def email_name_change_request_links(name:)
-      [[:cancel_and_show.t(type: Name),
-        add_query_param(name.show_link_args),
-        { class: "name_return_link" }]]
+      [object_return_link(name)]
     end
 
     def email_merge_request_links(model:, old_obj:)

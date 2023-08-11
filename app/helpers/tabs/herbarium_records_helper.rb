@@ -12,15 +12,11 @@ module Tabs
           [:show_object.l(type: :observation),
            observation_path(params[:observation_id]),
            { class: "observation_link" }],
-          [:create_herbarium_record.l,
-           new_herbarium_record_path(id: params[:id]),
-           { class: "new_herbarium_record_link" }]
+          new_herbarium_record_link
         ]
       end
-      links << [:create_herbarium.l, new_herbarium_path,
-                { class: "new_herbarium_link" }]
-      links << [:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                { class: "nonpersonal_herbaria_index_link" }]
+      links << new_herbarium_link
+      links << nonpersonal_herbaria_index_link
     end
 
     def herbarium_record_show_links(herbarium_record:)
@@ -35,19 +31,15 @@ module Tabs
            herbarium_record, { button: :destroy }]
         )
       end
-      links << nonpersonal_herbaria_index_link_unlabeled
+      links << nonpersonal_herbaria_index_link
       links
     end
 
     def herbarium_record_form_new_links(observation:)
       [
-        [:cancel_and_show.t(type: :observation),
-         add_query_param(observation_path(observation.id)),
-         { class: "observation_link" }],
-        [:create_herbarium.t,
-         add_query_param(new_herbarium_path),
-         { class: "new_herbarium_link" }],
-        nonpersonal_herbaria_index_link_unlabeled
+        object_return_link(observation),
+        new_herbarium_link,
+        nonpersonal_herbaria_index_link
       ]
     end
 
@@ -68,10 +60,14 @@ module Tabs
                                         q: get_query_param),
                   { class: "herbarium_record_link" }]
       end
-      links << [:create_herbarium.t,
-                new_herbarium_path(q: get_query_param),
-                { class: "new_herbarium_link" }]
+      links << new_herbarium_link
       links << nonpersonal_herbaria_index_link_unlabeled
+    end
+
+    def new_herbarium_record_link
+      [:create_herbarium_record.l,
+       new_herbarium_record_path(id: params[:id]),
+       { class: __method__.to_s }]
     end
   end
 end

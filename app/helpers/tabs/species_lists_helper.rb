@@ -71,7 +71,7 @@ module Tabs
 
     def species_list_form_observations_links
       [[:species_list_add_remove_cancel.t, add_query_param(observations_path),
-        { class: "observation_return_link" }]]
+        { class: "observations_index_return_link" }]]
     end
 
     def species_list_form_name_list_links

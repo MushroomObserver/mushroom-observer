@@ -8,10 +8,7 @@ module Tabs
       # in user_stats_helper
       paths = user_stats_link_paths(show_user)
 
-      links = [
-        [:show_user_contributors.t, contributors_path,
-         { class: "contributors_link" }]
-      ]
+      links = [contributors_link]
       links += if show_user == user
                  links_for_this_user(paths)
                else
@@ -34,12 +31,9 @@ module Tabs
          { class: "user_observations_link" }],
         [:show_user_comments_for_you.t, paths[:comments_for],
          { class: "comments_for_user_link" }],
-        [:show_user_your_notifications.t, interests_path,
-         { class: "notifications_for_user_link" }],
-        [:show_user_edit_profile.t, edit_account_profile_path,
-         { class: "edit_account_profile_link" }],
-        [:app_preferences.t, edit_account_preferences_path,
-         { class: "edit_account_preferences_link" }],
+        account_show_notifications_link,
+        account_edit_profile_link,
+        account_edit_preferences_link,
         [:app_life_list.t, paths[:life_list],
          { class: "life_list_link" }]
       ]
