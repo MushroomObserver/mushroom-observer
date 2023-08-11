@@ -1,11 +1,7 @@
 <%
-  target_type = @comment.target_type.underscore.upcase.to_sym
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: target_type),
-                    @target.show_link_args)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+tabs = create_tabs(comment_form_new_links(target: @target))
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :full
 %>
 
 <div class="row">

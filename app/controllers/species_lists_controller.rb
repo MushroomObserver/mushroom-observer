@@ -188,7 +188,6 @@ class SpeciesListsController < ApplicationController
 
   # Show selected list of species_lists.
   def show_selected_species_lists(query, args = {})
-    @links ||= []
     args = {
       action: :index,
       num_per_page: 20,

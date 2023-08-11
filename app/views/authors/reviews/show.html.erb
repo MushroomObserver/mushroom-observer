@@ -1,17 +1,9 @@
 <%
   @title ||= :review_authors_title.t(name: @object.format_name)
-  parent = @object.parent
-  type = @object.type_tag
-  parent_type = parent.type_tag
 
-  tabs = [
-    link_to(:show_object.t(type: parent_type),
-            controller: parent.show_controller,
-            action: parent.show_action, id: parent.id),
-    link_to(:show_object.t(type: type),
-            controller: @object.show_controller,
-            action: @object.show_action, id: @object.id)
-  ]
+  type = @object.type_tag
+
+  tabs = create_tabs(author_review_links(obj: @object))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

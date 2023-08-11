@@ -171,7 +171,6 @@ class SequencesController < ApplicationController
     args = { include: [{ observation: :name }, :user],
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
-    @links ||= []
     args[:sorting_links] = sequence_index_sorts
     show_index_of_objects(query, args)
   end

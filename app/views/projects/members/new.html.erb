@@ -1,15 +1,12 @@
 <%
-  @title = :add_members_title.t(title: @project.title)
+@title = :add_members_title.t(title: @project.title)
 
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+tabs = create_tabs(project_members_form_new_links(project: @project))
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :wide
 
-  action = { controller: "/projects/members", action: :create,
-             project_id: @project.id, q: get_query_param }
-
+action = { controller: "/projects/members", action: :create,
+            project_id: @project.id, q: get_query_param }
 %>
 
 <div class="container-text mt-3 pb-2">

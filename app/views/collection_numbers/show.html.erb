@@ -1,20 +1,8 @@
 <%
-  @title = "#{:COLLECTION_NUMBER.t} '#{@collection_number.format_name.t}'"
+@title = "#{:COLLECTION_NUMBER.t} '#{@collection_number.format_name.t}'"
 
-  tabs = []
-  if in_admin_mode? || @collection_number.can_edit?
-    tabs << link_to(:edit_collection_number.t,
-                    edit_collection_number_path(
-                      id: @collection_number.id, back: :show, q: get_query_param
-                    ))
-    tabs << destroy_button(name: :delete_collection_number.t,
-                           target: @collection_number)
-  end
-
-  @tabsets = {
-    pager_for: @collection_number,
-    right: draw_tab_set(tabs)
-  }
+tabs = create_tabs(collection_number_show_links(c_n: @collection_number))
+@tabsets = { pager_for: @collection_number, right: draw_tab_set(tabs) }
 %>
 
 <p class="mt-3">

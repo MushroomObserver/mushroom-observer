@@ -1,15 +1,10 @@
 <%
-  tabs = []
-  if @back == "index"
-    tabs << link_with_query(:edit_collection_number_back_to_index.t,
-                            @collection_number.index_link_args)
-  else
-    tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
-                            @back_object.show_link_args)
-  end
-
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+tabs = create_tabs(
+  collection_number_form_edit_links(back: @back, c_n: @collection_number,
+                                    obj: @back_object)
+)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :full
 %>
 
 <div class="row">
