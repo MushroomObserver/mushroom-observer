@@ -1,7 +1,7 @@
 <%
   @title = :species_list_projects_title.t(list: @list.title)
 
-  tabs = create_tabs(species_list_edit_projects_links(list: @list))
+  tabs = create_tabs(species_list_edit_project_links(list: @list))
   @tabsets = { right: draw_tab_set(tabs) }
 
   action = { controller: "/species_lists/projects",
