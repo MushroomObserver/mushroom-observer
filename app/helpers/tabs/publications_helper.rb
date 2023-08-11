@@ -17,7 +17,11 @@ module Tabs
       [new_publication_link]
     end
 
-    def publication_form_links(pub:)
+    def publication_form_new_links
+      [publications_index_link]
+    end
+
+    def publication_form_edit_links(pub:)
       [
         publication_return_link(pub),
         publications_index_link
