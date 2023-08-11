@@ -57,6 +57,18 @@ module Tabs
       end
     end
 
+    def name_map_show_links(name:, query:)
+      [
+        [:name_map_about.t(name: name.display_name),
+         add_query_param(name.show_link_args),
+         { class: "name_link" }],
+        [*coerced_query_link(query, Location),
+         { class: "name_location_query_link" }],
+        [*coerced_query_link(query, Observation),
+         { class: "name_observation_query_link" }]
+      ]
+    end
+
     ##########################################################################
     #
     #    Index:

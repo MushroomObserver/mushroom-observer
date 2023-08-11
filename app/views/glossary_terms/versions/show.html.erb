@@ -4,10 +4,7 @@
     name: @glossary_term.name
   )
 
-  tabs = [
-    link_to(:show_glossary_term.t(glossary_term: @glossary_term.name),
-            glossary_term_path(@glossary_term.id))
-  ]
+  tabs = create_tabs(glossary_term_version_links(term: @glossary_term))
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

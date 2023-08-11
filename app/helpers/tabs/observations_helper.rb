@@ -206,13 +206,23 @@ module Tabs
     def observation_return_link(obs)
       [:cancel_and_show.t(type: :observation),
        add_query_param(obs.show_link_args),
-       { class: "observation_return_link" }]
+       { class: __method__.to_s }]
     end
 
     def edit_observation_link(obs)
       [:edit_object.t(type: Observation),
        add_query_param(edit_observation_path(obs.id)),
-       { class: "edit_observation_link" }]
+       { class: __method__.to_s }]
+    end
+
+    def observation_download_links
+      [observations_index_link]
+    end
+
+    def observations_index_link
+      [:download_observations_back.t,
+       add_query_param(observations_path),
+       { class: __method__.to_s }]
     end
   end
 end
