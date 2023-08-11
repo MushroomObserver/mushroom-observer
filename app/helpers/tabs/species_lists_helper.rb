@@ -19,8 +19,8 @@ module Tabs
       [
         [:species_list_show_set_source.t,
          add_query_param(species_list_path(list.id, set_source: 1)),
-         { help: :species_list_show_set_source_help.l,
-           class: "species_list_set_source_link" }],
+         { class: "species_list_set_source_link",
+           help: :species_list_show_set_source_help.l }],
         [:species_list_show_clone_list.t,
          add_query_param(new_species_list_path(clone: list.id)),
          { class: "species_list_clone_link" }],
