@@ -51,11 +51,13 @@ module Tabs
     end
 
     def new_glossary_term_link
-      [:create_glossary_term.t, new_glossary_term_path]
+      [:create_glossary_term.t, new_glossary_term_path,
+       { class: "new_glossary_term_link" }]
     end
 
     def edit_glossary_term_link(term)
-      [:edit_glossary_term.t, edit_glossary_term_path(term.id)]
+      [:edit_glossary_term.t, edit_glossary_term_path(term.id),
+       { class: "edit_glossary_term_link" }]
     end
   end
 end
