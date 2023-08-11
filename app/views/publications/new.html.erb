@@ -1,7 +1,7 @@
 <%
 @title = :create_publication_title.l
 
-tabs = create_links(publication_form_links(pub: @publication))
+tabs = create_tabs(publication_form_links(pub: @publication))
 @tabsets = { right: draw_tab_set(tabs) }
 %>
 
