@@ -1,7 +1,7 @@
 <%
 @title = :email_merge_request_title.t(type: @model.type_tag)
 
-tabs = create_tabs(email_merge_request_links(model: @model, old_obj: @old_obj))
+tabs = create_tabs(email_merge_request_links(old_obj: @old_obj))
 @tabsets = { right: draw_tab_set(tabs) }
 
 url = { action: :merge_request, type: @model.name,

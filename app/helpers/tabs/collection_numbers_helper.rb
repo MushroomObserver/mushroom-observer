@@ -8,12 +8,11 @@ module Tabs
       collection_number_mod_links(c_n)
     end
 
-    # NOTE: that obs is just an id here
     def collection_numbers_index_links(obs:)
+      return [] if obs.blank?
+
       [
-        [:show_object.l(type: :observation),
-         add_query_param(observation_path(obs)),
-         { class: "observation_return_link" }],
+        object_return_link(obs),
         new_collection_number_for_obs_link(obs)
       ]
     end

@@ -14,65 +14,84 @@ module Tabs
          { class: "location_countries_link" }],
         # Add "show observations" link if this query can be coerced into an
         # observation query. (coerced_query_link returns array)
-        [*coerced_query_link(query, Observation),
-         { class: "location_observations_link" }]
+        coerced_observation_query_link(query)
       ]
     end
 
     # Composed links because there's interest_icons
     def location_show_links(location:)
       links = [
-        [show_obs_link_title_with_count(location),
-         add_query_param(observations_path(location: location.id)),
-         { class: "location_observations_link" }],
-        [:all_objects.t(type: :location), locations_path,
-         { class: "locations_index_link" }],
-        [:show_location_create.t, add_query_param(new_location_path),
-         { class: "new_location_link" }],
-        [:show_location_edit.t,
-         add_query_param(edit_location_path(location.id)),
-         { class: "edit_location_link" }]
+        observations_at_location_link(location),
+        locations_index_link,
+        new_location_link,
+        edit_location_link(location)
       ]
       if in_admin_mode?
         links += [
-          [:show_location_destroy.t, location, { button: :destroy }],
-          [:show_location_reverse.t,
-           add_query_param(location_reverse_name_order_path(location.id)),
-           { class: "location_reverse_order_link" }]
+          destroy_location_link(location),
+          location_reverse_order_link(location)
         ]
       end
       links
     end
 
+    def new_location_link
+      [:show_location_create.t, add_query_param(new_location_path),
+       { class: __method__.to_s }]
+    end
+
+    def edit_location_link(location)
+      [:show_location_edit.t,
+       add_query_param(edit_location_path(location.id)),
+       { class: __method__.to_s }]
+    end
+
+    def destroy_location_link(location)
+      [:show_location_destroy.t, location, { button: :destroy }]
+    end
+
+    def location_reverse_order_link(location)
+      [:show_location_reverse.t,
+       add_query_param(location_reverse_name_order_path(location.id)),
+       { class: __method__.to_s }]
+    end
+
     def location_version_links(location:)
-      [
-        [:show_location.t(location: location.display_name),
-         location_path(location.id),
-         { class: "location_versions_link" }]
-      ]
+      [location_versions_link(location)]
+    end
+
+    def location_versions_link(location)
+      [:show_location.t(location: location.display_name),
+       location_path(location.id),
+       { class: __method__.to_s }]
+    end
+
+    def locations_index_link
+      [:all_objects.t(type: :location), locations_path,
+       { class: __method__.to_s }]
+    end
+
+    def observations_at_location_link(location)
+      [show_obs_link_title_with_count(location),
+       add_query_param(observations_path(location: location.id)),
+       { class: __method__.to_s }]
     end
 
     def location_map_links(query:)
       [
         locations_index_link,
-        [*coerced_query_link(query, Observation),
-         { class: "location_observations_link" }],
-        [*coerced_query_link(query, Location),
-         { class: "location_locations_link" }]
+        coerced_observation_query_link(query),
+        coerced_location_query_link(query)
       ]
     end
 
     def location_countries_links
-      [
-        locations_index_link
-      ]
+      [locations_index_link]
     end
 
     # link attribute arrays
     def location_form_new_links(location:)
-      tabs = [
-        locations_index_link
-      ]
+      tabs = [locations_index_link]
       tabs += location_search_links(location.name)
       tabs
     end
@@ -80,17 +99,10 @@ module Tabs
     def location_form_edit_links(location:)
       tabs = [
         locations_index_link,
-        [:cancel_and_show.t(type: :location),
-         add_query_param(location.show_link_args),
-         { class: "location_link" }]
+        object_return_link(location)
       ]
       tabs += location_search_links(location.name)
       tabs
-    end
-
-    def locations_index_link
-      [:all_objects.t(type: :location), locations_path,
-       { class: "locations_index_link" }]
     end
 
     # Dictionary of urls for searches on external sites

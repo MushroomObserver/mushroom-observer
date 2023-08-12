@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Tabs
-  module CoercedQueriesHelper
+  module GeneralHelper
     def coerced_observation_query_link(query)
       [*coerced_query_link(query, Observation),
        { class: __method__.to_s }]
