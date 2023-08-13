@@ -63,9 +63,9 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_feature_email
-    QueuedEmail::Feature.create_email(mary, "blah blah blah")
+    QueuedEmail::Features.create_email(mary, "blah blah blah")
     assert_email(0,
-                 flavor: "QueuedEmail::Feature",
+                 flavor: "QueuedEmail::Features",
                  to: mary,
                  note: "blah blah blah")
     email = QueuedEmail.first.deliver_email

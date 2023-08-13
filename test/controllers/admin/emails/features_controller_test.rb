@@ -3,7 +3,7 @@
 require("test_helper")
 
 module Admin::Emails
-  class FeatureControllerTest < FunctionalTestCase
+  class FeaturesControllerTest < FunctionalTestCase
     def test_features
       page = :create
       params = { feature_email: { content: "test" } }

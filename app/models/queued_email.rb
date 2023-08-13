@@ -113,6 +113,19 @@
 #    # This automatically sets flavor to 'QueuedEmail::CommentAdd'.
 #    email = QueuedEmail::CommentAdd.new
 #
+#
+#  TODO: Convert to QueuedEmail classes
+#
+#  AdminMailer
+#  CommercialMailer
+#  DeniedMailer
+#  ObservationMailer
+#  PasswordMailer
+#  UserMailer
+#  VerifyAPIKeyMailer
+#  VerifyMailer
+#  WebmasterMailer
+#
 ################################################################################
 
 # Stores an email and details about it to get delivered later
