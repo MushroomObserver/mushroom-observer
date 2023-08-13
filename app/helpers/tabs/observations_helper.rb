@@ -99,19 +99,9 @@ module Tabs
       return [] unless query.flavor == :at_where
 
       [
-        [:list_observations_location_define.l,
-         add_query_param(new_location_path(
-                           where: query.params[:user_where]
-                         )),
-         { class: "new_location_link" }],
-        [:list_observations_location_merge.l,
-         add_query_param(location_merges_form_path(
-                           where: query.params[:user_where]
-                         )),
-         { class: "merge_locations_link" }],
-        [:list_observations_location_all.l,
-         add_query_param(locations_path),
-         { class: "locations_index_link" }]
+        define_location_link(query),
+        merge_locations_link(query),
+        locations_index_link
       ]
     end
 

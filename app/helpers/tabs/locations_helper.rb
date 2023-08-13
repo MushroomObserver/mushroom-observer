@@ -134,5 +134,22 @@ module Tabs
       [site_symbol.to_s.titlecase, "#{url}#{search_string}",
        { id: "search_link_to_#{site_symbol}_#{search_string}" }]
     end
+
+    # these are from the observations form
+    def define_location_link(query)
+      [:list_observations_location_define.l,
+       add_query_param(new_location_path(
+                         where: query.params[:user_where]
+                       )),
+       { class: __method__.to_s }]
+    end
+
+    def merge_locations_link(query)
+      [:list_observations_location_merge.l,
+       add_query_param(location_merges_form_path(
+                         where: query.params[:user_where]
+                       )),
+       { class: __method__.to_s }]
+    end
   end
 end
