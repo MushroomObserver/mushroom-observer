@@ -95,7 +95,7 @@ module ObservationsController::Show
   end
 
   # Tell search engines what the "correct" URL is for this page.
-  # Used in layouts/application
+  # Used in application/app/head
   def canonical_url(obs)
     observation_url(obs.id)
   end

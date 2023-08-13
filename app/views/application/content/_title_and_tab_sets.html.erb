@@ -15,7 +15,7 @@
     <!-- Pager -->
     <%= content_tag(:div, class: "hidden-print") do
           if @tabsets[:pager_for]
-            render(partial: "layouts/content/prev_next_pager",
+            render(partial: "application/content/prev_next_pager",
                   locals: { object: @tabsets[:pager_for] })
           end
         end %>

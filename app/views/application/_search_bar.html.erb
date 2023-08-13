@@ -5,13 +5,13 @@
     <% if controller.controller_name == "identify" %>
       <%= render(partial: "observations/identify/form_identify_filter") %>
     <% else ##user is logged in %>
-      <%= render(partial: "layouts/search_bar/search_form") %>
+      <%= render(partial: "application/search_bar/search_form") %>
     <% end %>
 
     <% if @user.nil? %>
-      <%= render(partial: "layouts/search_bar/login") %>
+      <%= render(partial: "application/search_bar/login") %>
     <% else ##user is logged in %>
-      <%= render(partial: "layouts/search_bar/user_nav") %>
+      <%= render(partial: "application/search_bar/user_nav") %>
     <% end %>
   </div>
 
