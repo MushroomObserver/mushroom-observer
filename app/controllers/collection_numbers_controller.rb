@@ -153,15 +153,10 @@ class CollectionNumbersController < ApplicationController
 
   # Display list of CollectionNumbers for an Observation
   def observation_id
+    @observation = Observation.find(params[:observation_id])
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:observation_id].to_s)
-    @links = [
-      [:show_object.l(type: :observation),
-       observation_path(params[:observation_id])],
-      [:create_collection_number.l,
-       new_collection_number_path(id: params[:observation_id])]
-    ]
     show_selected_collection_numbers(query, always_index: true)
   end
 
@@ -171,8 +166,6 @@ class CollectionNumbersController < ApplicationController
       letters: "collection_numbers.name",
       num_per_page: 100
     }.merge(args)
-
-    @links ||= []
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [

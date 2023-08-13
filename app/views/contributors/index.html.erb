@@ -1,9 +1,7 @@
 <% #bs4
   @title = :users_by_contribution_title.t
 
-  tabs = [
-    link_with_query(:app_site_stats.t, info_site_stats_path)
-  ]
+  tabs = create_tabs(contributors_index_links)
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :wide
 %>

@@ -1,13 +1,6 @@
 <%
   @title = :prefs_title.t
-  tabs = [
-    link_to(:bulk_license_link.t, images_edit_licenses_path),
-    link_to(:prefs_change_image_vote_anonymity.t,
-            images_edit_vote_anonymity_path),
-    link_to(:profile_link.t, edit_account_profile_path),
-    link_to(:show_user_your_notifications.t, interests_path),
-    link_to(:account_api_keys_link.t, account_api_keys_path)
-  ]
+  tabs = create_tabs(account_preferences_edit_links)
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

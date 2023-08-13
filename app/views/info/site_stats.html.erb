@@ -1,12 +1,9 @@
 <% #bs4
-  @title = :show_site_stats_title.t
+@title = :show_site_stats_title.t
 
-  tabs = [
-    link_to(:app_contributors.t, contributors_path),
-    link_to(:site_stats_observed_taxa.t, checklist_path)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+tabs = create_tabs(info_site_stats_links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :full
 %>
 
 <div class="row mt-3">

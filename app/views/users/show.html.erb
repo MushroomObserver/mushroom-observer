@@ -3,75 +3,13 @@
   name = @show_user.unique_text_name
   @title = :show_user_title.t(user: name)
   @container = :full
-  links = user_stats_links(@show_user)
-  tabs = [
-    link_to(:show_user_contributors.t, contributors_path)
-  ]
-  if @show_user == @user
-    tabs += [
-      link_to(:show_user_your_observations.t, links[:observations]),
-      link_to(:show_user_comments_for_you.t, links[:comments_for]),
-      link_to(:show_user_your_notifications.t, interests_path),
-      link_to(:show_user_edit_profile.t, edit_account_profile_path),
-      link_to(:app_preferences.t, edit_account_preferences_path),
-      link_to(:app_life_list.t, links[:life_list])
-    ]
-  else
-    tabs += [
-      link_to(:show_user_observations_by.t(name: name), links[:observations]),
-      link_to(:show_user_comments_for.t(name: name), links[:comments_for]),
-      link_to(:show_user_email_to.t(name: name),
-              emails_ask_user_question_path(id: id))
-    ]
-  end
-  if in_admin_mode?
-    tabs += [
-      link_to(:change_user_bonuses.t, edit_admin_users_path(@show_user.id)),
-      destroy_button(name: :DESTROY.t,
-                     target: admin_users_path(id: @show_user.id))
-    ]
-  end
-  @tabsets = {
-    pager_for: @show_user,
-    right: draw_tab_set(tabs)
-  }
 
-  # These are roughly in decreasing order of importance.
-  rows = []
-  (SiteData::ALL_FIELDS -
-   SiteData::SITE_WIDE_FIELDS -
-   # omit sequence stuff because it has no weight
-   [:sequences, :sequenced_observations]).
-  each do |field|
-    rows << {
-      field: field,
-      label: "user_stats_#{field}".to_sym.t,
-      count: (count = @user_data[field].to_i),
-      weight: (weight = SiteData::FIELD_WEIGHTS[field]),
-      points: count * weight
-    }
-  end
+  links = user_show_links(show_user: @show_user, user: @user)
+  tabs = create_tabs(links)
+  @tabsets = { pager_for: @show_user, right: draw_tab_set(tabs) }
 
-  # Add bonuses for translations.
-  if @user_data[:languages_itemized]
-    @user_data[:languages_itemized].each do |lang, score|
-      rows << {
-        label: :show_user_language_contribution.t(name: lang.name),
-        points: score.to_i
-      }
-    end
-  end
-
-  # Add bonuses at the bottom.
-  if @show_user.bonuses
-    @show_user.bonuses.each do |points, reason|
-      rows << {
-        label: reason.to_s.t,
-        points: points.to_i
-      }
-    end
-  end
-
+  rows = user_stats_rows(@show_user, @user_data)
+  paths = user_stats_link_paths(@show_user)
   total = 0
 %>
 
@@ -133,7 +71,7 @@
           count = row[:count]
           weight = row[:weight]
           points = row[:points]
-          url = links[field]
+          url = paths[field]
           link = url ? link_to(label, url) : label
           total += points
           if !count %>
@@ -168,7 +106,7 @@
       <%= if @life_list.num_species > 0
         :show_user_life_list.t(genera: @life_list.num_genera,
                                species: @life_list.num_species,
-                               url: links[:life_list])
+                               url: paths[:life_list])
       end %>
     </div><!-- .text-center -->
   </div>

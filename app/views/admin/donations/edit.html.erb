@@ -1,11 +1,7 @@
 <%
   @title = :review_donations_title.l
 
-  tabs = [
-    link_to(:donors_tab.t, support_donors_path),
-    link_to(:donate_tab.t, support_donate_path),
-    link_to(:create_donation_tab.t, new_admin_donations_path)
-  ]
+  tabs = create_tabs(admin_donations_form_edit_links)
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :full
 %>

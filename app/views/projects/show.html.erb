@@ -1,28 +1,12 @@
 <% #bs4
-  @title ||= :show_project_title.t(title: @project.title)
+@title ||= :show_project_title.t(title: @project.title)
 
-  tabs = [
-    link_to(:app_list_projects.t, projects_path),
-    link_with_query(:show_project_admin_request.t,
-                    new_project_admin_request_path(project_id: @project.id))
-  ]
-  if @project.is_admin?(@user)
-    tabs += [
-      link_with_query(:show_project_add_members.t,
-                      new_project_member_path(project_id: @project.id))
-    ]
-  end
-  if check_permission(@project)
-    tabs += [
-      destroy_button(name: :show_project_destroy.t, target: @project),
-      link_with_query(:show_project_edit.t, edit_project_path(@project.id))
-    ]
-  end
-  tabs << draw_interest_icons(@project)
-  @tabsets = {
-    pager_for: @project,
-    right: draw_tab_set(tabs)
-  }
+tabs = create_tabs(project_show_links(project: @project, user: @user))
+tabs << draw_interest_icons(@project)
+@tabsets = {
+  pager_for: @project,
+  right: draw_tab_set(tabs)
+}
 %>
 
 <div class="row">

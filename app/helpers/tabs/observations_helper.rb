@@ -45,18 +45,30 @@ module Tabs
 
     def obs_related_name_links(name)
       [
-        [:show_name.t(name: name.display_name_brief_authors),
-         name_path(name.id), { class: "observation_name_link" }],
-        [:show_observation_more_like_this.t,
-         observations_path(name: name.id),
-         { class: "observations_of_name_link" }],
-        [:show_observation_look_alikes.t,
-         observations_path(name: name.id, look_alikes: "1"),
-         { class: "observations_of_look_alikes_link" }],
-        [:show_observation_related_taxa.t,
-         observations_path(name: name.id, related_taxa: "1"),
-         { class: "observations_of_related_taxa_link" }]
+        show_object_link(name,
+                         :show_name.t(name: name.display_name_brief_authors)),
+        observations_of_name_link(name),
+        observations_of_look_alikes_link(name),
+        observations_of_related_taxa_link(name)
       ]
+    end
+
+    def observations_of_name_link(name)
+      [:show_observation_more_like_this.t,
+       observations_path(name: name.id),
+       { class: "observations_of_name_link" }]
+    end
+
+    def observations_of_look_alikes_link(name)
+      [:show_observation_look_alikes.t,
+       observations_path(name: name.id, look_alikes: "1"),
+       { class: __method__.to_s }]
+    end
+
+    def observations_of_related_taxa_link(name)
+      [:show_observation_related_taxa.t,
+       observations_path(name: name.id, related_taxa: "1"),
+       { class: __method__.to_s }]
     end
 
     # from descriptions_helper
@@ -316,6 +328,10 @@ module Tabs
         object_return_link(obs),
         edit_observation_link(obs)
       ]
+    end
+
+    def observation_download_links
+      [observations_index_link]
     end
 
     def observations_index_link

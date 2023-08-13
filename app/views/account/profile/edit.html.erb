@@ -1,12 +1,7 @@
 <%
   @title = :profile_title.t
 
-  tabs = [
-    link_to(:bulk_license_link.t, images_license_updater_path),
-    link_to(:show_user_your_notifications.t, interests_path),
-    link_to(:prefs_link.t, edit_account_preferences_path),
-    link_to(:account_api_keys_link.t, account_api_keys_path)
-  ]
+  tabs = create_tabs(account_profile_edit_links)
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :full
 %>

@@ -65,10 +65,12 @@ module LinkHelper
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
     content = block ? capture(&block) : ""
     name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
+    path_args = args.slice(:back) # empty hash if blank
     path = if target.is_a?(String)
              target
            else
-             add_query_param(send("#{target.type_tag}_path", target.id))
+             add_query_param(send("#{target.type_tag}_path", target.id,
+                                  **path_args))
            end
 
     html_options = {
@@ -76,7 +78,7 @@ module LinkHelper
       class: class_names("text-danger", args[:class]), # usually also btn
       data: { confirm: :are_you_sure.t,
               toggle: "tooltip", placement: "top", title: name }
-    }.merge(args.except(:class))
+    }.merge(args.except(:class, :back))
 
     unless target.is_a?(String)
       html_options[:class] += " destroy_#{target.type_tag}_link_#{target.id}"

@@ -1,16 +1,10 @@
 <%
-  @title = :show_glossary_term_title.t(name: @glossary_term.name)
+@title = :show_glossary_term_title.t(name: @glossary_term.name)
 
-  tabs = User.current ? [
-    link_to(:glossary_term_index.t, glossary_terms_path),
-    link_to(:create_glossary_term.t, new_glossary_term_path),
-    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
-  ] : []
-  tabs << glossary_term_destroy_button(@glossary_term) if in_admin_mode?
+tabs = create_tabs(glossary_term_show_links(term: @glossary_term, user: @user))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  @tabsets = { right: draw_tab_set(tabs) }
-
-  @container = :wide
+@container = :wide
 %>
 
 <div class="row mt-3">
