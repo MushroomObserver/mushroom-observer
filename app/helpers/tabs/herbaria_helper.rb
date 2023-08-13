@@ -60,8 +60,8 @@ module Tabs
 
     def destroy_herbarium_link(herbarium)
       [:destroy_object.t(type: :herbarium),
-       herbarium_path(herbarium, back: url_after_delete(herbarium)),
-       { button: :destroy, class: "delete_herbarium_link" }]
+       herbarium,
+       { button: :destroy, back: url_after_delete(herbarium) }] # , class: "#{__method__.to_s}_#{herbarium.id}"
     end
 
     def herbaria_index_link

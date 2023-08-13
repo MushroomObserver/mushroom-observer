@@ -252,8 +252,9 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     assert_selector(
       "#title", text: "Mary’s Herbarium" # smart apostrophe
     )
+    binding.break
     # Seems like these destroy links don't work with `click_button`
-    first(".delete_herbarium_link").click
+    first(class: /destroy_herbarium_/).click
     assert_selector("#title", text: :herbarium_index.l)
   end
 
