@@ -19,7 +19,7 @@
   bp = "lg" # breakpoint, for easier adjustment
   obs_changes = if check_permission(@observation)
                   tag.div(class: "observation-change-links") do
-                    obs_change_links(obs: @observation).safe_join
+                    obs_change_buttons(obs: @observation).safe_join
                   end
                 else
                   ""
