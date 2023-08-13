@@ -60,12 +60,15 @@ module LinkHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
+  #
   def destroy_button(target:, name: :DESTROY.t, **args)
     name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
+    path_args = args.slice(:back) # empty hash if blank
     path = if target.is_a?(String)
              target
            else
-             add_query_param(send("#{target.type_tag}_path", target.id))
+             add_query_param(send("#{target.type_tag}_path", target.id,
+                                  **path_args))
            end
     classes ||= "text-danger"
     id ||= nil
@@ -78,7 +81,7 @@ module LinkHelper
       class: classes,
       id: id,
       data: { confirm: :are_you_sure.t }
-    }.merge(args)
+    }.merge(args.except(:back))
 
     button_to(path, html_options) { name }
   end

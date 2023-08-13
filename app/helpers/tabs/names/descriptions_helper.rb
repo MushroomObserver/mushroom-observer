@@ -5,49 +5,35 @@ module Tabs
   module Names
     module DescriptionsHelper
       def name_description_index_links(query:)
-        [[*coerced_query_link(query, Name), { class: "name_query_link" }]]
+        [coerced_name_query_link(query)]
       end
 
       def name_description_form_new_links(description:)
-        [description_name_return_link(description)]
+        [object_return_link(description.name)]
       end
 
       def name_description_form_edit_links(description:, user:)
-        tabs = [
-          [:show_object.t(type: :name),
-           add_query_param(name_path(description.name_id)),
-           { class: "name_return_link" }],
-          [:cancel_and_show.t(type: :name_description),
-           add_query_param(name_description_path(description.id)),
-           { class: "name_description_return_link" }]
+        links = [
+          object_return_link(description.name, :show_object.t(type: :name)),
+          object_return_link(description)
         ]
         if description.is_admin?(user) || in_admin_mode?
-          tabs << [:show_description_adjust_permissions.t,
-                   edit_name_description_permissions_path(description.id),
-                   { class: "adjust_permissions_link" }]
+          links << adjust_description_permissions_link(description, :name, true)
         end
-        tabs
+        links
       end
 
       def name_description_form_permissions_links(description:)
         [
-          description_name_return_link(description),
-          [:show_object.t(type: :name_description),
-           add_query_param(name_description_path(description.id)),
-           { class: "name_description_return_link" }]
+          object_return_link(description.name),
+          object_return_link(description,
+                             :show_object.t(type: :name_description))
         ]
       end
 
       def name_description_version_links(description:, desc_title:)
-        [[:show_name_description.t(description: desc_title),
-          add_query_param(name_description_path(description.id)),
-          { class: "name_description_return_link" }]]
-      end
-
-      def description_name_return_link(description)
-        [:cancel_and_show.t(type: :name),
-         add_query_param(name_path(description.name_id)),
-         { class: "name_return_link" }]
+        [object_return_link(description,
+                            :show_name_description.t(description: desc_title))]
       end
     end
   end

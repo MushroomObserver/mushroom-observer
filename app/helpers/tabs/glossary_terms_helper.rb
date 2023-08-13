@@ -35,10 +35,27 @@ module Tabs
       ]
     end
 
+    def glossary_term_image_form_links(term:)
+      [
+        glossary_term_return_link(term),
+        edit_glossary_term_link(term)
+      ]
+    end
+
+    def glossary_term_version_links(term:)
+      [show_glossary_term_link(term)]
+    end
+
+    def show_glossary_term_link(term)
+      [:show_glossary_term.t(glossary_term: term.name),
+       glossary_term_path(term.id),
+       { class: __method__.to_s }]
+    end
+
     def glossary_term_return_link(term)
       [:cancel_and_show.t(type: :glossary_term),
        glossary_term_path(term.id),
-       { class: "glossary_term_return_link" }]
+       { class: __method__.to_s }]
     end
 
     def destroy_glossary_term_link(term)
@@ -47,17 +64,17 @@ module Tabs
 
     def glossary_terms_index_link
       [:glossary_term_index.t, glossary_terms_path,
-       { class: "glossary_term_index_link" }]
+       { class: __method__.to_s }]
     end
 
     def new_glossary_term_link
       [:create_glossary_term.t, new_glossary_term_path,
-       { class: "new_glossary_term_link" }]
+       { class: __method__.to_s }]
     end
 
     def edit_glossary_term_link(term)
       [:edit_glossary_term.t, edit_glossary_term_path(term.id),
-       { class: "edit_glossary_term_link" }]
+       { class: __method__.to_s }]
     end
   end
 end

@@ -26,20 +26,28 @@ module Tabs
     end
 
     def support_donors_link
-      [:donors_tab.t, support_donors_path, { class: "donors_link" }]
+      [:donors_tab.t, support_donors_path, { class: __method__.to_s }]
     end
 
     def support_donate_link
-      [:donate_tab.t, support_donate_path, { class: "donate_link" }]
+      [:donate_tab.t, support_donate_path, { class: __method__.to_s }]
     end
 
     def support_admin_links
       [
-        [:create_donation_tab.t, new_admin_donations_path,
-         { class: "admin_new_donation_link" }],
-        [:review_donations_tab.t, admin_review_donations_path,
-         { class: "admin_review_donations_link" }]
+        admin_new_donation_link,
+        admin_review_donations_link
       ]
+    end
+
+    def admin_new_donation_link
+      [:create_donation_tab.t, new_admin_donations_path,
+       { class: __method__.to_s }]
+    end
+
+    def admin_review_donations_link
+      [:review_donations_tab.t, admin_review_donations_path,
+       { class: __method__.to_s }]
     end
   end
 end

@@ -84,7 +84,7 @@ class ArticlesController < ApplicationController
 
   # Filter: Unless user permitted to perform request, just index
   def ignore_request_unless_permitted
-    return if helpers.permitted?(@user)
+    return if Article.can_edit?(@user)
 
     flash_notice(:permission_denied.t)
     redirect_to(articles_path)

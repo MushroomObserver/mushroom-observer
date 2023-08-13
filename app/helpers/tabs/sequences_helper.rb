@@ -14,22 +14,23 @@ module Tabs
     end
 
     def sequence_form_links(obj:)
-      [
-        [:cancel_and_show.t(type: obj.type_tag),
-         add_query_param(obj.show_link_args),
-         { class: "observation_return_link" }]
-      ]
+      [object_return_link(obj)]
     end
 
     def sequence_mod_links(seq)
-      [
-        [:edit_object.t(type: :sequence),
-         seq.edit_link_args.merge(back: :show),
-         { class: "edit_sequence_link" }],
-        [:destroy_object.t(type: :sequence),
-         sequence_path(seq, back: url_after_delete(seq)),
-         { button: :destroy, class: "destroy_sequence_link" }]
-      ]
+      [edit_sequence_link(seq),
+       destroy_sequence_link(seq)]
+    end
+
+    def edit_sequence_link(seq)
+      [:edit_object.t(type: :sequence),
+       seq.edit_link_args.merge(back: :show),
+       { class: __method__.to_s }]
+    end
+
+    def destroy_sequence_link(seq)
+      [:destroy_object.t(type: :sequence), seq,
+       { button: :destroy, back: url_after_delete(seq) }]
     end
   end
 end
