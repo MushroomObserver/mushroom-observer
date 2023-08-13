@@ -149,6 +149,8 @@ mo> vi config/consts-site.rb
   # grab this from old server
 mo> vi config/database.yml
   # grab this from old server
+mo> echo blahblahblah > config/master.key
+  # grab "blahblahblah" from the old server
 # Ping the database to make sure everything's working right.
 # (You will have to add the new IP address to the database server!)
 database_server_root> mysql -u root -p
