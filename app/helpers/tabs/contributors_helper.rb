@@ -11,7 +11,7 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def contributors_link
+    def site_contributors_link
       [:app_contributors.t, contributors_path,
        { class: __method__.to_s }]
     end

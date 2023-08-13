@@ -16,14 +16,9 @@ module Tabs
 
     def checklist_for_user_links(user)
       [
-        [:show_object.t(type: :profile), user_path(user.id),
-         { class: "user_profile_link" }],
-        [:show_objects.t(type: :observation),
-         observations_path(user: user.id),
-         { class: "user_observations_link" }],
-        [:show_user_email_to.t(name: user.legal_name),
-         emails_ask_user_question_path(user.id),
-         { class: "email_user_question_link" }]
+        user_profile_link(user),
+        user_observations_link(user),
+        email_user_question_link(user)
       ]
     end
 
@@ -48,9 +43,14 @@ module Tabs
 
     def checklist_for_site_links
       [
-        contributors_link,
+        site_contributors_link,
         info_site_stats_link
       ]
+    end
+
+    def site_checklist_link
+      [:site_stats_observed_taxa.t, checklist_path,
+       { class: __method__.to_s }]
     end
   end
 end

@@ -19,13 +19,20 @@ module Tabs
 
     def sequence_mod_links(seq)
       [
-        [:edit_object.t(type: :sequence),
-         seq.edit_link_args.merge(back: :show),
-         { class: "edit_sequence_link" }],
-        [:destroy_object.t(type: :sequence),
-         sequence_path(seq, back: url_after_delete(seq)),
-         { button: :destroy, class: "destroy_sequence_link" }]
+        edit_sequence_link(seq),
+        destroy_sequence_link(seq)
       ]
+    end
+
+    def edit_sequence_link(seq)
+      [:edit_object.t(type: :sequence),
+       seq.edit_link_args.merge(back: :show),
+       { class: __method__.to_s }]
+    end
+
+    def destroy_sequence_link(seq)
+      [:destroy_object.t(type: :sequence), seq,
+       { button: :destroy, back: url_after_delete(seq) }]
     end
   end
 end
