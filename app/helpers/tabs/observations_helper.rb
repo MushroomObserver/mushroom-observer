@@ -109,7 +109,7 @@ module Tabs
 
     def mycobank_name_search_link(name)
       ["Mycobank", mycobank_name_search_url(name),
-       { class: __method__.to_s. target: :_blank, rel: :noopener }]
+       { class: __method__.to_s, target: :_blank, rel: :noopener }]
     end
 
     def google_images_for_name_link(obs_name)
@@ -124,7 +124,6 @@ module Tabs
        add_query_param(map_name_path(id: obs_name.id)),
        { class: __method__.to_s }]
     end
-
 
     ############################################
     # INDEX
