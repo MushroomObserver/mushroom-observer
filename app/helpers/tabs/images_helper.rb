@@ -5,12 +5,7 @@ module Tabs
   module ImagesHelper
     # link attribute arrays
     def images_index_links(query:)
-      # Add "show observations" link if this query can be coerced into an
-      # observation query. (coerced_query_link returns array)
-      [
-        [*coerced_query_link(query, Observation),
-         { class: "images_observations_query_link" }]
-      ]
+      [coerced_observation_query_link(query)]
     end
 
     # assemble links for show_image
@@ -34,16 +29,16 @@ module Tabs
 
       obs = image.observations.first
       [
-        [:show_object.t(type: :observation),
-         add_query_param(permanent_observation_path(obs.id)),
-         { class: "image_observation_link" }],
-        [:show_object.t(type: :name),
-         add_query_param(name_path(obs.name.id)),
-         { class: "image_observation_name_link" }],
-        [:google_images.t,
-         "http://images.google.com/images?q=#{obs.name.search_name}",
-         { target: "_blank", rel: "noopener", class: "image_google_link" }]
+        show_object_link(obs),
+        show_object_link(obs.name),
+        name_google_images_link(obs.name)
       ]
+    end
+
+    def name_google_images_link(name)
+      [:google_images.t,
+       "http://images.google.com/images?q=#{name.search_name}",
+       { target: "_blank", rel: "noopener", class: __method__.to_s }]
     end
 
     def image_eol_link(image)

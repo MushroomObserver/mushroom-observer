@@ -29,23 +29,18 @@ module Tabs
 
     def checklist_for_project_links(project)
       [
-        [:show_object.t(type: :project), project_path(project.id),
-         { class: "project_link" }],
-        [:list_objects.t(type: :project), projects_path,
-         { class: "projects_index_link" }]
+        show_object_link(project),
+        object_index_link(project)
       ]
     end
 
     def checklist_for_species_list_links(list)
       links = [
-        [:show_object.t(type: :project), species_list_path(list.id),
-         { class: "species_list_link" }]
+        show_object_link(list)
       ]
       if check_permission(list)
         links += [
-          [:edit_object.t(type: :species_list),
-           edit_species_list_path(list.id),
-           { class: "edit_species_list_link" }]
+          edit_species_list_link(list)
         ]
       end
       links
@@ -54,7 +49,7 @@ module Tabs
     def checklist_for_site_links
       [
         contributors_link,
-         info_site_stats_link
+        info_site_stats_link
       ]
     end
   end

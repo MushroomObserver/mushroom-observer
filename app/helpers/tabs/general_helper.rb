@@ -30,14 +30,20 @@ module Tabs
 
     def show_object_link(obj)
       [:show_object.t(type: obj.type_tag),
-       obj.show_link_args,
-       { class: __method__.to_s }]
+       add_query_param(obj.show_link_args),
+       { class: "#{obj.type_tag}_link" }]
     end
 
     def show_parent_link(obj)
       [:show_object.t(type: obj.parent.type_tag),
-       obj.parent.show_link_args,
-       { class: __method__.to_s }]
+       add_query_param(obj.parent.show_link_args),
+       { class: "parent_#{obj.parent.type_tag}_link" }]
+    end
+
+    def object_index_link(obj)
+      [:list_objects.t(type: obj.type_tag),
+       add_query_param(obj.index_link_args),
+       { class: "#{obj.type_tag.pluralize}_index_link" }]
     end
   end
 end
