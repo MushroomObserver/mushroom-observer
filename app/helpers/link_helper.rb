@@ -65,24 +65,14 @@ module LinkHelper
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
     content = block ? capture(&block) : ""
     name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
-    path_args = args.slice(:back) # empty hash if blank
-    path = if target.is_a?(String)
-             target
-           else
-             add_query_param(send("#{target.type_tag}_path", target.id,
-                                  **path_args))
-           end
+    path, identifier = path_and_identifier_from_target(:destroy, target, args)
 
     html_options = {
-      method: :delete,
-      class: class_names("text-danger", args[:class]), # usually also btn
+      method: :delete, # class_names usually also btn
+      class: class_names(args[:class], identifier),
       data: { confirm: :are_you_sure.t,
               toggle: "tooltip", placement: "top", title: name }
     }.merge(args.except(:class, :back))
-
-    unless target.is_a?(String)
-      html_options[:class] += " destroy_#{target.type_tag}_link_#{target.id}"
-    end
 
     button_to(path, html_options) do
       [content, icon("fa-regular", "trash", class: "fa-lg")].safe_join
@@ -119,24 +109,30 @@ module LinkHelper
   # Not a <button> element, but an <a> because it's a GET
   def edit_button(target:, name: :EDIT.t, **args, &block)
     content = block ? capture(&block) : ""
-    path = if target.is_a?(String)
-             target
-           else
-             add_query_param(send("edit_#{target.type_tag}_path", target.id))
-           end
+    path, identifier = path_and_identifier_from_target(:edit, target, args)
 
     html_options = {
-      class: "", # usually also btn
+      class: class_names(identifier), # usually also btn
       data: { toggle: "tooltip", placement: "top", title: name }
     }.merge(args)
-
-    unless target.is_a?(String)
-      html_options[:class] += " edit_#{target.type_tag}_link_#{target.id}"
-    end
 
     link_to(path, html_options) do
       [content, icon("fa-regular", "pen-to-square", class: "fa-lg")].safe_join
     end
+  end
+
+  def path_and_identifier_from_target(action, target, args)
+    if target.is_a?(String)
+      path = target
+      identifier = ""
+    else
+      prefix = action == :destroy ? "" : "#{action}_"
+      path_args = args.slice(:back) # empty hash if blank
+      path = add_query_param(send("#{prefix}#{target.type_tag}_path", target.id,
+                                  **path_args))
+      identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
+    end
+    [path, identifier]
   end
 
   # POST to a path; used instead of a link because POST link requires js
