@@ -33,6 +33,9 @@ module Tabs
        { class: __method__.to_s }]
     end
 
+    ########################################################################
+    # Name section -- generates HTML
+
     # generates HTML using create_tabs with xtrargs { class: "d-block" }
     # the hiccup is that list_descriptions is already HTML
     def name_links_on_mo(name:, mappable:)
@@ -56,7 +59,7 @@ module Tabs
     def observations_of_name_link(name)
       [:show_observation_more_like_this.t,
        observations_path(name: name.id),
-       { class: "observations_of_name_link" }]
+       { class: __method__.to_s }]
     end
 
     def observations_of_look_alikes_link(name)
@@ -85,28 +88,6 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def obs_change_links(obs)
-      return unless check_permission(obs)
-
-      [
-        edit_observation_link(obs),
-        destroy_observation_link(obs)
-      ]
-    end
-
-    def edit_observation_link(obs)
-      [:edit_object.t(type: Observation),
-       add_query_param(edit_observation_path(obs.id)),
-       { class: "#{__method__}_#{obs.id}" }]
-    end
-
-    def destroy_observation_link(obs)
-      [nil, obs, { button: :destroy }]
-    end
-
-    ########################################################################
-    # Name section -- generates HTML
-
     def name_links_web(name:)
       tabs = create_tabs(observation_web_name_links(name), { class: "d-block" })
       tabs.reject(&:empty?)
@@ -123,12 +104,12 @@ module Tabs
 
     def mycoportal_name_link(name)
       ["MyCoPortal", mycoportal_url(name),
-       { target: :_blank, rel: :noopener, class: "mycoportal_name_link" }]
+       { class: __method__.to_s, target: :_blank, rel: :noopener }]
     end
 
     def mycobank_name_search_link(name)
       ["Mycobank", mycobank_name_search_url(name),
-       { target: :_blank, rel: :noopener, class: "mycobank_name_search_link" }]
+       { class: __method__.to_s. target: :_blank, rel: :noopener }]
     end
 
     def google_images_for_name_link(obs_name)
@@ -144,78 +125,6 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def obs_icon_size
-      "fa-lg"
-    end
-
-    def obs_icon_style
-      "btn-link"
-    end
-
-    def obs_change_buttons(obs:)
-      return [] unless check_permission(obs)
-
-      # icon_size = "fa-lg" # "fa-sm"
-      btn_style = "btn-sm btn-link"
-      links = []
-      links << edit_button(
-        target: obs, name: :show_observation_edit_observation.t,
-        class: "btn #{btn_style}"
-      )
-      links << destroy_button(
-        target: obs, name: :show_observation_destroy_observation.t,
-        class: "btn #{btn_style}"
-      )
-    end
-
-    # Using link_to in order to enable icons in these links
-    def observation_image_edit_links(obs:)
-      links = []
-      links << obs_add_images_link(obs)
-      links << obs_reuse_images_link(obs)
-      links << obs_remove_images_link(obs) if obs.images.length.positive?
-      links
-    end
-
-    # used by observation_image_edit_links
-    def obs_add_images_link(obs)
-      link_to(
-        add_query_param(new_image_for_observation_path(obs.id)),
-        class: "btn #{obs_icon_style} observation_add_images_link_#{obs.id}",
-        aria: { label: :show_observation_add_images.t },
-        data: { toggle: "tooltip", placement: "top",
-                title: :show_observation_add_images.t }
-      ) do
-        # concat(tag.span(:ADD.t, class: "mr-1"))
-        concat(icon("fa-regular", "plus", class: obs_icon_size))
-      end
-    end
-
-    def obs_reuse_images_link(obs)
-      link_to(
-        add_query_param(reuse_images_for_observation_path(obs.id)),
-        class: "btn #{obs_icon_style} observation_reuse_images_link_#{obs.id}",
-        aria: { label: :show_observation_reuse_image.t },
-        data: { toggle: "tooltip", placement: "top",
-                title: :show_observation_reuse_image.t }
-      ) do
-        # concat(tag.span(:image_reuse_reuse.t, class: "mr-1"))
-        concat(icon("fa-regular", "clone", class: obs_icon_size))
-      end
-    end
-
-    def obs_remove_images_link(obs)
-      link_to(
-        add_query_param(remove_images_from_observation_path(obs.id)),
-        class: "btn #{obs_icon_style} observation_remove_images_link_#{obs.id}",
-        aria: { label: :show_observation_remove_images.t },
-        data: { toggle: "tooltip", placement: "top",
-                title: :show_observation_remove_images.t }
-      ) do
-        # concat(tag.span(:image_remove_remove.t, class: "mr-1"))
-        concat(icon("fa-regular", "trash", class: obs_icon_size))
-      end
-    end
 
     ############################################
     # INDEX
@@ -332,6 +241,25 @@ module Tabs
 
     def observation_download_links
       [observations_index_link]
+    end
+
+    def obs_change_links(obs)
+      return unless check_permission(obs)
+
+      [
+        edit_observation_link(obs),
+        destroy_observation_link(obs)
+      ]
+    end
+
+    def edit_observation_link(obs)
+      [:edit_object.t(type: Observation),
+       add_query_param(edit_observation_path(obs.id)),
+       { class: "#{__method__}_#{obs.id}" }]
+    end
+
+    def destroy_observation_link(obs)
+      [nil, obs, { button: :destroy }]
     end
 
     def observations_index_link
