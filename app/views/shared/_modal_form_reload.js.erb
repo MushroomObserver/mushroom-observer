@@ -6,7 +6,7 @@ form_locals ||= {}
 
 // replace the flash notices in the modal
 $("#modal_flash").replaceWith("<%= j render(
-  partial: 'layouts/app/flash_notices',
+  partial: 'application/app/flash_notices',
   locals: { id: 'modal_flash' }
 ) if flash_notices? %>");
 

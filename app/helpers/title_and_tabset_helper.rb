@@ -76,12 +76,12 @@ module TitleAndTabsetHelper
 
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "layouts/content/tab_set", locals: { links: links })
+    render(partial: "application/content/tab_set", locals: { links: links })
   end
 
   def index_sorter(sorts)
     return "" unless sorts
 
-    render(partial: "layouts/content/sorter", locals: { sorts: sorts })
+    render(partial: "application/content/sorter", locals: { sorts: sorts })
   end
 end

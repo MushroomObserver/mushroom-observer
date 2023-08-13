@@ -19,38 +19,38 @@ classes = {
 
   <div class="<%= classes[:wrapper] %>">
 
-    <%= render(partial: "layouts/sidebar/info",
+    <%= render(partial: "application/sidebar/info",
                 locals: { classes: classes }) %>
 
     <% if in_admin_mode? %>
-      <%= render(partial: "layouts/sidebar/admin",
+      <%= render(partial: "application/sidebar/admin",
                   locals: { classes: classes }) %>
     <% end %>
 
     <% if @user.nil? %>
-      <%= render(partial: "layouts/sidebar/login",
+      <%= render(partial: "application/sidebar/login",
                   locals: { classes: classes }) %>
     <% else %>
-      <%= render(partial: "layouts/sidebar/user",
+      <%= render(partial: "application/sidebar/user",
                   locals: { classes: classes }) %>
     <% end %>
 
-    <%= render(partial: "layouts/sidebar/observations",
+    <%= render(partial: "application/sidebar/observations",
                 locals: { classes: classes }) %>
 
-    <%= render(partial: "layouts/sidebar/latest",
+    <%= render(partial: "application/sidebar/latest",
                 locals: { classes: classes }) %>
 
-    <%= render(partial: "layouts/sidebar/species_lists",
+    <%= render(partial: "application/sidebar/species_lists",
                 locals: { classes: classes }) %>
 
-    <%= render(partial: "layouts/sidebar/indexes",
+    <%= render(partial: "application/sidebar/indexes",
                 locals: { classes: classes }) %>
 
-    <%= render(partial: "layouts/sidebar/more",
+    <%= render(partial: "application/sidebar/more",
                 locals: { classes: classes }) %>
 
-    <%= render(partial: "layouts/sidebar/languages",
+    <%= render(partial: "application/sidebar/languages",
                 locals: { classes: classes }) %>
 
   </div><!-- .sidebar-nav -->
