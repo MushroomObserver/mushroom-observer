@@ -9,7 +9,7 @@ module Tabs
       end
 
       def name_description_form_new_links(description:)
-        [description_name_return_link(description)]
+        [object_return_link(description.name)]
       end
 
       def name_description_form_edit_links(description:, user:)
