@@ -119,7 +119,7 @@ module Tabs
 
     ### Forms
     def name_form_new_links
-      [object_index_link(name)]
+      [[:all_objects.t(type: :name), names_path, { class: "names_link" }]]
     end
 
     def name_form_edit_links(name:)
@@ -131,6 +131,10 @@ module Tabs
 
     def name_versions_links(name:)
       [show_object_link(name, :show_name.t(name: name.display_name))]
+    end
+
+    def name_forms_return_links(name:)
+      [object_return_link(name)]
     end
   end
 end

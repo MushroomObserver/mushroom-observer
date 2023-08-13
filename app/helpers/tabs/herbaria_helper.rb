@@ -61,7 +61,7 @@ module Tabs
     def destroy_herbarium_link(herbarium)
       [:destroy_object.t(type: :herbarium),
        herbarium,
-       { button: :destroy, back: url_after_delete(herbarium) }] # , class: "#{__method__.to_s}_#{herbarium.id}"
+       { button: :destroy, back: url_after_delete(herbarium) }]
     end
 
     def herbaria_index_link

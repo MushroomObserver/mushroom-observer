@@ -3,7 +3,7 @@
 
 @title = :email_tracking_title.t(name: @name.display_name)
 
-tabs = create_tabs(name_return_link(name: @name))
+tabs = create_tabs(name_forms_return_links(name: @name))
 @tabsets = { right: draw_tab_set(tabs) }
 
 action = { controller: "/names/trackers", action: :create, id: @name.id,

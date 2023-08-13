@@ -18,10 +18,8 @@ module Tabs
     end
 
     def sequence_mod_links(seq)
-      [
-        edit_sequence_link(seq),
-        destroy_sequence_link(seq)
-      ]
+      [edit_sequence_link(seq),
+       destroy_sequence_link(seq)]
     end
 
     def edit_sequence_link(seq)

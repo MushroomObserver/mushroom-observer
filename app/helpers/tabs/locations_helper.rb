@@ -6,14 +6,9 @@ module Tabs
     # link attribute arrays (coerced_query_link returns array)
     def locations_index_links(query:)
       [
-        [:show_location_create.t, add_query_param(new_location_path),
-         { class: "new_location_link" }],
-        [:list_place_names_map.t, add_query_param(map_locations_path),
-         { class: "map_locations_link" }],
-        [:list_countries.t, location_countries_path,
-         { class: "location_countries_link" }],
-        # Add "show observations" link if this query can be coerced into an
-        # observation query. (coerced_query_link returns array)
+        new_location_link,
+        map_locations_link,
+        location_countries_link,
         coerced_observation_query_link(query)
       ]
     end
@@ -37,6 +32,16 @@ module Tabs
 
     def new_location_link
       [:show_location_create.t, add_query_param(new_location_path),
+       { class: __method__.to_s }]
+    end
+
+    def map_locations_link
+      [:list_place_names_map.t, add_query_param(map_locations_path),
+       { class: __method__.to_s }]
+    end
+
+    def location_countries_link
+      [:list_countries.t, location_countries_path,
        { class: __method__.to_s }]
     end
 

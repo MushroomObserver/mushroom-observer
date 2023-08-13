@@ -3,7 +3,12 @@
 module Tabs
   module CommentsHelper
     def comment_show_links(comment:, target:)
-      links = [comment_target_return_link(comment, target)]
+      links = [
+        object_return_link(
+          target,
+          :comment_show_show.t(type: comment.target_type_localized)
+        )
+      ]
       return unless check_permission(comment)
 
       links += comment_mod_links(comment)
@@ -23,13 +28,6 @@ module Tabs
         edit_comment_link(comment),
         destroy_comment_link(comment)
       ]
-    end
-
-    # wording's a bit different from object_return_link
-    def comment_target_return_link(comment, target)
-      [:comment_show_show.t(type: comment.target_type_localized),
-       add_query_param(target.show_link_args),
-       { class: __method__.to_s }]
     end
 
     def edit_comment_link(comment)

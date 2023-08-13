@@ -3,10 +3,8 @@
 module Tabs
   module ThemesHelper
     def theme_show_links
-      [
-        theme_list_link,
-        account_edit_preferences_link
-      ]
+      [theme_list_link,
+        account_edit_preferences_link]
     end
 
     def theme_list_link

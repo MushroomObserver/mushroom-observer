@@ -6,7 +6,7 @@ module Tabs
       [object_return_link(name)]
     end
 
-    def email_merge_request_links(model:, old_obj:)
+    def email_merge_request_links(old_obj:)
       [object_return_link(old_obj)]
     end
   end

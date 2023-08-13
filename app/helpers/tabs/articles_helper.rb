@@ -11,37 +11,46 @@ module Tabs
     def articles_index_links(user:)
       return [] unless permitted?(user)
 
-      [[:create_article_title.t, new_article_path,
-        { class: "new_article_link" }]]
+      [new_article_link]
     end
 
     def article_show_links(article:, user:)
-      links = [[:index_article.t, articles_path,
-                { class: "articles_index_link" }]]
-      return links unless permitted?(user)
+      links = [articles_index_link]
+      # Can user modify all articles
+      return links unless Article.can_edit?(user)
 
-      links.push([:create_article_title.t, new_article_path,
-                  { class: "new_article_link" }],
-                 [:EDIT.t, edit_article_path(article.id),
-                  { class: "edit_article_link" }],
-                 [nil, article, { button: :destroy }])
-    end
-
-    # Can user modify all articles
-    def permitted?(user)
-      Article.can_edit?(user)
+      links.push(new_article_link,
+                 edit_article_link(article),
+                 destroy_article_link)
     end
 
     def article_form_new_links
-      [[:index_article.t, articles_path, { class: "articles_index_link" }]]
+      [articles_index_link]
     end
 
     def article_form_edit_links(article:)
       [
-        [:cancel_and_show.t(type: :article),
-         article_path(article.id), { class: "article_link" }],
-        [:index_article.t, articles_path, { class: "articles_index_link" }]
+        object_return_link(article),
+        articles_index_link
       ]
+    end
+
+    def new_article_link
+      [:create_article_title.t, new_article_path,
+       { class: __method__.to_s }]
+    end
+
+    def edit_article_link(article)
+      [:EDIT.t, edit_article_path(article.id),
+       { class: __method__.to_s }]
+    end
+
+    def destroy_article_link(article)
+      [nil, article, { button: :destroy }]
+    end
+
+    def articles_index_link
+      [:index_article.t, articles_path, { class: __method__.to_s }]
     end
 
     # "Title (#nnn)" textilized

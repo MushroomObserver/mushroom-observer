@@ -14,10 +14,10 @@ module Tabs
         destroy_description_link(description, admin),
         clone_description_link(description),
         merge_description_link(description, admin),
-        description_permissions_link(description, type, admin),
-        description_make_default_link(description),
-        description_show_project_link(description),
-        description_publish_draft_link(description, type, admin)
+        adjust_description_permissions_link(description, type, admin),
+        make_description_default_link(description),
+        description_project_link(description),
+        publish_description_draft_link(description, type, admin)
       ].reject(&:empty?)
     end
 
@@ -79,7 +79,7 @@ module Tabs
          class: __method__.to_s }]
     end
 
-    def description_permissions_link(description, type, admin)
+    def adjust_description_permissions_link(description, type, admin)
       return unless admin && type == :name
 
       [:show_description_adjust_permissions.t,
@@ -89,7 +89,7 @@ module Tabs
          class: __method__.to_s }]
     end
 
-    def description_make_default_link(description)
+    def make_description_default_link(description)
       return unless description.public && User.current &&
                     (description.parent.description_id != description.id)
 
@@ -101,7 +101,7 @@ module Tabs
          class: __method__.to_s }]
     end
 
-    def description_show_project_link(description)
+    def description_project_link(description)
       return unless (description.source_type == :project) &&
                     (project = description.source_object)
 
@@ -109,7 +109,7 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def description_publish_draft_link(description, type, admin)
+    def publish_description_draft_link(description, type, admin)
       return unless admin && (type == :name) &&
                     (description.source_type != :public)
 
