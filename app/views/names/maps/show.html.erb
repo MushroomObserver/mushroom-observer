@@ -1,7 +1,7 @@
 <%
 @title = :name_map_title.t(name: @name.display_name)
 
-tabs = name_map_show_links(name: @name, query: @query)
+tabs = create_tabs(name_map_links(name: @name, query: @query))
 @tabsets = { right: draw_tab_set(tabs) }
 %>
 

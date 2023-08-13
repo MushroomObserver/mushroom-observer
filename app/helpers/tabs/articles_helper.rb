@@ -9,7 +9,7 @@
 module Tabs
   module ArticlesHelper
     def articles_index_links(user:)
-      return [] unless permitted?(user)
+      return [] unless Article.can_edit?(user)
 
       [new_article_link]
     end
@@ -21,7 +21,7 @@ module Tabs
 
       links.push(new_article_link,
                  edit_article_link(article),
-                 destroy_article_link)
+                 destroy_article_link(article))
     end
 
     def article_form_new_links

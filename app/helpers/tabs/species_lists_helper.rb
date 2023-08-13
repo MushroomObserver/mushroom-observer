@@ -26,7 +26,7 @@ module Tabs
         manage_species_list_projects_link(list),
         edit_species_list_link(list),
         clear_species_list_link(list),
-        destroy_species_list_link(link)
+        destroy_species_list_link(list)
       ]
     end
 
@@ -77,7 +77,7 @@ module Tabs
          data: { confirm: :are_you_sure.l } }]
     end
 
-    def destroy_species_list_link(_link)
+    def destroy_species_list_link(list)
       [:species_list_show_destroy.t, list, { button: :destroy }]
     end
 

@@ -13,7 +13,7 @@ module Tabs
       end
 
       def location_description_form_new_links(description:)
-        [description_location_return_link(description)]
+        [object_return_link(description.location)]
       end
 
       def location_description_form_edit_links(description:)

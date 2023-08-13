@@ -69,7 +69,7 @@ module Tabs
       end
     end
 
-    def name_map_show_links(name:, query:)
+    def name_map_links(name:, query:)
       [
         show_object_link(name, :name_map_about.t(name: name.display_name)),
         coerced_location_query_link(query),
@@ -119,14 +119,16 @@ module Tabs
 
     ### Forms
     def name_form_new_links
-      [[:all_objects.t(type: :name), names_path, { class: "names_link" }]]
+      [names_index_link]
+    end
+
+    def names_index_link
+      [:all_objects.t(type: :name), names_path, { class: __method__.to_s }]
     end
 
     def name_form_edit_links(name:)
-      [
-        object_return_link(name),
-        object_index_link(name)
-      ]
+      [object_return_link(name),
+       object_index_link(name)]
     end
 
     def name_versions_links(name:)

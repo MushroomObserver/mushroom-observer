@@ -51,7 +51,7 @@ module Tabs
     def object_index_link(obj, text = nil)
       text ||= :list_objects.t(type: obj.type_tag)
       [text, add_query_param(obj.index_link_args),
-       { class: "#{obj.type_tag.pluralize}_index_link" }]
+       { class: "#{obj.type_tag.to_s.pluralize}_index_link" }]
     end
   end
 end
