@@ -1,19 +1,19 @@
-<!--SEARCH_BAR-->
-<nav id="search_bar" class="navbar navbar-default hidden-xs hidden-print">
+<!--top_nav-->
+<nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print">
 
   <div class="container-fluid px-0">
     <% if controller.controller_name == "identify" %>
       <%= render(partial: "observations/identify/form_identify_filter") %>
     <% else ##user is logged in %>
-      <%= render(partial: "application/search_bar/search_form") %>
+      <%= render(partial: "application/top_nav/search_form") %>
     <% end %>
 
     <% if @user.nil? %>
-      <%= render(partial: "application/search_bar/login") %>
+      <%= render(partial: "application/top_nav/login") %>
     <% else ##user is logged in %>
-      <%= render(partial: "application/search_bar/user_nav") %>
+      <%= render(partial: "application/top_nav/user_nav") %>
     <% end %>
   </div>
 
 </nav>
-<!--/SEARCH_BAR-->
+<!--/top_nav-->
