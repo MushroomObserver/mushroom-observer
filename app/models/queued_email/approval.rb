@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Approval notification
-module QueuedEmail
+class QueuedEmail
   class Approval < QueuedEmail
     def subject
       get_string(:subject)

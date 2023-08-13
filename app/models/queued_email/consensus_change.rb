@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Consensus Change Email
-module QueuedEmail
+class QueuedEmail
   class ConsensusChange < QueuedEmail
     def observation
       get_object(:observation, ::Observation)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Name Change Email
-module QueuedEmail
+class QueuedEmail
   class NameChange < QueuedEmail
     def name
       get_object(:name, ::Name)

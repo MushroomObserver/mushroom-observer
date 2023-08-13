@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Admin Email
-module QueuedEmail
+class QueuedEmail
   class Admin < QueuedEmail
   end
 end

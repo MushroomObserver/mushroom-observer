@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Commercial Email
-module QueuedEmail
+class QueuedEmail
   class Commercial < QueuedEmail
   end
 end

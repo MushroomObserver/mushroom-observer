@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # VerifyAPIKey Email
-module QueuedEmail
+class QueuedEmail
   class VerifyAPIKey < QueuedEmail
     def api_key
       get_object(:api_key, ::APIKey)

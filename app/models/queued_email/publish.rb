@@ -2,7 +2,7 @@
 
 # Name Published Email
 
-module QueuedEmail
+class QueuedEmail
   class Publish < QueuedEmail
     def name
       get_object(:name, ::Name)
