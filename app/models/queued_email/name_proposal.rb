@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Name Proposal Email
-class QueuedEmail
+module QueuedEmail
   class NameProposal < QueuedEmail
     def naming
       get_object(:naming, Naming)

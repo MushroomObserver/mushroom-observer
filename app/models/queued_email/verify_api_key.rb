@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # VerifyAPIKey Email
-class QueuedEmail
+module QueuedEmail
   class VerifyAPIKey < QueuedEmail
     def api_key
       get_object(:api_key, ::APIKey)
@@ -12,6 +12,7 @@ class QueuedEmail
 
       result = create(recipient, other_user)
 
+      result.add_integer(:user, recipient.id) if recipient
       result.add_integer(:other_user, other_user.id) if other_user
       result.add_integer(:api_key, api_key.id)
       result.finish
@@ -22,7 +23,7 @@ class QueuedEmail
       # Make sure it hasn't been deleted since email was queued.
       return unless api_key
 
-      VerifyAPIKeyMailer.build(for_user, other_user, api_key).deliver_now
+      VerifyAPIKeyMailer.build(user, other_user, api_key).deliver_now
     end
   end
 end

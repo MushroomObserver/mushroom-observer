@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Name Tracking Email
-class QueuedEmail
+module QueuedEmail
   class NameTracking < QueuedEmail
     def name_tracker
       get_object(:name_tracker, NameTracker)

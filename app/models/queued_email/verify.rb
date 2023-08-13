@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Verify (Account) Email
-class QueuedEmail
+module QueuedEmail
   class Verify < QueuedEmail
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Observation Email
-class QueuedEmail
+module QueuedEmail
   class Observation < QueuedEmail
   end
 end

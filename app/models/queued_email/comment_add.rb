@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Comment Email
-class QueuedEmail
+module QueuedEmail
   class CommentAdd < QueuedEmail
     def comment
       get_object(:comment, Comment)

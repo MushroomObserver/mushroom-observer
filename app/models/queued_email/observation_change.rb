@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Observation Change Email
-class QueuedEmail
+module QueuedEmail
   class ObservationChange < QueuedEmail
     def observation
       get_object(:observation, ::Observation)

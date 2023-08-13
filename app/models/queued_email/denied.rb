@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Denied Email
-class QueuedEmail
+module QueuedEmail
   class Denied < QueuedEmail
   end
 end

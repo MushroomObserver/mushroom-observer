@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Add HerbariumRecord Not Curator Email
-class QueuedEmail
+module QueuedEmail
   class AddHerbariumRecordNotCurator < QueuedEmail
     def herbarium_record
       get_object(:herbarium_record, ::HerbariumRecord)

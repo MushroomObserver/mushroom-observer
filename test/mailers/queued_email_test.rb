@@ -62,7 +62,7 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_feature_email
+  def test_features_email
     QueuedEmail::Features.create_email(mary, "blah blah blah")
     assert_email(0,
                  flavor: "QueuedEmail::Features",
@@ -226,6 +226,8 @@ class QueuedEmailTest < UnitTestCase
                  flavor: "QueuedEmail::VerifyAPIKey",
                  from: mary,
                  to: dick,
+                 user: mary.id,
+                 other_user: dick.id,
                  api_key: key.id)
   end
 end

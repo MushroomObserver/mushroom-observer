@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Location Change Email
-class QueuedEmail
+module QueuedEmail
   class LocationChange < QueuedEmail
     def location
       get_object(:location, ::Location)
