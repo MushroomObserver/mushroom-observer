@@ -1,34 +1,36 @@
 # frozen_string_literal: true
 
 # Consensus Change Email
-class QueuedEmail::ConsensusChange < QueuedEmail
-  def observation
-    get_object(:observation, ::Observation)
-  end
+class QueuedEmail
+  class ConsensusChange < QueuedEmail
+    def observation
+      get_object(:observation, ::Observation)
+    end
 
-  def old_name
-    get_object(:old_name, ::Name)
-  end
+    def old_name
+      get_object(:old_name, ::Name)
+    end
 
-  def new_name
-    get_object(:new_name, ::Name)
-  end
+    def new_name
+      get_object(:new_name, ::Name)
+    end
 
-  def self.create_email(sender, recipient, observation, old_name, new_name)
-    result = create(sender, recipient)
-    raise("Missing observation!") unless observation
+    def self.create_email(sender, recipient, observation, old_name, new_name)
+      result = create(sender, recipient)
+      raise("Missing observation!") unless observation
 
-    result.add_integer(:observation, observation.id)
-    result.add_integer(:old_name, old_name ? old_name.id : 0)
-    result.add_integer(:new_name, new_name ? new_name.id : 0)
-    result.finish
-    result
-  end
+      result.add_integer(:observation, observation.id)
+      result.add_integer(:old_name, old_name ? old_name.id : 0)
+      result.add_integer(:new_name, new_name ? new_name.id : 0)
+      result.finish
+      result
+    end
 
-  def deliver_email
-    # Make sure it hasn't been deleted since email was queued.
-    return unless observation && old_name && new_name
+    def deliver_email
+      # Make sure it hasn't been deleted since email was queued.
+      return unless observation && old_name && new_name
 
-    ConsensusChangeMailer.build(self).deliver_now
+      ConsensusChangeMailer.build(self).deliver_now
+    end
   end
 end
