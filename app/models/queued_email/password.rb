@@ -18,10 +18,7 @@ class QueuedEmail
     end
 
     def deliver_email
-      # Make sure it hasn't been deleted since email was queued.
-      return unless password
-
-      PasswordMailer.build(user, password).deliver_now
+      PasswordMailer.build(to_user, password).deliver_now
     end
   end
 end
