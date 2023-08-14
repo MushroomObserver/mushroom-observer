@@ -62,10 +62,10 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_feature_email
-    QueuedEmail::Feature.create_email(mary, "blah blah blah")
+  def test_features_email
+    QueuedEmail::Features.create_email(mary, "blah blah blah")
     assert_email(0,
-                 flavor: "QueuedEmail::Feature",
+                 flavor: "QueuedEmail::Features",
                  to: mary,
                  note: "blah blah blah")
     email = QueuedEmail.first.deliver_email
@@ -216,5 +216,18 @@ class QueuedEmailTest < UnitTestCase
                  note: "Please make me the author")
     email = QueuedEmail.first.deliver_email
     assert(email)
+  end
+
+  def test_verify_api_key_email
+    key = api_keys(:marys_api_key)
+
+    QueuedEmail::VerifyAPIKey.create_email(mary, dick, key)
+    assert_email(0,
+                 flavor: "QueuedEmail::VerifyAPIKey",
+                 from: mary,
+                 to: dick,
+                 user: mary.id,
+                 for_user: dick.id,
+                 api_key: key.id)
   end
 end
