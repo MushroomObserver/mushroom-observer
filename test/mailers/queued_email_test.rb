@@ -237,7 +237,7 @@ class QueuedEmailTest < UnitTestCase
                  from: mary,
                  to: dick,
                  user: mary.id,
-                 other_user: dick.id,
+                 for_user: dick.id,
                  api_key: key.id)
   end
 end
