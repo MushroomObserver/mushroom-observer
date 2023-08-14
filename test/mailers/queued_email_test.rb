@@ -239,8 +239,6 @@ class QueuedEmailTest < UnitTestCase
                  flavor: "QueuedEmail::VerifyAPIKey",
                  from: dick,
                  to: mary,
-                 user: mary.id,
-                 other_user: dick.id,
                  api_key: key.id)
   end
 end
