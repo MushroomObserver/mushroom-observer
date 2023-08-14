@@ -4,11 +4,11 @@
 class QueuedEmail
   class NameProposal < QueuedEmail
     def naming
-      get_object(:naming, Naming)
+      get_object(:naming, ::Naming)
     end
 
     def observation
-      get_object(:observation, Observation)
+      get_object(:observation, ::Observation)
     end
 
     def self.create_email(sender, recipient, observation, naming)
