@@ -2,6 +2,6 @@
 
 # User Email
 class QueuedEmail
-  class User < QueuedEmail
+  class UserQuestion < QueuedEmail
   end
 end
