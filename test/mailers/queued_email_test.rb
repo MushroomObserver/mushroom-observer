@@ -190,6 +190,16 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
+  def test_password_email
+    password = String.random(10)
+
+    QueuedEmail::Password.create_email(mary, password)
+    assert_email(0,
+                 flavor: "QueuedEmail::Password",
+                 to: mary,
+                 password: password)
+  end
+
   def test_publish_email
     QueuedEmail::Publish.create_email(rolf, mary, names(:peltigera))
     assert_email(0,

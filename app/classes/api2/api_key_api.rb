@@ -42,7 +42,6 @@ class API2
     def after_create(api_key)
       return if api_key.verified
 
-      # VerifyAPIKeyMailer.build(@for_user, @user, api_key).deliver_now
       QueuedEmail::VerifyAPIKey.create_email(@for_user, @user, api_key)
     end
 
