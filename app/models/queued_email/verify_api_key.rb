@@ -7,10 +7,10 @@ class QueuedEmail
       get_object(:api_key, ::APIKey)
     end
 
-    def self.create_email(for_user, user, api_key)
+    def self.create_email(user, app, api_key)
       raise("Missing api_key!") unless api_key
 
-      result = create(user, for_user)
+      result = create(app, user)
       result.add_integer(:api_key, api_key.id)
       result.finish
       result
@@ -20,7 +20,7 @@ class QueuedEmail
       # Make sure it hasn't been deleted since email was queued.
       return unless key = api_key
 
-      VerifyAPIKeyMailer.build(for_user, user, key).deliver_now
+      VerifyAPIKeyMailer.build(recipient, sender, key).deliver_now
     end
   end
 end
