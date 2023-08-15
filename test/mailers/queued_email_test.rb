@@ -62,6 +62,19 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
+  def test_commercial_inquiry_email
+    QueuedEmail::CommercialInquiry.find_or_create_email(
+      rolf, mary, comments(:minimal_unknown_obs_comment_1)
+    )
+    assert_email(0,
+                 flavor: "QueuedEmail::CommercialInquiry",
+                 from: rolf,
+                 to: mary,
+                 comment: comments(:minimal_unknown_obs_comment_1).id)
+    email = QueuedEmail.first.deliver_email
+    assert(email)
+  end
+
   def test_consensus_change_email
     QueuedEmail::ConsensusChange.create_email(
       rolf, mary,

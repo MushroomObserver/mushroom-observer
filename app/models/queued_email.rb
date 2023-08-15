@@ -117,10 +117,8 @@
 #  TODO: Convert to QueuedEmail classes
 #
 #  AdminMailer
-#  CommercialMailer
 #  DeniedMailer
 #  ObservationMailer
-#  UserMailer
 #  WebmasterMailer
 #
 ################################################################################
