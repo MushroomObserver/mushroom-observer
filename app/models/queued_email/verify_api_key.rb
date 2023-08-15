@@ -19,7 +19,7 @@ class QueuedEmail
 
     def deliver_email
       # Make sure it hasn't been deleted since email was queued.
-      return unless key = api_key
+      return unless (key = api_key)
 
       VerifyAPIKeyMailer.build(to_user, user, key).deliver_now
     end

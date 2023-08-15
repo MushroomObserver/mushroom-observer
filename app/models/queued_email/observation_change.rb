@@ -53,7 +53,7 @@ class QueuedEmail
       email
     end
 
-    # This should be called when images are added or removed from an observation.
+    # This should be called when images are added or removed from an obs.
     # The "action" parameter should be either :added_image or :removed_image.
     def self.change_images(sender, recipient, observation, action)
       if (email = find_email(recipient, observation))
