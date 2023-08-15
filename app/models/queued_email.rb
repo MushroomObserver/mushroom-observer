@@ -121,7 +121,6 @@
 #  DeniedMailer
 #  ObservationMailer
 #  UserMailer
-#  VerifyAccountMailer
 #  WebmasterMailer
 #
 ################################################################################
