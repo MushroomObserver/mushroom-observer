@@ -231,13 +231,14 @@ class QueuedEmailTest < UnitTestCase
   def test_verify_api_key_email
     key = api_keys(:marys_api_key)
 
+    # Dick is creating an API for Mary at Mary's request.
+    # The email is from Dick to Mary, the "user" is Mary, the "other_user"
+    # is Dick.
     QueuedEmail::VerifyAPIKey.create_email(mary, dick, key)
     assert_email(0,
                  flavor: "QueuedEmail::VerifyAPIKey",
-                 from: mary,
-                 to: dick,
-                 user: mary.id,
-                 for_user: dick.id,
+                 from: dick,
+                 to: mary,
                  api_key: key.id)
   end
 end
