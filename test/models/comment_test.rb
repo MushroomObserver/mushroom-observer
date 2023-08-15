@@ -110,6 +110,8 @@ class CommentTest < UnitTestCase
   end
 
   def do_comment_test(chg, obs, user, summary, comment = "")
+    QueuedEmail.queue = true
+
     old = num_emails
     obs&.reload # (to ensure it sees chgs in user prefs)
     Comment.create!(
@@ -122,15 +124,19 @@ class CommentTest < UnitTestCase
   end
 
   def num_emails
-    ActionMailer::Base.deliveries.length
+    # ActionMailer::Base.deliveries.length
+    QueuedEmail.count
   end
 
+  # FIXME : need to alter this to test for QueuedEmails
   def sent_emails(start)
     return "No emails were sent" if num_emails == start
 
-    strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
-      "to: #{mail["to"]}, subject: #{mail["subject"]}"
-    end
-    "These emails were sent:\n#{strs.join("\n")}"
+    all_emails = QueuedEmail.all[start..-1]
+    binding.break
+    # strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
+    #   "to: #{mail["to"]}, subject: #{mail["subject"]}"
+    # end
+    # "These emails were sent:\n#{strs.join("\n")}"
   end
 end
