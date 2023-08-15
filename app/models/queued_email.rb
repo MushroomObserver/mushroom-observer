@@ -113,12 +113,6 @@
 #    # This automatically sets flavor to 'QueuedEmail::CommentAdd'.
 #    email = QueuedEmail::CommentAdd.new
 #
-#
-#  TODO: Convert to QueuedEmail classes
-#
-#  ProjectAdminRequestMailer
-#  DeniedMailer
-#
 ################################################################################
 
 # Stores an email and details about it to get delivered later

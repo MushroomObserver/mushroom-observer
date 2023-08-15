@@ -79,7 +79,7 @@ class ApplicationMailerTest < UnitTestCase
     project = projects(:eol_project)
     run_mail_test("admin_request", rolf) do
       ProjectAdminRequestMailer.build(katrina, rolf, project,
-                        "Please do something or other", "and this is why...").
+                                      "Please do something or other", "and this is why...").
         deliver_now
     end
   end
@@ -138,12 +138,6 @@ class ApplicationMailerTest < UnitTestCase
       email = QueuedEmail::ConsensusChange.create_email(dick, mary, obs,
                                                         name1, name2)
       ConsensusChangeMailer.build(email).deliver_now
-    end
-  end
-
-  def test_denied_email
-    run_mail_test("denied") do
-      DeniedMailer.build(junk).deliver_now
     end
   end
 
