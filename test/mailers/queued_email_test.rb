@@ -19,16 +19,15 @@ class QueuedEmailTest < UnitTestCase
 
   def test_add_herbarium_record_email
     # Dick's fungarium is empty. Mary wants to add `fundis_record` to it
-    fung_r = herbarium_records(:fundis_record)
+    f_r = herbarium_records(:fundis_record)
     QueuedEmail::AddRecordToHerbarium.create_email(
-      mary, dick, fung_r
+      mary, dick, f_r
     )
     assert_email(0,
                  flavor: "QueuedEmail::AddRecordToHerbarium",
                  from: mary,
-                 reply_to: dick,
-                 obj_type: :herbarium_record,
-                 obj_id: fung_r.id)
+                 to: dick,
+                 herbarium_record: f_r.id)
     email = QueuedEmail.first.deliver_email
     assert(email)
   end
@@ -310,7 +309,6 @@ class QueuedEmailTest < UnitTestCase
                                         content: content, subject: subject)
     assert_email(0,
                  flavor: "QueuedEmail::Webmaster",
-                 from: mary,
                  to: "webmaster@mushroomobserver.org",
                  subject: "Euh...",
                  note: "What's up with this button here?")

@@ -8,9 +8,9 @@ class QueuedEmail
     end
 
     def self.create_email(sender, recipient, herbarium_record)
-      result = create(sender, recipient)
       raise("Missing herbarium_record!") unless herbarium_record
 
+      result = create(sender, recipient)
       result.add_integer(:herbarium_record, herbarium_record.id)
       result.finish
       result
