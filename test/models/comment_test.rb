@@ -133,7 +133,7 @@ class CommentTest < UnitTestCase
     return "No emails were sent" if num_emails == start
 
     all_emails = QueuedEmail.all[start..-1]
-    binding.break
+    # binding.break
     # strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
     #   "to: #{mail["to"]}, subject: #{mail["subject"]}"
     # end

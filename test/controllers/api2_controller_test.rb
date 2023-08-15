@@ -354,6 +354,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(CGI.escapeHTML("<p>New API2 Key</p>"), notes.to_s)
   end
 
+  # FIXME: this test also needs to be altered to test for QueuedEmail
   def test_post_api_key
     email_count = ActionMailer::Base.deliveries.size
 
