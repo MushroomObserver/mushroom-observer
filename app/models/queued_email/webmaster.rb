@@ -19,12 +19,8 @@ class QueuedEmail
       raise("Missing email address!") unless sender_email
       raise("Missing content!") unless content
 
-      # FIXME: Shouldn't both the mailer and this class take a user arg, rather
-      # than their email address?
-      # Seems backwards when the caller prolly has access to the user
-      user = ::User.find_by(email: sender_email)
-
-      result = create(user, nil)
+      result = create(nil, nil)
+      result.add_string(:sender_email, sender_email)
       result.add_string(:subject, subject) if subject
       result.set_note(content)
       result.finish
