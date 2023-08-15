@@ -32,7 +32,24 @@ class QueuedEmailTest < UnitTestCase
     assert(email.deliver_email)
   end
 
-  def test_comment_email
+  def test_author_request_email
+    QueuedEmail::AuthorRequest.create_email(
+      mary, dick, name_descriptions(:peltigera_desc),
+      "Hi", "Please make me the author"
+    )
+    assert_email(0,
+                 flavor: "QueuedEmail::AuthorRequest",
+                 from: mary,
+                 to: dick,
+                 obj_id: name_descriptions(:peltigera_desc).id,
+                 obj_type: "name_description",
+                 subject: "Hi",
+                 note: "Please make me the author")
+    email = QueuedEmail.first.deliver_email
+    assert(email)
+  end
+
+  def test_comment_add_email
     QueuedEmail::CommentAdd.find_or_create_email(
       rolf, mary, comments(:minimal_unknown_obs_comment_1)
     )
@@ -211,21 +228,16 @@ class QueuedEmailTest < UnitTestCase
     assert(email)
   end
 
-  def test_author_request_email
-    QueuedEmail::AuthorRequest.create_email(
-      mary, dick, name_descriptions(:peltigera_desc),
-      "Hi", "Please make me the author"
-    )
+  def test_user_question_email
+    subject = "Hiya"
+    content = "What's up?"
+    QueuedEmail::UserQuestion.create_email(mary, dick, subject, content)
     assert_email(0,
-                 flavor: "QueuedEmail::AuthorRequest",
+                 flavor: "QueuedEmail::UserQuestion",
                  from: mary,
                  to: dick,
-                 obj_id: name_descriptions(:peltigera_desc).id,
-                 obj_type: "name_description",
-                 subject: "Hi",
-                 note: "Please make me the author")
-    email = QueuedEmail.first.deliver_email
-    assert(email)
+                 subject: "Hiya",
+                 note: "What's up?")
   end
 
   def test_verify_api_key_email
