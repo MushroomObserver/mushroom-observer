@@ -285,4 +285,16 @@ class QueuedEmailTest < UnitTestCase
                  flavor: "QueuedEmail::VerifyAccount",
                  to: users(:unverified))
   end
+
+  def test_webmaster_question_email
+    subject = "Euh..."
+    content = "What's up with this button here?"
+    QueuedEmail::Webmaster.create_email(mary, content, subject)
+    assert_email(0,
+                 flavor: "QueuedEmail::Webmaster",
+                 from: mary,
+                 to: "webmaster@mushroomobserver.org",
+                 subject: "Euh...",
+                 note: "What's up with this button here?")
+  end
 end

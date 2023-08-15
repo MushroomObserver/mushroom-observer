@@ -72,7 +72,7 @@ module Account
     def resend_email
       return unless (user = find_or_goto_index(User, params[:id]))
 
-      VerifyAccountMailer.build(user).deliver_now
+      QueuedEmail::VerifyAccount.create_email(user)
       self.class.notify_root_of_verification_email(user)
       flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(account_welcome_path)
@@ -83,11 +83,11 @@ module Account
       url = "#{MO.http_domain}/account/verify/#{user.id}?" \
             "auth_code=#{user.auth_code}"
       content = :email_verify_intro.tp(user: user.login, link: url)
-      WebmasterMailer.build(
+      QueuedEmail::Webmaster.create_email(
         sender_email: user.email,
         subject: :email_subject_verify.l,
         content: "email: #{user.email}\n\n #{content.html_to_ascii}"
-      ).deliver_now
+      )
     end
 
     private

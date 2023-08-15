@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Observation Email
+# Ask Observer a Question Emails
 class QueuedEmail
   class ObserverQuestion < QueuedEmail
     def observation
@@ -13,7 +13,7 @@ class QueuedEmail
 
     def self.create_email(sender, observation, question)
       raise("Missing observation!") unless observation
-      raise("Missing question!") unless content
+      raise("Missing question!") unless question
 
       result = create(sender, user)
       result.add_integer(:observation, observation.id)

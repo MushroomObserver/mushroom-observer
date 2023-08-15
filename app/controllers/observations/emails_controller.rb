@@ -29,7 +29,7 @@ module Observations
       return unless @observation && can_email_user_question?(@observation)
 
       question = params.dig(:question, :content)
-      ObserverQuestionMailer.build(@user, @observation, question).deliver_now
+      QueuedEmail::ObserverQuestion.create_email(@user, @observation, question)
       flash_notice(:runtime_ask_observation_question_success.t)
 
       show_flash_and_send_back

@@ -118,8 +118,6 @@
 #
 #  AdminMailer
 #  DeniedMailer
-#  ObserverQuestionMailer
-#  WebmasterMailer
 #
 ################################################################################
 

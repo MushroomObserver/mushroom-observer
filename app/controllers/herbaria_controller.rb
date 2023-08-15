@@ -323,14 +323,14 @@ class HerbariaController < ApplicationController
   end
 
   def notify_admins_of_new_herbarium
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "New Herbarium",
       content: "User created a new herbarium:\n" \
                "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
                "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
                "Obj: #{@herbarium.show_url}\n"
-    ).deliver_now
+    )
   end
 
   def user_can_destroy_herbarium?

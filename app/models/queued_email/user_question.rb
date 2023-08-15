@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# User Email
+# User to User Questions
 class QueuedEmail
   class UserQuestion < QueuedEmail
     def subject
