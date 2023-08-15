@@ -23,7 +23,7 @@ class QueuedEmail
     end
 
     def deliver_email
-      CommercialInquiryMailer.build(sender, image, content).deliver_now
+      CommercialInquiryMailer.build(user, image, content).deliver_now
     end
   end
 end

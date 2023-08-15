@@ -23,7 +23,7 @@ class QueuedEmail
     end
 
     def deliver_email
-      UserQuestionMailer.build(sender, user, subject, content).deliver_now
+      UserQuestionMailer.build(user, to_user, subject, content).deliver_now
     end
   end
 end

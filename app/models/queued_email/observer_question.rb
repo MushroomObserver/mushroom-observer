@@ -15,7 +15,7 @@ class QueuedEmail
       raise("Missing observation!") unless observation
       raise("Missing question!") unless question
 
-      result = create(sender, user)
+      result = create(sender, observation.user)
       result.add_integer(:observation, observation.id)
       result.set_note(question)
       result.finish
@@ -23,7 +23,7 @@ class QueuedEmail
     end
 
     def deliver_email
-      ObserverQuestionMailer.build(sender, observation, question).deliver_now
+      ObserverQuestionMailer.build(user, observation, question).deliver_now
     end
   end
 end
