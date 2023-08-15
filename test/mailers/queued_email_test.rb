@@ -70,7 +70,8 @@ class QueuedEmailTest < UnitTestCase
     assert_email(0,
                  flavor: "QueuedEmail::CommercialInquiry",
                  from: rolf,
-                 to: image.user)
+                 to: image.user
+                 note: "What's shakin' with this?")
     email = QueuedEmail.first.deliver_email
     assert(email)
   end
