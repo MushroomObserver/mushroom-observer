@@ -119,8 +119,9 @@ class ApplicationMailerTest < UnitTestCase
   def test_commercial_email
     image = images(:commercial_inquiry_image)
     run_mail_test("commercial_inquiry", image.user) do
-      CommercialMailer.build(mary, image,
-                             "Did test_commercial_inquiry work?").deliver_now
+      CommercialInquiryMailer.build(
+        mary, image, "Did test_commercial_inquiry work?"
+      ).deliver_now
     end
   end
 
@@ -266,7 +267,7 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_user_email
     run_mail_test("user_question", mary) do
-      UserMailer.build(
+      UserQuestionMailer.build(
         rolf, mary, "Interesting idea", "Shall we discuss it in email?"
       ).deliver_now
     end
@@ -301,14 +302,14 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_undeliverable_email
     mary.update(email: "bogus.address")
-    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not have delivered an email to 'bogus.address'.")
   end
 
   def test_opt_out
     mary.update(no_emails: true)
-    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not deliver email if recipient has opted out.")
   end

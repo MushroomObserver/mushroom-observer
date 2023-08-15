@@ -17,7 +17,7 @@ class EmailsController < ApplicationController
     @email = @user.email if @user
   end
 
-  # TODO: Refactor UserMailer.build to take kwargs, eliminating
+  # TODO: Refactor UserQuestionMailer.build to take kwargs, eliminating
   #       local variable assignments.
   def ask_user_question
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
@@ -26,7 +26,7 @@ class EmailsController < ApplicationController
 
     subject = params[:email][:subject]
     content = params[:email][:content]
-    UserMailer.build(@user, @target, subject, content).deliver_now
+    UserQuestionMailer.build(@user, @target, subject, content).deliver_now
     flash_notice(:runtime_ask_user_question_success.t)
     redirect_to(user_path(@target.id))
   end
@@ -38,7 +38,7 @@ class EmailsController < ApplicationController
                   request.method == "POST"
 
     commercial_inquiry = params[:commercial_inquiry][:content]
-    CommercialMailer.build(@user, @image, commercial_inquiry).deliver_now
+    CommercialInquiryMailer.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
     redirect_with_query(image_path(@image.id))
   end
