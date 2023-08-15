@@ -63,14 +63,14 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_commercial_inquiry_email
+    image = images(:amateur_image)
     QueuedEmail::CommercialInquiry.create_email(
-      rolf, mary, comments(:minimal_unknown_obs_comment_1)
+      rolf, image, "What's shakin' with this?"
     )
     assert_email(0,
                  flavor: "QueuedEmail::CommercialInquiry",
                  from: rolf,
-                 to: mary,
-                 comment: comments(:minimal_unknown_obs_comment_1).id)
+                 to: image.user)
     email = QueuedEmail.first.deliver_email
     assert(email)
   end
@@ -289,7 +289,8 @@ class QueuedEmailTest < UnitTestCase
   def test_webmaster_question_email
     subject = "Euh..."
     content = "What's up with this button here?"
-    QueuedEmail::Webmaster.create_email(mary, content, subject)
+    QueuedEmail::Webmaster.create_email(sender_email: mary.email,
+                                        content: content, subject: subject)
     assert_email(0,
                  flavor: "QueuedEmail::Webmaster",
                  from: mary,
