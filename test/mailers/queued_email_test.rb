@@ -319,13 +319,15 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_webmaster_question_email
+    # Note that there is no `from` or `to` User instance for these,
+    # because anyone can email the webmaster, even without an account.
     subject = "Euh..."
     content = "What's up with this button here?"
     QueuedEmail::Webmaster.create_email(sender_email: mary.email,
                                         content: content, subject: subject)
     assert_email(0,
                  flavor: "QueuedEmail::Webmaster",
-                 to: "webmaster@mushroomobserver.org",
+                 sender_email: mary.email,
                  subject: "Euh...",
                  note: "What's up with this button here?")
   end
