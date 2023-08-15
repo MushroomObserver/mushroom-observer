@@ -4,12 +4,12 @@ module Admin
   module Emails
     class FeaturesController < AdminController
       def new
-        @users = User.where(email_general_feature: true, no_emails: false).
+        @users = ::User.where(email_general_feature: true, no_emails: false).
                  where.not(verified: nil)
       end
 
       def create
-        @users = User.where(email_general_feature: true, no_emails: false).
+        @users = ::User.where(email_general_feature: true, no_emails: false).
                  where.not(verified: nil)
         @users.each do |user|
           QueuedEmail::Features.create_email(user,

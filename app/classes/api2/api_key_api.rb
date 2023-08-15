@@ -10,6 +10,7 @@ class API2
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
+    # the :user may be the mobile app. the :for_user is the user the key is for
     def create_params
       @for_user = parse(:user, :for_user, help: :api_key_user) || @user
       {
