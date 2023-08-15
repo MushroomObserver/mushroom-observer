@@ -9,6 +9,7 @@ can_vote = check_permission(naming)
 if !can_vote || !@vote || @vote.value == 0
   menu = [Vote.no_opinion] + menu
 end
+context ||= "blank"
 %>
 
 <%= form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
@@ -22,6 +23,8 @@ end
                     onchange: "Rails.fire(this.closest('form'), 'submit')",
                     data: { role: "change_vote", id: naming.id } }) %>
   <% end %>
+
+  <%= hidden_field_tag(:context, context) %>
 
   <%= submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
                     data: { role: "save_vote" }) %>

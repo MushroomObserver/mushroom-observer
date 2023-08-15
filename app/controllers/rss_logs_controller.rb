@@ -36,16 +36,17 @@ class RssLogsController < ApplicationController
 
   private
 
+  # Get the types whose value == "1"
   def types_query_string_from_params
-    types = params[:type]
-    if types.is_a?(Array)
-      if types.empty?
-        types = "none"
-      else
-        types = RssLog.all_types.intersection(types)
-        types = "all" if types.length == RssLog.all_types.length
-        types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-      end
+    types = ""
+    if params[:type].is_a?(ActionController::Parameters)
+      types = params[:type].select { |_key, value| value == "1" }.keys
+      types = RssLog.all_types.intersection(types)
+      types = "all" if types.length == RssLog.all_types.length
+      types = "none" if types.empty?
+      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+    elsif params[:type].is_a?(String)
+      types = params[:type]
     end
     types
   end
@@ -98,17 +99,11 @@ class RssLogsController < ApplicationController
     }.merge(args)
 
     @types = query.params[:type].to_s.split.sort
-    @links = []
 
     # Let the user make this their default and fine tune.
-    if @user
-      if params[:make_default] == "1"
-        @user.default_rss_type = @types.join(" ")
-        @user.save_without_our_callbacks
-      elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [:rss_make_default.t,
-                   add_query_param(action: :index, make_default: 1)]
-      end
+    if @user && params[:make_default] == "1"
+      @user.default_rss_type = @types.join(" ")
+      @user.save_without_our_callbacks
     end
 
     show_index_of_objects(query, args)

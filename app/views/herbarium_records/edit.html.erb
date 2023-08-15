@@ -1,26 +1,8 @@
 <%
-  @title = :edit_herbarium_record_title.l(
-    herbarium_label: @herbarium_record.herbarium_label
-  )
-
-  # link_with_query(label, @back_object.show_link_args) not working here
-  tabs = []
-  if @back == "index"
-    tabs << link_to(:edit_herbarium_record_back_to_index.t,
-                    herbarium_records_path(q: get_query_param))
-  elsif @back_object.type_tag == :observation
-    tabs << link_to(:cancel_and_show.t(type: @back_object.type_tag),
-                    observation_path(id: @back_object.id, q: get_query_param))
-  elsif @back_object.type_tag == :herbarium_record
-    tabs << link_to(:cancel_and_show.t(type: @back_object.type_tag),
-                    herbarium_record_path(id: @back_object.id,
-                                          q: get_query_param))
-  end
-  tabs << link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param))
-  tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
-
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+links = herbarium_record_form_edit_links(back: @back, back_object: @back_object)
+tabs = create_tabs(links)
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :wide
 %>
 
 <div class="row">

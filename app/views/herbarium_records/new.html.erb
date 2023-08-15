@@ -1,17 +1,7 @@
 <%
-  @title = :create_herbarium_record_title.l
-
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    observation_path(@observation.id),
-                    id: "show_observation_link"),
-    link_with_query(:create_herbarium.t, new_herbarium_path,
-                    id: "new_herbarium_link"),
-    link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                    id: "all_nonpersonal_herbaria_link")
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+tabs = create_tabs(herbarium_record_form_new_links(obs: @observation))
+@tabsets = { right: draw_tab_set(tabs) }
+@container = :full
 %>
 
 <div class="row">

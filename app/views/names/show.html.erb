@@ -1,10 +1,13 @@
 <%
-  @title = :show_name_title.t(name: @name.display_name)
+@title = :show_name_title.t(name: @name.display_name)
 
-  Textile.register_name(@name)
+Textile.register_name(@name)
 
-  @tabsets = show_name_tabset(name: @name, user: @user)
-  @container = :wide
+tabs = create_tabs(name_show_links(name: @name, user: @user))
+tabs << draw_interest_icons(@name)
+@tabsets = { pager_for: @name, right: draw_tab_set(tabs) }
+
+@container = :wide
 %>
 
 <div class="row">
@@ -21,7 +24,7 @@
 
     <div id="name_authors_editors">
       <%= panel_block do %>
-        <%= show_authors_and_editors(@name) %>
+        <%= show_authors_and_editors(obj: @name, user: @user) %>
       <% end %>
     </div>
 

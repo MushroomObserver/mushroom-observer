@@ -84,7 +84,7 @@ class ArticlesController < ApplicationController
 
   # Filter: Unless user permitted to perform request, just index
   def ignore_request_unless_permitted
-    return if helpers.permitted?(@user)
+    return if Article.can_edit?(@user)
 
     flash_notice(:permission_denied.t)
     redirect_to(articles_path)
@@ -127,14 +127,13 @@ class ArticlesController < ApplicationController
                       ["user",        :sort_by_user.t],
                       ["title",       :sort_by_title.t]].freeze
     }.merge(args)
-    @links ||= []
 
     show_index_of_objects(query, args)
   end
 
   # add flash message if title missing
   def flash_missing_title?
-    return if params[:article][:title].present?
+    return false if params[:article][:title].present?
 
     flash_error(:article_title_required.t)
     true

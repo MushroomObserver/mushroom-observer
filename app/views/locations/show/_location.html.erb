@@ -6,7 +6,7 @@
       gmap.div(width: "100%", height: "480px").html_safe
     %>
     <div class="text-center">
-      <%= show_authors_and_editors(location) %>
+      <%= show_authors_and_editors(obj: location, user: @user) %>
     </div><!-- .text-center -->
   </div><!--.col-sm-8-->
 

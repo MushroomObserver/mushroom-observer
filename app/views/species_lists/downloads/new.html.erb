@@ -1,9 +1,7 @@
 <%
   @title = :species_list_download_title.t
 
-  tabs = [
-    link_with_query(:species_list_download_back.t, species_list_path(@list))
-  ]
+  tabs = create_tabs(species_list_download_links(list: @list))
   @tabsets = { right: draw_tab_set(tabs) }
 
   query_param = get_query_param(@query)

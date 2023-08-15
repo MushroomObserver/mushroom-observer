@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# frozen_string_literal: true.
-
 require("cgi")
 require("redcloth")
 
@@ -42,27 +40,29 @@ class Textile < String
   ########## Class methods #####################################################
 
   # Convenience wrapper on instance method Textile#textilize_without_paragraph.
-  def self.textilize_without_paragraph(str, do_object_links = false,
-                                       sanitize = true)
-    new(str).textilize_without_paragraph(do_object_links, sanitize)
+  def self.textilize_without_paragraph(str, do_object_links: false,
+                                       sanitize: true)
+    new(str).textilize_without_paragraph(do_object_links: do_object_links,
+                                         sanitize: sanitize)
   end
 
   # Wrap self.textilize_without_paragraph, marking output trusted safe
-  def self.textilize_without_paragraph_safe(str, do_object_links = false,
-                                            sanitize = true)
-    textilize_without_paragraph(str, do_object_links, sanitize).
+  def self.textilize_without_paragraph_safe(str, do_object_links: false,
+                                            sanitize: true)
+    textilize_without_paragraph(str, do_object_links: do_object_links,
+                                     sanitize: sanitize).
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety
   end
 
   # Convenience wrapper on the instance method Textile#textilize.
-  def self.textilize(str, do_object_links = false, sanitize = true)
-    new(str).textilize(do_object_links, sanitize)
+  def self.textilize(str, do_object_links: false, sanitize: true)
+    new(str).textilize(do_object_links: do_object_links, sanitize: sanitize)
   end
 
   # Wrap self.textilize_without_paragraph, marking output trusted safe
-  def self.textilize_safe(str, do_object_links = false, sanitize = true)
-    textilize(str, do_object_links, sanitize).
+  def self.textilize_safe(str, do_object_links: false, sanitize: true)
+    textilize(str, do_object_links: do_object_links, sanitize: sanitize).
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -78,8 +78,9 @@ class Textile < String
 
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
-  def textilize_without_paragraph(do_object_links = false, sanitize = true)
-    textilize(do_object_links, sanitize).sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
+  def textilize_without_paragraph(do_object_links: false, sanitize: true)
+    textilize(do_object_links: do_object_links, sanitize: sanitize).
+      sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
   end
 
   # Textilizes the string using RedCloth, doing a little extra processing:
@@ -91,24 +92,18 @@ class Textile < String
   # textilize::                   The general case.
   # textilize_without_paragraph:: Just returns body of first paragraph.
   # ---
-  # String#t::                    Same as textilize_without_paragraph(false).
-  # String#tl::                   Same as textilize_without_paragraph(true).
-  # String#tp::                   Same as textilize(false).
-  # String#tpl::                  Same as textilize(true).
+  # String#t::   Same as textilize_without_paragraph(do_object_links: false)
+  # String#tl::  Same as textilize_without_paragraph(do_object_links: true)
+  # String#tp::  Same as textilize(do_object_links: false).
+  # String#tpl:: Same as textilize(do_object_links: true).
   #
   # Here are some mnemonics for the aliases:
   # t::    Just textilize: no paragraphs or links or anything fancy.
   # tl::   Do 't' and check for links.
   # tp::   Wrap 't' in a <p> block.
   # tpl::  Wrap 't' in a <p> block AND do links.
-  def textilize(do_object_links = false, sanitize = true)
-    # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
-    # (The "x"s prevent Textile from interpreting the curlies as style info.)
-    if do_object_links
-      check_name_links!
-      check_other_links!
-      check_our_images!
-    end
+  def textilize(do_object_links: false, sanitize: true)
+    preprocess_object_links if do_object_links
 
     # Textile will screw with "@John Doe@".  We need to protect at signs now.
     gsub!("@", "&#64;")
@@ -135,7 +130,7 @@ class Textile < String
     # by the following lines, saving the links so we can restore them later.
     saved_links = pre_existing_links_replaced_by_placeholders!(do_object_links)
     convert_bare_urls_to_links!
-    convert_object_tags_to_proper_links!
+    convert_tagged_objects_to_proper_links!
     fully_qualify_links!
     restore_pre_existing_links!(saved_links)
 
@@ -206,26 +201,45 @@ class Textile < String
 
   private
 
+  # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
+  # (The "x"s prevent Textile from interpreting the curlies as style info.)
+  def preprocess_object_links
+    convert_name_links_to_tagged_objects!
+    convert_other_links_to_tagged_objects!
+    convert_embedded_image_links_to_textile!
+    convert_implicit_terms_to_tagged_glossary_terms!
+  end
+
+  # rubocop:disable Style/RegexpLiteral
+  # cop gives false positive
   NAME_LINK_PATTERN = /
-    (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
+    (?<prefix> ^|\W)
+    (?: \**_+)
+    (?<formatted_label> [^_]+)
+    (?: _+\**)
+    (?= (?: s|ish|like)?
+    (?: \W|\Z) )
+
+    (?! (?: <\/[a-z]+>)) # discard match if followed by html closing tag
   /x
-  OTHER_LINK_PATTERN = /
-   (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
-  /x
+  # rubocop:enable Style/RegexpLiteral
 
   # Convert __Names__ to links in a textile string.
-  def check_name_links!
+  def convert_name_links_to_tagged_objects!
     @@name_lookup ||= {}
 
     # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     gsub!(NAME_LINK_PATTERN) do |orig_str|
-      prefix = Regexp.last_match(1)
-      label = remove_formatting(Regexp.last_match(2))
-      name = expand_genus_abbreviation(label)
-      name = supply_implicit_species(name)
-      name = strip_out_sp_cfr_and_sensu(name)
+      prefix = $LAST_MATCH_INFO[:prefix]
+      label = remove_formatting($LAST_MATCH_INFO[:formatted_label])
+      name = strip_out_sp_cfr_and_sensu(
+        supply_implicit_species(
+          expand_genus_abbreviation(label)
+        )
+      )
+      # name = strip_out_sp_cfr_and_sensu(name)
       if (parse = Name.parse_name(name)) &&
          # Allowing arbitrary authors on Genera and higher makes it impossible
          # to distinguish between publication titles and taxa, e.g.,
@@ -234,7 +248,7 @@ class Textile < String
          # very infrequent (I don't see it in current tests). -JPH
          (parse.author.blank? || parse.rank != "Genus")
         Textile.private_register_name(parse.real_text_name, parse.rank)
-        prefix + "x{NAME __#{label}__ }{ #{name} }x"
+        "#{prefix}x{NAME __#{label}__ }{ #{name} }x"
       else
         orig_str
       end
@@ -301,36 +315,74 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
-  # Textile should be able to create internal links to Glossary Terms
-  # See https://www.pivotaltracker.com/story/show/76993598
-  # Convert _object name_ and _object id_ in a textile string.
-  def check_other_links!
+  # rubocop:disable Style/RegexpLiteral
+  # cop gives false positive
+  OTHER_LINK_PATTERN = /
+    (?<prefix> ^|\W)
+    (?: _+)
+    (?<marked_type>
+      [a-zA-Z]+ # model name or abbr
+      (?: _[a-zA-Z]+)? # optionally including underscores
+    )
+    \s+
+    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
+    (?: _+)
+
+    (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or html close tag
+  /x
+  # rubocop:enable Style/RegexpLiteral
+
+  OTHER_LINK_TYPES = [
+    ["comment"],
+    %w[glossary_term term],
+    %w[image img],
+    %w[location loc],
+    ["name"],
+    %w[observation obs ob],
+    %w[project proj],
+    %w[species_list spl],
+    ["user"]
+  ].freeze
+
+  MARKED_TYPE_TO_TAGGED_TYPE = {
+    comment: "COMMENT",
+    glossary_term: "GLOSSARY_TERM",
+    image: "IMAGE",
+    img: "IMAGE",
+    location: "LOCATION",
+    loc: "LOCATION",
+    name: "NAME",
+    term: "GLOSSARY_TERM",
+    ob: "OBSERVATION",
+    obs: "OBSERVATION",
+    observation: "OBSERVATION",
+    project: "PROJECT",
+    species_list: "SPECIES_LIST",
+    spl: "SPECIES_LIST",
+    user: "USER"
+  }.freeze
+
+  # Convert _object name_ and _object id_ to a textile string.
+  def convert_other_links_to_tagged_objects!
     gsub!(OTHER_LINK_PATTERN) do |orig|
-      result = orig
-      prefix = Regexp.last_match(1)
-      type = Regexp.last_match(2)
-      id = Regexp.last_match(3)
-      matches = [
-        ["comment"],
-        %w[image img],
-        %w[location loc],
-        ["name"],
-        %w[observation obs ob],
-        %w[project proj],
-        %w[species_list spl],
-        ["user"]
-      ].select { |x| x[0] == type.downcase || x[1] == type.downcase }
-      if matches.length == 1
-        label = (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
-        result =
-          "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
-      end
-      result
+      prefix = $LAST_MATCH_INFO[:prefix]
+      marked_type = $LAST_MATCH_INFO[:marked_type]
+      id = $LAST_MATCH_INFO[:id]
+
+      tagged_type = MARKED_TYPE_TO_TAGGED_TYPE[marked_type.downcase.to_sym]
+      next(orig) unless tagged_type
+
+      label = tagged_object_label(marked_type, id)
+      "#{prefix}x{#{tagged_type} __#{label}__ }{ #{id} }x"
     end
   end
 
+  def tagged_object_label(type, id)
+    (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
+  end
+
   # Convert !image 12345! in a textile string.
-  def check_our_images!
+  def convert_embedded_image_links_to_textile!
     gsub!(%r{!image (?:(\w+)/)?(\d+)!}) do
       size = Regexp.last_match[1] || "thumb"
       id   = Regexp.last_match[2]
@@ -361,6 +413,42 @@ class Textile < String
     end
     saved_links
   end
+
+  # NOTE: (JDC 2023-06-23) Multiple lookbehinds are required because
+  # Ruby does not allow variable length lookbehinds.
+  # They might be avoided via the (nontrivial) changes suggested here:
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1528#issuecomment-1608114858
+  # rubocop:disable Style/RegexpLiteral
+  # cop gives false positive
+  IMPLICIT_TERM_PATTERN = /
+    (?<! x{NAME) # discard match if preceded by an MO object tag
+    (?<! x{GLOSSARY_TERM)
+    (?<! x{OBSERVATION)
+    (?<! x{LOCATION)
+    (?<! x{USER)
+    (?<! x{IMAGE)
+    (?<! x{PROJECT)
+    (?<! x{SPECIES_LIST)
+    (?<! x{COMMENT)
+
+    (?<prefix> ^|\W) # prefix
+    (?: _+)
+    (?<id> (?: [\p{Latin}0-9\-.'’]+ \ ?){1,3}) # 1-3 words
+    (?: _+)
+
+    (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
+  /x
+  # rubocop:enable Style/RegexpLiteral
+
+  def convert_implicit_terms_to_tagged_glossary_terms!
+    gsub!(IMPLICIT_TERM_PATTERN) do
+      id = $LAST_MATCH_INFO[:id]
+      "#{$LAST_MATCH_INFO[:prefix]}" \
+      "x{GLOSSARY_TERM __#{tagged_object_label("term", id)}__ }{ #{id} }x"
+    end
+  end
+
+  ###############################
 
   def restore_pre_existing_links!(saved_links)
     gsub!(/<XXX(\d+)>/) do
@@ -393,17 +481,31 @@ class Textile < String
     url.length > URL_TRUNCATION_LENGTH && !url.starts_with?(MO.http_domain)
   end
 
-  def convert_object_tags_to_proper_links!
-    gsub!(/
-      x\{([A-Z]+) \s+ ([^{}]+?) \s+\}\{\s+ ([^{}]+?) \s+\}x
-    /x) do |_orig|
-      type = Regexp.last_match(1)
-      label = Regexp.last_match(2)
-      id = Regexp.last_match(3)
+  OBJECT_TAG_PATTERN = /
+    x\{
+        (?<type> [A-Z]+_?[A-Z]+)
+        \s+
+        (?<label> [^{}]+?)
+        \s+
+      \}
+      \{
+        \s+
+        (?<id> [^{}]+?)
+        \s+
+      \}x
+  /x
+
+  def convert_tagged_objects_to_proper_links!
+    gsub!(OBJECT_TAG_PATTERN) do |_orig|
+      type = $LAST_MATCH_INFO[:type]
+      label = $LAST_MATCH_INFO[:label]
+      id = $LAST_MATCH_INFO[:id]
+      id.gsub!(/&#821[6789];/, "'")
       id.gsub!(/&#822[01];/, '"')
       id = CGI.unescapeHTML(id)
       id = CGI.escape(id)
       url = "#{MO.http_domain}/lookups/lookup_#{type.downcase}/#{id}"
+
       "<a href=\"#{url}\">#{label}</a>"
     end
   end

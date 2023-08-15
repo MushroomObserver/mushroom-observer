@@ -38,11 +38,10 @@ module NamingsHelper
   # the "propose-naming-button" is remote: true to send js request
   def observation_naming_buttons(observation, do_suggestions)
     buttons = []
-    buttons << render(partial: "observations/namings/propose_button",
-                      locals: { obs_id: observation.id,
-                                text: :show_namings_propose_new_name.t,
-                                btn_class: "btn-default" },
-                      layout: false)
+    buttons << propose_naming_link(observation.id,
+                                   text: :show_namings_propose_new_name.t,
+                                   btn_class: "btn-default",
+                                   context: "namings_table")
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
@@ -123,7 +122,7 @@ module NamingsHelper
     [content_tag(:small, "#{:show_namings_your_vote.t}: ",
                  class: "visible-xs-block"),
      render(partial: "observations/namings/votes/form",
-            locals: { naming: naming })].safe_join
+            locals: { naming: naming, context: "namings_table" })].safe_join
   end
 
   def eyes_html(observation, naming)

@@ -28,7 +28,10 @@ module HerbariumRecords
           redirect_with_query(observation_path(@observation.id))
         end
         format.js do
-          render(partial: "herbarium_records/update_observation") and return
+          render(
+            partial: "observations/show/section_update",
+            locals: { identifier: "herbarium_records" }
+          ) and return
         end
       end
     end

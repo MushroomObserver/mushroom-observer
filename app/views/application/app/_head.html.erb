@@ -1,0 +1,36 @@
+<!--APPLICATION LAYOUT HEAD-->
+<% if Rails.env == "production" %>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PJKJR59');</script>
+  <!-- End Google Tag Manager -->
+<% end %>
+
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<%= auto_discovery_link_tag(
+  :rss, activity_logs_rss_path, { title: :app_rss.l }
+) %>
+<title><%= :app_title.l%>: <%= title_tag_contents(title: @title, action_name: controller.action_name)%></title>
+<link rel="SHORTCUT ICON" href="/favicon.ico?20220116"/>
+<% if @canonical_url %>
+<link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
+<% end %>
+<%= csrf_meta_tag %>
+<meta property="og:image" content="https://mushroomobserver.org/images/facebook_icon.png"/>
+<meta property="og:title" content="Mushroom Observer"/>
+<meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
+<%=
+  stylesheet_link_tag(@css_theme, media: "screen") +
+  stylesheet_link_tag(@css_theme, media: "print")
+%>
+<%= @header unless @header.blank? %>
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+<!--/APPLICATION LAYOUT HEAD-->

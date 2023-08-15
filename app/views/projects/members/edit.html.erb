@@ -1,23 +1,15 @@
 <%
-  @title ||= :change_member_status_title.t(
-    name: @candidate.legal_name,
-    title: @project.title
-  )
+@title ||= :change_member_status_title.t(
+  name: @candidate.legal_name,
+  title: @project.title
+)
 
-  tabs = [
-    link_to(:app_list_projects.t, projects_path),
-    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
-  ]
-  if check_permission(@project)
-    tabs << link_with_query(:change_member_status_edit.t,
-                            edit_project_path(@project.id))
-  end
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = create_tabs(project_member_form_edit_links(project: @project))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  action = { controller: "/projects/members", action: :update,
-             project_id: @project.id, candidate: @candidate.id,
-             q: get_query_param }
-
+action = { controller: "/projects/members", action: :update,
+            project_id: @project.id, candidate: @candidate.id,
+            q: get_query_param }
 %>
 
 <%= form_with(url: action, method: :patch, id: "project_member_form") do |f| %>

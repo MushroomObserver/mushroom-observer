@@ -29,11 +29,17 @@ module Observations::Namings
     #
     # Create vote if none exists; change vote if exists; delete vote if setting
     # value to -1 (owner of naming is not allowed to do this).
-    # Linked from: (show_observation)
+
+    # Linked from: (show_observation and help_identify)
     # Inputs: params[]
     # HTML requests: Redirects to show_observation.
-    # JS requests: Updates the naming table (and potentially the obs title) via
-    # update.js.erb and naming_vote_ajax.js, which handles <select> bindings
+    # JS requests: depends on params[:context]
+    # when namings_table (show_observation)
+    #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
+    #   and naming_vote_ajax.js, which handles <select> bindings
+    # when matrix_box (help_identify)
+    #   updates the lightbox and matrix_box
+
     def update
       pass_query_params
       @naming = Naming.find(params[:naming_id].to_s)
@@ -47,7 +53,15 @@ module Observations::Namings
         format.html do
           redirect_with_query(observation_path(id: @observation.id))
         end
-        format.js
+        format.js do
+          case params[:context]
+          when "matrix_box"
+            render(partial: "observations/namings/update_lightbox")
+          else
+            render(partial: "observations/namings/update_observation")
+          end
+          return
+        end
       end
     end
 

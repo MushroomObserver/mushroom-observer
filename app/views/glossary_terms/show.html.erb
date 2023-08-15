@@ -1,33 +1,22 @@
 <%
-  @title = :show_glossary_term_title.t(name: @glossary_term.name)
+@title = :show_glossary_term_title.t(name: @glossary_term.name)
 
-  tabs = User.current ? [
-    link_to(:glossary_term_index.t, glossary_terms_path),
-    link_to(:create_glossary_term.t, new_glossary_term_path),
-    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
-  ] : []
-  tabs << glossary_term_destroy_button(@glossary_term) if in_admin_mode?
+tabs = create_tabs(glossary_term_show_links(term: @glossary_term, user: @user))
+@tabsets = { right: draw_tab_set(tabs) }
 
-  @tabsets = { right: draw_tab_set(tabs) }
-
-  @container = :wide
+@container = :wide
 %>
 
 <div class="row mt-3">
+  <div class="col-sm-8">
+    <%= @glossary_term.description.tpl %>
+    <%= tag.p(search_link_to(:Wikipedia, @glossary_term.name)) %>
+  </div>
   <% if @glossary_term.thumb_image %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-    </div>
     <div class="col-sm-4">
       <%= thumbnail(@glossary_term.thumb_image, size: :medium, votes: true) %>
     </div>
-  <% else %>
-    <div class="col-sm-8">
-      <%= @glossary_term.description.tpl %>
-    </div>
   <% end %>
-  <%# Form should have links to MycoBank thesaurus and maybe Wikipedia
-      See https://www.pivotaltracker.com/story/show/76992734 %>
 </div><!--.row-->
 
 <div class="mb-3">
@@ -51,4 +40,10 @@
     <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
     <%= :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time) %>
   </p>
+
+  <div id="glossary_term_authors_editors">
+    <%= panel_block do %>
+      <%= show_authors_and_editors(obj: @glossary_term, user: @user) %>
+    <% end %>
+  </div>
 </div>

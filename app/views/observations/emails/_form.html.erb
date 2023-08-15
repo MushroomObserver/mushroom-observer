@@ -1,0 +1,12 @@
+<%= form_with(url: add_query_param({ action: :create, id: @observation.id }),
+              scope: :question, local: local) do |f| %>
+
+  <%= text_area_with_label(form: f, field: :content, rows: 6,
+                           data: { autofocus: true },
+                           label: :ask_observation_question_label.tp(
+                                    user: @observation.user.legal_name
+                                  )) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

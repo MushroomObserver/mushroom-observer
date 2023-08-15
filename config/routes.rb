@@ -80,9 +80,11 @@ ACTIONS = {
     letter: {},
     thanks: {},
     # Disable cop for legacy routes.
-    # The routes are to very old pages that we might get rid of.
+    # The routes are two very old pages that we might get rid of.
+    # rubocop:disable Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
+    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -154,6 +156,7 @@ LOOKUP_ACTIONS = %w[
   lookup_accepted_name
   lookup_comment
   lookup_image
+  lookup_glossary_term
   lookup_location
   lookup_name
   lookup_observation
@@ -308,10 +311,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    get("email_new_password", controller: "login")
+    unresourced_login_gets = %w[email_new_password logout test_autologin].freeze
+    unresourced_login_gets.each { |action| get(action, controller: "login") }
     post("new_password_request", controller: "login")
-    get("logout", controller: "login")
-    get("test_autologin", controller: "login")
 
     resource :preferences, only: [:edit, :update]
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
@@ -381,9 +383,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :contributors, only: [:index]
 
   # ----- Emails: no resources, just forms ------------------------------------
-  match("/emails/ask_observation_question(/:id)",
-        to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_observation_question")
   match("/emails/ask_user_question(/:id)",
         to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_user_question")
@@ -714,6 +713,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
+      get("emails/new", to: "observations/emails#new",
+                        as: "new_question_for")
+      post("emails", to: "observations/emails#create",
+                     as: "send_question_for")
       get("images/new", to: "observations/images#new",
                         as: "new_image_for")
       post("images", to: "observations/images#create",
@@ -727,6 +730,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       put("images/detach", to: "observations/images#detach",
                            as: "detach_images_from")
     end
+
     collection do
       get("map", to: "observations/maps#index")
       post("print_labels", to: "observations/downloads#print_labels",
@@ -734,6 +738,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       get("identify", to: "observations/identify#index", as: "identify")
     end
   end
+
   # NOTE: the intentional "backwards" param specificity here:
   get("/observations/:id/species_lists/edit",
       to: "observations/species_lists#edit",

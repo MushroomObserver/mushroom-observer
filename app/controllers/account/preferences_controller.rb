@@ -14,33 +14,27 @@ module Account
       update_password
       update_prefs_from_form
 
-      # render to get the errors to display
-      render(action: :edit) and return unless prefs_changed_successfully
-
-      update_copyright_holder(@user.legal_name_change)
-      redirect_to(action: :edit) and return
+      if prefs_changed_successfully
+        redirect_to(action: :edit)
+      else
+        render(action: :edit) # render to get the errors to display
+      end
     end
 
     # This action handles GET requests from email links.
     # It does write to the DB.
     def no_email
       user = User.safe_find(params[:id])
-      type = params[:type]
-      if user && check_permission!(user) && EMAIL_TYPES.include?(type)
-        method  = "email_#{type}="
-        prefix  = "no_email_#{type}"
-        success = "#{prefix}_success".to_sym
-        @note   = "#{prefix}_note".to_sym
-        @user.send(method, false)
-        if @user.save
-          flash_notice(success.t(name: @user.unique_text_name))
-          render(action: :no_email)
-        else
-          # Probably should write a better error message here...
-          flash_object_errors(@user)
-          redirect_to("/")
-        end
+      return redirect_to("/") unless permitted_user_with_valid_email_type?(user)
+
+      @note = email_note
+      @user.send(email_type_setter, false)
+      if @user.save
+        flash_notice(success.t(name: @user.unique_text_name))
+        render(action: :no_email)
       else
+        # Probably should write a better error message here...
+        flash_object_errors(@user)
         redirect_to("/")
       end
     end
@@ -113,15 +107,13 @@ module Account
         end
     end
 
-    def update_copyright_holder(legal_name_change = nil)
-      return unless legal_name_change
-
-      Image.update_copyright_holder(*legal_name_change, @user)
-    end
-
     def prefs_changed_successfully
       result = false
       if !@user.changed
+        # NOTE: The next line appears to be unreachable
+        # because @user.changed is always truthy. (It's at least `[]`.)
+        # Perhaps `!@user.changed?` was intended, but it breaks tests.
+        # 2023-06-11 JDC
         flash_notice(:runtime_no_changes.t)
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
@@ -178,6 +170,30 @@ module Account
       ContentFilter.all.map do |fltr|
         [fltr.sym, :content_filter]
       end
+    end
+
+    def permitted_user_with_valid_email_type?(user)
+      user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
+    end
+
+    def email_type_setter
+      "email_#{email_type}="
+    end
+
+    def email_msg_prefix
+      "no_email_#{email_type}"
+    end
+
+    def success
+      "#{email_msg_prefix}_success".to_sym
+    end
+
+    def email_note
+      "#{email_msg_prefix}_note".to_sym
+    end
+
+    def email_type
+      params[:type]
     end
   end
 end

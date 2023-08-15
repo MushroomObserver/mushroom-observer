@@ -1495,6 +1495,10 @@
   form_list_feedback_missing_names: The following names could not be found.
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
+  # glossary
+  form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use. \n Avoid (a) variations of other Terms, or (b) Names of taxa. Details:"
+  form_glossary_description_help: "A concise definition matching the part of speech of the Term, without repeating another Term's definition. (Instead link to the other Term.) Details:"
+
   # location/_form_location
   form_locations_locked: Lock this location so users cannot change the name or coordinates?
   form_locations_gen_desc: General Description
@@ -1537,7 +1541,7 @@
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
-  form_names_gen_desc_help: Describe the general appearance of this taxon.
+  form_names_gen_desc_help: "Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here."
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
   form_names_habitat_help: What habitats has taxon has been found in?
@@ -1632,7 +1636,6 @@
   # images/new
   image_set_default: Set as default thumbnail
   image_add_title: Add an Image for [name]
-  image_add_edit: "[:edit_object(type=:observation)]"
   image_add_default: Default thumbnail
   image_add_image: "[:Image]"
   image_add_optional: "[:optional]"
@@ -1647,13 +1650,11 @@
   image_edit_title: "Editing Image: [name]"
 
   # observations/images/remove
-  image_remove_edit: "[:edit_object(type=:observation)]"
   image_remove_remove: Remove
   image_remove_title: Remove Images from [name]
 
   # observations/images/reuse
   image_reuse_title: Reuse Image for [name]
-  image_reuse_edit: "[:edit_object(type=:observation)]"
   image_reuse_id: Image ID
   image_reuse_reuse: Reuse
   image_reuse_id_help: Either click one of the images below, or if you know the image ID, just enter it here and click '[:image_reuse_reuse]'.
@@ -2083,7 +2084,7 @@
   show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
-  show_name_brief_description: Brief Description
+  show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   index_fungorum: Index Fungorum
@@ -2268,7 +2269,7 @@
   signup_preferred_theme: Preferred Theme (optional)
   signup_random: Random
   signup_button: Signup
-  signup_email_help: "A working email address is required to verify your account.  This helps us keep the spammers out.\n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences.\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information."
+  signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\n When you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\n Once you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
   # species_list/create_species_list
   species_list_create_title: "[:create_object(type=:species_list)]"
@@ -2346,7 +2347,7 @@
 
   # sequence/add_sequence
   sequence_add_title: Add [:SEQUENCE]
-  sequence_add_edit: "[:image_add_edit]"
+  sequence_add_edit: "[:edit_object(type=:observation)]"
   sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence
@@ -2404,6 +2405,10 @@
   show_glossary_term_title: "Glossary Term: [name]"
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
+  show_glossary_term_creator: Creator of this Glossary Term
+  show_glossary_term_editor: "[:Editors]"
+  show_glossary_term_editors: "[:Editors]"
+
 
   # glossary_term#show_past_glossary_term
   show_past_glossary_term_title: "[:VERSION] [num]: [name]"
@@ -2417,13 +2422,15 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_intro: "In collaboration with the Rhode Island School of Design, students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, this new glossary feature for Mushroom Observer was created.\nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-general\">mo-general@googlegroups.com</a>) or the <a href=\"https://www.facebook.com/groups/105230049528087/\">unofficial Mushroom Observer Facebook page</a>."
+  glossary_term_index_documentation: "Glossary Documentation and Guidelines"
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
-  edit_glossary_term_not_allowed: Only admins can edit glossary terms
+  edit_glossary_term_not_allowed: This Glossary Term has been locked by the site admins
+  edit_glossary_term_locked: Lock this Glossary Term?
+
 
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
@@ -3008,13 +3015,13 @@
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
-  sandbox_link4: The RedCloth manual
-  sandbox_link5: The old hobix.com tutorial
-  sandbox_link6: Cheatsheet courtesy warpedivisions.org
+  sandbox_link_hobix_textile_reference: hobix Textile Reference
+  sandbox_link_hobix_textile_cheatsheet: hobix cheatsheet (Textile Quick Reference)
+  sandbox_link_textile_language_website: Textile Language website
   sandbox_look_like: This is what it will look like
   sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n _glossary_term 270_, _term Bolete_, or _bolete_ (all lower-case)\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox

@@ -1,9 +1,13 @@
 <%
-  @tabsets = index_observation_tabset(query: @query) if @objects.any?
+if @objects.any?
+  links = index_observation_links(query: @query)
+  tabs = create_tabs(links)
+  @tabsets = { right: draw_tab_set(tabs) }
+end
 
-  @container = :full
+@container = :full
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?

@@ -172,7 +172,7 @@ class Symbol
     end
     if result.is_a?(String)
       # Allow literal square brackets by doubling them.
-      result = result.gsub(/\[\[/, "[").gsub(/\]\]/, "]")
+      result = result.gsub("[[", "[").gsub("]]", "]")
     end
     if capitalize_result
       # Make token attempt to capitalize result if requested [:TAG] for :tag.

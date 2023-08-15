@@ -102,7 +102,8 @@ gem("unicorn")
 # Use i18n for internationalization
 gem("i18n")
 
-# Enable Textile markup language. See http://redcloth.org/
+# Enable Textile markup language. See https://github.com/jgarber/redcloth,
+# https://textile-lang.com/doc/insertions-and-deletions
 gem("RedCloth")
 
 # Provide abstract base class for classes that depend upon method_missing

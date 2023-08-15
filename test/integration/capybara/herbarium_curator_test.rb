@@ -92,7 +92,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     end
 
     assert_selector("body.herbarium_records__show")
-    click_on(id: "destroy_herbarium_record_link")
+    click_on(class: "destroy_herbarium_record_link_#{rec.id}")
 
     assert_selector("body.herbarium_records__index")
     assert_not(obs.reload.herbarium_records.include?(rec))
@@ -167,7 +167,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     obs = observations(:minimal_unknown_obs)
     login!("mary")
     visit(new_herbarium_record_path(observation_id: obs.id))
-    click_link(id: "all_nonpersonal_herbaria_link")
+    click_link(class: "nonpersonal_herbaria_index_link")
 
     assert_selector("#title", text: :query_title_nonpersonal.l)
   end
@@ -231,7 +231,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
     assert_equal([], user.curated_herbaria)
     login!(user.login)
     visit(herbaria_path(flavor: :all))
-    click_link(id: "new_herbarium_link")
+    click_link(class: "new_herbarium_link")
 
     within("#herbarium_form") do
       assert_field("herbarium_name")
@@ -253,7 +253,7 @@ class HerbariumCuratorTest < CapybaraIntegrationTestCase
       "#title", text: "Mary’s Herbarium" # smart apostrophe
     )
     # Seems like these destroy links don't work with `click_button`
-    first("#delete_herbarium_link").click
+    first(class: /destroy_herbarium_link/).click
     assert_selector("#title", text: :herbarium_index.l)
   end
 

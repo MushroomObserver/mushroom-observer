@@ -1,10 +1,7 @@
 <%
   @title = :letter_title.l
 
-  tabs = [
-    link_to(:donate_tab.t, action: :donate),
-    link_to(:donors_tab.t, action: :donors)
-  ]
+  tabs = create_tabs(support_governance_links)
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

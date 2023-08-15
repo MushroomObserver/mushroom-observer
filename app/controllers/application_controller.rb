@@ -1132,7 +1132,7 @@ class ApplicationController < ActionController::Base
   # This method avoids a call to find_safe, which would add
   # "undefined method `id' for nil:NilClass" if there's no QueryRecord for q
   def handle_advanced_search_invalid_q_param?
-    return unless invalid_q_param?
+    return false unless invalid_q_param?
 
     flash_error(:advanced_search_bad_q_error.t)
     redirect_to(search_advanced_path)

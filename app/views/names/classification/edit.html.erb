@@ -1,14 +1,12 @@
 <%
-  @title = :edit_classification_title.t(name: @name.display_name)
+@title = :edit_classification_title.t(name: @name.display_name)
 
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
-  rank = rank_as_lower_string(@name.rank)
-  action = { controller: "/names/classification", action: :update,
-             id: @name.id, q: get_query_param }
-  @container = :text
+tabs = create_tabs(name_forms_return_links(name: @name))
+@tabsets = { right: draw_tab_set(tabs) }
+rank = rank_as_lower_string(@name.rank)
+action = { controller: "/names/classification", action: :update,
+            id: @name.id, q: get_query_param }
+@container = :text
 %>
 
 <%= form_with(url: action, method: :put) do |f| %>

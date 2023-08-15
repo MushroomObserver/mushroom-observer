@@ -49,7 +49,7 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_collection_number_form
       end
     end
   end
@@ -74,7 +74,7 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render(layout: false)
+        render_modal_collection_number_form
       end
     end
   end
@@ -96,9 +96,11 @@ class CollectionNumbersController < ApplicationController
 
     @collection_number.destroy
     respond_to do |format|
-      format.js
       format.html do
         redirect_with_query(action: :index)
+      end
+      format.js do
+        render_collection_numbers_section_update
       end
     end
   end
@@ -106,6 +108,18 @@ class CollectionNumbersController < ApplicationController
   ##############################################################################
 
   private
+
+  def render_modal_collection_number_form
+    render(partial: "shared/modal_form_show",
+           locals: { identifier: "collection_number" }) and return
+  end
+
+  def render_collection_numbers_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "collection_numbers" }
+    ) and return
+  end
 
   def default_index_subaction
     list_all
@@ -139,15 +153,10 @@ class CollectionNumbersController < ApplicationController
 
   # Display list of CollectionNumbers for an Observation
   def observation_id
+    @observation = Observation.find(params[:observation_id])
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:observation_id].to_s)
-    @links = [
-      [:show_object.l(type: :observation),
-       observation_path(params[:observation_id])],
-      [:create_collection_number.l,
-       new_collection_number_path(id: params[:observation_id])]
-    ]
     show_selected_collection_numbers(query, always_index: true)
   end
 
@@ -157,8 +166,6 @@ class CollectionNumbersController < ApplicationController
       letters: "collection_numbers.name",
       num_per_page: 100
     }.merge(args)
-
-    @links ||= []
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -174,13 +181,18 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @title = :create_collection_number_title.l
   end
 
   def set_ivars_for_edit
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @title = :edit_collection_number_title.l(
+      name: @collection_number.format_name
+    )
   end
 
+  # create
   def create_collection_number
     @collection_number =
       CollectionNumber.new(permitted_collection_number_params)
@@ -194,6 +206,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # create, update
   def flash_error_and_reload_if_form_has_errors
     redirect_params = case action_name # this is a rails var
                       when "create"
@@ -214,14 +227,16 @@ class CollectionNumbersController < ApplicationController
           redirect_to(redirect_params) and return true
         end
         format.js do
-          render(partial: "form_reload",
-                 locals: { action: action_name.to_sym }) and return true
+          render(partial: "shared/modal_form_reload",
+                 locals: { identifier: "collection_number",
+                           form: "collection_numbers/form" }) and return true
         end
       end
     end
     false
   end
 
+  # create
   def save_collection_number_and_update_associations
     @collection_number.save
     @collection_number.add_observation(@observation)
@@ -232,10 +247,13 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js # updates the observation. @back_object is set already
+      format.js do
+        render_collection_numbers_section_update
+      end
     end
   end
 
+  # create
   def flash_collection_number_already_used_and_return
     flash_warning(:edit_collection_number_already_used.t) if
       @other_number.observations.any?
@@ -244,6 +262,7 @@ class CollectionNumbersController < ApplicationController
     show_flash_and_send_back
   end
 
+  # update
   def update_collection_number
     old_format_name = @collection_number.format_name
     @collection_number.attributes = permitted_collection_number_params
@@ -257,6 +276,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # update
   def update_collection_number_and_associations(old_format_name)
     @collection_number.save
     @collection_number.change_corresponding_herbarium_records(old_format_name)
@@ -267,10 +287,13 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       @observation = @back_object # if we're here, we're on an obs page
-      format.js # updates the page
+      format.js do
+        render_collection_numbers_section_update
+      end
     end
   end
 
+  # update
   def flash_numbers_merged_and_update_associations(old_format_name)
     flash_warning(
       :edit_collection_numbers_merged.t(
@@ -349,7 +372,7 @@ class CollectionNumbersController < ApplicationController
       end
       format.js do
         # renders the flash in the modal via js
-        render(partial: "shared/update_modal_flash") and return
+        render(partial: "shared/modal_flash_update") and return
       end
     end
   end

@@ -1,11 +1,6 @@
 <%
 # NOTE: this is the searchable comments index for the whole site. The list of
 # comments for a particular object is in the partial "comments_for_object"
-
-if @links.any?
-  tabs = create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
-end
 @container = :text_image
 
 flash_error(@error) if @error && @objects.empty?

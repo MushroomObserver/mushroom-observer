@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module DescriptionsHelper
+  include Tabs::DescriptionsHelper
+
   def writer?(desc)
     desc.writer?(User.current) || in_admin_mode?
   end
@@ -13,119 +15,6 @@ module DescriptionsHelper
     desc.is_reader?(User.current) || in_admin_mode?
   end
 
-  # Create tabs for show_description page.
-  def show_description_tabset(description:, pager: false)
-    type = description.parent.type_tag
-    admin = is_admin?(description)
-    # assemble HTML for "tabset" for show_{type}_description
-    tabs = [
-      show_parent_link(description, type),
-      edit_description_link(description),
-      destroy_description_link(description, admin),
-      clone_description_link(description),
-      merge_description_link(description, admin),
-      adjust_permissions_link(description, type, admin),
-      make_default_link(description),
-      project_link(description),
-      publish_draft_link(description, type, admin)
-    ].flatten.reject(&:empty?)
-    tabset = { right: draw_tab_set(tabs) }
-    tabset = tabset.merge(pager_for: description) if pager
-    tabset
-  end
-
-  def show_parent_link(description, type)
-    link_with_query(:show_object.t(type: type),
-                    description.parent.show_link_args)
-  end
-
-  def create_description_link(object)
-    link_to(
-      :show_name_create_description.t,
-      { controller: "#{object.show_controller}/descriptions",
-        action: :new, id: object.id, q: get_query_param },
-      class: "create_description_link_#{object.id}"
-    )
-  end
-
-  def edit_description_link(description)
-    return unless writer?(description)
-
-    link_with_query(:show_description_edit.t, description.edit_link_args)
-  end
-
-  def destroy_description_link(description, admin)
-    return unless admin
-
-    destroy_button(name: :show_description_destroy.t,
-                   target: description, q: get_query_param)
-  end
-
-  def clone_description_link(description)
-    link_with_query(:show_description_clone.t,
-                    { controller: description.show_controller,
-                      action: :new, id: description.parent_id,
-                      clone: description.id },
-                    help: :show_description_clone_help.l)
-  end
-
-  def merge_description_link(description, admin)
-    return unless admin
-
-    link_with_query(:show_description_merge.t,
-                    { controller: "#{description.show_controller}/merges",
-                      action: :new, id: description.id },
-                    help: :show_description_merge_help.l)
-  end
-
-  def move_description_link(description, admin)
-    return unless admin
-
-    parent_type = description.parent.type_tag.to_s
-    link_with_query(:show_description_move.t,
-                    { controller: "#{description.show_controller}/moves",
-                      action: :new, id: description.id },
-                    help: :show_description_move_help.l(parent: parent_type))
-  end
-
-  def adjust_permissions_link(description, type, admin)
-    return unless admin && type == :name
-
-    link_with_query(:show_description_adjust_permissions.t,
-                    { controller: "#{description.show_controller}/permissions",
-                      action: :edit, id: description.id },
-                    help: :show_description_adjust_permissions_help.l)
-  end
-
-  def make_default_link(description)
-    return unless description.public && User.current &&
-                  (description.parent.description_id != description.id)
-
-    put_button(name: :show_description_make_default.t,
-               path: { controller: "#{description.show_controller}/defaults",
-                       action: :update, id: description.id,
-                       q: get_query_param },
-               help: :show_description_make_default_help.l)
-  end
-
-  def project_link(description)
-    return unless (description.source_type == :project) &&
-                  (project = description.source_object)
-
-    link_with_query(:show_object.t(type: :project), project.show_link_args)
-  end
-
-  def publish_draft_link(description, type, admin)
-    return unless admin && (type == :name) &&
-                  (description.source_type != :public)
-
-    put_button(name: :show_description_publish.t,
-               path: { controller: "#{description.show_controller}/publish",
-                       action: :update, id: description.id,
-                       q: get_query_param },
-               help: :show_description_publish_help.l)
-  end
-
   # Header of the embedded description within a show_object page.
   #
   #   <%= show_embedded_description_title(desc, name) %>
@@ -134,19 +23,16 @@ module DescriptionsHelper
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
   def show_embedded_description_title(desc)
-    parent_type = desc.parent.type_tag
     title = description_title(desc)
+    links = description_mod_links(desc)
+    tag.p(tag.span(title, class: "text-lg") + links.safe_join(" | "))
+  end
+
+  def description_mod_links(desc)
     links = []
-    if writer?(desc)
-      links << link_with_query(:EDIT.t,
-                               { controller: "/#{parent_type}s/descriptions",
-                                 action: :edit, id: desc.id })
-    end
-    if is_admin?(desc)
-      links << destroy_button(name: :show_description_destroy.t, target: desc,
-                              q: get_query_param)
-    end
-    content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
+    links << link_to(*edit_description_link(desc)) if writer?(desc)
+    links << destroy_button(target: desc) if is_admin?(desc)
+    links
   end
 
   # Show list of name/location descriptions.
@@ -185,31 +71,15 @@ module DescriptionsHelper
   def make_list_links(list, fake_default)
     list.map! do |desc|
       item = description_link(desc)
-      writer = writer?(desc)
-      admin  = is_admin?(desc)
-      if writer || admin
-        links = []
-        if writer
-          links << link_with_query(:EDIT.t,
-                                   { controller: desc.show_controller,
-                                     action: :edit,
-                                     id: desc.id })
-        end
-        if admin
-          links << destroy_button(name: :show_description_destroy.t,
-                                  target: desc, q: get_query_param)
-        end
-        item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
-      end
+      links = description_mod_links(desc)
+      item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
       item
     end
 
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, { controller: desc.show_controller,
-                                          action: :new,
-                                          id: obj.id })
+      link = link_to(*create_description_link(obj))
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
@@ -239,13 +109,8 @@ module DescriptionsHelper
     type = object.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = content_tag(:b, :show_name_descriptions.t) + ": "
-    head += link_with_query(
-      :show_name_create_description.t,
-      { controller: "#{object.show_controller}/descriptions",
-        action: :new,
-        id: object.id }
-    )
+    head = tag.b(:show_name_descriptions.t) + ": "
+    head += link_to(*create_description_link(object))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object).map { |link| indent + link }
@@ -253,7 +118,7 @@ module DescriptionsHelper
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t unless any
     html = list.safe_join(safe_br)
-    html = content_tag(:div, html)
+    html = tag.div(html)
 
     add_list_of_projects(object, html, projects) if projects.present?
     html
@@ -265,18 +130,11 @@ module DescriptionsHelper
 
     head2 = :show_name_create_draft.t + ": "
     list = [head2] + projects.map do |project|
-      item = link_with_query(
-        project.title,
-        { controller: "#{object.show_controller}/descriptions",
-          action: :new,
-          id: object.id,
-          project: project.id,
-          source: "project" }
-      )
+      item = link_to(*new_description_for_project_link(object, project))
       indent + item
     end
     html2 = list.safe_join(safe_br)
-    html += content_tag(:p, html2)
+    html += tag.p(html2)
     html
   end
 
@@ -290,9 +148,8 @@ module DescriptionsHelper
   #
   def notes_panel(msg = nil, &block)
     msg = capture(&block) if block
-    result = content_tag(:div, msg, class: "panel-body")
-    wrapper = content_tag(:div, result,
-                          class: "panel panel-default dotted-border")
+    result = tag.div(msg, class: "panel-body")
+    wrapper = tag.div(result, class: "panel panel-default dotted-border")
     if block
       concat(wrapper)
     else
@@ -324,7 +181,7 @@ module DescriptionsHelper
     return unless data && data != 0
 
     url = add_query_param(observations_path, query)
-    content_tag(:p, link_to(title, url))
+    tag.p(link_to(title, url))
   end
 
   # Helpers for description forms

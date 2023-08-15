@@ -8,6 +8,7 @@ DEFAULTS: &DEFAULTS
   user: rolf
   name: $LABEL
   description: Description of Term $LABEL
+  locked: false
 
 conic_glossary_term:
   <<: *DEFAULTS
@@ -44,3 +45,17 @@ unused_thumb_and_used_image_glossary_term:
   <<: *DEFAULTS
   thumb_image: unused_image # not used elsewhere
   images: conic_image, unused_image # used elsewhere (conic_glossary_term)
+
+multiple_word_glossary_term:
+  <<: *DEFAULTS
+  name: Emarginate Gills
+
+fungi_glossary_term:
+  <<: *DEFAULTS
+  name: Fungi
+
+locked_glossary_term:
+  <<: *DEFAULTS
+  name: complex
+  description: A _monophyletic_ group of species that are indistinguishable from each other in the field.
+  locked: true

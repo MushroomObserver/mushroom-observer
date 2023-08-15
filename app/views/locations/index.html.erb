@@ -1,11 +1,6 @@
 <%
-  tabs = [
-    link_with_query(:show_location_create.t, new_location_path),
-    link_with_query(:list_place_names_map.t, map_locations_path),
-    link_to(:list_countries.t, location_countries_path)
-  ]
-  tabs += create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  links = create_tabs(locations_index_links(query: @query))
+  @tabsets = { right: draw_tab_set(links) }
   @container = :wide
 
   @known_pages = @pages

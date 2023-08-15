@@ -1,13 +1,10 @@
 <%
-  @title ||= :list_projects_title.t
+@title ||= :list_projects_title.t
 
-  tabs = [
-    link_with_query(:list_projects_add_project.t, new_project_path)
-  ]
-  tabs += create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+tabs = create_tabs(projects_index_links)
+@tabsets = { right: draw_tab_set(tabs) }
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <!-- list the projects -->

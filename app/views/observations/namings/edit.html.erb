@@ -1,10 +1,5 @@
 <%
-  @title = :edit_naming_title.t(id: @observation.id)
-
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    @observation.show_link_args)
-  ]
+  tabs = create_tabs(edit_naming_links(obs: @observation))
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :double
 %>

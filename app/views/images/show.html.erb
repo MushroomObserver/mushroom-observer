@@ -1,7 +1,8 @@
 <%
-  @title = :image_show_title.t(name: @image.unique_format_name)
-  @tabsets = show_image_tabset(image: @image)
-  @container = :wide
+@title = :image_show_title.t(name: @image.unique_format_name)
+tabs = create_tabs(show_image_links(image: @image))
+@tabsets = { pager_for: @image, right: draw_tab_set(tabs) }
+@container = :wide
 %>
 
 <div class="row">

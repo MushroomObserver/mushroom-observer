@@ -1,25 +1,12 @@
 <%
-  @title = :HERBARIUM_RECORD.t + " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
+@title = :HERBARIUM_RECORD.t + " '".html_safe +
+         @herbarium_record.format_name.t + "'".html_safe
 
-  tabs = []
-  if in_admin_mode? || @herbarium_record.can_edit?
-    tabs << link_to(:edit_herbarium_record.t,
-                    edit_herbarium_record_path(id: @herbarium_record.id,
-                                               back: :show, q: get_query_param),
-                    id: "edit_herbarium_record_link")
-    tabs << destroy_button(name: :destroy_object.t(type: :herbarium_record),
-                           target: herbarium_record_path(@herbarium_record.id),
-                           id: "destroy_herbarium_record_link")
-  end
-  tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal),
-                  id: "herbarium_index_link")
+links = herbarium_record_show_links(h_r: @herbarium_record)
+tabs = create_tabs(links)
+@tabsets = { pager_for: @herbarium_record, right: draw_tab_set(tabs) }
 
-  @tabsets = {
-    pager_for: @herbarium_record,
-    right: draw_tab_set(tabs)
-  }
-
-  herbarium = @herbarium_record.herbarium
+herbarium = @herbarium_record.herbarium
 %>
 
 <div class="mt-3" id="herbarium_record_details">

@@ -8,53 +8,53 @@ body_class = whos_calling + theme_class
 <!DOCTYPE html>
 <html>
 <head>
-  <%= render(partial: "layouts/app/head") %>
+  <%= render(partial: "application/app/head") %>
 </head>
 
 <body class="<%= body_class %>">
   <% if Rails.env == "production" %>
-    <%= render(partial: "layouts/app/gtm_iframe") %>
+    <%= render(partial: "application/app/gtm_iframe") %>
   <% end %>
 
 <div id="main_container" class="container-fluid">
 
-  <%= render(partial: "layouts/app/banners") %>
+  <%= render(partial: "application/app/banners") %>
 
   <div class="row row-offcanvas row-offcanvas-left">
 
     <nav id="sidebar" class="sidebar-offcanvas col-xs-8 col-sm-2 hidden-print">
-      <%= render(partial: "layouts/sidebar") %>
+      <%= render(partial: "application/sidebar") %>
     </nav><!-- #sidebar -->
 
     <div id="right_side" class="col-xs-12 col-sm-10">
 
-      <%= render(partial: "layouts/app/hamburger") %>
+      <%= render(partial: "application/app/hamburger") %>
 
-      <%= render(partial: "layouts/search_bar") %>
+      <%= render(partial: "application/top_nav") %>
 
       <%# need to print a `#page_flash` div no matter what, so js can add %>
       <div class="container-text hidden-print" id="page_flash">
         <% if flash_notices? %>
-          <%= render(partial: "layouts/app/flash_notices",
+          <%= render(partial: "application/app/flash_notices",
                      locals: { id: "flash_notices"}) %>
         <% end %>
         <% flash_clear %>
       </div><!--.container-text-->
 
       <header id="header">
-        <%= render(partial: "layouts/content/title_and_tab_sets") %>
+        <%= render(partial: "application/content/title_and_tab_sets") %>
       </header>
 
       <main id="content" class="<%= container_class %>">
         <% unless @user&.verified? %>
-          <%= render(partial: "layouts/content/login_layout") %>
+          <%= render(partial: "application/content/login_layout") %>
         <% end %>
 
         <!--MAIN_PAGE_CONTENT-->
         <%= yield %>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <%= render(partial: "layouts/content/translator_credit") %>
+        <%= render(partial: "application/content/translator_credit") %>
       </main><!-- #content -->
 
     </div><!-- #right_side -->
@@ -64,9 +64,9 @@ body_class = whos_calling + theme_class
 <!--AJAX PROGRESS WHIRLY -->
 <%= render(partial: "shared/modal_ajax_progress") %>
 
-<%= render(partial: "layouts/app/media_query_tests") %>
+<%= render(partial: "application/app/media_query_tests") %>
 
-<%= render(partial: "layouts/app/javascript_footer") %>
+<%= render(partial: "application/app/javascript_footer") %>
 
 </body>
 </html>

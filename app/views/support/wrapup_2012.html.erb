@@ -1,10 +1,7 @@
 <%
   @title = :wrapup_2012_title.l
 
-  tabs = [
-    link_to(:donate_tab.t, "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q"),
-    link_to(:donors_tab.t, action: :donors)
-  ]
+  tabs = create_tabs(support_governance_links)
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

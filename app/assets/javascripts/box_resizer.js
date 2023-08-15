@@ -1,5 +1,5 @@
 // Patch to make matrix boxes in a row the same height
-// TODO: Completely remove this script and layouts/app/media_query_tests partial
+// TODO: Completely remove this script and application/app/media_query_tests partial
 // if moving to Bootstrap 4+
 
 $(window).on('load', function () {

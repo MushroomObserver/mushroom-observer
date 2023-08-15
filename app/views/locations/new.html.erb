@@ -1,10 +1,7 @@
 <%
   @title ||= :create_location_title.t
 
-  tabs = [
-    link_to(:all_objects.t(type: :location), locations_path)
-  ]
-  tabs += location_search_links(@location.name)
+  tabs = create_tabs(location_form_new_links(location: @location))
   @tabsets = { right: draw_tab_set(tabs) }
   @container = :full
 

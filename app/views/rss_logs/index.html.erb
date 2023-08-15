@@ -1,13 +1,10 @@
 <%
   @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
+  tabs = create_tabs(rss_logs_index_links(user: @user, types: @types))
+  @tabsets = { right: draw_tab_set(tabs) }
+  @full_width_tab_set = render(partial: "type_filters")
+
   @container = :full
-
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
-
-  @full_width_tab_set = render(partial: "rss_log_tabset")
 
   flash_error(@error) if @error && @objects.empty?
 %>

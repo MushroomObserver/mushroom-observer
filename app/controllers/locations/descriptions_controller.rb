@@ -87,7 +87,7 @@ module Locations
     # Show selected search results as a list with 'list_locations' template.
     def show_selected_location_descriptions(query, args = {})
       store_query_in_session(query)
-      @links ||= []
+
       args = {
         controller: "/locations/descriptions",
         action: :index,
@@ -101,10 +101,6 @@ module Locations
         ["updated_at",  :sort_by_updated_at.t],
         ["num_views",   :sort_by_num_views.t]
       ]
-
-      # Add "show locations" link if this query can be coerced into an
-      # observation query.
-      @links << coerced_query_link(query, Location)
 
       show_index_of_objects(query, args)
     end

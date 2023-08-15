@@ -24,10 +24,11 @@ module MatrixBoxHelper
       content_tag(:div, class: "vote-select-container mb-3",
                         data: { vote_cache: object.vote_cache }) do
         render(partial: "observations/namings/votes/form",
-               locals: { naming: nam })
+               locals: { naming: nam, context: "matrix_box" })
       end
     else
-      propose_naming_link(object.id, "btn-default mb-3")
+      propose_naming_link(object.id, btn_class: "btn-default mb-3",
+                                     context: "matrix_box")
     end
   end
 
