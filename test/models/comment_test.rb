@@ -3,6 +3,10 @@
 require("test_helper")
 
 class CommentTest < UnitTestCase
+  def setup
+    QueuedEmail.queue = true
+  end
+
   def test_user_highlighting_parsing
     do_highlight_test([], "")
     do_highlight_test([mary], "_user #{mary.id}_")
@@ -110,8 +114,6 @@ class CommentTest < UnitTestCase
   end
 
   def do_comment_test(chg, obs, user, summary, comment = "")
-    QueuedEmail.queue = true
-
     old = num_emails
     obs&.reload # (to ensure it sees chgs in user prefs)
     Comment.create!(
@@ -120,23 +122,21 @@ class CommentTest < UnitTestCase
       summary: summary,
       comment: comment
     )
-    assert_equal(chg, num_emails - old, sent_emails(old))
+    assert_equal(chg, num_emails - old, queued_emails(old))
   end
 
   def num_emails
-    # ActionMailer::Base.deliveries.length
     QueuedEmail.count
   end
 
-  # FIXME : need to alter this to test for QueuedEmails
-  def sent_emails(start)
-    return "No emails were sent" if num_emails == start
+  def queued_emails(start)
+    return "No emails were queued" if num_emails == start
 
-    all_emails = QueuedEmail.all[start..-1]
-    # binding.break
-    # strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
-    #   "to: #{mail["to"]}, subject: #{mail["subject"]}"
-    # end
-    # "These emails were sent:\n#{strs.join("\n")}"
+    strs = QueuedEmail.all[start..-1].map do |mail|
+      to_user = mail&.to_user_id ? User.find(mail.to_user_id)&.login : nil
+      email = mail&.id ? QueuedEmail.find(mail.id) : nil
+      "to: #{to_user}, email: #{email}"
+    end
+    "These emails were queued:\n#{strs.join("\n")}"
   end
 end
