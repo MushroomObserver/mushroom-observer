@@ -250,10 +250,10 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_observation_email
+  def test_observer_question_email
     obs = observations(:detailed_unknown_obs)
     run_mail_test("observation_question", obs.user) do
-      ObservationMailer.build(rolf, obs, "Where did you find it?").
+      ObserverQuestionMailer.build(rolf, obs, "Where did you find it?").
         deliver_now
     end
   end

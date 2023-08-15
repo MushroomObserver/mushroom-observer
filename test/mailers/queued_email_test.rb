@@ -63,7 +63,7 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_commercial_inquiry_email
-    QueuedEmail::CommercialInquiry.find_or_create_email(
+    QueuedEmail::CommercialInquiry.create_email(
       rolf, mary, comments(:minimal_unknown_obs_comment_1)
     )
     assert_email(0,
@@ -176,6 +176,18 @@ class QueuedEmailTest < UnitTestCase
     )
     email = QueuedEmail.first.deliver_email
     assert(email)
+  end
+
+  def test_observer_question_email
+    observation = observations(:coprinus_comatus_obs) # rolf's
+    question = "What's going on with that pileus?"
+    QueuedEmail::ObserverQuestion.create_email(mary, observation, question)
+    assert_email(0,
+                 flavor: "QueuedEmail::ObserverQuestion",
+                 from: mary,
+                 to: rolf,
+                 observation: observation.id,
+                 note: "What's going on with that pileus?")
   end
 
   def test_observation_change_email

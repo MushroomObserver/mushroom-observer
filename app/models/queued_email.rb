@@ -118,7 +118,7 @@
 #
 #  AdminMailer
 #  DeniedMailer
-#  ObservationMailer
+#  ObserverQuestionMailer
 #  WebmasterMailer
 #
 ################################################################################
