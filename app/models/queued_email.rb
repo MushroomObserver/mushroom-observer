@@ -240,7 +240,7 @@ class QueuedEmail < AbstractModel
     self.class.debug_log(log_msg)
     current_locale = I18n.locale
     result = false
-    if if user.present? && user == to_user
+    if user.present? && user == to_user
       unless Rails.env.test?
         raise("Skipping email with same sender and recipient: #{user.email}\n")
       end
