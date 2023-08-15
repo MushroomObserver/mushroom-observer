@@ -7,6 +7,10 @@ class CommentTest < UnitTestCase
     QueuedEmail.queue = true
   end
 
+  def teardown
+    QueuedEmail.queue = false
+  end
+
   def test_user_highlighting_parsing
     do_highlight_test([], "")
     do_highlight_test([mary], "_user #{mary.id}_")

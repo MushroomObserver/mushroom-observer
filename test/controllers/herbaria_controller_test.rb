@@ -408,13 +408,16 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
     assert_equal(count_before + 1, QueuedEmail.count)
-    # FIXME: - can QueuedEmail content be tested in a controller test?
-    #         Or should it be elsewhere?
+
+    # FIXME: The last (only) QE is a Webmaster email here.
+    #        Why isn't it an AddRecordToHerbarium email?
+
     # email = ActionMailer::Base.deliveries.last
     # assert_equal(katrina.email, email.header["reply_to"].to_s)
     # assert_match(/new herbarium/i, email.header["subject"].to_s)
     # assert_includes(email.body.to_s, "Burbank Herbarium")
     # assert_includes(email.body.to_s, herbarium.show_url)
+    QueuedEmail.queue = false
   end
 
   def test_create_no_login
