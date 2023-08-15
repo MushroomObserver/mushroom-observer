@@ -274,7 +274,7 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_verify_email
     run_mail_test("verify", mary) do
-      VerifyMailer.build(mary).deliver_now
+      VerifyAccountMailer.build(mary).deliver_now
     end
   end
 

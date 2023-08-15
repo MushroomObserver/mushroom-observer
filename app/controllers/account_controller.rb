@@ -64,7 +64,7 @@ class AccountController < ApplicationController
 
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp}#:{email_spam_notice.tp}")
-      VerifyMailer.build(@new_user).deliver_now
+      VerifyAccountMailer.build(@new_user).deliver_now
     end
 
     redirect_back_or_default(account_welcome_path)

@@ -241,4 +241,11 @@ class QueuedEmailTest < UnitTestCase
                  to: mary,
                  api_key: key.id)
   end
+
+  def test_verify_account_email
+    QueuedEmail::VerifyAccount.create_email(users(:unverified))
+    assert_email(0,
+                 flavor: "QueuedEmail::VerifyAccount",
+                 to: users(:unverified))
+  end
 end

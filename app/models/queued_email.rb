@@ -120,10 +120,8 @@
 #  CommercialMailer
 #  DeniedMailer
 #  ObservationMailer
-#  PasswordMailer
 #  UserMailer
-#  VerifyAPIKeyMailer
-#  VerifyMailer
+#  VerifyAccountMailer
 #  WebmasterMailer
 #
 ################################################################################
