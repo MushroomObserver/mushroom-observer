@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 class VisualGroupImages
-  VOTE_LIMIT = 1.5
+  # VOTE_LIMIT = 1.5
 
   attr_accessor :query
 
-  def initialize(name, included, count = nil)
+  def initialize(visual_group, name, included, count = nil)
     self.query = tables[:observation_images]
     add_joins(included)
     add_project
-    add_conditions(name, included)
+    add_conditions(visual_group, name, included)
     add_order_and_limit(count)
   end
 
   def vals
-    VisualGroup.connection.select_rows(query.to_sql)
+    VisualGroup.connection.select_rows(query.to_sql).uniq
   end
 
   private
@@ -64,9 +64,10 @@ class VisualGroupImages
                   attribute(:observations, :vote_cache))
   end
 
-  def add_conditions(name, included)
+  def add_conditions(visual_group, name, included)
     query.where(attribute(:names, :text_name).eq(name))
-    query.where(attribute(:observations, :vote_cache).gteq(VOTE_LIMIT))
+    # query.where(attribute(:observations, :vote_cache).gteq(VOTE_LIMIT))
+    query.where(attribute(:visual_group_images, :visual_group_id).eq(visual_group.id))
     query.where(attribute(:visual_group_images, :included).eq(included))
   end
 end

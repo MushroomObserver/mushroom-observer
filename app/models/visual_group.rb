@@ -40,6 +40,29 @@ class VisualGroup < AbstractModel
     visual_group_images.where(included: true).pluck(:image_id)
   end
 
+  def merge(visual_group)
+    Rails.logger.info { "Merging #{visual_group.name} into #{self.name}" }
+    visual_group.visual_group_images.each do |vgi|
+      if vgi.image.visual_groups.pluck(:id).include?(self.id)
+        Rails.logger.info do
+          "Image #{vgi.image.id} already in #{self.name}"
+        end
+      else
+        vgi.visual_group = self
+        if vgi.save
+          Rails.logger.info do
+            "Moved #{vgi.image.id}"
+          end
+        else
+          Rails.logger.info do
+            "FAILED to move #{vgi.image.id}"
+          end
+          return
+        end
+      end
+    end
+  end
+
   private
 
   def image_ids_by_name_vote(name, vote)
