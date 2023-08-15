@@ -21,7 +21,7 @@ class QueuedEmail
 
       result = create(sender, recipient)
       result.add_integer(:project, project.id)
-      result.add_string(subject)
+      result.add_string(:subject, subject)
       result.set_note(content)
       result.finish
       result
@@ -29,7 +29,7 @@ class QueuedEmail
 
     def deliver_email
       # Make sure it hasn't been deleted since email was queued.
-      return unless herbarium_record
+      return unless project
 
       ProjectAdminRequestMailer.build(user, to_user, project,
                                       subject, content).deliver_now
