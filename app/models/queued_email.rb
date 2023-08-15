@@ -116,7 +116,7 @@
 #
 #  TODO: Convert to QueuedEmail classes
 #
-#  AdminMailer
+#  ProjectAdminRequestMailer
 #  DeniedMailer
 #
 ################################################################################
