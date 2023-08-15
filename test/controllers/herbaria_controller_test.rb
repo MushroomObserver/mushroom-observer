@@ -390,6 +390,8 @@ class HerbariaControllerTest < FunctionalTestCase
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def test_create
+    QueuedEmail.queue = true
+    count_before = QueuedEmail.count
     herbarium_count = Herbarium.count
     login("katrina")
     post(:create, params: { herbarium: create_params })
@@ -405,11 +407,14 @@ class HerbariaControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
-    email = ActionMailer::Base.deliveries.last
-    assert_equal(katrina.email, email.header["reply_to"].to_s)
-    assert_match(/new herbarium/i, email.header["subject"].to_s)
-    assert_includes(email.body.to_s, "Burbank Herbarium")
-    assert_includes(email.body.to_s, herbarium.show_url)
+    assert_equal(count_before + 1, QueuedEmail.count)
+    # FIXME: - can QueuedEmail content be tested in a controller test?
+    #         Or should it be elsewhere?
+    # email = ActionMailer::Base.deliveries.last
+    # assert_equal(katrina.email, email.header["reply_to"].to_s)
+    # assert_match(/new herbarium/i, email.header["subject"].to_s)
+    # assert_includes(email.body.to_s, "Burbank Herbarium")
+    # assert_includes(email.body.to_s, herbarium.show_url)
   end
 
   def test_create_no_login

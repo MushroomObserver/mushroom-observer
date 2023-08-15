@@ -2,7 +2,7 @@
 
 # Add HerbariumRecord Not Curator Email
 class QueuedEmail
-  class AddHerbariumRecordNotCurator < QueuedEmail
+  class AddRecordToHerbarium < QueuedEmail
     def herbarium_record
       get_object(:herbarium_record, ::HerbariumRecord)
     end
