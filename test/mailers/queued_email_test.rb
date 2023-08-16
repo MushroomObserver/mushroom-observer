@@ -301,7 +301,7 @@ class QueuedEmailTest < UnitTestCase
     key = api_keys(:marys_api_key)
 
     # Dick is creating an API for Mary at Mary's request.
-    # The email is from Dick to Mary, the "user" is Mary, the "other_user"
+    # The email is from Dick to Mary, the "user" is Mary, the "app_user"
     # is Dick.
     QueuedEmail::VerifyAPIKey.create_email(mary, dick, key)
     assert_email(0,
