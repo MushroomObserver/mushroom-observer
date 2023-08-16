@@ -271,7 +271,7 @@ class QueuedEmail < AbstractModel
   def dump
     result = ""
     result += "#{id}: from => #{user&.login}, "
-    result += "to => #{to_user.login}, flavor => #{flavor}, "
+    result += "to => #{to_user&.login}, flavor => #{flavor}, "
     result += "queued => #{queued}\n"
     queued_email_integers.each { |i| result += "\t#{i.key} => #{i.value}\n" }
     queued_email_strings.each { |i| result += "\t#{i.key} => #{i.value}\n" }

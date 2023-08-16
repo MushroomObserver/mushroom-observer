@@ -408,7 +408,11 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
     assert_equal(count_before + 1, QueuedEmail.count)
-    assert_equal(katrina.id, QueuedEmail.last.user_id)
+    email = QueuedEmail.last
+    assert_equal(katrina.id, email.user_id)
+    assert_equal(katrina.email, email.get_string(:sender_email))
+    assert_match(/new herbarium/i, email.get_string(:subject))
+    assert_includes(email.get_note, "Burbank Herbarium")
     QueuedEmail.queue = false
   end
 
