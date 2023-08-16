@@ -20,4 +20,26 @@ class VisualGroupTest < ActiveSupport::TestCase
     vg1.reload
     assert_equal(vg1.images.count, total)
   end
+
+  def test_merge_failed_save
+    vg1 = visual_groups(:visual_group_one)
+    total = vg1.images.count
+    vg1.stub(:visual_group_images, [mock_vgi]) do
+      vg1.merge(vg1)
+    end
+    vg1.reload
+    assert_equal(vg1.images.count, total)
+  end
+
+  def mock_vgi
+    vgi = MiniTest::Mock.new
+    vgi.expect(:image_in_group?, false) do |id|
+      true
+    end
+    vgi.expect(:save, false)
+    vgi.expect(:visual_group=, true) do |group|
+      true
+    end
+    vgi
+  end
 end

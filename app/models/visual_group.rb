@@ -43,7 +43,7 @@ class VisualGroup < AbstractModel
   def merge(visual_group)
     Rails.logger.info { "Merging #{visual_group.name} into #{name}" }
     visual_group.visual_group_images.each do |vgi|
-      if vgi.image.visual_groups.pluck(:id).include?(id)
+      if vgi.image_in_group?(id)
         Rails.logger.info { "Image #{vgi.image.id} already in #{name}" }
       else
         vgi.visual_group = self
