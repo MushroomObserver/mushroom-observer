@@ -152,7 +152,7 @@ class AccountController < ApplicationController
       QueuedEmail::Webmaster.create_email(
         sender_email: MO.accounts_email_address,
         subject: "Account Denied",
-        content: denied_message(new_user)
+        content: denied_message(@new_user)
       )
     end
     false
