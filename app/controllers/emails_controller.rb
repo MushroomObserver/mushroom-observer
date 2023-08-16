@@ -17,7 +17,7 @@ class EmailsController < ApplicationController
     @email = @user.email if @user
   end
 
-  # TODO: Refactor UserMailer.build to take kwargs, eliminating
+  # TODO: Refactor UserQuestionMailer.build to take kwargs, eliminating
   #       local variable assignments.
   def ask_user_question
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
@@ -26,7 +26,7 @@ class EmailsController < ApplicationController
 
     subject = params[:email][:subject]
     content = params[:email][:content]
-    UserMailer.build(@user, @target, subject, content).deliver_now
+    QueuedEmail::UserQuestion.create_email(@user, @target, subject, content)
     flash_notice(:runtime_ask_user_question_success.t)
     redirect_to(user_path(@target.id))
   end
@@ -38,7 +38,8 @@ class EmailsController < ApplicationController
                   request.method == "POST"
 
     commercial_inquiry = params[:commercial_inquiry][:content]
-    CommercialMailer.build(@user, @image, commercial_inquiry).deliver_now
+    QueuedEmail::CommercialInquiry.create_email(@user, @image,
+                                                commercial_inquiry)
     flash_notice(:runtime_commercial_inquiry_success.t)
     redirect_with_query(image_path(@image.id))
   end
@@ -89,7 +90,8 @@ class EmailsController < ApplicationController
     elsif non_user_potential_spam?
       flash_error(:runtime_ask_webmaster_antispam.t)
     else
-      WebmasterMailer.build(sender_email: @email, content: @content).deliver_now
+      QueuedEmail::Webmaster.create_email(sender_email: @email,
+                                          content: @content)
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to("/")
     end
@@ -120,11 +122,11 @@ class EmailsController < ApplicationController
 
   def send_merge_request
     temporarily_set_locale(MO.default_locale) do
-      WebmasterMailer.build(
+      QueuedEmail::Webmaster.create_email(
         sender_email: @user.email,
         subject: "#{@model.name} Merge Request",
         content: merge_request_content
-      ).deliver_now
+      )
     end
     flash_notice(:email_merge_request_success.t)
     redirect_to(@old_obj.show_link_args)
@@ -146,11 +148,11 @@ class EmailsController < ApplicationController
 
   def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
     temporarily_set_locale(MO.default_locale) do
-      WebmasterMailer.build(
+      QueuedEmail::Webmaster.create_email(
         sender_email: @user.email,
         content: change_request_content(name_with_icn_id, new_name_with_icn_id),
         subject: "Request to change Name having dependents"
-      ).deliver_now
+      )
     end
     flash_notice(:email_change_name_request_success.t)
     redirect_to(@name.show_link_args)

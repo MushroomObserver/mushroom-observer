@@ -4,10 +4,10 @@
 class VerifyAPIKeyMailer < ApplicationMailer
   after_action :webmaster_delivery, only: [:build]
 
-  def build(user, other_user, api_key)
+  def build(user, app_user, api_key)
     setup_user(user)
     @title = :email_subject_verify_api_key.l
-    @other_user = other_user
+    @app_user = app_user
     @api_key = api_key
     debug_log(:verify, nil, user, email: user.email)
     mo_mail(@title,

@@ -126,14 +126,14 @@ module Names
 
       user = name_tracker.user
       name = name_tracker.name
-      WebmasterMailer.build(
+      QueuedEmail::Webmaster.create_email(
         sender_email: user.email,
         subject: "New Name Tracker with Template",
         content: "User: ##{user.id} / #{user.login} / #{user.email}\n" \
                  "Name: ##{name.id} / #{name.search_name}\n" \
                  "Note: [[#{name_tracker.note_template}]]\n\n" \
                  "#{MO.http_domain}/names/trackers/#{name_tracker.id}/approve"
-      ).deliver_now
+      )
 
       # Let the user know that the note_template feature requires approval.
       flash_notice(:email_tracking_awaiting_approval.t)

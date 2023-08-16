@@ -561,11 +561,11 @@ class LocationsController < ApplicationController
 
   def email_admin_location_change
     content = email_location_change_content
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "Nontrivial Location Change",
       content: content
-    ).deliver_now
+    )
     LocationsControllerTest.report_email(content) if Rails.env.test?
   end
 

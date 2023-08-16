@@ -10,7 +10,7 @@ module Projects
         project_id: eol_project.id,
         email: {
           subject: "Admin request subject",
-          message: "Message for admins"
+          content: "Message for admins"
         }
       }
       post_requires_login(:create, params)

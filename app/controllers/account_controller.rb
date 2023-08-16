@@ -64,7 +64,7 @@ class AccountController < ApplicationController
 
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp}#:{email_spam_notice.tp}")
-      VerifyMailer.build(@new_user).deliver_now
+      QueuedEmail::VerifyAccount.create_email(@new_user)
     end
 
     redirect_back_or_default(account_welcome_path)
@@ -148,9 +148,25 @@ class AccountController < ApplicationController
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
-      DeniedMailer.build(params[:new_user]).deliver_now
+
+      QueuedEmail::Webmaster.create_email(
+        sender_email: MO.accounts_email_address,
+        subject: "Account Denied",
+        content: denied_message(@new_user)
+      )
     end
     false
+  end
+
+  def denied_message(new_user)
+    "The request for account #{new_user.login} was denied since the theme" \
+    "was set to '#{new_user.theme}'.\n" \
+    "Here are all the fields for the request user:\n\n" \
+    "login: #{new_user.login}\n" \
+    "password: #{new_user.password}\n" \
+    "email: #{new_user.email}\n" \
+    "theme: #{new_user.theme}\n" \
+    "name: #{new_user.name}\n" \
   end
 
   def validate_and_save_new_user!

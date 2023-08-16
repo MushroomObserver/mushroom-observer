@@ -436,7 +436,7 @@ class Name < AbstractModel
   # Notify webmaster that a new name was created.
   after_create do |name|
     user = User.current || User.admin
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: user.email,
       subject: "#{user.login} created #{name.real_text_name}",
       content: "#{MO.http_domain}/names/#{name.id}"

@@ -390,6 +390,8 @@ class HerbariaControllerTest < FunctionalTestCase
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def test_create
+    QueuedEmail.queue = true
+    count_before = QueuedEmail.count
     herbarium_count = Herbarium.count
     login("katrina")
     post(:create, params: { herbarium: create_params })
@@ -405,11 +407,13 @@ class HerbariaControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(create_params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
-    email = ActionMailer::Base.deliveries.last
-    assert_equal(katrina.email, email.header["reply_to"].to_s)
-    assert_match(/new herbarium/i, email.header["subject"].to_s)
-    assert_includes(email.body.to_s, "Burbank Herbarium")
-    assert_includes(email.body.to_s, herbarium.show_url)
+    assert_equal(count_before + 1, QueuedEmail.count)
+    email = QueuedEmail.last
+    assert_equal(katrina.id, email.user_id)
+    assert_equal(katrina.email, email.get_string(:sender_email))
+    assert_match(/new herbarium/i, email.get_string(:subject))
+    assert_includes(email.get_note, "Burbank Herbarium")
+    QueuedEmail.queue = false
   end
 
   def test_create_no_login
