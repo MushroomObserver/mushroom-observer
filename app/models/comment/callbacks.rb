@@ -34,11 +34,11 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.water_users)
     return unless user_ids.intersect?(::MO.oil_users)
 
-    ::WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: MO.noreply_email_address,
       subject: oil_and_water_subject,
       content: oil_and_water_content(user_ids)
-    ).deliver_now
+    )
   end
 
   ##########################################################################

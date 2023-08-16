@@ -355,7 +355,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
     namespace :emails do
-      resource :feature, only: [:new, :create], controller: "feature"
+      resource :features, only: [:new, :create], controller: "features"
     end
   end
 

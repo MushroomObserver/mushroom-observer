@@ -8,7 +8,7 @@ class ApprovalMailer < ApplicationMailer
     setup_user(user)
     @title = subject
     @message = content
-    debug_log(:approval, User.admin, user)
+    debug_log(:approval, ::User.admin, user)
     mo_mail(@title, to: user, reply_to: MO.webmaster_email_address)
   end
 end

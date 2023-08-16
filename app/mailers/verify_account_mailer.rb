@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Email sent to verify user's email.
-class VerifyMailer < ApplicationMailer
+class VerifyAccountMailer < ApplicationMailer
   after_action :webmaster_delivery, only: [:build]
 
   def build(user)

@@ -26,8 +26,9 @@ module Projects
       subject = params[:email][:subject]
       content = params[:email][:content]
       @project.admin_group.users.each do |receiver|
-        AdminMailer.build(sender, receiver, @project,
-                          subject, content).deliver_now
+        QueuedEmail::ProjectAdminRequest.create_email(sender, receiver,
+                                                      @project, subject,
+                                                      content)
       end
       flash_notice(:admin_request_success.t(title: @project.title))
       redirect_to(project_path(@project.id, q: get_query_param))

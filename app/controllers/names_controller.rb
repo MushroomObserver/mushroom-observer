@@ -572,11 +572,11 @@ class NamesController < ApplicationController
 
   def email_admin_name_change
     content = email_name_change_content
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "Nontrivial Name Change",
       content: content
-    ).deliver_now
+    )
     NamesControllerTest.report_email(content) if Rails.env.test?
   end
 
@@ -674,11 +674,11 @@ class NamesController < ApplicationController
       show_url: "#{MO.http_domain}/names/#{@name.id}",
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "Merger identifier conflict",
       content: content
-    ).deliver_now
+    )
     NamesControllerTest.report_email(content) if Rails.env.test?
   end
 

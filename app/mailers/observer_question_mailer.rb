@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # User asking user about an observation.
-class ObservationMailer < ApplicationMailer
+class ObserverQuestionMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
   def build(sender, observation, question)

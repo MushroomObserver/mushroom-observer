@@ -86,7 +86,7 @@ class ApplicationMailer < ActionMailer::Base
   def to_address(user)
     # I just want to be extra certain that we don't accidentally send email
     # to anyone who has opted out of all email.
-    return nil if user.is_a?(User) && user.no_emails
+    return nil if user.is_a?(::User) && user.no_emails
 
     address = calc_email(user)
     return nil unless ApplicationMailer.valid_email_address?(address)

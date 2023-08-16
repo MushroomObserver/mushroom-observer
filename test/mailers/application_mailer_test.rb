@@ -78,9 +78,10 @@ class ApplicationMailerTest < UnitTestCase
   def test_admin_email
     project = projects(:eol_project)
     run_mail_test("admin_request", rolf) do
-      AdminMailer.build(katrina, rolf, project,
-                        "Please do something or other", "and this is why...").
-        deliver_now
+      ProjectAdminRequestMailer.build(
+        katrina, rolf, project,
+        "Please do something or other", "and this is why..."
+      ).deliver_now
     end
   end
 
@@ -119,8 +120,9 @@ class ApplicationMailerTest < UnitTestCase
   def test_commercial_email
     image = images(:commercial_inquiry_image)
     run_mail_test("commercial_inquiry", image.user) do
-      CommercialMailer.build(mary, image,
-                             "Did test_commercial_inquiry work?").deliver_now
+      CommercialInquiryMailer.build(
+        mary, image, "Did test_commercial_inquiry work?"
+      ).deliver_now
     end
   end
 
@@ -137,12 +139,6 @@ class ApplicationMailerTest < UnitTestCase
       email = QueuedEmail::ConsensusChange.create_email(dick, mary, obs,
                                                         name1, name2)
       ConsensusChangeMailer.build(email).deliver_now
-    end
-  end
-
-  def test_denied_email
-    run_mail_test("denied") do
-      DeniedMailer.build(junk).deliver_now
     end
   end
 
@@ -249,10 +245,10 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_observation_email
+  def test_observer_question_email
     obs = observations(:detailed_unknown_obs)
     run_mail_test("observation_question", obs.user) do
-      ObservationMailer.build(rolf, obs, "Where did you find it?").
+      ObserverQuestionMailer.build(rolf, obs, "Where did you find it?").
         deliver_now
     end
   end
@@ -266,7 +262,7 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_user_email
     run_mail_test("user_question", mary) do
-      UserMailer.build(
+      UserQuestionMailer.build(
         rolf, mary, "Interesting idea", "Shall we discuss it in email?"
       ).deliver_now
     end
@@ -274,7 +270,7 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_verify_email
     run_mail_test("verify", mary) do
-      VerifyMailer.build(mary).deliver_now
+      VerifyAccountMailer.build(mary).deliver_now
     end
   end
 
@@ -301,14 +297,14 @@ class ApplicationMailerTest < UnitTestCase
 
   def test_undeliverable_email
     mary.update(email: "bogus.address")
-    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not have delivered an email to 'bogus.address'.")
   end
 
   def test_opt_out
     mary.update(no_emails: true)
-    UserMailer.build(rolf, mary, "subject", "body").deliver_now
+    UserQuestionMailer.build(rolf, mary, "subject", "body").deliver_now
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not deliver email if recipient has opted out.")
   end
