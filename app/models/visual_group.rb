@@ -41,11 +41,11 @@ class VisualGroup < AbstractModel
   end
 
   def merge(visual_group)
-    Rails.logger.info { "Merging #{visual_group.name} into #{self.name}" }
+    Rails.logger.info { "Merging #{visual_group.name} into #{name}" }
     visual_group.visual_group_images.each do |vgi|
-      if vgi.image.visual_groups.pluck(:id).include?(self.id)
+      if vgi.image.visual_groups.pluck(:id).include?(id)
         Rails.logger.info do
-          "Image #{vgi.image.id} already in #{self.name}"
+          "Image #{vgi.image.id} already in #{name}"
         end
       else
         vgi.visual_group = self
@@ -57,7 +57,7 @@ class VisualGroup < AbstractModel
           Rails.logger.info do
             "FAILED to move #{vgi.image.id}"
           end
-          return
+          break
         end
       end
     end

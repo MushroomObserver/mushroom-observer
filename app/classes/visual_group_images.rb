@@ -67,7 +67,8 @@ class VisualGroupImages
   def add_conditions(visual_group, name, included)
     query.where(attribute(:names, :text_name).eq(name))
     # query.where(attribute(:observations, :vote_cache).gteq(VOTE_LIMIT))
-    query.where(attribute(:visual_group_images, :visual_group_id).eq(visual_group.id))
+    query.where(attribute(:visual_group_images,
+                          :visual_group_id).eq(visual_group.id))
     query.where(attribute(:visual_group_images, :included).eq(included))
   end
 end
