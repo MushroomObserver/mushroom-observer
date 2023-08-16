@@ -354,9 +354,11 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(CGI.escapeHTML("<p>New API2 Key</p>"), notes.to_s)
   end
 
-  # FIXME: does this test also need to be altered to test for QueuedEmail?
-  # Why does it pass if not?
+  # NOTE: Checking ActionMailer::Base.deliveries works here only because
+  #       QueuedEmail.queue == false.
+  #       The mail is sent via QueuedEmail but delivered immediately.
   def test_post_api_key
+    QueuedEmail.queue = false
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
