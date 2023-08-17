@@ -79,21 +79,28 @@ module TitleAndTabsetHelper
   def create_tabs(links)
     return [] unless links
 
-    links.compact.map do |str, url, args|
-      args ||= {}
-      kwargs = args&.except(:button, :target)
-      case args[:button]
-      when :destroy
-        destroy_button(name: str, target: args[:target] || url, **kwargs)
-      when :post
-        post_button(name: str, path: url, **kwargs)
-      when :put
-        put_button(name: str, path: url, **kwargs)
-      when :patch
-        patch_button(name: str, path: url, **kwargs)
-      else
-        link_to(str, url, kwargs)
-      end
+    links.compact.map do |link|
+      create_link_to(link)
+    end
+  end
+
+  # Unpacks the [text, url, args] array for a single link and figures out
+  # which HTML to return for that type of link
+  def create_link_to(link)
+    str, url, args = link
+    args ||= {}
+    kwargs = args&.except(:button, :target)
+    case args[:button]
+    when :destroy
+      destroy_button(name: str, target: args[:target] || url, **kwargs)
+    when :post
+      post_button(name: str, path: url, **kwargs)
+    when :put
+      put_button(name: str, path: url, **kwargs)
+    when :patch
+      patch_button(name: str, path: url, **kwargs)
+    else
+      link_to(str, url, kwargs)
     end
   end
 
