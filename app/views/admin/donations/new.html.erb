@@ -1,8 +1,7 @@
 <%
-  @title = :create_donation_title.l
+@title = :create_donation_title.l
 
-  tabs = create_tabs(admin_donations_form_new_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(admin_donations_form_new_links)
 %>
 
 <%= form_with(model: @donation, url: admin_donations_path,

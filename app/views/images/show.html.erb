@@ -1,7 +1,7 @@
 <% #bs4
 @title = :image_show_title.t(name: @image.unique_format_name)
-tabs = create_tabs(show_image_links(image: @image))
-@tabsets = { pager_for: @image, right: draw_tab_set(tabs) }
+add_pager_for(@image)
+add_tab_set(show_image_links(image: @image))
 @container = :wide
 %>
 

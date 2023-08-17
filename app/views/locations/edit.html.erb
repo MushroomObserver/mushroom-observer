@@ -1,14 +1,12 @@
 <%
-  @title ||= :edit_location_title.t(name: @location.display_name)
+@title ||= :edit_location_title.t(name: @location.display_name)
 
-  tabs = create_tabs(location_form_edit_links(location: @location))
-  @tabsets = {
-    pager_for: @image,
-    right: draw_tab_set(tabs),
-  }
-  @container = :full
-  action = { action: :update, id: @location.id,
-             approved_where: @display_name, q: get_query_param }
+add_pager_for(@image)
+add_tab_set(location_form_edit_links(location: @location))
+
+@container = :full
+action = { action: :update, id: @location.id,
+            approved_where: @display_name, q: get_query_param }
 %>
 
 <%= render(partial: "locations/form",

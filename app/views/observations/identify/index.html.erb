@@ -1,10 +1,8 @@
 <%
-  # @tabsets = index_observation_tabset(query: @query) if @objects.any?
+@container = :full
+@title = "#{:obs_needing_id.t}"
 
-  @container = :full
-  @title = "#{:obs_needing_id.t}"
-
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <div class="container-text">

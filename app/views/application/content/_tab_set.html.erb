@@ -1,7 +1,11 @@
-<%# The old one. Called from application_helper#draw_tab_set %>
-<% links ||= [] %>
+<%#
+Plain tab set. Takes `tabs` as an array of <a> or <button> links.
+Just adds <small> and line breaks.
+%>
+
+<% tabs ||= [] %>
 <small>
-  <% links.reject(&:nil?).each do |link| %>
-    <%= link %><br>
+  <% tabs.reject(&:nil?).each do |tabs| %>
+    <%= tabs %><br>
   <% end %>
 </small>

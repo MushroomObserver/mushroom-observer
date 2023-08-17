@@ -1,8 +1,7 @@
 <%
 @title = :donate_title.l
 
-tabs = create_tabs(support_donate_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(support_donate_links)
 
 amounts = [25.00, 50.00, 100.00, 200.00].freeze
 

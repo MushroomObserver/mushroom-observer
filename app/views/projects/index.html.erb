@@ -1,8 +1,7 @@
 <%
 @title ||= :list_projects_title.t
 
-tabs = create_tabs(projects_index_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(projects_index_links)
 
 flash_error(@error) if @error && @objects.empty?
 %>

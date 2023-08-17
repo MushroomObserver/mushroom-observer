@@ -1,8 +1,7 @@
 <%
   @title = :profile_title.t
 
-  tabs = create_tabs(account_profile_edit_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  add_tab_set(account_profile_edit_links)
   @container = :full
 %>
 

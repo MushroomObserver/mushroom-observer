@@ -1,25 +1,29 @@
-<%
-  # This is a stop-gap measure until I/we figure out exactly how we want to
-  # deal with tabsets moving foward.  I'm not sure that my current approach is
-  # correct, but I feel like it is a bit more transparent than the previous
-  # approach and allows more flexibility in styling the tabs - RJS 2/15/2015
-  @tabsets ||= {}
+<%#
+The header for page content (below the application top nav)
+May include:
+prev_next_pager
+title
+context_help
+owner_naming
+interest_icons
+tab_set
+type_filters
+sorts
 %>
 
 <div class="row-justified">
 
   <div id="title_bar">
     <!-- Pager -->
-    <%= content_tag(:div, class: "d-print-none") do
-          if @tabsets[:pager_for]
-            render(partial: "application/content/prev_next_pager",
-                  locals: { object: @tabsets[:pager_for] })
-          end
+    <%= content_tag_if(content_for?(:prev_next_object), :div,
+                       class: "d-print-none") do
+          yield(:prev_next_object)
+        end
         end %>
 
     <!-- Title Caption -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= content_tag(:h1, @title, class: "h3", id: "title") -%>
+    <%= tag.h1(@title, class: "h3", id: "title") -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
                                        class: "context-help"),
@@ -29,16 +33,18 @@
                        class: "small", id: "owner_naming") %>
   </div>
 
-  <!-- Sorts and Tabsets -->
-  <%= if @tabsets[:right] || @sorts # defined on page or in helper
-    tag.div(id: "right_tabs", class: "d-flex flex-row d-print-none") do
-      [
-        index_sorter(@sorts),
-        @tabsets[:right]
-      ].safe_join
-    end
-  end %>
+  <!-- Tabsets and Sorter. conditionally renders the partials -->
+  <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons),
+                    :div, id: "right_tabs",
+                    class: "d-flex flex-row d-print-none") do
+        concat(yield(:interest_icons))
+        concat(index_sorter(@sorts))
+        concat(yield(:tab_set))
+      end %>
 
-  <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
-                    class: "col-12 d-print-none") %>
+  <%= content_tag_if(content_for?(:type_filters), :div,
+                     class: "col-12 d-print-none") do
+        yield(:type_filters)
+      end %>
+
 </div>

@@ -4,8 +4,7 @@
   title: @project.title
 )
 
-tabs = create_tabs(project_member_form_edit_links(project: @project))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(project_member_form_edit_links(project: @project))
 
 action = { controller: "/projects/members", action: :update,
             project_id: @project.id, candidate: @candidate.id,

@@ -1,7 +1,6 @@
 <%
-  tabs = create_tabs(edit_naming_links(obs: @observation))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :double
+add_tab_set(edit_naming_links(obs: @observation))
+@container = :double
 %>
 
 <div class="row">

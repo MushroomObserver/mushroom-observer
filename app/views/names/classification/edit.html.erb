@@ -1,8 +1,8 @@
 <%
 @title = :edit_classification_title.t(name: @name.display_name)
 
-tabs = create_tabs(name_forms_return_links(name: @name))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_forms_return_links(name: @name))
+
 rank = rank_as_lower_string(@name.rank)
 action = { controller: "/names/classification", action: :update,
             id: @name.id, q: get_query_param }

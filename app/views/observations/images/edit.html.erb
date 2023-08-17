@@ -1,13 +1,13 @@
-<% #bs4
-  @title = :image_edit_title.t(name: @image.unique_format_name)
+<%
+#bs4
+@title = :image_edit_title.t(name: @image.unique_format_name)
 
-  tabs = create_tabs(observation_images_edit_links(image: @image))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
-  form_action = { controller: "/observations/images",
-                  action: :update,
-                  id: @image.id,
-                  q: get_query_param }
+add_tab_set(observation_images_edit_links(image: @image))
+@container = :wide
+form_action = { controller: "/observations/images",
+                action: :update,
+                id: @image.id,
+                q: get_query_param }
 %>
 
 <div class="row">

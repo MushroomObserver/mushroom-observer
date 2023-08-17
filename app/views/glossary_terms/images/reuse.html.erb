@@ -1,8 +1,7 @@
 <%
 @title = :image_reuse_title.t(name: @object.unique_format_name)
 
-tabs = create_tabs(glossary_term_image_form_links(term: @object))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(glossary_term_image_form_links(term: @object))
 @container = :full
 
 form_action = { controller: "/glossary_terms/images",

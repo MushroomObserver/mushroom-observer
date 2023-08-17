@@ -4,8 +4,7 @@
   name: @name.display_name
 )
 
-tabs = create_tabs(name_versions_links(name: @name))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_versions_links(name: @name))
 @container = :text
 %>
 
