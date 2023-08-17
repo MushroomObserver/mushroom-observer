@@ -4,15 +4,15 @@
 #  --- links and buttons ----
 #
 #  title_tag_contents           # text to put in html header <title>
-#  add_tab_set
-#  add_pager_for(object)
+#  add_pager_for(object)        # add a prev/next pager for an object (show)
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
-#  add_tab_set(links)
-#  create_tabs(links)           # convert links into list of tabs
-#  add_type_filters
-#  index_sorter
-#  add_interest_icons(user, object)
+#  add_tab_set(links)           # add content_for(:tab_set)
+#  create_links_to(links)       # convert links array -> link_to's / button_to's
+#  create_link_to(link)         # convert one link attribute array into HTML
+#  add_type_filters             # add content_for(:type_filters)
+#  index_sorter                 # helper to render the sorter partial
+#  add_interest_icons(user, object) #add content_for(:interest_icons)
 #
 
 module TitleAndTabsetHelper
@@ -34,6 +34,7 @@ module TitleAndTabsetHelper
     end
   end
 
+  # used by application/content/prev_next_pager
   # link to next object in query results
   def link_next(object)
     path = if object.type_tag == :rss_log
@@ -58,7 +59,7 @@ module TitleAndTabsetHelper
   def add_tab_set(links)
     return unless links
 
-    tabs = create_tabs(links)
+    tabs = create_links_to(links)
 
     content_for(:tab_set) do
       render(partial: "application/content/tab_set", locals: { tabs: tabs })
@@ -72,11 +73,11 @@ module TitleAndTabsetHelper
   #   ["text", "url", { class: "edit_form_link" }],
   #   [nil, article, { button: :destroy }]
   # ]
-  # create_tabs(links) will make an array of the following HTML
+  # create_links_to(links) will make an array of the following HTML
   #   "<a href="url" class="edit_form_link">text</a>",
   #   "(an HTML form)" via destroy_button, gives default button text and class
   #
-  def create_tabs(links)
+  def create_links_to(links)
     return [] unless links
 
     links.compact.map do |link|
