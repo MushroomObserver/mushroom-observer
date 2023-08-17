@@ -11,9 +11,6 @@ module Locations
     before_action :pass_query_params, except: [:index]
     # rubocop:enable Rails/LexicallyScopedActionFilter
     before_action :login_required
-    before_action :disable_link_prefetching, except: [
-      :new, :create, :edit, :update, :show
-    ]
     before_action :require_successful_user, only: [
       :new, :create
     ]

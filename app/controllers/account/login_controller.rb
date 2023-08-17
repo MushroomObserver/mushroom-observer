@@ -9,10 +9,6 @@ module Account
       :email_new_password,
       :new_password_request
     ]
-    before_action :disable_link_prefetching, except: [
-      :new,
-      :create
-    ]
 
     # the login form
     def new

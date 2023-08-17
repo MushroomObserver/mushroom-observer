@@ -4,7 +4,6 @@ class ProjectsController < ApplicationController
   before_action :login_required
   # disable cop because index is defined in ApplicationController
   before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
-  before_action :disable_link_prefetching, except: [:edit, :show]
 
   # index::
   # ApplicationController uses this to dispatch #index to a private method

@@ -4,7 +4,6 @@
 module Names::EolData
   class ExpandedReviewController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     def show
       @timer_start = Time.current

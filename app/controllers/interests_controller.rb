@@ -19,7 +19,6 @@
 
 class InterestsController < ApplicationController
   before_action :login_required
-  before_action :disable_link_prefetching
   before_action :pass_query_params, except: [:index]
 
   # Show list of objects user has expressed interest in.

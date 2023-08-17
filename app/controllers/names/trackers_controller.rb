@@ -7,7 +7,6 @@ module Names
   class TrackersController < ApplicationController
     before_action :pass_query_params
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Form accessible from show_name that lets a user setup a tracker
     # with notifications for a name.

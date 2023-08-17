@@ -3,7 +3,6 @@
 module Account
   class APIKeysController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # NOTE: The index has two forms: a form to edit/remove existing_keys and
     # a form to create a new_key. The existing_keys form commits to the :destroy

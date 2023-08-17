@@ -4,7 +4,6 @@
 module Names::Descriptions
   class ReviewStatusController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # PUT Callback to let reviewers change review_status of a NameDescription
     # from the show_name page.

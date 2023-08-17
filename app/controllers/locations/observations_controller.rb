@@ -4,7 +4,6 @@
 module Locations
   class ObservationsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # merges_controller_test
     # Adds the Observation's associated with obs.where == params[:where]

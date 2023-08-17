@@ -7,7 +7,6 @@ class UsersController < ApplicationController
   require "set"
 
   before_action :login_required
-  before_action :disable_link_prefetching
 
   # User index
   def index
