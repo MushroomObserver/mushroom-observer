@@ -1,9 +1,8 @@
 <%
 @title ||= :edit_name_description_title.t(name: @description.format_name)
 
-links = name_description_form_edit_links(description: @description, user: @user)
-tabs = create_tabs(links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_description_form_edit_links(description: @description,
+                                             user: @user))
 
 action = { controller: "/names/descriptions", action: :update,
             id: @description.id, q: get_query_param }

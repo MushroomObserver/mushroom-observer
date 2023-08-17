@@ -1,10 +1,9 @@
 <%
-  @title = :species_list_download_title.t
+@title = :species_list_download_title.t
 
-  tabs = create_tabs(species_list_download_links(list: @list))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(species_list_download_links(list: @list))
 
-  query_param = get_query_param(@query)
+query_param = get_query_param(@query)
 %>
 
 <%= render(partial: "form_print_labels",

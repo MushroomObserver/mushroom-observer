@@ -1,8 +1,7 @@
 <%
-  @title = :account_api_keys_title.t
+@title = :account_api_keys_title.t
 
-  tabs = create_tabs(account_api_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(account_api_links)
 %>
 
 <%= :account_api_keys_help.tp %>

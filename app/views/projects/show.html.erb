@@ -2,8 +2,7 @@
 @title ||= :show_project_title.t(title: @project.title)
 add_pager_for(@project)
 draw_interest_icons(@user, @project)
-tabs = create_tabs(project_show_links(project: @project, user: @user))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(project_show_links(project: @project, user: @user))
 %>
 
 <div class="row">

@@ -2,8 +2,7 @@
 @title = :show_location_title.t(name: @location.display_name)
 add_pager_for(@location)
 draw_interest_icons(@user, @location)
-tabs = create_tabs(location_show_links(location: @location))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(location_show_links(location: @location))
 @container = :wide
 %>
 

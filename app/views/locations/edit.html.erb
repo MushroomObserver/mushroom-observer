@@ -2,8 +2,8 @@
 @title ||= :edit_location_title.t(name: @location.display_name)
 
 add_pager_for(@image)
-tabs = create_tabs(location_form_edit_links(location: @location))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(location_form_edit_links(location: @location))
+
 @container = :full
 action = { action: :update, id: @location.id,
             approved_where: @display_name, q: get_query_param }

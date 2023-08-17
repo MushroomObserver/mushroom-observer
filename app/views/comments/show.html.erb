@@ -18,8 +18,7 @@ elsif @comment.target_type == "Name"
 end
 
 add_pager_for(@comment)
-tabs = create_tabs(comment_show_links(comment: @comment, target: @target))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(comment_show_links(comment: @comment, target: @target))
 %>
 
 <p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>

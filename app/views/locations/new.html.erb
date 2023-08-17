@@ -1,20 +1,20 @@
 <%
-  @title ||= :create_location_title.t
+@title ||= :create_location_title.t
 
-  tabs = create_tabs(location_form_new_links(location: @location))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+add_tab_set(location_form_new_links(location: @location))
 
-  action = {
-    action: :create,
-    where: @original_name,
-    approved_where: @display_name,
-    set_observation: @set_observation,
-    set_species_list: @set_species_list,
-    set_user: @set_user,
-    set_herbarium: @set_herbarium,
-    q: get_query_param
-  }
+@container = :full
+
+action = {
+  action: :create,
+  where: @original_name,
+  approved_where: @display_name,
+  set_observation: @set_observation,
+  set_species_list: @set_species_list,
+  set_user: @set_user,
+  set_herbarium: @set_herbarium,
+  q: get_query_param
+}
 %>
 
 <%= render(partial: "form", locals: { action: action, button: :CREATE }) %>

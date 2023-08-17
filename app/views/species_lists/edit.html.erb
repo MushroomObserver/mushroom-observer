@@ -1,11 +1,10 @@
 <%
-  @title = :species_list_edit_title.t(name: @species_list.unique_format_name)
+@title = :species_list_edit_title.t(name: @species_list.unique_format_name)
 
-  tabs = create_tabs(species_list_form_edit_links(list: @species_list))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :text
+add_tab_set(species_list_form_edit_links(list: @species_list))
+@container = :text
 
-  action = species_list_path(@species_list, approved_where: @place_name)
+action = species_list_path(@species_list, approved_where: @place_name)
 %>
 
 <%= render(partial: "species_lists/form",

@@ -1,8 +1,7 @@
 <%
 @title = :publication_index_title.l
 
-tabs = create_tabs(publications_index_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(publications_index_links)
 @container = :wide
 %>
 

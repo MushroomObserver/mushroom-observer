@@ -9,8 +9,7 @@
     @title = "This is a test page, let's give it a much longer title just to see what happens when we do something like this"
 
     draw_interest_icons(@user, Observation.first)
-    tabs = create_tabs(admin_test_links)
-    @tabsets = { right: draw_tab_set(tabs) }
+    add_tab_set(admin_test_links)
   %>
 
   <% left_content do %>

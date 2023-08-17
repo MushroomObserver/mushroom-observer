@@ -1,9 +1,9 @@
 <%
 @title ||= @description.format_name.t
 
-links = location_description_form_permissions_links(description: @description)
-tabs = create_tabs(links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(
+  location_description_form_permissions_links(description: @description)
+)
 action = { controller: "/locations/descriptions/permissions", action: :update,
             id: @description.id, q: get_query_param }
 %>

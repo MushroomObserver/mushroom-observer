@@ -1,6 +1,5 @@
 <%
-tabs = create_tabs(name_description_index_links(query: @query))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_description_index_links(query: @query))
 
 flash_error(@error) if @error && @objects.empty?
 %>

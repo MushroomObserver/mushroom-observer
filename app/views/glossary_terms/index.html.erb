@@ -1,8 +1,7 @@
 <%
 @title = :glossary_term_index_title.t
 
-tabs = User.current ? create_tabs(glossary_term_index_links) : []
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(glossary_term_index_links) if User.current
 @container = :text_image
 %>
 

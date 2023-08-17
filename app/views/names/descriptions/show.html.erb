@@ -1,7 +1,6 @@
 <%
 @title ||= @description.format_name.t
-tabs = create_tabs(show_description_links(description: @description))
-tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(show_description_links(description: @description))
 @container = :wide
 %>
 

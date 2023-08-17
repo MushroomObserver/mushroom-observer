@@ -4,9 +4,8 @@
 
 add_pager_for(@observation)
 draw_interest_icons(@user, @observation)
-tabs = create_tabs(show_observation_links(obs: @observation, user: @user,
+add_tab_set(show_observation_links(obs: @observation, user: @user,
                                           mappable: @mappable))
-@tabsets = { right: draw_tab_set(tabs) }
 
 @container = :double
 

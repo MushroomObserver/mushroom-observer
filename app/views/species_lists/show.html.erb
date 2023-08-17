@@ -2,9 +2,7 @@
 @title = :species_list_show_title.t(name: @species_list.unique_format_name)
 add_pager_for(@species_list)
 draw_interest_icons(@user, @species_list)
-links = species_list_show_links(list: @species_list)
-tabs = create_tabs(links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(species_list_show_links(list: @species_list))
 @container = :text_image
 %>
 

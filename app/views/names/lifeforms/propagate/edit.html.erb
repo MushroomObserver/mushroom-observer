@@ -1,8 +1,7 @@
 <%
 @title = :propagate_lifeform_title.t(name: @name.display_name)
 
-tabs = create_tabs(name_forms_return_links(name: @name))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_forms_return_links(name: @name))
 @container = :text_image
 action = { controller: "/names/lifeforms/propagate", action: :update,
            id: @name.id, q: get_query_param }

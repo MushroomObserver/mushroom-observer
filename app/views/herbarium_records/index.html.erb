@@ -1,8 +1,7 @@
 <%
 @title ||= :list_herbarium_records_title.t
 
-tabs = create_tabs(herbarium_record_index_links(obs: @observation))
-@tabsets = { right: draw_tab_set(tabs) } if tabs
+add_tab_set(herbarium_record_index_links(obs: @observation))
 @container = :wide
 
 flash_error(@error) if @error && @objects.empty?

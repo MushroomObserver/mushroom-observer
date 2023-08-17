@@ -7,7 +7,7 @@
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
 #  create_links                 # convert links into list of tabs
-#  draw_tab_set
+#  add_tab_set
 #
 
 module TitleAndTabsetHelper
@@ -49,6 +49,17 @@ module TitleAndTabsetHelper
     link_with_query("« #{:BACK.t}", path)
   end
 
+  # Short-hand to render shared tab_set partial for a given set of links.
+  def add_tab_set(links)
+    return unless links
+
+    tabs = create_tabs(links)
+
+    content_for(:tab_set) do
+      render(partial: "application/content/tab_set", locals: { tabs: tabs })
+    end
+  end
+
   # Convert an array (of arrays) of link attributes into an array of HTML tabs
   # that may be either links or CRUD button_to's, for RHS tab set
   # Example
@@ -79,11 +90,6 @@ module TitleAndTabsetHelper
         link_to(str, url, kwargs)
       end
     end
-  end
-
-  # Short-hand to render shared tab_set partial for a given set of links.
-  def draw_tab_set(links)
-    render(partial: "application/content/tab_set", locals: { links: links })
   end
 
   def index_sorter(sorts)

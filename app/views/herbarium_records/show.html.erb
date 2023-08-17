@@ -3,9 +3,7 @@
          @herbarium_record.format_name.t + "'".html_safe
 
 add_pager_for(@herbarium_record)
-links = herbarium_record_show_links(h_r: @herbarium_record)
-tabs = create_tabs(links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(herbarium_record_show_links(h_r: @herbarium_record))
 
 herbarium = @herbarium_record.herbarium
 %>
