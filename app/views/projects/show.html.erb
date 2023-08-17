@@ -1,7 +1,7 @@
 <%
 @title ||= :show_project_title.t(title: @project.title)
 add_pager_for(@project)
-draw_interest_icons(@user, @project)
+add_interest_icons(@user, @project)
 add_tab_set(project_show_links(project: @project, user: @user))
 %>
 

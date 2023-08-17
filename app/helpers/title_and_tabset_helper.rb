@@ -115,13 +115,13 @@ module TitleAndTabsetHelper
   #     end
   #
   #     # Draw interest icons in the top-right.
-  #     draw_interest_icons(@object)
+  #     add_interest_icons(@object)
   #   %>
   #
   # This will cause the set of three icons to be rendered floating in the
   # top-right corner of the content portion of the page.
 
-  def draw_interest_icons(user, object)
+  def add_interest_icons(user, object)
     return unless user
 
     content_for(:interest_icons) do
