@@ -2,6 +2,7 @@
 <nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print">
 
   <div class="container-fluid px-0">
+    <%= tag.span(rubric, class: "hidden") %>
     <% if controller.controller_name == "identify" %>
       <%= render(partial: "observations/identify/form_identify_filter") %>
     <% else ##user is logged in %>
