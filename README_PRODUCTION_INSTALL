@@ -26,24 +26,31 @@ root> visudo
 root> useradd -m -s /bin/bash -G mo,sudo jason
 root> useradd -m -s /bin/bash -G mo,sudo jdcohenesq
 root> useradd -m -s /bin/bash -G mo,sudo alan
+root> useradd -m -s /bin/bash -G mo,sudo andrnimm
 root> mkdir /home/jason/.ssh
 root> mkdir /home/jdcohenesq/.ssh
 root> mkdir /home/alan/.ssh
+root> mkdir /home/andrnimm/.ssh
 root> vi /home/jason/.ssh/authorized_keys
   # copy over from old server
 root> vi /home/jdcohenesq/.ssh/authorized_keys
   # copy over from old server
 root> vi /home/alan/.ssh/authorized_keys
   # copy over from old server
+root> vi /home/andrnimm/.ssh/authorized_keys
+  # copy over from old server
 root> chmod 600 /home/jason/.ssh/authorized_keys
 root> chmod 600 /home/jdcohenesq/.ssh/authorized_keys
 root> chmod 600 /home/alan/.ssh/authorized_keys
+root> chmod 600 /home/andrnimm/.ssh/authorized_keys
 root> chmod 700 /home/jason/.ssh
 root> chmod 700 /home/jdcohenesq/.ssh
 root> chmod 700 /home/alan/.ssh
+root> chmod 700 /home/andrnimm/.ssh
 root> chown -R jason:jason /home/jason/.ssh
 root> chown -R jdcohenesq:jdcohenesq /home/jdcohenesq/.ssh
 root> chown -R alan:alan /home/alan/.ssh
+root> chown -R andrnimm:andrnimm /home/andrnimm/.ssh
 root> passwd $USER
   # set your password now just to be safe, in case keyless login fails
 root> logout
@@ -70,23 +77,45 @@ root> apt-get upgrade -y
 root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
-root> iptables-restore
-  # Run "sudo iptables-save" on old server, then copy into here.
+# Run "sudo iptables-save" on old server, then copy into here.
+root> iptables-restore [copy of firewall from old server]
 root> iptables-save > /etc/firewall.conf
 root> chmod 600 /etc/firewall.conf
+# What does the following do????
 root> vi /etc/rc.local
   iptables-restore < /etc/firewall.conf
   swapon /swap
+
+# Create swap file if not one already.
+# (I'm moving this ahead because it was hanging during installation
+# of the gems, and I think it migh have been because the droplet was
+# too small, because when I added swap it suddenly completed.  So
+# if it really did need swap to perform the installation, the sooner
+# we add swap the better, right? -JPH 20230813)
+root> free -h
+# If there is no swap do this:
+root> fallocate -l 1G /swap
+root> chmod 600 /swap
+root> mkswap /swap
+root> swapon /swap
+root> echo '/swap none swap sw 0 0' | tee -a /etc/fstab
 
 # Install most of the modules that we will need (except ruby).
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev \
           exiftool mrtg
+# (it's saying several services need to be restarted so rebooting
+# sounded like a good idea at this point)
+root> reboot
 
-# Install rvm and ruby.
+# Install rvm and ruby. [CHECK LATEST RUBY VERSION!!!]
 root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.4.1
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.2
+# It failed here, so I followed the instructions and reran the cmd:
+# (I don't understand the following cmd, so it may change?)
+root> sudo gpg2 --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.2
 root> gpasswd -a mo rvm
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
@@ -99,7 +128,7 @@ root> mkdir /var/web
 root> mkdir /var/web/mo
 root> chown mo:mo /var/web/mo
 root> chmod 750 /var/web/mo
-root> ln -s /var/web/mushroom-observer /var/web/mo
+root> ln -s /var/web/mo /var/web/mushroom-observer
 
 # Make sure nginx user has access to rails directories.
 root> usermod -a -G mo www-data
@@ -120,7 +149,17 @@ mo> vi config/consts-site.rb
   # grab this from old server
 mo> vi config/database.yml
   # grab this from old server
+mo> echo blahblahblah > config/master.key
+  # grab "blahblahblah" from the old server
 # Ping the database to make sure everything's working right.
+# (You will have to add the new IP address to the database server!)
+database_server_root> mysql -u root -p
+  # For each remote user:
+  create user 'mo'@'$WEB_SERVER' identified by '$DB_PASSWORD';
+  grant all privileges on mo_production.* to 'mo'@'$WEB_SERVER' with grant option;
+  GRANT PROCESS, SELECT, LOCK TABLES ON *.* TO 'mo'@'$WEB_SERVER';
+database_server_root> service mysql restart
+# Now test it on the new server...
 mo> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db3.mushroomobserver.org ping
 
 # Or can just mirror old server like this:
@@ -134,6 +173,11 @@ mo> bundle install
 # Configure nginx.
 mo> exit
 root> cp /var/web/mushroom-observer/config/etc/nginx.conf /etc/nginx/
+# This is failing because of letsencrypt not being installed yet.
+# root> apt install snapd
+# root> snap install --classic certbot
+# root> ln -s /snap/bin/certbot /usr/bin/certbot
+# root> certbot --nginx
 root> service nginx restart
 root> rm /usr/share/nginx/html/index.html # (there's *got* to be a better way!)
 
@@ -144,15 +188,6 @@ root> chmod 755 /usr/local/bin/exifautotran
 root> cp /var/web/mushroom-observer/script/unicorn /etc/init.d/unicorn
 root> chmod 755 /etc/init.d/unicorn
 root> update-rc.d unicorn defaults
-
-# Create swap file if not one already.
-root> free -h
-# If there is no swap do this:
-root> fallocate -l 1G /swap
-root> chmod 600 /swap
-root> mkswap /swap
-root> swapon /swap
-root> echo '/swap none swap sw 0 0' | tee -a /etc/fstab
 
 --------------------------------------------------------------------------------
 
@@ -187,7 +222,7 @@ mo> service nginx stop
 mo> service nginx start
 
 # Should start listening on port 8080.
-mo> lynx localhost:8080
+# This isn't working, also seems to be an ssl issue?
 mo> wget localhost:8080
 
 --------------------------------------------------------------------------------
@@ -260,13 +295,12 @@ root> chmod 755 /usr/local/bin/autoreply
 mo> su mo
 mo> ssh-keygen -t rsa
   # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
-mo> ssh-copy-id -i ~/.ssh/id_rsa.pub images.mushroomobserver.org
-  # Enter password.
-# If that doesn't work it may be because mo doesn't have a password on the
-# image server.  In that case go into the image server as root:
-images> vi /home/mo/.ssh/authorized_keys
-  # copy /home/mo/.ssh/id_rsa.pub from the new server
-mo> ssh cdmr@images.mushroomobserver.org echo hello world
+  # Now copy and paste
+  #   /home/mo/.ssh/id_rsa.pub
+  # onto the end of
+  #   /home/mo/.ssh/authorized_keys
+  # on the image server.  Test if it worked:
+mo> ssh images.mushroomobserver.org echo hello world
 
 # Set up logrotate to archive unicorn and rails logs.
 mo> exit

@@ -233,6 +233,7 @@
   article: article
   ARTICLES: Articles
   articles: articles
+  CHECKLISTS: Checklists
   CLADE: Clade
   clade: clade
   COLLECTION_NUMBER: Collection Number
@@ -243,10 +244,12 @@
   comment: comment
   COMMENTS: Comments
   comments: comments
+  CONTRIBUTORS: Contributors
   DESCRIPTION: Description
   description: description
   DESCRIPTIONS: Descriptions
   descriptions: descriptions
+  DONATIONS: Donations
   DRAFT: Draft
   draft: draft
   DRAFTS: Drafts
@@ -263,8 +266,11 @@
   image: image
   IMAGES: Images
   images: images
-  ignore: ignore
   IGNORE: Ignore
+  ignore: ignore
+  INFO: Info
+  INFORMATION: Information
+  INTERESTS: Interests
   GEOLOCATION: Geolocation
   geolocation: geolocation
   GLOSSARY: Glossary
@@ -346,6 +352,8 @@
   past_name: name change
   PAST_NAMES: Name Changes
   past_names: name changes
+  PIVOTAL: Pivotal
+  POLICY: Policy
   PROJECT: Project
   project: project
   PROJECTS: Projects
@@ -376,6 +384,13 @@
   specimen: specimen
   SPECIMENS: Specimens
   specimens: specimens
+  SUPPORT: Support
+  support: support
+  THEME: Theme
+  TRANSLATION: Translation
+  translation: translation
+  TRANSLATIONS: Translations
+  translations: translations
   USER: User
   user: user
   USERS: Users

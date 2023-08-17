@@ -9,6 +9,7 @@ top_nav_classes = %w[navbar navbar-light bg-light border-light
 
   <div class="container-fluid px-0 justify-content-between">
     <div class="top-bar-left d-flex flex-row">
+      <%= tag.span(rubric, class: "d-none") %>
       <% if controller.controller_name == "identify" %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else ##future filters %>

@@ -85,12 +85,13 @@
 #  ==== Other stuff
 #  disable_link_prefetching::    (filter: prevents prefetching of destroy
 #                                 methods)
+#  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
+#  default_thumbnail_size_set::  Change default thumbnail size for current user.
+#  rubric::                      Label for what the controller deals with
 #  update_view_stats::           Called after each show_object request.
 #  calc_layout_params::          Gather User's list layout preferences.
 #  catch_errors_and_log_request_stats::
 #                                (filter: catches errors for integration tests)
-#  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
-#  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #
 class ApplicationController < ActionController::Base
   require "extensions"
@@ -1825,6 +1826,35 @@ class ApplicationController < ActionController::Base
       session[:thumbnail_size] = val
     end
   end
+
+  # "rubric"
+  # The name of the "application domain" of the present controller. In human
+  # terms, it's a label for "what we're dealing with on this page, generally."
+  # Usually that would be the same as the controller_name, like
+  # "Observations" or "Account". But in a nested controller like
+  # "Locations::Descriptions::DefaultsController" though, what we want is just
+  # the "Locations" part, so we need to parse the class.module_parent.
+  #   gotcha - `Object` is the module_parent of a top-level controller!
+  #
+  # NOTE: The rubric can of course be overridden in each controller.
+  #
+  # Returns a translation string.
+  #
+  def rubric
+    # Levels of nesting. parent_module is one level.
+    if (parent_module = self.class.module_parent).present? &&
+       parent_module != Object
+
+      if (grandma_module = parent_module.to_s.rpartition("::").first).present?
+        return grandma_module.underscore.upcase.to_sym.t
+      end
+
+      return parent_module.to_s.underscore.upcase.to_sym.t
+    end
+
+    controller_name.upcase.to_sym.t
+  end
+  helper_method :rubric
 
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count
