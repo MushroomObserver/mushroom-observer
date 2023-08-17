@@ -1,9 +1,14 @@
-<%
-  # This is a stop-gap measure until I/we figure out exactly how we want to
-  # deal with tabsets moving foward.  I'm not sure that my current approach is
-  # correct, but I feel like it is a bit more transparent than the previous
-  # approach and allows more flexibility in styling the tabs - RJS 2/15/2015
-  @tabsets ||= {}
+<%#
+The header for page content (below the application top nav)
+May include:
+prev_next_pager
+title
+context_help
+owner_naming
+interest_icons
+tab_set
+type_filters
+sorts
 %>
 
 <div class="row">
@@ -12,7 +17,8 @@
 
   <div class="col-xs-<%= content_for?(:tab_set) ? 8 : 12 %>" id="title_bar">
     <!-- Pager -->
-    <%= tag.div(class: "hidden-print") do
+    <%= content_tag_if(content_for?(:prev_next_pager), :div,
+                       class: "hidden-print") do
           yield :prev_next_pager
         end %>
 
@@ -36,10 +42,10 @@
       end %>
 
   <%= content_tag_if(content_for?(:type_filters), :div,
-                    class: "hidden-print col-xs-12") do
+                     class: "hidden-print col-xs-12") do
         yield :type_filters
       end %>
 
-  <!-- Sorter -->
+  <!-- Sorter. conditionally renders the partial -->
   <%= index_sorter(@sorts) %>
 </div>

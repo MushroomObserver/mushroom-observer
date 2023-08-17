@@ -98,6 +98,7 @@ module TitleAndTabsetHelper
     end
   end
 
+  # @sorts is set by ApplicationController#show_index_count_results
   def index_sorter(sorts)
     return "" unless sorts
 
