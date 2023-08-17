@@ -128,7 +128,7 @@ module TitleAndTabsetHelper
     types == [type] ? label : link_with_query(label, link, **help)
   end
 
-  # @sorts is set by ApplicationController#show_index_count_results
+  # @sorts is set by ApplicationController#set_index_view_ivars
   def index_sorter(sorts)
     return "" unless sorts
 
