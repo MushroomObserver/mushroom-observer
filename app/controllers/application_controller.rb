@@ -1491,12 +1491,15 @@ class ApplicationController < ActionController::Base
 
   ###########################################################################
   #
-  #  INDEX VIEW METHODS - MOVE TO HELPERS
+  # INDEX VIEW METHODS - MOVE TO HELPERS?
 
-  # This useful method sets a bunch of ivars used in all indexes.
+  # These useful methods set a bunch of ivars used in all indexes.
   # Converting it to a helper seems desirable re: separation of concerns,
-  # but how to attach to any index by default?
-  # I believe we have to add helper manually to each index. - AN 2023
+  # but we'd need access to the args passed to show_index_of_objects
+  # by the controller index action in the hypothetical helper.
+  # Also, these ivars are magically available to any index by default.
+  # I believe we'd have to add a helper manually to each index. - AN 2023
+  #
   def set_index_view_ivars(query, args)
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if args[:matrix]
