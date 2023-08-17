@@ -10,7 +10,7 @@
 
       # Everything tab
       tag.span(
-        log_tab_for_everything(@types),
+        filter_for_everything(@types),
         class: class_names("btn btn-default btn-sm",
                            { active: @types == ['all'] })
       ),
