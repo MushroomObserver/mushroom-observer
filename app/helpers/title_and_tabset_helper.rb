@@ -4,10 +4,15 @@
 #  --- links and buttons ----
 #
 #  title_tag_contents           # text to put in html header <title>
+#  add_tab_set
+#  add_pager_for(object)
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
-#  create_links                 # convert links into list of tabs
-#  add_tab_set
+#  add_tab_set(links)
+#  create_tabs(links)           # convert links into list of tabs
+#  add_type_filters
+#  index_sorter
+#  add_interest_icons(user, object)
 #
 
 module TitleAndTabsetHelper
