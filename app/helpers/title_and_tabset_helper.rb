@@ -22,7 +22,7 @@ module TitleAndTabsetHelper
     end
   end
 
-  def add_prev_next_pager(object)
+  def add_pager_for(object)
     content_for(:prev_next_object) do
       render(partial: "application/content/prev_next_pager",
              locals: { object: object })
