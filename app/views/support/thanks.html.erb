@@ -1,8 +1,7 @@
 <%
-  @title = :thanks_title.l
+@title = :thanks_title.l
 
-  tabs = create_tabs(support_governance_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(support_governance_links)
 %>
 
 <%= :thanks_note.tp %>

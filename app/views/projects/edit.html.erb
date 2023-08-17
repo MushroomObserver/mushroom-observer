@@ -1,8 +1,7 @@
 <%
 @title ||= :edit_project_title.t(title: @project.title)
 
-tabs = create_tabs(project_form_edit_links(project: @project))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(project_form_edit_links(project: @project))
 
 button = :SAVE_EDITS.l
 %>

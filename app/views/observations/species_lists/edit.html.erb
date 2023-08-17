@@ -1,19 +1,18 @@
 <%
 # :manage_species_lists
-  @title = :species_list_manage_title.t(name: @observation.unique_format_name)
+@title = :species_list_manage_title.t(name: @observation.unique_format_name)
 
-  tabs = create_tabs(observation_list_links(obs: @observation))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(observation_list_links(obs: @observation))
 
-  obs_lists = []
-  other_lists = []
-  @all_lists.each do |list|
-    if list.observations.member?(@observation)
-      obs_lists << list
-    else
-      other_lists << list
-    end
+obs_lists = []
+other_lists = []
+@all_lists.each do |list|
+  if list.observations.member?(@observation)
+    obs_lists << list
+  else
+    other_lists << list
   end
+end
 %>
 
 <% if obs_lists.any? %>

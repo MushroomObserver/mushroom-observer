@@ -1,9 +1,8 @@
 <%
-  @title = :users_by_contribution_title.t
+@title = :users_by_contribution_title.t
 
-  tabs = create_tabs(contributors_index_links)
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+add_tab_set(contributors_index_links)
+@container = :wide
 %>
 
 <div class="row">

@@ -1,11 +1,10 @@
 <%
-  @title = :show_past_glossary_term_title.t(
-    num: @glossary_term.version,
-    name: @glossary_term.name
-  )
+@title = :show_past_glossary_term_title.t(
+  num: @glossary_term.version,
+  name: @glossary_term.name
+)
 
-  tabs = create_tabs(glossary_term_version_links(term: @glossary_term))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(glossary_term_version_links(term: @glossary_term))
 %>
 
 <div class="row">

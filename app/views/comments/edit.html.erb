@@ -1,6 +1,5 @@
 <%
-  tabs = create_tabs(comment_form_edit_links(comment: @comment))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(comment_form_edit_links(comment: @comment))
 %>
 
 <%= render(partial: "form", locals: { action: :update, local: true }) %>

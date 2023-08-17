@@ -1,8 +1,7 @@
 <%
 @title = :list_countries_title.t
 
-tabs = create_tabs(location_countries_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(location_countries_links)
 @container = :wide
 %>
 

@@ -1,11 +1,10 @@
 <%
-  @owner_naming = owner_naming_line(@observation) # must before show_obs_title
-  @title = show_obs_title(obs: @observation, owner_naming: @owner_naming)
-  num_images = @observation.images.length
+@owner_naming = owner_naming_line(@observation) # must before show_obs_title
+@title = show_obs_title(obs: @observation, owner_naming: @owner_naming)
+num_images = @observation.images.length
 
-  tabs = create_tabs(naming_suggestion_links(obs: @observation))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :double
+add_tab_set(naming_suggestion_links(obs: @observation))
+@container = :double
 %>
 
 <div class="row">

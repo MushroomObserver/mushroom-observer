@@ -1,8 +1,7 @@
 <%
-  @title = :image_add_title.t(name: @observation.unique_format_name)
+@title = :image_add_title.t(name: @observation.unique_format_name)
 
-  tabs = create_tabs(observation_images_new_links(obs: @observation))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(observation_images_new_links(obs: @observation))
 %>
 
 <%= form_with(model: @image,

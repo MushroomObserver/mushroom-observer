@@ -1,8 +1,7 @@
 <%
 @title ||= :add_project_title.t
 
-tabs = create_tabs(project_form_new_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(project_form_new_links)
 
 button = :CREATE.l
 %>

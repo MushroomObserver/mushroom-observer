@@ -1,8 +1,7 @@
 <%
 @title = :add_members_title.t(title: @project.title)
 
-tabs = create_tabs(project_members_form_new_links(project: @project))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(project_members_form_new_links(project: @project))
 @container = :wide
 
 action = { controller: "/projects/members", action: :create,

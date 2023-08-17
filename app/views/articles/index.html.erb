@@ -1,10 +1,9 @@
 <%
-  @title ||= :ARTICLES.t
-  tabs = create_tabs(articles_index_links(user: @user))
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :wide
+@title ||= :ARTICLES.t
+add_tab_set(articles_index_links(user: @user))
+@container = :wide
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
