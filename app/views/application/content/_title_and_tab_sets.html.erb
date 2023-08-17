@@ -19,7 +19,7 @@ sorts
     <!-- Pager -->
     <%= content_tag_if(content_for?(:prev_next_object), :div,
                        class: "hidden-print") do
-          yield :prev_next_object
+          yield(:prev_next_object)
         end %>
 
     <!-- Title Caption -->
@@ -37,13 +37,13 @@ sorts
   <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons),
                     :div, id: "right_tabs",
                     class: "hidden-print text-right col-sm-4 mb-3") do
-        [yield :interest_icons,
-         yield :tab_set].safe_join
+        concat(yield(:interest_icons))
+        concat(yield(:tab_set))
       end %>
 
   <%= content_tag_if(content_for?(:type_filters), :div,
                      class: "hidden-print col-xs-12") do
-        yield :type_filters
+        yield(:type_filters)
       end %>
 
   <!-- Sorter. conditionally renders the partial -->
