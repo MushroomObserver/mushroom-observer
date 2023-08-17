@@ -1,8 +1,8 @@
 <%
 @title = @sequence.unique_format_name
-
+add_pager_for(@sequence)
 tabs = create_tabs(sequence_show_links(seq: @sequence))
-@tabsets = { pager_for: @sequence, right: draw_tab_set(tabs) }
+@tabsets = { right: draw_tab_set(tabs) }
 @container = :wide
 %>
 

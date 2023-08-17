@@ -1,8 +1,9 @@
 <%
 @title = @herbarium.format_name.t
 
+add_pager_for(@herbarium)
 tabs = create_tabs(herbarium_show_links(herbarium: @herbarium, user: @user))
-@tabsets = { pager_for: @herbarium, right: draw_tab_set(tabs) }
+@tabsets = { right: draw_tab_set(tabs) }
 
 map = @herbarium.location ? true : false
 @container = :wide

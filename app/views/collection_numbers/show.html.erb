@@ -1,8 +1,8 @@
 <%
 @title = "#{:COLLECTION_NUMBER.t} '#{@collection_number.format_name.t}'"
-
+add_pager_for(@collection_number)
 tabs = create_tabs(collection_number_show_links(c_n: @collection_number))
-@tabsets = { pager_for: @collection_number, right: draw_tab_set(tabs) }
+@tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <p class="mt-3">

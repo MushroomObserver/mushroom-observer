@@ -27,7 +27,7 @@
 #
 #  3. Add interest "eyes" to the header section of the show_object view:
 #
-#       draw_interest_icons(@target)
+#       draw_interest_icons(@user, @target)
 #
 #  4. Add comments_for_object partial at the bottom of the show_object view:
 #

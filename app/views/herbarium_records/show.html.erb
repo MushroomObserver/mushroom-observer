@@ -2,9 +2,10 @@
 @title = :HERBARIUM_RECORD.t + " '".html_safe +
          @herbarium_record.format_name.t + "'".html_safe
 
+add_pager_for(@herbarium_record)
 links = herbarium_record_show_links(h_r: @herbarium_record)
 tabs = create_tabs(links)
-@tabsets = { pager_for: @herbarium_record, right: draw_tab_set(tabs) }
+@tabsets = { right: draw_tab_set(tabs) }
 
 herbarium = @herbarium_record.herbarium
 %>

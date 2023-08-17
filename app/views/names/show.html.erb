@@ -2,10 +2,10 @@
 @title = :show_name_title.t(name: @name.display_name)
 
 Textile.register_name(@name)
-
+add_pager_for(@name)
+draw_interest_icons(@user, @name)
 tabs = create_tabs(name_show_links(name: @name, user: @user))
-tabs << draw_interest_icons(@name)
-@tabsets = { pager_for: @name, right: draw_tab_set(tabs) }
+@tabsets = { right: draw_tab_set(tabs) }
 
 @container = :wide
 %>
