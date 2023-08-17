@@ -1,8 +1,7 @@
 <%
 @title = :show_site_stats_title.t
 
-tabs = create_tabs(info_site_stats_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(info_site_stats_links)
 @container = :full
 %>
 

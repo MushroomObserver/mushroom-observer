@@ -17,8 +17,8 @@ elsif @comment.target_type == "Name"
   Textile.register_name(@comment.target)
 end
 
-tabs = create_tabs(comment_show_links(comment: @comment, target: @target))
-@tabsets = { pager_for: @comment, right: draw_tab_set(tabs) }
+add_pager_for(@comment)
+add_tab_set(comment_show_links(comment: @comment, target: @target))
 %>
 
 <p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>

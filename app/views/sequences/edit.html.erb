@@ -1,6 +1,5 @@
 <%
-tabs = create_tabs(sequence_form_links(obj: @back_object))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(sequence_form_links(obj: @back_object))
 @container = :wide
 obs = @sequence.observation
 %>

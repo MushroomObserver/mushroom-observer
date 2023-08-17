@@ -1,7 +1,6 @@
 <%
-  @title = :prefs_title.t
-  tabs = create_tabs(account_preferences_edit_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+@title = :prefs_title.t
+add_tab_set(account_preferences_edit_links)
 %>
 
 <%= form_with(model: @user, url: account_preferences_path,

@@ -1,11 +1,10 @@
 <%
-  @title = :species_list_create_title.t
+@title = :species_list_create_title.t
 
-  tabs = create_tabs(species_list_form_new_links)
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :text
+add_tab_set(species_list_form_new_links)
+@container = :text
 
-  action = species_lists_path(approved_where: @place_name)
+action = species_lists_path(approved_where: @place_name)
 %>
 
 <%= render(partial: "species_lists/form",

@@ -1,7 +1,6 @@
 <%
 @title = edit_title(@article)
-tabs = create_tabs(article_form_edit_links(article: @article))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(article_form_edit_links(article: @article))
 %>
 
 <%= render(partial: "form") %>

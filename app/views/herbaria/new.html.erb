@@ -1,9 +1,8 @@
 <%# Display form to creat a new herbarium %>
 <%
-  @title = :create_herbarium_title.l
+@title = :create_herbarium_title.l
 
-  tabs = create_tabs(herbarium_form_new_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(herbarium_form_new_links)
 %>
 
 <%= render(partial: "form", locals: { button_name: :CREATE }) %>

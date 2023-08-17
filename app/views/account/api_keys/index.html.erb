@@ -1,12 +1,11 @@
 <%
-  @title = :account_api_keys_title.t
+@title = :account_api_keys_title.t
 
-  tabs = create_tabs(account_api_links)
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+add_tab_set(account_api_links)
+@container = :full
 
-  javascript_include("account_api_keys")
-  inject_javascript_at_end("APIKeyModule()")
+javascript_include("account_api_keys")
+inject_javascript_at_end("APIKeyModule()")
 %>
 
 <div class="container-text">

@@ -1,13 +1,12 @@
 <%
-  links = create_tabs(locations_index_links(query: @query))
-  @tabsets = { right: draw_tab_set(links) }
-  @container = :wide
+add_tab_set(locations_index_links(query: @query))
+@container = :wide
 
-  @known_pages = @pages
-  @known_data  = @objects
+@known_pages = @pages
+@known_data  = @objects
 
-  observation_counts = calc_counts(@objects)
-  flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
+observation_counts = calc_counts(@objects)
+flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
 <div class="mt-3">

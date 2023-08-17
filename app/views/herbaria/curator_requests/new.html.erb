@@ -1,9 +1,8 @@
 <%# Display form for a new request to be a herbarium curator %>
 <%
-  @title = :show_herbarium_curator_request.t
+@title = :show_herbarium_curator_request.t
 
-  tabs = create_tabs(herbaria_curator_request_links(herbarium: @herbarium))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(herbaria_curator_request_links(herbarium: @herbarium))
 %>
 
 <%= :show_herbarium_curator_help.tp %>

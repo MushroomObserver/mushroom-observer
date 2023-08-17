@@ -1,6 +1,5 @@
 <%
-tabs = create_tabs(comment_form_new_links(target: @target))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(comment_form_new_links(target: @target))
 @container = :full
 %>
 

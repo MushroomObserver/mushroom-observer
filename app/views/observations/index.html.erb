@@ -1,9 +1,5 @@
 <%
-if @objects.any?
-  links = index_observation_links(query: @query)
-  tabs = create_tabs(links)
-  @tabsets = { right: draw_tab_set(tabs) }
-end
+add_tab_set(index_observation_links(query: @query)) if @objects.any?
 
 @container = :full
 

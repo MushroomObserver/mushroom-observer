@@ -6,10 +6,8 @@ desc_title = description_title(@description)
   name: desc_title
 )
 
-links = name_description_version_links(description: @description,
-                                       desc_title: desc_title)
-tabs = create_tabs(links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_description_version_links(description: @description,
+                                           desc_title: desc_title))
 
 Textile.register_name(@name)
 %>

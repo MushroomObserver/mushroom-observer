@@ -33,7 +33,7 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
   # destroy_button tab tested in articles_controller_test
   # That method calls `add_query_param` and others unavailable to helper tests
   # put_button is not used for articles, but we're just testing HTML output
-  def test_create_tabs
+  def test_create_links_to
     article = Article.last
     links = [[:create_article_title.t, new_article_path,
               { class: "new_article_link" }],
@@ -43,7 +43,7 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
              ["move", article_path(article.id), { button: :patch }],
              ["celebrate", article_path(article.id), { button: :post }]]
 
-    tabs = create_tabs(links)
+    tabs = create_links_to(links)
 
     tab1 = link_to(
       :create_article_title.t, new_article_path, { class: "new_article_link" }

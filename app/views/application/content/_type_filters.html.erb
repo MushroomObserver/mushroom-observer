@@ -10,13 +10,14 @@
 
       # Everything tab
       tag.span(
-        log_tab_for_everything(@types),
+        filter_for_everything(@types),
         class: class_names("btn btn-default btn-sm",
                            { active: @types == ['all'] })
       ),
 
       # Tab for each type of log
-      render(partial: "type", collection: RssLog.all_types(&:to_s),
+      render(partial: "application/content/type",
+             collection: RssLog.all_types(&:to_s),
              locals: { f: f }),
 
       f.submit(:SUBMIT.t, class: "btn btn-default btn-sm")

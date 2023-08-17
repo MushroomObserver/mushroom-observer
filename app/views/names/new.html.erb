@@ -1,7 +1,6 @@
 <%
 @title ||= :create_name_title.t
-tabs = create_tabs(name_form_new_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(name_form_new_links)
 action = add_query_param({ controller: "/names", action: :create })
 %>
 

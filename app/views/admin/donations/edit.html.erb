@@ -1,9 +1,8 @@
 <%
-  @title = :review_donations_title.l
+@title = :review_donations_title.l
 
-  tabs = create_tabs(admin_donations_form_edit_links)
-  @tabsets = { right: draw_tab_set(tabs) }
-  @container = :full
+add_tab_set(admin_donations_form_edit_links)
+@container = :full
 %>
 
 <%= form_with(url: admin_donations_path,

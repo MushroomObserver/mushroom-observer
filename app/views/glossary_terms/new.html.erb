@@ -1,8 +1,7 @@
 <%
 @title = :create_glossary_term_title.t
 
-tabs = create_tabs(glossary_term_form_new_links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(glossary_term_form_new_links)
 %>
 
 <%= render("form", button_name: :edit_glossary_term_save) do |f| %>

@@ -1,8 +1,7 @@
 <%
 @title = :email_name_change_request_title.t
 
-tabs = create_tabs(email_name_change_request_links(name: @name))
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(email_name_change_request_links(name: @name))
 
 url = { action: :name_change_request, name_id: @name.id, new_name: @new_name }
 %>

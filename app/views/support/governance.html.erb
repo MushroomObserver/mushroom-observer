@@ -1,8 +1,7 @@
 <%
-  @title = :governance_title.l
+@title = :governance_title.l
 
-  tabs = create_tabs(support_governance_links)
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(support_governance_links)
 %>
 
 <%= :governance.tp %>

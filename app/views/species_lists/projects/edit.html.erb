@@ -1,11 +1,10 @@
 <%
-  @title = :species_list_projects_title.t(list: @list.title)
+@title = :species_list_projects_title.t(list: @list.title)
 
-  tabs = create_tabs(species_list_edit_project_links(list: @list))
-  @tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(species_list_edit_project_links(list: @list))
 
-  action = { controller: "/species_lists/projects",
-             action: :update, id: @list.id }
+action = { controller: "/species_lists/projects",
+           action: :update, id: @list.id }
 %>
 
 <div class="help-block mt-3">

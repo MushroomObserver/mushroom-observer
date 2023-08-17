@@ -1,11 +1,10 @@
 <%
-  @title ||= :list_herbaria_title.t
+@title ||= :list_herbaria_title.t
 
-  links = create_tabs(herbaria_index_links(query: @query))
-  @tabsets = { right: draw_tab_set(links) }
-  @container = :wide
+add_tab_set(herbaria_index_links(query: @query))
+@container = :wide
 
-  flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @merge %>

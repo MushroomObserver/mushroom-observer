@@ -11,10 +11,9 @@
             :checklist_for_site_title.t
           end
 
-links = checklist_show_links(user: @show_user, project: @project,
-                             list: @species_list)
-tabs = create_tabs(links)
-@tabsets = { right: draw_tab_set(tabs) }
+add_tab_set(checklist_show_links(user: @show_user,
+                                 project: @project,
+                                 list: @species_list))
 @container = :full
 names = @data.species
 %>

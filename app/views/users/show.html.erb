@@ -1,16 +1,15 @@
 <%
-  id = @show_user.id
-  name = @show_user.unique_text_name
-  @title = :show_user_title.t(user: name)
-  @container = :full
+id = @show_user.id
+name = @show_user.unique_text_name
+@title = :show_user_title.t(user: name)
+add_pager_for(@show_user)
+add_tab_set(user_show_links(show_user: @show_user, user: @user))
 
-  links = user_show_links(show_user: @show_user, user: @user)
-  tabs = create_tabs(links)
-  @tabsets = { pager_for: @show_user, right: draw_tab_set(tabs) }
+@container = :full
 
-  rows = user_stats_rows(@show_user, @user_data)
-  paths = user_stats_link_paths(@show_user)
-  total = 0
+rows = user_stats_rows(@show_user, @user_data)
+paths = user_stats_link_paths(@show_user)
+total = 0
 %>
 
 <div class="row">
