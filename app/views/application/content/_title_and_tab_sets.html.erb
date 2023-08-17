@@ -10,7 +10,7 @@
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
   <%= tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
 
-  <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title_bar">
+  <div class="col-xs-<%= content_for?(:tab_set) ? 8 : 12 %>" id="title_bar">
     <!-- Pager -->
     <%= tag.div(class: "hidden-print") do
           yield :prev_next_pager
@@ -28,15 +28,17 @@
   </div>
 
   <!-- Tabsets -->
-  <%= content_tag_if(@tabsets[:right], :div,
+  <%= content_tag_if(content_for?(:tab_set), :div,
                     id: "right_tabs",
                     class: "hidden-print text-right col-sm-4 mb-3") do
         yield :interest_icons
-        @tabsets[:right]
+        yield :tab_set
       end %>
 
-  <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
-                    class: "hidden-print col-xs-12") %>
+  <%= content_tag_if(content_for?(:type_filters), :div,
+                    class: "hidden-print col-xs-12") do
+        yield :type_filters
+      end %>
 
   <!-- Sorter -->
   <%= index_sorter(@sorts) %>

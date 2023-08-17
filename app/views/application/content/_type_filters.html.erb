@@ -16,7 +16,8 @@
       ),
 
       # Tab for each type of log
-      render(partial: "type", collection: RssLog.all_types(&:to_s),
+      render(partial: "application/content/type",
+             collection: RssLog.all_types(&:to_s),
              locals: { f: f }),
 
       f.submit(:SUBMIT.t, class: "btn btn-default btn-sm")

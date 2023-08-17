@@ -21,7 +21,7 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    # type filters full_width_tab_set in #index
+    # type_filters full_width_tab_set in #index
     # The "Everything" tab
     def log_tab_for_everything(types)
       label = :rss_all.t

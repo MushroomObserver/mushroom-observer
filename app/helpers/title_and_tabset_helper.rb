@@ -92,6 +92,12 @@ module TitleAndTabsetHelper
     end
   end
 
+  def add_type_filters
+    content_for(:type_filters) do
+      render(partial: "application/content/type_filters")
+    end
+  end
+
   def index_sorter(sorts)
     return "" unless sorts
 
