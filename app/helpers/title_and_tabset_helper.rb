@@ -118,16 +118,7 @@ module TitleAndTabsetHelper
   #   <%
   #     # Specify the page's title.
   #     @title = "Page Title"
-  #
-  #     # Define set of linked text tabs for top-left.
-  #     new_tab_set do
-  #       add_tab("Tab Label One", link: args, ...)
-  #       add_tab("Tab Label Two", link: args, ...)
-  #       ...
-  #     end
-  #
-  #     # Draw interest icons in the top-right.
-  #     add_interest_icons(@object)
+  #     add_interest_icons(@user, @object)
   #   %>
   #
   # This will cause the set of three icons to be rendered floating in the
@@ -136,9 +127,10 @@ module TitleAndTabsetHelper
   def add_interest_icons(user, object)
     return unless user
 
+    img1, img2, img3 = img_link_array(user, object)
+
     content_for(:interest_icons) do
-      img1, img2, img3 = img_link_array(user, object)
-      interest_tab(img1, img2, img3)
+      tag.div(img1 + safe_br + img2 + img3, class: "interest-eyes")
     end
   end
 
@@ -205,9 +197,5 @@ module TitleAndTabsetHelper
   # Create small icon image.
   def interest_icon_small(type, alt) # :nodoc:
     image_tag("#{type}3.png", alt: alt, class: "interest_small", title: alt)
-  end
-
-  def interest_tab(img1, img2, img3)
-    content_tag(:div, img1 + safe_br + img2 + img3, class: "interest-eyes")
   end
 end
