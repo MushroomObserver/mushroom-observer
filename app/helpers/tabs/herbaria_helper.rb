@@ -14,7 +14,7 @@ module Tabs
     end
 
     def herbaria_index_sorts(query:)
-      return nonpersonal_herbaria_index_sorts if query.flavor == :nonpersonal
+      return nonpersonal_herbaria_index_sorts if query&.flavor == :nonpersonal
 
       full_herbaria_index_sorts
     end

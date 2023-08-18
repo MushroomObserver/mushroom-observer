@@ -83,9 +83,13 @@ module Tabs
       [nil, admin_users_path(id: user.id), { button: :destroy }]
     end
 
-    def users_index_sorts
-      return admin_users_index_sorts if in_admin_mode?
+    def users_index_sorts(admin)
+      return admin_users_index_sorts if admin
 
+      regular_user_index_sorts
+    end
+
+    def regular_user_index_sorts
       [
         ["login",         :sort_by_login.t],
         ["name",          :sort_by_name.t],
