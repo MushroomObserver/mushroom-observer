@@ -128,6 +128,7 @@ module TitleAndTabsetHelper
     types == [type] ? label : link_with_query(label, link, **help)
   end
 
+  # Sort links, for indexes
   def add_sorter(query, links)
     content_for(:sorter) do
       return "" unless links && query && query.num_results > 1
@@ -138,7 +139,7 @@ module TitleAndTabsetHelper
     end
   end
 
-  # Create sorting links for index pages, "graying-out" the current order.
+  # Create sorting links, "graying-out" the current order.
   # Need query to know which is current order
   def create_sorting_links(query, links, link_all = false)
     results = []
