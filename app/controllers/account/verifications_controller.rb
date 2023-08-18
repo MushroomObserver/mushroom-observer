@@ -8,10 +8,6 @@ module Account
       :reverify,
       :resend_email
     ]
-    before_action :disable_link_prefetching, except: [
-      :new,
-      :create
-    ]
 
     # Regular signup verifications hit this page only (via GET).
     def new

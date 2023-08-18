@@ -4,7 +4,6 @@
 module Locations::Descriptions
   class DefaultsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     include ::Descriptions::Defaults
     include ::Locations::Descriptions::SharedPrivateMethods

@@ -9,7 +9,6 @@ module Account::Profile
   class ImagesController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
-    before_action :disable_link_prefetching
 
     # was reuse_image params[:mode] = profile
     def reuse

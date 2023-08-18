@@ -4,7 +4,6 @@
 module Names
   class ClassificationController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Form
     def edit

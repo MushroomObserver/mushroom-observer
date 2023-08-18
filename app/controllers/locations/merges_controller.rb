@@ -4,7 +4,6 @@
 module Locations
   class MergesController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     ############################################################################
     #

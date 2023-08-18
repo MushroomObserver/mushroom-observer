@@ -4,8 +4,6 @@
 module Observations
   class NamingsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching,
-                  except: [:new, :create, :edit, :update]
 
     def new
       pass_query_params

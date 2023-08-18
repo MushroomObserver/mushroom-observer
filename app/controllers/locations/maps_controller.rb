@@ -4,7 +4,6 @@
 module Locations
   class MapsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Map results of a search or index.
     def show

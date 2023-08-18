@@ -3,7 +3,6 @@
 module Observations
   class DownloadsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     def new
       @query = find_or_create_query(:Observation, by: params[:by])

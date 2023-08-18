@@ -15,7 +15,6 @@ class CommentsController < ApplicationController
   # disable cop because index is defined in ApplicationController
   # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
-  before_action :disable_link_prefetching, except: [:new, :edit, :show]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
