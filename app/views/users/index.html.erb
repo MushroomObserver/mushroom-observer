@@ -1,4 +1,5 @@
 <%
+@container = :full
 @title ||= :users_by_name_title.t
 add_sorter(@query, users_index_sorts(in_admin_mode?))
 
