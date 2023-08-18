@@ -135,7 +135,7 @@ module Tabs
         ["date",        :sort_by_date.t],
         ["user",        :sort_by_user.t],
         ["created_at",  :sort_by_created_at.t],
-        [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+        [(query&.flavor == :by_rss_log ? "rss_log" : "updated_at"),
          :sort_by_updated_at.t]
       ]
     end
