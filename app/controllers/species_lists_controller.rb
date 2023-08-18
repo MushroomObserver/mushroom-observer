@@ -193,16 +193,6 @@ class SpeciesListsController < ApplicationController
       letters: "species_lists.title"
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["title",       :sort_by_title.t],
-      ["date",        :sort_by_date.t],
-      ["user",        :sort_by_user.t],
-      ["created_at",  :sort_by_created_at.t],
-      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-       :sort_by_updated_at.t]
-    ]
-
     # Paginate by letter if sorting by user.
     args[:letters] =
       if [query.params[:by]].intersect?(%w[user reverse_user])

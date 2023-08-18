@@ -15,10 +15,6 @@ options = [
   [:app_search_google.l, :google],
 ].sort
 
-@timer_end ||= Time.zone.now
-secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-timer = "(#{ :app_index_timer.t(seconds: secs,
-                                num: @num_results.to_i) })"
 adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
@@ -64,19 +60,10 @@ identify_page = controller.controller_name == "identify"
   <span class=""> |</span>
 </p>
 
-<% if @timer_start %>
-  <div class="navbar-text my-1 mx-2 hidden-xs smaller">
-    <span id="timer"><%= timer %></span><br/>
-    <%= adv_search %>
-  </div>
-<% else %>
-  <p class="navbar-text mx-2 hidden-xs">
-    <%= adv_search %>
-  </p>
-<% end %>
+<p class="navbar-text mx-2 hidden-xs">
+  <%= adv_search %>
+</p>
 
 <div class="visible-xs">
-  <%= content_tag(:span, timer, id: "timer",
-                  class: "text-nowrap") if @timer_start %>
   <%= adv_search %>
 </div>

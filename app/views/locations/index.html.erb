@@ -1,7 +1,7 @@
 <%
-add_tab_set(locations_index_links(query: @query))
 @container = :wide
-
+add_tab_set(locations_index_links(query: @query))
+add_sorter(@query, location_index_sorts(query: @query))
 @known_pages = @pages
 @known_data  = @objects
 

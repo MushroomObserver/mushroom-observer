@@ -1,5 +1,6 @@
 <%
-  flash_error(@error) if @error && @objects.empty?
+add_sorter(@query, species_lists_index_sorts(query: @query))
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>

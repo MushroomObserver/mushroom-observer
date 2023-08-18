@@ -167,14 +167,6 @@ class CollectionNumbersController < ApplicationController
       num_per_page: 100
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",       :sort_by_name.t],
-      ["number",     :sort_by_number.t],
-      ["created_at", :sort_by_created_at.t],
-      ["updated_at", :sort_by_updated_at.t]
-    ]
-
     show_index_of_objects(query, args)
   end
 

@@ -82,5 +82,28 @@ module Tabs
     def admin_destroy_user_link(user)
       [nil, admin_users_path(id: user.id), { button: :destroy }]
     end
+
+    def users_index_sorts
+      return admin_users_index_sorts if in_admin_mode?
+
+      [
+        ["login",         :sort_by_login.t],
+        ["name",          :sort_by_name.t],
+        ["created_at",    :sort_by_created_at.t],
+        ["location",      :sort_by_location.t],
+        ["contribution",  :sort_by_contribution.t]
+      ].freeze
+    end
+
+    def admin_users_index_sorts
+      [
+        ["id",          :sort_by_id.t],
+        ["login",       :sort_by_login.t],
+        ["name",        :sort_by_name.t],
+        ["created_at",  :sort_by_created_at.t],
+        ["updated_at",  :sort_by_updated_at.t],
+        ["last_login",  :sort_by_last_login.t]
+      ].freeze
+    end
   end
 end

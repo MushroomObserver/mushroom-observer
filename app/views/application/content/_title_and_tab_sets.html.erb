@@ -47,5 +47,6 @@ sorts
       end %>
 
   <!-- Sorter. conditionally renders the partial -->
-  <%= index_sorter(@sorts) %>
+  <%= yield(:sorter) %>
+
 </div>

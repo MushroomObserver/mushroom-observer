@@ -189,15 +189,7 @@ class HerbariaController < ApplicationController
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args,
-            template: "/herbaria/index", # render with this template
-            # Add some alternate sorting criteria.
-            sorting_links: [["records",     :sort_by_records.t],
-                            ["user",        :sort_by_user.t],
-                            ["code",        :sort_by_code.t],
-                            ["name",        :sort_by_name.t],
-                            ["created_at",  :sort_by_created_at.t],
-                            ["updated_at",  :sort_by_updated_at.t]])
+    }.merge(args)
   end
 
   def make_sure_can_edit!

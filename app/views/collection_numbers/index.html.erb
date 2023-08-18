@@ -1,10 +1,11 @@
 <%
+@container = :wide
 @title ||= :list_collection_numbers_title.t
 
 add_tab_set(collection_numbers_index_links(obs: @observation))
+add_sorter(@query, collection_numbers_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?
-@container = :wide
 %>
 
 <%= paginate_block(@pages) do %>

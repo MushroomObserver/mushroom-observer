@@ -2,6 +2,7 @@
 @title ||= :list_projects_title.t
 
 add_tab_set(projects_index_links)
+add_sorter(@query, projects_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?
 %>

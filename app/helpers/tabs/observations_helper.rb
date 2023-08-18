@@ -82,7 +82,7 @@ module Tabs
     ############################################
     # INDEX
 
-    def index_observation_links(query:)
+    def observations_index_links(query:)
       links = [
         *observations_at_where_links(query), # maybe multiple links
         map_observations_link(query),
@@ -103,6 +103,21 @@ module Tabs
         merge_locations_link(query),
         locations_index_link
       ]
+    end
+
+    def observations_index_sorts
+      [
+        ["rss_log", :sort_by_activity.t],
+        ["date", :sort_by_date.t],
+        ["created_at", :sort_by_posted.t],
+        # kind of redundant to sort by rss_logs, though not strictly ===
+        # ["updated_at", :sort_by_updated_at.t],
+        ["name", :sort_by_name.t],
+        ["user", :sort_by_user.t],
+        ["confidence", :sort_by_confidence.t],
+        ["thumbnail_quality", :sort_by_thumbnail_quality.t],
+        ["num_views", :sort_by_num_views.t]
+      ].freeze
     end
 
     def map_observations_link(query)

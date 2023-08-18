@@ -1,7 +1,8 @@
 <%
-   @title ||= :users_by_name_title.t
+@title ||= :users_by_name_title.t
+add_sorter(@query, users_index_sorts)
 
-   flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%

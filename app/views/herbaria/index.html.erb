@@ -1,8 +1,9 @@
 <%
+@container = :wide
 @title ||= :list_herbaria_title.t
 
 add_tab_set(herbaria_index_links(query: @query))
-@container = :wide
+add_sorter(@query, herbaria_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?
 %>

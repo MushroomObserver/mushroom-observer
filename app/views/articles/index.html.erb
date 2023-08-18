@@ -1,7 +1,8 @@
 <%
+@container = :wide
 @title ||= :ARTICLES.t
 add_tab_set(articles_index_links(user: @user))
-@container = :wide
+add_sorter(@query, articles_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?
 %>

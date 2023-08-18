@@ -1,5 +1,6 @@
 <%
 add_tab_set(location_description_index_links(query: @query))
+add_sorter(@query, descriptions_index_sorts)
 @container = :wide
 
 flash_error(@error) if @error && @objects.empty?

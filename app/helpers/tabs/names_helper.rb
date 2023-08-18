@@ -117,6 +117,16 @@ module Tabs
        { class: __method__.to_s }]
     end
 
+    def names_index_sorts(query:)
+      [
+        ["name", :sort_by_name.t],
+        ["created_at", :sort_by_created_at.t],
+        [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+         :sort_by_updated_at.t],
+        ["num_views", :sort_by_num_views.t]
+      ]
+    end
+
     ### Forms
     def name_form_new_links
       [names_index_link]

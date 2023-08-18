@@ -128,5 +128,14 @@ module Tabs
          project: project.id, source: "project" },
        { class: __method__.to_s }]
     end
+
+    def descriptions_index_sorts
+      [
+        ["name",        :sort_by_name.t],
+        ["created_at",  :sort_by_created_at.t],
+        ["updated_at",  :sort_by_updated_at.t],
+        ["num_views",   :sort_by_num_views.t]
+      ].freeze
+    end
   end
 end

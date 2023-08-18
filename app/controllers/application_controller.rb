@@ -1488,7 +1488,7 @@ class ApplicationController < ActionController::Base
 
   ###########################################################################
   #
-  # INDEX VIEW METHODS - MOVE TO HELPERS?
+  # INDEX VIEW METHODS - MOVE SORTING LINKS TO HELPERS
 
   # These useful methods set a bunch of ivars used in all indexes.
   # Converting it to a helper seems desirable re: separation of concerns,
@@ -1500,15 +1500,12 @@ class ApplicationController < ActionController::Base
   def set_index_view_ivars(query, args)
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if args[:matrix]
-    @timer_start = Time.current
     @num_results = query.num_results
-    @timer_end = Time.current
     if @num_results.zero?
       @title = args[:no_hits_title]
     else
       @title ||= index_default_title(query)
     end
-    @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
   end
 
   # Special title for new obs default home page query
@@ -1519,53 +1516,6 @@ class ApplicationController < ActionController::Base
     end
 
     query.title
-  end
-
-  def sorting_links(query, args)
-    return nil unless (sorts = args[:sorting_links]) &&
-                      (sorts.length > 1) &&
-                      !browser.bot?
-
-    add_sorting_links(query, sorts, args[:link_all_sorts])
-  end
-
-  public ##########
-
-  # Create sorting links for index pages, "graying-out" the current order.
-  def add_sorting_links(query, links, link_all = false)
-    results = []
-    this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
-
-    links.each do |by, label|
-      results << link_or_grayed_text(link_all, this_by, label, query, by)
-    end
-
-    # Add a "reverse" button.
-    results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by))
-  end
-
-  private ##########
-
-  def link_or_grayed_text(link_all, this_by, label, query, by)
-    if !link_all && (by.to_s == this_by)
-      [label.t, nil]
-    else
-      sort_link(label.t, query, by)
-    end
-  end
-
-  def sort_link(text, query, by)
-    [text, { controller: query.model.show_controller,
-             action: query.model.index_action,
-             by: by }.merge(query_params)]
-  end
-
-  def reverse_by(query, this_by)
-    if query.params[:by].to_s.start_with?("reverse_")
-      this_by
-    else
-      "reverse_#{this_by}"
-    end
   end
 
   ###########################################################################

@@ -1,6 +1,6 @@
 <%
-add_tab_set(index_observation_links(query: @query)) if @objects.any?
-
+add_tab_set(observations_index_links(query: @query)) if @objects.any?
+add_sorter(@query, observations_index_sorts)
 @container = :full
 
 flash_error(@error) if @error && @objects.empty?

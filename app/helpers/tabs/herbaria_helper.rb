@@ -13,6 +13,17 @@ module Tabs
       links << new_herbarium_link
     end
 
+    def herbaria_index_sorts
+      [
+        ["records",     :sort_by_records.t],
+        ["user",        :sort_by_user.t],
+        ["code",        :sort_by_code.t],
+        ["name",        :sort_by_name.t],
+        ["created_at",  :sort_by_created_at.t],
+        ["updated_at",  :sort_by_updated_at.t]
+      ].freeze
+    end
+
     def herbarium_show_links(herbarium:, user:)
       tabs = []
       if herbarium.curators.empty? ||
