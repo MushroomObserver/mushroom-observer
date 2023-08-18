@@ -1413,14 +1413,10 @@ class ApplicationController < ActionController::Base
   # letter_arg::    Param used to store letter for pagination.
   # number_arg::    Param used to store page number for pagination.
   # num_per_page::  Number of results per page.
-  # sorting_links:: Array of pairs: ["by" String, label String]
   # always_index::  Always show index, even if only one result.
-  # link_all_sorts:: Don't gray-out the current sort criteria.
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links:         Extra links to add to right hand tab set.
-  # @sorts::
   # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.

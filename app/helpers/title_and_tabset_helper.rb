@@ -129,11 +129,11 @@ module TitleAndTabsetHelper
   end
 
   # Sort links, for indexes
-  def add_sorter(query, links)
+  def add_sorter(query, links, link_all: false)
     content_for(:sorter) do
       return "" unless links && query && query.num_results > 1
 
-      sorts = create_sorting_links(query, links, false)
+      sorts = create_sorting_links(query, links, link_all)
 
       render(partial: "application/content/sorter", locals: { sorts: sorts })
     end
@@ -141,7 +141,7 @@ module TitleAndTabsetHelper
 
   # Create sorting links, "graying-out" the current order.
   # Need query to know which is current order
-  def create_sorting_links(query, links, link_all = false)
+  def create_sorting_links(query, links, link_all)
     results = []
     this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
 

@@ -3,9 +3,10 @@
 @title ||= :list_herbaria_title.t
 
 add_tab_set(herbaria_index_links(query: @query))
-add_sorter(@query, herbaria_index_sorts)
+add_sorter(@query, herbaria_index_sorts(query: @query))
 
 flash_error(@error) if @error && @objects.empty?
+nonpersonal = (@query.flavor == :nonpersonal)
 %>
 
 <% if @merge %>
@@ -21,7 +22,7 @@ flash_error(@error) if @error && @objects.empty?
       <thead>
         <tr>
           <th><%= :herbarium_index_records.t %></th>
-          <th><%= :USER.t unless @no_user_column %></th>
+          <th><%= :USER.t unless nonpersonal %></th>
           <th><%= :herbarium_code.t %></th>
           <th><%= :NAME.t %></th>
         </tr>
@@ -33,7 +34,7 @@ flash_error(@error) if @error && @objects.empty?
               <%= herbarium.herbarium_records.length %>
             </td>
             <td>
-              <%= if !@no_user_column && herbarium.personal_user.present?
+              <%= if !nonpersonal && herbarium.personal_user.present?
                     tag.span(user_link(herbarium.personal_user),
                             title: herbarium.personal_user.unique_text_name)
               end %>
