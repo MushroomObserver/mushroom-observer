@@ -10,7 +10,6 @@ class RssLogsController < ApplicationController
     :rss,
     :show
   ]
-  before_action :disable_link_prefetching
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.

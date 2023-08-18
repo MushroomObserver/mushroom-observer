@@ -4,7 +4,6 @@
 module Names::Classification
   class InheritController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # form
     def new

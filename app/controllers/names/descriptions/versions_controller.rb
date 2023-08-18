@@ -4,7 +4,6 @@
 module Names::Descriptions
   class VersionsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Show past versions of NameDescription.  Accessible only from
     # show_name_description page.

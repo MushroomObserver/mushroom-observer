@@ -3,7 +3,6 @@
 module SpeciesLists
   class UploadsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Form to let user add to a species_list from file.
     def new

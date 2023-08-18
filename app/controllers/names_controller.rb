@@ -7,13 +7,6 @@ class NamesController < ApplicationController
   before_action :pass_query_params, except: [:index]
   # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
-  before_action :disable_link_prefetching, except: [
-    :show,
-    :new,
-    :create,
-    :edit,
-    :update
-  ]
 
   ##############################################################################
   #

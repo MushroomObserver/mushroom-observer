@@ -4,7 +4,6 @@
 module Locations
   class ReverseNameOrderController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Callback for :show
     def update

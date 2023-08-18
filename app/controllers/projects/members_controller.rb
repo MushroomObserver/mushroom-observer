@@ -11,7 +11,6 @@ module Projects
   class MembersController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
-    before_action :disable_link_prefetching
 
     # View that lists all users with links to add each as a member.
     # Linked from: show_project (for admins only)

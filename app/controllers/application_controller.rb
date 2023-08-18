@@ -83,8 +83,6 @@
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
 #
 #  ==== Other stuff
-#  disable_link_prefetching::    (filter: prevents prefetching of destroy
-#                                 methods)
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #  rubric::                      Label for what the controller deals with
@@ -136,7 +134,6 @@ class ApplicationController < ActionController::Base
     skip_before_action(:autologin)
     skip_before_action(:set_timezone)
     skip_before_action(:track_translations)
-    before_action(:disable_link_prefetching)
     before_action { User.current = nil }
   end
 
@@ -1786,28 +1783,6 @@ class ApplicationController < ActionController::Base
   #  :section: Other stuff
   #
   ##############################################################################
-
-  # Before filter: disable link prefetching.
-  #
-  # This, I'm inferring, is when an over-achieving browser actively goes out
-  # prefetching all the pages linked to from the current page so that the user
-  # doesn't have to wait as long when they click on one.  The problem is, if
-  # the browser pre-fetches something like +destroy_comment+, it could
-  # potentially delete or otherwise harm things unintentionally.
-  #
-  # The old policy was to disable this feature for a few obviously dangerous
-  # actions.  I've changed it now to only _enable_ it for common (and safe)
-  # actions like observations/show, post_comment, etc.  Each controller is now
-  # responsible for explicitly listing the actions which accept it.
-  # -JPH 20100123
-  #
-  def disable_link_prefetching
-    return unless request.env["HTTP_X_MOZ"] == "prefetch"
-
-    logger.debug("prefetch detected: sending 403 Forbidden")
-    render(plain: "", status: :forbidden)
-    false
-  end
 
   # Tell an object that someone has looked at it (unless a robot made the
   # request).

@@ -10,8 +10,6 @@
 class SpeciesListsController < ApplicationController
   before_action :login_required
   # disable cop because index is defined in ApplicationController
-  before_action :disable_link_prefetching,
-                except: [:show, :new, :edit, :create, :update]
   before_action :require_successful_user, only: [:new, :create]
 
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [

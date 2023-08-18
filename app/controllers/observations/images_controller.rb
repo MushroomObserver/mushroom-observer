@@ -9,7 +9,6 @@ module Observations
   class ImagesController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
-    before_action :disable_link_prefetching, except: [:edit]
 
     # NEW: Upload Images to an Observation.
     # was ImageController#add_image

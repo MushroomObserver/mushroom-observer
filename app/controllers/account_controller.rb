@@ -38,9 +38,6 @@ class AccountController < ApplicationController
     :create,
     :welcome
   ]
-  before_action :disable_link_prefetching, except: [
-    :new
-  ]
 
   ##############################################################################
   #
