@@ -5,7 +5,6 @@ module Projects
   class AdminRequestsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
-    before_action :disable_link_prefetching
 
     # Form to compose email for the admins
     # Linked from: show_project

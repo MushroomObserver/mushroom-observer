@@ -4,7 +4,6 @@
 module Locations
   class VersionsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Show past version of Location.  Accessible only from show_location page.
     def show

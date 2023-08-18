@@ -4,7 +4,6 @@
 module Names::EolData
   class PreviewController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Show the data getting sent to EOL
     def show

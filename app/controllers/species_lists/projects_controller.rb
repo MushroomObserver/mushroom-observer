@@ -3,7 +3,6 @@
 module SpeciesLists
   class ProjectsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # ----------------------------
     #  :section: Manage Projects

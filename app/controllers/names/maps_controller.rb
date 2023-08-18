@@ -4,7 +4,6 @@
 module Names
   class MapsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Draw a map of all the locations where this name has been observed.
     def show

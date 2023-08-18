@@ -12,11 +12,6 @@ class ObservationsController < ApplicationController
   before_action :login_required, except: [
     :show
   ]
-  before_action :disable_link_prefetching, except: [
-    :new,
-    :edit,
-    :show
-  ]
   before_action :pass_query_params, only: [
     :show,
     :edit,

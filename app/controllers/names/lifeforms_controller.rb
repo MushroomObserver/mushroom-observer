@@ -4,7 +4,6 @@
 module Names
   class LifeformsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     def edit
       pass_query_params
