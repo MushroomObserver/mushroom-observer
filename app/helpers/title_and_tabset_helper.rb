@@ -130,7 +130,7 @@ module TitleAndTabsetHelper
 
   def add_sorter(query, links)
     content_for(:sorter) do
-      return "" unless links && query&.num_results&. > 1
+      return "" unless links && query && query.num_results > 1
 
       sorts = create_sorting_links(query, links, false)
 
