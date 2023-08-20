@@ -31,7 +31,8 @@ module Tabs
     end
 
     def nonpersonal_herbaria_index_sorts
-      sorts = full_herbaria_index_sorts
+      # must dup a frozen array, this is new ruby 3 policy
+      sorts = full_herbaria_index_sorts.map(&:clone)
       sorts.reject! { |x| x[0] == "user" }
     end
 
