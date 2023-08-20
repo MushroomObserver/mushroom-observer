@@ -194,15 +194,6 @@ class ProjectsController < ApplicationController
       include: :user
     }.merge(args)
 
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",        :sort_by_title.t],
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t]
-    ]
-
     show_index_of_objects(query, args)
   end
 

@@ -89,5 +89,14 @@ module Tabs
     def destroy_project_link(project)
       [nil, project, { button: :destroy }]
     end
+
+    # Add some alternate sorting criteria.
+    def projects_index_sorts
+      [
+        ["name", :sort_by_title.t],
+        ["created_at",  :sort_by_created_at.t],
+        ["updated_at",  :sort_by_updated_at.t]
+      ].freeze
+    end
   end
 end

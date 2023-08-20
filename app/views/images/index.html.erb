@@ -1,7 +1,8 @@
 <%
-add_tab_set(images_index_links(query: @query))
-
 @container = :full
+add_tab_set(images_index_links(query: @query))
+add_sorter(@query, images_index_sorts)
+
 flash_error(@error) if @error && @objects.empty?
 %>
 <%# render(partial: "shared/matrix_grid",

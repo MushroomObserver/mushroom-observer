@@ -15,11 +15,6 @@ options = [
   [:app_search_google.l, :google],
 ].sort
 
-@timer_end ||= Time.zone.now
-secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-timer_text = "(#{ :app_index_timer.t(seconds: secs,
-                                     num: @num_results.to_i) })"
-timer = content_tag(:div, timer_text, class: "text-nowrap", id: "timer")
 adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
   search_advanced_path
@@ -58,7 +53,7 @@ end %>
 
 <% if @timer_start %>
   <%= content_tag(:div, class: "navbar-text mx-2 d-none d-md-block smaller") do
-    [timer, adv_search].safe_join
+    [adv_search].safe_join
   end %>
 <% else %>
   <%= content_tag(:div, adv_search,
@@ -66,6 +61,5 @@ end %>
 <% end %>
 
 <%= content_tag(:div, class: "d-block d-md-none") do
-  concat(timer) if @timer_start
   concat(adv_search)
 end %>

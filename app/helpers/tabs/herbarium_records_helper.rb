@@ -5,7 +5,7 @@
 module Tabs
   module HerbariumRecordsHelper
     include HerbariaHelper
-    def herbarium_record_index_links(obs:)
+    def herbarium_records_index_links(obs:)
       links = []
       if obs.present?
         links = [
@@ -15,6 +15,15 @@ module Tabs
       end
       links << new_herbarium_link
       links << nonpersonal_herbaria_index_link
+    end
+
+    def herbarium_records_index_sorts
+      [
+        ["herbarium_name",  :sort_by_herbarium_name.t],
+        ["herbarium_label", :sort_by_herbarium_label.t],
+        ["created_at",      :sort_by_created_at.t],
+        ["updated_at",      :sort_by_updated_at.t]
+      ].freeze
     end
 
     def herbarium_record_show_links(h_r:)

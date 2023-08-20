@@ -73,9 +73,6 @@ class UsersController < ApplicationController
       matrix: !in_admin_mode?
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = args_sorting_links
-
     # Paginate by "correct" letter.
     args[:letters] = if (query.params[:by] == "login") ||
                         (query.params[:by] == "reverse_login")
@@ -85,27 +82,6 @@ class UsersController < ApplicationController
                      end
 
     show_index_of_objects(query, args)
-  end
-
-  def args_sorting_links
-    if in_admin_mode?
-      [
-        ["id",          :sort_by_id.t],
-        ["login",       :sort_by_login.t],
-        ["name",        :sort_by_name.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t],
-        ["last_login",  :sort_by_last_login.t]
-      ]
-    else
-      [
-        ["login",         :sort_by_login.t],
-        ["name",          :sort_by_name.t],
-        ["created_at",    :sort_by_created_at.t],
-        ["location",      :sort_by_location.t],
-        ["contribution",  :sort_by_contribution.t]
-      ]
-    end
   end
 
   # set @observations whose thumbnails will display in user summary

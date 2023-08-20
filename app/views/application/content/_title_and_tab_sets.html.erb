@@ -38,7 +38,6 @@ sorts
                     :div, id: "right_tabs",
                     class: "d-flex flex-row d-print-none") do
         concat(yield(:interest_icons))
-        concat(index_sorter(@sorts))
         concat(yield(:tab_set))
       end %>
 
@@ -46,5 +45,8 @@ sorts
                      class: "col-12 d-print-none") do
         yield(:type_filters)
       end %>
+
+  <!-- Sorter. conditionally renders the partial -->
+  <%= yield(:sorter) %>
 
 </div>

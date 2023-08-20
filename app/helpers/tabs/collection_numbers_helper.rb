@@ -17,6 +17,15 @@ module Tabs
       ]
     end
 
+    def collection_numbers_index_sorts
+      [
+        ["name",       :sort_by_name.t],
+        ["number",     :sort_by_number.t],
+        ["created_at", :sort_by_created_at.t],
+        ["updated_at", :sort_by_updated_at.t]
+      ].freeze
+    end
+
     def collection_number_form_new_links(obs:)
       [object_return_link(obs)]
     end

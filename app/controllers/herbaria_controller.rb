@@ -171,12 +171,6 @@ class HerbariaController < ApplicationController
   def show_selected_herbaria(query, args = {})
     args = show_index_args(args)
 
-    # Clean up display by removing user-related stuff from nonpersonal index.
-    if query.flavor == :nonpersonal
-      args[:sorting_links].reject! { |x| x[0] == "user" }
-      @no_user_column = true
-    end
-
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
     @merge = Herbarium.safe_find(params[:merge])
@@ -189,15 +183,7 @@ class HerbariaController < ApplicationController
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args,
-            template: "/herbaria/index", # render with this template
-            # Add some alternate sorting criteria.
-            sorting_links: [["records",     :sort_by_records.t],
-                            ["user",        :sort_by_user.t],
-                            ["code",        :sort_by_code.t],
-                            ["name",        :sort_by_name.t],
-                            ["created_at",  :sort_by_created_at.t],
-                            ["updated_at",  :sort_by_updated_at.t]])
+    }.merge(args)
   end
 
   def make_sure_can_edit!
