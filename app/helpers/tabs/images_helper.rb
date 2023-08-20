@@ -22,7 +22,7 @@ module Tabs
       [object_return_link(image)]
     end
 
-    def images_sorting_links
+    def images_index_sorts
       [
         ["name",          :sort_by_name.t],
         ["original_name", :sort_by_filename.t],
