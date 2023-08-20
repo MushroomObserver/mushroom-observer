@@ -128,5 +128,16 @@ module Tabs
     def species_list_download_links(list:)
       [object_return_link(list)]
     end
+
+    def species_lists_index_sorts(query:)
+      [
+        ["title",       :sort_by_title.t],
+        ["date",        :sort_by_date.t],
+        ["user",        :sort_by_user.t],
+        ["created_at",  :sort_by_created_at.t],
+        [(query&.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+         :sort_by_updated_at.t]
+      ]
+    end
   end
 end

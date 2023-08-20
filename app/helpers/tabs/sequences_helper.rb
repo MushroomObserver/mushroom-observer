@@ -32,5 +32,14 @@ module Tabs
       [:destroy_object.t(type: :sequence), seq,
        { button: :destroy, back: url_after_delete(seq) }]
     end
+
+    def sequences_index_sorts
+      [
+        ["created_at",  :sort_by_created_at.t],
+        ["updated_at",  :sort_by_updated_at.t],
+        ["user",        :USER.t],
+        ["observation", :OBSERVATION.t]
+      ].freeze
+    end
   end
 end

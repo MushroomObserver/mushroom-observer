@@ -121,14 +121,6 @@ class CommentsController < ApplicationController
       include: [:target, :user]
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      # ["summary",  :sort_by_summary.t],
-      ["user", :sort_by_user.t],
-      ["created_at", :sort_by_posted.t],
-      ["updated_at", :sort_by_updated_at.t]
-    ]
-
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")

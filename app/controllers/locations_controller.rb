@@ -131,15 +131,6 @@ class LocationsController < ApplicationController
 
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_locations(query, args = {})
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",        :sort_by_name.t],
-      ["created_at",  :sort_by_created_at.t],
-      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-       :sort_by_updated_at.t],
-      ["num_views", :sort_by_num_views.t]
-    ]
-
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)

@@ -12,12 +12,9 @@ module Observations
       apply_content_filters(@query)
       @title = :map_locations_title.t(locations: @query.title)
       @query = restrict_query_to_box(@query)
-      @timer_start = Time.current
 
       find_locations_matching_observations
 
-      @num_results = @observations.count
-      @timer_end = Time.current
       render(template: "observations/maps/index")
     end
 

@@ -1,6 +1,7 @@
 <%
-add_tab_set(names_index_links(query: @query))
 @container = :full
+add_tab_set(names_index_links(query: @query))
+add_sorter(@query, names_index_sorts(query: @query))
 
 flash_error(@error) if @error && @objects.empty?
 %>

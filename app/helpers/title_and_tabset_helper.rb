@@ -128,11 +128,53 @@ module TitleAndTabsetHelper
     types == [type] ? label : link_with_query(label, link, **help)
   end
 
-  # @sorts is set by ApplicationController#show_index_count_results
-  def index_sorter(sorts)
-    return "" unless sorts
+  # Sort links, for indexes
+  def add_sorter(query, links, link_all: false)
+    content_for(:sorter) do
+      if links && (query&.num_results&.> 1)
+        sorts = create_sorting_links(query, links, link_all)
 
-    render(partial: "application/content/sorter", locals: { sorts: sorts })
+        render(partial: "application/content/sorter", locals: { sorts: sorts })
+      else
+        ""
+      end
+    end
+  end
+
+  # Create sorting links, "graying-out" the current order.
+  # Need query to know which is current order
+  def create_sorting_links(query, links, link_all)
+    results = []
+    this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
+
+    links.each do |by, label|
+      results << link_or_grayed_text(link_all, this_by, label, query, by)
+    end
+
+    # Add a "reverse" button.
+    results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by))
+  end
+
+  def link_or_grayed_text(link_all, this_by, label, query, by)
+    if !link_all && (by.to_s == this_by)
+      [label.t, nil] # just text
+    else
+      sort_link(label.t, query, by)
+    end
+  end
+
+  def sort_link(text, query, by)
+    [text, { controller: query.model.show_controller,
+             action: query.model.index_action,
+             by: by }.merge(query_params)]
+  end
+
+  def reverse_by(query, this_by)
+    if query.params[:by].to_s.start_with?("reverse_")
+      this_by
+    else
+      "reverse_#{this_by}"
+    end
   end
 
   # Draw the cutesy eye icons in the upper right side of screen.  It does it

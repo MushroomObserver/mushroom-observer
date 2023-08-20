@@ -171,17 +171,7 @@ class SequencesController < ApplicationController
     args = { include: [{ observation: :name }, :user],
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
-    args[:sorting_links] = sequence_index_sorts
     show_index_of_objects(query, args)
-  end
-
-  def sequence_index_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :USER.t],
-      ["observation", :OBSERVATION.t]
-    ].freeze
   end
 
   # ---------- Create, Edit ----------------------------------------------------

@@ -1,6 +1,7 @@
 <%
+# the no_hits_title.
 @title ||= :SEQUENCES.t
-
+add_sorter(@query, sequences_index_sorts)
 flash_error(@error) if @error && @objects.empty?
 %>
 

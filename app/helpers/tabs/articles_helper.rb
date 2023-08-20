@@ -14,6 +14,15 @@ module Tabs
       [new_article_link]
     end
 
+    def articles_index_sorts
+      [
+        ["created_at",  :sort_by_created_at.t],
+        ["updated_at",  :sort_by_updated_at.t],
+        ["user",        :sort_by_user.t],
+        ["title",       :sort_by_title.t]
+      ].freeze
+    end
+
     def article_show_links(article:, user:)
       links = [articles_index_link]
       # Can user modify all articles

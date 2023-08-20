@@ -94,6 +94,17 @@ module Tabs
       [locations_index_link]
     end
 
+    # Add some alternate sorting criteria.
+    def location_index_sorts(query:)
+      [
+        ["name", :sort_by_name.t],
+        ["created_at", :sort_by_created_at.t],
+        [(query&.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+         :sort_by_updated_at.t],
+        ["num_views", :sort_by_num_views.t]
+      ]
+    end
+
     # link attribute arrays
     def location_form_new_links(location:)
       tabs = [locations_index_link]

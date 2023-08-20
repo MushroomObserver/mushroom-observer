@@ -1413,14 +1413,10 @@ class ApplicationController < ActionController::Base
   # letter_arg::    Param used to store letter for pagination.
   # number_arg::    Param used to store page number for pagination.
   # num_per_page::  Number of results per page.
-  # sorting_links:: Array of pairs: ["by" String, label String]
   # always_index::  Always show index, even if only one result.
-  # link_all_sorts:: Don't gray-out the current sort criteria.
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links:         Extra links to add to right hand tab set.
-  # @sorts::
   # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.
@@ -1458,9 +1454,8 @@ class ApplicationController < ActionController::Base
     store_location
     clear_query_in_session if session[:checklist_source] != query.id
     query_params_set(query)
-    @error ||= :runtime_no_matches.t(type: query.model.type_tag)
-    @layout = calc_layout_params if args[:matrix]
-    show_index_count_results(query, args)
+    query.need_letters = args[:letters] if args[:letters]
+    set_index_view_ivars(query, args)
   end
 
   def apply_content_filters(query)
@@ -1487,17 +1482,23 @@ class ApplicationController < ActionController::Base
     @any_content_filters_applied = true
   end
 
-  def show_index_count_results(query, args)
-    query.need_letters = args[:letters] if args[:letters]
-    @timer_start = Time.current
+  ###########################################################################
+  #
+  # INDEX VIEW METHODS - MOVE VIEW CODE TO HELPERS
+
+  # Set some ivars used in all index views.
+  # Makes @query available to the :index template for query-dependent tabs
+  #
+  def set_index_view_ivars(query, args)
+    @query = query
+    @error ||= :runtime_no_matches.t(type: query.model.type_tag)
+    @layout = calc_layout_params if args[:matrix]
     @num_results = query.num_results
-    @timer_end = Time.current
     if @num_results.zero?
       @title = args[:no_hits_title]
     else
       @title ||= index_default_title(query)
     end
-    @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
   end
 
   # Special title for new obs default home page query
@@ -1509,6 +1510,8 @@ class ApplicationController < ActionController::Base
 
     query.title
   end
+
+  ###########################################################################
 
   def show_action_redirect(query)
     redirect_with_query(controller: query.model.show_controller,
@@ -1564,53 +1567,6 @@ class ApplicationController < ActionController::Base
 
   def users_content_filters
     @user ? @user.content_filter : MO.default_content_filter
-  end
-
-  def sorting_links(query, args)
-    return nil unless (sorts = args[:sorting_links]) &&
-                      (sorts.length > 1) &&
-                      !browser.bot?
-
-    add_sorting_links(query, sorts, args[:link_all_sorts])
-  end
-
-  public ##########
-
-  # Create sorting links for index pages, "graying-out" the current order.
-  def add_sorting_links(query, links, link_all = false)
-    results = []
-    this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
-
-    links.each do |by, label|
-      results << link_or_grayed_text(link_all, this_by, label, query, by)
-    end
-
-    # Add a "reverse" button.
-    results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by))
-  end
-
-  private ##########
-
-  def link_or_grayed_text(link_all, this_by, label, query, by)
-    if !link_all && (by.to_s == this_by)
-      [label.t, nil]
-    else
-      sort_link(label.t, query, by)
-    end
-  end
-
-  def sort_link(text, query, by)
-    [text, { controller: query.model.show_controller,
-             action: query.model.index_action,
-             by: by }.merge(query_params)]
-  end
-
-  def reverse_by(query, this_by)
-    if query.params[:by].to_s.start_with?("reverse_")
-      this_by
-    else
-      "reverse_#{this_by}"
-    end
   end
 
   public ##########

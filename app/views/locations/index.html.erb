@@ -1,7 +1,14 @@
 <%
-add_tab_set(locations_index_links(query: @query))
 @container = :wide
-
+add_tab_set(locations_index_links(query: @query))
+all_links = if (params[:id].present? ||
+                params[:by].present? ||
+                params[:by_user].present?)
+              false
+            else
+              true
+            end
+add_sorter(@query, location_index_sorts(query: @query), link_all: all_links)
 @known_pages = @pages
 @known_data  = @objects
 

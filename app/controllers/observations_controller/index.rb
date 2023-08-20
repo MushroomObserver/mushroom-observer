@@ -188,9 +188,6 @@ class ObservationsController
       # if it needed to stuff multiple locations into a single marker).
       query = restrict_query_to_box(query)
 
-      # make @query available to the :index template for query-dependent tabs
-      @query = query
-
       show_index_of_objects(query, args)
     end
 
@@ -200,21 +197,6 @@ class ObservationsController
                matrix: true,
                include: [:name, :location, :user, :rss_log,
                          { thumb_image: :image_votes }] }.merge(args)
-
-      # Add some alternate sorting criteria.
-      links = [
-        ["rss_log", :sort_by_activity.t],
-        ["date", :sort_by_date.t],
-        ["created_at", :sort_by_posted.t],
-        # kind of redundant to sort by rss_logs, though not strictly ===
-        # ["updated_at", :sort_by_updated_at.t],
-        ["name", :sort_by_name.t],
-        ["user", :sort_by_user.t],
-        ["confidence", :sort_by_confidence.t],
-        ["thumbnail_quality", :sort_by_thumbnail_quality.t],
-        ["num_views", :sort_by_num_views.t]
-      ]
-      args[:sorting_links] = links
 
       # Paginate by letter if sorting by user.
       case query.params[:by]

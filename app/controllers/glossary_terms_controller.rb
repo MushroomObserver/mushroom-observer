@@ -111,7 +111,6 @@ class GlossaryTermsController < ApplicationController
       num_per_page: 50,
       include: includes
     }.merge(args)
-    @links ||= []
 
     show_index_of_objects(query, args)
   end

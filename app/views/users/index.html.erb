@@ -1,7 +1,9 @@
 <%
-   @title ||= :users_by_name_title.t
+@container = :full
+@title ||= :users_by_name_title.t
+add_sorter(@query, users_index_sorts(in_admin_mode?))
 
-   flash_error(@error) if @error && @objects.empty?
+flash_error(@error) if @error && @objects.empty?
 %>
 
 <%

@@ -106,14 +106,6 @@ module Names
         num_per_page: 50
       }.merge(args)
 
-      # Add some alternate sorting criteria.
-      args[:sorting_links] = [
-        ["name",        :sort_by_name.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t],
-        ["num_views",   :sort_by_num_views.t]
-      ]
-
       show_index_of_objects(query, args)
     end
 

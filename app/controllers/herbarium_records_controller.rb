@@ -197,14 +197,6 @@ class HerbariumRecordsController < ApplicationController
       include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["herbarium_name",  :sort_by_herbarium_name.t],
-      ["herbarium_label", :sort_by_herbarium_label.t],
-      ["created_at",      :sort_by_created_at.t],
-      ["updated_at",      :sort_by_updated_at.t]
-    ]
-
     show_index_of_objects(query, args)
   end
 
