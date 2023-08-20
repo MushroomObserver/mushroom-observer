@@ -1494,6 +1494,7 @@ class ApplicationController < ActionController::Base
   # I believe we'd have to add a helper manually to each index. - AN 2023
   #
   def set_index_view_ivars(query, args)
+    @query = query
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if args[:matrix]
     @num_results = query.num_results

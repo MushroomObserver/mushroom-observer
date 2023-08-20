@@ -131,11 +131,13 @@ module TitleAndTabsetHelper
   # Sort links, for indexes
   def add_sorter(query, links, link_all: false)
     content_for(:sorter) do
-      return "" unless links && query && (query.num_results > 1)
+      if links && (query.num_results > 1)
+        sorts = create_sorting_links(query, links, link_all)
 
-      sorts = create_sorting_links(query, links, link_all)
-
-      render(partial: "application/content/sorter", locals: { sorts: sorts })
+        render(partial: "application/content/sorter", locals: { sorts: sorts })
+      else
+        ""
+      end
     end
   end
 
