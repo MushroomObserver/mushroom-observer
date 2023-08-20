@@ -1484,14 +1484,10 @@ class ApplicationController < ActionController::Base
 
   ###########################################################################
   #
-  # INDEX VIEW METHODS - MOVE SORTING LINKS TO HELPERS
+  # INDEX VIEW METHODS - MOVE VIEW CODE TO HELPERS
 
-  # These useful methods set a bunch of ivars used in all indexes.
-  # Converting it to a helper seems desirable re: separation of concerns,
-  # but we'd need access to the args passed to show_index_of_objects
-  # by the controller index action in the hypothetical helper.
-  # Also, these ivars are magically available to any index by default.
-  # I believe we'd have to add a helper manually to each index. - AN 2023
+  # Set some ivars used in all index views.
+  # Makes @query available to the :index template for query-dependent tabs
   #
   def set_index_view_ivars(query, args)
     @query = query

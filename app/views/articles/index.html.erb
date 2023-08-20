@@ -1,5 +1,6 @@
 <%
 @container = :wide
+# the no_hits_title.
 @title ||= :ARTICLES.t
 add_tab_set(articles_index_links(user: @user))
 add_sorter(@query, articles_index_sorts)
