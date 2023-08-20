@@ -34,10 +34,11 @@ def report_update_usage
     "MODEL_NAME=MyModel UPDATE_LIST=./update_list rails visual_model:update\n" \
     "\nExample lines from UPDATE_LIST:\n" \
     "Aseroe rubra # Add all images for a species to visual group\n" \
-    "Bovista pila, Cyathus olla # Multiple species/visual groups\n" \
     "1234 Lepista nuda # Include specific image\n" \
-    "-2345 Verpa conica1 # Exclude specific image\n" \
-    "3456 # Move image to current name"
+    "-2345 Verpa conica # Exclude specific image\n" \
+    "3456 # Move image to current name\n" \
+    "- Bad name # Delete a visual group\n" \
+    "= Clitocybe nuda, Lepista nuda # Merge groups into first group\n" \
   )
   exit
 end
@@ -57,17 +58,20 @@ def build_from_file(model_name, update_list)
   Rails.logger.error(model.errors.full_messages)
 end
 
-def process_line(model, line)
-  line.split(",").each do |raw_cmd|
-    cmd = raw_cmd.strip
-    next if cmd == ""
+def process_line(model, raw_cmd)
+  cmd = raw_cmd[/^[^#]*/].strip # Remove any comment and extra whitespace
+  return if cmd == ""
 
-    id, label = parse_cmd(cmd)
-    if id.nil?
-      add_visual_group(model, label)
-    else
-      adjust_image(model, id, label)
-    end
+  action, data = parse_cmd(cmd)
+  print("parse_cmd: #{action}, #{data}\n")
+  if action == "delete"
+    delete_visual_group(model, data)
+  elsif action == "merge"
+    merge_visual_groups(model, data)
+  elsif action.nil?
+    add_visual_group(model, data)
+  else
+    adjust_image(model, action, data)
   end
 end
 
@@ -75,14 +79,19 @@ def parse_cmd(cmd)
   first_space = cmd.index(" ")
   return process_simple_cmd(cmd) if first_space.nil?
 
+  first_token = cmd[..first_space - 1]
+  rest = cmd[first_space + 1..]
+  return ["delete", rest] if first_token == "-"
+  return ["merge", rest] if first_token == "="
+
   id = begin
-         Integer(cmd[..first_space - 1])
+         Integer(first_token)
        rescue StandardError
          nil
        end
   return [nil, cmd] if id.nil?
 
-  [id, cmd[first_space + 1..]]
+  [id, rest]
 end
 
 def process_simple_cmd(cmd)
@@ -96,6 +105,30 @@ def process_simple_cmd(cmd)
   [id, obs.name.text_name]
 rescue StandardError
   [nil, cmd]
+end
+
+def delete_visual_group(model, name)
+  Rails.logger.info { "Deleting VisualGroup for '#{name}'" }
+  VisualGroup.where(visual_model: model, name: name).each(&:destroy)
+end
+
+def merge_visual_groups(model, groups)
+  Rails.logger.info { "Merging VisualGroups '#{groups}'" }
+  names = groups.split(",").map(&:strip)
+  return if names == []
+
+  target_group = VisualGroup.find_or_create_by(visual_model: model,
+                                               name: names[0])
+  return unless target_group
+
+  names.each do |name|
+    VisualGroup.where(visual_model: model, name: name).each do |group|
+      next if target_group == group
+
+      Rails.logger.info { "Merging '#{name}'" }
+      target_group.merge(group)
+    end
+  end
 end
 
 def add_visual_group(model, name)
