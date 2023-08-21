@@ -1,14 +1,22 @@
 <%
+@container = :wide
+# This template is used for both the :index and the :show actions
+@title = if(controller.action_name == :index)
+           :map_locations_title.t(locations: @query.title)
+         elsif(controller.action_name == :show)
+           :map_observation_title.t(id: obs.id)
+         end
 add_tab_set(observation_maps_links(query: @query))
 %>
 
-<br/>
-<%= if @observations.any?
-  objects = @observations
-  objects += @locations if @locations.any?
-  gmap = make_map(objects, query_params: query_params(@query), zoom: 2)
-  finish_map(gmap)
-  gmap.div(width: "100%", height: 550).html_safe
-else
-  :runtime_map_nothing_to_map.t
+<%= tag.div do
+  if @observations.any?
+    objects = @observations
+    objects += @locations if @locations.any?
+    gmap = make_map(objects, query_params: query_params(@query), zoom: 2)
+    finish_map(gmap)
+    gmap.div(width: "100%", height: 550).html_safe
+  else
+    :runtime_map_nothing_to_map.t
+  end
 end %>

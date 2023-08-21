@@ -1,22 +1,20 @@
 <%
-@container = :text_image
+@container = :wide
 @title = if @query.flavor == :all
            :map_locations_global_map.t
          else
            :map_locations_title.t(locations: @query.title)
          end
-
 add_tab_set(location_map_links(query: @query))
 %>
 
-<div class="text-center">
-  <%=
-    if @locations.any?
-      gmap = make_map(@locations)
-      finish_map(gmap)
-      gmap.div(width: 800, height: 550).html_safe
-    else
-      :runtime_map_nothing_to_map.t
-    end
-  %>
-</div><!-- .text-center -->
+<%= tag.div(class: "text-center") do
+  if @locations.any?
+    gmap = make_map(@locations)
+    finish_map(gmap)
+    gmap.div(width: 800, height: 550).html_safe
+  else
+    :runtime_map_nothing_to_map.t
+  end
+end %>
+

@@ -10,7 +10,6 @@ module Observations
 
       @query = find_or_create_query(:Observation)
       apply_content_filters(@query)
-      @title = :map_locations_title.t(locations: @query.title)
       @query = restrict_query_to_box(@query)
 
       find_locations_matching_observations
@@ -24,7 +23,6 @@ module Observations
       obs = find_or_goto_index(Observation, params[:id].to_s)
       return unless obs
 
-      @title = :map_observation_title.t(id: obs.id)
       @observations = [
         MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
                                   obs.location)

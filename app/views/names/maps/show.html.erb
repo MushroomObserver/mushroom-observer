@@ -1,10 +1,10 @@
 <%
+@container = :wide
 @title = :name_map_title.t(name: @name.display_name)
-
 add_tab_set(name_map_links(name: @name, query: @query))
 %>
 
-<%=
+<%= tag.div do
   if @observations.any?
     gmap = make_map(@observations, query_params: query_params(@query), zoom: 2)
     finish_map(gmap)
@@ -12,4 +12,4 @@ add_tab_set(name_map_links(name: @name, query: @query))
   else
     :name_map_no_maps.tp(name: @name.display_name)
   end
-%>
+end %>
