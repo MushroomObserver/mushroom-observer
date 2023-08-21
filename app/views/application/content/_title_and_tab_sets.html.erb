@@ -34,10 +34,12 @@ sorts
   </div>
 
   <!-- Tabsets and Sorter. conditionally renders the partials -->
-  <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons),
+  <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons) ||
+                     content_for?(:dropdown_tab_set),
                     :div, id: "right_tabs",
                     class: "d-flex flex-row d-print-none") do
         concat(yield(:interest_icons))
+        concat(yield(:dropdown_tab_set))
         concat(yield(:tab_set))
       end %>
 

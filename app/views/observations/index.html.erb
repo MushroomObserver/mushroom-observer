@@ -4,9 +4,9 @@
 if @objects.any?
   tab_title = "Show As:" # TODO: make new translation string
   links = index_observation_links(query: @query)
-  @tabsets = { right: add_dropdown_tab_set(title: tab_title, links: links) }
+  add_dropdown_tab_set(title: tab_title, links: links)
+  add_sorter(@query, observations_index_sorts)
 end
-add_sorter(@query, observations_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?
 %>

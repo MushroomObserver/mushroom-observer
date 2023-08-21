@@ -105,22 +105,22 @@ module TitleAndTabsetHelper
     end
   end
 
+  # New style dropdown tabsets take array of tabs as hash of args,
+  #   { name:, link:, class:, id:, etc. }
+  #   not fully-formed `link_to` or `link_with_query`
+  def add_dropdown_tab_set(links:, title: :LINKS.t)
+    content_for(:dropdown_tab_set) do
+      render(partial: "application/content/dropdown_tab_set",
+             locals: { title: title, tabs: create_dropdown_tabs(links) })
+    end
+  end
+
   def create_dropdown_tabs(links)
     xtrargs = {
       role: "menuitem",
       class: "dropdown-item"
     }
     create_tabs(links, xtrargs)
-  end
-
-  # New style dropdown tabsets take array of tabs as hash of args,
-  #   { name:, link:, class:, id:, etc. }
-  #   not fully-formed `link_to` or `link_with_query`
-  def add_dropdown_tab_set(links:, title: :LINKS.t)
-    content_for(:dropdown) do
-      render(partial: "application/content/dropdown_tab_set",
-             locals: { title: title, tabs: create_dropdown_tabs(links) })
-    end
   end
 
   def dropdown_link_options(args = {})
