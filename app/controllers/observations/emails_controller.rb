@@ -11,10 +11,6 @@ module Observations
       @observation = find_or_goto_index(Observation, params[:id].to_s)
       return unless @observation && can_email_user_question?(@observation)
 
-      @title = :ask_observation_question_title.t(
-        name: @observation.unique_format_name
-      )
-
       respond_to do |format|
         format.html
         format.js do

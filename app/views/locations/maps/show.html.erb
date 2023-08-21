@@ -1,6 +1,12 @@
 <%
-add_tab_set(location_map_links(query: @query))
 @container = :text_image
+@title = if @query.flavor == :all
+           :map_locations_global_map.t
+         else
+           :map_locations_title.t(locations: @query.title)
+         end
+
+add_tab_set(location_map_links(query: @query))
 %>
 
 <div class="text-center">

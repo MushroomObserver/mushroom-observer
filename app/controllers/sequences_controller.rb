@@ -76,7 +76,6 @@ class SequencesController < ApplicationController
     return unless @observation
 
     @sequence = Sequence.new
-    @title = :sequence_add_title.t
 
     respond_to do |format|
       format.html
@@ -99,8 +98,6 @@ class SequencesController < ApplicationController
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
-
-    @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
 
     respond_to do |format|
       format.html

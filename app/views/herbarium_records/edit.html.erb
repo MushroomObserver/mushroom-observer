@@ -1,7 +1,10 @@
 <%
-add_tab_set(herbarium_record_form_edit_links(back: @back,
-                                             back_object: @back_object))
 @container = :wide
+@title = :edit_herbarium_record_title.l(
+  herbarium_label: @herbarium_record.herbarium_label
+)
+add_tab_set(herbarium_record_form_edit_links(back: @back,
+                                              back_object: @back_object))
 %>
 
 <div class="row">

@@ -28,7 +28,6 @@ class InterestsController < ApplicationController
   def index
     store_location
     @container = :wide
-    @title = :list_interests_title.t
     @interests = find_relevant_interests
     @types = interest_types(@interests)
     @selected_type = params[:type].to_s

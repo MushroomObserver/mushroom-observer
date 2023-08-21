@@ -1,5 +1,7 @@
 <%
-  flash_error(@error) if @error && !@interests.any?(&:target)
+@title = :list_interests_title.t
+
+flash_error(@error) if @error && !@interests.any?(&:target)
 %>
 
 <% if @selected_type || @types.length > 1 && @pages.num_total > 1 %>
