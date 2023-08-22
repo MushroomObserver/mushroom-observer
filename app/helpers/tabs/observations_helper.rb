@@ -41,7 +41,7 @@ module Tabs
     def name_links_on_mo(name:, mappable:)
       tabs = create_tabs(obs_related_name_links(name), { class: "d-block" })
       tabs += obs_name_description_links(name)
-      tabs += create_tabs([observation_map_link(mappable)],
+      tabs += create_tabs([occurrence_map_for_name_link(obs_name)],
                           { class: "d-block" })
       tabs.reject(&:empty?)
     end
@@ -97,8 +97,7 @@ module Tabs
       [
         mycoportal_name_link(name),
         mycobank_name_search_link(name),
-        google_images_for_name_link(name),
-        google_distribution_map_for_name_link(name)
+        google_images_for_name_link(name)
       ]
     end
 
@@ -119,7 +118,7 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def google_distribution_map_for_name_link(obs_name)
+    def occurrence_map_for_name_link(obs_name)
       [:show_name_distribution_map.t,
        add_query_param(map_name_path(id: obs_name.id)),
        { class: __method__.to_s }]
