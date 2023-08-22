@@ -8,8 +8,7 @@
 
 add_pager_for(@observation)
 add_interest_icons(@user, @observation)
-add_tab_set(show_observation_links(obs: @observation, user: @user,
-                                          mappable: @mappable))
+add_tab_set(show_observation_links(obs: @observation, user: @user))
 
 @container = :double
 
