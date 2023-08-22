@@ -1,6 +1,6 @@
 <%
 @container = :wide
-@title = :map_observation_title.t(id: obs.id)
+@title = :map_observation_title.t(id: @observation.id)
 add_tab_set(observation_maps_links(query: @query))
 %>
 

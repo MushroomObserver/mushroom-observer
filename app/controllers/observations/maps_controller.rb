@@ -18,12 +18,14 @@ module Observations
     # Show map of one observation by id.
     def show
       pass_query_params
-      obs = find_or_goto_index(Observation, params[:id].to_s)
-      return unless obs
+      @observation = find_or_goto_index(Observation, params[:id].to_s)
+      return unless @observation
 
       @observations = [
-        MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
-                                  obs.location)
+        MinimalMapObservation.new(@observation.id,
+                                  @observation.public_lat,
+                                  @observation.public_long,
+                                  @observation.location)
       ]
     end
 
