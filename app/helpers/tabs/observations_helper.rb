@@ -5,7 +5,7 @@ module Tabs
   module ObservationsHelper
     # assemble links for "tabset" for show_observation
     # actually a list of links and the interest icons
-    def show_observation_links(obs:, user:, mappable:)
+    def show_observation_links(obs:, user:)
       [
         google_images_for_name_link(obs.name),
         occurrence_map_for_name_link(obs.name),
