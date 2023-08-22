@@ -7,8 +7,8 @@ module Tabs
     # actually a list of links and the interest icons
     def show_observation_links(obs:, user:, mappable:)
       [
-        google_images_for_name_link(obs_name),
-        occurrence_map_for_name_link(obs_name),
+        google_images_for_name_link(obs.name),
+        occurrence_map_for_name_link(obs.name),
         send_observer_question_link(obs, user),
         observation_manage_lists_link(obs, user),
         *obs_change_links(obs)
