@@ -10,7 +10,7 @@ module Tabs
         # *show_obs_google_links_for(obs.name),
         send_observer_question_link(obs, user),
         observation_manage_lists_link(obs, user)
-        # observation_map_locations_link(mappable),
+        # observation_map_link(mappable),
         # *obs_change_links(obs)
       ].reject(&:empty?)
     end
@@ -81,10 +81,10 @@ module Tabs
       end
     end
 
-    def observation_map_locations_link(mappable)
+    def observation_map_link(mappable)
       return unless mappable
 
-      [:MAP.t, add_query_param(map_locations_path),
+      [:MAP.t, add_query_param(map_observation_path),
        { class: __method__.to_s }]
     end
 
