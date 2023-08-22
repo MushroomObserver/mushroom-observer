@@ -26,12 +26,12 @@ module TitleAndTabsetHelper
       title
     end
     content_for(:document_title) do
-      title_tag_contents(title: title)
+      title_tag_contents(title)
     end
   end
 
   # contents of the <title> in html <head>
-  def title_tag_contents(title:, action: controller.action_name)
+  def title_tag_contents(title, action: controller.action_name)
     if title.present?
       title.strip_html.unescape_html # removes tags and special chars
     elsif TranslationString.where(tag: "title_for_#{action}").present?

@@ -11,7 +11,7 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
     title = "@title present"
     action_name = "something_else"
     assert_equal(title,
-                 title_tag_contents(title: title, action: action_name))
+                 title_tag_contents(title, action: action_name))
 
     # Prove that if @title is absent,
     # and there's an en.txt label for :title_for_action_name,
@@ -19,7 +19,7 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
     title = ""
     action_name = "user_search"
     assert_equal("User Search",
-                 title_tag_contents(title: title, action: action_name))
+                 title_tag_contents(title, action: action_name))
 
     # Prove that if @title is absent,
     # and no en.txt label for :title_for_action_name,
@@ -27,7 +27,7 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
     title = ""
     action_name = "blah_blah"
     assert_equal("Blah Blah",
-                 title_tag_contents(title: title, action: action_name))
+                 title_tag_contents(title, action: action_name))
   end
 
   # destroy_button tab tested in articles_controller_test
