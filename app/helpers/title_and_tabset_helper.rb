@@ -16,14 +16,23 @@
 #
 
 module TitleAndTabsetHelper
+  def set_page_title(title:, action:)
+    content_for(:title) do
+      title
+    end
+    content_for(:document_title) do
+      title_tag_contents(title: title, action_name: action)
+    end
+  end
+
   # contents of the <title> in html <head>
-  def title_tag_contents(title:, action_name:)
+  def title_tag_contents(title:, action:)
     if title.present?
       title.strip_html.unescape_html # removes tags and special chars
-    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
-      :"title_for_#{action_name}".t
+    elsif TranslationString.where(tag: "title_for_#{action}").present?
+      :"title_for_#{action}".t
     else
-      action_name.tr("_", " ").titleize
+      action.tr("_", " ").titleize
     end
   end
 
