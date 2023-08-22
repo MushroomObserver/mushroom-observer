@@ -3,7 +3,11 @@
 # --------- contextual nav ------------------------------------------------
 #  --- links and buttons ----
 #
+#  add_page_title(title)        # add content_for(:title)
+#                                 and content_for(:document_title)
 #  title_tag_contents           # text to put in html header <title>
+#  add_index_title              # logic for index titles, with fallbacks
+#  index_default_title          # logic for observations index default sort
 #  add_pager_for(object)        # add a prev/next pager for an object (show)
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
@@ -12,7 +16,7 @@
 #  create_link_to(link)         # convert one link attribute array into HTML
 #  add_type_filters             # add content_for(:type_filters)
 #  index_sorter                 # helper to render the sorter partial
-#  add_interest_icons(user, object) #add content_for(:interest_icons)
+#  add_interest_icons(user, object) # add content_for(:interest_icons)
 #
 
 module TitleAndTabsetHelper
@@ -70,6 +74,7 @@ module TitleAndTabsetHelper
     query.title
   end
 
+  # Previous/next object links for show templates
   def add_pager_for(object)
     content_for(:prev_next_object) do
       render(partial: "application/content/prev_next_pager",
