@@ -5,21 +5,14 @@ module Tabs
   module ObservationsHelper
     # assemble links for "tabset" for show_observation
     # actually a list of links and the interest icons
-    def show_observation_links(obs:, user:, mappable:)
+    def show_observation_links(obs:, user:)
       [
-        *show_obs_google_links_for(obs.name),
+        google_images_for_name_link(obs.name),
+        occurrence_map_for_name_link(obs.name),
         send_observer_question_link(obs, user),
         observation_manage_lists_link(obs, user),
-        observation_map_link(mappable),
         *obs_change_links(obs)
       ].reject(&:empty?)
-    end
-
-    def show_obs_google_links_for(obs_name)
-      return unless obs_name.known?
-
-      [google_images_for_name_link(obs_name),
-       google_distribution_map_for_name_link(obs_name)]
     end
 
     def google_images_for_name_link(obs_name)
@@ -29,7 +22,7 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def google_distribution_map_for_name_link(obs_name)
+    def occurrence_map_for_name_link(obs_name)
       [:show_name_distribution_map.t,
        add_query_param(map_name_path(id: obs_name.id)),
        { class: __method__.to_s }]
