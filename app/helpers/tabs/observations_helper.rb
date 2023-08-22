@@ -41,7 +41,7 @@ module Tabs
     def name_links_on_mo(name:, mappable:)
       tabs = create_tabs(obs_related_name_links(name), { class: "d-block" })
       tabs += obs_name_description_links(name)
-      tabs += create_tabs([observation_map_locations_link(mappable)],
+      tabs += create_tabs([observation_map_link(mappable)],
                           { class: "d-block" })
       tabs.reject(&:empty?)
     end
