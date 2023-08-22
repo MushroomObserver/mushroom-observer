@@ -8,13 +8,7 @@
 add_tab_set(location_map_links(query: @query))
 %>
 
-<%= tag.div(class: "text-center") do
-  if @locations.any?
-    gmap = make_map(@locations)
-    finish_map(gmap)
-    gmap.div(width: 800, height: 550).html_safe
-  else
-    :runtime_map_nothing_to_map.t
-  end
-end %>
+<%= render(partial: "shared/map",
+           locals: { objects: @locations,
+                     query_params: query_params(@query), zoom: 2 }) %>
 

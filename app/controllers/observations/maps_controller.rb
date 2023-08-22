@@ -13,8 +13,6 @@ module Observations
       @query = restrict_query_to_box(@query)
 
       find_locations_matching_observations
-
-      render(template: "observations/maps/index")
     end
 
     # Show map of one observation by id.
@@ -27,7 +25,6 @@ module Observations
         MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
                                   obs.location)
       ]
-      render(template: "observations/maps/index")
     end
 
     private
