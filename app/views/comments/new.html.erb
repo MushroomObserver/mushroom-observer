@@ -1,6 +1,6 @@
 <%
 @container = :full
-@title = :comment_add_title.t(name: @target.unique_format_name)
+add_page_title(:comment_add_title.t(name: @target.unique_format_name))
 add_tab_set(comment_form_new_links(target: @target))
 %>
 

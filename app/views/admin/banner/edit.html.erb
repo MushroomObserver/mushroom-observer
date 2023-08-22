@@ -1,4 +1,6 @@
-<% @title = :change_banner_title.t %>
+<%
+add_page_title(:change_banner_title.t)
+%>
 
 <%= form_with(url: admin_banner_path, method: :put,
               id: "admin_banner_form") do |f| %>

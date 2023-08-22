@@ -1,5 +1,5 @@
 <%
-@title = :email_merge_request_title.t(type: @model.type_tag)
+add_page_title(:email_merge_request_title.t(type: @model.type_tag))
 
 add_tab_set(email_merge_request_links(old_obj: @old_obj))
 

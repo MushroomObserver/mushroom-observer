@@ -1,5 +1,5 @@
 <%
-@title = :commercial_inquiry_title.t(name: @image.unique_format_name)
+add_page_title(:commercial_inquiry_title.t(name: @image.unique_format_name))
 @container = :text_image
 
 url = add_query_param({ action: :commercial_inquiry, id: @image.id })

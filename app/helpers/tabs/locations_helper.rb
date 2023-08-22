@@ -82,6 +82,14 @@ module Tabs
        { class: __method__.to_s }]
     end
 
+    def location_map_title(query:)
+      if query.flavor == :all
+        :map_locations_global_map.t
+      else
+        :map_locations_title.t(locations: query.title)
+      end
+    end
+
     def location_map_links(query:)
       [
         locations_index_link,

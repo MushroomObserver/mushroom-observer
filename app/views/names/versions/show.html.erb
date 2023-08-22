@@ -1,9 +1,7 @@
 <%
-@title = :show_past_name_title.t(
-  num:  @name.version,
-  name: @name.display_name
-)
-
+add_page_title(:show_past_name_title.t(
+  num:  @name.version, name: @name.display_name
+))
 add_tab_set(name_versions_links(name: @name))
 @container = :text
 %>

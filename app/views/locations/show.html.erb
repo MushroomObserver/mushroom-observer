@@ -1,5 +1,5 @@
 <%
-@title = :show_location_title.t(name: @location.display_name)
+add_page_title(:show_location_title.t(name: @location.display_name))
 add_pager_for(@location)
 add_interest_icons(@user, @location)
 add_tab_set(location_show_links(location: @location))

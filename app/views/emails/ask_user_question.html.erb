@@ -1,5 +1,5 @@
 <%
-@title = :ask_user_question_title.t(user: @target.legal_name)
+add_page_title(:ask_user_question_title.t(user: @target.legal_name))
 
 url = add_query_param({ action: :ask_user_question, id: @target.id })
 %>

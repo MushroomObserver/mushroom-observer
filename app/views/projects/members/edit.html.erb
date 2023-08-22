@@ -1,9 +1,8 @@
 <%
-@title ||= :change_member_status_title.t(
+add_page_title(:change_member_status_title.t(
   name: @candidate.legal_name,
   title: @project.title
-)
-
+))
 add_tab_set(project_member_form_edit_links(project: @project))
 
 action = { controller: "/projects/members", action: :update,

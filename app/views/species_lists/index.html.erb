@@ -1,4 +1,5 @@
 <%
+add_index_title(@query, no_hits: "")
 add_sorter(@query, species_lists_index_sorts(query: @query))
 flash_error(@error) if @error && @objects.empty?
 %>

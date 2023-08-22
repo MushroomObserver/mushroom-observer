@@ -1494,21 +1494,6 @@ class ApplicationController < ActionController::Base
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if args[:matrix]
     @num_results = query.num_results
-    if @num_results.zero?
-      @title = args[:no_hits_title]
-    else
-      @title ||= index_default_title(query)
-    end
-  end
-
-  # Special title for new obs default home page query
-  def index_default_title(query)
-    if query.title_args[:type] == :observation &&
-       query.title_args[:order] == :sort_by_rss_log
-      return :query_title_observations_by_activity_log.l
-    end
-
-    query.title
   end
 
   ###########################################################################

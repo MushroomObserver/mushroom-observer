@@ -1,5 +1,6 @@
 <%
 @container = :full
+add_index_title(@query, no_hits: "")
 add_tab_set(names_index_links(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
 

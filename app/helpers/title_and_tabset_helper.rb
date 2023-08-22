@@ -16,17 +16,18 @@
 #
 
 module TitleAndTabsetHelper
-  def set_page_title(title:, action:)
+  # sets both the html doc title and the title for the page (previously @title)
+  def add_page_title(title)
     content_for(:title) do
       title
     end
     content_for(:document_title) do
-      title_tag_contents(title: title, action_name: action)
+      title_tag_contents(title: title)
     end
   end
 
   # contents of the <title> in html <head>
-  def title_tag_contents(title:, action:)
+  def title_tag_contents(title:, action: controller.action_name)
     if title.present?
       title.strip_html.unescape_html # removes tags and special chars
     elsif TranslationString.where(tag: "title_for_#{action}").present?
@@ -34,6 +35,39 @@ module TitleAndTabsetHelper
     else
       action.tr("_", " ").titleize
     end
+  end
+
+  # Special builder for index page titles.
+  # These default to the query title, but may have several fallbacks, for
+  # example, when users hit indexes with a bad no query. The fallback
+  # is determined by the "no_hits" arg. If indexes pass `no_hits: nil`,
+  # the page will display the query title as the no_hits title.
+  #
+  # However, the helper allows indexes to pass a blank, non-nil `no_hits: ""`.
+  # In this case, `index_default_title` will return a document_title of "Index"
+  # but this helper will generate no title on the page. Currently this is the
+  # expected behavior on Locations, Names, Observations and SpeciesLists tests.
+  # It's debatable whether this is ideal UI, but i'm preserving the current
+  # behavior for now.) - AN 2023
+  def add_index_title(query, no_hits: nil)
+    title = if !query
+              ""
+            elsif query.num_results.zero? && !no_hits.nil?
+              no_hits
+            else
+              index_default_title(query)
+            end
+    add_page_title(title)
+  end
+
+  # Special title for new obs default home page query
+  def index_default_title(query)
+    if query.title_args[:type] == :observation &&
+       query.title_args[:order] == :sort_by_rss_log
+      return :query_title_observations_by_activity_log.l
+    end
+
+    query.title
   end
 
   def add_pager_for(object)

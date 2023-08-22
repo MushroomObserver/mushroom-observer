@@ -1,6 +1,6 @@
 <%
-@title = :ask_observation_question_title.t(
+add_page_title(:ask_observation_question_title.t(
   name: @observation.unique_format_name
-)
+))
 %>
 <%= render(partial: "observations/emails/form", locals: { local: true }) %>

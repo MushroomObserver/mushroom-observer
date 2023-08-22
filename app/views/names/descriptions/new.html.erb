@@ -1,6 +1,5 @@
 <%
-@title ||= :create_name_description_title.t(name: @name.display_name)
-
+add_page_title(:create_name_description_title.t(name: @name.display_name))
 add_tab_set(name_description_form_new_links(description: @description))
 
 action = { controller: "/names/descriptions", action: :create,

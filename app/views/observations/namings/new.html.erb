@@ -1,6 +1,6 @@
 <%
 @container = :double
-@title = :create_naming_title.t(id: @observation.id)
+add_page_title(:create_naming_title.t(id: @observation.id))
 add_tab_set(new_naming_links(obs: @observation))
 %>
 

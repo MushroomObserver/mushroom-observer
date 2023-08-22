@@ -1,5 +1,5 @@
 <%
-  @title = :email_welcome.t(user: @unverified_user.legal_name)
+add_page_title(:email_welcome.t(user: @unverified_user.legal_name))
 %>
 
 <%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>

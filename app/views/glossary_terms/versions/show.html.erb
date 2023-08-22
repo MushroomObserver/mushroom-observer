@@ -1,8 +1,8 @@
 <%
-@title = :show_past_glossary_term_title.t(
+add_page_title(:show_past_glossary_term_title.t(
   num: @glossary_term.version,
   name: @glossary_term.name
-)
+))
 
 add_tab_set(glossary_term_version_links(term: @glossary_term))
 %>

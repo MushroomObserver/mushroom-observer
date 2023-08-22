@@ -1,10 +1,6 @@
 <%
 @container = :wide
-@title = if @query.flavor == :all
-           :map_locations_global_map.t
-         else
-           :map_locations_title.t(locations: @query.title)
-         end
+add_page_title(location_map_title(query: @query))
 add_tab_set(location_map_links(query: @query))
 %>
 

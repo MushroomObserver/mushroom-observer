@@ -1,6 +1,7 @@
 <%
-@title ||= :create_location_description_title.t(name: @location.display_name)
-
+add_page_title(
+  :create_location_description_title.t(name: @location.display_name)
+)
 add_tab_set(location_description_form_new_links(description: @description))
 %>
 

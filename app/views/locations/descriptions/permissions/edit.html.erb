@@ -1,6 +1,5 @@
 <%
-@title ||= @description.format_name.t
-
+add_page_title(@description.format_name.t)
 add_tab_set(
   location_description_form_permissions_links(description: @description)
 )

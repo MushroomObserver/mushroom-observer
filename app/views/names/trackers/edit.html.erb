@@ -1,7 +1,7 @@
 <%
 # Form to edit or delete a tracker, via params[:commit]
 
-@title = :email_tracking_title.t(name: @name.display_name)
+add_page_title(:email_tracking_title.t(name: @name.display_name))
 
 add_tab_set(name_forms_return_links(name: @name))
 
