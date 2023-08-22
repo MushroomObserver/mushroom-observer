@@ -3,31 +3,27 @@
 module Tabs
   module GeneralHelper
     def coerced_observation_query_link(query)
-      return unless query
+      return unless query && (link = coerced_query_link(query, Observation))
 
-      [*coerced_query_link(query, Observation),
-       { class: __method__.to_s }]
+      [*link, { class: __method__.to_s }]
     end
 
     def coerced_location_query_link(query)
-      return unless query
+      return unless query && (link = coerced_query_link(query, Location))
 
-      [*coerced_query_link(query, Location),
-       { class: __method__.to_s }]
+      [*link, { class: __method__.to_s }]
     end
 
     def coerced_image_query_link(query)
-      return unless query
+      return unless query && (link = coerced_query_link(query, Image))
 
-      [*coerced_query_link(query, Image),
-       { class: __method__.to_s }]
+      [*link, { class: __method__.to_s }]
     end
 
     def coerced_name_query_link(query)
-      return unless query
+      return unless query && (link = coerced_query_link(query, Name))
 
-      [*coerced_query_link(query, Name),
-       { class: __method__.to_s }]
+      [*link, { class: __method__.to_s }]
     end
 
     def object_return_link(obj, text = nil)
