@@ -6,7 +6,7 @@ module Tabs
     # assemble links for "tabset" for show_observation
     # actually a list of links and the interest icons
     def show_observation_links(obs:)
-      obs_change_links(obs).reject(&:empty?)
+      obs_change_links(obs)&.reject(&:empty?)
     end
 
     ########################################################################
