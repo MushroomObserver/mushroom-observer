@@ -1,5 +1,5 @@
 <%
-if observation.location
+if obs.location
   loc = observation.location
   n = ((90.0 - loc.north) / 1.80).round(6)
   s = ((90.0 - loc.south) / 1.80).round(6)
@@ -7,19 +7,19 @@ if observation.location
   w = ((180.0 + loc.west) / 3.60).round(6)
 end
 
-lat, long = if observation.lat && observation.long
-  [observation.public_lat, observation.public_long]
-elsif observation.location
-  observation.location.center
+lat, long = if obs.lat && obs.long
+  [obs.public_lat, obs.public_long]
+elsif obs.location
+  obs.location.center
 end
 if lat && long
   x = ((180.0 + long) / 3.60).round(6)
   y = ((90.0 - lat) / 1.80).round(6)
 end
 
-map_url = map_observation_path(id: observation.id, q: get_query_param)
+map_url = map_observation_path(id: obs.id, q: get_query_param)
 hide_map_path = add_query_param(
-                  javascript_hide_thumbnail_map_path(id: @observation.id)
+                  javascript_hide_thumbnail_map_path(id: obs.id)
                 )
 %>
 
@@ -48,7 +48,7 @@ hide_map_path = add_query_param(
 
     <div class="thumbnail-map">
 
-      <%= if observation.location
+      <%= if obs.location
         if w < e && s > n
           content_tag(:div, "",
             class: "thumbnail-map-box",

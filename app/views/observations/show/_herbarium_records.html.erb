@@ -1,16 +1,16 @@
 <%
-  records = observation.herbarium_records
-  can_add = in_admin_mode? || observation.can_edit? ||
-            @user && @user.curated_herbaria.any?
-  obs_id = observation.id
-  # This is passed in to show_herbarium_record, allowing users to do prev,
-  # next and index from there to navigate through all the rest for this obs.
-  query = Query.lookup(:HerbariumRecord, :all, observations: observation.id)
+records = obs.herbarium_records
+can_add = in_admin_mode? || obs.can_edit? ||
+          @user && @user.curated_herbaria.any?
+obs_id = obs.id
+# This is passed in to show_herbarium_record, allowing users to do prev,
+# next and index from there to navigate through all the rest for this obs.
+query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
 %>
 
 <div class="obs-herbarium card-text" id="observation_herbarium_records">
 <% unless @user.try(&:hide_specimen_stuff?) ||
-          observation.user.try(&:hide_specimen_stuff?) %>
+          obs.user.try(&:hide_specimen_stuff?) %>
   <% if records.any? && can_add %>
     <div>
       <%= tag.b(:Herbarium_records.t + ":") %> [<%=

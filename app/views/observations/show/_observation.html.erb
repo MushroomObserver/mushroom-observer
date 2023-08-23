@@ -1,52 +1,52 @@
 <%
 # The basic info box for the observation
-obs_id = observation.id
+obs_id = obs.id
 caption ||= false
 %>
 
 <p class="obs-when card-text" id="observation_when">
-  <%= tag.b(:WHEN.t + ":") %> <%= observation.when.web_date %>
+  <%= tag.b(:WHEN.t + ":") %> <%= obs.when.web_date %>
 </p>
 
 <p class="obs-where card-text" id="observation_where">
-  <%= label = observation.is_collection_location ?
+  <%= label = obs.is_collection_location ?
         :show_observation_collection_location.t :
         :show_observation_seen_at.t
     tag.b(label + ":") %>
-  <%= location_link(observation.place_name,
-                    observation.location, nil, true) %>
+  <%= location_link(obs.place_name,
+                    obs.location, nil, true) %>
 </p>
 
 <p class="obs-lat-lng card-text" id="observation_lat_lng">
   <%=
     hidden = "<i>(#{:show_observation_gps_hidden.t})</i>".html_safe
-    if observation.lat &&
-        (!observation.gps_hidden || observation.can_edit?)
-      link_to("#{observation.display_lat_long.t} " \
-              "#{observation.display_alt.t} " \
+    if obs.lat &&
+        (!obs.gps_hidden || obs.can_edit?)
+      link_to("#{obs.display_lat_long.t} " \
+              "#{obs.display_alt.t} " \
               "[#{:click_for_map.t}]".html_safe,
               map_observation_path(id: obs_id))
-    elsif observation.lat
-      hidden + " ".html_safe + observation.display_alt.t
+    elsif obs.lat
+      hidden + " ".html_safe + obs.display_alt.t
     else
-      observation.display_alt.t
+      obs.display_alt.t
     end
   %>
   <%=
-    if observation.lat && observation.gps_hidden && observation.can_edit?
+    if obs.lat && obs.gps_hidden && obs.can_edit?
       hidden
     end
   %>
 </p>
 
 <p class="obs-who card-text" id="observation_who">
-  <%= tag.b(:WHO.t + ":") %> <%= user_link(observation.user) %>
+  <%= tag.b(:WHO.t + ":") %> <%= user_link(obs.user) %>
 </p>
 
 <% if !caption %>
   <% if @user %>
     <div class="obs-projects" id="observation_projects">
-      <% observation.projects.each do |project| %>
+      <% obs.projects.each do |project| %>
         <%= tag.p(class: "card-text") do
           [
             (:PROJECT.t + ":"),
@@ -55,32 +55,33 @@ caption ||= false
         end %>
       <% end %>
     </div>
+
+    <% if @user %>
+      <%= render(partial: "observations/show/collection_numbers",
+                locals: { obs: obs }) %>
+
+      <%= render(partial: "observations/show/herbarium_records",
+                locals: { obs: obs }) %>
+
+      <%= render(partial: "observations/show/sequences",
+                locals: { obs: obs }) %>
+    <% end %>
   <% end %>
 
   <div class="obs-specimen card-text"
        id="observation_specimen_available">
-    <%= observation.specimen ? :show_observation_specimen_available.t :
-                                :show_observation_specimen_not_available.t %>
+    <%= obs.specimen ? :show_observation_specimen_available.t :
+                       :show_observation_specimen_not_available.t %>
   </div>
 
-  <% if @user %>
-    <%= render(partial: "observations/show/collection_numbers",
-               locals: { observation: observation }) %>
-
-    <%= render(partial: "observations/show/herbarium_records",
-               locals: { observation: observation }) %>
-
-    <%= render(partial: "observations/show/sequences",
-               locals: { observation: observation }) %>
-  <% end %>
 <% end %>
 
 <div class="obs-notes card-text" id="observation_notes">
-  <%= if observation.notes?
+  <%= if obs.notes?
     Textile.clear_textile_cache
-    Textile.register_name(observation.name)
+    Textile.register_name(obs.name)
     tag.div(
-      observation.notes_show_formatted.sub(/^\A/, tag.b(:NOTES.t + ":\n")).tpl
+      obs.notes_show_formatted.sub(/^\A/, tag.b(:NOTES.t + ":\n")).tpl
     )
   end %>
 </div><!--.obs-notes-->

@@ -12,6 +12,8 @@ sorts
 %>
 <%
 add_filter_help(@any_content_filters_applied)
+add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons) ||
+                     content_for?(:dropdown_tab_set))
 %>
 
 <div class="row-justified">
@@ -31,8 +33,7 @@ add_filter_help(@any_content_filters_applied)
   </div>
 
   <!-- Tabsets and interest icons, within "#right_tabs" -->
-  <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons) ||
-                     content_for?(:dropdown_tab_set),
+  <%= content_tag_if(add_right_tabs,
                     :div, id: "right_tabs",
                     class: "d-flex flex-row d-print-none") do
         concat(yield(:interest_icons))

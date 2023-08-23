@@ -1,20 +1,18 @@
-<% #bs4
-if observation.images.any? || check_permission(observation)
-%>
+<% if obs.images.any? || check_permission(obs) %>
   <div class="row">
     <div class="col-12 col-md-6 col-lg-4">
       <%= content_tag(:h4, :IMAGES.t, class: "mt-0") %>
     </div>
-    <% if check_permission(observation) # header links for image things %>
+    <% if check_permission(obs) # header links for image things %>
       <div class="col-12 col-md-6 col-lg-8">
         <small>
           <%= link_with_query(:show_observation_add_images.t,
-                              new_image_for_observation_path(observation.id)) %>
+                              new_image_for_observation_path(obs.id)) %>
           | <%= link_with_query(:show_observation_reuse_image.t,
-                                reuse_images_for_observation_path(observation.id)) %>
-          <% if observation.images.length > 0 %>
+                                reuse_images_for_observation_path(obs.id)) %>
+          <% if obs.images.length > 0 %>
             | <%= link_with_query(:show_observation_remove_images.t,
-                                  remove_images_from_observation_path(observation.id)) %>
+                                  remove_images_from_observation_path(obs.id)) %>
             <% end %>
         </small>
       </div>
@@ -22,19 +20,18 @@ if observation.images.any? || check_permission(observation)
   </div><!--.row-->
 <% end %>
 
-<% if observation.images.any? %>
+<% if obs.images.any? %>
   <div class="show_images list-group text-center">
     <%
     # This sort puts the thumbnail first.  We can't use thumb_image, because we
     # haven't eager-loaded it; we *have* eager-loaded all the other images.
-    observation.images.
-                sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id}.
-                each do |image| %>
-      <% info = image_info(image, observation, original: false) %>
+    obs.images.sort_by {|x| x.id == obs.thumb_image_id ? -1 : x.id}.
+               each do |image| %>
+      <% info = image_info(image, obs, original: false) %>
       <%= tag.div(class: "list-group-item") do
         concat(interactive_image(
                 image,
-                image_link: image.show_link_args.merge({ obs: observation.id }),
+                image_link: image.show_link_args.merge({ obs: obs.id }),
                 original: true,
                 is_set: true,
                 votes: true

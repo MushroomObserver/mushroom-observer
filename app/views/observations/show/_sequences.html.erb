@@ -1,24 +1,24 @@
 <%
-  sequences = observation.sequences
-  can_edit  = in_admin_mode? || observation.can_edit?
+sequences = obs.sequences
+can_edit  = in_admin_mode? || obs.can_edit?
 
-  # This is passed in to show_sequence, allowing users to do prev,
-  # next and index from there to navigate through all the rest for this obs.
-  query = Query.lookup(:Sequence, :all, observations: observation.id)
+# This is passed in to show_sequence, allowing users to do prev,
+# next and index from there to navigate through all the rest for this obs.
+query = Query.lookup(:Sequence, :all, observations: obs.id)
 %>
 
 <div class="obs-sequence card-text" id="observation_sequences">
 <% unless @user.try(&:hide_specimen_stuff?) ||
-          observation.user.try(&:hide_specimen_stuff?) %>
+          obs.user.try(&:hide_specimen_stuff?) %>
   <% if @user || sequences.any? %>
     <div>
       <%= sequences.any? ? tag.b(:Sequences.t + ":") : :show_observation_no_sequences.t %>
       <%=
           add_sequence_link = link_with_query(
             :show_observation_add_sequence.t,
-            new_sequence_path(params: { observation_id: observation.id }),
+            new_sequence_path(params: { observation_id: obs.id }),
             remote: true, onclick: "MOEvents.whirly();",
-            class: "create_sequence_link_#{observation.id}"
+            class: "create_sequence_link_#{obs.id}"
           )
           "[#{add_sequence_link}]".html_safe if @user
       %>
@@ -48,7 +48,7 @@
             if in_admin_mode? || sequence.can_edit?(@user)
               links << link_with_query(
                 :EDIT.t,
-                edit_sequence_path(id: sequence.id, back: observation.id),
+                edit_sequence_path(id: sequence.id, back: obs.id),
                 remote: true, onclick: "MOEvents.whirly();",
                 class: "edit_sequence_link_#{sequence.id}"
               )

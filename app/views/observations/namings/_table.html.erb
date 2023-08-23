@@ -2,20 +2,20 @@
 # called from observations/show/namings
 # Just the "table" of current namings, with headers
 logged_in = @user&.verified
-namings = observation.namings.sort_by(&:created_at)
-any_names = observation.namings&.length&.positive?
-votes = gather_users_votes(observation, @user)
+namings = obs.namings.sort_by(&:created_at)
+any_names = obs.namings&.length&.positive?
+votes = gather_users_votes(obs, @user)
 %>
 
 <div class="namings-table card bg-light mb-4" id="namings_table">
   <%= render(partial: "observations/namings/table_header",
-             locals: { logged_in: logged_in, observation: observation }) %>
+             locals: { logged_in: logged_in, obs: obs }) %>
 
   <%= tag.div(class: "list-group list-group-flush") do %>
     <% if any_names %>
       <% namings.each do |naming| %>
         <%= render(partial: "observations/namings/row",
-                  locals: { logged_in: logged_in, observation: observation,
+                  locals: { logged_in: logged_in, obs: obs,
                             naming: naming, votes: votes }) %>
       <% end # each naming %>
     <% else %>
@@ -24,5 +24,5 @@ votes = gather_users_votes(observation, @user)
   <% end %>
 
   <%= render(partial: "observations/namings/table_footer",
-             locals: { logged_in: logged_in, observation: observation }) %>
+             locals: { logged_in: logged_in, obs: obs }) %>
 </div>
