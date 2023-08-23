@@ -146,7 +146,7 @@ module TitleAndTabsetHelper
   #   "<a href="url" class="edit_form_link">text</a>",
   #   "(an HTML form)" via destroy_button, gives default button text and class
   #
-  # Allows passing an extra args hash to be merged with each link's args
+  # Allows passing an extra_args hash to be merged with each link's args
   #
   def create_links_to(links, extra_args = {})
     return [] unless links
@@ -158,10 +158,16 @@ module TitleAndTabsetHelper
 
   # Unpacks the [text, url, args] array for a single link and figures out
   # which HTML to return for that type of link
-  def create_link_to(link)
+  # Pass extra_args hash to modify the link/button attributes
+  def create_link_to(link, extra_args = {})
     str, url, args = link
     args ||= {}
+    # kwargs that will be passed to link. remove args used in button helpers
     kwargs = args&.except(:button, :target)
+    # blend in the class names that may come from the extra_args
+    kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
+    # merge in other args from extra_args (will overwrite keys!)
+    kwargs = kwargs&.merge(extra_args&.except(:class))
     case args[:button]
     when :destroy
       destroy_button(name: str, target: args[:target] || url, **kwargs)
