@@ -4,12 +4,11 @@ add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
 add_owner_naming(@owner_naming)
 add_pager_for(@observation)
 add_interest_icons(@user, @observation)
-add_tab_set(show_observation_links(obs: @observation, user: @user))
+add_tab_set(show_observation_links(obs: @observation))
 
 @container = :double
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
-show_lists = @user && @observation.species_lists.any?
 show_links = @user && (@observation.external_links.any? || @new_sites.any?)
 
 obs_locals = { observation: @observation }
@@ -23,7 +22,7 @@ obs_locals = { observation: @observation }
     <% if @user %>
       <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
 
-      <% if show_lists %>
+      <% if @user %>
         <%= render(partial: "observations/show/species_lists",
                    locals: obs_locals) %>
       <% end %>

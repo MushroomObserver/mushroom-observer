@@ -42,6 +42,9 @@ caption ||= false
 
   <p class="obs-who" id="observation_who">
     <%= :WHO.t %>: <span><%= user_link(observation.user) %></span>
+    <%= create_link_to(
+      send_observer_question_link(observation, observation.user)
+    ) %>
   </p>
 
   <% if !caption %>

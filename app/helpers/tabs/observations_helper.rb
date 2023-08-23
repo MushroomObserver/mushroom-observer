@@ -5,16 +5,14 @@ module Tabs
   module ObservationsHelper
     # assemble links for "tabset" for show_observation
     # actually a list of links and the interest icons
-    def show_observation_links(obs:, user:)
-      [
-        google_images_for_name_link(obs.name),
-        occurrence_map_for_name_link(obs.name),
-        send_observer_question_link(obs, user),
-        observation_manage_lists_link(obs, user),
-        *obs_change_links(obs)
-      ].reject(&:empty?)
+    def show_observation_links(obs:)
+      obs_change_links(obs).reject(&:empty?)
     end
 
+    ########################################################################
+    # LINKS FOR PANELS
+    #
+    # Used in the observation panel
     def send_observer_question_link(obs, user)
       return if obs.user.no_emails
       return unless obs.user.email_general_question && obs.user != user
@@ -25,6 +23,7 @@ module Tabs
          class: __method__.to_s }]
     end
 
+    # Used in the lists panel
     def observation_manage_lists_link(obs, user)
       return unless user
 
@@ -33,11 +32,10 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    ########################################################################
-    # Name section -- generates HTML
+    # Name panel -- generates HTML
 
-    # generates HTML using create_tabs with xtrargs { class: "d-block" }
-    # the hiccup is that list_descriptions is already HTML
+    # uses create_links_to with extra_args { class: "d-block" }
+    # the hiccup here is that list_descriptions is already HTML, an inline list
     def name_links_on_mo(name:)
       tabs = create_links_to(obs_related_name_links(name), { class: "d-block" })
       tabs += obs_name_description_links(name)
