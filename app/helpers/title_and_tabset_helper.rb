@@ -144,7 +144,8 @@ module TitleAndTabsetHelper
   # ]
   # create_links_to(links) will make an array of the following HTML
   #   "<a href="url" class="edit_form_link">text</a>",
-  #   "(an HTML form)" via destroy_button, gives default button text and class
+  #   "<form action='destroy'>" etc via destroy_button
+  #   (The above array gives default button text and class)
   #
   # Allows passing an extra_args hash to be merged with each link's args
   #
