@@ -38,11 +38,11 @@ module Tabs
 
     # generates HTML using create_tabs with xtrargs { class: "d-block" }
     # the hiccup is that list_descriptions is already HTML
-    def name_links_on_mo(name:, mappable:)
-      tabs = create_tabs(obs_related_name_links(name), { class: "d-block" })
+    def name_links_on_mo(name:)
+      tabs = create_links_to(obs_related_name_links(name), { class: "d-block" })
       tabs += obs_name_description_links(name)
-      tabs += create_tabs([occurrence_map_for_name_link(obs_name)],
-                          { class: "d-block" })
+      tabs += create_links_to([occurrence_map_for_name_link(obs_name)],
+                              { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
@@ -89,7 +89,8 @@ module Tabs
     end
 
     def name_links_web(name:)
-      tabs = create_tabs(observation_web_name_links(name), { class: "d-block" })
+      tabs = create_links_to(observation_web_name_links(name),
+                             { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
