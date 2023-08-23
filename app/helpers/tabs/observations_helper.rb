@@ -89,7 +89,8 @@ module Tabs
     end
 
     def name_links_web(name:)
-      tabs = create_tabs(observation_web_name_links(name), { class: "d-block" })
+      tabs = create_links_to(observation_web_name_links(name),
+                             { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
