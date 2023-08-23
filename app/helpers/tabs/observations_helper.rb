@@ -116,7 +116,7 @@ module Tabs
       [:google_images.t,
        format("https://images.google.com/images?q=%s",
               obs_name.real_text_name),
-       { class: __method__.to_s }]
+       { class: __method__.to_s, target: :_blank, rel: :noopener }]
     end
 
     def occurrence_map_for_name_link(obs_name)

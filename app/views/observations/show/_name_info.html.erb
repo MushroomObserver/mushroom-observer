@@ -3,9 +3,12 @@
   name = observation.name
 %>
 
-<%= panel_with_outer_heading(id: "observation_name_info",
-                             heading: :about_taxon.t,
-                             inner_class: "name-section small") do %>
+<%=
+panel_with_outer_heading(
+  id: "observation_name_info",
+  heading: :show_name.t(name: name.display_name_brief_authors),
+  inner_class: "name-section small"
+) do %>
 
   <%= tag.div(class: "row") do %>
     <%= tag.div(class: "col-6") do
