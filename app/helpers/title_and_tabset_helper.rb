@@ -146,11 +146,13 @@ module TitleAndTabsetHelper
   #   "<a href="url" class="edit_form_link">text</a>",
   #   "(an HTML form)" via destroy_button, gives default button text and class
   #
-  def create_links_to(links)
+  # Allows passing an extra args hash to be merged with each link's args
+  #
+  def create_links_to(links, extra_args = {})
     return [] unless links
 
     links.compact.map do |link|
-      create_link_to(link)
+      create_link_to(link, extra_args)
     end
   end
 
