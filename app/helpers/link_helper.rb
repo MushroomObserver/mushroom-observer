@@ -75,13 +75,14 @@ module LinkHelper
     unless target.is_a?(String)
       classes += " destroy_#{target.type_tag}_link_#{target.id}"
     end
+    classes = class_names(classes, args[:class])
 
     html_options = {
       method: :delete,
       class: classes,
       id: id,
       data: { confirm: :are_you_sure.t }
-    }.merge(args.except(:back))
+    }.merge(args.except(:back, :class))
 
     button_to(path, html_options) { name }
   end
