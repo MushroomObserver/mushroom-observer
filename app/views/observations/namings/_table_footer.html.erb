@@ -2,9 +2,9 @@
 # called from observations/namings/table
 # nested rows/columns parallel those in the row partial
 
-suggest = logged_in && observation.thumb_image_id.present? &&
+suggest = logged_in && obs.thumb_image_id.present? &&
           (@user.admin || MO.image_model_beta_testers.include?(@user.id))
-buttons = observation_naming_buttons(observation, suggest)
+buttons = observation_naming_buttons(obs, suggest)
 help_text = logged_in ? :show_namings_consensus_help.t :
                         :show_namings_please_login.t
 help = content_tag(:div, help_text, class: "card-text small")
