@@ -42,7 +42,7 @@ module Tabs
     def name_links_on_mo(name:)
       tabs = create_links_to(obs_related_name_links(name), { class: "d-block" })
       tabs += obs_name_description_links(name)
-      tabs += create_links_to([occurrence_map_for_name_link(obs_name)],
+      tabs += create_links_to([occurrence_map_for_name_link(name)],
                               { class: "d-block" })
       tabs.reject(&:empty?)
     end
@@ -113,16 +113,16 @@ module Tabs
        { class: __method__.to_s, target: :_blank, rel: :noopener }]
     end
 
-    def google_images_for_name_link(obs_name)
+    def google_images_for_name_link(name)
       [:google_images.t,
        format("https://images.google.com/images?q=%s",
-              obs_name.real_text_name),
+              name.real_text_name),
        { class: __method__.to_s, target: :_blank, rel: :noopener }]
     end
 
-    def occurrence_map_for_name_link(obs_name)
+    def occurrence_map_for_name_link(name)
       [:show_name_distribution_map.t,
-       add_query_param(map_name_path(id: obs_name.id)),
+       add_query_param(map_name_path(id: name.id)),
        { class: __method__.to_s }]
     end
 
