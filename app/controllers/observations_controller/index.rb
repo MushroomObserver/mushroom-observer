@@ -128,9 +128,7 @@ class ObservationsController
           identify_observations_path(q: get_query_param(search.query))
         )
       else
-        show_selected_observations(
-          search.query, no_hits_title: :title_for_observation_search.t
-        )
+        show_selected_observations(search.query)
       end
     end
 

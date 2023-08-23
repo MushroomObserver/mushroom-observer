@@ -1,5 +1,5 @@
 <%
-@title = @herbarium.format_name.t
+add_page_title(@herbarium.format_name.t)
 
 add_pager_for(@herbarium)
 add_tab_set(herbarium_show_links(herbarium: @herbarium, user: @user))

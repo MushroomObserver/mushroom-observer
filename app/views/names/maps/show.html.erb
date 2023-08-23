@@ -1,15 +1,12 @@
 <%
-@title = :name_map_title.t(name: @name.display_name)
-
+@container = :wide
+add_page_title(:name_map_title.t(name: @name.display_name))
 add_tab_set(name_map_links(name: @name, query: @query))
 %>
 
-<%=
-  if @observations.any?
-    gmap = make_map(@observations, query_params: query_params(@query), zoom: 2)
-    finish_map(gmap)
-    gmap.div(width: "100%", height: 550).html_safe
-  else
-    :name_map_no_maps.tp(name: @name.display_name)
-  end
-%>
+<%= render(partial: "shared/map",
+           locals: {
+             objects: @observations,
+             query_params: query_params(@query), zoom: 2,
+             nothing_to_map: :name_map_no_maps.tp(name: @name.display_name)
+           }) %>

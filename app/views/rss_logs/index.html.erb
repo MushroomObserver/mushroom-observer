@@ -1,5 +1,5 @@
 <%
-@title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
+add_page_title(tag.span(:rss_log_title.t, class: "text-nowrap"))
 add_tab_set(rss_logs_index_links(user: @user, types: @types))
 add_type_filters
 

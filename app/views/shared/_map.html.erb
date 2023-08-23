@@ -1,0 +1,16 @@
+<%
+# Map for observations, names, locations - any objects
+# Takes locals listed here:
+map_args = local_assigns.except(:objects, :nothing_to_map)
+nothing_to_map = local_assigns[:nothing_to_map] || :runtime_map_nothing_to_map.t
+%>
+
+<%= tag.div(class: "text-center") do
+  if objects.any?
+    gmap = make_map(local_assigns[:objects], **map_args)
+    finish_map(gmap)
+    gmap.div(width: 800, height: 550).html_safe
+  else
+    nothing_to_map
+  end
+end %>

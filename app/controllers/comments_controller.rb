@@ -204,7 +204,6 @@ class CommentsController < ApplicationController
                   allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
-    @title = :comment_add_title.t(name: @target.unique_format_name)
 
     respond_to do |format|
       format.html
@@ -290,7 +289,6 @@ class CommentsController < ApplicationController
     return unless allowed_to_see!(@target)
     return unless check_permission_or_redirect!(@comment, @target)
 
-    @title = :comment_edit_title.t(name: @target.unique_format_name)
     respond_to do |format|
       format.html
       format.js do

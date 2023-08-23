@@ -61,9 +61,9 @@ class UsersControllerTest < FunctionalTestCase
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_equal(
+    assert_match(
       :title_for_user_search.t,
-      @controller.instance_variable_get(:@title),
+      css_select("title").text,
       "metadata <title> tag incorrect"
     )
     assert_empty(css_select("#sorts"),

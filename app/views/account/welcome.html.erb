@@ -1,6 +1,5 @@
 <%
-  @title = @user ? :email_welcome.t(user: @user.legal_name) :
-                   :welcome_no_user_title.t
+add_page_title(account_welcome_title(@user))
 %>
 
 <% if @user %>

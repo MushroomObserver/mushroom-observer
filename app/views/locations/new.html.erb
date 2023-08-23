@@ -1,9 +1,7 @@
 <%
-@title ||= :create_location_title.t
-
-add_tab_set(location_form_new_links(location: @location))
-
 @container = :full
+add_page_title(:create_location_title.t)
+add_tab_set(location_form_new_links(location: @location))
 
 action = {
   action: :create,

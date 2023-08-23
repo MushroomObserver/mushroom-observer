@@ -24,7 +24,7 @@ sorts
 
     <!-- Title Caption -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= tag.h1(@title, class: "h3", id: "title") -%>
+    <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
                                       class: "context-help"),
@@ -33,7 +33,7 @@ sorts
     <%= content_tag_if(@owner_naming, :h5, @owner_naming, id: "owner_naming") %>
   </div>
 
-  <!-- Tabsets -->
+  <!-- Tabsets and interest icons, within "#right_tabs" -->
   <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons),
                     :div, id: "right_tabs",
                     class: "hidden-print text-right col-sm-4 mb-3") do

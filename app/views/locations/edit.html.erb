@@ -1,6 +1,5 @@
 <%
-@title ||= :edit_location_title.t(name: @location.display_name)
-
+add_page_title(:edit_location_title.t(name: @location.display_name))
 add_pager_for(@image)
 add_tab_set(location_form_edit_links(location: @location))
 

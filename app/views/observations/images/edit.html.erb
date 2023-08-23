@@ -1,5 +1,5 @@
 <%
-@title = :image_edit_title.t(name: @image.unique_format_name)
+add_page_title(:image_edit_title.t(name: @image.unique_format_name))
 
 add_tab_set(observation_images_edit_links(image: @image))
 @container = :wide

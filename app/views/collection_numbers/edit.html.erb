@@ -1,9 +1,12 @@
 <%
+@container = :full
+add_page_title(
+  :edit_collection_number_title.l(name: @collection_number.format_name)
+)
 add_tab_set(
   collection_number_form_edit_links(back: @back, c_n: @collection_number,
                                     obj: @back_object)
 )
-@container = :full
 %>
 
 <div class="row">

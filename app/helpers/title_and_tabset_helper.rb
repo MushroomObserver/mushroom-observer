@@ -3,7 +3,11 @@
 # --------- contextual nav ------------------------------------------------
 #  --- links and buttons ----
 #
+#  add_page_title(title)        # add content_for(:title)
+#                                 and content_for(:document_title)
 #  title_tag_contents           # text to put in html header <title>
+#  add_index_title              # logic for index titles, with fallbacks
+#  index_default_title          # logic for observations index default sort
 #  add_pager_for(object)        # add a prev/next pager for an object (show)
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
@@ -12,21 +16,65 @@
 #  create_link_to(link)         # convert one link attribute array into HTML
 #  add_type_filters             # add content_for(:type_filters)
 #  index_sorter                 # helper to render the sorter partial
-#  add_interest_icons(user, object) #add content_for(:interest_icons)
+#  add_interest_icons(user, object) # add content_for(:interest_icons)
 #
 
 module TitleAndTabsetHelper
-  # contents of the <title> in html <head>
-  def title_tag_contents(title:, action_name:)
-    if title.present?
-      title.strip_html.unescape_html # removes tags and special chars
-    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
-      :"title_for_#{action_name}".t
-    else
-      action_name.tr("_", " ").titleize
+  # sets both the html doc title and the title for the page (previously @title)
+  def add_page_title(title)
+    content_for(:title) do
+      title
+    end
+    content_for(:document_title) do
+      title_tag_contents(title)
     end
   end
 
+  # contents of the <title> in html <head>
+  def title_tag_contents(title, action: controller.action_name)
+    if title.present?
+      title.strip_html.unescape_html # removes tags and special chars
+    elsif TranslationString.where(tag: "title_for_#{action}").present?
+      :"title_for_#{action}".t
+    else
+      action.tr("_", " ").titleize
+    end
+  end
+
+  # Special builder for index page titles.
+  # These default to the query title, but may have several fallbacks, for
+  # example, when users hit indexes with a bad no query. The fallback
+  # is determined by the "no_hits" arg. If indexes pass `no_hits: nil`,
+  # the page will display the query title as the no_hits title.
+  #
+  # However, the helper allows indexes to pass a blank, non-nil `no_hits: ""`.
+  # In this case, `index_default_title` will return a document_title of "Index"
+  # but this helper will generate no title on the page. Currently this is the
+  # expected behavior on Locations, Names, Observations and SpeciesLists tests.
+  # It's debatable whether this is ideal UI, but i'm preserving the current
+  # behavior for now.) - AN 2023
+  def add_index_title(query, no_hits: nil)
+    title = if !query
+              ""
+            elsif query.num_results.zero? && !no_hits.nil?
+              no_hits
+            else
+              index_default_title(query)
+            end
+    add_page_title(title)
+  end
+
+  # Special title for new obs default home page query
+  def index_default_title(query)
+    if query.title_args[:type] == :observation &&
+       query.title_args[:order] == :sort_by_rss_log
+      return :query_title_observations_by_activity_log.l
+    end
+
+    query.title
+  end
+
+  # Previous/next object links for show templates
   def add_pager_for(object)
     content_for(:prev_next_object) do
       render(partial: "application/content/prev_next_pager",

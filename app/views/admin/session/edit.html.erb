@@ -2,7 +2,7 @@
 # This is the form for admins to switch users, while in admin mode.
 # It's not in the admin controller because it has different auth
 
-@title = :app_switch_users.l
+add_page_title(:app_switch_users.l)
 %>
 
 <%= form_with(url: admin_mode_path, class: "mt-3 pb-2", method: :put,

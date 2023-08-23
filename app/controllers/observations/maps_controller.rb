@@ -10,26 +10,23 @@ module Observations
 
       @query = find_or_create_query(:Observation)
       apply_content_filters(@query)
-      @title = :map_locations_title.t(locations: @query.title)
       @query = restrict_query_to_box(@query)
 
       find_locations_matching_observations
-
-      render(template: "observations/maps/index")
     end
 
     # Show map of one observation by id.
     def show
       pass_query_params
-      obs = find_or_goto_index(Observation, params[:id].to_s)
-      return unless obs
+      @observation = find_or_goto_index(Observation, params[:id].to_s)
+      return unless @observation
 
-      @title = :map_observation_title.t(id: obs.id)
       @observations = [
-        MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
-                                  obs.location)
+        MinimalMapObservation.new(@observation.id,
+                                  @observation.public_lat,
+                                  @observation.public_long,
+                                  @observation.location)
       ]
-      render(template: "observations/maps/index")
     end
 
     private

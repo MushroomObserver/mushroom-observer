@@ -1,5 +1,5 @@
 <%
-  @title = :show_visual_model_title.t(name: @visual_model.name)
+  add_page_title(:show_visual_model_title.t(name: @visual_model.name))
 %>
 
 <p id="notice"><%= notice %></p>
@@ -21,7 +21,7 @@
       <th colspan="2"></th>
     </tr>
   </thead>
-  
+
   <tbody>
     <% included_counts = visual_model.image_counts(true)
        excluded_counts = visual_model.image_counts(false)

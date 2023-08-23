@@ -13,14 +13,14 @@ module Observations
     def test_map_observation_hidden_gps
       obs = observations(:unknown_with_lat_long)
       login("rolf") # a user who does not own obs
-      get(:index, params: { id: obs.id })
+      get(:show, params: { id: obs.id })
       assert_true(assigns(:observations).map(&:lat).map(&:to_s).join.
                                          include?("34.1622"))
       assert_true(assigns(:observations).map(&:long).map(&:to_s).join.
                                          include?("118.3521"))
 
       obs.update(gps_hidden: true)
-      get(:index, params: { id: obs.id })
+      get(:show, params: { id: obs.id })
       assert_false(assigns(:observations).map(&:lat).map(&:to_s).join.
                                           include?("34.1622"))
       assert_false(assigns(:observations).map(&:long).map(&:to_s).join.
