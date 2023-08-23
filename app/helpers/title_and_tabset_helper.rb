@@ -205,11 +205,11 @@ module TitleAndTabsetHelper
   end
 
   def create_dropdown_tabs(links)
-    xtrargs = {
+    extra_args = {
       role: "menuitem",
       class: "dropdown-item"
     }
-    create_tabs(links, xtrargs)
+    create_links_to(links, extra_args)
   end
 
   def dropdown_link_options(args = {})
@@ -241,14 +241,11 @@ module TitleAndTabsetHelper
 
   # Sort links, for indexes
   def add_sorter(query, links, link_all: false)
-    content_for(:sorter) do
-      if links && (query&.num_results&.> 1)
-        sorts = create_sorting_links(query, links, link_all)
+    return unless links && (query&.num_results&.> 1)
 
-        render(partial: "application/content/sorter", locals: { sorts: sorts })
-      else
-        ""
-      end
+    sorts = create_sorting_links(query, links, link_all)
+    content_for(:sorter) do
+      render(partial: "application/content/sorter", locals: { sorts: sorts })
     end
   end
 

@@ -10,7 +10,9 @@
   ) { :sort_by_header.t } %>
   <%= tag.div(class: "dropdown-menu dropdown-menu-right") do %>
     <% sorts.each do |sort|
-      opts = dropdown_link_options(sort) %>
+      text, url, args = sort
+      args ||= {}
+      opts = dropdown_link_options(args) %>
       <%= if sort[:link].nil?
         link_to(sort[:name], "#",
                 class: class_names("dropdown-item active", sort[:class]),
