@@ -34,7 +34,7 @@ module LightboxHelper
     end
     html << caption_obs_title(obs_data)
     html << render(partial: "observations/show/observation",
-                   locals: { observation: obs_data[:obs], caption: true })
+                   locals: { obs: obs_data[:obs], caption: true })
   end
 
   def caption_obs_title(obs_data)

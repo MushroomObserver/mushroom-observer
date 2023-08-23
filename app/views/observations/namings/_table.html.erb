@@ -2,9 +2,9 @@
 # called from observations/show/namings
 # Just the "table" of current namings, with headers
 logged_in = @user&.verified
-namings = observation.namings.sort_by(&:created_at)
-header = observation_naming_header_row(observation, logged_in)
-votes = gather_users_votes(observation, @user)
+namings = obs.namings.sort_by(&:created_at)
+header = observation_naming_header_row(obs, logged_in)
+votes = gather_users_votes(obs, @user)
 %>
 
 <div class="namings-table" id="namings_table">
@@ -21,7 +21,7 @@ votes = gather_users_votes(observation, @user)
   <div class="container-fluid panel panel-default">
     <% namings.each do |naming| %>
       <%= render(partial: "observations/namings/row",
-                  locals: { naming: naming, observation: observation,
+                  locals: { naming: naming, obs: obs,
                             votes: votes, logged_in: logged_in }) %>
     <% end # each naming %>
   </div>

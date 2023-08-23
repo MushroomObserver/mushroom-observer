@@ -2,26 +2,22 @@
                             id: "observation_species_lists",
                             inner_class: "p-0") do %>
 
-  <% if observation.species_lists.any? %>
-    <table class="table table-responsive mx-0 mb-0">
-      <% observation.species_lists.each do |spl| %>
-        <tr>
-          <td style="border-top:0">
-            <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
-            <%= if check_permission(spl)
-              put_button(name: :REMOVE.t,
-                        path: observation_species_list_path(
-                          id: observation.id, species_list_id: spl.id,
-                          commit: "remove"
-                        ),
-                        data: { confirm: :are_you_sure.l })
-            end %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-  <% end %>
-
-  <%= create_link_to(observation_manage_lists_link(observation, @user)) %>
+  <table class="table table-responsive mx-0 mb-0">
+    <% obs.species_lists.each do |spl| %>
+      <tr>
+        <td style="border-top:0">
+          <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
+          <%= if check_permission(spl)
+            put_button(name: :REMOVE.t,
+                      path: observation_species_list_path(
+                        id: obs.id, species_list_id: spl.id,
+                        commit: "remove"
+                      ),
+                      data: { confirm: :are_you_sure.l })
+          end %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
 
 <% end %>

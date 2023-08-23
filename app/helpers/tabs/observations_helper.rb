@@ -5,14 +5,19 @@ module Tabs
   module ObservationsHelper
     # assemble links for "tabset" for show_observation
     # actually a list of links and the interest icons
-    def show_observation_links(obs:)
-      obs_change_links(obs)&.reject(&:empty?)
+    def show_observation_links(obs:, user:)
+      [
+        send_observer_question_link(obs, user),
+        observation_manage_lists_link(obs, user),
+        *obs_change_links(obs)&.reject(&:empty?)
+      ]
     end
 
     ########################################################################
     # LINKS FOR PANELS
     #
     # Used in the observation panel
+
     def send_observer_question_link(obs, user)
       return if obs.user.no_emails
       return unless obs.user.email_general_question && obs.user != user

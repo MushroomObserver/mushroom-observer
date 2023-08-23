@@ -3,13 +3,13 @@
                                      inner_class: "p-0") do %>
 
   <table class="table table-responsive mx-0 mb-0">
-    <% observation.external_links.
+    <% obs.external_links.
                     sort_by(&:site_name).each do |link| %>
       <tr>
         <td style="border-top:0">
           <%= content_tag(:a, link.external_site.name, href: link.url,
               data: { role: "link", url: link.url, link: link.id,
-                      site: link.external_site.id, obs: observation.id }) %>
+                      site: link.external_site.id, obs: obs.id }) %>
           <% if link.can_edit?(@user) || in_admin_mode? %>
             <span data-role="link-controls" class="hidden-links">[<%=
               content_tag(:a, :EDIT.t, href: "#",
@@ -26,7 +26,7 @@
       <tr class="hidden-links">
         <td style="border-top:0">
           <%= content_tag(:span, site.name,
-              data: { role: "link", obs: observation.id, site: site.id }) %>
+              data: { role: "link", obs: obs.id, site: site.id }) %>
           <span data-role="link-controls">[<%=
             content_tag(:a, :ADD.t, href: "#",
                         data: { role: "add-link" })

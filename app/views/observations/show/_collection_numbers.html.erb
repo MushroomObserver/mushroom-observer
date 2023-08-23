@@ -1,15 +1,15 @@
 <%
-  numbers  = observation.collection_numbers
-  can_edit = in_admin_mode? || observation.can_edit?
-  obs_id = observation.id
-  # This is passed in to show_collection_number, allowing users to do prev,
-  # next and index from there to navigate through all the rest for this obs.
-  cn_query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
+numbers  = obs.collection_numbers
+can_edit = in_admin_mode? || obs.can_edit?
+obs_id = obs.id
+# This is passed in to show_collection_number, allowing users to do prev,
+# next and index from there to navigate through all the rest for this obs.
+cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
 %>
 
 <div class="obs-collection" id="observation_collection_numbers">
 <% unless @user.try(&:hide_specimen_stuff?) ||
-          observation.user.try(&:hide_specimen_stuff?) %>
+          obs.user.try(&:hide_specimen_stuff?) %>
   <% if numbers.any? && can_edit %>
     <div>
       <%= :Collection_numbers.t %>: [<%=
