@@ -295,6 +295,8 @@
   licenses: licenses
   LICHEN: Lichen
   lichen: lichen
+  LINKS: Links
+  links: links
   LOCATION: Location
   location: location
   LOCATIONS: Locations
