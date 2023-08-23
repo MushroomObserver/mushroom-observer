@@ -43,7 +43,7 @@ module TitleAndTabsetHelper
 
   # Special builder for index page titles.
   # These default to the query title, but may have several fallbacks, for
-  # example, when users hit indexes with a bad no query. The fallback
+  # example, when users hit indexes with a bad or no query. The fallback
   # is determined by the "no_hits" arg. If indexes pass `no_hits: nil`,
   # the page will display the query title as the no_hits title.
   #
@@ -86,12 +86,12 @@ module TitleAndTabsetHelper
     end
   end
 
-  # Show obs: observer's preferred naming. HTML is here in case there is none
+  # Show obs: observer's preferred naming. HTML here in case there is no naming
   def add_owner_naming(naming)
     return unless naming
 
     content_for(:owner_naming) do
-      tag.h5(owner_naming, id: "owner_naming")
+      tag.h5(naming, id: "owner_naming")
     end
   end
 
