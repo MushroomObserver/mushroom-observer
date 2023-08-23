@@ -74,14 +74,14 @@ module TitleAndTabsetHelper
     query.title
   end
 
-  # Show obs
+  # Used by several indexes that can be filtered based on user prefs
   def add_filter_help(filters_applied)
     return unless filters_applied
 
     content_for(:filter_help) do
-      add_context_help(
-        tag.span("(#{:filtered.t})", class: "filter-help"),
-        title: :rss_filtered_mouseover.t
+      help_tooltip(
+        "(#{:filtered.t})",
+        title: :rss_filtered_mouseover.t, class: "filter-help"
       )
     end
   end

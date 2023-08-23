@@ -10,6 +10,9 @@ tab_set
 type_filters
 sorts
 %>
+<%
+add_filter_help(@any_content_filters_applied)
+%>
 
 <div class="row">
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
@@ -20,9 +23,9 @@ sorts
     <%= content_tag_if(content_for?(:prev_next_object), :div,
                        class: "hidden-print") do
           yield(:prev_next_object)
-        end %>
+        end -%>
 
-    <!-- Title Caption -->
+    <!-- Title -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
     <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
     <%= yield(:filter_help) -%>
