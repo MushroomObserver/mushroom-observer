@@ -43,7 +43,7 @@ module TitleAndTabsetHelper
 
   # Special builder for index page titles.
   # These default to the query title, but may have several fallbacks, for
-  # example, when users hit indexes with a bad no query. The fallback
+  # example, when users hit indexes with a bad or no query. The fallback
   # is determined by the "no_hits" arg. If indexes pass `no_hits: nil`,
   # the page will display the query title as the no_hits title.
   #
@@ -72,6 +72,27 @@ module TitleAndTabsetHelper
     end
 
     query.title
+  end
+
+  # Used by several indexes that can be filtered based on user prefs
+  def add_filter_help(filters_applied)
+    return unless filters_applied
+
+    content_for(:filter_help) do
+      help_tooltip(
+        "(#{:filtered.t})",
+        title: :rss_filtered_mouseover.t, class: "filter-help"
+      )
+    end
+  end
+
+  # Show obs: observer's preferred naming. HTML here in case there is no naming
+  def add_owner_naming(naming)
+    return unless naming
+
+    content_for(:owner_naming) do
+      tag.h5(naming, id: "owner_naming")
+    end
   end
 
   # Previous/next object links for show templates

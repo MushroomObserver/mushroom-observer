@@ -1,7 +1,7 @@
 <%
 @owner_naming = owner_naming_line(@observation) # must before show_obs_title
 add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
-
+add_owner_naming(@owner_naming)
 add_pager_for(@observation)
 add_interest_icons(@user, @observation)
 add_tab_set(show_observation_links(obs: @observation, user: @user))
