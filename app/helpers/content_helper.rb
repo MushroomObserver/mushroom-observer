@@ -82,8 +82,11 @@ module ContentHelper
   #
   #   <%= add_context_help(link, "Click here to do something.") %>
   #
-  def add_context_help(object, help)
-    content_tag(:span, object, title: help, data: { toggle: "tooltip" })
+  def add_context_help(element, title: "")
+    tag.span(title: title, class: "context-help",
+             data: { toggle: "tooltip" }) do
+      element
+    end
   end
 
   # make a help-note styled element, like a div, p, or span

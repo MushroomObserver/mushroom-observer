@@ -74,6 +74,27 @@ module TitleAndTabsetHelper
     query.title
   end
 
+  # Show obs
+  def add_filter_help(filters_applied)
+    return unless filters_applied
+
+    content_for(:filter_help) do
+      add_context_help(
+        tag.span("(#{:filtered.t})", class: "filter-help"),
+        title: :rss_filtered_mouseover.t
+      )
+    end
+  end
+
+  # Show obs: observer's preferred naming. HTML is here in case there is none
+  def add_owner_naming(naming)
+    return unless naming
+
+    content_for(:owner_naming) do
+      tag.h5(owner_naming, id: "owner_naming")
+    end
+  end
+
   # Previous/next object links for show templates
   def add_pager_for(object)
     content_for(:prev_next_object) do
