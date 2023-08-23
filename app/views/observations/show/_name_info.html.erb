@@ -6,22 +6,15 @@
 <%= panel_block(id: "observation_name_info",
                 class: "name-section small") do %>
 
-  <%= content_tag(:p,
-                  link_to(:show_name.t(name: name.display_name_brief_authors),
-                          name_path(name.id))) %>
-  <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
-                              target: :_blank)) %>
-  <%= content_tag(:p, link_to("Mycobank", mycobank_name_search_url(name),
-                              target: :_blank)) %>
-  <%= content_tag(:p, link_to(:show_observation_more_like_this.t,
-                              observations_path(name: name.id))) %>
-  <%= content_tag(:p, link_to(:show_observation_look_alikes.t,
-                              observations_path(name: name.id,
-                                                look_alikes: "1"))) %>
-  <%= content_tag(:p, link_to(:show_observation_related_taxa.t,
-                              observations_path(name: name.id,
-                                                related_taxa: "1"))) %>
-  <%= list_descriptions(object: name)&.map { |link|
-        content_tag(:div, link) }.safe_join %>
+  <%= tag.div(class: "row") do %>
+    <%= tag.div(class: "col-6") do
+      concat(tag.div("On MO:", class: "font-weight-bold"))
+      concat(name_links_on_mo(name: name).safe_join)
+    end %>
+    <%= tag.div(class: "col-6") do
+      concat(tag.div("On the web:", class: "font-weight-bold"))
+      concat(name_links_web(name: name).safe_join)
+    end %>
+  <% end %>
 
 <% end %>
