@@ -1,5 +1,5 @@
-<% #bs4
-@title ||= @description.format_name.t
+<%
+add_page_title(@description.format_name.t)
 add_tab_set(show_description_links(description: @description))
 @container = :wide
 %>

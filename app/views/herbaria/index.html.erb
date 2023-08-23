@@ -1,7 +1,6 @@
 <%
 @container = :wide
-@title ||= :list_herbaria_title.t
-
+add_index_title(@query, no_hits: :list_herbaria_title.t)
 add_tab_set(herbaria_index_links(query: @query))
 add_sorter(@query, herbaria_index_sorts(query: @query))
 

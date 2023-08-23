@@ -1,5 +1,5 @@
 <%
-@title = :show_name_title.t(name: @name.display_name)
+add_page_title(:show_name_title.t(name: @name.display_name))
 
 Textile.register_name(@name)
 add_pager_for(@name)

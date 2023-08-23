@@ -1,5 +1,5 @@
 <%
-@title = :image_reuse_title.t(name: @object.unique_format_name)
+add_page_title(:image_reuse_title.t(name: @object.unique_format_name))
 
 add_tab_set(glossary_term_image_form_links(term: @object))
 @container = :full

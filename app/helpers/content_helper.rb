@@ -85,10 +85,13 @@ module ContentHelper
   # Wrap an html object in '<span title="blah">' tag.  This has the effect of
   # giving it context help (mouse-over popup) in most modern browsers.
   #
-  #   <%= add_context_help(link, "Click here to do something.") %>
+  #   <%= help_tooltip(label, title: "Click here to do something.") %>
   #
-  def add_context_help(object, help)
-    content_tag(:span, object, title: help, data: { toggle: "tooltip" })
+  def help_tooltip(label, **args)
+    args[:data] ||= {}
+    tag.span(label, title: args[:title],
+                    class: class_names("context-help", args[:class]),
+                    data: { toggle: "tooltip" }.merge(args[:data]))
   end
 
   # make a help-note styled element, like a div, p, or span

@@ -2,6 +2,18 @@
 
 module Tabs
   module ChecklistsHelper
+    def checklist_show_title(user:, project:, list:)
+      if user
+        :checklist_for_user_title.t(user: user.legal_name)
+      elsif project
+        :checklist_for_project_title.t(project: project.title)
+      elsif list
+        :checklist_for_species_list_title.t(list: list.title)
+      else
+        :checklist_for_site_title.t
+      end
+    end
+
     def checklist_show_links(user:, project:, list:)
       if user
         checklist_for_user_links(user)

@@ -173,15 +173,11 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
-    @title = :create_collection_number_title.l
   end
 
   def set_ivars_for_edit
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    @title = :edit_collection_number_title.l(
-      name: @collection_number.format_name
-    )
   end
 
   # create

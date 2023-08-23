@@ -2,6 +2,14 @@
 
 module Tabs
   module AccountHelper
+    def account_welcome_title(user = nil)
+      if user
+        :email_welcome.t(user: user.legal_name)
+      else
+        :welcome_no_user_title.t
+      end
+    end
+
     def account_profile_edit_links
       [
         account_bulk_license_updater_link,

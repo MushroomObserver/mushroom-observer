@@ -1,5 +1,5 @@
 <%
-  @title = :admin_request_title.t(title: @project.title)
+  add_page_title(:admin_request_title.t(title: @project.title))
   action = { controller: "/projects/admin_requests", action: :create,
              project_id: @project.id }
 %>

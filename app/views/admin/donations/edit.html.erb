@@ -1,8 +1,7 @@
 <%
-@title = :review_donations_title.l
-
-add_tab_set(admin_donations_form_edit_links)
 @container = :full
+add_page_title(:review_donations_title.l)
+add_tab_set(admin_donations_form_edit_links)
 %>
 
 <%= form_with(url: admin_donations_path,

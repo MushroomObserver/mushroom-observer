@@ -1,9 +1,7 @@
 <%
-#bs4
-@title = :image_edit_title.t(name: @image.unique_format_name)
-
-add_tab_set(observation_images_edit_links(image: @image))
 @container = :wide
+add_page_title(:image_edit_title.t(name: @image.unique_format_name))
+add_tab_set(observation_images_edit_links(image: @image))
 form_action = { controller: "/observations/images",
                 action: :update,
                 id: @image.id,

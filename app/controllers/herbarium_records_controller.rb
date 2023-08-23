@@ -115,15 +115,11 @@ class HerbariumRecordsController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
-    @title = :create_herbarium_record_title.l
   end
 
   def set_ivars_for_edit
     @layout = calc_layout_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
-    @title = :edit_herbarium_record_title.l(
-      herbarium_label: @herbarium_record.herbarium_label
-    )
   end
 
   def render_modal_herbarium_record_form

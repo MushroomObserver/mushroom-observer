@@ -1,6 +1,7 @@
 <%
 #bs4
 @container = :wide
+add_index_title(@query, no_hits: "")
 add_tab_set(locations_index_links(query: @query))
 add_sorter(@query, locations_index_sorts(query: @query))
 

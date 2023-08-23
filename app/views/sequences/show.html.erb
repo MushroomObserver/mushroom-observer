@@ -1,5 +1,5 @@
-<% #bs4 TODO: check
-@title = @sequence.unique_format_name
+<%
+add_page_title(@sequence.unique_format_name)
 add_pager_for(@sequence)
 add_tab_set(sequence_show_links(seq: @sequence))
 @container = :wide

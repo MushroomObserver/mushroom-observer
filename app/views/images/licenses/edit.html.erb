@@ -1,5 +1,5 @@
 <%
-  @title = :image_updater_title.t(user: @user.login)
+  add_page_title(:image_updater_title.t(user: @user.login))
   @container = :wide
   form_action = {
     controller: "/images/licenses",

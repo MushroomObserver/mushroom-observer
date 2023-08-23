@@ -1,6 +1,7 @@
 <%
-@title = :species_list_edit_title.t(name: @species_list.unique_format_name)
-
+add_page_title(
+  :species_list_edit_title.t(name: @species_list.unique_format_name)
+)
 add_tab_set(species_list_form_edit_links(list: @species_list))
 @container = :text
 

@@ -1,6 +1,5 @@
 <%
-@title ||= :merge_descriptions_title.t(object: @description.format_name)
-
+add_page_title(:merge_descriptions_title.t(object: @description.format_name))
 add_tab_set(
   location_description_form_permissions_links(description: @description)
 )

@@ -14,7 +14,7 @@
 <%= auto_discovery_link_tag(
   :rss, activity_logs_rss_path, { title: :app_rss.l }
 ) %>
-<title><%= :app_title.l%>: <%= title_tag_contents(title: @title, action_name: controller.action_name)%></title>
+<title><%= :app_title.l%>: <%= yield(:document_title) %></title>
 <link rel="SHORTCUT ICON" href="/favicon.ico?20220116"/>
 <% if @canonical_url %>
 <link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>

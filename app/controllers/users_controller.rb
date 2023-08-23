@@ -60,7 +60,7 @@ class UsersController < ApplicationController
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
-      show_selected_users(query, no_hits_title: :title_for_user_search.t)
+      show_selected_users(query)
     end
   end
 

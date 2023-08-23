@@ -1,3 +1,5 @@
-<% @title = :show_votes_title.t(name: @naming.unique_format_name) %>
+<%
+add_page_title(:show_votes_title.t(name: @naming.unique_format_name))
+%>
 
 <%= render(partial: "table", locals: { naming: @naming }) %>

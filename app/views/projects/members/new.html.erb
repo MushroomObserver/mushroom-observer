@@ -1,5 +1,5 @@
 <%
-@title = :add_members_title.t(title: @project.title)
+add_page_title(:add_members_title.t(title: @project.title))
 
 add_tab_set(project_members_form_new_links(project: @project))
 @container = :wide

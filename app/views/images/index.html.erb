@@ -1,5 +1,6 @@
 <%
 @container = :full
+add_index_title(@query)
 add_tab_set(images_index_links(query: @query))
 add_sorter(@query, images_index_sorts)
 

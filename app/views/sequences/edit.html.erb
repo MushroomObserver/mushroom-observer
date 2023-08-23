@@ -1,6 +1,8 @@
 <%
-add_tab_set(sequence_form_links(obj: @back_object))
 @container = :wide
+add_page_title(:sequence_edit_title.t(name: @sequence.unique_format_name))
+add_tab_set(sequence_form_links(obj: @back_object))
+
 obs = @sequence.observation
 %>
 

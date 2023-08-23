@@ -1,6 +1,6 @@
 <%
-@title = :HERBARIUM_RECORD.t + " '".html_safe +
-         @herbarium_record.format_name.t + "'".html_safe
+add_page_title(:HERBARIUM_RECORD.t + " '" +
+               @herbarium_record.format_name.t + "'".html_safe)
 
 add_pager_for(@herbarium_record)
 add_tab_set(herbarium_record_show_links(h_r: @herbarium_record))

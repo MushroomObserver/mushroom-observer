@@ -1,4 +1,6 @@
-<% @title = :change_user_bonuses_title.t(user: @user2.legal_name) %>
+<%
+add_page_title(:change_user_bonuses_title.t(user: @user2.legal_name))
+%>
 
 <%= form_with(url: admin_users_path, method: :patch) do |f| %>
 

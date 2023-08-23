@@ -1,9 +1,6 @@
 <%
-# NOTE: Move template to account/profile/images/new
-#       Account::Profile::ImagesController#new
-# Partial should be in shared
-@title = :image_reuse_title.t(name: @user.legal_name)
 @container = :full
+add_page_title(:image_reuse_title.t(name: @user.legal_name))
 form_action = { controller: "/account/profile/images",
                 action: :attach,
                 id: @user.id,

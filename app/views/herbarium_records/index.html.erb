@@ -1,8 +1,7 @@
 <%
 #bs4
 @container = :wide
-# the no_hits_title.
-@title ||= :list_herbarium_records_title.t
+add_index_title(@query, no_hits: :list_herbarium_records_title.t)
 add_tab_set(herbarium_records_index_links(obs: @observation))
 add_sorter(@query, herbarium_records_index_sorts)
 

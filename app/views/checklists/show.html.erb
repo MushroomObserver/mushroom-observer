@@ -1,20 +1,12 @@
 <%
-@container = :wide
-
-@title =  if @show_user
-            :checklist_for_user_title.t(user: @show_user.legal_name)
-          elsif @project
-            :checklist_for_project_title.t(project: @project.title)
-          elsif @species_list
-            :checklist_for_species_list_title.t(list: @species_list.title)
-          else
-            :checklist_for_site_title.t
-          end
+@container = :full
+add_page_title(checklist_show_title(user: @show_user,
+                                    project: @project,
+                                    list: @species_list))
 
 add_tab_set(checklist_show_links(user: @show_user,
                                  project: @project,
                                  list: @species_list))
-@container = :full
 names = @data.species
 %>
 

@@ -10,6 +10,9 @@ tab_set
 type_filters
 sorts
 %>
+<%
+add_filter_help(@any_content_filters_applied)
+%>
 
 <div class="row-justified">
 
@@ -18,22 +21,16 @@ sorts
     <%= content_tag_if(content_for?(:prev_next_object), :div,
                        class: "d-print-none") do
           yield(:prev_next_object)
-        end
-        end %>
-
-    <!-- Title Caption -->
-    <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= tag.h1(@title, class: "h3", id: "title") -%>
-    <%= if @any_content_filters_applied
-          add_context_help(content_tag(:span, "(#{:filtered.t})",
-                                       class: "context-help"),
-                                       :rss_filtered_mouseover.t)
         end -%>
-    <%= content_tag_if(@owner_naming, :p, @owner_naming,
-                       class: "small", id: "owner_naming") %>
+
+    <!-- Title -->
+    <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
+    <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+    <%= yield(:filter_help) -%>
+    <%= yield(:owner_naming) %>
   </div>
 
-  <!-- Tabsets and Sorter. conditionally renders the partials -->
+  <!-- Tabsets and interest icons, within "#right_tabs" -->
   <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons) ||
                      content_for?(:dropdown_tab_set),
                     :div, id: "right_tabs",

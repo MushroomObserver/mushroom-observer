@@ -1,4 +1,6 @@
-<% @title = :author_request_title.t(title: @object.format_name) %>
+<%
+add_page_title(:author_request_title.t(title: @object.format_name))
+%>
 
 <%= form_with(url: authors_email_requests_path(id: @object.id,
       type: @object.type_tag, q: get_query_param), scope: :email,

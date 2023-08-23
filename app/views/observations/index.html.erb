@@ -1,6 +1,9 @@
 <%
-# bs4
 @container = :full
+no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
+add_index_title(@query, no_hits: no_hits) # note default above is non-nil
+add_tab_set(observations_index_links(query: @query)) if @objects.any?
+add_sorter(@query, observations_index_sorts)
 if @objects.any?
   tab_title = "Show As:" # TODO: make new translation string
   links = index_observation_links(query: @query)

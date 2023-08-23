@@ -11,11 +11,6 @@ module Locations
 
       apply_content_filters(@query)
 
-      @title = if @query.flavor == :all
-                 :map_locations_global_map.t
-               else
-                 :map_locations_title.t(locations: @query.title)
-               end
       @query = restrict_query_to_box(@query)
       columns = %w[name north south east west].map { |x| "locations.#{x}" }
       args = { select: "DISTINCT(locations.id), #{columns.join(", ")}" }

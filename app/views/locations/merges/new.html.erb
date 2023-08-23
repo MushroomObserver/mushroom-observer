@@ -1,8 +1,8 @@
-<% #bs4
-  @title ||= :list_merge_options_title.t(where: @where)
-  @container = :wide
-  # NOTE: the "forms" are patch buttons in the "row" partial
-  # TODO: Redo partial, passing a collection?
+<%
+@container = :wide
+add_page_title(:list_merge_options_title.t(where: @where))
+# NOTE: the "forms" are patch buttons in the "row" partial
+# TODO: Redo partial, passing a collection?
 %>
 
 <div class="row">
