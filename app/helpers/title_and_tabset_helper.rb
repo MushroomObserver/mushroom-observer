@@ -159,15 +159,12 @@ module TitleAndTabsetHelper
   # Unpacks the [text, url, args] array for a single link and figures out
   # which HTML to return for that type of link
   # Pass extra_args hash to modify the link/button attributes
+  #
   def create_link_to(link, extra_args = {})
     str, url, args = link
     args ||= {}
-    # kwargs that will be passed to link. remove args used in button helpers
-    kwargs = args&.except(:button, :target)
-    # blend in the class names that may come from the extra_args
-    kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
-    # merge in other args from extra_args (will overwrite keys!)
-    kwargs = kwargs&.merge(extra_args&.except(:class))
+    kwargs = merge_link_args_with_extra_args(args, extra_args)
+
     case args[:button]
     when :destroy
       destroy_button(name: str, target: args[:target] || url, **kwargs)
@@ -180,6 +177,42 @@ module TitleAndTabsetHelper
     else
       link_to(str, url, kwargs)
     end
+  end
+
+  # Make a hash of the kwargs that will be passed to link helper for HTML.
+  # e.g. { data: { pileus: "awesome" }, id: "best_pileus", class: "hidden" }
+  # Removes args used in link_to/button helpers and merges with passed
+  # extra_args, e.g. removes { name: "Click here to post", target: obs }
+  # Note that class_names need to be concatenated or the merge will overwrite.
+  #
+  def merge_link_args_with_extra_args(args, extra_args)
+    kwargs = args&.except(:button, :target)
+    # blend in the class names that may come from the extra_args
+    kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
+    # merge in other args from extra_args (will overwrite keys!)
+    kwargs&.merge(extra_args&.except(:class))
+  end
+
+  # New style dropdown tabsets take array of tabs as hash of args,
+  #   { name:, link:, class:, id:, etc. }
+  #   not fully-formed `link_to` or `link_with_query`
+  def add_dropdown_tab_set(links:, title: :LINKS.t)
+    content_for(:dropdown_tab_set) do
+      render(partial: "application/content/dropdown_tab_set",
+             locals: { title: title, tabs: create_dropdown_tabs(links) })
+    end
+  end
+
+  def create_dropdown_tabs(links)
+    xtrargs = {
+      role: "menuitem",
+      class: "dropdown-item"
+    }
+    create_tabs(links, xtrargs)
+  end
+
+  def dropdown_link_options(args = {})
+    args&.except(:name, :link, :button, :class) # prolly delete name and link
   end
 
   # type_filters, currently only used in RssLogsController#index
