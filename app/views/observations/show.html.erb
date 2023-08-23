@@ -17,31 +17,19 @@ obs_locals = { observation: @observation }
 
 <div class="row">
   <div class="col-sm-8 col-lg-7 float-sm-left">
-    <%= panel_block(id: "observation_details", class: "name-section") do
-      render(partial: "observations/show/observation", locals: obs_locals)
-    end %>
+    <%= render(partial: "observations/show/observation", locals: obs_locals) %>
   </div>
   <div class="col-sm-4 col-lg-5 float-sm-right">
     <% if @user %>
-      <%= panel_block(id: "observation_name_info",
-                      class: "name-section small") do
-        render(partial: "observations/show/name_info", locals: obs_locals)
-      end %>
+      <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
 
       <% if show_lists %>
-        <%= panel_with_outer_heading(heading: :show_lists_header.t,
-                                     id: "observation_species_lists",
-                                     inner_class: "p-0") do
-          render(partial: "observations/show/species_lists", locals: obs_locals)
-        end %>
+        <%= render(partial: "observations/show/species_lists",
+                   locals: obs_locals) %>
       <% end %>
 
       <% if show_links %>
-        <%= panel_with_outer_heading(heading: :EXTERNAL_LINKS.t,
-                                     id: "observation_links",
-                                     inner_class: "p-0") do
-          render(partial: "observations/show/links", locals: obs_locals)
-        end %>
+        <%= render(partial: "observations/show/links", locals: obs_locals) %>
       <% end %>
     <% end %>
 
