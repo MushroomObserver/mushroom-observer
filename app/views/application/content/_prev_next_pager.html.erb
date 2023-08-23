@@ -4,7 +4,6 @@
   <div>
     <%= link_prev(object) %> |
     <%= link_with_query(:INDEX.t, object.index_link_args) %> |
-    <%= link_to(*observation_map_link(@mappable)) if @mappable %> |
     <%= link_next(object) %>
   </div>
 <% end %>
