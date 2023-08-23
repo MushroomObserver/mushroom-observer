@@ -254,6 +254,7 @@ module TitleAndTabsetHelper
 
   # Create sorting links, "graying-out" the current order.
   # Need query to know which is current order
+  # Links are arrays of [text, path]
   def create_sorting_links(query, links, link_all)
     results = []
     this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
