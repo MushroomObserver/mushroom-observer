@@ -61,46 +61,44 @@ module LinkHelper
   #     name: :destroy_object.t(type: :herbarium),
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
-  # NOTE: button_to with block generates a button, not an input #quirksmode
+  # NOTE: button_to with block generates a button, not an input
   #
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
-    name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
     content = block ? capture(&block) : ""
+    name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
     path, identifier = path_and_identifier_from_target(:destroy, target, args)
-    args[:class] = class_names(identifier, args[:class])
-    args[:data] = { confirm: :are_you_sure.t }.merge(args[:data] || {})
-    args[:icon] = "trash"
 
-    button_with_target(name, path, content, method: :delete, **args)
+    html_options = {
+      method: :delete, # class_names usually also btn
+      class: class_names(args[:class], identifier),
+      data: { confirm: :are_you_sure.t,
+              toggle: "tooltip", placement: "top", title: name }
+    }.merge(args.except(:class, :back))
+
+    button_to(path, html_options) do
+      [content, icon("fa-regular", "trash", class: "fa-lg")].safe_join
+    end
   end
 
-  # Not a <button> element, but an <a> because it's a GET
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def edit_button(target:, name: :EDIT.t, **args, &block)
     content = block ? capture(&block) : ""
     path, identifier = path_and_identifier_from_target(:edit, target, args)
-    args[:class] = class_names(identifier, args[:class])
-    args[:icon] = "pen-to-square"
 
-    button_with_target(name, path, content, method: :get, **args)
-  end
-
-  def button_with_target(name, path, content, method:, **args)
     html_options = {
-      method: method,
-      class: "", # allows merge overwrite
-      data: { toggle: "tooltip", placement: "top",
-              title: name }.merge(args[:data] || {})
-    }.merge(args.except(:back, :data, :icon))
+      class: class_names(args[:class], identifier), # usually also btn
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.merge(args.except(:class, :back))
 
-    button_to(path, html_options) do
-      [content, icon("fa-regular", args[:icon], class: "fa-lg")].safe_join
+    link_to(path, html_options) do
+      [content, icon("fa-regular", "pen-to-square", class: "fa-lg")].safe_join
     end
   end
 
   def path_and_identifier_from_target(action, target, args)
     if target.is_a?(String)
       path = target
-      identifier = "" # needs to be supplied in args[:class]
+      identifier = "" # can send one via args[:class]
     else
       prefix = action == :destroy ? "" : "#{action}_"
       path_args = args.slice(:back) # adds back arg, or empty hash if blank
@@ -111,7 +109,7 @@ module LinkHelper
     [path, identifier]
   end
 
-  # Not a <button> element, but an <a> because it's a GET
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def add_button(path:, name: :ADD.t, **args, &block)
     content = block ? capture(&block) : ""
     html_options = {
@@ -125,7 +123,7 @@ module LinkHelper
   end
 
   # TODO: Change translations BACK to PREV, or make a BACK TO translation
-  # Not a <button> element, but an <a> because it's a GET
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def back_button(path:, name: :BACK.t, **args, &block)
     content = block ? capture(&block) : ""
     html_options = {
@@ -164,9 +162,9 @@ module LinkHelper
     tip = content ? { toggle: "tooltip", placement: "top", title: name } : ""
     html_options = {
       method: method,
-      class: "", # blank allows merge overwrite
+      class: "",
       data: tip
-    }.merge(args)
+    }.merge(args) # currently don't have to merge class arg upstream
 
     button_to(path, html_options) { content }
   end
