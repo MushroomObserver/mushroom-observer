@@ -50,8 +50,9 @@ module LinkHelper
     link_to(*link)
   end
 
-  # button to destroy object
-  # Used instead of link_to because method: :delete requires jquery_ujs library
+  # Buttons to change a target object
+  # Destroy uses button_to instead of link_to because method: :delete requires
+  # Rails to create a whole form around the button, using the jquery_ujs library
   # Sample usage:
   #   destroy_button(target: article)
   #   destroy_button(name: :destroy_object.t(type: :glossary_term),
@@ -63,20 +64,51 @@ module LinkHelper
   # NOTE: button_to with block generates a button, not an input #quirksmode
   #
   def destroy_button(target:, name: :DESTROY.t, **args, &block)
-    content = block ? capture(&block) : ""
     name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
+    content = block ? capture(&block) : ""
     path, identifier = path_and_identifier_from_target(:destroy, target, args)
+    args[:class] = class_names(identifier, args[:class])
+    args[:data] = { confirm: :are_you_sure.t }.merge(args[:data] || {})
+    args[:icon] = "trash"
 
+    button_with_target(name, path, content, method: :delete, **args)
+  end
+
+  # Not a <button> element, but an <a> because it's a GET
+  def edit_button(target:, name: :EDIT.t, **args, &block)
+    content = block ? capture(&block) : ""
+    path, identifier = path_and_identifier_from_target(:edit, target, args)
+    args[:class] = class_names(identifier, args[:class])
+    args[:icon] = "pen-to-square"
+
+    button_with_target(name, path, content, method: :get, **args)
+  end
+
+  def button_with_target(name, path, content, method:, **args)
     html_options = {
-      method: :delete, # class_names usually also btn
-      class: class_names(args[:class], identifier),
-      data: { confirm: :are_you_sure.t,
-              toggle: "tooltip", placement: "top", title: name }
-    }.merge(args.except(:class, :back))
+      method: method,
+      class: "", # allows merge overwrite
+      data: { toggle: "tooltip", placement: "top",
+              title: name }.merge(args[:data] || {})
+    }.merge(args.except(:back, :data, :icon))
 
     button_to(path, html_options) do
-      [content, icon("fa-regular", "trash", class: "fa-lg")].safe_join
+      [content, icon("fa-regular", args[:icon], class: "fa-lg")].safe_join
     end
+  end
+
+  def path_and_identifier_from_target(action, target, args)
+    if target.is_a?(String)
+      path = target
+      identifier = "" # needs to be supplied in args[:class]
+    else
+      prefix = action == :destroy ? "" : "#{action}_"
+      path_args = args.slice(:back) # adds back arg, or empty hash if blank
+      path = add_query_param(send("#{prefix}#{target.type_tag}_path", target.id,
+                                  **path_args))
+      identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
+    end
+    [path, identifier]
   end
 
   # Not a <button> element, but an <a> because it's a GET
@@ -106,35 +138,6 @@ module LinkHelper
     end
   end
 
-  # Not a <button> element, but an <a> because it's a GET
-  def edit_button(target:, name: :EDIT.t, **args, &block)
-    content = block ? capture(&block) : ""
-    path, identifier = path_and_identifier_from_target(:edit, target, args)
-
-    html_options = {
-      class: class_names(identifier), # usually also btn
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args)
-
-    link_to(path, html_options) do
-      [content, icon("fa-regular", "pen-to-square", class: "fa-lg")].safe_join
-    end
-  end
-
-  def path_and_identifier_from_target(action, target, args)
-    if target.is_a?(String)
-      path = target
-      identifier = ""
-    else
-      prefix = action == :destroy ? "" : "#{action}_"
-      path_args = args.slice(:back) # empty hash if blank
-      path = add_query_param(send("#{prefix}#{target.type_tag}_path", target.id,
-                                  **path_args))
-      identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
-    end
-    [path, identifier]
-  end
-
   # POST to a path; used instead of a link because POST link requires js
   def post_button(name:, path:, **args, &block)
     any_method_button(method: :post, name:, path:, **args, &block)
@@ -161,7 +164,7 @@ module LinkHelper
     tip = content ? { toggle: "tooltip", placement: "top", title: name } : ""
     html_options = {
       method: method,
-      class: "",
+      class: "", # blank allows merge overwrite
       data: tip
     }.merge(args)
 
