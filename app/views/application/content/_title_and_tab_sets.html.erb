@@ -12,13 +12,14 @@ sorts
 %>
 <%
 add_filter_help(@any_content_filters_applied)
+add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons))
 %>
 
 <div class="row">
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
   <%= tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
 
-  <div class="col-xs-<%= content_for?(:tab_set) ? 8 : 12 %>" id="title_bar">
+  <div class="col-xs-<%= add_right_tabs ? 8 : 12 %>" id="title_bar">
     <!-- Pager -->
     <%= content_tag_if(content_for?(:prev_next_object), :div,
                        class: "hidden-print") do
@@ -33,8 +34,7 @@ add_filter_help(@any_content_filters_applied)
   </div>
 
   <!-- Tabsets and interest icons, within "#right_tabs" -->
-  <%= content_tag_if(content_for?(:tab_set) || content_for?(:interest_icons),
-                    :div, id: "right_tabs",
+  <%= content_tag_if(add_right_tabs, :div, id: "right_tabs",
                     class: "hidden-print text-right col-sm-4 mb-3") do
         concat(yield(:interest_icons))
         concat(yield(:tab_set))

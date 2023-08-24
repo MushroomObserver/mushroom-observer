@@ -4,7 +4,7 @@
 # Also naming edit and delete buttons if the current user owns the naming.
 # @vote is used by observations/namings/votes/form
 @vote = votes[naming.id]
-row = observation_naming_row(observation, naming, logged_in)
+row = observation_naming_row(obs, naming, logged_in)
 %>
 
 <div class="row" id="observation_naming_<%= naming.id %>">

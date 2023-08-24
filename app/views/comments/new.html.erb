@@ -13,7 +13,7 @@ add_tab_set(comment_form_new_links(target: @target))
   <% if @target.is_a?(Observation) %>
     <div class="col-xs-12 col-sm-4">
       <%= render(partial: "observations/show/images",
-                 locals: { observation: @target, thumb_size_control: false }) %>
+                 locals: { obs: @target, thumb_size_control: false }) %>
     </div>
   <% end %>
 </div><!--.row-->

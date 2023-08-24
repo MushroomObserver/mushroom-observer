@@ -1,36 +1,43 @@
-<table class="table table-responsive mx-0 mb-0">
-  <% observation.external_links.
-                  sort_by(&:site_name).each do |link| %>
-    <tr>
-      <td style="border-top:0">
-        <%= content_tag(:a, link.external_site.name, href: link.url,
-            data: { role: "link", url: link.url, link: link.id,
-                    site: link.external_site.id, obs: observation.id }) %>
-        <% if link.can_edit?(@user) || in_admin_mode? %>
-          <span data-role="link-controls" class="hidden-links">[<%=
-            content_tag(:a, :EDIT.t, href: "#",
-                              data: { role: "edit-link" })
-          %>|<%=
-            content_tag(:a, :REMOVE.t, href: "#",
-                            data: { role: "remove-link" })
+<%= panel_with_outer_heading(heading: :EXTERNAL_LINKS.t,
+                                     id: "observation_links",
+                                     inner_class: "p-0") do %>
+
+  <table class="table table-responsive mx-0 mb-0">
+    <% obs.external_links.
+                    sort_by(&:site_name).each do |link| %>
+      <tr>
+        <td style="border-top:0">
+          <%= content_tag(:a, link.external_site.name, href: link.url,
+              data: { role: "link", url: link.url, link: link.id,
+                      site: link.external_site.id, obs: obs.id }) %>
+          <% if link.can_edit?(@user) || in_admin_mode? %>
+            <span data-role="link-controls" class="hidden-links">[<%=
+              content_tag(:a, :EDIT.t, href: "#",
+                                data: { role: "edit-link" })
+            %>|<%=
+              content_tag(:a, :REMOVE.t, href: "#",
+                              data: { role: "remove-link" })
+            %>]</span>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    <% @new_sites.sort_by(&:name).each do |site| %>
+      <tr class="hidden-links">
+        <td style="border-top:0">
+          <%= content_tag(:span, site.name,
+              data: { role: "link", obs: obs.id, site: site.id }) %>
+          <span data-role="link-controls">[<%=
+            content_tag(:a, :ADD.t, href: "#",
+                        data: { role: "add-link" })
           %>]</span>
-        <% end %>
-      </td>
-    </tr>
-  <% end %>
-  <% @new_sites.sort_by(&:name).each do |site| %>
-    <tr class="hidden-links">
-      <td style="border-top:0">
-        <%= content_tag(:span, site.name,
-            data: { role: "link", obs: observation.id, site: site.id }) %>
-        <span data-role="link-controls">[<%=
-          content_tag(:a, :ADD.t, href: "#",
-                      data: { role: "add-link" })
-        %>]</span>
-      </td>
-    </tr>
-  <% end %>
-</table>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+
+<% end %>
+
 <%= javascript_tag %(
   var ADD_LINK_DIALOG    = "#{j :show_observation_add_link_dialog.l}";
   var EDIT_LINK_DIALOG   = "#{j :show_observation_edit_link_dialog.l}";

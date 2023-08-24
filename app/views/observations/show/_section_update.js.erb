@@ -16,7 +16,7 @@ end
 
 $("#<%= id %>").replaceWith('<%= j render(
   partial: partial,
-  locals: { observation: @observation.reload },
+  locals: { obs: @observation.reload },
   layout: false
 ) %>');
 

@@ -1,9 +1,9 @@
 <%
 logged_in = @user&.verified
-do_suggestions = logged_in && observation.thumb_image_id.present? &&
+do_suggestions = logged_in && obs.thumb_image_id.present? &&
                   (@user.admin ||
                    MO.image_model_beta_testers.include?(@user.id))
-buttons = observation_naming_buttons(observation, do_suggestions)
+buttons = observation_naming_buttons(obs, do_suggestions)
 help = logged_in ? :show_namings_consensus_help.t : :show_namings_please_login.t
 eye  = content_tag(:div,
          "#{image_tag("eye3.png")} = #{:show_namings_eye_help.t}".html_safe,
@@ -17,7 +17,7 @@ eyes = content_tag(:div,
 
   <!--TABLE OF NAMES / REFRESHED BY AJAX -->
   <%= render(partial: "observations/namings/table",
-             locals: { observation: observation }) %>
+             locals: { obs: obs }) %>
   <!--/TABLE OF NAMES -->
 
   <!--HELP TEXT AND EYES -->
@@ -46,11 +46,11 @@ inject_javascript_at_end %(
 <!--SUGGESTIONS-->
 <%
 @query ||= nil
-url = naming_suggestions_for_observation_path(id: observation.id,
+url = naming_suggestions_for_observation_path(id: obs.id,
         names: :xxx, q: get_query_param(@query))
 
 inject_javascript_at_end %(
-  SuggestionModule(#{observation.image_ids}, "#{url}", {
+  SuggestionModule(#{obs.image_ids}, "#{url}", {
     suggestions_processing_images:  "#{j :suggestions_processing_images.t}",
     suggestions_processing_image:   "#{j :suggestions_processing_image.t}",
     suggestions_processing_results: "#{j :suggestions_processing_results.t}",

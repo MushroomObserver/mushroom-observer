@@ -7,26 +7,16 @@ module Tabs
     # actually a list of links and the interest icons
     def show_observation_links(obs:, user:)
       [
-        google_images_for_name_link(obs.name),
-        occurrence_map_for_name_link(obs.name),
         send_observer_question_link(obs, user),
         observation_manage_lists_link(obs, user),
-        *obs_change_links(obs)
-      ].reject(&:empty?)
+        *obs_change_links(obs)&.reject(&:empty?)
+      ]
     end
 
-    def google_images_for_name_link(obs_name)
-      [:google_images.t,
-       format("https://images.google.com/images?q=%s",
-              obs_name.real_text_name),
-       { class: __method__.to_s }]
-    end
-
-    def occurrence_map_for_name_link(obs_name)
-      [:show_name_distribution_map.t,
-       add_query_param(map_name_path(id: obs_name.id)),
-       { class: __method__.to_s }]
-    end
+    ########################################################################
+    # LINKS FOR PANELS
+    #
+    # Used in the observation panel
 
     def send_observer_question_link(obs, user)
       return if obs.user.no_emails
@@ -38,12 +28,60 @@ module Tabs
          class: __method__.to_s }]
     end
 
+    # Used in the lists panel
     def observation_manage_lists_link(obs, user)
       return unless user
 
       [:show_observation_manage_species_lists.t,
        add_query_param(edit_observation_species_lists_path(obs.id)),
        { class: __method__.to_s }]
+    end
+
+    # Name panel -- generates HTML
+
+    # uses create_links_to with extra_args { class: "d-block" }
+    # the hiccup here is that list_descriptions is already HTML, an inline list
+    def name_links_on_mo(name:)
+      tabs = create_links_to(obs_related_name_links(name), { class: "d-block" })
+      tabs += obs_name_description_links(name)
+      tabs += create_links_to([occurrence_map_for_name_link(name)],
+                              { class: "d-block" })
+      tabs.reject(&:empty?)
+    end
+
+    def obs_related_name_links(name)
+      [
+        show_object_link(name,
+                         :show_name.t(name: name.display_name_brief_authors)),
+        observations_of_name_link(name),
+        observations_of_look_alikes_link(name),
+        observations_of_related_taxa_link(name)
+      ]
+    end
+
+    def observations_of_name_link(name)
+      [:show_observation_more_like_this.t,
+       observations_path(name: name.id),
+       { class: __method__.to_s }]
+    end
+
+    def observations_of_look_alikes_link(name)
+      [:show_observation_look_alikes.t,
+       observations_path(name: name.id, look_alikes: "1"),
+       { class: __method__.to_s }]
+    end
+
+    def observations_of_related_taxa_link(name)
+      [:show_observation_related_taxa.t,
+       observations_path(name: name.id, related_taxa: "1"),
+       { class: __method__.to_s }]
+    end
+
+    # from descriptions_helper
+    def obs_name_description_links(name)
+      list_descriptions(object: name)&.map do |link|
+        tag.div(link)
+      end
     end
 
     def observation_map_link(mappable)
@@ -53,23 +91,41 @@ module Tabs
        { class: __method__.to_s }]
     end
 
-    def obs_change_links(obs)
-      return unless check_permission(obs)
+    def name_links_web(name:)
+      tabs = create_links_to(observation_web_name_links(name),
+                             { class: "d-block" })
+      tabs.reject(&:empty?)
+    end
 
+    def observation_web_name_links(name)
       [
-        edit_observation_link(obs),
-        destroy_observation_link(obs)
+        mycoportal_name_link(name),
+        mycobank_name_search_link(name),
+        google_images_for_name_link(name)
       ]
     end
 
-    def edit_observation_link(obs)
-      [:edit_object.t(type: Observation),
-       add_query_param(edit_observation_path(obs.id)),
-       { class: "#{__method__}_#{obs.id}" }]
+    def mycoportal_name_link(name)
+      ["MyCoPortal", mycoportal_url(name),
+       { class: __method__.to_s, target: :_blank, rel: :noopener }]
     end
 
-    def destroy_observation_link(obs)
-      [nil, obs, { button: :destroy }]
+    def mycobank_name_search_link(name)
+      ["Mycobank", mycobank_name_search_url(name),
+       { class: __method__.to_s, target: :_blank, rel: :noopener }]
+    end
+
+    def google_images_for_name_link(obs_name)
+      [:google_images.t,
+       format("https://images.google.com/images?q=%s",
+              obs_name.real_text_name),
+       { class: __method__.to_s, target: :_blank, rel: :noopener }]
+    end
+
+    def occurrence_map_for_name_link(obs_name)
+      [:show_name_distribution_map.t,
+       add_query_param(map_name_path(id: obs_name.id)),
+       { class: __method__.to_s }]
     end
 
     ############################################
@@ -208,6 +264,25 @@ module Tabs
       [:download_observations_back.t,
        add_query_param(observations_path),
        { class: __method__.to_s }]
+    end
+
+    def obs_change_links(obs)
+      return unless check_permission(obs)
+
+      [
+        edit_observation_link(obs),
+        destroy_observation_link(obs)
+      ]
+    end
+
+    def edit_observation_link(obs)
+      [:edit_object.t(type: Observation),
+       add_query_param(edit_observation_path(obs.id)),
+       { class: "#{__method__}_#{obs.id}" }]
+    end
+
+    def destroy_observation_link(obs)
+      [nil, obs, { button: :destroy }]
     end
   end
 end
