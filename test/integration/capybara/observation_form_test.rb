@@ -116,7 +116,7 @@ class ObservationFormTest < CapybaraIntegrationTestCase
 
   def open_edit_observation_form
     new_obs = Observation.last
-    click_link(class: "edit_observation_link_#{new_obs.id}")
+    click_on(class: "edit_observation_link_#{new_obs.id}")
     assert_selector("body.observations__edit")
     assert_form_has_correct_values(edit_observation_form_initial_values,
                                    "#observation_form")
