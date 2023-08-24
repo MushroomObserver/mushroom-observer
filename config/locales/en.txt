@@ -794,6 +794,7 @@
   map_all: Map All
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
+  about_this_taxon: About this taxon
   show_name: About [NAME]
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]
@@ -810,6 +811,8 @@
   EDITING: Editing
   google_images: Google Images
   MAXIMUM: Maximum
+  on_mo: On MO
+  on_the_web: On the web
   show_on_map: Show on map
   many_times: "[num] times"
   one_time: once

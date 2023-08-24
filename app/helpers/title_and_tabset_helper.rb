@@ -239,42 +239,51 @@ module TitleAndTabsetHelper
     types == [type] ? label : link_with_query(label, link, **help)
   end
 
-  # Sort links, for indexes
-  def add_sorter(query, links, link_all: false)
-    return unless links && (query&.num_results&.> 1)
+  # Conditionally dds a group of sorting links, for indexes, if relevant
+  # These link back to the same index action, changing only the `by` param.
+  #
+  def add_sorter(query, sorts, link_all: false)
+    return unless sorts && (query&.num_results&.> 1)
 
-    sorts = create_sorting_links(query, links, link_all)
+    links = create_sorting_links(query, sorts, link_all)
     content_for(:sorter) do
-      render(partial: "application/content/sorter", locals: { sorts: sorts })
+      render(partial: "application/content/sorter", locals: { links: links })
     end
   end
 
-  # Create sorting links, "graying-out" the current order.
-  # Need query to know which is current order
-  def create_sorting_links(query, links, link_all)
+  # Make HTML buttons after adding relevant info to the raw sorts
+  #
+  # The terminology we're using to build these may be confusing:
+  # `sorts` = the arrays of [by_param, :label.t] provided by index helpers.
+  # `sort_links` = the same arrays, turned into [:label.t, path, id, active].
+  # `links` = HTML links with all the fixin's, sent to the template
+  #
+  def create_sorting_links(query, sorts, link_all)
+    sort_links = assemble_sort_links(query, sorts, link_all)
+
+    sort_links.map do |title, path, identifier, active|
+      classes = "dropdown-item"
+      classes += " active" if active
+      args = { class: class_names(classes, identifier),
+               role: "menuitem" }
+      args = args.merge(disabled: true) if active
+
+      link_with_query(title, path, **args)
+    end
+  end
+
+  # Add some info to the raw sorts: path, identifier, and if is current sort_by
+  def assemble_sort_links(query, sorts, link_all)
     results = []
     this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
 
-    links.each do |by, label|
-      results << link_or_grayed_text(link_all, this_by, label, query, by)
+    sorts.each do |by, label|
+      results << sort_link(label, query, by, this_by, link_all)
     end
 
     # Add a "reverse" button.
-    results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by))
-  end
-
-  def link_or_grayed_text(link_all, this_by, label, query, by)
-    if !link_all && (by.to_s == this_by)
-      [label.t, nil] # just text
-    else
-      sort_link(label.t, query, by)
-    end
-  end
-
-  def sort_link(text, query, by)
-    [text, { controller: query.model.show_controller,
-             action: query.model.index_action,
-             by: by }.merge(query_params)]
+    results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by),
+                         this_by, link_all)
   end
 
   def reverse_by(query, this_by)
@@ -283,6 +292,18 @@ module TitleAndTabsetHelper
     else
       "reverse_#{this_by}"
     end
+  end
+
+  # The final product of `assemble_sort_links`: an array of attributes
+  # [text, action, identifier, active]
+  def sort_link(label, query, by, this_by, link_all)
+    path = { controller: query.model.show_controller,
+             action: query.model.index_action,
+             by: by }.merge(query_params)
+    identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
+    active = (!link_all && (by.to_s == this_by)) # boolean if current sort order
+
+    [label.t, path, identifier, active]
   end
 
   # Draw the cutesy eye icons in the upper right side of screen.  It does it

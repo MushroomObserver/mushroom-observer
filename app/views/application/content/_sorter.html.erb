@@ -9,18 +9,8 @@
     aria: { expanded: "false" }
   ) { :sort_by_header.t } %>
   <%= tag.div(class: "dropdown-menu dropdown-menu-right") do %>
-    <% sorts.each do |sort|
-      text, url, args = sort
-      args ||= {}
-      opts = dropdown_link_options(args) %>
-      <%= if sort[:link].nil?
-        link_to(sort[:name], "#",
-                class: class_names("dropdown-item active", sort[:class]),
-                disabled: true, **opts)
-      else
-        link_with_query(sort[:name], sort[:link],
-                        class: class_names("dropdown-item", sort[:class]))
-      end %>
+    <% links.each do |link| %>
+      <%= link %>
     <% end %>
   <% end %>
 <% end %>
