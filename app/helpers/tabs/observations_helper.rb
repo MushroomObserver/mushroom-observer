@@ -258,25 +258,6 @@ module Tabs
       [observations_index_link]
     end
 
-    def obs_change_links(obs)
-      return unless check_permission(obs)
-
-      [
-        edit_observation_link(obs),
-        destroy_observation_link(obs)
-      ]
-    end
-
-    def edit_observation_link(obs)
-      [:edit_object.t(type: Observation),
-       add_query_param(edit_observation_path(obs.id)),
-       { class: "#{__method__}_#{obs.id}" }]
-    end
-
-    def destroy_observation_link(obs)
-      [nil, obs, { button: :destroy }]
-    end
-
     def observations_index_link
       [:download_observations_back.t,
        add_query_param(observations_path),
