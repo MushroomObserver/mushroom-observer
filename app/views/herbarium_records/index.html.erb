@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_index_title(@query, no_hits: :list_herbarium_records_title.t)
-add_tab_set(herbarium_records_index_links(obs: @observation))
+add_tab_set(herbarium_records_index_tabs(obs: @observation))
 add_sorter(@query, herbarium_records_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?

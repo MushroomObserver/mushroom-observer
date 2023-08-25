@@ -2,13 +2,14 @@
 
 module Tabs
   module ThemesHelper
-    def theme_show_links
-      [theme_list_link,
-       account_edit_preferences_link]
+    def theme_show_tabs
+      [theme_list_tab,
+       account_edit_preferences_tab]
     end
 
-    def theme_list_link
-      [:theme_list.t, theme_color_themes_path, { class: __method__.to_s }]
+    def theme_list_tab
+      [:theme_list.t, theme_color_themes_path,
+       { class: tab_id(__method__.to_s) }]
     end
   end
 end

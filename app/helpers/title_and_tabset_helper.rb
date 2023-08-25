@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# --------- contextual nav ------------------------------------------------
-#  --- links and buttons ----
+# --------- Contextual Title and Navigation Links -----------------------------
+#
+#  Helpers for the page title and `tabs`, which are `link attribute arrays`
+#  for building nav links (in the context of a page)
 #
 #  add_page_title(title)        # add content_for(:title)
 #                                 and content_for(:document_title)
@@ -11,9 +13,9 @@
 #  add_pager_for(object)        # add a prev/next pager for an object (show)
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
-#  add_tab_set(links)           # add content_for(:tab_set)
-#  create_links_to(links)       # convert links array -> link_to's / button_to's
-#  create_link_to(link)         # convert one link attribute array into HTML
+#  add_tab_set(tabs)            # add content_for(:tab_set)
+#  create_links_to(tabs)        # convert tabs -> link_to's / button_to's
+#  create_link_to(tab)          # convert one tab into an HTML link or button
 #  add_type_filters             # add content_for(:type_filters)
 #  index_sorter                 # helper to render the sorter partial
 #  add_interest_icons(user, object) # add content_for(:interest_icons)
@@ -124,14 +126,14 @@ module TitleAndTabsetHelper
     link_with_query("« #{:BACK.t}", path)
   end
 
-  # Short-hand to render shared tab_set partial for a given set of links.
-  def add_tab_set(links)
-    return unless links
+  # Short-hand to render shared tab_set partial for a given set of tabs.
+  def add_tab_set(tabs)
+    return unless tabs
 
-    tabs = create_links_to(links)
+    links = create_links_to(tabs, { class: "d-block" })
 
     content_for(:tab_set) do
-      render(partial: "application/content/tab_set", locals: { tabs: tabs })
+      render(partial: "application/content/tab_set", locals: { links: links })
     end
   end
 
@@ -149,11 +151,11 @@ module TitleAndTabsetHelper
   #
   # Allows passing an extra_args hash to be merged with each link's args
   #
-  def create_links_to(links, extra_args = {})
-    return [] unless links
+  def create_links_to(tabs, extra_args = {})
+    return [] unless tabs
 
-    links.compact.map do |link|
-      create_link_to(link, extra_args)
+    tabs.compact.map do |tab|
+      create_link_to(tab, extra_args)
     end
   end
 
@@ -161,10 +163,10 @@ module TitleAndTabsetHelper
   # which HTML to return for that type of link
   # Pass extra_args hash to modify the link/button attributes
   #
-  def create_link_to(link, extra_args = {})
-    str, url, args = link
+  def create_link_to(tab, extra_args = {})
+    str, url, args = tab
     args ||= {}
-    kwargs = merge_link_args_with_extra_args(args, extra_args)
+    kwargs = merge_tab_args_with_extra_args(args, extra_args)
 
     case args[:button]
     when :destroy
@@ -182,11 +184,11 @@ module TitleAndTabsetHelper
 
   # Make a hash of the kwargs that will be passed to link helper for HTML.
   # e.g. { data: { pileus: "awesome" }, id: "best_pileus", class: "hidden" }
-  # Removes args used in link_to/button helpers and merges with passed
+  # Removes non-HTML args used by link_to/button helpers and merges with passed
   # extra_args, e.g. removes { name: "Click here to post", target: obs }
-  # Note that class_names need to be concatenated or the merge will overwrite.
+  # Note that class_names need to be concatenated, or the merge will overwrite.
   #
-  def merge_link_args_with_extra_args(args, extra_args)
+  def merge_tab_args_with_extra_args(args, extra_args)
     kwargs = args&.except(:button, :target)
     # blend in the class names that may come from the extra_args
     kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
@@ -197,19 +199,19 @@ module TitleAndTabsetHelper
   # New style dropdown tabsets take array of tabs as hash of args,
   #   { name:, link:, class:, id:, etc. }
   #   not fully-formed `link_to` or `link_with_query`
-  def add_dropdown_tab_set(links:, title: :LINKS.t)
+  def add_dropdown_tab_set(tabs:, title: :LINKS.t)
     content_for(:dropdown_tab_set) do
       render(partial: "application/content/dropdown_tab_set",
-             locals: { title: title, tabs: create_dropdown_tabs(links) })
+             locals: { title: title, links: create_dropdown_links(tabs) })
     end
   end
 
-  def create_dropdown_tabs(links)
+  def create_dropdown_links(tabs)
     extra_args = {
       role: "menuitem",
       class: "dropdown-item"
     }
-    create_links_to(links, extra_args)
+    create_links_to(tabs, extra_args)
   end
 
   def dropdown_link_options(args = {})
@@ -393,5 +395,17 @@ module TitleAndTabsetHelper
   # Create small icon image.
   def interest_icon_small(type, alt) # :nodoc:
     image_tag("#{type}3.png", alt: alt, class: "interest_small", title: alt)
+  end
+
+  # Generate an identifying class_name from the supplied tab method_name,
+  # removing "_tab" from the method_name and replacing it with "_link"
+  #   e.g., tab_id("map_observations_tab") returns "map_observations_link"
+  # tab_id returns the original method_name if suffix "_tag" not found.
+  # Class name is useful for identifying links or buttons in integration tests.
+  #   Ruby notes: delete_suffix! returns nil if the suffix is not present.
+  #   (The bang method is quicker than delete_suffix according to internet.)
+  def tab_id(method_name)
+    identifier = method_name.delete_suffix!("_tab")
+    identifier ? "#{identifier}_link" : method_name
   end
 end

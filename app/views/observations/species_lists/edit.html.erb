@@ -4,7 +4,7 @@ add_page_title(
   :species_list_manage_title.t(name: @observation.unique_format_name)
 )
 
-add_tab_set(observation_list_links(obs: @observation))
+add_tab_set(observation_list_tabs(obs: @observation))
 
 obs_lists = []
 other_lists = []

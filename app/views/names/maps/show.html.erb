@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_page_title(:name_map_title.t(name: @name.display_name))
-add_tab_set(name_map_links(name: @name, query: @query))
+add_tab_set(name_map_tabs(name: @name, query: @query))
 %>
 
 <%= render(partial: "shared/map",

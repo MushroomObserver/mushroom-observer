@@ -1,7 +1,7 @@
 <%
 @container = :double
 add_page_title(:edit_naming_title.t(id: @observation.id))
-add_tab_set(edit_naming_links(obs: @observation))
+add_tab_set(edit_naming_tabs(obs: @observation))
 %>
 
 <div class="row">

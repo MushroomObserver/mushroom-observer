@@ -3,7 +3,7 @@ add_page_title(
   :edit_location_description_title.t(name: @description.format_name)
 )
 
-add_tab_set(location_description_form_edit_links(description: @description))
+add_tab_set(location_description_form_edit_tabs(description: @description))
 %>
 
 <%= render(partial: "form", locals: { action: :update }) %>

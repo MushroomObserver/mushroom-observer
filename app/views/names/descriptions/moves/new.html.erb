@@ -1,6 +1,6 @@
 <%
 add_page_title(:merge_descriptions_title.t(object: @description.format_name))
-add_tab_set(name_description_form_permissions_links(description: @description))
+add_tab_set(name_description_form_permissions_tabs(description: @description))
 
 action = { controller: "/names/descriptions/moves", action: :create,
             id: @description.id }

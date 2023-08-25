@@ -1,7 +1,7 @@
 <%
 add_page_title(:edit_observation_title.t(name: @observation.unique_format_name))
 
-add_tab_set(observation_form_edit_links(obs: @observation))
+add_tab_set(observation_form_edit_tabs(obs: @observation))
 @container = :wide
 %>
 

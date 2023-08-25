@@ -1,7 +1,7 @@
 <%
 add_page_title(:image_add_title.t(name: @observation.unique_format_name))
 
-add_tab_set(observation_images_new_links(obs: @observation))
+add_tab_set(observation_images_new_tabs(obs: @observation))
 %>
 
 <%= form_with(model: @image,
