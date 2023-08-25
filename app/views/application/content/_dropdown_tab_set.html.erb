@@ -20,36 +20,27 @@ If there's only one tab, it prints a button, not a dropdown.
 
 <%
 title ||= "Links"
-tabs ||= []
+links ||= []
 
-if tabs&.count == 1
+if links&.count == 1 %>
 
-  tab = tabs[0]
-  text, url, args = tab
-  args ||= {}
-  opts = dropdown_link_options(args) %>
+  <%= links[0] %>
 
-  <%= link_to(url,
-              class: class_names("btn btn-outline-secondary", args[:class]),
-              **opts) do
-    text
-  end %>
-
-<% elsif tabs %>
+<% elsif links %>
 
   <%= tag.div(class: "dropdown") do %>
     <%= tag.button(
       class: "btn btn-outline-secondary font-weight-bold dropdown-toggle",
-      type: "button", id: "dropdown-label",
+      type: "button", id: "dropdown_label",
       data: { toggle: "dropdown" },
-      aria: { expanded: "false", haspopup: "true", controls: "dropdown-tabs" }
+      aria: { expanded: "false", haspopup: "true", controls: "dropdown_tabs" }
     ) { title } %>
     <%= tag.div(class: "dropdown-menu dropdown-menu-right",
-                role: "menu", id: "dropdown-tabs",
-                aria: { labelledby: "dropdown-label" }) do %>
+                role: "menu", id: "dropdown_tabs",
+                aria: { labelledby: "dropdown_tabs_label" }) do %>
       <%# Changed to accept create_dropdown_tabs array. %>
-      <% tabs.each do |tab| %>
-        <%= tab %>
+      <% links.each do |link| %>
+        <%= link %>
       <% end %>
     <% end %>
   <% end %>
