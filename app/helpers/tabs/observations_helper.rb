@@ -278,7 +278,7 @@ module Tabs
     def edit_observation_tab(obs)
       [:edit_object.t(type: Observation),
        add_query_param(edit_observation_path(obs.id)),
-       { class: "#{__method__}_#{obs.id}" }]
+       { class: "#{tab_id(__method__.to_s)}_#{obs.id}" }]
     end
 
     def destroy_observation_tab(obs)
