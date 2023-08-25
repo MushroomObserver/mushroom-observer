@@ -1,7 +1,7 @@
 <%
 add_page_title(:image_edit_title.t(name: @image.unique_format_name))
 
-add_tab_set(observation_images_edit_links(image: @image))
+add_tab_set(observation_images_edit_tabs(image: @image))
 @container = :wide
 form_action = { controller: "/observations/images",
                 action: :update,

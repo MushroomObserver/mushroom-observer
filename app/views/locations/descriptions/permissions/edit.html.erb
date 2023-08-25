@@ -1,7 +1,7 @@
 <%
 add_page_title(@description.format_name.t)
 add_tab_set(
-  location_description_form_permissions_links(description: @description)
+  location_description_form_permissions_tabs(description: @description)
 )
 action = { controller: "/locations/descriptions/permissions", action: :update,
             id: @description.id, q: get_query_param }

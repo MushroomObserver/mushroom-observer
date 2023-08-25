@@ -2,10 +2,10 @@
 
 module Tabs
   module InfoHelper
-    def info_site_stats_links
+    def info_site_stats_tabs
       [
-        site_contributors_link,
-        site_checklist_link
+        site_contributors_tab,
+        site_checklist_tab
       ]
     end
   end

@@ -2,52 +2,52 @@
 
 module Tabs
   module SupportHelper
-    def support_donate_links
-      links = [support_donors_link]
+    def support_donate_tabs
+      links = [support_donors_tab]
       return unless in_admin_mode?
 
-      links += support_admin_links
+      links += support_admin_tabs
       links
     end
 
-    def support_donors_links
-      links = [support_donate_link]
+    def support_donors_tabs
+      links = [support_donate_tab]
       return unless in_admin_mode?
 
-      links += support_admin_links
+      links += support_admin_tabs
       links
     end
 
-    def support_governance_links
+    def support_governance_tabs
       [
-        support_donate_link,
-        support_donors_link
+        support_donate_tab,
+        support_donors_tab
       ]
     end
 
-    def support_donors_link
-      [:donors_tab.t, support_donors_path, { class: __method__.to_s }]
+    def support_donors_tab
+      [:donors_tab.t, support_donors_path, { class: tab_id(__method__.to_s) }]
     end
 
-    def support_donate_link
-      [:donate_tab.t, support_donate_path, { class: __method__.to_s }]
+    def support_donate_tab
+      [:donate_tab.t, support_donate_path, { class: tab_id(__method__.to_s) }]
     end
 
-    def support_admin_links
+    def support_admin_tabs
       [
-        admin_new_donation_link,
-        admin_review_donations_link
+        admin_new_donation_tab,
+        admin_review_donations_tab
       ]
     end
 
-    def admin_new_donation_link
+    def admin_new_donation_tab
       [:create_donation_tab.t, new_admin_donations_path,
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def admin_review_donations_link
+    def admin_review_donations_tab
       [:review_donations_tab.t, admin_review_donations_path,
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
   end
 end

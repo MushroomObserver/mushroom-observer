@@ -1,6 +1,6 @@
 <%
 add_page_title(:name_change_synonyms_title.t(name: @name.display_name))
-add_tab_set(name_forms_return_links(name: @name))
+add_tab_set(name_forms_return_tabs(name: @name))
 @container = :text_image
 
 url = { controller: "/names/synonyms", action: :update, id: @name.id,

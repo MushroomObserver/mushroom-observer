@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_index_title(@query, no_hits: "")
-add_tab_set(locations_index_links(query: @query))
+add_tab_set(locations_index_tabs(query: @query))
 all_links = if (params[:id].present? ||
                 params[:by].present? ||
                 params[:by_user].present?)

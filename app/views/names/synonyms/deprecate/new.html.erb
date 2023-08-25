@@ -1,7 +1,7 @@
 <%
 add_page_title(:name_deprecate_title.t(name: @name.display_name))
 
-add_tab_set(name_forms_return_links(name: @name))
+add_tab_set(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/synonyms/deprecate", action: :create,
             id: @name.id, approved_name: @what }

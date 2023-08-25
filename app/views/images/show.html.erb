@@ -1,7 +1,7 @@
 <%
 add_page_title(:image_show_title.t(name: @image.unique_format_name))
 add_pager_for(@image)
-add_tab_set(show_image_links(image: @image))
+add_tab_set(show_image_tabs(image: @image))
 @container = :wide
 %>
 

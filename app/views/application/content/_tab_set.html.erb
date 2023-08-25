@@ -1,11 +1,11 @@
 <%#
-Plain tab set. Takes `tabs` as an array of <a> or <button> links.
+Plain tab set. Takes `links` as an array of <a> or <button> links.
 Just adds <small> and line breaks.
 %>
 
-<% tabs ||= [] %>
+<% links ||= [] %>
 <small>
-  <% tabs.reject(&:nil?).each do |tabs| %>
-    <%= tabs %><br>
+  <% links.reject(&:nil?).each do |link| %>
+    <%= link %>
   <% end %>
 </small>

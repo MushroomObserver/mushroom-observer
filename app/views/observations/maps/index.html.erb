@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_page_title(:map_locations_title.t(locations: @query.title))
-add_tab_set(observation_maps_links(query: @query))
+add_tab_set(observation_maps_tabs(query: @query))
 
 objects = @observations
 objects += @locations if @locations.any?

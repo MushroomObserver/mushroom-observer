@@ -2,7 +2,7 @@
 add_page_title(
   :create_location_description_title.t(name: @location.display_name)
 )
-add_tab_set(location_description_form_new_links(description: @description))
+add_tab_set(location_description_form_new_tabs(description: @description))
 %>
 
 <%= render(partial: "form", locals: { action: :create }) %>

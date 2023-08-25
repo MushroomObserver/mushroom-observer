@@ -3,7 +3,7 @@ desc_title = description_title(@description)
 add_page_title(:show_past_location_description_title.t(
   num: @description.version, name: desc_title
 ))
-add_tab_set(location_description_version_links(description: @description,
+add_tab_set(location_description_version_tabs(description: @description,
                                                desc_title: desc_title))
 %>
 

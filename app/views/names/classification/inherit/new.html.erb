@@ -1,7 +1,7 @@
 <%
 add_page_title(:inherit_classification_title.t(name: @name.display_name))
 
-add_tab_set(name_forms_return_links(name: @name))
+add_tab_set(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/classification/inherit", action: :create,
             id: @name.id, q: get_query_param }
