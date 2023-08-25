@@ -30,7 +30,7 @@ obs_changes = if check_permission(@observation)
 <div class="card card-combination mb-4">
 
   <div class="row no-gutters">
-    <%= tag.div(class: "col-#{bp}-4") do
+    <%= tag.div(class: "col-#{bp}-4 order-#{bp}-2") do
       tag.div(class: "h-100 d-flex flex-column") do %>
         <% tags = [
           tag.div(class:"card-header row-justified py-1 pr-#{bp}-1") do
@@ -64,7 +64,7 @@ obs_changes = if check_permission(@observation)
       <% end
     end %>
 
-    <%= tag.div(class: "col-#{bp}-8") do
+    <%= tag.div(class: "col-#{bp}-8 order-#{bp}-1") do
       render(partial: "shared/images/carousel",
              locals: { object: @observation })
     end %>
