@@ -8,10 +8,10 @@
 #
 module Tabs
   module ArticlesHelper
-    def articles_index_links(user:)
+    def articles_index_tabs(user:)
       return [] unless Article.can_edit?(user)
 
-      [new_article_link]
+      [new_article_tab]
     end
 
     def articles_index_sorts
@@ -23,47 +23,47 @@ module Tabs
       ].freeze
     end
 
-    def article_show_links(article:, user:)
-      links = [articles_index_link]
+    def article_show_tabs(article:, user:)
+      links = [articles_index_tab]
       # Can user modify all articles
       return links unless Article.can_edit?(user)
 
-      links.push(new_article_link,
-                 edit_article_link(article),
-                 destroy_article_link(article))
+      links.push(new_article_tab,
+                 edit_article_tab(article),
+                 destroy_article_tab(article))
     end
 
-    def article_form_new_links
-      [articles_index_link]
+    def article_form_new_tabs
+      [articles_index_tab]
     end
 
-    def article_form_edit_links(article:)
+    def article_form_edit_tabs(article:)
       [
-        object_return_link(article),
-        articles_index_link
+        object_return_tab(article),
+        articles_index_tab
       ]
     end
 
-    def new_article_link
+    def new_article_tab
       [:create_article_title.t, new_article_path,
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def edit_article_link(article)
+    def edit_article_tab(article)
       [:EDIT.t, edit_article_path(article.id),
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def destroy_article_link(article)
+    def destroy_article_tab(article)
       [nil, article, { button: :destroy }]
     end
 
-    def articles_index_link
-      [:index_article.t, articles_path, { class: __method__.to_s }]
+    def articles_index_tab
+      [:index_article.t, articles_path, { class: tab_id(__method__.to_s) }]
     end
 
     # "Title (#nnn)" textilized
-    def show_title(article)
+    def article_show_title(article)
       capture do
         concat(article.display_title.t)
         concat(" (##{article.id || "?"})")
@@ -71,10 +71,10 @@ module Tabs
     end
 
     # "Editing: Title (#nnn)"  textilized
-    def edit_title(article)
+    def article_edit_title(article)
       capture do
         concat("#{:EDITING.l}: ")
-        concat(show_title(article))
+        concat(article_show_title(article))
       end
     end
   end

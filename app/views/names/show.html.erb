@@ -4,7 +4,7 @@ add_page_title(:show_name_title.t(name: @name.display_name))
 Textile.register_name(@name)
 add_pager_for(@name)
 add_interest_icons(@user, @name)
-add_tab_set(name_show_links(name: @name, user: @user))
+add_tab_set(name_show_tabs(name: @name, user: @user))
 
 @container = :wide
 %>

@@ -3,7 +3,7 @@ id = @show_user.id
 name = @show_user.unique_text_name
 add_page_title(:show_user_title.t(user: name))
 add_pager_for(@show_user)
-add_tab_set(user_show_links(show_user: @show_user, user: @user))
+add_tab_set(user_show_tabs(show_user: @show_user, user: @user))
 
 @container = :full
 

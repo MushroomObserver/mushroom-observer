@@ -1070,17 +1070,6 @@ class ApplicationController < ActionController::Base
     url_for(add_query_param(args, query))
   end
 
-  def coerced_query_link(query, model)
-    return nil unless query&.coercable?(model.name.to_sym)
-
-    [
-      :show_objects.t(type: model.type_tag),
-      add_query_param({ controller: model.show_controller,
-                        action: model.index_action }, query)
-    ]
-  end
-  helper_method :coerced_query_link
-
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}

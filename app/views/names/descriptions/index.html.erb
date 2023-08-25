@@ -1,6 +1,6 @@
 <%
 add_index_title(@query)
-add_tab_set(name_description_index_links(query: @query))
+add_tab_set(name_description_index_tabs(query: @query))
 add_sorter(@query, descriptions_index_sorts)
 flash_error(@error) if @error && @objects.empty?
 %>

@@ -4,7 +4,7 @@
 # Partial should be in shared
 add_page_title(:image_reuse_title.t(name: @observation.unique_format_name))
 
-add_tab_set(observation_images_reuse_links(obs: @observation))
+add_tab_set(observation_images_reuse_tabs(obs: @observation))
 @container = :full
 # Use a path here:
 form_action = { controller: "/observations/images",

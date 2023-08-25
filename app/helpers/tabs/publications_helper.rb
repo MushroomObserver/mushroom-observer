@@ -2,55 +2,55 @@
 
 module Tabs
   module PublicationsHelper
-    def publication_show_links(pub:, user:)
+    def publication_show_tabs(pub:, user:)
       links = [
-        new_publication_link,
-        publications_index_link
+        new_publication_tab,
+        publications_index_tab
       ]
       return links unless in_admin_mode? || pub.can_edit?(user)
 
-      links += publication_mod_links(pub)
+      links += publication_mod_tabs(pub)
       links
     end
 
-    def publications_index_links
-      [new_publication_link]
+    def publications_index_tabs
+      [new_publication_tab]
     end
 
-    def publication_form_new_links
-      [publications_index_link]
+    def publication_form_new_tabs
+      [publications_index_tab]
     end
 
-    def publication_form_edit_links(pub:)
+    def publication_form_edit_tabs(pub:)
       [
-        object_return_link(pub),
-        publications_index_link
+        object_return_tab(pub),
+        publications_index_tab
       ]
     end
 
-    def new_publication_link
+    def new_publication_tab
       [:create_publication.t, new_publication_path,
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def publications_index_link
+    def publications_index_tab
       [:publication_index.t, publications_path,
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def publication_mod_links(pub)
+    def publication_mod_tabs(pub)
       [
-        edit_publication_link(pub),
-        destroy_publication_link(pub)
+        edit_publication_tab(pub),
+        destroy_publication_tab(pub)
       ]
     end
 
-    def edit_publication_link(pub)
+    def edit_publication_tab(pub)
       [:EDIT.t, edit_publication_path(pub.id),
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def destroy_publication_link(pub)
+    def destroy_publication_tab(pub)
       [nil, pub, { button: :destroy }]
     end
   end

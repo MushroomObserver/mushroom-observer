@@ -1,6 +1,6 @@
 <%
 add_page_title(:review_authors_title.t(name: @object.format_name))
-add_tab_set(author_review_links(obj: @object))
+add_tab_set(author_review_tabs(obj: @object))
 
 type = @object.type_tag
 %>

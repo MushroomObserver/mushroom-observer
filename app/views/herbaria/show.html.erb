@@ -2,7 +2,7 @@
 add_page_title(@herbarium.format_name.t)
 
 add_pager_for(@herbarium)
-add_tab_set(herbarium_show_links(herbarium: @herbarium, user: @user))
+add_tab_set(herbarium_show_tabs(herbarium: @herbarium, user: @user))
 
 map = @herbarium.location ? true : false
 @container = :wide

@@ -2,41 +2,41 @@
 
 module Tabs
   module CommentsHelper
-    def comment_show_links(comment:, target:)
+    def comment_show_tabs(comment:, target:)
       links = [
-        object_return_link(
+        object_return_tab(
           target,
           :comment_show_show.t(type: comment.target_type_localized)
         )
       ]
       return unless check_permission(comment)
 
-      links += comment_mod_links(comment)
+      links += comment_mod_tabs(comment)
       links
     end
 
-    def comment_form_new_links(target:)
-      [object_return_link(target)]
+    def comment_form_new_tabs(target:)
+      [object_return_tab(target)]
     end
 
-    def comment_form_edit_links(comment:)
-      [object_return_link(comment)]
+    def comment_form_edit_tabs(comment:)
+      [object_return_tab(comment)]
     end
 
-    def comment_mod_links(comment)
+    def comment_mod_tabs(comment)
       [
-        edit_comment_link(comment),
-        destroy_comment_link(comment)
+        edit_comment_tab(comment),
+        destroy_comment_tab(comment)
       ]
     end
 
-    def edit_comment_link(comment)
+    def edit_comment_tab(comment)
       [:comment_show_edit.t,
        add_query_param(edit_comment_path(comment.id)),
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def destroy_comment_link(comment)
+    def destroy_comment_tab(comment)
       [:comment_show_destroy.t, comment, { button: :destroy }]
     end
 

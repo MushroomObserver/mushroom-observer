@@ -44,10 +44,10 @@ module LinkHelper
   # Take a query which can be coerced into a different model, and create a link
   # to the results of that coerced query.  Return +nil+ if not coercable.
   def link_to_coerced_query(query, model)
-    link = coerced_query_link(query, model)
-    return nil unless link
+    tab = coerced_query_tab(query, model)
+    return nil unless tab
 
-    link_to(*link)
+    link_to(*tab)
   end
 
   # Buttons to change a target object

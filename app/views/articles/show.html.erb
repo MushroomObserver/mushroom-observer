@@ -1,7 +1,7 @@
 <%
 @container = :wide
-add_page_title(show_title(@article))
-add_tab_set(article_show_links(article: @article, user: @user))
+add_page_title(article_show_title(@article))
+add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
 <% card_title = tag.div(class: "card-title") do

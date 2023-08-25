@@ -2,12 +2,12 @@
 
 module Tabs
   module EmailsHelper
-    def email_name_change_request_links(name:)
-      [object_return_link(name)]
+    def email_name_change_request_tabs(name:)
+      [object_return_tab(name)]
     end
 
-    def email_merge_request_links(old_obj:)
-      [object_return_link(old_obj)]
+    def email_merge_request_tabs(old_obj:)
+      [object_return_tab(old_obj)]
     end
   end
 end

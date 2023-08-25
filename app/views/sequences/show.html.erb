@@ -1,7 +1,7 @@
 <%
 add_page_title(@sequence.unique_format_name)
 add_pager_for(@sequence)
-add_tab_set(sequence_show_links(seq: @sequence))
+add_tab_set(sequence_show_tabs(seq: @sequence))
 @container = :wide
 %>
 

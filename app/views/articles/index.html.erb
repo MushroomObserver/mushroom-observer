@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_index_title(@query, no_hits: :ARTICLES.t)
-add_tab_set(articles_index_links(user: @user))
+add_tab_set(articles_index_tabs(user: @user))
 add_sorter(@query, articles_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?

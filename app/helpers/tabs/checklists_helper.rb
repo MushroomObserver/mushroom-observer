@@ -14,55 +14,55 @@ module Tabs
       end
     end
 
-    def checklist_show_links(user:, project:, list:)
+    def checklist_show_tabs(user:, project:, list:)
       if user
-        checklist_for_user_links(user)
+        checklist_for_user_tabs(user)
       elsif project
-        checklist_for_project_links(project)
+        checklist_for_project_tabs(project)
       elsif list
-        checklist_for_species_list_links(list)
+        checklist_for_species_list_tabs(list)
       else
-        checklist_for_site_links
+        checklist_for_site_tabs
       end
     end
 
-    def checklist_for_user_links(user)
+    def checklist_for_user_tabs(user)
       [
-        user_profile_link(user),
-        user_observations_link(user),
-        email_user_question_link(user)
+        user_profile_tab(user),
+        user_observations_tab(user),
+        email_user_question_tab(user)
       ]
     end
 
-    def checklist_for_project_links(project)
+    def checklist_for_project_tabs(project)
       [
-        show_object_link(project),
-        object_index_link(project)
+        show_object_tab(project),
+        object_index_tab(project)
       ]
     end
 
-    def checklist_for_species_list_links(list)
+    def checklist_for_species_list_tabs(list)
       links = [
-        show_object_link(list)
+        show_object_tab(list)
       ]
       if check_permission(list)
         links += [
-          edit_species_list_link(list)
+          edit_species_list_tab(list)
         ]
       end
       links
     end
 
-    def checklist_for_site_links
+    def checklist_for_site_tabs
       [
-        site_contributors_link,
-        info_site_stats_link
+        site_contributors_tab,
+        info_site_stats_tab
       ]
     end
 
-    def site_checklist_link
+    def site_checklist_tab
       [:site_stats_observed_taxa.t, checklist_path,
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
   end
 end

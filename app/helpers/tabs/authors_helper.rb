@@ -2,10 +2,10 @@
 
 module Tabs
   module AuthorsHelper
-    def author_review_links(obj:)
+    def author_review_tabs(obj:)
       [
-        show_parent_link(obj),
-        show_object_link(obj)
+        show_parent_tab(obj),
+        show_object_tab(obj)
       ]
     end
   end

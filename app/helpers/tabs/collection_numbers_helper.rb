@@ -2,18 +2,18 @@
 
 module Tabs
   module CollectionNumbersHelper
-    def collection_number_show_links(c_n:)
+    def collection_number_show_tabs(c_n:)
       return [] unless in_admin_mode? || c_n.can_edit?
 
-      collection_number_mod_links(c_n)
+      collection_number_mod_tabs(c_n)
     end
 
-    def collection_numbers_index_links(obs:)
+    def collection_numbers_index_tabs(obs:)
       return [] if obs.blank?
 
       [
-        object_return_link(obs),
-        new_collection_number_for_obs_link(obs)
+        object_return_tab(obs),
+        new_collection_number_for_obs_tab(obs)
       ]
     end
 
@@ -26,43 +26,43 @@ module Tabs
       ].freeze
     end
 
-    def collection_number_form_new_links(obs:)
-      [object_return_link(obs)]
+    def collection_number_form_new_tabs(obs:)
+      [object_return_tab(obs)]
     end
 
-    def collection_number_form_edit_links(c_n:, back:, obj:)
+    def collection_number_form_edit_tabs(c_n:, back:, obj:)
       links = []
       links << if back == "index"
-                 collection_numbers_index_link(c_n)
+                 collection_numbers_index_tab(c_n)
                else
-                 object_return_link(obj)
+                 object_return_tab(obj)
                end
     end
 
-    def collection_numbers_index_link(c_n)
+    def collection_numbers_index_tab(c_n)
       [:edit_collection_number_back_to_index.t,
        add_query_param(c_n.index_link_args),
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def collection_number_mod_links(c_n)
-      [edit_collection_number_link(c_n),
-       destroy_collection_number_link(c_n)]
+    def collection_number_mod_tabs(c_n)
+      [edit_collection_number_tab(c_n),
+       destroy_collection_number_tab(c_n)]
     end
 
-    def new_collection_number_for_obs_link(obs)
+    def new_collection_number_for_obs_tab(obs)
       [:create_collection_number.l,
        add_query_param(new_collection_number_path(obs)),
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def edit_collection_number_link(c_n)
+    def edit_collection_number_tab(c_n)
       [:edit_collection_number.t,
        add_query_param(edit_collection_number_path(id: c_n.id, back: :show)),
-       { class: __method__.to_s }]
+       { class: tab_id(__method__.to_s) }]
     end
 
-    def destroy_collection_number_link(c_n)
+    def destroy_collection_number_tab(c_n)
       [:delete_collection_number.t, c_n, { button: :destroy }]
     end
   end

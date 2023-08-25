@@ -4,7 +4,7 @@
 add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
 num_images = @observation.images.length
 
-add_tab_set(naming_suggestion_links(obs: @observation))
+add_tab_set(naming_suggestion_tabs(obs: @observation))
 @container = :double
 %>
 

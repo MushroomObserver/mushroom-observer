@@ -79,7 +79,7 @@ module DescriptionsHelper
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_to(*create_description_link(obj))
+      link = link_to(*create_description_tab(obj))
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
@@ -110,7 +110,7 @@ module DescriptionsHelper
 
     # Show existing drafts, with link to create new one.
     head = tag.b(:show_name_descriptions.t) + ": "
-    head += link_to(*create_description_link(object))
+    head += link_to(*create_description_tab(object))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(object: object).map { |link| indent + link }
@@ -130,7 +130,7 @@ module DescriptionsHelper
 
     head2 = :show_name_create_draft.t + ": "
     list = [head2] + projects.map do |project|
-      item = link_to(*new_description_for_project_link(object, project))
+      item = link_to(*new_description_for_project_tab(object, project))
       indent + item
     end
     html2 = list.safe_join(safe_br)

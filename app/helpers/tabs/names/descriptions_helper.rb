@@ -4,36 +4,36 @@
 module Tabs
   module Names
     module DescriptionsHelper
-      def name_description_index_links(query:)
-        [coerced_name_query_link(query)]
+      def name_description_index_tabs(query:)
+        [coerced_name_query_tab(query)]
       end
 
-      def name_description_form_new_links(description:)
-        [object_return_link(description.name)]
+      def name_description_form_new_tabs(description:)
+        [object_return_tab(description.name)]
       end
 
-      def name_description_form_edit_links(description:, user:)
+      def name_description_form_edit_tabs(description:, user:)
         links = [
-          object_return_link(description.name, :show_object.t(type: :name)),
-          object_return_link(description)
+          object_return_tab(description.name, :show_object.t(type: :name)),
+          object_return_tab(description)
         ]
         if description.is_admin?(user) || in_admin_mode?
-          links << adjust_description_permissions_link(description, :name, true)
+          links << adjust_description_permissions_tab(description, :name, true)
         end
         links
       end
 
-      def name_description_form_permissions_links(description:)
+      def name_description_form_permissions_tabs(description:)
         [
-          object_return_link(description.name),
-          object_return_link(description,
-                             :show_object.t(type: :name_description))
+          object_return_tab(description.name),
+          object_return_tab(description,
+                            :show_object.t(type: :name_description))
         ]
       end
 
-      def name_description_version_links(description:, desc_title:)
-        [object_return_link(description,
-                            :show_name_description.t(description: desc_title))]
+      def name_description_version_tabs(description:, desc_title:)
+        [object_return_tab(description,
+                           :show_name_description.t(description: desc_title))]
       end
     end
   end
