@@ -796,7 +796,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def assert_show_observation
     assert_template("observations/show")
     assert_template("observations/show/_name_info")
-    assert_template("observations/show/_observation")
+    assert_template("observations/show/_observation_details")
     assert_template("observations/show/_namings")
     assert_template("comments/_comments_for_object")
     assert_template("observations/show/_thumbnail_map")

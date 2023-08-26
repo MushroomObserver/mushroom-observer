@@ -2,9 +2,11 @@
 @container = :full
 no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
 add_index_title(@query, no_hits: no_hits) # note default above is non-nil
-add_dropdown_tab_set(title: "Show As:", # TODO: make new translation string
-                     tabs: observations_index_tabs(query: @query))
-add_sorter(@query, observations_index_sorts)
+if @objects.any?
+  add_dropdown_tab_set(title: "Show As:", # TODO: make new translation string
+                       tabs: observations_index_tabs(query: @query))
+  add_sorter(@query, observations_index_sorts)
+end
 
 flash_error(@error) if @error && @objects.empty?
 %>
