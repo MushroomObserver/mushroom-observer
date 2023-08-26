@@ -3,21 +3,20 @@
 # Requires an object that responds to .images
 # javascript_include("image_slider") huh?
 html_id = "#{object.type_tag}_carousel"
-default_image = object&.thumb_image || nil
-has_images = !object.images.nil? && object.images.any?
+has_images = !images.nil? && images.any?
 %>
 
 <% if has_images %>
   <div id="<%= html_id %>" class="carousel slide card-img"
        data-ride="false" data-interval="false">
     <div class="carousel-inner bg-light">
-      <% object.images.each do |image| %>
+      <% images.each do |image| %>
         <%= render(partial: "shared/images/carousel_item",
                    locals: { image: image, default_image: default_image,
                              object: object }) %>
       <% end %>
     </div>
-    <% if object.images.length > 1 %>
+    <% if images.length > 1 %>
       <a class="carousel-control-prev"
         href="#<%= html_id %>"
         role="button"

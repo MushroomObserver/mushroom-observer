@@ -4,6 +4,7 @@ presenter_args = local_assigns.except(:image).
                  merge({ size: :large, fit: :contain, original: true })
 presenter = ImagePresenter.new(image, @view, presenter_args)
 active = (image == default_image) ? " active" : ""
+# Caption needs object for copyright info
 caption = if (info = image_info(image, object,
                                 original: presenter.original)).present?
             tag.div(info, class: "image-info d-none d-md-block")

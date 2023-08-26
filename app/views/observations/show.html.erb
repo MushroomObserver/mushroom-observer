@@ -16,8 +16,8 @@ show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user && @observation.species_lists.any?
 show_links = @user && (@observation.external_links.any? || @new_sites.any?)
 
-obs_locals = { obs: @observation }
 bp = "lg" # breakpoint, for easier adjustment
+obs_locals = { obs: @observation, bp: bp }
 obs_changes = if check_permission(@observation)
                 tag.div(class: "observation-change-links") do
                   obs_change_buttons(obs: @observation).safe_join
@@ -30,43 +30,15 @@ obs_changes = if check_permission(@observation)
 <div class="card card-combination mb-4">
 
   <div class="row no-gutters">
-    <%= tag.div(class: "col-#{bp}-4 order-#{bp}-2") do
-      tag.div(class: "h-100 d-flex flex-column") do %>
-        <% tags = [
-          tag.div(class:"card-header row-justified py-1 pr-#{bp}-1") do
-            [
-              tag.h6(:show_observation_details.t, class: "mb-0"),
-              obs_changes
-            ].safe_join
-          end,
-          tag.div(class:"card-body list-indented pr-#{bp}-4",
-                  id: "observation_details") do
-            render(partial: "observations/show/observation",
-                   locals: obs_locals)
-          end
-        ]
-        tags << tag.div(class:"card-footer pr-#{bp}-4") do
-                  show_object_footer(@observation)
-                end
-        if check_permission(@observation)
-          tags << tag.div(class: "card-footer row-justified py-1 pr-#{bp}-1") do
-                    [
-                      tag.strong(:IMAGES.l),
-                      tag.div(class: "btn-group btn-group-sm") do
-                        observation_image_edit_links(obs: @observation).
-                        safe_join
-                      end
-                    ].safe_join
-                  end
-        end
-        %>
-        <%= tags.safe_join %>
-      <% end
+    <%= tag.div(class: "col-#{bp}-8 card-combination-left") do
+      render(partial: "shared/images/carousel",
+             locals: { object: @observation, images: @observation.images,
+                       default_image: @observation&.thumb_image || nil })
     end %>
 
-    <%= tag.div(class: "col-#{bp}-8 order-#{bp}-1") do
-      render(partial: "shared/images/carousel",
-             locals: { object: @observation })
+    <%= tag.div(class: "col-#{bp}-4 card-combination-right") do
+          render(partial: "observations/show/observation_info",
+                 locals: obs_locals.merge(obs_changes: obs_changes))
     end %>
   </div><!--.row-->
 
@@ -83,7 +55,7 @@ obs_changes = if check_permission(@observation)
     concat(@observation.source_credit.tpl) if @observation.source_noteworthy?
   end %>
 
-  <%= tag.div(class: "col-#{bp}-4 col-xl-5") do
+  <%= tag.div(class: "col-#{bp}-4 col-xl-5 mt-4 mt-#{bp}-0") do
     if @user
       concat(render(partial: "observations/show/name_info",
                     locals: obs_locals))

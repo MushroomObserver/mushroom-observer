@@ -24,7 +24,7 @@ module ImageHelper
            locals: args.merge({ image: image }))
   end
 
-  # Currently for the observation
+  # Needs object for copyright info
   def image_info(image, object, original: false)
     notes = []
     notes << tag.div(image_owner_original_name(image, original),

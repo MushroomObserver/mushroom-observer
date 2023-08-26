@@ -58,13 +58,13 @@ caption ||= false
 
     <% if @user %>
       <%= render(partial: "observations/show/collection_numbers",
-                locals: { obs: obs }) %>
+                 locals: { obs: obs }) %>
 
       <%= render(partial: "observations/show/herbarium_records",
-                locals: { obs: obs }) %>
+                 locals: { obs: obs }) %>
 
       <%= render(partial: "observations/show/sequences",
-                locals: { obs: obs }) %>
+                 locals: { obs: obs }) %>
     <% end %>
   <% end %>
 
