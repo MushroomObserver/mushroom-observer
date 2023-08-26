@@ -12,27 +12,19 @@
 // On combination cards for carousels, give a border to the card part
 .no-gutters {
   .card-combination-left {
-    .card-header,
-    .card-body,
-    .card-footer {
-      border-top: 1px solid $card-border-color;
+    border-top: 1px solid $card-border-color;
 
-      @include media-breakpoint-up(lg){
-        border-top: 0;
-        border-right: 1px solid $card-border-color;
-      }
+    @include media-breakpoint-up(lg){
+      border-top: 0;
+      border-right: 1px solid $card-border-color;
     }
   }
   .card-combination-right {
-    .card-header,
-    .card-body,
-    .card-footer {
-      border-top: 1px solid $card-border-color;
+    border-top: 1px solid $card-border-color;
 
-      @include media-breakpoint-up(lg){
-        border-top: 0;
-        border-left: 1px solid $card-border-color;
-      }
+    @include media-breakpoint-up(lg){
+      border-top: 0;
+      border-left: 1px solid $card-border-color;
     }
   }
 }

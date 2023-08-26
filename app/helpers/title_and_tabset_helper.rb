@@ -93,7 +93,7 @@ module TitleAndTabsetHelper
     return unless naming
 
     content_for(:owner_naming) do
-      tag.h5(naming, id: "owner_naming")
+      tag.p(naming, id: "owner_naming")
     end
   end
 
