@@ -33,7 +33,7 @@ module LightboxHelper
       html << mark_as_reviewed_toggle(obs_data[:id], "btn-primary")
     end
     html << caption_obs_title(obs_data)
-    html << render(partial: "observations/show/observation",
+    html << render(partial: "observations/show/observation_details",
                    locals: { obs: obs_data[:obs], caption: true })
   end
 

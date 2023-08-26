@@ -20,7 +20,7 @@
     render(partial: "names/descriptions/show/name_description", object: object, locals: { review: false })
 
   when "Observation"
-    render(partial: "observations/show/observation", locals: { obs: object })
+    render(partial: "observations/show/observation_details", locals: { obs: object })
 
   when "Project"
     render(partial: "project/project", object: object)
