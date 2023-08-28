@@ -81,7 +81,7 @@ class SequencesController < ApplicationController
       format.html
       format.js do
         render_modal_sequence_form(
-          title: helpers.sequence_form_new_title(obs: @observation)
+          title: helpers.sequence_form_new_title
         )
       end
     end
@@ -105,7 +105,7 @@ class SequencesController < ApplicationController
       format.html
       format.js do
         render_modal_sequence_form(
-          title: helpers.sequence_form_edit_title(obs: @observation)
+          title: helpers.sequence_form_edit_title(seq: @sequence)
         )
       end
     end
