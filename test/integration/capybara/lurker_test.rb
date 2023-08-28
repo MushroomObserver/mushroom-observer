@@ -264,7 +264,7 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#right_tabs") { click_link(text: "Observations at this Location") }
-    assert_match("Observations from Burbank, California, USA",
+    assert_match("Observations from Burbank",
                  page.title, "Wrong page")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
@@ -344,9 +344,8 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
-    # assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
     assert_equal(
-      "#{:app_title.l}: #{:query_title_observations_by_activity_log.l}",
+      "#{:app_title.l}: Observations by #{:sort_by_rss_log.l}",
       page.title, "Login failed"
     )
   end

@@ -311,6 +311,12 @@ class Location < AbstractModel
     false
   end
 
+  # Abbreviated description of the location for shorter query titles.
+  # Just the location without locality, region, country
+  def title_display_name
+    name.split(", ").first
+  end
+
   def display_name
     User.current_location_format == "scientific" ? scientific_name : name
   end
