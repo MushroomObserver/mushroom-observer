@@ -175,7 +175,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title(:query_title_observations_by_activity_log.l)
+    assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
   end
 
   def test_index_sorted_by_name
@@ -234,7 +234,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title(:query_title_observations_by_activity_log.l)
+    assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
   end
 
   def test_index_useless_param_page2
@@ -243,7 +243,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title(:query_title_observations_by_activity_log.l)
+    assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end

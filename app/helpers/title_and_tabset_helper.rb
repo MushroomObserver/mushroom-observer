@@ -61,19 +61,9 @@ module TitleAndTabsetHelper
             elsif query.num_results.zero? && !no_hits.nil?
               no_hits
             else
-              index_default_title(query)
+              query.title
             end
     add_page_title(title)
-  end
-
-  # Special title for new obs default home page query
-  def index_default_title(query)
-    if query.title_args[:type] == :observation &&
-       query.title_args[:order] == :sort_by_rss_log
-      return :query_title_observations_by_activity_log.l
-    end
-
-    query.title
   end
 
   # Used by several indexes that can be filtered based on user prefs

@@ -4162,7 +4162,6 @@
   query_title_all: "[TYPE] Index"
   query_title_all_by: "[TYPES] by [ORDER]"
   query_title_all_filtered: "Matching [TYPES]"
-  query_title_observations_by_activity_log: "Observation Activity"
   query_title_at_location: "[TYPES] from [LOCATION]"
   query_title_at_where: "[TYPES] from '[USER_WHERE]'"
   query_title_by_author: "[TYPES] Authored by [USER]"
@@ -4332,7 +4331,7 @@
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
-  sort_by_rss_log: "[:sort_by_updated_at]"
+  sort_by_rss_log: Recent Activity
   sort_by_summary: "[:SUMMARY]"
   sort_by_thumbnail_quality: Thumbnail Quality
   sort_by_title: "[:TITLE]"
