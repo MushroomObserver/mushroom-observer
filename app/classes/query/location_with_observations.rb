@@ -123,9 +123,9 @@ module Query
       Query.lookup(:Observation, :all, params_with_old_by_restored)
     end
 
-    # def title
-    #   default = super
-    #   with_observations_query_description || default
-    # end
+    def title
+      default = super
+      with_observations_query_description || default
+    end
   end
 end
