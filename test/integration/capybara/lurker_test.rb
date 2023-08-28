@@ -261,7 +261,7 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#right_tabs") { click_link(text: "Observations at this Location") }
-    assert_match("Observations from Burbank, California, USA",
+    assert_match("Observations from Burbank",
                  page.title, "Wrong page")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})

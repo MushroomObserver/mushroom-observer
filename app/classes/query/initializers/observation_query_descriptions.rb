@@ -2,12 +2,11 @@
 
 module Query
   module Initializers
-    # initializing methods inherited by all Query's for Names
+    # initializing methods inherited by all Query's for Observations
     module ObservationQueryDescriptions
       def with_observations_query_description
         return nil unless (description = observation_query_description)
 
-        # binding.break
         if params[:user].blank?
           :query_title_with_observations_filtered.t(type: model.type_tag,
                                                     subtitle: description)
@@ -39,6 +38,7 @@ module Query
         :query_title_in_herbarium.t(type: :observation, herbarium: str)
       end
 
+      # NOTE: this is never used - AN 2023
       def title_for_locations
         str = map_join_and_truncate(:locations, Location, :display_name)
         :query_title_at_location.t(type: :observation, location: str)
