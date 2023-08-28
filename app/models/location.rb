@@ -315,13 +315,11 @@ class Location < AbstractModel
   # Just the location without locality, region, country
   # Furthermore abbreviates the location if longer than 4 words
   def title_display_name
-    str = if User.current_location_format == "scientific"
-            scientific_name.split(", ").last
-          else
-            name.split(", ").first
-          end
-    str = "#{str.split.first(4).join(" ")}..." if str.split.length > 4
-    str
+    if User.current_location_format == "scientific"
+      scientific_name.split(", ").last
+    else
+      name.split(", ").first
+    end
   end
 
   def display_name
