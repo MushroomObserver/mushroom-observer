@@ -311,15 +311,10 @@ class Location < AbstractModel
     false
   end
 
-  # Very abbreviated description of the location for shorter query titles.
+  # Abbreviated description of the location for shorter query titles.
   # Just the location without locality, region, country
-  # Furthermore abbreviates the location if longer than 4 words
   def title_display_name
-    if User.current_location_format == "scientific"
-      scientific_name.split(", ").last
-    else
-      name.split(", ").first
-    end
+    name.split(", ").first
   end
 
   def display_name
