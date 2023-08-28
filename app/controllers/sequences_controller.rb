@@ -80,7 +80,9 @@ class SequencesController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_sequence_form
+        render_modal_sequence_form(
+          title: helpers.sequence_form_new_title
+        )
       end
     end
   end
@@ -102,7 +104,9 @@ class SequencesController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_sequence_form
+        render_modal_sequence_form(
+          title: helpers.sequence_form_edit_title(seq: @sequence)
+        )
       end
     end
   end
@@ -140,9 +144,9 @@ class SequencesController < ApplicationController
     @back_object = @back == "show" ? @sequence : @sequence.observation
   end
 
-  def render_modal_sequence_form
+  def render_modal_sequence_form(title:)
     render(partial: "shared/modal_form_show",
-           locals: { identifier: "sequence" }) and return
+           locals: { title: title, identifier: "sequence" }) and return
   end
 
   def render_sequences_section_update

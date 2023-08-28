@@ -15,8 +15,16 @@ module Tabs
       links
     end
 
+    def comment_form_new_title(target:)
+      :comment_add_title.t(name: target.unique_format_name)
+    end
+
     def comment_form_new_tabs(target:)
       [object_return_tab(target)]
+    end
+
+    def comment_form_edit_title(target:)
+      :comment_edit_title.t(name: target.unique_format_name)
     end
 
     def comment_form_edit_tabs(comment:)

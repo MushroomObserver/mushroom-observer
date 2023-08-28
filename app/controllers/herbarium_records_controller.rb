@@ -50,7 +50,9 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_herbarium_record_form
+        render_modal_herbarium_record_form(
+          title: helpers.herbarium_record_form_new_title
+        )
       end
     end
   end
@@ -75,7 +77,11 @@ class HerbariumRecordsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_herbarium_record_form
+        render_modal_herbarium_record_form(
+          title: helpers.herbarium_record_form_edit_title(
+            h_r: @herbarium_record
+          )
+        )
       end
     end
   end
@@ -122,9 +128,9 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
 
-  def render_modal_herbarium_record_form
+  def render_modal_herbarium_record_form(title:)
     render(partial: "shared/modal_form_show",
-           locals: { identifier: "herbarium_record" }) and return
+           locals: { title: title, identifier: "herbarium_record" }) and return
   end
 
   def render_herbarium_records_section_update

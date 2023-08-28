@@ -19,7 +19,9 @@ module Observations
       respond_to do |format|
         format.html
         format.js do
-          render_modal_naming_form
+          render_modal_naming_form(
+            title: helpers.naming_form_new_title(obs: @observation)
+          )
         end
       end
     end
@@ -57,7 +59,9 @@ module Observations
       respond_to do |format|
         format.html
         format.js do
-          render_modal_naming_form
+          render_modal_naming_form(
+            title: helpers.naming_form_edit_title(obs: @observation)
+          )
         end
       end
     end
@@ -96,9 +100,10 @@ module Observations
 
     private
 
-    def render_modal_naming_form
+    def render_modal_naming_form(title:)
       render(partial: "shared/modal_form_show",
              locals: {
+               title: title,
                identifier: "naming",
                form_bindings: "observations/namings/form_bindings",
                form_locals: { show_reasons: true,

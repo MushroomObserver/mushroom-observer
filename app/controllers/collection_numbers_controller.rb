@@ -49,7 +49,9 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_collection_number_form
+        render_modal_collection_number_form(
+          title: helpers.collection_number_form_new_title
+        )
       end
     end
   end
@@ -74,7 +76,11 @@ class CollectionNumbersController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_collection_number_form
+        render_modal_collection_number_form(
+          title: helpers.collection_number_form_edit_title(
+            c_n: @collection_number
+          )
+        )
       end
     end
   end
@@ -109,9 +115,9 @@ class CollectionNumbersController < ApplicationController
 
   private
 
-  def render_modal_collection_number_form
+  def render_modal_collection_number_form(title:)
     render(partial: "shared/modal_form_show",
-           locals: { identifier: "collection_number" }) and return
+           locals: { title: title, identifier: "collection_number" }) and return
   end
 
   def render_collection_numbers_section_update
