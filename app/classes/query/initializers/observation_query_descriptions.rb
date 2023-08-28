@@ -38,7 +38,7 @@ module Query
         :query_title_in_herbarium.t(type: :observation, herbarium: str)
       end
 
-      # NOTE: this is never used - AN 2023
+      # NOTE: used in "Locations with Observations of {name}" - AN 2023
       def title_for_locations
         str = map_join_and_truncate(:locations, Location, :display_name)
         :query_title_at_location.t(type: :observation, location: str)
