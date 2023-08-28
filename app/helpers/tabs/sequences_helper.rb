@@ -13,6 +13,14 @@ module Tabs
       links
     end
 
+    def sequence_form_new_title
+      :sequence_add_title.t
+    end
+
+    def sequence_form_edit_title(sequence:)
+      :sequence_edit_title.t(name: sequence.unique_format_name)
+    end
+
     def sequence_form_tabs(obj:)
       [object_return_tab(obj)]
     end

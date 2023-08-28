@@ -38,12 +38,22 @@ module Tabs
       links
     end
 
+    def herbarium_record_form_new_title
+      :create_herbarium_record_title.l
+    end
+
     def herbarium_record_form_new_tabs(obs:)
       [
         object_return_tab(obs),
         new_herbarium_tab,
         nonpersonal_herbaria_index_tab
       ]
+    end
+
+    def herbarium_record_form_edit_title(h_r:)
+      :edit_herbarium_record_title.l(
+        herbarium_label: h_r.herbarium_label
+      )
     end
 
     def herbarium_record_form_edit_tabs(back:, back_object:)
