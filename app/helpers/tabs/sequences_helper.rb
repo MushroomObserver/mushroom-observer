@@ -18,7 +18,7 @@ module Tabs
     end
 
     def sequence_form_edit_title(seq:)
-      :sequence_edit_title.t(name: sequence.unique_format_name)
+      :sequence_edit_title.t(name: seq.unique_format_name)
     end
 
     def sequence_form_tabs(obj:)
