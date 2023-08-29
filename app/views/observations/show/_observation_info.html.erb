@@ -5,7 +5,7 @@ caption ||= false
 
 <%= panel_block(id: "observation_details", class: "name-section") do
 
-  render(partial: "observations/show/_observation_details",
+  render(partial: "observations/show/observation_details",
          locals: { obs: obs, caption: caption })
 
 end %>
