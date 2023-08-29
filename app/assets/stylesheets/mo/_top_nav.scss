@@ -39,4 +39,11 @@
       // background-color: $navbar-light-link-hover-bg !important;
     }
   }
+
+  // The button_to form, not the button, needs to display: block
+  #right_tabs {
+    .button_to {
+      display: block;
+    }
+  }
 }

@@ -50,15 +50,17 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = edit_button(name: :EDIT.t, target: naming, remote: true,
-                              onclick: "MOEvents.whirly();")
+      edit_link = edit_button(name: :EDIT.t, target: naming,
+                              remote: true, onclick: "MOEvents.whirly();")
       delete_link = destroy_button(target: naming, remote: true)
-      proposer_links = ["[", edit_link, " | ", delete_link, "]"].safe_join
+      proposer_links = tag.span(class: "small text-nowrap") do
+        ["[", edit_link, " | ", delete_link, "]"].safe_join
+      end
     else
       proposer_links = ""
     end
 
-    [naming_name_link(naming), proposer_links].safe_join
+    [naming_name_link(naming), " ", proposer_links].safe_join
   end
 
   def naming_name_link(naming)

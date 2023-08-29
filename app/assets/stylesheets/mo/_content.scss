@@ -55,7 +55,7 @@
 @include media-breakpoint-up(md) {
   .interest-eyes {
     position: absolute;
-    bottom: 0;
+    bottom: calc($grid-gutter-width * .5);
     right: calc($grid-gutter-width * .5);
   }
 }

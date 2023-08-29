@@ -194,10 +194,10 @@ $panel-bg: $LIST_BG_COLOR;
 $panel-body-padding: 12px;
 $panel-heading-padding: 8px 12px;
 $panel-inner-border: $LIST_BORDER_COLOR;
-$panel-footer-bg: $LIST_BG_COLOR;
+$panel-footer-bg: darken($LIST_BG_COLOR, 3%);
 $panel-default-text: $LIST_FG_COLOR;
 $panel-default-border: $LIST_BORDER_COLOR;
-$panel-default-heading-bg: $LIST_HEADER_BG_COLOR;
+$panel-default-heading-bg: darken($LIST_BG_COLOR, 3%);
 
 $hr-border: $LIST_BORDER_COLOR;
 

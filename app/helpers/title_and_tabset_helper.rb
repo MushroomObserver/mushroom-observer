@@ -157,6 +157,10 @@ module TitleAndTabsetHelper
     str, url, args = tab
     args ||= {}
     kwargs = merge_tab_args_with_extra_args(args, extra_args)
+    # remove d-block from buttons, other links need it
+    if args[:button].present? && kwargs[:class].present?
+      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
+    end
 
     case args[:button]
     when :destroy

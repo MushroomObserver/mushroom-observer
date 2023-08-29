@@ -33,12 +33,12 @@ module LinkHelper
     link_to(link, opts) { content }
   end
 
+  # mixes in "active" class
   def active_link_with_query(text = nil, path = nil, **opts, &block)
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
-    opts[:class] = class_names(opts[:class], { active: current_page?(link) })
 
-    link_to(add_query_param(link), opts) { content }
+    active_link_to(add_query_param(link), **opts) { content }
   end
 
   # Take a query which can be coerced into a different model, and create a link
@@ -50,7 +50,31 @@ module LinkHelper
     link_to(*tab)
   end
 
+  def icon_link_to(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+    icon_type = opts[:icon]
+    return link_to(link, opts) { content } if icon_type.blank?
+
+    opts = { title: content,
+             data: { toggle: "tooltip" } }.merge(opts.except(:icon))
+
+    link_to(link, opts) do
+      concat(tag.span(content, class: "sr-only"))
+      concat(link_icon(icon_type))
+    end
+  end
+
+  def icon_link_with_query(text = nil, path = nil, **opts, &block)
+    link = block ? text : path # because positional
+    content = block ? capture(&block) : text
+
+    icon_link_to(add_query_param(link), **opts) { content }
+  end
+
   def link_icon(type)
+    return "" unless (glyph = link_icon_index[type])
+
     icon("fa-regular", link_icon_index[type], class: "fa-lg")
   end
 
@@ -59,7 +83,10 @@ module LinkHelper
       edit: "pen-to-square",
       destroy: "trash",
       add: "square-plus",
-      back: "arrow-left"
+      back: "arrow-left",
+      hide: "eye-close",
+      reuse: "share",
+      remove: "minus-sign"
     }.freeze
   end
 
@@ -76,39 +103,40 @@ module LinkHelper
   #   )
   # NOTE: button_to with block generates a button, not an input
   #
-  def destroy_button(target:, name: :DESTROY.t, **args, &block)
-    content = block ? capture(&block) : ""
-    name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
-    path, identifier = path_and_identifier_from_target(:destroy, target, args)
+  def destroy_button(target:, name: :DESTROY.t, **args)
+    # necessary if nil/empty string passed
+    name = :DESTROY.t if name.blank?
+    path, identifier, icon, content = button_atts(:destroy, target, args, name)
 
     html_options = {
-      method: :delete, # class_names usually also btn
-      class: class_names(identifier, args[:class]),
+      method: :delete, title: name,
+      class: class_names(identifier, args[:class], "text-danger"),
       data: { confirm: :are_you_sure.t,
               toggle: "tooltip", placement: "top", title: name }
     }.merge(args.except(:class, :back))
 
     button_to(path, html_options) do
-      [content, link_icon(:destroy)].safe_join
+      [content, icon].safe_join
     end
   end
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def edit_button(target:, name: :EDIT.t, **args, &block)
-    content = block ? capture(&block) : ""
-    path, identifier = path_and_identifier_from_target(:edit, target, args)
+  def edit_button(target:, name: :EDIT.t, **args)
+    # necessary if nil/empty string passed
+    name = :EDIT.t if name.blank?
+    path, identifier, icon, content = button_atts(:edit, target, args, name)
 
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn
-      data: { toggle: "tooltip", placement: "top", title: name }
+      title: name, data: { toggle: "tooltip", placement: "top", title: name }
     }.merge(args.except(:class, :back))
 
     link_to(path, html_options) do
-      [content, link_icon(:edit)].safe_join
+      [content, icon].safe_join
     end
   end
 
-  def path_and_identifier_from_target(action, target, args)
+  def button_atts(action, target, args, name)
     if target.is_a?(String)
       path = target
       identifier = "" # can send one via args[:class]
@@ -119,7 +147,14 @@ module LinkHelper
                                   **path_args))
       identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
     end
-    [path, identifier]
+    if args[:icon]
+      icon = link_icon(args[:icon])
+      content = tag.span(name, class: "sr-only")
+    else
+      icon = ""
+      content = name
+    end
+    [path, identifier, icon, content]
   end
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET

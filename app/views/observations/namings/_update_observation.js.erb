@@ -7,6 +7,11 @@
   locals: { identifier: "namings" }
 ) %>
 
+<%= render(
+  partial: "observations/show/section_update",
+  locals: { identifier: "name_info" }
+) %>
+
 // reset title of obs if necessary
 var title = '<%= tag.div(
   show_obs_title(obs: @observation).break_name.small_author,

@@ -4,18 +4,6 @@
     border-radius: $card-border-radius;
   }
 
-  header.row {
-    .col {
-      padding: $card-spacer-x;
-      vertical-align: bottom;
-      padding-bottom: 0.25rem;
-
-      &:first-child {
-        padding-bottom: 0.5rem;
-      }
-    }
-  }
-
   div.row {
     // background-color: $card-bg;
 
