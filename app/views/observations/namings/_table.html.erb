@@ -3,7 +3,7 @@
 # Just the "table" of current namings, with headers
 logged_in = @user&.verified
 namings = obs.namings.sort_by(&:created_at)
-header = observation_naming_header_row(obs, logged_in)
+any_names = obs.namings&.length&.positive?
 votes = gather_users_votes(obs, @user)
 %>
 
