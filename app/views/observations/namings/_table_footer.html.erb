@@ -10,23 +10,24 @@ help_text = logged_in ? :show_namings_consensus_help.t :
 help = content_tag(:div, help_text, class: "card-text small")
 %>
 
-<div class="card-footer d-none d-md-block">
-  <div class="row">
-    <div class="col-12 col-md-11">
-      <div class="row">
-        <div class="col-6 col-lg-4"><%= buttons %></div>
-        <div class="col-6 col-lg-8"><%= help %></div>
-      </div><!-- .row -->
-    </div><!-- .col -->
-  </div>
-</div>
-<div class="card-footer d-none d-md-block py-2">
-  <div class="row">
-    <div class="col-12 col-md-11">
-      <div class="row">
-        <div class="col-4 offset-4"><%= vote_legend_yours %></div>
-        <div class="col-4"><%= vote_legend_consensus %></div>
-      </div><!-- .row -->
-    </div><!-- .col -->
-  </div>
-</div>
+<%= tag.div(class: "card-footer d-none d-md-block") do
+  tag.div(class: "row") do
+    tag.div(class: "col-12 col-md-11") do
+      tag.div(class: "row") do
+        concat(tag.div(buttons, class: "col-6 col-lg-4"))
+        concat(tag.div(help, class: "col-6 col-lg-8"))
+      end
+    end
+  end
+end %>
+
+<%= tag.div(class: "card-footer d-none d-md-block py-2") do
+  tag.div(class: "row") do
+    tag.div(class: "col-12 col-md-11") do
+      tag.div(class: "row") do
+        concat(tag.div(vote_legend_yours, class: "col-4 offset-4"))
+        concat(tag.div(vote_legend_consensus, class: "col-4"))
+      end
+    end
+  end
+end %>

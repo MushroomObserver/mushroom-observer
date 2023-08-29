@@ -2,27 +2,25 @@
 # called from observations/namings/table
 # nested rows/columns parallel those in the row partial
 header = observation_naming_header_row(obs, logged_in)
-behavior = " flex-column justify-content-end"
+behavior = "flex-column justify-content-end"
 %>
 
-<div class="card-header namings-table-header">
-  <div class="row">
-    <div class="col-12 col-md-11">
-      <div class="row">
-        <div class="col-md-4 d-flex<%= behavior %>">
-          <%= header[:heading] %>
-        </div>
-        <div class="col-md-3 d-none d-md-flex<%= behavior %>">
-          <%= header[:user_name] %>
-        </div>
-        <div class="col-md-2 d-none d-md-flex<%= behavior %>">
-          <%= header[:consensus_vote] %>
-        </div>
-        <div class="col-md-3 d-none d-md-flex<%= behavior %>">
-          <%= header[:your_vote] %>
-        </div>
-      </div><!-- .row -->
-    </div><!-- .col -->
-    <div class="col-md-1 d-none d-md-flex<%= behavior %>"></div>
-  </div>
-</div>
+<%= tag.div(class: "card-header namings-table-header") do
+  tag.div(class: "row") do
+    concat(
+      tag.div(class: "col-12 col-md-11") do
+        tag.div(class: "row") do
+          concat(tag.div(header[:heading],
+                        class: "col-md-4 d-flex #{behavior}"))
+          concat(tag.div(header[:user_name],
+                        class: "col-md-3 d-none d-md-flex #{behavior}"))
+          concat(tag.div(header[:consensus_vote],
+                        class: "col-md-2 d-none d-md-flex #{behavior}"))
+          concat(tag.div(header[:your_vote],
+                        class: "col-md-3 d-none d-md-flex #{behavior}"))
+        end
+      end
+    )
+    concat(tag.div("", class: "col-md-1 d-none d-md-flex #{behavior}"))
+  end
+end %>
