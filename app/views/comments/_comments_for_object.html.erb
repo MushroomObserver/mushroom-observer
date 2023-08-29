@@ -27,7 +27,7 @@
     <%= link_with_query(:show_comments_add_comment.t,
                         new_comment_path(target: object.id,
                                         type: object.class.name),
-                        class: "btn btn-primary btn-sm",
+                        class: "btn btn-default btn-sm",
                         remote: true) if controls %>
 
     <%= if limit && and_more > 0
