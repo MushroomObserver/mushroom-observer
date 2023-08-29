@@ -20,7 +20,7 @@ end
 map_url = map_observation_path(id: obs.id, q: get_query_param)
 %>
 
-<%= tag.div(class: "panel panel-default" id: "observation_thumbnail_map") do %>
+<%= tag.div(class: "panel panel-default", id: "observation_thumbnail_map") do %>
 
   <%= tag.div(class: "panel-heading") do
     tag.h4(class: "panel-title") do
@@ -40,8 +40,8 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
   <%= tag.div(class: "panel-body p-0 thumbnail-map-container") do %>
 
     <%= tag.div(class: "thumbnail-buttons") do
-      concat(tag.div(class: "plus-button"))
-      concat(tag.div(class: "minus-button"))
+      concat(tag.div("", class: "plus-button"))
+      concat(tag.div("", class: "minus-button"))
     end %>
 
     <%= tag.div(class: "thumbnail-map") do %>
@@ -65,13 +65,16 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
       end %>
 
       <%= if lat && long
-        tag.div(class: "pin-offset") do
-          tag.div(class: "red-pin", style: "left:#{x}%; bottom:#{100-y}%")
+        tag.div("", class: "pin-offset") do
+          tag.div("", class: "red-pin", style: "left:#{x}%; bottom:#{100-y}%")
         end
       end %>
 
-      <%= image_tag("globe.jpg", class: "w-100", id: "globe_image",
-                    data: { globe_large_url: "#{image_url("globe_large.jpg")}" })%>
+      <%= image_tag(
+        "globe.jpg", class: "w-100", id: "globe_image",
+        data: { globe_large_url: "#{image_url("globe_large.jpg")}" }
+      ) %>
+
     <% end %>
   <% end %>
 
