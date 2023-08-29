@@ -3,61 +3,57 @@
   user = comment.user
 %>
 
-<div class="list-group-item comment" id="comment_<%= comment.id %>">
-  <div class="row">
+<%= tag.div(class: "list-group-item comment", id:"comment_#{comment.id}") do %>
+  <%= tag.div(class: "row") do %>
 
-    <div class="col-12 col-md-9 col-xl-10">
+    <%= tag.div(class: "col-12 col-md-9 col-xl-10") do %>
 
       <% if local_assigns[:show_name] && show_name %>
-        <h4 class="mt-0">
+        <%= tag.h4(class: "mt-0") do %>
           <%= link_to(target.unique_format_name.t, target.show_link_args) \
                       rescue :comment_list_deleted.t %>
-          <small>(<%= target.class.name.to_sym.t rescue :runtime_object_deleted %>)</small>
-        </h4>
+          <%= tag.span(target.class.name.to_sym.t, class: "small") \
+                       rescue :runtime_object_deleted %>
+        <% end %>
       <% end %>
 
-      <div class="font-weight-bold">
-        <%= comment.summary.tl %>
-      </div>
+      <%= tag.div(comment.summary.tl, class: "font-weight-bold") %>
 
-      <div class="comment-info d-flex flex-row justify-content-between">
+      <%= tag.div(
+        class: "comment-info d-flex flex-row justify-content-between"
+      ) do %>
         <%= :BY.t %>: <%= user_link(user) %>
         <% if check_permission(comment) %>
-          <span class="text-nowrap">
-            [<%= edit_button(name: :EDIT.t, target: comment, remote: true) %> |
-             <%= destroy_button(name: :comment_show_destroy.t, target: comment,
-                               remote: true) %>]
-          </span>
+          <%= tag.span(class: "text-nowrap") do
+            concat(edit_button(name: :EDIT.t, target: comment, remote: true))
+            concat(destroy_button(name: :comment_show_destroy.t,
+                                  target: comment, remote: true))
+          end %>
         <% end %>
-        <div class="text-nowrap small my-0 mx-3">
-          <%= comment.created_at.web_time %>
-        </div>
-      </div><!--.comment-info-->
+        <%= tag.div(comment.created_at.web_time,
+                    class: "text-nowrap small my-0 mx-3") %>
+      <% end %>
 
       <% unless comment.comment.blank? %>
-        <div class="p-2 comment-body">
-          <%= comment.comment.tpl %>
-        </div><!--.comment-body-->
+        <%= tag.div(comment.comment.tpl, class: "p-2 comment-body") %>
       <% end %>
 
-    </div><!-- .col -->
+    <% end %>
 
-    <div class="d-none d-md-block col-md-3 col-xl-2 text-center">
-
+     <%= tag.div(class: "d-none d-md-block col-md-3 col-xl-2 text-center") do %>
       <% if user.image_id %>
-        <div class="user-image-sizer">
-          <%= image_tag(Image.url(:thumbnail, user.image_id),
-                        class: "img-fluid",
-                        data: { role: "link", url: user_path(user.id) }) %>
-        </div><!-- .user-image-sizer -->
+        <%= tag.div(class: "user-image-sizer") do
+          image_tag(Image.url(:thumbnail, user.image_id),
+                    class: "img-fluid",
+                    data: { role: "link", url: user_path(user.id) })
+        end %>
       <% end %>
+    <% end %>
 
-    </div><!-- .col -->
-
-  </div><!-- .row -->
-
-  <% if user.image_id %>
-    <div class="clearfix"></div>
   <% end %>
 
-</div><!-- .list-group -->
+  <% if user.image_id %>
+    <%= tag.div("", class: "clearfix") %>
+  <% end %>
+
+<% end %>
