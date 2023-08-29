@@ -50,11 +50,11 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = edit_button(name: :EDIT.t, target: naming,
+      edit_link = edit_button(name: :EDIT.t, target: naming, icon: :edit,
                               remote: true, onclick: "MOEvents.whirly();")
-      delete_link = destroy_button(target: naming, remote: true)
+      delete_link = destroy_button(target: naming, remote: true, icon: :destroy)
       proposer_links = tag.span(class: "small text-nowrap") do
-        ["[", edit_link, " | ", delete_link, "]"].safe_join
+        [edit_link, " | ", delete_link].safe_join
       end
     else
       proposer_links = ""
@@ -75,7 +75,6 @@ module NamingsHelper
   def naming_proposer_html(naming)
     user_link = user_link(naming.user, naming.user.login,
                           { class: "py-md-1 font-weight-bold" })
-    reasons = reasons_html(naming)
 
     # row props have mobile-friendly labels
     [tag.small("#{:show_namings_user.t}: ",

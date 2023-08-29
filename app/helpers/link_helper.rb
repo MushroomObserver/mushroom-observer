@@ -75,7 +75,7 @@ module LinkHelper
   def link_icon(type)
     return "" unless (glyph = link_icon_index[type])
 
-    icon("fa-regular", link_icon_index[type], class: "fa-lg")
+    icon("fa-regular", glyph, class: "fa-lg")
   end
 
   def link_icon_index
@@ -85,8 +85,8 @@ module LinkHelper
       add: "square-plus",
       back: "arrow-left",
       hide: "eye-close",
-      reuse: "share",
-      remove: "minus-sign"
+      reuse: "clone",
+      remove: "trash"
     }.freeze
   end
 
