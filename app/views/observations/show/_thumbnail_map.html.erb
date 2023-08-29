@@ -32,7 +32,7 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
             add_query_param(javascript_hide_thumbnail_map_path(id: obs.id))
           ) do
             concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
-            concat(tag.span(class: "glyphicon glyphicon-eye-close"))
+            concat(tag.span("", class: "glyphicon glyphicon-eye-close"))
           end
         end
       )
