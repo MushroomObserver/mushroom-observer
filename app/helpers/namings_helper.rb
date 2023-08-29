@@ -6,12 +6,7 @@ module NamingsHelper
   ##### Observation Naming "table" content #########
   def observation_naming_header_row(observation, logged_in)
     any_names = observation.namings&.length&.positive?
-    heading = (if any_names
-                 :show_namings_proposed_names.t
-               else
-                 :show_namings_no_names_yet.t
-               end)
-    heading_html = content_tag(:h4, heading, class: "table-title my-0")
+    heading_html = content_tag(:h4, :show_namings_proposed_names.t)
     user_heading_html = content_tag(:small, :show_namings_user.t)
     consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
     your_heading_html = content_tag(:small, :show_namings_your_vote.t)
