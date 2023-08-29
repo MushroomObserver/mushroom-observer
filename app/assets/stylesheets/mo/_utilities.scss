@@ -12,6 +12,10 @@
   display: flex;
 }
 
+.flex-column {
+  flex-direction: column;
+}
+
 .align-items-center {
   align-items: center !important;
 }
@@ -566,6 +570,10 @@
 @media screen and (min-width: 767px) {
   .d-sm-block {
     display: block;
+  }
+
+  .d-sm-flex {
+    display: flex;
   }
 
   .float-sm-left {
