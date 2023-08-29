@@ -13,13 +13,14 @@ sorts
 <%
 add_filter_help(@any_content_filters_applied)
 add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons))
+left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
 %>
 
-<div class="row">
+<%= tag.div(class: "row") do %>
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
   <%= tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
 
-  <div class="col-xs-<%= add_right_tabs ? 8 : 12 %>" id="title_bar">
+  <%= tag.div(class: left_cols, id: "title_bar") do %>
     <!-- Pager -->
     <%= content_tag_if(content_for?(:prev_next_object), :div,
                        class: "hidden-print") do
@@ -31,12 +32,12 @@ add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons))
     <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
     <%= yield(:filter_help) -%>
     <%= yield(:owner_naming) %>
-  </div>
+    <%= yield(:interest_icons) %>
+  <% end %>
 
   <!-- Tabsets and interest icons, within "#right_tabs" -->
   <%= content_tag_if(add_right_tabs, :div, id: "right_tabs",
-                    class: "hidden-print text-right col-sm-4 mb-3") do
-        concat(yield(:interest_icons))
+                    class: "hidden-print text-right col-sm-4 col-lg-5 mb-3") do
         concat(yield(:tab_set))
       end %>
 
@@ -48,4 +49,4 @@ add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons))
   <!-- Sorter. conditionally renders the partial -->
   <%= yield(:sorter) %>
 
-</div>
+<% end %>
