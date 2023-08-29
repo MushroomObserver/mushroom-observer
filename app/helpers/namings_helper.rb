@@ -4,9 +4,9 @@
 # TODO: some of this should be in a presenter
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_naming_header_row(observation, logged_in)
-    any_names = observation.namings&.length&.positive?
-    heading_html = content_tag(:h4, :show_namings_proposed_names.t)
+  def observation_naming_header_row(logged_in)
+    heading_html = content_tag(:h4, :show_namings_proposed_names.t,
+                               class: "panel-title")
     user_heading_html = content_tag(:small, :show_namings_user.t)
     consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
     your_heading_html = content_tag(:small, :show_namings_your_vote.t)

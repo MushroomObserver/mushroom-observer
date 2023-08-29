@@ -4,7 +4,7 @@
     border-radius: $panel-border-radius;
   }
 
-  header.row {
+  .panel-heading .row {
     .col {
       padding: $panel-body-padding;
       vertical-align: bottom;
@@ -16,7 +16,7 @@
     }
   }
 
-  div.row {
+  .list-group-item {
     background-color: $panel-bg;
 
     .col {
