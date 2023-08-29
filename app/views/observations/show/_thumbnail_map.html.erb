@@ -18,6 +18,9 @@ if lat && long
 end
 
 map_url = map_observation_path(id: obs.id, q: get_query_param)
+hide_map_path = add_query_param(
+                  javascript_hide_thumbnail_map_path(id: obs.id)
+                )
 %>
 
 <div class="hidden-xs panel panel-default" id="observation_thumbnail_map">
@@ -26,11 +29,8 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
     tag.h4(class: "panel-title") do
       concat(:MAP.t)
       concat(
-        tag.span(class: "float-right small mt-2") do
-          link_to(
-            :show_observation_hide_map.t,
-            add_query_param(javascript_hide_thumbnail_map_path(id: obs.id))
-          ) do
+        tag.span(class: "float-right") do
+          link_to(hide_map_path) do
             concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
             concat(tag.span("", class: "glyphicon glyphicon-eye-close"))
           end
@@ -39,7 +39,7 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
     end
   end%>
 
-  <div class="panel-body p-0 thumbnail-map-container">
+  <div class="panel-body p-0 position-relative">
 
     <div class="thumbnail-buttons">
       <div class="plus-button"></div>
