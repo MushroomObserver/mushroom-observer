@@ -15,7 +15,7 @@
 @media (min-width: $screen-sm-min) {
   .interest-eyes {
     position: absolute;
-    bottom: 0;
+    bottom: $padding-base-horizontal;
     right: $padding-base-horizontal;
   }
 }
