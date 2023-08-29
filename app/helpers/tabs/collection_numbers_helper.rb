@@ -30,6 +30,10 @@ module Tabs
       [object_return_tab(obs)]
     end
 
+    def collection_number_form_new_title
+      :create_collection_number_title.l
+    end
+
     def collection_number_form_edit_tabs(c_n:, back:, obj:)
       links = []
       links << if back == "index"
@@ -37,6 +41,10 @@ module Tabs
                else
                  object_return_tab(obj)
                end
+    end
+
+    def collection_number_form_edit_title(c_n:)
+      :edit_collection_number_title.l(name: c_n.format_name)
     end
 
     def collection_numbers_index_tab(c_n)

@@ -1,8 +1,6 @@
 <%
 @container = :wide
-add_page_title(:edit_herbarium_record_title.l(
-  herbarium_label: @herbarium_record.herbarium_label
-))
+add_page_title(herbarium_record_form_edit_title(h_r: @herbarium_record))
 add_tab_set(herbarium_record_form_edit_tabs(back: @back,
                                               back_object: @back_object))
 %>

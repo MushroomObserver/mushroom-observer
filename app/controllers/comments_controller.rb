@@ -208,7 +208,9 @@ class CommentsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_comment_form
+        render_modal_comment_form(
+          title: helpers.comment_form_new_title(target: @target)
+        )
       end
     end
   end
@@ -222,54 +224,6 @@ class CommentsController < ApplicationController
 
     save_comment_or_flash_errors_and_redirect!
   end
-
-  private
-
-  def render_modal_comment_form
-    render(partial: "shared/modal_form_show",
-           locals: { identifier: "comment" }) and return
-  end
-
-  def render_modal_form_reload
-    render(partial: "shared/modal_form_reload",
-           locals: { identifier: "comment",
-                     form: "comments/form" }) and return true
-  end
-
-  def render_update_comments_for_object
-    render(partial: "comments/update_comments_for_object")
-  end
-
-  def permitted_comment_params
-    params[:comment].permit([:summary, :comment])
-  end
-
-  def save_comment_or_flash_errors_and_redirect!
-    unless @comment.save
-      flash_object_errors(@comment)
-      respond_to do |format|
-        format.html { render(:new) and return }
-        format.js do
-          render_modal_form_reload
-        end
-      end
-    end
-
-    @comment.log_create
-    flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
-
-    respond_to do |format|
-      format.html do
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
-      end
-      format.js do
-        render_update_comments_for_object
-      end
-    end
-  end
-
-  public
 
   # Form to edit a comment for an object..
   # Linked from: show_comment, show_object.
@@ -292,7 +246,9 @@ class CommentsController < ApplicationController
     respond_to do |format|
       format.html
       format.js do
-        render_modal_comment_form
+        render_modal_comment_form(
+          title: helpers.comment_form_edit_title(target: @target)
+        )
       end
     end
   end
@@ -355,6 +311,50 @@ class CommentsController < ApplicationController
   end
 
   private
+
+  def render_modal_comment_form(title:)
+    render(partial: "shared/modal_form_show",
+           locals: { title: title, identifier: "comment" }) and return
+  end
+
+  def render_modal_form_reload
+    render(partial: "shared/modal_form_reload",
+           locals: { identifier: "comment",
+                     form: "comments/form" }) and return true
+  end
+
+  def render_update_comments_for_object
+    render(partial: "comments/update_comments_for_object")
+  end
+
+  def permitted_comment_params
+    params[:comment].permit([:summary, :comment])
+  end
+
+  def save_comment_or_flash_errors_and_redirect!
+    unless @comment.save
+      flash_object_errors(@comment)
+      respond_to do |format|
+        format.html { render(:new) and return }
+        format.js do
+          render_modal_form_reload
+        end
+      end
+    end
+
+    @comment.log_create
+    flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
+
+    respond_to do |format|
+      format.html do
+        redirect_with_query(controller: @target.show_controller,
+                            action: @target.show_action, id: @target.id)
+      end
+      format.js do
+        render_update_comments_for_object
+      end
+    end
+  end
 
   def comment_target
     load_target(@comment.target_type, @comment.target_id)

@@ -215,11 +215,19 @@ module Tabs
       ]
     end
 
-    def new_naming_tabs(obs:)
+    def naming_form_new_title(obs:)
+      :create_naming_title.t(id: obs.id)
+    end
+
+    def naming_form_new_tabs(obs:)
       [object_return_tab(obs)]
     end
 
-    def edit_naming_tabs(obs:)
+    def naming_form_edit_title(obs:)
+      :edit_naming_title.t(id: obs.id)
+    end
+
+    def naming_form_edit_tabs(obs:)
       [object_return_tab(obs)]
     end
 

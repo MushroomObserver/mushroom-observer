@@ -1,7 +1,7 @@
 <%
 @container = :double
-add_page_title(:create_naming_title.t(id: @observation.id))
-add_tab_set(new_naming_tabs(obs: @observation))
+add_page_title(naming_form_new_title(obs: @observation))
+add_tab_set(naming_form_new_tabs(obs: @observation))
 %>
 
 <div class="row">
