@@ -1,22 +1,5 @@
 <%
-if obs.location
-  loc = obs.location
-  n = ((90.0 - loc.north) / 1.80).round(6)
-  s = ((90.0 - loc.south) / 1.80).round(6)
-  e = ((180.0 + loc.east) / 3.60).round(6)
-  w = ((180.0 + loc.west) / 3.60).round(6)
-end
-
-lat, long = if obs.lat && obs.long
-  [obs.public_lat, obs.public_long]
-elsif obs.location
-  obs.location.center
-end
-if lat && long
-  x = ((180.0 + long) / 3.60).round(6)
-  y = ((90.0 - lat) / 1.80).round(6)
-end
-
+n, s, e, w, lat, long, x, y = observation_map_coordinates(obs: obs)
 map_url = map_observation_path(id: obs.id, q: get_query_param)
 %>
 
@@ -27,12 +10,10 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
       concat(:MAP.t)
       concat(
         tag.span(class: "float-right") do
-          link_with_query(javascript_hide_thumbnail_map_path(id: obs.id),
-                          title: :show_observation_hide_map.t,
-                          data: { toggle: "tooltip" }) do
-            concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
-            concat(tag.span("", class: "glyphicon glyphicon-eye-close"))
-          end
+          icon_link_with_query(
+            :show_observation_hide_map.t,
+            javascript_hide_thumbnail_map_path(id: obs.id), icon: :hide
+          )
         end
       )
     end

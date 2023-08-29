@@ -35,12 +35,12 @@ module NamingsHelper
     buttons = []
     buttons << propose_naming_link(observation.id,
                                    text: :show_namings_propose_new_name.t,
-                                   btn_class: "btn-default",
+                                   btn_class: "btn-default btn-sm",
                                    context: "namings_table")
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
-                           class: "btn btn-default mt-2" })
+                           class: "btn btn-default btn-sm mt-2" })
     end
     buttons.safe_join(tag.br)
   end
@@ -51,9 +51,8 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
-                                  class: "edit_naming_link_#{naming.id}",
-                                  remote: true, onclick: "MOEvents.whirly();")
+      edit_link = edit_button(name: :EDIT.t, target: naming,
+                              remote: true, onclick: "MOEvents.whirly();")
       delete_link = destroy_button(target: naming, remote: true)
       proposer_links = [tag.br,
                         "[", edit_link, " | ", delete_link, "]"].safe_join

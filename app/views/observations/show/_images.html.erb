@@ -1,26 +1,5 @@
 <%
-if check_permission(obs)
-  links = link_with_query(new_image_for_observation_path(obs.id),
-                          title: :show_observation_add_images.t,
-                          data: { toggle: "tooltip" }) do
-            tag.span("", class: "glyphicon glyphicon-plus")
-          end
-
-  links += " | "
-  links += link_with_query(reuse_images_for_observation_path(obs.id),
-                          title: :show_observation_reuse_image.t,
-                          data: { toggle: "tooltip" }) do
-            tag.span("", class: "glyphicon glyphicon-share")
-          end
-  links += " | "
-  links += link_with_query(remove_images_from_observation_path(obs.id),
-                          title: :show_observation_remove_images.t,
-                          data: { toggle: "tooltip" }) do
-            tag.span("", class: "glyphicon glyphicon-minus-sign")
-          end
-else
-  links = ""
-end
+links = observation_show_image_links(obs: obs)
 %>
 
 <%= tag.div(class: "panel panel-default") do %>
