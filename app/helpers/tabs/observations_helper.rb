@@ -222,7 +222,9 @@ module Tabs
       [object_return_tab(obs)]
     end
 
-    def naming_form_edit_title(obs:); end
+    def naming_form_edit_title(obs:)
+      :edit_naming_title.t(id: obs.id)
+    end
 
     def naming_form_edit_tabs(obs:)
       [object_return_tab(obs)]
