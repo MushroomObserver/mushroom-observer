@@ -50,6 +50,19 @@ module LinkHelper
     link_to(*tab)
   end
 
+  def link_icon(type)
+    tag.span("", class: "glyphicons glyphicons-#{link_icon_index[type]}")
+  end
+
+  def link_icon_index
+    {
+      edit: "edit",
+      destroy: "remove-circle",
+      add: "plus",
+      back: "step-backward"
+    }.freeze
+  end
+
   # button to destroy object
   # Used instead of link_to because method: :delete requires jquery_ujs library
   # Sample usage:
@@ -61,30 +74,77 @@ module LinkHelper
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
   #
-  def destroy_button(target:, name: :DESTROY.t, **args)
+  def destroy_button(target:, name: :DESTROY.t, **args, &block)
+    content = block ? capture(&block) : ""
     name = :DESTROY.t if name.blank? # necessary if nil/empty string passed
-    path_args = args.slice(:back) # empty hash if blank
-    path = if target.is_a?(String)
-             target
-           else
-             add_query_param(send("#{target.type_tag}_path", target.id,
-                                  **path_args))
-           end
-    classes ||= "text-danger"
-    id ||= nil
-    unless target.is_a?(String)
-      classes += " destroy_#{target.type_tag}_link_#{target.id}"
-    end
-    classes = class_names(classes, args[:class])
+    path, identifier = path_and_identifier_from_target(:destroy, target, args)
 
     html_options = {
-      method: :delete,
-      class: classes,
-      id: id,
-      data: { confirm: :are_you_sure.t }
-    }.merge(args.except(:back, :class))
+      method: :delete, # class_names usually also btn
+      class: class_names(identifier, args[:class]),
+      data: { confirm: :are_you_sure.t,
+              toggle: "tooltip", placement: "top", title: name }
+    }.merge(args.except(:class, :back))
 
-    button_to(path, html_options) { name }
+    button_to(path, html_options) do
+      [content, link_icon(:destroy)].safe_join
+    end
+  end
+
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  def edit_button(target:, name: :EDIT.t, **args, &block)
+    content = block ? capture(&block) : ""
+    path, identifier = path_and_identifier_from_target(:edit, target, args)
+
+    html_options = {
+      class: class_names(identifier, args[:class]), # usually also btn
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.merge(args.except(:class, :back))
+
+    link_to(path, html_options) do
+      [content, link_icon(:edit)].safe_join
+    end
+  end
+
+  def path_and_identifier_from_target(action, target, args)
+    if target.is_a?(String)
+      path = target
+      identifier = "" # can send one via args[:class]
+    else
+      prefix = action == :destroy ? "" : "#{action}_"
+      path_args = args.slice(:back) # adds back arg, or empty hash if blank
+      path = add_query_param(send("#{prefix}#{target.type_tag}_path", target.id,
+                                  **path_args))
+      identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
+    end
+    [path, identifier]
+  end
+
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  def add_button(path:, name: :ADD.t, **args, &block)
+    content = block ? capture(&block) : ""
+    html_options = {
+      class: "", # usually also btn
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.merge(args)
+
+    link_to(path, html_options) do
+      [content, link_icon(:add)].safe_join
+    end
+  end
+
+  # TODO: Change translations BACK to PREV, or make a BACK TO translation
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  def back_button(path:, name: :BACK.t, **args, &block)
+    content = block ? capture(&block) : ""
+    html_options = {
+      class: "", # usually also btn
+      data: { toggle: "tooltip", placement: "top", title: name }
+    }.merge(args)
+
+    link_to(path, html_options) do
+      [content, link_icon(:back)].safe_join
+    end
   end
 
   # POST to a path; used instead of a link because POST link requires js
