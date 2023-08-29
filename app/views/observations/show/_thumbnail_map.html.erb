@@ -18,66 +18,64 @@ if lat && long
 end
 
 map_url = map_observation_path(id: obs.id, q: get_query_param)
-hide_map_path = add_query_param(
-                  javascript_hide_thumbnail_map_path(id: obs.id)
-                )
 %>
 
-<div class="hidden-xs panel panel-default" id="observation_thumbnail_map">
+<%= tag.div(class: "panel panel-default" id: "observation_thumbnail_map") do %>
 
   <%= tag.div(class: "panel-heading") do
     tag.h4(class: "panel-title") do
       concat(:MAP.t)
       concat(
         tag.span(class: "float-right") do
-          link_to(hide_map_path) do
-            concat(tag.span(:show_observation_hide_map.t, class: "sr-only"))
+          link_with_query(javascript_hide_thumbnail_map_path(id: obs.id),
+                          title: :show_observation_hide_map.t,
+                          data: { toggle: "tooltip" }) do
             concat(tag.span("", class: "glyphicon glyphicon-eye-close"))
           end
         end
       )
     end
-  end%>
+  end %>
 
-  <div class="panel-body p-0 position-relative">
+  <%= tag.div(class: "panel-body p-0 thumbnail-map-container") do %>
 
-    <div class="thumbnail-buttons">
-      <div class="plus-button"></div>
-      <div class="minus-button"></div>
-    </div><!--.thumbnail-buttons-->
+    <%= tag.div(class: "thumbnail-buttons") do
+      concat(tag.div(class: "plus-button"))
+      concat(tag.div(class: "minus-button"))
+    end %>
 
-    <div class="thumbnail-map">
+    <%= tag.div(class: "thumbnail-map") do %>
 
       <%= if obs.location
         if w < e && s > n
-          content_tag(:div, "",
-            class: "thumbnail-map-box",
+          tag.div(
+            "", class: "thumbnail-map-box",
             style: "left:#{w}%; top:#{n}%; width:#{e-w}%; height:#{s-n}%"
           )
         elsif w > e && s > n
-          content_tag(:div, "",
-            class: "thumbnail-map-box",
+          tag.div(
+            "", class: "thumbnail-map-box",
             style: "left:0%; top:#{n}%; width:#{e}%; height:#{s-n}%"
           ) +
-          content_tag(:div, "",
-            class: "thumbnail-map-box",
+          tag.div(
+            "", class: "thumbnail-map-box",
             style: "left:#{w}%; top:#{n}%; width:#{100-w}%; height:#{s-n}%"
           )
         end
       end %>
 
-      <% if lat && long %>
-        <div class="pin-offset">
-          <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
-        </div>
-      <% end %>
+      <%= if lat && long
+        tag.div(class: "pin-offset") do
+          tag.div(class: "red-pin", style: "left:#{x}%; bottom:#{100-y}%")
+        end
+      end %>
 
-      <%= image_tag("globe.jpg", width: "100%", id: "globe_image",
+      <%= image_tag("globe.jpg", class: "w-100", id: "globe_image",
                     data: { globe_large_url: "#{image_url("globe_large.jpg")}" })%>
-    </div><!--.thumbnail-map-->
-  </div><!--.thumbnail-map-container-->
+    <% end %>
+  <% end %>
 
-</div><!--#observation_thumbnail_map-->
+<% end %>
 
 <%= if lat && long
   javascript_tag %{
