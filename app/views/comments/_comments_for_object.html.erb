@@ -6,24 +6,24 @@
   end
 %>
 
-<div class="card" id="comments_for_object">
-  <div class="card-header">
-    <%= content_tag(:h6, :COMMENTS.t) %>
-  </div>
+<%= tag.div(class: "card", id: "comments_for_object") do %>
 
-  <div class="list-group list-group-flush comments">
+  <%= tag.div(class: "card-header") do
+    tag.h6(:COMMENTS.t)
+  end %>
+
+  <%= tag.div(class: "list-group list-group-flush comments") do %>
     <% if comments.empty? %>
-      <div class="list-group-item">
-        <%= :show_comments_no_comments_yet.t %>
-      </div>
+      <%= tag.div(:show_comments_no_comments_yet.t,
+                  class: "list-group-item") %>
     <% else %>
       <% comments.each do |comment| %>
         <%= render(partial: "comments/comment", object: comment) %>
       <% end %>
     <% end %>
-  </div>
+  <% end %>
 
-  <div class="card-footer d-flex justify-content-between">
+  <%= tag.div(class: "card-footer d-flex justify-content-between") do %>
     <%= link_with_query(:show_comments_add_comment.t,
                         new_comment_path(target: object.id,
                                         type: object.class.name),
@@ -34,5 +34,6 @@
       link_to(:show_comments_and_more.t(num: and_more),
               comments_path(target: object.id, type: object.class.name))
     end %>
-  </div><!--.card-footer-->
-</div><!--.card-->
+  <% end %>
+
+<% end %>
