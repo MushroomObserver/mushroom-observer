@@ -8,6 +8,14 @@
   display: none;
 }
 
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center !important;
+}
+
 .w-auto {
   width: auto !important;
 }
@@ -547,11 +555,19 @@
   }
 }
 
+.list-group-flush {
+  border-radius: 0;
+}
+
 //
 // larger devices
 // --------------------------------------------------
 
 @media screen and (min-width: 767px) {
+  .d-sm-block {
+    display: block;
+  }
+
   .float-sm-left {
     float: left !important;
   }
