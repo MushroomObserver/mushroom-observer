@@ -6,7 +6,7 @@
 
   .panel-heading .row {
     .col {
-      padding: $panel-body-padding;
+      // padding: $panel-body-padding;
       vertical-align: bottom;
       padding-bottom: 0.25rem;
 
@@ -20,7 +20,7 @@
     background-color: $panel-bg;
 
     .col {
-      padding: $panel-body-padding;
+      // padding: $panel-body-padding;
       vertical-align: middle;
 
       &.naming-reasons {
