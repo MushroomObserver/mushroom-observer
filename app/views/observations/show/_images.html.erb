@@ -1,51 +1,54 @@
-<% if obs.images.any? || check_permission(obs) %>
-  <div class="row">
-    <div class="col-sm-6 col-md-4">
-      <%= content_tag(:h4, :IMAGES.t, class: "mt-0") %>
-    </div>
-    <% if check_permission(obs) %>
-      <div class="col-sm-6 col-md-8 float-sm-right">
-        <small>
-          <%= link_with_query(:show_observation_add_images.t,
-                              new_image_for_observation_path(obs.id)) %>
-          | <%= link_with_query(:show_observation_reuse_image.t,
-                                reuse_images_for_observation_path(obs.id)) %>
-          <% if obs.images.length > 0 %>
-            | <%= link_with_query(:show_observation_remove_images.t,
-                                  remove_images_from_observation_path(obs.id)) %>
-            <% end %>
-        </small>
-      </div>
-    <% end %>
-  </div><!--.row-->
-<% end %>
+<%
+links = observation_show_image_links(obs: obs)
+%>
 
-<% if obs.images.any? %>
-  <div class="show_images list-group text-center">
-    <%
-    # This sort puts the thumbnail first.  We can't use thumb_image, because we
-    # haven't eager-loaded it; we *have* eager-loaded all the other images.
-    obs.images.sort_by {|x| x.id == obs.thumb_image_id ? -1 : x.id}.
-               each do |image| %>
-      <div class="list-group-item">
-        <%= thumbnail(
-              image,
-              image_link: image.show_link_args.merge({ obs: obs.id }),
-              original: true,
-              is_set: true,
-              votes: true) %>
-        <%=
-          notes = []
-          if image.copyright_holder != obs.user.legal_name
-            notes << image_copyright(image)
-          end
-          if !image.notes.blank?
-            notes << image.notes.tl.truncate_html(300)
-          end
-          notes = notes.safe_join(safe_br)
-          content_tag(:center, notes) if !notes.blank?
-        %>
-      </div>
-    <% end %>
-  </div>
-<% end %>
+<%= tag.div(class: "panel panel-default") do %>
+
+  <%= tag.div(class: "panel-heading") do
+    tag.h4(class: "panel-title") do
+      concat(:IMAGES.t)
+      concat(tag.span(links, class: "float-right"))
+    end
+  end %>
+
+  <% if obs.images.any? %>
+
+    <%= tag.div(class: "show_images list-group text-center m-0") do %>
+
+      <%
+      # This sort puts the thumbnail first.
+      # We can't use thumb_image, because we haven't eager-loaded it;
+      # we *have* eager-loaded all the other images.
+      obs.images.sort_by {|x| x.id == obs.thumb_image_id ? -1 : x.id}.
+                each do |image| %>
+
+        <%= tag.div(class: "list-group-item") do %>
+
+          <%= thumbnail(
+                image,
+                image_link: image.show_link_args.merge({ obs: obs.id }),
+                original: true,
+                is_set: true,
+                votes: true) %>
+
+          <%=
+            notes = []
+            if image.copyright_holder != obs.user.legal_name
+              notes << image_copyright(image)
+            end
+            if !image.notes.blank?
+              notes << image.notes.tl.truncate_html(300)
+            end
+            notes = notes.safe_join(safe_br)
+            tag.div(notes, class: "text-center") if !notes.blank?
+          %>
+
+        <% end # .list-group-item %>
+
+      <% end # each %>
+
+    <% end # .list-group %>
+
+  <% end # if obs.images.any? %>
+
+<% end # .panel %>

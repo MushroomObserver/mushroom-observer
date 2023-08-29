@@ -87,4 +87,47 @@ module ObservationsHelper
     link_to(name.display_name_without_authors.t,
             name_path(id: name.id))
   end
+
+  def observation_map_coordinates(obs:)
+    if obs.location
+      loc = obs.location
+      n = ((90.0 - loc.north) / 1.80).round(6)
+      s = ((90.0 - loc.south) / 1.80).round(6)
+      e = ((180.0 + loc.east) / 3.60).round(6)
+      w = ((180.0 + loc.west) / 3.60).round(6)
+    end
+
+    lat, long = if obs.lat && obs.long
+                  [obs.public_lat, obs.public_long]
+                elsif obs.location
+                  obs.location.center
+                end
+    if lat && long
+      x = ((180.0 + long) / 3.60).round(6)
+      y = ((90.0 - lat) / 1.80).round(6)
+    end
+
+    [n, s, e, w, lat, long, x, y]
+  end
+
+  def observation_show_image_links(obs:)
+    return "" unless check_permission(obs)
+
+    [
+      icon_link_with_query(
+        :show_observation_add_images.t,
+        new_image_for_observation_path(obs.id), icon: :add
+      ),
+      " | ",
+      icon_link_with_query(
+        :show_observation_reuse_image.t,
+        reuse_images_for_observation_path(obs.id), icon: :reuse
+      ),
+      " | ",
+      icon_link_with_query(
+        :show_observation_remove_images.t,
+        remove_images_from_observation_path(obs.id), icon: :remove
+      )
+    ].safe_join
+  end
 end

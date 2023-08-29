@@ -4,14 +4,9 @@
 # TODO: some of this should be in a presenter
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_naming_header_row(observation, logged_in)
-    any_names = observation.namings&.length&.positive?
-    heading = (if any_names
-                 :show_namings_proposed_names.t
-               else
-                 :show_namings_no_names_yet.t
-               end)
-    heading_html = content_tag(:h4, heading, class: "table-title my-0")
+  def observation_naming_header_row(logged_in)
+    heading_html = content_tag(:h4, :show_namings_proposed_names.t,
+                               class: "panel-title")
     user_heading_html = content_tag(:small, :show_namings_user.t)
     consensus_heading_html = content_tag(:small, :show_namings_consensus.t)
     your_heading_html = content_tag(:small, :show_namings_your_vote.t)
@@ -30,7 +25,7 @@ module NamingsHelper
       proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
       your_vote: logged_in ? your_vote_html(naming) : "",
-      eyes: eyes_html(observation, naming),
+      eyes: vote_icons_html(observation, naming),
       reasons: reasons_html(naming)
     }
   end
@@ -40,12 +35,12 @@ module NamingsHelper
     buttons = []
     buttons << propose_naming_link(observation.id,
                                    text: :show_namings_propose_new_name.t,
-                                   btn_class: "btn-default",
+                                   btn_class: "btn-default btn-sm",
                                    context: "namings_table")
     if do_suggestions
       buttons << link_to(:show_namings_suggest_names.l, "#",
                          { data: { role: "suggest_names" },
-                           class: "btn btn-default mt-2" })
+                           class: "btn btn-default btn-sm mt-2" })
     end
     buttons.safe_join(tag.br)
   end
@@ -56,17 +51,17 @@ module NamingsHelper
     Textile.register_name(naming.name)
 
     if check_permission(naming)
-      edit_link = link_with_query(:EDIT.t, edit_naming_path(id: naming.id),
-                                  class: "edit_naming_link_#{naming.id}",
-                                  remote: true, onclick: "MOEvents.whirly();")
+      edit_link = edit_button(name: :EDIT.t, target: naming,
+                              remote: true, onclick: "MOEvents.whirly();")
       delete_link = destroy_button(target: naming, remote: true)
-      proposer_links = [tag.br,
-                        "[", edit_link, " | ", delete_link, "]"].safe_join
+      proposer_links = tag.span(class: "small text-nowrap") do
+        ["[", edit_link, " | ", delete_link, "]"].safe_join
+      end
     else
       proposer_links = ""
     end
 
-    [naming_name_link(naming), proposer_links].safe_join
+    [naming_name_link(naming), " ", proposer_links].safe_join
   end
 
   def naming_name_link(naming)
@@ -125,11 +120,40 @@ module NamingsHelper
             locals: { naming: naming, context: "namings_table" })].safe_join
   end
 
-  def eyes_html(observation, naming)
+  # May show both user and consensus icons
+  def vote_icons_html(observation, naming)
     consensus = observation.consensus_naming
 
-    [(observation.owners_favorite?(naming) ? image_tag("eye3.png") : ""),
-     (naming == consensus ? image_tag("eyes3.png") : "")].safe_join
+    [(observation.owners_favorite?(naming) ? vote_icon_yours : ""),
+     (naming == consensus ? vote_icon_consensus : "")].safe_join
+  end
+
+  def vote_icon_yours
+    tag.div("", class: "vote-icon-width") do
+      tag.div("", class: "vote-icon-sizer") do
+        tag.div("", class: "vote-icon-yours")
+      end
+    end
+  end
+
+  def vote_icon_consensus
+    tag.div("", class: "vote-icon-width") do
+      tag.div("", class: "vote-icon-sizer") do
+        tag.div("", class: "vote-icon-consensus")
+      end
+    end
+  end
+
+  def vote_legend_yours
+    tag.div(class: "d-flex flex-row align-items-center small") do
+      [vote_icon_yours, " = ", :show_namings_eye_help.t].safe_join
+    end
+  end
+
+  def vote_legend_consensus
+    tag.div(class: "d-flex flex-row align-items-center small") do
+      [vote_icon_consensus, " = ", :show_namings_eyes_help.t].safe_join
+    end
   end
 
   def reasons_html(naming)

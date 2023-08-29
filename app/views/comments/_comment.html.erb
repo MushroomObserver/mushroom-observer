@@ -3,61 +3,57 @@
   user = comment.user
 %>
 
-<div class="list-group-item default comment" id="comment_<%= comment.id %>">
-  <div class="row">
-    <div class="col-sm-3 col-lg-2 hidden-xs float-right text-center">
+<%= tag.div(class: "list-group-item comment", id:"comment_#{comment.id}") do %>
+  <%= tag.div(class: "row") do %>
 
-      <% if user.image_id %>
-        <div class="user-image-sizer">
-          <%= image_tag(Image.url(:thumbnail, user.image_id),
-                        class: "img-fluid",
-                        data: { role: "link", url: user_path(user.id) }) %>
-        </div><!-- .user-image-sizer -->
-      <% end %>
-
-    </div><!-- .col -->
-
-    <div class="col-xs-12 col-sm-9 col-lg-10">
+    <%= tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do %>
 
       <% if local_assigns[:show_name] && show_name %>
-        <h4 class="mt-0">
+        <%= tag.h4(class: "mt-0") do %>
           <%= link_to(target.unique_format_name.t, target.show_link_args) \
                       rescue :comment_list_deleted.t %>
-          <small>(<%= target.class.name.to_sym.t rescue :runtime_object_deleted %>)</small>
-        </h4>
+          <%= tag.span(target.class.name.to_sym.t, class: "small") \
+                       rescue :runtime_object_deleted %>
+        <% end %>
       <% end %>
 
-      <div class="font-weight-bold">
-        <%= comment.summary.tl %>
-      </div>
+      <%= tag.div(comment.summary.tl, class: "font-weight-bold") %>
 
-      <div class="comment-info">
+      <%= tag.div(class: "comment-info") do %>
         <%= :BY.t %>: <%= user_link(user) %>
         <% if check_permission(comment) %>
-          <span class="text-nowrap">
+          <%= tag.span(class: "text-nowrap") do %>
             [<%= link_with_query(:EDIT.t, edit_comment_path(comment.id),
                                 class: "edit_comment_link_#{comment.id}",
                                 remote: true) %> |
             <%= destroy_button(name: :comment_show_destroy.t, target: comment,
                               remote: true) %>]
-          </span>
+          <% end %>
         <% end %>
-        <div class="pull-right text-nowrap small my-0 mx-3">
-          <%= comment.created_at.web_time %>
-        </div>
-      </div><!--.comment-info-->
-
-      <% unless comment.comment.blank? %>
-        <div class="p-5px comment-body">
-          <%= comment.comment.tpl %>
-        </div><!--.comment-body-->
+        <%= tag.div(comment.created_at.web_time,
+                    class: "float-right text-nowrap small my-0 mx-3") %>
       <% end %>
 
-    </div><!-- .col -->
-  </div><!-- .row -->
+      <% unless comment.comment.blank? %>
+        <%= tag.div(comment.comment.tpl, class: "p-2 comment-body") %>
+      <% end %>
 
-  <% if user.image_id %>
-    <div class="clearfix"></div>
+    <% end %>
+
+     <%= tag.div(class: "d-none d-sm-block col-sm-3 col-lg-2 text-center") do %>
+      <% if user.image_id %>
+        <%= tag.div(class: "user-image-sizer") do
+          image_tag(Image.url(:thumbnail, user.image_id),
+                    class: "img-fluid",
+                    data: { role: "link", url: user_path(user.id) })
+        end %>
+      <% end %>
+    <% end %>
+
   <% end %>
 
-</div><!-- .list-group -->
+  <% if user.image_id %>
+    <%= tag.div("", class: "clearfix") %>
+  <% end %>
+
+<% end %>

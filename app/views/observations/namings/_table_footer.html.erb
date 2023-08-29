@@ -1,0 +1,33 @@
+<%
+# called from observations/namings/table
+# nested rows/columns parallel those in the row partial
+
+suggest = logged_in && obs.thumb_image_id.present? &&
+          (@user.admin || MO.image_model_beta_testers.include?(@user.id))
+buttons = observation_naming_buttons(obs, suggest)
+help_text = logged_in ? :show_namings_consensus_help.t :
+                        :show_namings_please_login.t
+help = content_tag(:div, help_text, class: "card-text small")
+%>
+
+<%= tag.div(class: "panel-footer d-none d-sm-block") do
+  tag.div(class: "row") do
+    tag.div(class: "col-sm-11") do
+      tag.div(class: "row") do
+        concat(tag.div(buttons, class: "col-xs-6 col-md-4"))
+        concat(tag.div(help, class: "col-xs-6 col-md-8"))
+      end
+    end
+  end
+end %>
+
+<%= tag.div(class: "panel-footer d-none d-sm-block py-2") do
+  tag.div(class: "row") do
+    tag.div(class: "col-sm-11") do
+      tag.div(class: "row") do
+        concat(tag.div(vote_legend_yours, class: "col-xs-4 col-xs-offset-4"))
+        concat(tag.div(vote_legend_consensus, class: "col-xs-4"))
+      end
+    end
+  end
+end %>
