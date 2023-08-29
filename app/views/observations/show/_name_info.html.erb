@@ -1,6 +1,5 @@
-<% # Section showing information about consensus name in ShowObservation
-lines = []
-name = obs.name
+<%
+# Section showing information about consensus name in ShowObservation
 %>
 
 <%=
@@ -13,11 +12,11 @@ panel_with_outer_heading(
   <%= tag.div(class: "row") do %>
     <%= tag.div(class: "col-xs-6") do
       concat(tag.div("#{:on_mo.l}:", class: "font-weight-bold"))
-      concat(name_links_on_mo(name: name).safe_join)
+      concat(name_links_on_mo(name: obs.name).safe_join)
     end %>
     <%= tag.div(class: "col-xs-6") do
       concat(tag.div("#{:on_the_web.l}:", class: "font-weight-bold"))
-      concat(name_links_web(name: name).safe_join)
+      concat(name_links_web(name: obs.name).safe_join)
     end %>
   <% end %>
 
