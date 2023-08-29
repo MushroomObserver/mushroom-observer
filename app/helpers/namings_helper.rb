@@ -30,7 +30,7 @@ module NamingsHelper
       proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
       your_vote: logged_in ? your_vote_html(naming) : "",
-      eyes: eyes_html(observation, naming),
+      eyes: vote_icons_html(observation, naming),
       reasons: reasons_html(naming)
     }
   end
@@ -125,11 +125,40 @@ module NamingsHelper
             locals: { naming: naming, context: "namings_table" })].safe_join
   end
 
-  def eyes_html(observation, naming)
+  # May show both user and consensus icons
+  def vote_icons_html(observation, naming)
     consensus = observation.consensus_naming
 
-    [(observation.owners_favorite?(naming) ? image_tag("eye3.png") : ""),
-     (naming == consensus ? image_tag("eyes3.png") : "")].safe_join
+    [(observation.owners_favorite?(naming) ? vote_icon_yours : ""),
+     (naming == consensus ? vote_icon_consensus : "")].safe_join
+  end
+
+  def vote_icon_yours
+    tag.div("", class: "vote-icon-width") do
+      tag.div("", class: "vote-icon-sizer") do
+        tag.div("", class: "vote-icon-yours")
+      end
+    end
+  end
+
+  def vote_icon_consensus
+    tag.div("", class: "vote-icon-width") do
+      tag.div("", class: "vote-icon-sizer") do
+        tag.div("", class: "vote-icon-consensus")
+      end
+    end
+  end
+
+  def vote_legend_yours
+    tag.div(class: "d-flex flex-row align-items-center small") do
+      [vote_icon_yours, " = ", :show_namings_eye_help.t].safe_join
+    end
+  end
+
+  def vote_legend_consensus
+    tag.div(class: "d-flex flex-row align-items-center small") do
+      [vote_icon_consensus, " = ", :show_namings_eyes_help.t].safe_join
+    end
   end
 
   def reasons_html(naming)
