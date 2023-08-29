@@ -17,7 +17,8 @@ obs_locals = { obs: @observation }
 
 <div class="row">
   <div class="col-sm-8 col-lg-7 float-sm-left">
-    <%= render(partial: "observations/show/observation", locals: obs_locals) %>
+    <%= render(partial: "observations/show/observation_info",
+               locals: obs_locals) %>
   </div>
   <div class="col-sm-4 col-lg-5 float-sm-right">
     <% if @user %>
