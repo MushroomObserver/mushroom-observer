@@ -7,26 +7,6 @@ header = observation_naming_header_row(obs, logged_in)
 votes = gather_users_votes(obs, @user)
 %>
 
-<div class="namings-table" id="namings_table">
-  <div class="container-fluid">
-    <header class="row">
-      <div class="col col-xs-12 col-sm-3"><%= header[:heading] %></div>
-      <div class="col col-sm-3 hidden-xs"><%= header[:user_name] %></div>
-      <div class="col col-sm-2 hidden-xs"><%= header[:consensus_vote] %></div>
-      <div class="col col-sm-3 hidden-xs"><%= header[:your_vote] %></div>
-      <div class="col col-sm-1 hidden-xs"></div>
-    </header>
-  </div>
-
-  <div class="container-fluid panel panel-default">
-    <% namings.each do |naming| %>
-      <%= render(partial: "observations/namings/row",
-                  locals: { naming: naming, obs: obs,
-                            votes: votes, logged_in: logged_in }) %>
-    <% end # each naming %>
-  </div>
-</div>
-
 <%= tag.div(class: "namings-table panel panel-default mb-4",
             id: "namings_table") do %>
 

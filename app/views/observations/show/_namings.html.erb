@@ -1,34 +1,12 @@
 <%
-logged_in = @user&.verified
-do_suggestions = logged_in && obs.thumb_image_id.present? &&
-                  (@user.admin ||
-                   MO.image_model_beta_testers.include?(@user.id))
-buttons = observation_naming_buttons(obs, do_suggestions)
-help = logged_in ? :show_namings_consensus_help.t : :show_namings_please_login.t
-eye  = content_tag(:div,
-         "#{image_tag("eye3.png")} = #{:show_namings_eye_help.t}".html_safe,
-         class: "p-2")
-eyes = content_tag(:div,
-         "#{image_tag("eyes3.png")} = #{:show_namings_eyes_help.t}".html_safe,
-         class: "p-2")
+# Observation Namings
 %>
 
 <div id="observation_namings">
-
   <!--TABLE OF NAMES / REFRESHED BY AJAX -->
   <%= render(partial: "observations/namings/table",
              locals: { obs: obs }) %>
   <!--/TABLE OF NAMES -->
-
-  <!--HELP TEXT AND EYES -->
-  <div class="float-sm-right text-right my-2 ml-3"><%= buttons %></div>
-  <div class="help-block container-text my-2"><%= help %></div>
-  <div class="row hidden-xs">
-    <div class="col-xs-6"><%= eye %></div>
-    <div class="col-xs-6"><%= eyes %></div>
-  </div>
-  <!--/HELP TEXT AND EYES -->
-
 </div><!--#observation_namings-->
 
 <!--NAME AUTOCOMPLETE INSTANCE FOR REUSE IN MODALS-->
