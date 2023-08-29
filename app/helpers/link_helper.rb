@@ -70,7 +70,7 @@ module LinkHelper
 
     html_options = {
       method: :delete, # class_names usually also btn
-      class: class_names(args[:class], identifier),
+      class: class_names(identifier, args[:class]),
       data: { confirm: :are_you_sure.t,
               toggle: "tooltip", placement: "top", title: name }
     }.merge(args.except(:class, :back))
@@ -86,7 +86,7 @@ module LinkHelper
     path, identifier = path_and_identifier_from_target(:edit, target, args)
 
     html_options = {
-      class: class_names(args[:class], identifier), # usually also btn
+      class: class_names(identifier, args[:class]), # usually also btn
       data: { toggle: "tooltip", placement: "top", title: name }
     }.merge(args.except(:class, :back))
 
