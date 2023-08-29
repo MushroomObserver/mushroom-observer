@@ -50,6 +50,19 @@ module LinkHelper
     link_to(*tab)
   end
 
+  def link_icon(type)
+    icon("fa-regular", link_icon_index[type], class: "fa-lg")
+  end
+
+  def link_icon_index
+    {
+      edit: "pen-to-square",
+      destroy: "trash",
+      add: "square-plus",
+      back: "arrow-left"
+    }.freeze
+  end
+
   # Buttons to change a target object
   # Destroy uses button_to instead of link_to because method: :delete requires
   # Rails to create a whole form around the button, using the jquery_ujs library
@@ -76,7 +89,7 @@ module LinkHelper
     }.merge(args.except(:class, :back))
 
     button_to(path, html_options) do
-      [content, icon("fa-regular", "trash", class: "fa-lg")].safe_join
+      [content, link_icon(:destroy)].safe_join
     end
   end
 
@@ -91,7 +104,7 @@ module LinkHelper
     }.merge(args.except(:class, :back))
 
     link_to(path, html_options) do
-      [content, icon("fa-regular", "pen-to-square", class: "fa-lg")].safe_join
+      [content, link_icon(:edit)].safe_join
     end
   end
 
@@ -118,7 +131,7 @@ module LinkHelper
     }.merge(args)
 
     link_to(path, html_options) do
-      [content, icon("fa-regular", "square-plus", class: "fa-lg")].safe_join
+      [content, link_icon(:add)].safe_join
     end
   end
 
@@ -132,7 +145,7 @@ module LinkHelper
     }.merge(args)
 
     link_to(path, html_options) do
-      [content, icon("fa-regular", "arrow-left", class: "fa-lg")].safe_join
+      [content, link_icon(:back)].safe_join
     end
   end
 

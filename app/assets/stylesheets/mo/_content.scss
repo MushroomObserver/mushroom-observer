@@ -56,7 +56,7 @@
   .interest-eyes {
     position: absolute;
     bottom: 0;
-    right: $padding-base-horizontal;
+    right: calc($grid-gutter-width * .5);
   }
 }
 
