@@ -23,7 +23,8 @@ else
 end
 %>
 
-<div class="panel panel-default">
+<%= tag.div(class: "panel panel-default") do %>
+
   <%= tag.div(class: "panel-heading") do
     tag.h4(class: "panel-title") do
       concat(:IMAGES.t)
@@ -32,20 +33,25 @@ end
   end %>
 
   <% if obs.images.any? %>
-    <div class="show_images list-group text-center m-0">
+
+    <%= tag.div(class: "show_images list-group text-center m-0") do %>
+
       <%
       # This sort puts the thumbnail first.
       # We can't use thumb_image, because we haven't eager-loaded it;
       # we *have* eager-loaded all the other images.
       obs.images.sort_by {|x| x.id == obs.thumb_image_id ? -1 : x.id}.
                 each do |image| %>
-        <div class="list-group-item">
+
+        <%= tag.div(class: "list-group-item") do %>
+
           <%= thumbnail(
                 image,
                 image_link: image.show_link_args.merge({ obs: obs.id }),
                 original: true,
                 is_set: true,
                 votes: true) %>
+
           <%=
             notes = []
             if image.copyright_holder != obs.user.legal_name
@@ -57,8 +63,13 @@ end
             notes = notes.safe_join(safe_br)
             tag.div(notes, class: "text-center") if !notes.blank?
           %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
-</div><!--.panel-->
+
+        <% end # .list-group-item %>
+
+      <% end # each %>
+
+    <% end # .list-group %>
+
+  <% end # if obs.images.any? %>
+
+<% end # .panel %>

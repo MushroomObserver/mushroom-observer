@@ -37,7 +37,7 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
     end
   end %>
 
-  <%= tag.div(class: "panel-body p-0 thumbnail-map-container") do %>
+  <%= tag.div(class: "thumbnail-map-container") do %>
 
     <%= tag.div(class: "thumbnail-buttons") do
       concat(tag.div("", class: "plus-button"))
