@@ -26,7 +26,7 @@ map_url = map_observation_path(id: obs.id, q: get_query_param)
     tag.h4(class: "panel-title") do
       concat(:MAP.t)
       concat(
-        tag.span(class: "pull-right small mt-2") do
+        tag.span(class: "float-right small mt-2") do
           link_to(
             :show_observation_hide_map.t,
             add_query_param(javascript_hide_thumbnail_map_path(id: obs.id))
