@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  # gem("actioncable", "~> 6.1")
-  # gem("actionmailbox", "~> 6.1")
-  gem("actionmailer", "~> 6.1")
-  gem("actionpack", "~> 6.1")
-  # gem("actiontext", "~> 6.1")
-  gem("actionview", "~> 6.1")
-  gem("activejob", "~> 6.1")
-  gem("activemodel", "~> 6.1")
-  gem("activerecord", "~> 6.1")
-  # gem("activestorage", "~> 6.1")
-  gem("activesupport", "~> 6.1")
+  # gem("actioncable")
+  # gem("actionmailbox")
+  gem("actionmailer")
+  gem("actionpack")
+  # gem("actiontext")
+  gem("actionview")
+  gem("activejob")
+  gem("activemodel")
+  gem("activerecord")
+  # gem("activestorage")
+  gem("activesupport")
   gem("bundler")
-  gem("railties", "~> 6.1")
+  gem("railties")
   gem("sprockets-rails")
 end
 
@@ -67,10 +67,6 @@ gem("sassc-rails")
 # Use jquery as the JavaScript library
 gem("jquery-rails")
 
-# Use therubyracer as JavaScript runtime for ExecJS
-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
-# gem("therubyracer", platforms: :ruby)
-
 # Use mini_racer as a substitute for therubyracer
 # If having trouble installing this gem in Vagrant:
 # gem update --system
@@ -82,10 +78,6 @@ gem("coffee-rails")
 
 # Use Uglifier as compressor for JavaScript assets
 gem("uglifier")
-
-# Turbolinks makes following links in your web application faster.
-# Read more: https://github.com/rails/turbolinks
-# gem("turbolinks")
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem("jbuilder")
@@ -188,7 +180,7 @@ gem("graphql")
 # Extends classes of graphql-ruby
 # Use with GraphQL::Connections::Stable
 # https://github.com/bibendi/graphql-connections
-gem("graphql-connections")
+# gem("graphql-connections")
 #
 # Allows cursor pagination through an ActiveRecord relation.
 # Supports ordering by any column, ascending or descending.
@@ -213,7 +205,7 @@ gem("graphql-connections")
 # def product(id:) RecordLoader.for(Product).load(id)
 # def products(ids:) RecordLoader.for(Product).load_many(ids)
 # https://github.com/Shopify/graphql-batch
-gem("graphql-batch")
+# gem("graphql-batch")
 #
 # Brings association lazy load functionality to your Rails applications
 # Use like User.lazy_preload(:posts).limit(10)
@@ -284,7 +276,7 @@ group :test, :development do
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
   # Until current changes are released, need to use this Github version:
-  gem("graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1")
+  # gem("graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1")
 end
 
 group :test do
