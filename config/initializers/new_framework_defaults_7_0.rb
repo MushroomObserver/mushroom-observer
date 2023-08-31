@@ -11,7 +11,7 @@
 
 # `button_to` view helper will render `<button>` element, regardless of whether
 # or not the content is passed as the first argument or as a block.
-# Rails.application.config.action_view.button_to_generates_button_tag = true
+Rails.application.config.action_view.button_to_generates_button_tag = true
 
 # `stylesheet_link_tag` view helper will not render the media attribute by default.
 # Rails.application.config.action_view.apply_stylesheet_media_default = false
@@ -32,16 +32,16 @@
 
 # Don't override ActiveSupport::TimeWithZone.name and use the default Ruby
 # implementation.
-# Rails.application.config.active_support.remove_deprecated_time_with_zone_name = true
+Rails.application.config.active_support.remove_deprecated_time_with_zone_name = true
 
 # Calls `Rails.application.executor.wrap` around test cases.
 # This makes test cases behave closer to an actual request or job.
 # Several features that are normally disabled in test, such as Active Record query cache
 # and asynchronous queries will then be enabled.
-# Rails.application.config.active_support.executor_around_test_case = true
+Rails.application.config.active_support.executor_around_test_case = true
 
 # Set both the `:open_timeout` and `:read_timeout` values for `:smtp` delivery method.
-# Rails.application.config.action_mailer.smtp_timeout = 5
+Rails.application.config.action_mailer.smtp_timeout = 5
 
 # The ActiveStorage video previewer will now use scene change detection to generate
 # better preview images (rather than the previous default of using the first frame
@@ -50,10 +50,10 @@
 #   "-vf 'select=eq(n\\,0)+eq(key\\,1)+gt(scene\\,0.015),loop=loop=-1:size=2,trim=start_frame=1' -frames:v 1 -f image2"
 
 # Automatically infer `inverse_of` for associations with a scope.
-# Rails.application.config.active_record.automatic_scope_inversing = true
+Rails.application.config.active_record.automatic_scope_inversing = true
 
 # Raise when running tests if fixtures contained foreign key violations
-# Rails.application.config.active_record.verify_foreign_keys_for_fixtures = true
+Rails.application.config.active_record.verify_foreign_keys_for_fixtures = true
 
 # Disable partial inserts.
 # This default means that all columns will be referenced in INSERT queries
@@ -92,7 +92,6 @@
 #   "Referrer-Policy" => "strict-origin-when-cross-origin"
 # }
 
-
 # ** Please read carefully, this must be configured in config/application.rb **
 # Change the format of the cache entry.
 # Changing this default means that all new cache entries added to the cache
@@ -101,7 +100,6 @@
 # and you have no plans to rollback.
 # When you're ready to change format, add this to `config/application.rb` (NOT this file):
 #  config.active_support.cache_format_version = 7.0
-
 
 # Cookie serializer: 2 options
 #
