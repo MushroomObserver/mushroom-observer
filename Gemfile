@@ -162,7 +162,7 @@ gem("rack-cors")
 
 # GraphQL-Ruby
 # https://github.com/rmosolgo/graphql-ruby
-gem("graphql")
+# gem("graphql") *
 #
 # Note: Some of the following gems are experimental at this point 1/22
 #
@@ -180,7 +180,7 @@ gem("graphql")
 # Extends classes of graphql-ruby
 # Use with GraphQL::Connections::Stable
 # https://github.com/bibendi/graphql-connections
-# gem("graphql-connections")
+# gem("graphql-connections") *
 #
 # Allows cursor pagination through an ActiveRecord relation.
 # Supports ordering by any column, ascending or descending.
@@ -205,7 +205,7 @@ gem("graphql")
 # def product(id:) RecordLoader.for(Product).load(id)
 # def products(ids:) RecordLoader.for(Product).load_many(ids)
 # https://github.com/Shopify/graphql-batch
-# gem("graphql-batch")
+# gem("graphql-batch") *
 #
 # Brings association lazy load functionality to your Rails applications
 # Use like User.lazy_preload(:posts).limit(10)
@@ -271,7 +271,7 @@ group :test, :development do
   #  - rubocop-other-extension
   #  - rubocop-graphql
   # http://github.com/DmitryTsepelev/rubocop-graphql
-  gem("rubocop-graphql", require: false)
+  # gem("rubocop-graphql", require: false)
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
