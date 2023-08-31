@@ -33,7 +33,7 @@ SimpleCov.start("rails")
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
 require("minitest/reporters")
-MiniTest::Reporters.use!
+Minitest::Reporters.use!
 
 require("minitest/autorun")
 
