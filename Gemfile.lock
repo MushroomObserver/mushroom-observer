@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/MushroomObserver/acts_as_versioned/
+  remote: https://github.com/MushroomObserver/acts_as_versioned
   revision: 56891f7f915610e9f884e3a932bfb6934303b3b8
   specs:
     mo_acts_as_versioned (0.6.6)
@@ -18,35 +18,35 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.3.2)
-    actionmailer (6.1.7.4)
-      actionpack (= 6.1.7.4)
-      actionview (= 6.1.7.4)
-      activejob (= 6.1.7.4)
-      activesupport (= 6.1.7.4)
+    actionmailer (6.1.7.5)
+      actionpack (= 6.1.7.5)
+      actionview (= 6.1.7.5)
+      activejob (= 6.1.7.5)
+      activesupport (= 6.1.7.5)
       mail (~> 2.5, >= 2.5.4)
       rails-dom-testing (~> 2.0)
-    actionpack (6.1.7.4)
-      actionview (= 6.1.7.4)
-      activesupport (= 6.1.7.4)
+    actionpack (6.1.7.5)
+      actionview (= 6.1.7.5)
+      activesupport (= 6.1.7.5)
       rack (~> 2.0, >= 2.0.9)
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.2.0)
-    actionview (6.1.7.4)
-      activesupport (= 6.1.7.4)
+    actionview (6.1.7.5)
+      activesupport (= 6.1.7.5)
       builder (~> 3.1)
       erubi (~> 1.4)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.1, >= 1.2.0)
-    activejob (6.1.7.4)
-      activesupport (= 6.1.7.4)
+    activejob (6.1.7.5)
+      activesupport (= 6.1.7.5)
       globalid (>= 0.3.6)
-    activemodel (6.1.7.4)
-      activesupport (= 6.1.7.4)
-    activerecord (6.1.7.4)
-      activemodel (= 6.1.7.4)
-      activesupport (= 6.1.7.4)
-    activesupport (6.1.7.4)
+    activemodel (6.1.7.5)
+      activesupport (= 6.1.7.5)
+    activerecord (6.1.7.5)
+      activemodel (= 6.1.7.5)
+      activesupport (= 6.1.7.5)
+    activesupport (6.1.7.5)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -198,9 +198,9 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    railties (6.1.7.4)
-      actionpack (= 6.1.7.4)
-      activesupport (= 6.1.7.4)
+    railties (6.1.7.5)
+      actionpack (= 6.1.7.5)
+      activesupport (= 6.1.7.5)
       method_source
       rake (>= 12.2)
       thor (~> 1.0)
@@ -299,7 +299,7 @@ GEM
       webrick
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.6.8)
+    zeitwerk (2.6.11)
 
 PLATFORMS
   arm64-darwin-21
