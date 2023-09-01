@@ -32,7 +32,10 @@ group :rails do
   gem("activesupport", "~> 6.1")
   gem("bundler")
   gem("railties", "~> 6.1")
+  gem("redis", "~> 4.0")
   gem("sprockets-rails")
+  # gem("turbo-rails")
+  # gem("importmap-rails")
 end
 
 # Security fix updates via Dependabot

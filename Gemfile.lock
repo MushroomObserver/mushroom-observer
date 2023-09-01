@@ -120,6 +120,9 @@ GEM
     hashdiff (1.0.1)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
+    importmap-rails (1.2.1)
+      actionpack (>= 6.0.0)
+      railties (>= 6.0.0)
     io-console (0.6.0)
     irb (1.8.0)
       rdoc (~> 6.5)
@@ -214,6 +217,7 @@ GEM
     rbtree (0.4.6)
     rdoc (6.5.0)
       psych (>= 4.0.0)
+    redis (4.8.1)
     regexp_parser (2.8.1)
     reline (0.3.8)
       io-console (~> 0.5)
@@ -342,6 +346,7 @@ DEPENDENCIES
   graphql-batch
   graphql-connections
   i18n
+  importmap-rails
   jbuilder
   jquery-rails
   jquery-slick-rails
@@ -363,6 +368,7 @@ DEPENDENCIES
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties (~> 6.1)
+  redis (~> 4.0)
   rtf
   rubocop
   rubocop-graphql
