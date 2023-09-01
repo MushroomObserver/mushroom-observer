@@ -3227,6 +3227,7 @@
 
   # project/_form_projects
   form_projects_title: "[:Title]"
+  form_projects_open: Enable users to add themselves and disable shared editing
 
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"

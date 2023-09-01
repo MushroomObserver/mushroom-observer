@@ -2,6 +2,9 @@
 
   <%= submit_button(form: f, button: button, center: true) %>
 
+  <%= check_box_with_label(form: f, field: :open,
+                           label: :form_projects_open.t) %>
+
   <%= text_field_with_label(form: f, field: :title,
                             label: :form_projects_title.t + ":",
                             data: { autofocus: true }) %>
