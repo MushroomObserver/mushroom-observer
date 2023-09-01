@@ -111,6 +111,9 @@ GEM
     hashdiff (1.0.1)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
+    importmap-rails (1.2.1)
+      actionpack (>= 6.0.0)
+      railties (>= 6.0.0)
     io-console (0.6.0)
     irb (1.8.0)
       rdoc (~> 6.5)
@@ -312,14 +315,14 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  actioncable
-  actionmailer
-  actionpack
-  actionview
-  activejob
-  activemodel
-  activerecord
-  activesupport
+  actioncable (~> 7.0.7)
+  actionmailer (~> 7.0.7)
+  actionpack (~> 7.0.7)
+  actionview (~> 7.0.7)
+  activejob (~> 7.0.7)
+  activemodel (~> 7.0.7)
+  activerecord (~> 7.0.7)
+  activesupport (~> 7.0.7)
   arel-helpers
   arel_extensions
   bcrypt (~> 3.1.7)
@@ -336,6 +339,7 @@ DEPENDENCIES
   debug (>= 1.0.0)
   fastimage
   i18n
+  importmap-rails (~> 1.2)
   jbuilder
   jquery-rails
   jquery-slick-rails
