@@ -204,7 +204,7 @@ class ProjectsController < ApplicationController
   ##############################################################################
 
   def permitted_project_params
-    params.require(:project).permit(:title, :summary)
+    params.require(:project).permit(:title, :summary, :open)
   end
 
   def find_project!
