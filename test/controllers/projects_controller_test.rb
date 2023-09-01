@@ -20,7 +20,7 @@ class ProjectsControllerTest < FunctionalTestCase
       id: project.id,
       project: {
         title: title,
-        summary: project.summary,
+        summary: project.summary
       }
     }
     put_requires_user(:update, { action: :show }, params)
@@ -190,7 +190,7 @@ class ProjectsControllerTest < FunctionalTestCase
     project = Project.find_by(title: title)
     assert(project)
     assert_not_equal(summary, project.summary)
-    assert(!project.open)
+    assert_not(project.open)
     params = {
       id: project.id,
       project: {
