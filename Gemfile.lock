@@ -198,6 +198,7 @@ GEM
     rbtree (0.4.6)
     rdoc (6.5.0)
       psych (>= 4.0.0)
+    redis (4.8.1)
     regexp_parser (2.8.1)
     reline (0.3.8)
       io-console (~> 0.5)
@@ -261,6 +262,10 @@ GEM
     thor (1.2.2)
     tilt (2.2.0)
     timeout (0.4.0)
+    turbo-rails (1.4.0)
+      actionpack (>= 6.0.0)
+      activejob (>= 6.0.0)
+      railties (>= 6.0.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uglifier (4.2.0)
@@ -344,6 +349,7 @@ DEPENDENCIES
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties (~> 7.0)
+  redis (~> 4.0)
   rtf
   rubocop
   rubocop-performance
@@ -355,6 +361,7 @@ DEPENDENCIES
   simplecov-lcov
   sorted_set
   sprockets-rails
+  turbo-rails
   uglifier
   unicorn
   web-console
