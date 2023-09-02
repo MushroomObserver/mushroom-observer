@@ -31,10 +31,13 @@ group :rails do
   # gem("activestorage", "~> 6.1")
   gem("activesupport", "~> 6.1")
   gem("bundler")
-  gem("railties", "~> 6.1")
-  gem("sprockets-rails")
+  gem("importmap-rails")
   # gem irb now depends on psych, but version 5 will not bundle currently
   gem("psych", "~> 4")
+  gem("railties", "~> 6.1")
+  # gem("redis", "~> 4.0")
+  gem("sprockets-rails")
+  # gem("turbo-rails")
 end
 
 # Security fix updates via Dependabot
