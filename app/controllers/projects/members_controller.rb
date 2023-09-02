@@ -32,7 +32,8 @@ module Projects
 
     def create
       return unless find_project!
-      unless @project.is_admin?(@user)
+      unless @project.is_admin?(@user) ||
+             (@project.open && @user.id.to_s == params[:candidate])
         return must_be_project_admin!(@project.id)
       end
       return unless (@candidate = params[:candidate])

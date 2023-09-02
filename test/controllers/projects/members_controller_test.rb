@@ -170,6 +170,38 @@ module Projects
       assert_equal(false, target_user.in_group?(eol_project.user_group.name))
     end
 
+    def test_add_self_to_open_project
+      project = projects(:open_burbank_project)
+      target_user = dick
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+      params = {
+        project_id: project.id,
+        candidate: target_user.id
+      }
+      post_requires_login(:create, params, target_user.login)
+      assert_redirected_to(project_path(project.id))
+      target_user = User.find(target_user.id)
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(true, target_user.in_group?(project.user_group.name))
+    end
+
+    def test_add_someone_else_to_open_project
+      project = projects(:open_burbank_project)
+      target_user = dick
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+      params = {
+        project_id: project.id,
+        candidate: target_user.id
+      }
+      post_requires_login(:create, params, katrina.login)
+      assert_redirected_to(project_path(project.id))
+      target_user = User.find(target_user.id)
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+    end
+
     def test_add_member_writein
       eol_project = projects(:eol_project)
       target_user = dick
