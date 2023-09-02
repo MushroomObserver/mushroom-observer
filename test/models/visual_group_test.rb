@@ -32,7 +32,7 @@ class VisualGroupTest < ActiveSupport::TestCase
   end
 
   def mock_vgi
-    vgi = MiniTest::Mock.new
+    vgi = Minitest::Mock.new
     vgi.expect(:image_in_group?, false) do |_id|
       true
     end

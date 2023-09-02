@@ -60,7 +60,7 @@ class ObservationsControllerTest < FunctionalTestCase
       else
         assert_redirected_to(/#{new_location_path}/)
       end
-    rescue MiniTest::Assertion => e
+    rescue Minitest::Assertion => e
       flash = get_last_flash.to_s
       flash.sub!(/^(\d)/, "")
       message = "#{e}\n" \
