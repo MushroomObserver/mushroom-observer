@@ -31,14 +31,15 @@ group :rails do
   # gem("activestorage", "~> 6.1")
   gem("activesupport", "~> 6.1")
   gem("bundler")
-  gem("importmap-rails")
-  # gem irb now depends on psych, but version 5 will not bundle currently
-  gem("psych", "~> 4")
   gem("railties", "~> 6.1")
-  # gem("redis", "~> 4.0")
-  gem("sprockets-rails")
-  # gem("turbo-rails")
 end
+
+gem("importmap-rails")
+# gem irb now depends on psych, but version 5 will not bundle currently
+gem("psych", "~> 4")
+# gem("redis", "~> 4.0")
+gem("sprockets-rails")
+# gem("turbo-rails")
 
 # Security fix updates via Dependabot
 # CVE-2021-41817 regex denial of service vulnerability

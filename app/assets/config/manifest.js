@@ -24,3 +24,5 @@
 //= link Cantharellaceae.css
 //= link Hygrocybe.css
 //= link Sudo.css
+//= link_tree ../../javascript .js
+//= link_tree ../../../vendor/javascript .js
