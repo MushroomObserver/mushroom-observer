@@ -91,7 +91,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         text: /Creator.*: #{rolf.name}Editors: #{mary.name}, #{katrina.name}/ }
     )
     assert_select(
-      "a[href='https://en.wikipedia.org/w/index.php?search=#{term.name}']", true,
+      "a[href='https://en.wikipedia.org/w/index.php?search=#{term.name}']",
+      true,
       "Glossary Term page should have link to Wikipedia search for the Term"
     )
   end
