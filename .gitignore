@@ -38,3 +38,4 @@ coverage
 /config/master.key
 
 /config/credentials/production.key
+checkpoint_stripped.gz
