@@ -232,16 +232,6 @@ end
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
 MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
-  # if Rails.env.development?
-  #   mount(GraphiQL::Rails::Engine, at: "/graphiql",
-  #                                  graphql_path: "/graphql#execute")
-  # end
-
-  # if Rails.env.development? || Rails.env.test?
-  #   # GraphQL development additions
-  #   post("/graphql", to: "graphql#execute")
-  # end
-
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
