@@ -53,7 +53,7 @@ module Projects
     def edit
       return unless find_project!
       return unless find_candidate!
-      return if @project.is_admin?(@user)
+      return if @project.is_admin?(@user) || @user == @candidate
 
       must_be_project_admin!(@project.id)
     end
@@ -61,7 +61,7 @@ module Projects
     def update
       return unless find_project!
       return unless find_candidate!
-      unless @project.is_admin?(@user)
+      unless @project.is_admin?(@user) || @user == @candidate
         return must_be_project_admin!(@project.id)
       end
 
@@ -100,11 +100,18 @@ module Projects
       admin = member = :remove
       case params[:commit]
       when :change_member_status_make_admin.l
+        unless project.is_admin?(@user)
+          return must_be_project_admin!(project.id)
+        end
+
         admin = member = :add
       when :change_member_status_make_member.l
         member = :add
       end
-      set_status(project, :admin, candidate, admin)
+      if project.is_admin?(@user)
+        set_status(project, :admin, candidate,
+                   admin)
+      end
       set_status(project, :member, candidate, member)
       redirect_to(project_path(project.id, q: get_query_param))
     end

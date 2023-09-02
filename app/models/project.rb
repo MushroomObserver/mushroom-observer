@@ -23,6 +23,7 @@
 #
 #  is_member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
+#  can_join?::      Can the current user join this Project?
 #  text_name::      Alias for +title+ for debugging.
 #  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
 #
@@ -89,6 +90,14 @@ class Project < AbstractModel
   # Is +user+ an admin for this Project?
   def is_admin?(user)
     user && (admin_group.users.member?(user) || user.admin)
+  end
+
+  def can_join?(user)
+    open && !is_member?(user)
+  end
+
+  def can_leave?(user)
+    is_member?(user) && user.id != user_id
   end
 
   # Check if user has permission to edit a given object.

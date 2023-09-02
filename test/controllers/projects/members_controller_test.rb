@@ -39,6 +39,16 @@ module Projects
                          candidate: mary.id, project_id: project.id)
     end
 
+    def test_change_member_status_non_admin
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: mary.id
+      }
+      requires_login(:edit, params, katrina.login)
+      assert_flash_error
+    end
+
     # non-admin member -> non-admin member (should be a no-op)
     def test_change_member_status_member_make_member
       change_member_status_helper(rolf, katrina,
@@ -118,6 +128,12 @@ module Projects
     def test_change_member_status_by_member_remove_member
       change_member_status_helper(katrina, katrina,
                                   :change_member_status_remove_member,
+                                  false, true, false, false)
+    end
+
+    def test_change_member_status_by_member_make_admin
+      change_member_status_helper(katrina, katrina,
+                                  :change_member_status_make_admin,
                                   false, true, false, true)
     end
 
