@@ -182,7 +182,7 @@ GEM
       ast (~> 2.4.1)
       racc
     promise.rb (0.7.4)
-    psych (5.1.0)
+    psych (4.0.6)
       stringio
     public_suffix (5.0.3)
     racc (1.7.1)
@@ -359,6 +359,7 @@ DEPENDENCIES
   net-smtp
   newrelic_rpm
   nokogiri (>= 1.13.10)
+  psych (~> 4)
   rack-cors
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
