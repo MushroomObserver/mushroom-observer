@@ -33,6 +33,8 @@ group :rails do
   gem("bundler")
   gem("railties", "~> 6.1")
   gem("sprockets-rails")
+  # gem irb now depends on psych, but version 5 will not bundle currently
+  gem("psych", "~> 4")
 end
 
 # Security fix updates via Dependabot

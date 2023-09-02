@@ -323,6 +323,7 @@ DEPENDENCIES
   net-smtp
   newrelic_rpm
   nokogiri (>= 1.13.10)
+  psych (~> 4)
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties (~> 6.1)
