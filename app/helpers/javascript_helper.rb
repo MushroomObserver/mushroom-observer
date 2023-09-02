@@ -52,9 +52,10 @@ module JavascriptHelper
   # javascript modules in correct order (see above).
   #   # Example usage in layout footer:
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
+  # Note the "unshifted" script is the main (old) application.js
   def javascript_includes
     @javascript_files ||= []
-    @javascript_files.unshift("application")
+    @javascript_files.unshift("mo_application")
     @javascript_files.uniq
   end
 
