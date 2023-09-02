@@ -3,9 +3,10 @@
 //= link_tree ../../javascript .js
 //= link_tree ../../../vendor/javascript .js
 
+//= link mo_application.js
+
 //= link advanced_search.js
 //= link account_api_keys.js
-//= link application.js
 //= link date_select.js
 //= link donate.js
 //= link edit_location.js
