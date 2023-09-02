@@ -2609,7 +2609,7 @@ class API2Test < UnitTestCase
     rolfs_obs.reload
     assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
     assert(rolfs_obs.images.include?(rolfs_img))
-    imgs = rolf.images.map(&:id).map(&:to_s).join(",")
+    imgs = rolf.images.map { |img| img.id.to_s }.join(",")
     assert_api_fail(params.merge(add_images: marys_img.id))
     assert_api_pass(params.merge(add_images: imgs))
     rolfs_obs.reload
@@ -2619,7 +2619,7 @@ class API2Test < UnitTestCase
     rolfs_obs.reload
     assert(rolfs_obs.thumb_image != rolfs_img)
     assert_objs_equal(rolfs_obs.images.first, rolfs_obs.thumb_image)
-    imgs = rolf.images[2..6].map(&:id).map(&:to_s).join(",")
+    imgs = rolf.images[2..6].map { |img| img.id.to_s }.join(",")
     imgs += ",#{marys_img.id}"
     assert_api_pass(params.merge(remove_images: imgs))
     rolfs_obs.reload
@@ -2833,7 +2833,7 @@ class API2Test < UnitTestCase
 
     imgs = mary.images.first.id
     assert_api_fail(params.merge(add_images: imgs))
-    imgs = rolf.images[0..1].map(&:id).map(&:to_s).join(",")
+    imgs = rolf.images[0..1].map { |img| img.id.to_s }.join(",")
     assert_api_pass(params.merge(add_images: imgs))
     assert_obj_arrays_equal(rolf.images[0..1], proj.reload.images)
     assert_api_pass(params.merge(remove_images: imgs))
@@ -2841,7 +2841,7 @@ class API2Test < UnitTestCase
 
     obses = mary.observations.first.id
     assert_api_fail(params.merge(add_observations: obses))
-    obses = rolf.observations[0..1].map(&:id).map(&:to_s).join(",")
+    obses = rolf.observations[0..1].map { |o| o.id.to_s }.join(",")
     assert_api_pass(params.merge(add_observations: obses))
     assert_obj_arrays_equal(rolf.observations[0..1], proj.reload.observations)
     assert_api_pass(params.merge(remove_observations: obses))
@@ -2849,7 +2849,7 @@ class API2Test < UnitTestCase
 
     spls = mary.species_lists.first.id
     assert_api_fail(params.merge(add_species_lists: spls))
-    spls = rolf.species_lists[0..1].map(&:id).map(&:to_s).join(",")
+    spls = rolf.species_lists[0..1].map { |list| list.id.to_s }.join(",")
     assert_api_pass(params.merge(add_species_lists: spls))
     assert_obj_arrays_equal(rolf.species_lists[0..1], proj.reload.species_lists)
     assert_api_pass(params.merge(remove_species_lists: spls))
