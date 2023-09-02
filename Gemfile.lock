@@ -9,42 +9,40 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.3.2)
-    actionmailer (7.0.7.2)
-      actionpack (= 7.0.7.2)
-      actionview (= 7.0.7.2)
-      activejob (= 7.0.7.2)
-      activesupport (= 7.0.7.2)
+    actionmailer (6.1.7.6)
+      actionpack (= 6.1.7.6)
+      actionview (= 6.1.7.6)
+      activejob (= 6.1.7.6)
+      activesupport (= 6.1.7.6)
       mail (~> 2.5, >= 2.5.4)
-      net-imap
-      net-pop
-      net-smtp
       rails-dom-testing (~> 2.0)
-    actionpack (7.0.7.2)
-      actionview (= 7.0.7.2)
-      activesupport (= 7.0.7.2)
-      rack (~> 2.0, >= 2.2.4)
+    actionpack (6.1.7.6)
+      actionview (= 6.1.7.6)
+      activesupport (= 6.1.7.6)
+      rack (~> 2.0, >= 2.0.9)
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.2.0)
-    actionview (7.0.7.2)
-      activesupport (= 7.0.7.2)
+    actionview (6.1.7.6)
+      activesupport (= 6.1.7.6)
       builder (~> 3.1)
       erubi (~> 1.4)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.1, >= 1.2.0)
-    activejob (7.0.7.2)
-      activesupport (= 7.0.7.2)
+    activejob (6.1.7.6)
+      activesupport (= 6.1.7.6)
       globalid (>= 0.3.6)
-    activemodel (7.0.7.2)
-      activesupport (= 7.0.7.2)
-    activerecord (7.0.7.2)
-      activemodel (= 7.0.7.2)
-      activesupport (= 7.0.7.2)
-    activesupport (7.0.7.2)
+    activemodel (6.1.7.6)
+      activesupport (= 6.1.7.6)
+    activerecord (6.1.7.6)
+      activemodel (= 6.1.7.6)
+      activesupport (= 6.1.7.6)
+    activesupport (6.1.7.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     addressable (2.8.5)
       public_suffix (>= 2.0.2, < 6.0)
     ansi (1.5.0)
@@ -101,9 +99,8 @@ GEM
     execjs (2.8.1)
     fastimage (2.2.7)
     ffi (1.15.5)
-    globalid (1.1.0)
-      activesupport (>= 5.0)
-    graphql (2.1.0)
+    globalid (1.2.0)
+      activesupport (>= 6.1)
     hashdiff (1.0.1)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
@@ -168,7 +165,7 @@ GEM
     parser (3.2.2.3)
       ast (~> 2.4.1)
       racc
-    psych (5.1.0)
+    psych (4.0.6)
       stringio
     public_suffix (5.0.3)
     racc (1.7.1)
@@ -188,13 +185,12 @@ GEM
     rails-html-sanitizer (1.6.0)
       loofah (~> 2.21)
       nokogiri (~> 1.14)
-    railties (7.0.7.2)
-      actionpack (= 7.0.7.2)
-      activesupport (= 7.0.7.2)
+    railties (6.1.7.6)
+      actionpack (= 6.1.7.6)
+      activesupport (= 6.1.7.6)
       method_source
       rake (>= 12.2)
       thor (~> 1.0)
-      zeitwerk (~> 2.5)
     rainbow (3.1.1)
     raindrops (0.20.1)
     rake (13.0.6)
@@ -220,8 +216,6 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.29.0)
       parser (>= 3.2.1.0)
-    rubocop-graphql (1.4.0)
-      rubocop (>= 0.90, < 2)
     rubocop-performance (1.19.0)
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
@@ -302,13 +296,13 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  actionmailer
-  actionpack
-  actionview
-  activejob
-  activemodel
-  activerecord
-  activesupport
+  actionmailer (~> 6.1.6)
+  actionpack (~> 6.1.6)
+  actionview (~> 6.1.6)
+  activejob (~> 6.1.6)
+  activemodel (~> 6.1.6)
+  activerecord (~> 6.1.6)
+  activesupport (~> 6.1.6)
   arel-helpers
   arel_extensions
   bcrypt (~> 3.1.7)
@@ -324,7 +318,6 @@ DEPENDENCIES
   date (>= 3.2.1)
   debug (>= 1.0.0)
   fastimage
-  graphql
   i18n
   jbuilder
   jquery-rails
@@ -346,10 +339,9 @@ DEPENDENCIES
   rack-cors
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
-  railties
+  railties (~> 6.1.6)
   rtf
   rubocop
-  rubocop-graphql
   rubocop-performance
   rubocop-rails
   rubyzip (~> 2.3.0)
