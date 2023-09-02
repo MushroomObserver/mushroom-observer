@@ -19,21 +19,25 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable")
-  # gem("actionmailbox")
-  gem("actionmailer")
-  gem("actionpack")
-  # gem("actiontext")
-  gem("actionview")
-  gem("activejob")
-  gem("activemodel")
-  gem("activerecord")
-  # gem("activestorage")
-  gem("activesupport")
+  gem("actioncable", "~> 7.0")
+  # gem("actionmailbox", "~> 7.0")
+  gem("actionmailer", "~> 7.0")
+  gem("actionpack", "~> 7.0")
+  # gem("actiontext", "~> 7.0")
+  gem("actionview", "~> 7.0")
+  gem("activejob", "~> 7.0")
+  gem("activemodel", "~> 7.0")
+  gem("activerecord", "~> 7.0")
+  # gem("activestorage", "~> 7.0")
+  gem("activesupport", "~> 7.0")
   gem("bundler")
+  gem("importmap-rails")
   gem("railties")
+  gem("redis", "~> 4.0")
   gem("sprockets-rails")
-  gem("turbo-rails")
+  # gem("turbo-rails")
+  # gem irb now depends on psych, but version 5 will not bundle currently
+  gem("psych", "~> 4")
 end
 
 # Security fix updates via Dependabot

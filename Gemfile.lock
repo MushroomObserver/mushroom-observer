@@ -111,6 +111,9 @@ GEM
     hashdiff (1.0.1)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
+    importmap-rails (1.2.1)
+      actionpack (>= 6.0.0)
+      railties (>= 6.0.0)
     io-console (0.6.0)
     irb (1.8.0)
       rdoc (~> 6.5)
@@ -173,7 +176,7 @@ GEM
     parser (3.2.2.3)
       ast (~> 2.4.1)
       racc
-    psych (5.1.0)
+    psych (4.0.6)
       stringio
     public_suffix (5.0.3)
     racc (1.7.1)
@@ -206,6 +209,7 @@ GEM
     rbtree (0.4.6)
     rdoc (6.5.0)
       psych (>= 4.0.0)
+    redis (4.8.1)
     regexp_parser (2.8.1)
     reline (0.3.8)
       io-console (~> 0.5)
@@ -269,10 +273,6 @@ GEM
     thor (1.2.2)
     tilt (2.2.0)
     timeout (0.4.0)
-    turbo-rails (1.4.0)
-      actionpack (>= 6.0.0)
-      activejob (>= 6.0.0)
-      railties (>= 6.0.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uglifier (4.2.0)
@@ -312,14 +312,14 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  actioncable
-  actionmailer
-  actionpack
-  actionview
-  activejob
-  activemodel
-  activerecord
-  activesupport
+  actioncable (~> 7.0)
+  actionmailer (~> 7.0)
+  actionpack (~> 7.0)
+  actionview (~> 7.0)
+  activejob (~> 7.0)
+  activemodel (~> 7.0)
+  activerecord (~> 7.0)
+  activesupport (~> 7.0)
   arel-helpers
   arel_extensions
   bcrypt (~> 3.1.7)
@@ -336,6 +336,7 @@ DEPENDENCIES
   debug (>= 1.0.0)
   fastimage
   i18n
+  importmap-rails
   jbuilder
   jquery-rails
   jquery-slick-rails
@@ -353,10 +354,12 @@ DEPENDENCIES
   net-smtp
   newrelic_rpm
   nokogiri (>= 1.13.10)
+  psych (~> 4)
   rack-cors
   rails-controller-testing
   rails-html-sanitizer (>= 1.4.4)
   railties
+  redis (~> 4.0)
   rtf
   rubocop
   rubocop-performance
@@ -368,7 +371,6 @@ DEPENDENCIES
   simplecov-lcov
   sorted_set
   sprockets-rails
-  turbo-rails
   uglifier
   unicorn
   web-console
