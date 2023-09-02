@@ -20,6 +20,7 @@ eol_project:
   summary: Project to make names for EOL
   created_at: 2008-09-24 21:33:30
   updated_at: 2008-09-24 21:33:30
+  open: false
 
 # admins: dick (4)
 # members: dick (4)
@@ -37,6 +38,22 @@ bolete_project:
   images: in_situ_image, turned_over_image
   observations: detailed_unknown_obs
   species_lists: unknown_species_list
+  open: false
+
+# admins: roy
+# members: katrina
+# observations: 1 (owner_accepts_general_questions - owned by roy)
+open_burbank_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  title: Burbank Project
+  summary: Project about Fungi of Burbank
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions
+  open: true
 
 empty_project:
   <<: *DEFAULTS
@@ -44,6 +61,7 @@ empty_project:
   user_group: mary_only
   admin_group: mary_only
   summary: No Images Observations or Lists
+  open: false
 
 # 2 lists, 0 observations, 0 images
 two_list_project:
@@ -53,22 +71,27 @@ two_list_project:
   admin_group: mary_only
   species_lists: query_first_list, query_second_list
   rss_log: project_rss_log
+  open: false
 
 obs_collected_and_displayed_project:
   <<: *DEFAULTS
   observations: collected_at_obs, displayed_at_obs
+  open: false
 
 two_img_obs_project:
   <<: *DEFAULTS
   observations: two_img_obs
+  open: false
 
 rss_log_project:
   <<: *DEFAULTS
   rss_log: project_rss_log
+  open: false
 
 one_genus_two_species_project:
   <<: *DEFAULTS
   observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
+  open: false
 
 news_articles_project:
   <<: *DEFAULTS
@@ -76,3 +99,4 @@ news_articles_project:
   admin_group: article_writers
   user_group:  article_writers
   summary:     Project members can create and modify News Articles.
+  open: false
