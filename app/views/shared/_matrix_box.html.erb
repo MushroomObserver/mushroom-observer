@@ -10,10 +10,12 @@ if presenter
   columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
   # presenter.image_data includes context: :matrix_box where appropriate
-  image = presenter.image_data[:image]
-  image_args = local_assigns.
-                  except(:columns, :object, :object_counter, :object_iteration).
-                  merge(presenter.image_data.except(:image) || {})
+  if presenter.image_data
+    image = presenter.image_data[:image]
+    image_args = local_assigns.
+                 except(:columns, :object, :object_counter, :object_iteration).
+                 merge(presenter.image_data.except(:image) || {})
+  end
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
   link_heading = content_tag(:small, "(#{presenter.id})",
                               class: "rss-id float-right") +
