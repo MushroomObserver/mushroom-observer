@@ -84,6 +84,9 @@ module ObservationsController::FormHelpers
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
     @project_checks = {}
+    @projects.each do |proj|
+      @project_checks[proj.id] = proj.enabled?
+    end
   end
 
   def init_project_vars_for_reload(obs)

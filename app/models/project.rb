@@ -100,6 +100,10 @@ class Project < AbstractModel
     is_member?(user) && user.id != user_id
   end
 
+  def enabled? # Will expand with future stories
+    open
+  end
+
   # Check if user has permission to edit a given object.
   def self.can_edit?(obj, user)
     return false unless user
