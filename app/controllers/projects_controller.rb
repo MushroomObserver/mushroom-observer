@@ -205,7 +205,7 @@ class ProjectsController < ApplicationController
 
   def permitted_project_params
     params.require(:project).permit(:title, :summary, :open_membership,
-                                    :acception_observations)
+                                    :accepting_observations)
   end
 
   def find_project!
