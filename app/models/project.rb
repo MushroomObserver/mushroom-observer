@@ -26,6 +26,7 @@
 #  can_join?::      Can the current user join this Project?
 #  text_name::      Alias for +title+ for debugging.
 #  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
+#  Proj.admin_power?:: Check for admin for a project of this Obs
 #
 #  ==== Logging
 #  log_create::        Log creation.
@@ -100,9 +101,8 @@ class Project < AbstractModel
     is_member?(user) && user.id != user_id
   end
 
-  # Will expand with future stories
   def enabled?
-    open_membership
+    open_membership && accepting_observations
   end
 
   # Check if user has permission to edit a given object.
@@ -116,6 +116,19 @@ class Project < AbstractModel
       next if project.open_membership
       return true if group_ids.member?(project.user_group_id) ||
                      group_ids.member?(project.admin_group_id)
+    end
+    false
+  end
+
+  # Check if this user is an admin for a project that includes
+  # this observation.
+  def self.admin_power?(observation, user)
+    return false unless user
+    return false if observation.projects.empty?
+
+    group_ids = user.user_groups.map(&:id)
+    observation.projects.each do |project|
+      return true if group_ids.member?(project.admin_group_id)
     end
     false
   end

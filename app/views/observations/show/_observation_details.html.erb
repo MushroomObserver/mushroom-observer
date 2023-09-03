@@ -17,8 +17,7 @@ caption ||= false
 
 <p class="obs-lat-lng" id="observation_lat_lng">
   <%=
-    if obs.lat &&
-        (!obs.gps_hidden || obs.can_edit?)
+    if obs.reveal_location?
       link_to("#{obs.display_lat_long.t} " \
               "#{obs.display_alt.t} " \
               "[#{:click_for_map.t}]".html_safe,
