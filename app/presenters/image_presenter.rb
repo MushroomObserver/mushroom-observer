@@ -15,7 +15,7 @@ class ImagePresenter < BasePresenter
     :votes,             # show votes? boolean
     :original           # show original image filename? (boolean)
 
-  def initialize(image, view, args = {})
+  def initialize(image, args = {})
     super
 
     # Sometimes it's prohibitive to do the extra join to images table,
@@ -42,7 +42,8 @@ class ImagePresenter < BasePresenter
       extra_classes: false,
       obs_data: {}, # used in lightbox caption
       identify: false,
-      image_link: h.image_path(image_id), # to ImagesController#show
+      # to ImagesController#show
+      image_link: Rails.application.routes.url_helpers.image_path(image_id),
       link_method: :get,
       votes: true,
       original: false,

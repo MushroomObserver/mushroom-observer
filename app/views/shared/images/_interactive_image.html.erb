@@ -1,5 +1,5 @@
 <%
-presenter = ImagePresenter.new(image, @view, local_assigns.except(:image))
+presenter = ImagePresenter.new(image, local_assigns.except(:image))
 set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 %>
 

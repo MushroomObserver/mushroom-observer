@@ -1,7 +1,7 @@
 
 <%
   presenter_args = local_assigns.except(:image).merge({ fit: :contain })
-  presenter = ImagePresenter.new(image, @view, presenter_args)
+  presenter = ImagePresenter.new(image, presenter_args)
 %>
 
 

@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
 module ImageHelper
-  # Draw an image with all the fixins. Takes either an Image instance or an id.
-  # Template uses thumbnail_presenter to assemble data
+  # Draw an image with all the fixin's. Takes either an Image instance or an id.
+  #
+  # Note: this is NOT rendering a partial because nested partials have been
+  # demonstrated to be VERY slow in loops or collections.
+  #
+  # Uses ImagePresenter to assemble data. Passing @view is required in order
+  # for the presenter to access helper methods.
   #
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
@@ -20,8 +25,30 @@ module ImageHelper
   #   }
   # )
   def interactive_image(image, **args)
-    render(partial: "shared/images/interactive_image",
-           locals: args.merge({ image: image }))
+    presenter = ImagePresenter.new(image, args.except(:image))
+    set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
+
+    [
+      tag.div(class: "image-sizer position-relative mx-auto",
+              style: set_width.to_s) do
+        [
+          tag.div(class: "image-lazy-sizer overflow-hidden",
+                  style: "padding-bottom: #{presenter.proportion}%;") do
+            [
+              image_tag("placeholder.svg", presenter.options_lazy),
+              tag.noscript do
+                image_tag(presenter.img_src, presenter.options_noscript)
+              end
+            ].safe_join
+          end,
+          image_stretched_link(presenter.image_link,
+                               presenter.image_link_method),
+          lightbox_link(presenter.lightbox_data),
+          image_vote_section_html(presenter.votes, presenter.image)
+        ].safe_join
+      end,
+      image_owner_original_name(presenter.image, presenter.original)
+    ].safe_join
   end
 
   # Needs object for copyright info
