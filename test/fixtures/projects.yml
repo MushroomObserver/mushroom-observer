@@ -64,7 +64,7 @@ not_accepting_observations_project:
   summary: Closed Project about Fungi of Burbank
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  observations: owner_accepts_general_questions
+  observations: amateur_obs
   accepting_observations: false
 
 empty_project:
