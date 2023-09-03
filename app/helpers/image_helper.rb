@@ -204,7 +204,7 @@ module ImageHelper
     user = User.current
     return "" unless user && image.users_vote(user).present?
 
-    [image_vote_link(image, 0), "&nbsp;"].safe_join
+    image_vote_link(image, 0) + "&nbsp;".html_safe
   end
 
   def image_vote_links(image)
@@ -226,8 +226,8 @@ module ImageHelper
                 end
 
     if current_vote == vote
-      return content_tag(:span, image_vote_as_short_string(vote),
-                         class: "image-vote")
+      return tag.span(image_vote_as_short_string(vote),
+                      class: "image-vote")
     end
 
     put_button(name: vote_text, remote: true,
