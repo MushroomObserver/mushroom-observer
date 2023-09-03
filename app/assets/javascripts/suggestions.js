@@ -55,5 +55,7 @@ function SuggestionModule(ids, url, text) {
     });
   };
 
-  $(document).ready(attach_suggestion_bindings);
+  $(document).on(
+    "ready turbo:load", attach_suggestion_bindings
+  );
 }

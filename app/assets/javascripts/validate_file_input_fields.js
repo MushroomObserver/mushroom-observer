@@ -2,7 +2,7 @@
 // Tried jQuery.clone(), but doesn't work -- copying value any all??
 function clear_file_input_field(old_field) {
   var new_field = document.createElement("input");
-  for (var i=0; i<old_field.attributes.length; i++) {
+  for (var i = 0; i < old_field.attributes.length; i++) {
     var attr = old_field.attributes[i];
     new_field.setAttribute(attr.name, attr.value);
   }
@@ -21,7 +21,7 @@ function apply_file_input_field_validation(id) {
   if (!max_size) alert("Missing max_upload_size attribute for #" + id);
   if (!error_msg) alert("Missing max_upload_msg attribute for #" + id);
   // alert("Applying validation to " + field.id);
-  field.onchange = function() {
+  field.onchange = function () {
     var file_size = this.files[0].size;
     // alert("Changed " + id + " to " + file_size);
     if (file_size > max_size) {
@@ -34,8 +34,8 @@ function apply_file_input_field_validation(id) {
 }
 
 // Add validation to all field input fields once page is loaded.
-jQuery(document).ready(function() {
-  jQuery("input[type=file][multiple!=multiple]").each(function() {
+$(document).on("ready turbo:load", function () {
+  jQuery("input[type=file][multiple!=multiple]").each(function () {
     apply_file_input_field_validation(this.id);
   });
 });

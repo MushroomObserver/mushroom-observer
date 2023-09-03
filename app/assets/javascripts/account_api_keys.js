@@ -1,5 +1,5 @@
 function APIKeyModule() {
-  jQuery(document).ready(function () {
+  $(document).on("ready turbo:load", function () {
 
     // bindings
     jQuery('[data-role="edit_api_key"]').on('click', function (event) {

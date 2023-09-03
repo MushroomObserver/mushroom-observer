@@ -1,4 +1,4 @@
-$(window).on('load', function () {
+$(document).on("ready turbo:load", function () {
   var add_callback = function () {
     var tr = $(this).parents("tr").first();
     var name = tr.find("[data-role='link']");

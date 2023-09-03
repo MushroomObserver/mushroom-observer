@@ -1,4 +1,4 @@
-$(window).on('load', function () {
+$(document).on("ready turbo:load", function () {
   $("#donation_other_amount").on('click', function () {
     $("#donation_amount_other")[0].checked = true;
   });

@@ -1,5 +1,5 @@
 function TranslationsModule(localizedText) {
-  jQuery(document).ready(function () {
+  $(document).on("ready turbo:load", function () {
     var LOCALE = localizedText.locale,
       CONFIRM_STRING = localizedText.confirm_string,
       LOADING_STRING = localizedText.loading_string,
@@ -14,6 +14,7 @@ function TranslationsModule(localizedText) {
       $tag_links = jQuery('[data-role="show_tag"]')
 
     // EVENT LISTENERS (note the delegates!)
+    // Turbo: check this. May need to be turbo.before_render or before_visit
     window.onbeforeunload = function () {
       if (CHANGED)
         return CONFIRM_STRING;
@@ -38,7 +39,7 @@ function TranslationsModule(localizedText) {
     });
 
     // Attach listeners as delegates since they are injected into the dom.
-    $post_form.on('change, keypress', 'textarea', function() {
+    $post_form.on('change, keypress', 'textarea', function () {
       form_changed();
     });
 
@@ -56,13 +57,13 @@ function TranslationsModule(localizedText) {
       show_tag($(this).val(), data.tag);
     });
 
-    $post_form.on('click', '[data-role="show_old_version"]', function(event) {
+    $post_form.on('click', '[data-role="show_old_version"]', function (event) {
       event.preventDefault()
       var data = $(this).data();
       show_old_version(data.id);
     });
 
-    $post_form.submit(function (){
+    $post_form.submit(function () {
       CHANGED = false;
       show_whirly(SAVING_STRING);
       setDisabledOnButtons(true);
@@ -93,7 +94,7 @@ function TranslationsModule(localizedText) {
       if (!CHANGED || confirm(CONFIRM_STRING)) {
         show_whirly(LOADING_STRING);
         jQuery.ajax('/translation/edit_translations_ajax_get', {
-          data: {locale: locale, tag: tag, authenticity_token: csrf_token()},
+          data: { locale: locale, tag: tag, authenticity_token: csrf_token() },
           dataType: 'text',
           async: true,
           error: function (response) {
@@ -119,7 +120,7 @@ function TranslationsModule(localizedText) {
     function show_old_version(id) {
       show_whirly(LOADING_STRING);
       jQuery.ajax('/ajax/old_translation/' + id, {
-        data: {authenticity_token: csrf_token()},
+        data: { authenticity_token: csrf_token() },
         dataType: 'text',
         async: true,
         success: function (text) {

@@ -1,5 +1,5 @@
 function MOPivotalModule(stories, localizedText) {
-  jQuery(document).ready(function () {
+  $(document).on("ready turbo:load", function () {
     var STORIES = stories,
       PIVOTAL_VOTE_FAILED = localizedText.pivotal_vote_failed,
       PIVOTAL_STORY_FAILED = localizedText.pivotal_story_failed,

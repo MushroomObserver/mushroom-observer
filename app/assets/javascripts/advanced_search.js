@@ -1,5 +1,5 @@
-$(document).ready(function () {
-  var disable_unused_filters = function() {
+$(document).on("ready turbo:load", function () {
+  var disable_unused_filters = function () {
     var model = " " + $("#search_model").val() + " ";
     $("[data-role='filter']").each(function () {
       var models = " " + $(this).data("models") + " ";

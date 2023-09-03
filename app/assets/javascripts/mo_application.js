@@ -1,6 +1,5 @@
 //= require jquery3
 //= require jquery_extensions
-//= require rails-ujs
 //= require bootstrap-sprockets
 //= require jstz
 //= require autocomplete
@@ -23,8 +22,4 @@
 lightbox.option({
   'fadeDuration': 0,
   'resizeDuration': 0
-});
-
-$(document).on("turbo:load", () => {
-  console.log("turbo!");
 });

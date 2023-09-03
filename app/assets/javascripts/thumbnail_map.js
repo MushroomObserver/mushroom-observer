@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).on("ready turbo:load", function () {
   var zoom = 1.0;
   var expanded = false;
   var container = jQuery(".thumbnail-map-container");
