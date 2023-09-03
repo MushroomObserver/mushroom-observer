@@ -2,7 +2,7 @@
 
 // @id and @image are sent by the controller
 var image_vote_links = $("#image_vote_links_<%= @id %>"),
-    updatedLinks = $("<%= j render(partial: 'shared/image_vote_links', locals: { image: @image }) %>");
+    updatedLinks = $("<%= j render(inline: image_vote_links(image)) %>");
 
 image_vote_links.html(updatedLinks.find(".image-vote-links").first().html());
 

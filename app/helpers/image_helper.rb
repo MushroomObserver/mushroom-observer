@@ -204,7 +204,7 @@ module ImageHelper
     user = User.current
     return "" unless user && image.users_vote(user).present?
 
-    image_vote_link(image, 0) + "&nbsp;".html_safe
+    [image_vote_link(image, 0), "&nbsp;"].safe_join
   end
 
   def image_vote_links(image)
