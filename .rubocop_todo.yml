@@ -66,11 +66,6 @@ Lint/ReturnInVoidContext:
     - 'app/classes/checklist.rb'
 
 # Offense count: 3
-Lint/ShadowingOuterLocalVariable:
-  Exclude:
-    - 'test/general_extensions.rb'
-
-# Offense count: 3
 # Configuration parameters: AllowComments, AllowNil.
 Lint/SuppressedException:
   Exclude:
