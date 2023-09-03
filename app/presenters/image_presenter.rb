@@ -15,7 +15,7 @@ class ImagePresenter < BasePresenter
     :votes,             # show votes? boolean
     :original           # show original image filename? (boolean)
 
-  def initialize(image, view, args = {})
+  def initialize(image, args = {})
     super
 
     # Sometimes it's prohibitive to do the extra join to images table,

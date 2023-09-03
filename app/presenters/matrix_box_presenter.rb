@@ -15,7 +15,7 @@ class MatrixBoxPresenter < BasePresenter
     :detail,     # string with extra details
     :time        # when object or target was last modified
 
-  def initialize(object, view)
+  def initialize(object)
     super
 
     case object
