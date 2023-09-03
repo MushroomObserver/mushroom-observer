@@ -160,7 +160,7 @@ class Project < AbstractModel
   # Add observation (and its images) to this project if not already done so.
   # Saves it.
   def add_observation(obs)
-    return if observations.include?(obs)
+    return if observations.include?(obs) || !accepting_observations
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     observations.push(obs)

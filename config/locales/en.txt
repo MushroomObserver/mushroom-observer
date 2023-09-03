@@ -3228,6 +3228,7 @@
   # project/_form_projects
   form_projects_title: "[:Title]"
   form_projects_open_membership: Enable users to add themselves and disable shared editing
+  form_projects_accepting_observations: Project is accepting new observations from members
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
