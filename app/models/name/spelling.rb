@@ -97,7 +97,7 @@ module Name::Spelling
     # results really are of the form /^Lepiota test(a|us|um)$/.
     def valid_alternate_genus?(name, parent, child_pat)
       unless (match = name.text_name.match(
-        /^#{parent} #{child_pat.gsub('%', '(.*)')}$/
+        /^#{parent} #{child_pat.gsub("%", "(.*)")}$/
       ))
         return false
       end
