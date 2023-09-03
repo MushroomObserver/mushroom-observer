@@ -6,8 +6,7 @@ module ImageHelper
   # Note: this is NOT rendering a partial because nested partials have been
   # demonstrated to be VERY slow in loops or collections.
   #
-  # Uses ImagePresenter to assemble data. Passing @view is required in order
-  # for the presenter to access helper methods.
+  # Uses ImagePresenter to assemble data.
   #
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
