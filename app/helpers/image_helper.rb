@@ -159,10 +159,59 @@ module ImageHelper
   def image_vote_section_html(votes, image)
     return "" unless votes && image && User.current
 
-    content_tag(:div, "", class: "vote-section") do
-      render(partial: "shared/images/image_vote_links",
-             locals: { image: image })
+    vote_pct = if image.vote_cache
+                 ((image.vote_cache / Image.all_votes.length) * 100).floor
+               else
+                 0
+               end
+
+    tag.div(class: "vote-section") do
+      [
+        image_vote_meter(image, vote_pct),
+        image_vote_buttons(image, vote_pct)
+      ].safe_join
     end
+  end
+
+  def image_vote_meter(image, vote_percentage)
+    return "" unless vote_percentage
+
+    tag.div(class: "vote-meter progress",
+            title: "#{image.num_votes} #{:Votes.t}") do
+      tag.div("", class: "progress-bar", id: "vote_meter_bar_#{image.id}",
+                  role: "progressbar", style: "width: #{vote_percentage}%")
+    end
+  end
+
+  def image_vote_buttons(image, vote_percentage)
+    tag.div(class: "vote-buttons mt-2") do
+      tag.div(class: "image-vote-links", id: "image_vote_links_#{image.id}") do
+        [
+          tag.div(class: "text-center small") do
+            [
+              user_vote_link(image),
+              image_vote_links(image)
+            ].safe_join
+          end,
+          tag.span(class: "hidden data_container",
+                   data: { id: image.id, percentage: vote_percentage.to_s,
+                           role: "image_vote_percentage" })
+        ].safe_join
+      end
+    end
+  end
+
+  def user_vote_link(image)
+    user = User.current
+    return "" unless user && image.users_vote(user).present?
+
+    image_vote_link(image, 0) + "&nbsp;".html_safe
+  end
+
+  def image_vote_links(image)
+    Image.all_votes.map do |vote|
+      image_vote_link(image, vote)
+    end.safe_join("|")
   end
 
   # Create an image link vote, where vote param is vote number ie: 3
