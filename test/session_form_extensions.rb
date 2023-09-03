@@ -393,8 +393,8 @@ module SessionExtensions
     end
 
     # Allow user to make further HTML assertions on the form.
-    def assert_select(*args, &block)
-      context.assert_select(form, *args, &block)
+    def assert_select(...)
+      context.assert_select(form, ...)
     end
 
     # Change the value of the given input field.  Matches field whose ID _ends_
