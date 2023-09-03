@@ -43,7 +43,7 @@ module ImageHelper
           image_stretched_link(presenter.image_link,
                                presenter.image_link_method),
           lightbox_link(presenter.lightbox_data),
-          image_vote_section_html(presenter.votes, presenter.image)
+          image_vote_section_html(presenter.image, presenter.votes)
         ].safe_join
       end,
       image_owner_original_name(presenter.image, presenter.original)
@@ -66,7 +66,7 @@ module ImageHelper
   def image_owner_original_name(image, original)
     return "" unless image && show_original_name?(image, original)
 
-    content_tag(:div, image.original_name)
+    tag.div(image.original_name)
   end
 
   def show_original_name?(image, original)
@@ -86,8 +86,8 @@ module ImageHelper
              else
                image.copyright_holder.to_s.t
              end
-    content_tag(:div, image.license.copyright_text(image.year, holder),
-                class: "small")
+    tag.div(image.license.copyright_text(image.year, holder),
+            class: "small")
   end
 
   def show_image_copyright?(image, object)
@@ -143,7 +143,7 @@ module ImageHelper
   def visual_group_status_link(visual_group, image_id, state, link)
     link_text = visual_group_status_text(link)
     state_text = visual_group_status_text(state)
-    return content_tag(:b, link_text) if link_text == state_text
+    return tag.b(link_text) if link_text == state_text
 
     put_button(name: link_text,
                path: image_vote_path(image_id: image_id, vote: 1),
@@ -154,22 +154,28 @@ module ImageHelper
                        status: link })
   end
 
-  # used in shared/images/interactive_image
-  def image_vote_section_html(votes, image)
+  # This is now a helper to avoid nested partials in loops - AN 2023
+  # called in interactive_image above
+  def image_vote_section_html(image, votes)
     return "" unless votes && image && User.current
 
+    tag.div(class: "vote-section") do
+      image_vote_meter_and_links(image)
+    end
+  end
+
+  # called in votes update.js.erb
+  def image_vote_meter_and_links(image)
     vote_pct = if image.vote_cache
                  ((image.vote_cache / Image.all_votes.length) * 100).floor
                else
                  0
                end
 
-    tag.div(class: "vote-section") do
-      [
-        image_vote_meter(image, vote_pct),
-        image_vote_buttons(image, vote_pct)
-      ].safe_join
-    end
+    [
+      image_vote_meter(image, vote_pct),
+      image_vote_buttons(image, vote_pct)
+    ].safe_join
   end
 
   def image_vote_meter(image, vote_percentage)
