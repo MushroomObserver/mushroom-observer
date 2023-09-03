@@ -13,8 +13,7 @@
       <% @projects.each do |project| %>
         <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
                                  checked: @project_checks[project.id],
-                                 disabled: @observation.user != @user &&
-                                   !project.is_member?(@user),
+                                 disabled: project.check_box_disabled?(@observation, @user),
                                  label: link_to_object(project)) %>
       <% end %>
     <% end %>

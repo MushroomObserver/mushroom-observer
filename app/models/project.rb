@@ -24,6 +24,8 @@
 #  is_member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
 #  can_join?::      Can the current user join this Project?
+#  can_leave?::     Can the current user leave this Project?
+#  check_box_disabled?:: Should the check box for this Project be disabled?
 #  text_name::      Alias for +title+ for debugging.
 #  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
 #  Proj.admin_power?:: Check for admin for a project of this Obs
@@ -99,6 +101,11 @@ class Project < AbstractModel
 
   def can_leave?(user)
     is_member?(user) && user.id != user_id
+  end
+
+  def check_box_disabled?(obs, user)
+    !accepting_observations || (obs.user != user &&
+                                !is_member?(user))
   end
 
   def enabled?
