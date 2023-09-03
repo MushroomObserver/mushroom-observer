@@ -53,7 +53,7 @@ add_tab_set(species_list_show_tabs(list: @species_list))
             <div class="row">
               <div class="col-sm-4 col-md-3">
                 <%= if observation.thumb_image_id
-                  thumbnail(observation.thumb_image,
+                  interactive_image(observation.thumb_image,
                             image_link: observation_path(id: observation.id),
                             votes: true)
                 end %>

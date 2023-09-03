@@ -55,7 +55,7 @@ add_tab_set(naming_suggestion_tabs(obs: @observation))
             <% end %>
           </td>
           <td>
-            <%= thumbnail(sugg.image_obs.thumb_image,
+            <%= interactive_image(sugg.image_obs.thumb_image,
                           image_link: image_path(id: sugg.image_obs.id)) \
                           if sugg.image_obs.present? %>
         </td>
