@@ -24,8 +24,8 @@ if presenter
 
       <div class="panel-sizing">
         <%= if presenter.image_data
-          content_tag(:div, class: "thumbnail-container") do
-            interactive_image(locals: thumb_locals)
+          tag.div(class: "thumbnail-container") do
+            interactive_image(image, **thumb_locals)
           end
         end %>
 

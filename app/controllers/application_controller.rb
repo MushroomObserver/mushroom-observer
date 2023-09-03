@@ -146,10 +146,11 @@ class ApplicationController < ActionController::Base
     Bullet.n_plus_one_query_enable = true
   end
 
-  ## @view can be used by classes to access view specific features like render
-  def create_view_instance_variable
-    @view = view_context
-  end
+  # @view can be used by classes to access view specific features like render
+  # huge context though! Don't use if you don't need it
+  # def create_view_instance_variable
+  #   @view = view_context
+  # end
 
   # Utility for extracting nested params where any level might be nil
   def param_lookup(path, default = nil)
