@@ -2900,8 +2900,8 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
 
-  def test_open_project_checkboxes_in_create_observation
-    project = projects(:open_burbank_project)
+  def test_open_membership_project_checkboxes_in_create_observation
+    project = projects(:open_membership_project)
 
     login("katrina")
     get(:new)

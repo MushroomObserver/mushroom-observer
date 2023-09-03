@@ -711,7 +711,7 @@ class ObservationTest < UnitTestCase
     assert_true(obs.can_edit?(dick))
   end
 
-  def test_open_project_ownership
+  def test_open_membership_project_ownership
     # Part of Burbank project, but owned by Roy
     obs = observations(:owner_accepts_general_questions)
     assert_false(obs.can_edit?(rolf))

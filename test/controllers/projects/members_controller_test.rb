@@ -186,8 +186,8 @@ module Projects
       assert_equal(false, target_user.in_group?(eol_project.user_group.name))
     end
 
-    def test_add_self_to_open_project
-      project = projects(:open_burbank_project)
+    def test_add_self_to_open_membership_project
+      project = projects(:open_membership_project)
       target_user = dick
       assert_equal(false, target_user.in_group?(project.admin_group.name))
       assert_equal(false, target_user.in_group?(project.user_group.name))
@@ -202,8 +202,8 @@ module Projects
       assert_equal(true, target_user.in_group?(project.user_group.name))
     end
 
-    def test_add_someone_else_to_open_project
-      project = projects(:open_burbank_project)
+    def test_add_someone_else_to_open_membership_project
+      project = projects(:open_membership_project)
       target_user = dick
       assert_equal(false, target_user.in_group?(project.admin_group.name))
       assert_equal(false, target_user.in_group?(project.user_group.name))

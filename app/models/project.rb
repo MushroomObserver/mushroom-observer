@@ -93,7 +93,7 @@ class Project < AbstractModel
   end
 
   def can_join?(user)
-    open && !is_member?(user)
+    open_membership && !is_member?(user)
   end
 
   def can_leave?(user)
@@ -102,7 +102,7 @@ class Project < AbstractModel
 
   # Will expand with future stories
   def enabled?
-    open
+    open_membership
   end
 
   # Check if user has permission to edit a given object.
@@ -113,7 +113,7 @@ class Project < AbstractModel
 
     group_ids = user.user_groups.map(&:id)
     obj.projects.each do |project|
-      next if project.open
+      next if project.open_membership
       return true if group_ids.member?(project.user_group_id) ||
                      group_ids.member?(project.admin_group_id)
     end
