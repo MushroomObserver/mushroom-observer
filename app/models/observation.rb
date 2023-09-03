@@ -1214,7 +1214,7 @@ class Observation < AbstractModel
 
   def owner_uniq_favorite_vote
     votes = owner_favorite_votes
-    return votes.first if votes.count == 1
+    votes.first if votes.count == 1
   end
 
   def owner_favorite_votes

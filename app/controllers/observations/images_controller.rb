@@ -279,7 +279,7 @@ module Observations
     def reuse
       return unless (@observation = find_observation!)
 
-      return unless check_observation_permission!
+      nil unless check_observation_permission!
     end
 
     # reuse image form buttons POST here

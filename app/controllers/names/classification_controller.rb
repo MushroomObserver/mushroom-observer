@@ -9,7 +9,7 @@ module Names
     def edit
       store_location
       pass_query_params
-      return unless find_name!
+      nil unless find_name!
     end
 
     # PUT callback
