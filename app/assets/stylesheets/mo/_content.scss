@@ -48,3 +48,9 @@ div.textile img {
   max-width: 100%;
   max-height: auto;
 }
+
+.panel {
+  .table-responsive {
+    border-color: transparent;
+  }
+}

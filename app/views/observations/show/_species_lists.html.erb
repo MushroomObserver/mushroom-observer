@@ -8,7 +8,7 @@
         <td style="border-top:0">
           <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
           <%= if check_permission(spl)
-            put_button(name: :REMOVE.t,
+            put_button(name: "[#{:REMOVE.t}]",
                       path: observation_species_list_path(
                         id: obs.id, species_list_id: spl.id,
                         commit: "remove"

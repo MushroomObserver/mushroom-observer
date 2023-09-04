@@ -39,7 +39,7 @@ class ImagePresenter < BasePresenter
       data: {},
       data_sizes: {},
       fit: :cover,
-      extra_classes: false,
+      extra_classes: "false",
       obs_data: {}, # used in lightbox caption
       identify: false,
       image_link: Rails.application.routes.url_helpers.image_path(image_id),
@@ -63,8 +63,9 @@ class ImagePresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid ab-fab object-fit-#{args[:fit]}"
-    img_class += " #{args[:extra_classes]}" if args[:extra_classes]
+    img_class = ActionController::Base.helpers.class_names(
+      "img-fluid ab-fab object-fit-#{args[:fit]}", args[:extra_classes]
+    )
 
     # <img> data attributes. Account for possible data-confirm, etc
     img_data = {
