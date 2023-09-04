@@ -163,7 +163,8 @@ svg.placeholder {
     &:hover,
     &:focus {
       .carousel-caption,
-      .theater-btn {
+      .theater-btn,
+      .vote-section {
         opacity: 1;
       }
     }
@@ -188,13 +189,20 @@ svg.placeholder {
 }
 
 .carousel-control {
+  margin-top: 5rem; // to let overlays through
+  margin-bottom: 5rem; // fullscreen and caption/voting
   background: none !important;
   font-size: 2rem;
   color: #bbb;
+
   &:hover,
   &:focus {
     color: #eee;
   }
+}
+
+.carousel-heading {
+  border-top: 1px solid $panel-inner-border;
 }
 
 .carousel-indicators {

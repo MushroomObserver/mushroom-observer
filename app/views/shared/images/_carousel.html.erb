@@ -37,6 +37,12 @@ has_images = !images.nil? && images.any?
       </a>
     <% end %>
   </div>
+  <%= tag.div(class: "panel-heading carousel-heading") do
+        tag.h4(class: "panel-title") do
+          concat(local_assigns[:title])
+          concat(tag.span(local_assigns[:links], class: "float-right"))
+        end
+      end %>
   <ol class="carousel-indicators bg-light mt-2 mb-0">
     <% object.images.each_with_index do |image, index| %>
       <% active = (image == default_image) ? " active" : "" %>
