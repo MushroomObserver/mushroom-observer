@@ -243,6 +243,10 @@ module ImageHelper
                data: { role: "image_vote", image_id: image.id, value: vote })
   end
 
+  def image_vote_none
+    icon("fa-solid", "circle-xmark", class: "fa-sm")
+  end
+
   # image vote lookup used in show_image
   def find_list_of_votes(image)
     image.image_votes.sort_by do |v|
