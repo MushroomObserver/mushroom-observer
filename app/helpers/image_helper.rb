@@ -279,7 +279,7 @@ module ImageHelper
 
     tag.div(class: classes) do
       [
-        image_vote_section_html(presenter.votes, presenter.image),
+        image_vote_section_html(presenter.image, presenter.votes),
         caption
       ].safe_join
     end
