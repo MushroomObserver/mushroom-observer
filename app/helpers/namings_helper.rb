@@ -18,12 +18,12 @@ module NamingsHelper
     }
   end
 
-  def observation_naming_row(observation, naming, logged_in)
+  def observation_naming_row(observation, naming, vote, logged_in)
     {
       name: naming_name_html(naming),
       proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
-      your_vote: logged_in ? your_vote_html(naming) : "",
+      your_vote: logged_in ? your_vote_html(naming, vote) : "",
       eyes: vote_icons_html(observation, naming),
       reasons: reasons_html(naming)
     }
@@ -109,7 +109,7 @@ module NamingsHelper
   end
 
   def num_votes_html(naming)
-    content_tag(:span, class: "vote-number-text") do
+    tag.span(class: "vote-number-text") do
       ["(",
        tag.span(naming.votes&.length,
                 class: "vote-number", data: { id: naming.id }),
@@ -117,12 +117,10 @@ module NamingsHelper
     end
   end
 
-  def your_vote_html(naming)
+  def your_vote_html(naming, vote)
     # row props have mobile-friendly labels
     [tag.small("#{:show_namings_your_vote.t}: ", class: "d-block d-md-none"),
-     render(partial: "observations/namings/votes/form",
-            locals: { naming: naming, classes: "form-control-sm",
-                      context: "namings_table" })].safe_join
+     naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
   # May show both user and consensus icons

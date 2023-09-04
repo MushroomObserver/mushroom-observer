@@ -6,7 +6,7 @@
 # Note the nested grid: the reasons are packed under the left 11 cols,
 # with the "eyes" graphic in the right 1 col for vertical space
 @vote = votes[naming.id]
-row = observation_naming_row(obs, naming, logged_in)
+row = observation_naming_row(obs, naming, @vote, logged_in)
 %>
 
 <%= tag.div(class: "list-group-item") do %>

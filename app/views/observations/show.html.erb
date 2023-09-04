@@ -25,15 +25,19 @@ obs_changes = if check_permission(@observation)
               else
                 ""
               end
+carousel_locals = {
+  object: @observation, images: @observation.images,
+  default_image: @observation&.thumb_image || nil,
+  title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
+}
+
 %>
 
 <div class="card card-combination mb-4">
 
   <div class="row no-gutters">
     <%= tag.div(class: "col-#{bp}-8 card-combination-left") do
-      render(partial: "shared/images/carousel",
-             locals: { object: @observation, images: @observation.images,
-                       default_image: @observation&.thumb_image || nil })
+      render(partial: "shared/images/carousel", locals: carousel_locals)
     end %>
 
     <%= tag.div(class: "col-#{bp}-4 card-combination-right") do
@@ -73,6 +77,5 @@ obs_changes = if check_permission(@observation)
                     locals: obs_locals))
     end
   end %>
-
 </div><!--.row-->
 

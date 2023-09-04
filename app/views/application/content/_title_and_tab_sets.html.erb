@@ -30,13 +30,13 @@ add_right_tabs = (content_for?(:tab_set) || content_for?(:interest_icons) ||
     <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
     <%= yield(:filter_help) -%>
     <%= yield(:owner_naming) %>
-    <%= yield(:interest_icons) %>
   <% end %>
 
   <!-- Tabsets and interest icons, within "#right_tabs" -->
   <%= content_tag_if(add_right_tabs,
                     :div, id: "right_tabs",
                     class: "d-flex flex-row d-print-none") do
+        concat(yield(:interest_icons))
         concat(yield(:dropdown_tab_set))
         concat(yield(:tab_set))
       end %>

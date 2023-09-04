@@ -254,7 +254,8 @@ module ImageHelper
 
   def carousel_item(image, default_image, object, **args)
     # Caption needs object for copyright info
-    presenter_args = args.merge({ size: :large, fit: :contain, original: true })
+    presenter_args = args.merge({ size: :large, fit: :contain, original: true,
+                                  extra_classes: "carousel-thumbnail" })
     presenter = ImagePresenter.new(image, presenter_args)
     active = image == default_image ? "active" : ""
 
@@ -282,6 +283,13 @@ module ImageHelper
         image_vote_section_html(presenter.image, presenter.votes),
         caption
       ].safe_join
+    end
+  end
+
+  def carousel_heading(title, links = "")
+    tag.div(class: "card-header carousel-heading row-justified") do
+      concat(tag.h6(title))
+      concat(tag.div(links, class: "btn-group btn-group-sm"))
     end
   end
 
