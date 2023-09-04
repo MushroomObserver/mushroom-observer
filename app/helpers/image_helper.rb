@@ -263,12 +263,12 @@ module ImageHelper
         image_tag(presenter.img_src, presenter.options_lazy),
         image_stretched_link(presenter.image_link, presenter.image_link_method),
         lightbox_link(presenter.lightbox_data),
-        carousel_caption(presenter, object)
+        carousel_caption(image, object, presenter)
       ].safe_join
     end
   end
 
-  def carousel_caption(presenter, object)
+  def carousel_caption(image, object, presenter)
     classes = "carousel-caption d-flex flex-column justify-content-center"
     caption = if (info = image_info(image, object,
                                     original: presenter.original)).present?
