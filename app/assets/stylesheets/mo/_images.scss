@@ -190,6 +190,11 @@ svg.placeholder {
 .carousel-control {
   background: none !important;
   font-size: 2rem;
+  color: #bbb;
+  &:hover,
+  &:focus {
+    color: #eee;
+  }
 }
 
 .carousel-indicators {
@@ -216,6 +221,7 @@ svg.placeholder {
     &.active {
       width: 6vw;
       height: 6vw;
+      opacity: 0.6;
     }
   }
 }

@@ -22,7 +22,8 @@ obs_locals = { obs: @observation }
       <%= tag.div(class: "panel-heading") do
         tag.h4(class: "panel-title") do
           concat(:IMAGES.t)
-          concat(tag.span(links, class: "float-right"))
+          concat(tag.span(observation_show_image_links(obs: @observation),
+                          class: "float-right"))
         end
       end %>
 
