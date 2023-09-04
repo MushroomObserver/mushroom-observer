@@ -1,0 +1,19 @@
+<%
+# Update observation view with results of update or create
+# Needs locals: identifier
+# The namings table is in another folder
+if identifier == "namings"
+  id = "namings_table"
+  partial = "observations/namings/table"
+else
+  id = "observation_#{identifier}"
+  partial = "observations/show/#{identifier}"
+end
+%>
+
+<%# need to hide the modal and update flash. stimulus?
+https://stackoverflow.com/questions/76467781/run-custom-javascript-when-turbo-stream-is-received
+%>
+<%= turbo_stream.update id do %>
+  <%= render partial: partial %>
+<% end %>

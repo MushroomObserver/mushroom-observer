@@ -250,7 +250,7 @@ class HerbariumRecordsController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
-      format.js do
+      format.turbo_stream do
         render_herbarium_records_section_update
       end
     end
@@ -296,7 +296,7 @@ class HerbariumRecordsController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @herbarium_record)
       end
       @observation = @back_object # if we're here, we're on an obs page
-      format.js do
+      format.turbo_stream do
         render_herbarium_records_section_update
       end
     end

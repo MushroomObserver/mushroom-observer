@@ -241,7 +241,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js do
+      format.turbo_stream do
         render_collection_numbers_section_update
       end
     end
@@ -281,7 +281,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       @observation = @back_object # if we're here, we're on an obs page
-      format.js do
+      format.turbo_stream do
         render_collection_numbers_section_update
       end
     end
