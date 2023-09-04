@@ -17,9 +17,19 @@ obs_locals = { obs: @observation }
 
 <div class="row">
   <div class="col-sm-8 col-lg-7 float-sm-left">
-    <%= render(partial: "shared/images/carousel",
-               locals: { object: @observation, images: @observation.images,
-                         default_image: @observation&.thumb_image || nil }) %>
+    <%= tag.div(class: "panel panel-default") do %>
+
+      <%= tag.div(class: "panel-heading") do
+        tag.h4(class: "panel-title") do
+          concat(:IMAGES.t)
+          concat(tag.span(links, class: "float-right"))
+        end
+      end %>
+
+      <%= render(partial: "shared/images/carousel",
+                locals: { object: @observation, images: @observation.images,
+                          default_image: @observation&.thumb_image || nil }) %>
+    <% end %>
   </div>
 
   <div class="col-sm-4 col-lg-5 float-sm-right">
