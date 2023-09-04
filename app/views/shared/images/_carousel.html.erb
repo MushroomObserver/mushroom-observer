@@ -1,0 +1,54 @@
+<%
+# CAROUSEL TEMPLATE
+# Requires an object that responds to .images
+# javascript_include("image_slider") huh?
+html_id = "#{object.type_tag}_carousel"
+has_images = !images.nil? && images.any?
+%>
+
+<% if has_images %>
+  <div id="<%= html_id %>" class="carousel slide card-img"
+       data-ride="false" data-interval="false">
+    <div class="carousel-inner bg-light" role="listbox">
+      <% images.each do |image| %>
+        <%= carousel_item(image, default_image, object) %>
+      <% end %>
+    </div>
+    <% if images.length > 1 %>
+      <a class="left carousel-control"
+        href="#<%= html_id %>"
+        role="button"
+        data-slide="prev">
+        <div class="btn">
+          <span class="glyphicon glyphicon-chevron-left"
+                aria-hidden="true"></span>
+          <span class="sr-only"><%= :PREV.l %></span>
+        </div>
+      </a>
+      <a class="right carousel-control"
+        href="#<%= html_id %>"
+        role="button"
+        data-slide="next">
+        <div class="btn">
+          <span class="glyphicon glyphicon-chevron-right"
+                aria-hidden="true"></span>
+          <span class="sr-only"><%= :NEXT.l %></span>
+        </div>
+      </a>
+    <% end %>
+    <ol class="carousel-indicators bg-light mb-0">
+      <% object.images.each_with_index do |image, index| %>
+        <% active = (image == default_image) ? " active" : "" %>
+          <li data-target="#<%= html_id %>"
+              data-slide-to="<%= index %>"
+              class="<%= active %>">
+            <%= carousel_thumbnail(image) %>
+          </li>
+      <% end %>
+    </ol>
+  </div>
+<% else %>
+  <%= tag.div(:show_observation_no_images.l,
+              class: "d-flex flex-column justify-content-center w-100 h-100 text-center h3 text-muted") %>
+<% end %>
+
