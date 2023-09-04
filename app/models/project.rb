@@ -103,7 +103,6 @@ class Project < AbstractModel
     is_member?(user) && user.id != user_id
   end
 
-  # Can *user* add this *obs* to this Project
   def user_can_add_observation?(obs, user)
     accepting_observations && (obs.user == user ||
                                is_member?(user))
