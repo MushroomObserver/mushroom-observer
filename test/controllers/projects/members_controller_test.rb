@@ -146,6 +146,8 @@ module Projects
 
       assert_displayed_title("Add users to #{project.title}",
                              "Admin should be able to see add members form")
+      assert_select("td", { text: users(:zero_user).login},
+                    "List of potential members should include verified users")
       assert_select("td", { text: users(:unverified).login, count: 0 },
                     "List of potential members should omit unverified users")
     end
