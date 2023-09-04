@@ -25,7 +25,7 @@
 #  is_admin?::      Is a given User an admin for this Project?
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
-#  check_box_disabled?:: Should the check box for this Project be disabled?
+#  user_can_add_observation?:: Can user add observation to this Project
 #  text_name::      Alias for +title+ for debugging.
 #  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
 #  Proj.admin_power?:: Check for admin for a project of this Obs
@@ -103,13 +103,9 @@ class Project < AbstractModel
     is_member?(user) && user.id != user_id
   end
 
-  def check_box_disabled?(obs, user)
-    !accepting_observations || (obs.user != user &&
-                                !is_member?(user))
-  end
-
-  def enabled?
-    open_membership && accepting_observations
+  def user_can_add_observation?(obs, user)
+    accepting_observations && (obs.user == user ||
+                               is_member?(user))
   end
 
   # Check if user has permission to edit a given object.
@@ -118,7 +114,7 @@ class Project < AbstractModel
     return true  if obj.user_id == user.id
     return false if obj.projects.empty?
 
-    group_ids = user.user_groups.map(&:id)
+    group_ids = user.user_group_ids
     obj.projects.each do |project|
       next if project.open_membership
       return true if group_ids.member?(project.user_group_id) ||
@@ -133,7 +129,7 @@ class Project < AbstractModel
     return false unless user
     return false if observation.projects.empty?
 
-    group_ids = user.user_groups.map(&:id)
+    group_ids = user.user_group_ids
     observation.projects.each do |project|
       return true if group_ids.member?(project.admin_group_id)
     end
