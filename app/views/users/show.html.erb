@@ -41,7 +41,7 @@ total = 0
   <div class="col-xs-5">
     <p class="mt-3">
       <%= if @show_user.image_id
-        thumbnail(Image.find(@show_user.image_id), votes: false)
+        interactive_image(Image.find(@show_user.image_id), votes: false)
       end %>
       <strong><%= :show_user_joined.t %>:</strong> <%= @show_user.verified %>
     </p>
@@ -53,7 +53,7 @@ total = 0
     <% if @observations %>
       <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
         <div class="my-3">
-          <%= thumbnail(obs.thumb_image,
+          <%= interactive_image(obs.thumb_image,
                         image_link: observation_path(id: obs.id),
                         votes: true) %>
         </div><!--.my-3-->
@@ -114,7 +114,7 @@ total = 0
     <% if @observations %>
       <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
         <div class="my-3">
-          <%= thumbnail(obs.thumb_image,
+          <%= interactive_image(obs.thumb_image,
                         image_link: observation_path(id: obs.id),
                         votes: true) %>
         </div><!--.my-3-->

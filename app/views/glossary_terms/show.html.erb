@@ -9,11 +9,11 @@ add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
 <div class="row mt-3">
   <div class="col-sm-8">
     <%= @glossary_term.description.tpl %>
-    <%= tag.p(link_to(search_tab_for(:Wikipedia, @glossary_term.name))) %>
+    <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
   </div>
   <% if @glossary_term.thumb_image %>
     <div class="col-sm-4">
-      <%= thumbnail(@glossary_term.thumb_image, size: :medium, votes: true) %>
+      <%= interactive_image(@glossary_term.thumb_image, size: :medium, votes: true) %>
     </div>
   <% end %>
 </div><!--.row-->
@@ -28,7 +28,7 @@ add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
 <div class="row">
   <% @other_images.each do |image|  %>
     <div class="col-sm-4">
-      <%= panel_block do thumbnail(image, votes: true) end %>
+      <%= panel_block do interactive_image(image, votes: true) end %>
     </div>
   <% end %>
 </div><!--.row-->

@@ -1,11 +1,22 @@
 <%
-presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
+case action
+when :create
+  method = :post
+  button = :CREATE.l
+  url = { controller: "/locations/descriptions", action: :create,
+                id: @description.location_id }
+when :update
+  method = :put
+  button = :UPDATE.l
+  url = { controller: "/locations/descriptions", action: :update,
+                id: @description.id, q: get_query_param }
+end
 %>
 
-<%= form_with(scope: :description, url: presenter.url, method: presenter.method,
+<%= form_with(scope: :description, url: url, method: method,
               id: "location_description_form") do |f| %>
 
-  <%= submit_button(form: f, button: presenter.button, center: true) %>
+  <%= submit_button(form: f, button: button, center: true) %>
 
   <%= render(partial: "descriptions/fields_for_description",
              locals: { f: f }) %>
@@ -22,7 +33,7 @@ presenter = LocationDescriptionFormPresenter.new(@description, @view, action)
 
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= submit_button(form: f, button: presenter.button, center: true) %>
+  <%= submit_button(form: f, button: button, center: true) %>
 
   <% if (action == :update) && @merge %>
     <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>

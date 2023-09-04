@@ -6,10 +6,10 @@ add_tab_set(species_list_download_tabs(list: @list))
 query_param = get_query_param(@query)
 %>
 
-<%= render(partial: "form_print_labels",
+<%= render(partial: "species_lists/downloads/form_print_labels",
            locals: { query_param: query_param }) %>
 
-<%= render(partial: "form_species_list_report",
+<%= render(partial: "species_lists/downloads/form_species_list_report",
            locals: { query_param: query_param }) %>
 
 <%= render(partial: "observations/downloads/form",

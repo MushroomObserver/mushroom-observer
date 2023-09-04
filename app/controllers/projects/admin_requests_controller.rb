@@ -14,7 +14,7 @@ module Projects
     #   @project
     # def admin_request
     def new
-      return unless find_project!
+      nil unless find_project!
     end
 
     # Redirects back to show_project.

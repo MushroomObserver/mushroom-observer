@@ -77,11 +77,11 @@ def parse_options
 
   if @old_name.is_a?(Array) && @old_name.count > 1
     raise("Multiple matches for #{old_name_id.inspect}: " \
-          "#{@old_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+          "#{@old_name.map { |name| name.search_name.inspect }.join(", ")}.\n")
   end
   if @new_name.is_a?(Array) && @new_name.count > 1
     raise("Multiple matches for #{new_name_id.inspect}: " \
-          "#{@new_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+          "#{@new_name.map { |name| name.search_name.inspect }.join(", ")}.\n")
   end
 
   @old_name = @old_name.first if @old_name.is_a?(Array)
