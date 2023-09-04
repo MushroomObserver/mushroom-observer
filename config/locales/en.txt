@@ -2179,6 +2179,7 @@
   show_observation_gps_hidden: coordinates hidden from public
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
+  show_observation_no_images: No images
   show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
