@@ -269,7 +269,7 @@ module ImageHelper
   end
 
   def carousel_caption(image, object, presenter)
-    classes = "carousel-caption d-flex flex-column justify-content-center"
+    classes = "carousel-caption"
     caption = if (info = image_info(image, object,
                                     original: presenter.original)).present?
                 tag.div(info, class: "image-info d-none d-md-block")
