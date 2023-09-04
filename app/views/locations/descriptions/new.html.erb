@@ -5,4 +5,5 @@ add_page_title(
 add_tab_set(location_description_form_new_tabs(description: @description))
 %>
 
-<%= render(partial: "form", locals: { action: :create }) %>
+<%= render(partial: "locations/descriptions/form",
+           locals: { action: :create }) %>

@@ -23,7 +23,7 @@
 
     <div class="col-xs-5">
       <%= if user.image_id
-            thumbnail(user.image_id,
+            interactive_image(user.image_id,
                       size: :thumbnail,
                       image_link: user_path(user.id),
                       votes: false)

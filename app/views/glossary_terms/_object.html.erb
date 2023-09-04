@@ -7,7 +7,7 @@
     <div class="col-xs-12 col-sm-3">
       <%= glossary_term_destroy_button(object) if in_admin_mode? %>
       <%= if object&.thumb_image_id&.nonzero?
-        thumbnail(object.thumb_image, votes: true)
+        interactive_image(object.thumb_image, votes: true)
       end %>
     </div><!--.col-->
   </div><!--.row-->
