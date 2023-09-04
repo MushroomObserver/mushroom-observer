@@ -12,7 +12,7 @@ module Projects
     before_action :login_required
     before_action :pass_query_params
 
-    # View that lists all users with links to add each as a member.
+    # View that lists all verified users with links to add each as a member.
     # Linked from: show_project (for admins only)
     # Inputs:
     #   params[:project_id] (was :id)
