@@ -10,7 +10,8 @@ module Names::Classification
       store_location
       pass_query_params
       return unless find_name!
-      return unless make_sure_name_is_at_or_above_genus!(@name)
+
+      nil unless make_sure_name_is_at_or_above_genus!(@name)
     end
 
     # POST callback

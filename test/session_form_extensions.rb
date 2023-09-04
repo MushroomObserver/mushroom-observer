@@ -163,14 +163,14 @@ module SessionExtensions
           when "select"
             val = nil
             field.options = opts = []
-            context.assert_select(elem, "option") do |elems|
-              elems.each do |elem|
+            context.assert_select(elem, "option") do |elements|
+              elements.each do |e|
                 opt = Field::Option.new
-                opt.value = CGI.unescapeHTML(elem["value"])
-                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join)
+                opt.value = CGI.unescapeHTML(e["value"])
+                opt.label = CGI.unescapeHTML(e.children.map(&:to_s).join)
                 opts << opt
                 val = opt.value \
-                  if elem["selected"] == "selected"
+                  if e["selected"] == "selected"
               end
             end
             val ||= opts.first.value
@@ -393,8 +393,8 @@ module SessionExtensions
     end
 
     # Allow user to make further HTML assertions on the form.
-    def assert_select(*args, &block)
-      context.assert_select(form, *args, &block)
+    def assert_select(...)
+      context.assert_select(form, ...)
     end
 
     # Change the value of the given input field.  Matches field whose ID _ends_

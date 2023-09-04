@@ -328,9 +328,9 @@ module GeneralExtensions
   #
   def get_xml_element(key)
     assert(@doc, "XML response is nil!")
-    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
-      assert(elem, "XML response missing element \"#{key}\".")
+    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
+      elem = elem.elements[/^\d+$/.match?(k) ? key.to_i : k]
+      assert(elem, "XML response missing element \"#{k}\".")
       elem
     end
   end
@@ -341,9 +341,9 @@ module GeneralExtensions
   #
   def assert_xml_exists(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
-      assert(nil, msg || "XML response should have \"#{key}\".") unless elem
+    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
+      elem = elem.elements[/^\d+$/.match?(key) ? k.to_i : k]
+      assert(nil, msg || "XML response should have \"#{k}\".") unless elem
       elem
     end
   end
@@ -354,8 +354,8 @@ module GeneralExtensions
   #
   def assert_xml_none(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
+    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
+      elem = elem.elements[/^\d+$/.match?(key) ? k.to_i : k]
       return unless elem
 
       elem
