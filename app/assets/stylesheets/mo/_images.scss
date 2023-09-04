@@ -197,6 +197,10 @@ svg.placeholder {
   font-size: 2rem;
   color: #bbb;
 
+  .btn {
+    font-size: inherit;
+  }
+
   &:hover,
   &:focus {
     color: #eee;
