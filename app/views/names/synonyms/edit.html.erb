@@ -15,14 +15,14 @@ current_synonyms = @name.synonyms
 
   <div class="row">
     <div class="col-sm-6">
-      <%= render(partial: "fields_existing",
+      <%= render(partial: "names/synonyms/fields_existing",
                  locals: { f: f, current_synonyms: current_synonyms }) %>
-      <%= render(partial: "fields_proposed",
+      <%= render(partial: "names/synonyms/fields_proposed",
                  locals: { f: f, current_synonyms: current_synonyms }) %>
     </div><!--.col-->
 
     <div class="col-sm-6">
-      <%= render(partial: "fields_members", locals: { f: f }) %>
+      <%= render(partial: "names/synonyms/fields_members", locals: { f: f }) %>
     </div><!--.col-->
   </div><!--.row-->
 

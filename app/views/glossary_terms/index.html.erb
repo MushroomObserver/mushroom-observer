@@ -13,6 +13,6 @@ add_tab_set(glossary_term_index_tabs) if User.current
 %>
 <%= paginate_block(@pages) do %>
   <div class="list-group">
-    <%= render(partial: "object", collection: @objects) %>
+    <%= render(partial: "glossary_terms/object", collection: @objects) %>
   </div>
 <% end %>

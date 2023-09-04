@@ -48,7 +48,7 @@
                             label: :advanced_search_content.t + ":",
                             between: cnt_betw, append: cnt_appd) %>
 
-  <%= render(partial: "advanced_search_filters", locals: { f: f }) %>
+  <%= render(partial: "search/advanced_search_filters", locals: { f: f }) %>
 
   <%= submit_button(form: f, button: :advanced_search_submit.l, center: true) %>
 
