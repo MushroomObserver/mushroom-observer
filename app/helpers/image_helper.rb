@@ -6,8 +6,7 @@ module ImageHelper
   # Note: this is NOT rendering a partial because nested partials have been
   # demonstrated to be VERY slow in loops or collections.
   #
-  # Uses ImagePresenter to assemble data. Passing @view is required in order
-  # for the presenter to access helper methods.
+  # Uses ImagePresenter to assemble data.
   #
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
   #   size::             Size to show, default is thumbnail.
@@ -44,7 +43,7 @@ module ImageHelper
           image_stretched_link(presenter.image_link,
                                presenter.image_link_method),
           lightbox_link(presenter.lightbox_data),
-          image_vote_section_html(presenter.votes, presenter.image)
+          image_vote_section_html(presenter.image, presenter.votes)
         ].safe_join
       end,
       image_owner_original_name(presenter.image, presenter.original)
@@ -67,7 +66,7 @@ module ImageHelper
   def image_owner_original_name(image, original)
     return "" unless image && show_original_name?(image, original)
 
-    content_tag(:div, image.original_name)
+    tag.div(image.original_name)
   end
 
   def show_original_name?(image, original)
@@ -87,8 +86,8 @@ module ImageHelper
              else
                image.copyright_holder.to_s.t
              end
-    content_tag(:div, image.license.copyright_text(image.year, holder),
-                class: "small")
+    tag.div(image.license.copyright_text(image.year, holder),
+            class: "small")
   end
 
   def show_image_copyright?(image, object)
@@ -144,7 +143,7 @@ module ImageHelper
   def visual_group_status_link(visual_group, image_id, state, link)
     link_text = visual_group_status_text(link)
     state_text = visual_group_status_text(state)
-    return content_tag(:b, link_text) if link_text == state_text
+    return tag.b(link_text) if link_text == state_text
 
     put_button(name: link_text,
                path: image_vote_path(image_id: image_id, vote: 1),
@@ -155,14 +154,69 @@ module ImageHelper
                        status: link })
   end
 
-  # used in shared/images/interactive_image
-  def image_vote_section_html(votes, image)
+  # This is now a helper to avoid nested partials in loops - AN 2023
+  # called in interactive_image above
+  def image_vote_section_html(image, votes)
     return "" unless votes && image && User.current
 
-    content_tag(:div, "", class: "vote-section") do
-      render(partial: "shared/images/image_vote_links",
-             locals: { image: image })
+    tag.div(class: "vote-section") do
+      image_vote_meter_and_links(image)
     end
+  end
+
+  # called in votes update.js.erb
+  def image_vote_meter_and_links(image)
+    vote_pct = if image.vote_cache
+                 ((image.vote_cache / Image.all_votes.length) * 100).floor
+               else
+                 0
+               end
+
+    [
+      image_vote_meter(image, vote_pct),
+      image_vote_buttons(image, vote_pct)
+    ].safe_join
+  end
+
+  def image_vote_meter(image, vote_percentage)
+    return "" unless vote_percentage
+
+    tag.div(class: "vote-meter progress",
+            title: "#{image.num_votes} #{:Votes.t}") do
+      tag.div("", class: "progress-bar", id: "vote_meter_bar_#{image.id}",
+                  role: "progressbar", style: "width: #{vote_percentage}%")
+    end
+  end
+
+  def image_vote_buttons(image, vote_percentage)
+    tag.div(class: "vote-buttons mt-2") do
+      tag.div(class: "image-vote-links", id: "image_vote_links_#{image.id}") do
+        [
+          tag.div(class: "text-center small") do
+            [
+              user_vote_link(image),
+              image_vote_links(image)
+            ].safe_join
+          end,
+          tag.span(class: "hidden data_container",
+                   data: { id: image.id, percentage: vote_percentage.to_s,
+                           role: "image_vote_percentage" })
+        ].safe_join
+      end
+    end
+  end
+
+  def user_vote_link(image)
+    user = User.current
+    return "" unless user && image.users_vote(user).present?
+
+    image_vote_link(image, 0) + "&nbsp;".html_safe
+  end
+
+  def image_vote_links(image)
+    Image.all_votes.map do |vote|
+      image_vote_link(image, vote)
+    end.safe_join("|")
   end
 
   # Create an image link vote, where vote param is vote number ie: 3
@@ -178,8 +232,8 @@ module ImageHelper
                 end
 
     if current_vote == vote
-      return content_tag(:span, image_vote_as_short_string(vote),
-                         class: "image-vote")
+      return tag.span(image_vote_as_short_string(vote),
+                      class: "image-vote")
     end
 
     put_button(name: vote_text, remote: true,
@@ -187,10 +241,6 @@ module ImageHelper
                path: image_vote_path(image_id: image.id, value: vote),
                title: image_vote_as_help_string(vote),
                data: { role: "image_vote", image_id: image.id, value: vote })
-  end
-
-  def image_vote_none
-    icon("fa-regular", "circle-xmark", class: "fa-sm")
   end
 
   # image vote lookup used in show_image

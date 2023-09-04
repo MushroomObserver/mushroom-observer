@@ -49,8 +49,7 @@
 
     <div class="mt-3 text-center">
       <% if User.current %>
-        <%= render(partial: "shared/images/image_vote_links",
-                  locals: { image: @image }) %>
+        <%= image_vote_links(@image) %>
       <% end %>
       <% if !@image.original_name.blank? &&
             (check_permission(@image) ||

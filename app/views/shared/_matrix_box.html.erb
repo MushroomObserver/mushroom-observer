@@ -1,6 +1,7 @@
 <%
 # Requires local variable object: RssLog, Observation, Image, etc. instance.
-presenter = MatrixBoxPresenter.new(object, @view)
+# NOTE panel-sizing div shd be deleted in bs4. thumbnail goes in card-img-top
+presenter = MatrixBoxPresenter.new(object)
 
 if presenter
 
@@ -9,22 +10,24 @@ if presenter
   columns ||= "col" # maybe passed as a local
   object_id = object&.id.present? ? object.id : "no_ID"
   # presenter.image_data includes context: :matrix_box where appropriate
-  thumb_locals = local_assigns.
-                  except(:columns, :object, :object_counter, :object_iteration).
-                  merge(presenter.image_data || {})
-  h_element = presenter.image_data ? :h5 : :h4 # bigger heading if no image
-  link_heading = content_tag(:div, "#{presenter.id}",
+  if presenter.image_data
+    image = presenter.image_data[:image]
+    image_args = local_assigns.
+                 except(:columns, :object, :object_counter, :object_iteration).
+                 merge(presenter.image_data.except(:image) || {})
+  end
+  h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
+  link_heading = content_tag(:small, "(#{presenter.id})",
                               class: "log-id float-right") +
-                 content_tag(:span, presenter.name, class: "log-name")
+                content_tag(:span, presenter.name, class: "log-name")
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do %>
     <div class="card log-item h-100">
 
       <%= if presenter.image_data
-        content_tag(:div, class: "thumbnail-container card-img-top") do
-          render(partial: "shared/images/interactive_image",
-                 locals: thumb_locals)
+        tag.div(class: "thumbnail-container card-img-top") do
+          interactive_image(image, **image_args)
         end
       end %>
 

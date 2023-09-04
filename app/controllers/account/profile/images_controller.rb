@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Clicking on an image currently fires a GET to these actions... because it
-# comes from a link made by image_helper#interactive_image(link: url_args)
-# TOCONSIDER: interactive_image can now fire a POST
+# comes from a link made by ImageHelper#interactive_image(link: url_args)
+# with CRUD refactor, change ImageHelper helper to fire a POST somehow?
 
 # No need to remove_images from Account profile: reuse_image removes image
 module Account::Profile
