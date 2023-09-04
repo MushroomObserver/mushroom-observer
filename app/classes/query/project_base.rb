@@ -64,6 +64,6 @@ class Query::ProjectBase < Query::Base
   end
 
   def self.default_order
-    "title"
+    "updated_at"
   end
 end
