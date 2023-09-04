@@ -2165,6 +2165,7 @@
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
+  show_observation_details: Details
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
