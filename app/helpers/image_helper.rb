@@ -252,18 +252,43 @@ module ImageHelper
     end
   end
 
-  # def carousel_image(image, **args)
-  #   render(partial: "shared/images/carousel_image",
-  #          locals: args.merge({ image: image }))
-  # end
+  def carousel_item(image, default_image, object, **args)
+    # Caption needs object for copyright info
+    presenter_args = args.merge({ size: :large, fit: :contain, original: true })
+    presenter = ImagePresenter.new(image, presenter_args)
+    active = image == default_image ? "active" : ""
 
-  # def carousel_thumbnail(image, **args)
-  #   render(partial: "shared/images/carousel_thumbnail",
-  #          locals: args.merge({ image: image }))
-  # end
+    tag.div(class: class_names("carousel-item", active)) do
+      [
+        image_tag(presenter.img_src, presenter.options_lazy),
+        image_stretched_link(presenter.image_link, presenter.image_link_method),
+        lightbox_link(presenter.lightbox_data),
+        carousel_caption(presenter, object)
+      ].safe_join
+    end
+  end
 
-  # def carousel_caption(image, **args)
-  #   render(partial: "shared/images/carousel_caption",
-  #          locals: args.merge({ image: image }))
-  # end
+  def carousel_caption(presenter, object)
+    classes = "carousel-caption d-flex flex-column justify-content-center"
+    caption = if (info = image_info(image, object,
+                                    original: presenter.original)).present?
+                tag.div(info, class: "image-info d-none d-md-block")
+              else
+                ""
+              end
+
+    tag.div(class: classes) do
+      [
+        image_vote_section_html(presenter.votes, presenter.image),
+        caption
+      ].safe_join
+    end
+  end
+
+  def carousel_thumbnail(image, **args)
+    presenter_args = args.merge({ fit: :contain })
+    presenter = ImagePresenter.new(image, presenter_args)
+
+    image_tag(presenter.img_src, presenter.options_lazy)
+  end
 end

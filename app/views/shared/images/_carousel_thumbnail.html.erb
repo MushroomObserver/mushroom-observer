@@ -1,8 +1,0 @@
-
-<%
-  presenter_args = local_assigns.except(:image).merge({ fit: :contain })
-  presenter = ImagePresenter.new(image, presenter_args)
-%>
-
-
-<%= image_tag(presenter.img_src, presenter.options_lazy) %>

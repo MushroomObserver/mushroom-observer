@@ -11,9 +11,7 @@ has_images = !images.nil? && images.any?
        data-ride="false" data-interval="false">
     <div class="carousel-inner bg-light">
       <% images.each do |image| %>
-        <%= render(partial: "shared/images/carousel_item",
-                   locals: { image: image, default_image: default_image,
-                             object: object }) %>
+        <%= carousel_item(image, default_image, object) %>
       <% end %>
     </div>
     <% if images.length > 1 %>
@@ -42,8 +40,7 @@ has_images = !images.nil? && images.any?
           <li data-target="#<%= html_id %>"
               data-slide-to="<%= index %>"
               class="<%= active %>">
-            <%= render(partial: "shared/images/carousel_thumbnail",
-                       locals: { image: image }) %>
+            <%= carousel_thumbnail(image) %>
           </li>
       <% end %>
     </ol>
