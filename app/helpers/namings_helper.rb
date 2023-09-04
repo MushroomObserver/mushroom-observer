@@ -19,12 +19,12 @@ module NamingsHelper
     }
   end
 
-  def observation_naming_row(observation, naming, logged_in)
+  def observation_naming_row(observation, naming, vote, logged_in)
     {
       name: naming_name_html(naming),
       proposer: naming_proposer_html(naming),
       consensus_vote: consensus_vote_html(naming),
-      your_vote: logged_in ? your_vote_html(naming) : "",
+      your_vote: logged_in ? your_vote_html(naming, vote) : "",
       eyes: vote_icons_html(observation, naming),
       reasons: reasons_html(naming)
     }
@@ -76,8 +76,7 @@ module NamingsHelper
                           { class: "btn btn-link px-0" })
 
     # row props have mobile-friendly labels
-    [content_tag(:small, "#{:show_namings_user.t}: ",
-                 class: "visible-xs-inline mr-4"),
+    [tag.small("#{:show_namings_user.t}: ", class: "visible-xs-inline mr-4"),
      user_link].safe_join
   end
 
@@ -90,9 +89,9 @@ module NamingsHelper
        end).html_safe # has links
 
     # row props have mobile-friendly labels
-    [content_tag(:small, "#{:show_namings_consensus.t}: ",
-                 class: "visible-xs-inline mr-4"),
-     content_tag(:span, consensus_votes)].safe_join
+    [tag.small("#{:show_namings_consensus.t}: ",
+               class: "visible-xs-inline mr-4"),
+     tag.span(consensus_votes)].safe_join
   end
 
   # Makes a link to naming_vote_path for no-js.
@@ -108,16 +107,44 @@ module NamingsHelper
   end
 
   def num_votes_html(naming)
-    content_tag(:span, naming.votes&.length,
-                { class: "vote-number", data: { id: naming.id } })
+    tag.span(naming.votes&.length,
+             class: "vote-number", data: { id: naming.id })
   end
 
-  def your_vote_html(naming)
+  def your_vote_html(naming, vote)
     # row props have mobile-friendly labels
-    [content_tag(:small, "#{:show_namings_your_vote.t}: ",
-                 class: "visible-xs-block"),
-     render(partial: "observations/namings/votes/form",
-            locals: { naming: naming, context: "namings_table" })].safe_join
+    [tag.small("#{:show_namings_your_vote.t}: ", class: "visible-xs-block"),
+     naming_vote_form(naming, vote, context: "namings_table")].safe_join
+  end
+
+  public
+
+  # Naming Vote Form:
+  # a tiny form within a naming row for voting on this naming only
+  # also called by matrix_box_vote_or_propose_ui
+  # fires the special rails-ujs submit event for remote submit
+  # requires a native js (not jQuery) element, form is parent of select
+  # Turbo: check how this should submit
+  def naming_vote_form(naming, vote, context: "blank")
+    menu = Vote.confidence_menu
+    can_vote = check_permission(naming)
+    menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
+
+    form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
+              local: false, id: "naming_vote_#{naming.id}",
+              class: "naming-vote-form") do |f|
+      [
+        fields_for(:vote) do |fv|
+          fv.select(:value, menu, {},
+                    { class: "form-control w-100",
+                      onchange: "Rails.fire(this.closest('form'), 'submit')",
+                      data: { role: "change_vote", id: naming.id } })
+        end,
+        hidden_field_tag(:context, context),
+        submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+                      data: { role: "save_vote" })
+      ].safe_join
+    end
   end
 
   # May show both user and consensus icons
