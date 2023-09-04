@@ -8,8 +8,10 @@ obs = @sequence.observation
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "observation_title", locals: { observation: obs }) %>
-    <%= render(partial: "form", locals: { action: :update, local: true }) %>
+    <%= render(partial: "sequences/observation_title",
+               locals: { observation: obs }) %>
+    <%= render(partial: "sequences/form",
+               locals: { action: :update, local: true }) %>
 
     <div class="small">
       <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>

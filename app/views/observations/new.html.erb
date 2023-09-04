@@ -5,7 +5,7 @@ add_tab_set(observation_form_new_tabs)
 @container = :wide
 %>
 
-<%= render(partial: "form", locals: {
+<%= render(partial: "observations/form", locals: {
       action: :create,
       method: :post,
       logging_optional: false,

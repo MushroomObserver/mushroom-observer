@@ -6,7 +6,8 @@ add_tab_set(collection_number_form_new_tabs(obs: @observation))
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "form", locals: { action: :create, local: true }) %>
+    <%= render(partial: "collection_numbers/form",
+               locals: { action: :create, local: true }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">
