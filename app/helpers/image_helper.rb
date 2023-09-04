@@ -285,6 +285,15 @@ module ImageHelper
     end
   end
 
+  def carousel_heading(title, links = "")
+    tag.div(class: "panel-heading carousel-heading") do
+      tag.h4(class: "panel-title") do
+        concat(title)
+        concat(tag.span(links, class: "float-right"))
+      end
+    end
+  end
+
   def carousel_thumbnail(image, **args)
     presenter_args = args.merge({ fit: :contain })
     presenter = ImagePresenter.new(image, presenter_args)

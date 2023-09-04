@@ -1,7 +1,5 @@
 <%
 # CAROUSEL TEMPLATE
-# Requires an object that responds to .images
-# javascript_include("image_slider") huh?
 html_id = "#{object.type_tag}_carousel"
 has_images = !images.nil? && images.any?
 %>
@@ -37,12 +35,7 @@ has_images = !images.nil? && images.any?
       </a>
     <% end %>
   </div>
-  <%= tag.div(class: "panel-heading carousel-heading") do
-        tag.h4(class: "panel-title") do
-          concat(local_assigns[:title])
-          concat(tag.span(local_assigns[:links], class: "float-right"))
-        end
-      end %>
+  <%= carousel_heading(local_assigns[:title], local_assigns[:links]) %>
   <ol class="carousel-indicators bg-light mt-2 mb-0">
     <% object.images.each_with_index do |image, index| %>
       <% active = (image == default_image) ? " active" : "" %>
@@ -54,6 +47,7 @@ has_images = !images.nil? && images.any?
     <% end %>
   </ol>
 <% else %>
+  <%= carousel_heading(local_assigns[:title], local_assigns[:links]) %>
   <%= tag.div(:show_observation_no_images.l,
               class: "d-flex flex-column justify-content-center w-100 h-100 text-center h3 text-muted") %>
 <% end %>
