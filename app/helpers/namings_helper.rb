@@ -123,6 +123,36 @@ module NamingsHelper
      naming_vote_form(naming, vote, context: "namings_table")].safe_join
   end
 
+  public
+
+  # Naming Vote Form:
+  # a tiny form within a naming row for voting on this naming only
+  # also called by matrix_box_vote_or_propose_ui
+  # fires the special rails-ujs submit event for remote submit
+  # requires a native js (not jQuery) element, form is parent of select
+  # Turbo: check how this should submit
+  def naming_vote_form(naming, vote, context: "blank")
+    menu = Vote.confidence_menu
+    can_vote = check_permission(naming)
+    menu = [Vote.no_opinion] + menu if !can_vote || !vote || vote&.value&.zero?
+
+    form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
+              local: false, id: "naming_vote_#{naming.id}",
+              class: "naming-vote-form") do |f|
+      [
+        fields_for(:vote) do |fv|
+          fv.select(:value, menu, {},
+                    { class: "form-control w-100",
+                      onchange: "Rails.fire(this.closest('form'), 'submit')",
+                      data: { role: "change_vote", id: naming.id } })
+        end,
+        hidden_field_tag(:context, context),
+        submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+                      data: { role: "save_vote" })
+      ].safe_join
+    end
+  end
+
   # May show both user and consensus icons
   def vote_icons_html(observation, naming)
     consensus = observation.consensus_naming
