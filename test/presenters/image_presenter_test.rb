@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# test the presenter for image thumbnails
-class ThumbnailPresenterTest < ActionView::TestCase
+# test the presenter for images
+class ImagePresenterTest < ActionView::TestCase
   # include ApplicationHelper
 
   # This test may become unnecessary when covered by other (integration?) tests

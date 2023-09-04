@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Clicking on an image currently fires a GET to these actions... because it
-# comes from a link made by thumbnail_helper#thumbnail(link: url_args)
-# with CRUD refactor, change thumbnail helper to fire a POST somehow?
+# comes from a link made by ImageHelper#interactive_image(link: url_args)
+# with CRUD refactor, change ImageHelper helper to fire a POST somehow?
 
 module Observations
   # Upload, attach, detach, edit Observation Images
@@ -279,7 +279,7 @@ module Observations
     def reuse
       return unless (@observation = find_observation!)
 
-      return unless check_observation_permission!
+      nil unless check_observation_permission!
     end
 
     # reuse image form buttons POST here

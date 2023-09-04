@@ -4,8 +4,8 @@ require("test_helper")
 require("textile")
 
 class Textile
-  def send_private(method, *args, &block)
-    send(method, *args, &block)
+  def send_private(method, ...)
+    send(method, ...)
   end
 end
 

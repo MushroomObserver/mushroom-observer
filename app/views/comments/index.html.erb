@@ -11,7 +11,7 @@ flash_error(@error) if @error && @objects.empty?
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <% @objects.each do |comment| %>
-      <%= render(partial: "comment", object: comment,
+      <%= render(partial: "comments/comment", object: comment,
                  locals: { show_name: true }) %>
     <% end %>
   <% end %>

@@ -6,8 +6,9 @@ add_tab_set(comment_form_new_tabs(target: @target))
 
 <div class="row">
   <div class="col-xs-12 col-sm-8">
-    <%= render(partial: "form", locals: { action: :create, local: true }) %>
-    <%= render(partial: "object", object: @target) %>
+    <%= render(partial: "comments/form",
+               locals: { action: :create, local: true }) %>
+    <%= render(partial: "comments/object", object: @target) %>
   </div>
 
   <% if @target.is_a?(Observation) %>

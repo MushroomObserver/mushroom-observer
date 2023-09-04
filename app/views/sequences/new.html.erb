@@ -6,9 +6,10 @@ add_tab_set(sequence_form_tabs(obj: @observation))
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
-    <%= render(partial: "observation_title",
+    <%= render(partial: "sequences/observation_title",
                locals: { observation: @observation }) %>
-    <%= render(partial: "form", locals: { action: :create, local: true }) %>
+    <%= render(partial: "sequences/form",
+               locals: { action: :create, local: true }) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">
