@@ -36,6 +36,11 @@ obs_locals = { obs: @observation }
       <% if show_links %>
         <%= render(partial: "observations/show/links", locals: obs_locals) %>
       <% end %>
+
+      <% if show_map %>
+        <%= render(partial: "observations/show/thumbnail_map",
+                   locals: obs_locals) %>
+      <% end %>
     <% end %>
   </div>
 </div><!--.row-->
@@ -53,12 +58,6 @@ obs_locals = { obs: @observation }
   </div>
 
   <div class="col-sm-4 col-lg-5 float-sm-right">
-
-    <% if show_map %>
-      <%= render(partial: "observations/show/thumbnail_map",
-                 locals: obs_locals) %>
-    <% end %>
-
     <%= render(partial: "observations/show/images", locals: obs_locals) %>
   </div>
 

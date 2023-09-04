@@ -7,7 +7,7 @@ has_images = !images.nil? && images.any?
 %>
 
 <% if has_images %>
-  <div id="<%= html_id %>" class="carousel slide card-img"
+  <div id="<%= html_id %>" class="carousel slide panel panel-default"
        data-ride="false" data-interval="false">
     <div class="carousel-inner bg-light" role="listbox">
       <% images.each do |image| %>
@@ -36,7 +36,7 @@ has_images = !images.nil? && images.any?
         </div>
       </a>
     <% end %>
-    <ol class="carousel-indicators bg-light mb-0">
+    <ol class="carousel-indicators bg-light mt-2 mb-0">
       <% object.images.each_with_index do |image, index| %>
         <% active = (image == default_image) ? " active" : "" %>
           <li data-target="#<%= html_id %>"

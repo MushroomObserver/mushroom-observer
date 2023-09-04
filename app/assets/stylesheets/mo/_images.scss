@@ -113,43 +113,65 @@ svg.placeholder {
 // Mushroom Observer carousels
 // --------------------------------------------------
 
-.carousel-item {
-  padding-bottom: 75%;
+.carousel-inner {
+  white-space: nowrap;
   position: relative;
+  width: 100%;
+  overflow: hidden;
 
-  > div {
-    position: absolute;
+  &::after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .item {
+    padding-bottom: 75%;
+    position: relative;
+    float: left;
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
-  }
+    margin-right: -100%;
 
-  .carousel-caption {
-    @extend .bg-legible, .py-2;
-    // position: absolute;
-    bottom: 0;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: auto;
-    height: auto;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-
-    .vote-section {
-      background: transparent;
+    > div {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
     }
-    .image-info {
-      @extend .smaller, .px-3, .pb-2;
-    }
-  }
 
-  &:hover,
-  &:focus {
     .carousel-caption {
-      opacity: 1;
+      @extend .bg-legible, .py-2;
+      // position: absolute;
+      bottom: 0;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: auto;
+      height: auto;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      .vote-section {
+        background: transparent;
+      }
+      .image-info {
+        @extend .smaller, .px-3, .pb-2;
+      }
     }
+
+    &:hover,
+    &:focus {
+      .carousel-caption,
+      .theater-btn {
+        opacity: 1;
+      }
+    }
+
+    // &.right,
+    // &.left {
+    //   display: inline-block;
+    // }
   }
 
   // .carousel-caption-and-votes {
@@ -165,37 +187,9 @@ svg.placeholder {
   }
 }
 
-
-
-.carousel-control-prev,
-.carousel-control-next {
-  padding: 2rem 6rem;
-  bottom: 6vw;
-  z-index: 3;
-
-  div.btn {
-    @extend .bg-visible;
-    color: $white;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    justify-content: center;
-  }
-  &:hover {
-    div.btn {
-      background: rgba($black, 1);
-    }
-  }
-}
-
-.carousel-control-prev {
-  justify-content: flex-start;
-  padding-left: 1rem;
-}
-
-.carousel-control-next {
-  justify-content: flex-end;
-  padding-right: 1rem;
+.carousel-control {
+  background: none !important;
+  font-size: 2rem;
 }
 
 .carousel-indicators {
@@ -203,13 +197,25 @@ svg.placeholder {
   width: 100%;
   margin-left: 0;
   margin-right: 0;
+  // bottom: -7.5vw;
+  // height: 6vw;
+  overflow-x: hidden;
+  white-space: nowrap;
 
   li {
-    background-color: transparent;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
     width: 6vw;
     height: 6vw;
-    position: relative;
-    display: flex;
-    overflow: hidden;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+
+    &.active {
+      width: 6vw;
+      height: 6vw;
+    }
   }
 }
