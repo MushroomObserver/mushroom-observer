@@ -27,7 +27,8 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      @users = User.order(last_login: :desc).limit(100).to_a
+      @users =
+        User.where(verified: true).order(last_login: :desc).limit(100).to_a
     end
 
     def create
