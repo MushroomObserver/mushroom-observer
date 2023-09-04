@@ -256,7 +256,7 @@ module ImageHelper
     # Caption needs object for copyright info
     presenter_args = args.merge({ size: :large, fit: :contain, original: true })
     presenter = ImagePresenter.new(image, presenter_args)
-    active = image == default_image ? "active" : ""
+    active = (image == default_image) ? "active" : ""
 
     tag.div(class: class_names("item", active)) do
       [
@@ -279,7 +279,7 @@ module ImageHelper
 
     tag.div(class: classes) do
       [
-        image_vote_section_html(presenter.votes, presenter.image),
+        image_vote_section_html(presenter.image, presenter.votes),
         caption
       ].safe_join
     end
