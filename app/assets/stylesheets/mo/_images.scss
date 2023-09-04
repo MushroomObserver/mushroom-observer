@@ -154,7 +154,9 @@ svg.placeholder {
 
       .vote-section {
         background: transparent;
+        position: static;
       }
+
       .image-info {
         @extend .smaller, .px-3, .pb-2;
       }
