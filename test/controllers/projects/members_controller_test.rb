@@ -140,9 +140,14 @@ module Projects
     # There are many other combinations that shouldn't work
     # for change_member_status, but I think the above covers the key cases
 
-    # Make sure admin can see form.
     def test_add_members
-      requires_login(:new, project_id: projects(:eol_project).id)
+      project = projects(:eol_project)
+      requires_login(:new, project_id: project.id)
+
+      assert_displayed_title("Add users to #{project.title}",
+                             "Admin should be able to see add members form")
+      assert_select("td", { text: users(:unverified).login, count: 0 },
+                    "List of potential members should omit unverified users")
     end
 
     # Make sure non-admin cannot see form.
