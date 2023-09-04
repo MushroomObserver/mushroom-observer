@@ -12,7 +12,7 @@ module Projects
     before_action :login_required
     before_action :pass_query_params
 
-    # View that lists all users with links to add each as a member.
+    # View that lists all verified users with links to add each as a member.
     # Linked from: show_project (for admins only)
     # Inputs:
     #   params[:project_id] (was :id)
@@ -27,7 +27,8 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      @users = User.order(last_login: :desc).limit(100).to_a
+      @users =
+        User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
     end
 
     def create
