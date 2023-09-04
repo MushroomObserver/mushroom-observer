@@ -67,11 +67,6 @@ obs_locals = { obs: @observation }
 
     <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>
-
-  <div class="col-sm-4 col-lg-5 float-sm-right">
-    <%= render(partial: "observations/show/images", locals: obs_locals) %>
-  </div>
-
 </div><!--.row-->
 
 <%= show_object_footer(@observation) %>

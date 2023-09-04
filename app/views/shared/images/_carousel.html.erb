@@ -36,17 +36,17 @@ has_images = !images.nil? && images.any?
         </div>
       </a>
     <% end %>
-    <ol class="carousel-indicators bg-light mt-2 mb-0">
-      <% object.images.each_with_index do |image, index| %>
-        <% active = (image == default_image) ? " active" : "" %>
-          <li data-target="#<%= html_id %>"
-              data-slide-to="<%= index %>"
-              class="<%= active %>">
-            <%= carousel_thumbnail(image) %>
-          </li>
-      <% end %>
-    </ol>
   </div>
+  <ol class="carousel-indicators bg-light mt-2 mb-0">
+    <% object.images.each_with_index do |image, index| %>
+      <% active = (image == default_image) ? " active" : "" %>
+        <li data-target="#<%= html_id %>"
+            data-slide-to="<%= index %>"
+            class="<%= active %>">
+          <%= carousel_thumbnail(image) %>
+        </li>
+    <% end %>
+  </ol>
 <% else %>
   <%= tag.div(:show_observation_no_images.l,
               class: "d-flex flex-column justify-content-center w-100 h-100 text-center h3 text-muted") %>
