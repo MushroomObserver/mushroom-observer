@@ -256,7 +256,7 @@ module ImageHelper
     # Caption needs object for copyright info
     presenter_args = args.merge({ size: :large, fit: :contain, original: true })
     presenter = ImagePresenter.new(image, presenter_args)
-    active = (image == default_image) ? "active" : ""
+    active = image == default_image ? "active" : ""
 
     tag.div(class: class_names("item", active)) do
       [
