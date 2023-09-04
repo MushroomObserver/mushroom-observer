@@ -624,7 +624,7 @@ module Observations
       assert_template("shared/_form_name_feedback")
       assert_template("observations/namings/_form")
       assert_template("observations/namings/_fields")
-      assert_template("shared/images/_carousel")
+      assert_template("observations/show/_images")
     end
 
     def test_automatic_author_bug
