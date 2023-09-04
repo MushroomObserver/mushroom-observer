@@ -194,7 +194,7 @@ class ProjectsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Project, :by_user, user: user)
+    query = create_query(:Project, :all, has_member: user)
     show_selected_projects(query)
   end
 

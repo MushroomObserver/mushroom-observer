@@ -188,7 +188,9 @@ module Query
           users: :user_id,
           rss_logs: :rss_log_id,
           user_groups: :user_group_id,
-          "user_groups.admin_group": :admin_group_id
+          "user_groups.admin_group": :admin_group_id,
+          "user_group_users.members": [:user_group_id, :user_group_id],
+          "user_group_users.admins": [:admin_group_id, :user_group_id]
         },
         project_species_lists: {
           projects: :project_id,
