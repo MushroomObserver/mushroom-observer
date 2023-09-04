@@ -528,9 +528,9 @@ module Name::Taxonomy
         # Reformat output, writing out lines in correct order.
         if parsed_names != {}
           result = ""
-          Name.all_ranks.reverse_each do |rank|
-            if (name = parsed_names[rank])
-              result += "#{rank}: _#{name}_\r\n"
+          Name.all_ranks.reverse_each do |r|
+            if (name = parsed_names[r])
+              result += "#{r}: _#{name}_\r\n"
             end
           end
           result.strip!

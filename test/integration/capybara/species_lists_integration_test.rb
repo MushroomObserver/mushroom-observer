@@ -92,7 +92,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
       "Suillus E.B. White",
       "Amanita baccata sensu Arora",
       "Caloplaca arnoldii subsp. obliterate"
-    ].sort, obs.map(&:name).map(&:search_name).sort)
+    ].sort, obs.map { |o| o.name.search_name }.sort)
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
@@ -150,7 +150,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
       "Caloplaca arnoldii subsp. obliterate",
       "Agaricus nova",
       "Amanita baccata sensu Borealis"
-    ].sort, obs.map(&:name).map(&:search_name).sort)
+    ].sort, obs.map { |o| o.name.search_name }.sort)
     assert_equal("Something New", spl.title)
     assert_equal(new_location, spl.where)
     assert_nil(spl.location)

@@ -32,13 +32,6 @@ class WebSequenceArchive
       archives.pluck(:name)
     end
 
-    def valid_archive?(str)
-      archives.each do |archive|
-        return archive.name if archive[:name].casecmp(str).zero?
-      end
-      nil
-    end
-
     # return the archive hash for the named archive
     def archive(name)
       archives.find { |archive| archive[:name] == name }

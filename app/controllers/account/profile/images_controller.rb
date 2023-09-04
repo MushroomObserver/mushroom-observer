@@ -12,7 +12,7 @@ module Account::Profile
 
     # was reuse_image params[:mode] = profile
     def reuse
-      return unless User.safe_find(params[:id]) == User.current
+      nil unless User.safe_find(params[:id]) == User.current
     end
 
     # POST action
