@@ -33,5 +33,5 @@
           "how to display objects of type \"#{object.class.name}\".")
 end %>
 
-<%= render(partial: "comments_for_object",
+<%= render(partial: "comments/comments_for_object",
            locals: { object: object, controls: false, limit: 10 }) %>

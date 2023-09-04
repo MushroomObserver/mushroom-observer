@@ -11,7 +11,7 @@ add_tab_set(info_site_stats_tabs)
     if obs_length > 0 %>
       <% @observations[0,3].each do |obs| %>
         <div class="pb-1">
-          <%= thumbnail(obs.thumb_image,
+          <%= interactive_image(obs.thumb_image,
                         image_link: observation_path(obs.id),
                         votes: true) %><br/><br/>
 
@@ -58,7 +58,7 @@ add_tab_set(info_site_stats_tabs)
   <div class="hidden-xs col-md-3">
     <% if obs_length > 3 %>
       <% @observations[3,3].each do |obs| %>
-        <%= thumbnail(obs.thumb_image,
+        <%= interactive_image(obs.thumb_image,
                       image_link: observation_path(obs.id),
                       votes: true) %><br/><br/>
       <% end %>

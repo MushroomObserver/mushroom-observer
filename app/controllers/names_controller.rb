@@ -218,7 +218,14 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = find_or_goto_index(Name, params[:id].to_s)
+    @name = Name.includes(show_name_includes).find_by(id: params[:id]) ||
+            flash_error_and_goto_index(Name, params[:id])
+  end
+
+  def show_name_includes
+    [
+      { observations: :user }
+    ]
   end
 
   def init_related_query_ivars

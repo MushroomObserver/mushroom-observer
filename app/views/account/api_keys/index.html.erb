@@ -12,9 +12,9 @@ inject_javascript_at_end("APIKeyModule()")
 </div><!--.container-text-->
 
 <% if @user.api_keys.any? %>
-  <%= render(partial: "existing_keys_form") %>
+  <%= render(partial: "account/api_keys/existing_keys_form") %>
 <% end %>
 
 <div class="container-text mt-3">
-  <%= render(partial: "new_key_form") %>
+  <%= render(partial: "account/api_keys/new_key_form") %>
 </div>

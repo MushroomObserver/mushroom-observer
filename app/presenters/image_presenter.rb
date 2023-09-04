@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Gather details for items in matrix-style ndex pages.
-class ThumbnailPresenter < BasePresenter
+# Gather details for items in interactive images.
+class ImagePresenter < BasePresenter
   attr_accessor \
     :image,             # image instance or id
     :img_src,           # img src for noscript image
@@ -15,7 +15,7 @@ class ThumbnailPresenter < BasePresenter
     :votes,             # show votes? boolean
     :original           # show original image filename? (boolean)
 
-  def initialize(image, view, args = {})
+  def initialize(image, args = {})
     super
 
     # Sometimes it's prohibitive to do the extra join to images table,
@@ -23,15 +23,26 @@ class ThumbnailPresenter < BasePresenter
     # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
 
+    notes = ""
+    # new: for the img alt property. nah, messes up format. in helper now
+    # if image.is_a?(Image) && args[:original] == true
+    #   notes = !image.notes || image.notes.blank? ? "" : image.notes
+    #   show_name = image.original_name.present? &&
+    #               (check_permission(image) ||
+    #                image.user && image.user.keep_filenames == :keep_and_show)
+    #   notes += "\n#{image.original_name}" if show_name
+    # end
+
     default_args = {
       size: :small,
-      notes: "",
+      notes: notes,
       data: {},
       data_sizes: {},
+      fit: :cover,
       extra_classes: false,
       obs_data: {}, # used in lightbox caption
       identify: false,
-      image_link: h.image_path(image_id), # to ImagesController#show
+      image_link: Rails.application.routes.url_helpers.image_path(image_id),
       link_method: :get,
       votes: true,
       original: false,
@@ -52,7 +63,7 @@ class ThumbnailPresenter < BasePresenter
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
     #                               img_urls[:large], img_urls[:huge])
     # img_sizes = args[:data_sizes] || thumbnail_srcset_sizes
-    img_class = "img-fluid ab-fab object-fit-cover"
+    img_class = "img-fluid ab-fab object-fit-#{args[:fit]}"
     img_class += " #{args[:extra_classes]}" if args[:extra_classes]
 
     # <img> data attributes. Account for possible data-confirm, etc

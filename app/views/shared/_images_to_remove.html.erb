@@ -14,7 +14,7 @@
       <%= matrix_box(id: image.id) do %>
         <div class="py-3 text-center">
           <% # no special link-or-button param here, there's a checkbox below %>
-          <%= thumbnail(image,
+          <%= interactive_image(image,
                         original: true,
                         extra_classes: "image-to-remove",
                         votes: false) %>
