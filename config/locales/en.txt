@@ -1300,6 +1300,7 @@
   app_your_observations: Your Observations
   app_your_lists: Your Lists
   app_your_interests: Your Interests
+  app_your_projects: Your Projects
   app_your_summary: Your Summary
   app_preferences: Preferences
   app_life_list: Life List

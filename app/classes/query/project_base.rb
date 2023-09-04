@@ -23,9 +23,16 @@ class Query::ProjectBase < Query::Base
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("projects")
+    initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
     super
+  end
+
+  def initialize_association_parameters
+    add_id_condition("user_group_users.user_group_id",
+                     lookup_projects_by_name(params[:projects]),
+                     :user_group_users)
   end
 
   def initialize_boolean_parameters

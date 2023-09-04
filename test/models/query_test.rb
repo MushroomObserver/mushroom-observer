@@ -2933,6 +2933,14 @@ class QueryTest < UnitTestCase
     assert_query([], :Project, :in_set, ids: [])
   end
 
+  def test_project_by_user
+    assert_query([projects(:eol_project).id],
+                 :Project, :by_user, user: rolf, by: :id)
+    assert_query(Project.where(user: roy),
+                 :Project, :by_user, user: roy)
+    assert_query([], :Project, :by_user, user: katrina)
+  end
+
   def test_project_pattern_search
     assert_query([],
                  :Project, :pattern_search, pattern: "no project has this")
