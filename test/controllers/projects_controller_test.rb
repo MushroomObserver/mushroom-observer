@@ -74,7 +74,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Projects by Title")
+    assert_displayed_title("Projects by Time Last Modified")
     assert_template("index")
   end
 
