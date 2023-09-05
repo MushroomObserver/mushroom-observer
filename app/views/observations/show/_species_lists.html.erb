@@ -1,6 +1,6 @@
-<%= panel_with_outer_heading(heading: :show_lists_header.t,
+<%= panel_block(heading: :show_lists_header.t,
                             id: "observation_species_lists",
-                            inner_class: "p-0") do %>
+                            inner_class: "p-2") do %>
 
   <table class="table table-responsive mx-0 mb-0">
     <% obs.species_lists.each do |spl| %>
@@ -8,7 +8,7 @@
         <td style="border-top:0">
           <%= link_to(spl.format_name.t, species_list_path(spl.id)) %>
           <%= if check_permission(spl)
-            put_button(name: :REMOVE.t,
+            put_button(name: "[#{:REMOVE.t}]",
                       path: observation_species_list_path(
                         id: obs.id, species_list_id: spl.id,
                         commit: "remove"

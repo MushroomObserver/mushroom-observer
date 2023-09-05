@@ -800,7 +800,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template("observations/show/_namings")
     assert_template("comments/_comments_for_object")
     assert_template("observations/show/_thumbnail_map")
-    assert_template("observations/show/_images")
+    assert_template("shared/images/_carousel")
   end
 
   def test_show_observation
