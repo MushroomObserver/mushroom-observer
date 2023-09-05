@@ -1,78 +1,34 @@
 <%
 # The content of the details box. This gets replaced by JS and is used elsewhere
-caption ||= false
 %>
 
-<p class="obs-when" id="observation_when">
-  <%= :WHEN.t %>: <span class="font-weight-bold"><%= obs.when.web_date %></span>
-</p>
+<%= observation_details_when_where_who(obs: obs) %>
 
-<p class="obs-where" id="observation_where">
-  <%= obs.is_collection_location ?
-        :show_observation_collection_location.t :
-        :show_observation_seen_at.t %>:
-  <%= location_link(obs.place_name,
-                    obs.location, nil, true) %>
-</p>
-
-<p class="obs-lat-lng" id="observation_lat_lng">
-  <%=
-    hidden = "<i>(#{:show_observation_gps_hidden.t})</i>".html_safe
-    if obs.lat &&
-        (!obs.gps_hidden || obs.can_edit?)
-      link_to("#{obs.display_lat_long.t} " \
-              "#{obs.display_alt.t} " \
-              "[#{:click_for_map.t}]".html_safe,
-              map_observation_path(id: obs.id))
-    elsif obs.lat
-      hidden + " ".html_safe + obs.display_alt.t
-    else
-      obs.display_alt.t
+<%= if @user
+  tag.div(class: "obs-projects", id: "observation_projects") do
+    obs.projects.each do |project|
+      tag.p("#{:PROJECT.t}: #{link_to_object(project)}")
     end
-  %>
-  <%=
-    if obs.lat && obs.gps_hidden && obs.can_edit?
-      hidden
-    end
-  %>
-</p>
+  end
+end %>
 
-<p class="obs-who" id="observation_who">
-  <%= :WHO.t %>: <span><%= user_link(obs.user) %></span>
-</p>
+<%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
+  if obs.specimen
+    :show_observation_specimen_available.t
+  else
+    :show_observation_specimen_not_available.t
+  end
+end %>
 
-<% if !caption %>
-  <% if @user %>
-    <div class="obs-projects" id="observation_projects">
-      <% obs.projects.each do |project| %>
-        <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
-      <% end %>
-    </div>
-  <% end %>
+<% if @user %>
+  <%= render(partial: "observations/show/collection_numbers",
+             locals: { obs: obs }) %>
 
-  <div class="obs-specimen" id="observation_specimen_available">
-    <%= obs.specimen ? :show_observation_specimen_available.t :
-                                :show_observation_specimen_not_available.t %>
-  </div>
+  <%= render(partial: "observations/show/herbarium_records",
+             locals: { obs: obs }) %>
 
-  <% if @user %>
-    <%= render(partial: "observations/show/collection_numbers",
-              locals: { obs: obs }) %>
-
-    <%= render(partial: "observations/show/herbarium_records",
-              locals: { obs: obs }) %>
-
-    <%= render(partial: "observations/show/sequences",
-              locals: { obs: obs }) %>
-  <% end %>
+  <%= render(partial: "observations/show/sequences",
+             locals: { obs: obs }) %>
 <% end %>
 
-<div class="obs-notes" id="observation_notes">
-  <%= if obs.notes?
-    Textile.clear_textile_cache
-    Textile.register_name(obs.name)
-    content_tag(
-      :div, obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
-    )
-  end %>
-</div><!--.obs-notes-->
+<%= observation_details_notes(obs: obs) %>
