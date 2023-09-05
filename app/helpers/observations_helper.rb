@@ -163,6 +163,8 @@ module ObservationsHelper
   end
 
   def observation_details_where_gps(obs:)
+    return "" unless obs.lat
+
     gps_display_link = link_to([obs.display_lat_long.t,
                                 obs.display_alt.t,
                                 "[#{:click_for_map.t}]"].safe_join(" "),
@@ -170,18 +172,8 @@ module ObservationsHelper
     gps_hidden_msg = tag.i("(#{:show_observation_gps_hidden.t})")
 
     tag.p(class: "obs-where-gps", id: "observation_where_gps") do
-      concat(
-        if obs.lat && (!obs.gps_hidden || obs.can_edit?)
-          gps_display_link
-        elsif obs.lat
-          [gps_hidden_msg, obs.display_alt.t].safe_join(" ")
-        else
-          obs.display_alt.t
-        end
-      )
-      concat(
-        (gps_hidden_msg if obs.lat && obs.gps_hidden && obs.can_edit?)
-      )
+      concat(gps_display_link) if !obs.gps_hidden || obs.can_edit?
+      concat(gps_hidden_msg) if obs.gps_hidden
     end
   end
 
