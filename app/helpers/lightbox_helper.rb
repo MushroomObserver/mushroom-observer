@@ -33,13 +33,13 @@ module LightboxHelper
       html << mark_as_reviewed_toggle(obs_data[:id], "btn-primary")
     end
     html << caption_obs_title(obs_data)
-    html << render(partial: "observations/show/observation_details",
-                   locals: { obs: obs_data[:obs], caption: true })
+    html << observation_details_when_where_who(obs: obs_data[:obs])
+    html << observation_details_notes(obs: obs_data[:obs])
   end
 
   def caption_obs_title(obs_data)
-    content_tag(:h4, show_obs_title(obs: obs_data[:obs]),
-                class: "obs-what", id: "observation_what_#{obs_data[:id]}")
+    tag.h4(show_obs_title(obs: obs_data[:obs]),
+           class: "obs-what", id: "observation_what_#{obs_data[:id]}")
   end
 
   # links relating to the image object, pre-joined as a div
@@ -48,7 +48,7 @@ module LightboxHelper
     links << original_image_link(image_id, "lightbox_link")
     links << " | "
     links << image_exif_link(image_id, "lightbox_link")
-    content_tag(:div, class: "caption-image-links my-3") do
+    tag.div(class: "caption-image-links my-3") do
       safe_join(links)
     end
   end
