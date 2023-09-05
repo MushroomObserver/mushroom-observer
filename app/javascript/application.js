@@ -2,4 +2,4 @@
 // If string literal error, it means the importmap is not functioning
 import "@hotwired/turbo-rails"
 import Rails from "@rails/ujs"
-Rails.start();
+Rails.start();import "controllers"

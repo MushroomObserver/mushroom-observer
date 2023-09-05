@@ -13,7 +13,8 @@
 # or not the content is passed as the first argument or as a block.
 Rails.application.config.action_view.button_to_generates_button_tag = true
 
-# `stylesheet_link_tag` view helper will not render the media attribute by default.
+# `stylesheet_link_tag` view helper will not render the media attribute by
+# default.
 # Rails.application.config.action_view.apply_stylesheet_media_default = false
 
 # Change the digest class for the key generators to `OpenSSL::Digest::SHA256`.
@@ -23,31 +24,36 @@ Rails.application.config.action_view.button_to_generates_button_tag = true
 #
 # See upgrading guide for more information on how to build a rotator.
 # https://guides.rubyonrails.org/v7.0/upgrading_ruby_on_rails.html
-# Rails.application.config.active_support.key_generator_hash_digest_class = OpenSSL::Digest::SHA256
+# Rails.application.config.active_support.key_generator_hash_digest_class =
+#   OpenSSL::Digest::SHA256
 
 # Change the digest class for ActiveSupport::Digest.
 # Changing this default means that for example Etags change and
 # various cache keys leading to cache invalidation.
-# Rails.application.config.active_support.hash_digest_class = OpenSSL::Digest::SHA256
+# Rails.application.config.active_support.hash_digest_class =
+#   OpenSSL::Digest::SHA256
 
 # Don't override ActiveSupport::TimeWithZone.name and use the default Ruby
 # implementation.
-Rails.application.config.active_support.remove_deprecated_time_with_zone_name = true
+Rails.application.config.active_support.
+  remove_deprecated_time_with_zone_name = true
 
 # Calls `Rails.application.executor.wrap` around test cases.
 # This makes test cases behave closer to an actual request or job.
-# Several features that are normally disabled in test, such as Active Record query cache
-# and asynchronous queries will then be enabled.
+# Several features that are normally disabled in test, such as Active Record
+# query cacheand asynchronous queries will then be enabled.
 Rails.application.config.active_support.executor_around_test_case = true
 
-# Set both the `:open_timeout` and `:read_timeout` values for `:smtp` delivery method.
+# Set both the `:open_timeout` and `:read_timeout` values for `:smtp` delivery
+# method.
 Rails.application.config.action_mailer.smtp_timeout = 5
 
-# The ActiveStorage video previewer will now use scene change detection to generate
-# better preview images (rather than the previous default of using the first frame
-# of the video).
+# The ActiveStorage video previewer will now use scene change detection to
+# generate better preview images (rather than the previous default of using the
+# first frame of the video).
 # Rails.application.config.active_storage.video_preview_arguments =
-#   "-vf 'select=eq(n\\,0)+eq(key\\,1)+gt(scene\\,0.015),loop=loop=-1:size=2,trim=start_frame=1' -frames:v 1 -f image2"
+#   "-vf 'select=eq(n\\,0)+eq(key\\,1)+gt(scene\\,0.015), \
+#   loop=loop=-1:size=2,trim=start_frame=1' -frames:v 1 -f image2"
 
 # Automatically infer `inverse_of` for associations with a scope.
 Rails.application.config.active_record.automatic_scope_inversing = true
@@ -71,15 +77,17 @@ Rails.application.config.active_record.verify_foreign_keys_for_fixtures = true
 # Rails.application.config.active_storage.variant_processor = :vips
 
 # Enable parameter wrapping for JSON.
-# Previously this was set in an initializer. It's fine to keep using that initializer if you've customized it.
+# Previously this was set in an initializer. It's fine to keep using that
+# initializer if you've customized it.
 # To disable parameter wrapping entirely, set this config to `false`.
 # Rails.application.config.action_controller.wrap_parameters_by_default = true
 
-# Specifies whether generated namespaced UUIDs follow the RFC 4122 standard for namespace IDs provided as a
-# `String` to `Digest::UUID.uuid_v3` or `Digest::UUID.uuid_v5` method calls.
-#
-# See https://guides.rubyonrails.org/configuring.html#config-active-support-use-rfc4122-namespaced-uuids for
-# more information.
+# Specifies whether generated namespaced UUIDs follow the RFC 4122 standard for
+# namespace IDs provided as a `String` to `Digest::UUID.uuid_v3` or
+# `Digest::UUID.uuid_v5` method calls.
+# See
+# https://guides.rubyonrails.org/configuring.html#config-active-support-use-rfc4122-namespaced-uuids
+# for more information.
 # Rails.application.config.active_support.use_rfc4122_namespaced_uuids = true
 
 # Change the default headers to disable browsers' flawed legacy XSS protection.
@@ -98,44 +106,59 @@ Rails.application.config.active_record.verify_foreign_keys_for_fixtures = true
 # will have a different format that is not supported by Rails 6.1 applications.
 # Only change this value after your application is fully deployed to Rails 7.0
 # and you have no plans to rollback.
-# When you're ready to change format, add this to `config/application.rb` (NOT this file):
+# When you're ready to change format, add this to `config/application.rb` (NOT
+# this file):
 #  config.active_support.cache_format_version = 7.0
 
 # Cookie serializer: 2 options
 #
-# If you're upgrading and haven't set `cookies_serializer` previously, your cookie serializer
-# is `:marshal`. The default for new apps is `:json`.
+# If you're upgrading and haven't set `cookies_serializer` previously, your
+# cookie serializer is `:marshal`. The default for new apps is `:json`.
 #
 # Rails.application.config.action_dispatch.cookies_serializer = :json
 #
 #
-# To migrate an existing application to the `:json` serializer, use the `:hybrid` option.
+# To migrate an existing application to the `:json` serializer, use the
+# `:hybrid` option.
 #
-# Rails transparently deserializes existing (Marshal-serialized) cookies on read and
-# re-writes them in the JSON format.
+# Rails transparently deserializes existing (Marshal-serialized) cookies on
+# read and re-writes them in the JSON format.
 #
-# It is fine to use `:hybrid` long term; you should do that until you're confident *all* your cookies
-# have been converted to JSON. To keep using `:hybrid` long term, move this config to its own
-# initializer or to `config/application.rb`.
+# It is fine to use `:hybrid` long term; you should do that until you're
+# confident *all* your cookies have been converted to JSON. To keep using
+# `:hybrid` long term, move this config to its own initializer or to
+# `config/application.rb`.
 #
 # Rails.application.config.action_dispatch.cookies_serializer = :hybrid
 #
 #
-# If your cookies can't yet be serialized to JSON, keep using `:marshal` for backward-compatibility.
+# If your cookies can't yet be serialized to JSON, keep using `:marshal` for
+# backward-compatibility.
 #
-# If you have configured the serializer elsewhere, you can remove this section of the file.
+# If you have configured the serializer elsewhere, you can remove this section
+# of the file.
 #
-# See https://guides.rubyonrails.org/action_controller_overview.html#cookies for more information.
+# See https://guides.rubyonrails.org/action_controller_overview.html#cookies
+# for more information.
 
-# Change the return value of `ActionDispatch::Request#content_type` to the Content-Type header without modification.
-# Rails.application.config.action_dispatch.return_only_request_media_type_on_content_type = false
+# Change the return value of `ActionDispatch::Request#content_type` to the
+# Content-Type header without modification.
+# Rails.application.config.action_dispatch.
+#   return_only_request_media_type_on_content_type = false
 
-# Active Storage `has_many_attached` relationships will default to replacing the current collection instead of appending to it.
-# Thus, to support submitting an empty collection, the `file_field` helper will render an hidden field `include_hidden` by default when `multiple_file_field_include_hidden` is set to `true`.
-# See https://guides.rubyonrails.org/configuring.html#config-active-storage-multiple-file-field-include-hidden for more information.
-# Rails.application.config.active_storage.multiple_file_field_include_hidden = true
+# Active Storage `has_many_attached` relationships will default to replacing
+# the current collection instead of appending to it. Thus, to support
+# submitting an empty collection, the `file_field` helper will render an hidden
+# field `include_hidden` by default when `multiple_file_field_include_hidden`
+# is set to `true`. See
+# https://guides.rubyonrails.org/configuring.html#config-active-storage-multiple-file-field-include-hidden
+# for more information.
+# Rails.application.config.active_storage.
+#   multiple_file_field_include_hidden = true
 
-# ** Please read carefully, this must be configured in config/application.rb (NOT this file) **
-# Disables the deprecated #to_s override in some Ruby core classes
-# See https://guides.rubyonrails.org/configuring.html#config-active-support-disable-to-s-conversion for more information.
+# ** Please read carefully, this must be configured in config/application.rb
+#    (NOT this file) **
+# Disables the deprecated #to_s override in some Ruby core classes. See
+# https://guides.rubyonrails.org/configuring.html#config-active-support-disable-to-s-conversion
+# for more information.
 # config.active_support.disable_to_s_conversion = true
