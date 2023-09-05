@@ -10,7 +10,7 @@ class ProjectsController < ApplicationController
   @index_subaction_param_keys = [
     :pattern,
     :by,
-    :by_user
+    :has_member
   ].freeze
 
   @index_subaction_dispatch_table = {
@@ -187,9 +187,9 @@ class ProjectsController < ApplicationController
   end
 
   # Display list of user's projects, sorted by date.
-  def by_user
+  def has_member
     user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
+      model: User, obj_id: params[:has_member].to_s,
       index_path: projects_path
     )
     return unless user

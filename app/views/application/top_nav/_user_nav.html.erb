@@ -52,7 +52,7 @@
                       observations_path(user: @user.id),
                       { class: "" } ) %></li>
       <li><%= link_to(:app_your_projects.t,
-                      projects_path(by_user: @user.id),
+                      projects_path(has_member: @user.id),
                       { class: "", id: "user_drop_projects_link" }) %></li>
       <li><%= link_to(:app_your_lists.t,
                       species_lists_path(by_user: @user.id),
