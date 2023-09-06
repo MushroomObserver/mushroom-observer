@@ -497,6 +497,10 @@ class Observation < AbstractModel
     Project.can_edit?(self, user)
   end
 
+  def project_admin?(user = User.current)
+    Project.admin_power?(self, user)
+  end
+
   # There is no value to keeping a collection number record after all its
   # observations are destroyed or removed from it.
   def destroy_orphaned_collection_numbers
@@ -692,6 +696,10 @@ class Observation < AbstractModel
 
   def public_long
     gps_hidden && user_id != User.current_id ? nil : long
+  end
+
+  def reveal_location?
+    !gps_hidden || can_edit? || project_admin?
   end
 
   def display_lat_long
