@@ -15,7 +15,7 @@
 # Modals that are "busy" are not destroyed when closed.
 
 locals = local_assigns.except(:identifier, :title, :partial).
-                       merge({ local: false })
+                       merge({ format: :turbo_stream })
 %>
 
 <%=

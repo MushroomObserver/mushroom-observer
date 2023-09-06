@@ -105,7 +105,7 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_with_query(action: :index)
       end
-      format.js do
+      format.turbo_stream do
         render_collection_numbers_section_update
       end
     end
@@ -220,7 +220,7 @@ class CollectionNumbersController < ApplicationController
         format.html do
           redirect_to(redirect_params) and return true
         end
-        format.js do
+        format.turbo_stream do
           render(partial: "shared/modal_form_reload",
                  locals: { identifier: "collection_number",
                            form: "collection_numbers/form" }) and return true
