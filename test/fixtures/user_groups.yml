@@ -18,6 +18,12 @@ bolete_users:
 bolete_admins:
   name: Bolete Project.admin
 
+burbank_users:
+  name: Burbank Project
+
+burbank_admins:
+  name: Burbank Project.admin
+
 only_admins:
   name: The Test Coverage Project.admin
 

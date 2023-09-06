@@ -12,7 +12,7 @@ module Projects
     before_action :login_required
     before_action :pass_query_params
 
-    # View that lists all users with links to add each as a member.
+    # View that lists all verified users with links to add each as a member.
     # Linked from: show_project (for admins only)
     # Inputs:
     #   params[:project_id] (was :id)
@@ -27,12 +27,14 @@ module Projects
         return must_be_project_admin!(@project.id)
       end
 
-      @users = User.order(last_login: :desc).limit(100).to_a
+      @users =
+        User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
     end
 
     def create
       return unless find_project!
-      unless @project.is_admin?(@user)
+      unless @project.is_admin?(@user) ||
+             (@project.open_membership && @user.id.to_s == params[:candidate])
         return must_be_project_admin!(@project.id)
       end
       return unless (@candidate = params[:candidate])
@@ -52,7 +54,7 @@ module Projects
     def edit
       return unless find_project!
       return unless find_candidate!
-      return if @project.is_admin?(@user)
+      return if @project.is_admin?(@user) || @user == @candidate
 
       must_be_project_admin!(@project.id)
     end
@@ -60,7 +62,7 @@ module Projects
     def update
       return unless find_project!
       return unless find_candidate!
-      unless @project.is_admin?(@user)
+      unless @project.is_admin?(@user) || @user == @candidate
         return must_be_project_admin!(@project.id)
       end
 
@@ -99,11 +101,18 @@ module Projects
       admin = member = :remove
       case params[:commit]
       when :change_member_status_make_admin.l
+        unless project.is_admin?(@user)
+          return must_be_project_admin!(project.id)
+        end
+
         admin = member = :add
       when :change_member_status_make_member.l
         member = :add
       end
-      set_status(project, :admin, candidate, admin)
+      if project.is_admin?(@user)
+        set_status(project, :admin, candidate,
+                   admin)
+      end
       set_status(project, :member, candidate, member)
       redirect_to(project_path(project.id, q: get_query_param))
     end

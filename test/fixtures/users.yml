@@ -58,7 +58,7 @@ katrina:
   <<: *DEFAULTS
   name: Katrina
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
-  user_groups: all_users, eol_users, katrina_only
+  user_groups: all_users, burbank_users, eol_users, katrina_only
 
 # Roy is a scientific user
 roy:
@@ -66,6 +66,7 @@ roy:
   name: Roy Halling
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
+  user_groups: all_users, burbank_admins
 
 spammer:
   <<: *DEFAULTS

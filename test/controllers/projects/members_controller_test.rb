@@ -39,6 +39,16 @@ module Projects
                          candidate: mary.id, project_id: project.id)
     end
 
+    def test_change_member_status_non_admin
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: mary.id
+      }
+      requires_login(:edit, params, katrina.login)
+      assert_flash_error
+    end
+
     # non-admin member -> non-admin member (should be a no-op)
     def test_change_member_status_member_make_member
       change_member_status_helper(rolf, katrina,
@@ -118,15 +128,28 @@ module Projects
     def test_change_member_status_by_member_remove_member
       change_member_status_helper(katrina, katrina,
                                   :change_member_status_remove_member,
+                                  false, true, false, false)
+    end
+
+    def test_change_member_status_by_member_make_admin
+      change_member_status_helper(katrina, katrina,
+                                  :change_member_status_make_admin,
                                   false, true, false, true)
     end
 
     # There are many other combinations that shouldn't work
     # for change_member_status, but I think the above covers the key cases
 
-    # Make sure admin can see form.
     def test_add_members
-      requires_login(:new, project_id: projects(:eol_project).id)
+      project = projects(:eol_project)
+      requires_login(:new, project_id: project.id)
+
+      assert_displayed_title("Add users to #{project.title}",
+                             "Admin should be able to see add members form")
+      assert_select("td", { text: users(:zero_user).login },
+                    "List of potential members should include verified users")
+      assert_select("td", { text: users(:unverified).login, count: 0 },
+                    "List of potential members should omit unverified users")
     end
 
     # Make sure non-admin cannot see form.
@@ -168,6 +191,38 @@ module Projects
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(false, target_user.in_group?(eol_project.user_group.name))
+    end
+
+    def test_add_self_to_open_membership_project
+      project = projects(:open_membership_project)
+      target_user = dick
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+      params = {
+        project_id: project.id,
+        candidate: target_user.id
+      }
+      post_requires_login(:create, params, target_user.login)
+      assert_redirected_to(project_path(project.id))
+      target_user = User.find(target_user.id)
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(true, target_user.in_group?(project.user_group.name))
+    end
+
+    def test_add_someone_else_to_open_membership_project
+      project = projects(:open_membership_project)
+      target_user = dick
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+      params = {
+        project_id: project.id,
+        candidate: target_user.id
+      }
+      post_requires_login(:create, params, katrina.login)
+      assert_redirected_to(project_path(project.id))
+      target_user = User.find(target_user.id)
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
     end
 
     def test_add_member_writein
