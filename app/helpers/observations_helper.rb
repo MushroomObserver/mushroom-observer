@@ -130,4 +130,66 @@ module ObservationsHelper
       )
     ].safe_join
   end
+
+  # The following sections of the observation_details partial are also needed as
+  # part of the lightbox caption, so that was called on the obs_index as a
+  # sub-partial. Here they're converted to helpers to speed up loading of index
+  def observation_details_when_where_who(obs:)
+    [
+      observation_details_when(obs: obs),
+      observation_details_where(obs: obs),
+      observation_details_where_gps(obs: obs),
+      observation_details_who(obs: obs)
+    ].safe_join
+  end
+
+  def observation_details_when(obs:)
+    tag.p(class: "obs-when", id: "observation_when") do
+      ["#{:WHEN.t}:", tag.b(obs.when.web_date)].safe_join(" ")
+    end
+  end
+
+  def observation_details_where(obs:)
+    tag.p(class: "obs-where", id: "observation_where") do
+      [
+        "#{if obs.is_collection_location
+             :show_observation_collection_location.t
+           else
+             :show_observation_seen_at.t
+           end}:",
+        location_link(obs.place_name, obs.location, nil, true)
+      ].safe_join(" ")
+    end
+  end
+
+  def observation_details_where_gps(obs:)
+    return "" unless obs.lat
+
+    gps_display_link = link_to([obs.display_lat_long.t,
+                                obs.display_alt.t,
+                                "[#{:click_for_map.t}]"].safe_join(" "),
+                               map_observation_path(id: obs.id))
+    gps_hidden_msg = tag.i("(#{:show_observation_gps_hidden.t})")
+
+    tag.p(class: "obs-where-gps", id: "observation_where_gps") do
+      concat(gps_display_link) if obs.reveal_location?
+      concat(gps_hidden_msg) if obs.gps_hidden
+    end
+  end
+
+  def observation_details_who(obs:)
+    tag.p(class: "obs-who", id: "observation_who") do
+      ["#{:WHO.t}:", user_link(obs.user)].safe_join(" ")
+    end
+  end
+
+  def observation_details_notes(obs:)
+    return "" unless obs.notes?
+
+    tag.div(class: "obs-notes", id: "observation_notes") do
+      Textile.clear_textile_cache
+      Textile.register_name(obs.name)
+      tag.div(obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl)
+    end
+  end
 end

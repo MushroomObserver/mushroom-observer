@@ -699,7 +699,7 @@ class Observation < AbstractModel
   end
 
   def reveal_location?
-    lat && (!gps_hidden || can_edit? || project_admin?)
+    !gps_hidden || can_edit? || project_admin?
   end
 
   def display_lat_long
