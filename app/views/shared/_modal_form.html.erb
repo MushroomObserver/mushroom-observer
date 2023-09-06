@@ -14,8 +14,7 @@
 # Successful submit sets it "false".
 # Modals that are "busy" are not destroyed when closed.
 
-locals = local_assigns.except(:identifier, :title, :partial).
-                       merge({ format: :turbo_stream })
+locals = local_assigns.except(:identifier, :title, :partial)
 %>
 
 <%=
