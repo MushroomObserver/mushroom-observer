@@ -56,6 +56,21 @@ module ApplicationHelper
     end
   end
 
+  # This can be called to display flash notices either in the page or a modal.
+  # Send it an html `id` to be able to find the notices via JS later.
+  def flash_notices_html
+    return "" unless flash_notices?
+
+    klass = case flash_notice_level
+            when 0 then "alert-success"
+            when 1 then "alert-warning"
+            when 2 then "alert-danger"
+            end
+
+    tag.div(flash_get_notices, id: "flash_notices",
+                               class: class_names("alert mt-3", klass))
+  end
+
   # ----------------------------------------------------------------------------
 
   # Add something to the header from within view.  This can be called as many

@@ -21,10 +21,7 @@ $("#<%= id %>").replaceWith('<%= j render(
 ) %>');
 
 // Update the page flash, not the modal flash
-$("#page_flash").html("<%= j render(
-  partial: 'application/app/flash_notices',
-  locals: { id: 'flash_notices' }
-) if flash_notices? %>");
+$("#page_flash").html("<%= j flash_notices_html %>");
 
 // Remove the modal, because results on page
 $(".modal").attr('data-busy', 'false').modal('hide');
