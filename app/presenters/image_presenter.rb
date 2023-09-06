@@ -39,7 +39,7 @@ class ImagePresenter < BasePresenter
       data: {},
       data_sizes: {},
       fit: :cover,
-      extra_classes: "false",
+      extra_classes: "",
       obs_data: {}, # used in lightbox caption
       identify: false,
       image_link: Rails.application.routes.url_helpers.image_path(image_id),
