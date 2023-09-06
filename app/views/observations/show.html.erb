@@ -13,14 +13,21 @@ show_lists = @user && @observation.species_lists.any?
 show_links = @user && (@observation.external_links.any? || @new_sites.any?)
 
 obs_locals = { obs: @observation }
+carousel_locals = {
+  object: @observation, images: @observation.images,
+  default_image: @observation&.thumb_image || nil,
+  title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
+}
 %>
 
 <div class="row">
-  <div class="col-sm-8 col-lg-7 float-sm-left">
+  <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
+    <%= render(partial: "shared/images/carousel", locals: carousel_locals) %>
+  </div>
+
+  <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
     <%= render(partial: "observations/show/observation_info",
                locals: obs_locals) %>
-  </div>
-  <div class="col-sm-4 col-lg-5 float-sm-right">
     <% if @user %>
       <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
 
@@ -33,16 +40,11 @@ obs_locals = { obs: @observation }
         <%= render(partial: "observations/show/links", locals: obs_locals) %>
       <% end %>
     <% end %>
-
-    <% if show_map %>
-      <%= render(partial: "observations/show/thumbnail_map",
-                 locals: obs_locals) %>
-    <% end %>
-
-    <%= render(partial: "observations/show/images", locals: obs_locals) %>
   </div>
+</div><!--.row-->
 
-  <div class="col-sm-8 col-lg-7 float-sm-left">
+<div class="row">
+  <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
     <% if @user %>
       <%= render(partial: "observations/show/namings", locals: obs_locals) %>
     <% end %>
@@ -53,6 +55,12 @@ obs_locals = { obs: @observation }
     <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>
 
+  <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
+    <% if show_map %>
+      <%= render(partial: "observations/show/thumbnail_map",
+                  locals: obs_locals) %>
+    <% end %>
+  </div>
 </div><!--.row-->
 
 <%= show_object_footer(@observation) %>

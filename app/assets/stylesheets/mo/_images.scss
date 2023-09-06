@@ -1,0 +1,241 @@
+.thumbnail-container {
+  background-color: rgba(0,0,0, 0.33)
+}
+
+//
+// image interactions - theater and votes
+// --------------------------------------------------
+
+svg.placeholder {
+  rect {
+    fill: rgba($LIST_BG_COLOR, 0.3) !important;
+  }
+}
+
+.image-sizer {
+  max-width: 100%;
+}
+
+//
+// user thumbnails for comments, etc
+// --------------------------------------------------
+
+.user-image-sizer {
+  max-width: 160px;
+  max-height: 160px;
+  position: relative;
+}
+
+//
+// lightbox activator and vote links
+// --------------------------------------------------
+
+.vote-section,
+.theater-btn {
+  z-index: 2;
+  opacity: 0;
+  background: rgba(0,0,0, 0.8);
+  // border-radius: $border-radius-sm;
+  color: white;
+  transition: opacity 0.3s ease-out;
+}
+
+.theater-btn {
+  @extend .top-right, .text-center, .mr-2, .mt-2;
+  padding: 0.125em;
+
+  &:hover {
+    color: rgba(white, 0.75);
+  }
+
+  i {
+    height: 2.4rem;
+    width: 2.4rem;
+    font-size: 2.1rem;
+    vertical-align: bottom;
+  }
+}
+
+.vote-section {
+  @extend .ab-bottom, .text-center;
+  padding: 0.5em 0.25em;
+
+  a,
+  button[type=submit]:not(.btn) {
+    color: white !important;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:focus {
+      color: lighten($link-color, 21%) !important;
+      text-decoration: none;
+    }
+  }
+}
+
+.matrix-box {
+  .vote-buttons {
+    font-size: 0.875em;
+  }
+}
+
+.image-sizer:hover,
+.image-sizer:focus {
+  .vote-section,
+  .theater-btn {
+    opacity: 1;
+    text-decoration: none;
+  }
+}
+
+
+//
+// image vote meter bar
+// --------------------------------------------------
+
+.progress.vote-meter {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 200px;
+  height: 7px;
+  margin-bottom: 0;
+
+  .progress-bar {
+    font-size: 12px;
+    line-height: 5px;
+    color: #FFF;
+  }
+}
+
+
+//
+// Mushroom Observer carousels
+// --------------------------------------------------
+
+.carousel-inner {
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+
+  &::after {
+    display: block;
+    clear: both;
+    content: "";
+  }
+
+  .item {
+    padding-bottom: 75%;
+    position: relative;
+    float: left;
+    width: 100%;
+    margin-right: -100%;
+
+    > div {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .carousel-caption {
+      @extend .bg-legible, .py-2;
+      // position: absolute;
+      bottom: 0;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: auto;
+      height: auto;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      .vote-section {
+        background: transparent;
+        position: static;
+      }
+
+      .image-info {
+        @extend .smaller, .px-3, .pb-2;
+      }
+    }
+
+    &:hover,
+    &:focus {
+      .carousel-caption,
+      .theater-btn,
+      .vote-section {
+        opacity: 1;
+      }
+    }
+
+    // &.right,
+    // &.left {
+    //   display: inline-block;
+    // }
+  }
+
+  // .carousel-caption-and-votes {
+  //   position: absolute;
+  //   bottom: 0;
+  //   top: auto;
+  // }
+
+  .vote-section {
+    @extend .text-center, .px-3, .py-2;
+    width: auto;
+    height: auto;
+  }
+}
+
+.carousel-control {
+  margin-top: 5rem; // to let overlays through
+  margin-bottom: 5rem; // fullscreen and caption/voting
+  background: none !important;
+  font-size: 2rem;
+  color: #bbb;
+
+  .btn {
+    font-size: inherit;
+  }
+
+  &:hover,
+  &:focus {
+    color: #eee;
+  }
+}
+
+.carousel-heading {
+  border-top: 1px solid $panel-inner-border;
+}
+
+.carousel-indicators {
+  position: static;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  // bottom: -7.5vw;
+  // height: 6vw;
+  overflow-x: hidden;
+  white-space: nowrap;
+
+  li {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    width: 6vw;
+    height: 6vw;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+
+    &.active {
+      width: 6vw;
+      height: 6vw;
+      opacity: 0.6;
+    }
+  }
+}
