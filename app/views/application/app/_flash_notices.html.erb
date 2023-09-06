@@ -7,8 +7,7 @@ klass = case flash_notice_level
   when 1; "alert-warning"
   when 2; "alert-danger"
 end
-content_tag(:div, flash_get_notices,
-            id: id,
-            class: "alert mt-3 #{klass}")
+
+tag.div(flash_get_notices, id: id, class: "alert mt-3 #{klass}")
 %>
 <!--/FLASH NOTICES-->
