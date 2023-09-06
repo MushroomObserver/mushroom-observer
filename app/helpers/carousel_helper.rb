@@ -52,7 +52,7 @@ module CarouselHelper
                            :thumbnails, :html_id)
     presenter_args = img_args.merge({ size: :large, fit: :contain,
                                       original: true,
-                                      extra_classes: "carousel-thumbnail" })
+                                      extra_classes: "carousel-image" })
     presenter = ImagePresenter.new(image, presenter_args)
     active = image == args[:top_img] ? "active" : ""
 
