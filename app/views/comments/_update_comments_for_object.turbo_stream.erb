@@ -4,13 +4,13 @@
 // create or update should provide.
 %>
 
-<%= turbo_stream.update "#comments_for_object" do %>
-  <%= render(
-  partial: "comments/comments_for_object",
-  locals: { object: @target, controls: true, limit: nil },
-  layout: false
-) %>
-<% end %>
+<%= turbo_stream.replace("comments_for_object") do
+  render(
+    partial: "comments/comments_for_object",
+    locals: { object: @target, controls: true, limit: nil },
+    layout: false
+  )
+end %>
 
 <%#
 // Finally, remove the modal if present (not in delete)

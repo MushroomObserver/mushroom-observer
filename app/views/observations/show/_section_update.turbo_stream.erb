@@ -1,3 +1,11 @@
+<%#
+need to hide the modal. stimulus?
+https://stackoverflow.com/questions/76467781/run-custom-javascript-when-turbo-stream-is-received
+
+$('#mo_ajax_progress_caption').empty();
+$('#mo_ajax_progress').modal('hide');
+%>
+
 <%
 # Update observation view with results of update or create
 # Needs locals: identifier
@@ -11,9 +19,19 @@ else
 end
 %>
 
-<%# need to hide the modal and update flash. stimulus?
-https://stackoverflow.com/questions/76467781/run-custom-javascript-when-turbo-stream-is-received
+<%= turbo_stream.replace(id) do
+  render(
+    partial: partial,
+    locals: { obs: @observation.reload },
+    layout: false
+  )
+end %>
+
+<%= turbo_stream.update("page_flash") do
+  flash_notices_html
+end %>
+
+<%#
+// Remove the modal, because results on page
+$(".modal").attr('data-busy', 'false').modal('hide');
 %>
-<%= turbo_stream.update id do %>
-  <%= render partial: partial %>
-<% end %>
