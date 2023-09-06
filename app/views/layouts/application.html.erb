@@ -2,8 +2,8 @@
 @css_theme = css_theme
 
 whos_calling = "#{controller.controller_name}__#{controller.action_name}"
-theme_class = " theme-#{@css_theme.underscore.dasherize}"
-body_class = whos_calling + theme_class
+theme_class = "theme-#{@css_theme.underscore.dasherize}"
+body_class = class_names(whos_calling, theme_class)
 %>
 <!DOCTYPE html>
 <html>
@@ -34,11 +34,8 @@ body_class = whos_calling + theme_class
       <%= render(partial: "application/top_nav") %>
 
       <%# need to print a `#page_flash` div no matter what, so js can add %>
-      <div class="container-text hidden-print" id="page_flash">
-        <% if flash_notices? %>
-          <%= render(partial: "application/app/flash_notices",
-                     locals: { id: "flash_notices"}) %>
-        <% end %>
+      <div class="container-full hidden-print" id="page_flash">
+        <%= flash_notices_html %>
         <% flash_clear %>
       </div><!--.container-text-->
 
