@@ -711,6 +711,14 @@ class ObservationTest < UnitTestCase
     assert_true(obs.can_edit?(dick))
   end
 
+  def test_open_membership_project_ownership
+    # Part of Burbank project, but owned by Roy
+    obs = observations(:owner_accepts_general_questions)
+    assert_false(obs.can_edit?(rolf))
+    assert_true(obs.can_edit?(roy)) # Owner & project admin
+    assert_false(obs.can_edit?(katrina)) # Project member
+  end
+
   def test_imageless
     # has image
     assert_true(observations(:coprinus_comatus_obs).has_backup_data?)

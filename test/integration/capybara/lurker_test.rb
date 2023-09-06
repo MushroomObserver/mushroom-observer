@@ -73,7 +73,8 @@ class LurkerTest < CapybaraIntegrationTestCase
                  page.title, "Wrong page")
 
     click_on("Projects")
-    assert_equal("#{:app_title.l}: Projects by Title", page.title, "Wrong page")
+    assert_equal("#{:app_title.l}: Projects by Time Last Modified", page.title,
+                 "Wrong page")
 
     click_on("Comments")
     assert_equal("#{:app_title.l}: Comments by Date Created",

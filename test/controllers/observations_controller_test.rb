@@ -125,6 +125,11 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_match(/34.1622|118.3521/, @response.body)
     assert_match(:show_observation_gps_hidden.t, @response.body)
+
+    login("roy")
+    get(:show, params: { id: obs.id })
+    assert_match(/34.1622|118.3521/, @response.body)
+    assert_match(:show_observation_gps_hidden.t, @response.body)
   end
 
   def test_show_obs_view_stats
@@ -2897,6 +2902,14 @@ class ObservationsControllerTest < FunctionalTestCase
            project: { "id_#{@proj1.id}" => "0" }
          })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
+  end
+
+  def test_open_membership_project_checkboxes_in_create_observation
+    project = projects(:open_membership_project)
+
+    login("katrina")
+    get(:new)
+    assert_project_checks(project.id => :checked)
   end
 
   def test_project_checkboxes_in_update_observation

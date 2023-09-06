@@ -190,11 +190,13 @@ class ProjectsControllerTest < FunctionalTestCase
     project = Project.find_by(title: title)
     assert(project)
     assert_not_equal(summary, project.summary)
+    assert_not(project.open_membership)
     params = {
       id: project.id,
       project: {
         title: title,
-        summary: summary
+        summary: summary,
+        open_membership: true
       }
     }
     put_requires_user(:update, { action: :show }, params)
@@ -202,6 +204,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_redirected_to(project_path(project.id))
     assert(project)
     assert_equal(summary, project.summary)
+    assert(project.open_membership)
   end
 
   def test_edit_project_empty_name

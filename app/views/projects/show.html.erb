@@ -5,6 +5,15 @@ add_interest_icons(@user, @project)
 add_tab_set(project_show_tabs(project: @project, user: @user))
 %>
 
+<% if @project.can_join?(@user) %>
+  <%= post_button(name: :show_project_join.t,
+      path: project_members_path(project_id: @project.id,
+                                 candidate: @user.id)) %>
+<% elsif @project.can_leave?(@user) %>
+  <%= put_button(name: :show_project_leave.t,
+                 path: project_member_path(project_id: @project.id,
+                                           candidate: @user.id)) %>
+<% end %>
 <div class="row">
   <div class="col-12 col-lg-6">
     <%= card_block do %>

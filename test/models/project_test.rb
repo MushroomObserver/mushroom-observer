@@ -3,6 +3,13 @@
 require("test_helper")
 
 class ProjectTest < UnitTestCase
+  def test_not_accepting_observations
+    proj = projects(:not_accepting_observations_project)
+    minimal_unknown_obs = observations(:minimal_unknown_obs)
+    proj.add_observation(minimal_unknown_obs)
+    assert_not(proj.observations.include?(minimal_unknown_obs))
+  end
+
   def test_add_and_remove_observations
     proj = projects(:eol_project)
     minimal_unknown_obs = observations(:minimal_unknown_obs)
