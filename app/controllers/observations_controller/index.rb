@@ -194,6 +194,7 @@ class ObservationsController
                action: :index,
                matrix: true,
                include: [:name, :location, :user, :rss_log,
+                         { images: [:image_votes, :license, :projects, :user] },
                          { thumb_image: :image_votes }] }.merge(args)
 
       # Paginate by letter if sorting by user.

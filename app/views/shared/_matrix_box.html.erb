@@ -17,15 +17,15 @@ if presenter
     image_args = local_assigns.
                  except(:columns, :object, :object_counter, :object_iteration).
                  merge(presenter.image_data.except(:images) || {})
+    top_img = if object.respond_to?(:thumb_image) && object.thumb_image
+                object.thumb_image
+              else
+                images[0]
+              end
   end
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
   link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
                  tag.span(presenter.name, class: "rss-name")
-  top_img = if object.respond_to?(:thumb_image) && object.thumb_image
-              object.thumb_image
-            else
-              images[0]
-            end
 
   %>
 

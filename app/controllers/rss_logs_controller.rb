@@ -86,6 +86,7 @@ class RssLogsController < ApplicationController
       location: :user,
       name: :user,
       observation: [:location, :name, :user,
+                    { images: [:image_votes, :license, :user] },
                     @user ? { thumb_image: :image_votes } : :thumb_image],
       project: :user,
       species_list: [:location, :user]

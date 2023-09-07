@@ -51,16 +51,15 @@ class MatrixBoxPresenter < BasePresenter
     end
     self.time = rss_log.updated_at
 
-    # no link through if it's a carousel
-    img_link = if target.images.present? && target.images.length > 1
-                 false
-               else
-                 target.show_link_args
-               end
-
-    if target&.respond_to?(:thumb_image) && target&.thumb_image
+    if (images = rss_log_target_images(target))
+      # no link through if it's a carousel
+      img_link = if images.length > 1
+                   false
+                 else
+                   target.show_link_args
+                 end
       self.image_data = {
-        images: target.images,
+        images: images,
         image_link: img_link,
         obs_data: obs_data_hash(target),
         context: :matrix_box
@@ -137,11 +136,23 @@ class MatrixBoxPresenter < BasePresenter
 
     # Not user.images because that's every image they've uploaded
     self.image_data = {
-      images: [Image.find(user.image_id)],
+      images: [user.image_id],
       image_link: user.show_link_args,
       votes: false,
       context: :matrix_box
     }
+  end
+
+  # The target may not have images or a thumb_image
+  def rss_log_target_images(target)
+    images = if target.respond_to?(:images) && target&.images&.length&.positive?
+               target.images
+             elsif target.respond_to?(:thumb_image) && target&.thumb_image
+               [target.thumb_image]
+             end
+    return false unless images
+
+    images
   end
 
   def display_time
