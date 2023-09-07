@@ -13,10 +13,12 @@ module ObservationsHelper
   #   Observation nnn: Ccc ddd Author(s) (Site ID) (Aaa bbb)
   # Observer preference shown, consensus not deprecated:
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
-  def show_obs_title(obs:)
+  #
+  # NOTE: Must pass owner naming, or it will be recalculated on every obs.
+  def show_obs_title(obs:, owner_naming: nil)
     [
       obs_title_id(obs),
-      obs_title_consensus_name_link(obs: obs)
+      obs_title_consensus_name_link(name: obs.name, owner_naming: owner_naming)
     ].safe_join(" ")
   end
 
@@ -27,13 +29,12 @@ module ObservationsHelper
   end
 
   # name portion of Observation title
-  def obs_title_consensus_name_link(obs:)
-    name = obs.name
+  def obs_title_consensus_name_link(name:, owner_naming: nil)
     if name.deprecated &&
        (prefer_name = name.best_preferred_synonym).present?
       obs_title_with_preferred_name_link(name, prefer_name)
     else
-      obs_title_name_link(obs, name)
+      obs_title_name_link(name, owner_naming)
     end
   end
 
@@ -46,10 +47,10 @@ module ObservationsHelper
     ].safe_join(" ")
   end
 
-  def obs_title_name_link(obs, name)
+  def obs_title_name_link(name, owner_naming)
     text = [link_to_display_name_brief_authors(name)]
     # Differentiate this Name from Observer Preference
-    text << consensus_id_tag if obs.owner_preference
+    text << consensus_id_tag if owner_naming
     text.safe_join(" ")
   end
 
