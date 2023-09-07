@@ -34,7 +34,7 @@ module ObservationsHelper
        (prefer_name = name.best_preferred_synonym).present?
       obs_title_with_preferred_name_link(name, prefer_name)
     else
-      obs_title_name_link(obs, name, owner_naming)
+      obs_title_name_link(name, owner_naming)
     end
   end
 
@@ -47,7 +47,7 @@ module ObservationsHelper
     ].safe_join(" ")
   end
 
-  def obs_title_name_link(_obs, name, owner_naming)
+  def obs_title_name_link(name, owner_naming)
     text = [link_to_display_name_brief_authors(name)]
     # Differentiate this Name from Observer Preference
     text << consensus_id_tag if owner_naming
