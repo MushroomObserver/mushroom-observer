@@ -111,7 +111,7 @@ module LinkHelper
       class: class_names(identifier, args[:class], "text-danger"),
       data: { confirm: :are_you_sure.t,
               toggle: "tooltip", placement: "top", title: name }
-    }.merge(args.except(:class, :back))
+    }.deep_merge(args.except(:class, :back))
 
     button_to(path, html_options) do
       [content, icon].safe_join
@@ -127,7 +127,7 @@ module LinkHelper
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn
       title: name, data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args.except(:class, :back))
+    }.deep_merge(args.except(:class, :back))
 
     link_to(path, html_options) do
       [content, icon].safe_join
@@ -155,19 +155,26 @@ module LinkHelper
     [path, identifier, icon, content]
   end
 
+  def modal_link_to(name, path, args)
+    link_to(name, path,
+            **args.merge({ remote: true, onclick: "MOEvents.whirly();" }))
+  end
+
+  # Refactor to accept a tab array
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def add_button(path:, name: :ADD.t, **args, &block)
     content = block ? capture(&block) : ""
     html_options = {
       class: "", # usually also btn
       data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args)
+    }.deep_merge(args)
 
     link_to(path, html_options) do
       [content, link_icon(:add)].safe_join
     end
   end
 
+  # Refactor to accept a tab array
   # TODO: Change translations BACK to PREV, or make a BACK TO translation
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def back_button(path:, name: :BACK.t, **args, &block)
@@ -175,13 +182,14 @@ module LinkHelper
     html_options = {
       class: "", # usually also btn
       data: { toggle: "tooltip", placement: "top", title: name }
-    }.merge(args)
+    }.deep_merge(args)
 
     link_to(path, html_options) do
       [content, link_icon(:back)].safe_join
     end
   end
 
+  # Refactor to accept a tab array
   # POST to a path; used instead of a link because POST link requires js
   # post_button(name: herbarium.name.t,
   #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
@@ -190,7 +198,7 @@ module LinkHelper
     html_options = {
       method: :post,
       class: ""
-    }.merge(args)
+    }.deep_merge(args)
 
     button_to(path, html_options) { name }
   end
@@ -203,7 +211,7 @@ module LinkHelper
     html_options = {
       method: :put,
       class: ""
-    }.merge(args)
+    }.deep_merge(args)
 
     button_to(path, html_options) { name }
   end
@@ -216,7 +224,7 @@ module LinkHelper
     html_options = {
       method: :patch,
       class: ""
-    }.merge(args)
+    }.deep_merge(args)
 
     button_to(path, html_options) { name }
   end

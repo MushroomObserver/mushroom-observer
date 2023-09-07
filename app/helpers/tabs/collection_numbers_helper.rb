@@ -53,6 +53,13 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
+    def collection_number_show_tab(c_n)
+      cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
+      [tag.i(c_n.format_name.t),
+       collection_number_path(id: c_n.id, q: cn_query),
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
+    end
+
     def collection_number_mod_tabs(c_n)
       [edit_collection_number_tab(c_n),
        destroy_collection_number_tab(c_n)]
@@ -61,13 +68,13 @@ module Tabs
     def new_collection_number_for_obs_tab(obs)
       [:create_collection_number.l,
        add_query_param(new_collection_number_path(obs)),
-       { class: tab_id(__method__.to_s) }]
+       { class: "#{tab_id(__method__.to_s)}_#{obs.id}" }]
     end
 
     def edit_collection_number_tab(c_n)
       [:edit_collection_number.t,
        add_query_param(edit_collection_number_path(id: c_n.id, back: :show)),
-       { class: tab_id(__method__.to_s) }]
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
     end
 
     def destroy_collection_number_tab(c_n)
