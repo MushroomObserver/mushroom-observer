@@ -251,7 +251,7 @@ GEM
     sorted_set (1.0.3)
       rbtree
       set (~> 1.0)
-    sprockets (4.2.0)
+    sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
     sprockets-rails (3.4.2)
@@ -362,6 +362,7 @@ DEPENDENCIES
   simplecov
   simplecov-lcov
   sorted_set
+  sprockets (~> 4.2.1)
   sprockets-rails
   stimulus-rails
   turbo-rails

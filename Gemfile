@@ -42,6 +42,11 @@ gem("sprockets-rails")
 gem("stimulus-rails")
 gem("turbo-rails")
 
+# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
+# Delete this dependency declaration if the issue gets resolved:
+# https://github.com/hotwired/stimulus-rails/issues/108
+gem("sprockets", "~>4.2.1")
+
 # Security fix updates via Dependabot
 # CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")
