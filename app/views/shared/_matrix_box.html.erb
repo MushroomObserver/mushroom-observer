@@ -11,7 +11,7 @@ if presenter
   object_id = object&.id.present? ? object.id : "no_ID"
   # presenter.image_data includes context: :matrix_box where appropriate
   if presenter.image_data
-    image = presenter.image_data[:image]
+    images = presenter.image_data[:images]
     image_args = local_assigns.
                  except(:columns, :object, :object_counter, :object_iteration).
                  merge(presenter.image_data.except(:image) || {})
@@ -28,7 +28,8 @@ if presenter
       <div class="panel-sizing">
         <%= if presenter.image_data
           tag.div(class: "thumbnail-container") do
-            interactive_image(image, **image_args)
+            carousel_html(object: object, images: images,
+                          top_img: object&.thumb_image || nil, **image_args)
           end
         end %>
 
