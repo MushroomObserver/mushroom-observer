@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Test whether actions redirected correctly
-class RedirectsTest < IntegrationTestCase
+class RedirectsIntegrationTest < IntegrationTestCase
   # helpers
   def assert_old_url_redirects_to_new_path(old_method, old_url, new_path)
     case old_method

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class RandomTest < CapybaraIntegrationTestCase
+class RandomIntegrationTest < CapybaraIntegrationTestCase
   def test_pivotal_tracker
     login(users(:zero_user))
     visit("/")
