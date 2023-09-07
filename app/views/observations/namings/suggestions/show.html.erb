@@ -1,6 +1,6 @@
 <%
 @owner_naming = owner_naming_line(@observation) # must before show_obs_title
-add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
+add_page_title(show_obs_title(obs: @observation))
 num_images = @observation.images.length
 
 add_tab_set(naming_suggestion_tabs(obs: @observation))

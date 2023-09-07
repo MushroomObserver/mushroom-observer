@@ -16,7 +16,7 @@ class ObservationsHelperTest < ActionView::TestCase
     assert_match(
       link_to(current_name.display_name_brief_authors.t,
               name_path(id: current_name.id)),
-      obs_title_consensus_id(name: current_name),
+      obs_title_consensus_name_link(name: current_name),
       "Observation of a current Name should link to that Name"
     )
 
@@ -28,7 +28,7 @@ class ObservationsHelperTest < ActionView::TestCase
     assert_match(
       "#{link_to_display_name_brief_authors(deprecated_name)} (Site ID) " \
       "(#{link_to_display_name_without_authors(current_name)})",
-      obs_title_consensus_id(name: deprecated_name),
+      obs_title_consensus_name_link(name: deprecated_name),
       "Observation of deprecated Name should link to it and approved Name"
     )
   end
