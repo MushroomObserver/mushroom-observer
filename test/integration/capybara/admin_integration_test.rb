@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class AdminTest < CapybaraIntegrationTestCase
+class AdminIntegrationTest < CapybaraIntegrationTestCase
   # This test is not much more than a stub.
   # Should test somebody making a donation, admin reviews.
   def test_review_donations
