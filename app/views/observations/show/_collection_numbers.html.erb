@@ -17,7 +17,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         tag.div do
           [
             "#{:Collection_numbers.t}:",
-            "[" + modal_link_to(*new_collection_number_for_obs_tab(obs)) + "]"
+            "[" + modal_link_to("collection_number",
+                                *new_collection_number_for_obs_tab(obs)) + "]"
           ].safe_join(" ")
         end,
         tag.ul(class: "tight-list") do
@@ -26,7 +27,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
               [
                 link_to(*collection_number_show_tab(c_n)),
                 "[",
-                modal_link_to(*edit_collection_number_tab(c_n)),
+                modal_link_to("collection_number",
+                              *edit_collection_number_tab(c_n)),
                 "|",
                 patch_button(
                   name: :REMOVE.t,
@@ -59,7 +61,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
       [
         :show_observation_no_collection_numbers.t,
         "[",
-        modal_link_to(*new_collection_number_for_obs_tab(obs)),
+        modal_link_to("collection_number",
+                      *new_collection_number_for_obs_tab(obs)),
         "]"
       ].safe_join(" ")
     end

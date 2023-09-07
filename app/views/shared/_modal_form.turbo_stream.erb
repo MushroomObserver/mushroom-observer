@@ -1,0 +1,49 @@
+<%
+# Bootstrap modal with a form. called from various form actions
+# forms can send a flash message to `#modal_flash`
+#
+# Requires these locals:
+#   identifier, used to build html ids for parts of the modal
+#   title, the text in the modal-header h4
+#   form, full path (after /views/) of the partial building the form
+#   (locals) anything else you want to send to the body partial.
+#      { local: false } gets merged so that form sends via js
+
+# In order to keep form progress if the modal is closed and opened again,
+# we're setting the data attribute "busy" as "true".
+# Successful submit sets it "false".
+# Modals that are "busy" are not destroyed when closed.
+
+locals = local_assigns.except(:identifier, :title, :partial)
+%>
+
+<%=
+tag.div(
+  class: "modal", id: "modal_#{identifier}", role: "dialog",
+  aria: { labelledby: "modal_header_#{identifier}" },
+  data: { busy: "true", target: "remote-modal.modal" }
+) do
+  tag.div(class: "modal-dialog modal-lg", role: "document") do
+    tag.div(class: "modal-content") do
+      [
+        tag.div(class: "modal-header") do
+          [
+            tag.button(
+              type: :button, class: "close", data: { dismiss: "modal" },
+              aria: { label: :CLOSE.l } # stimulus: hide or destroy
+            ) { tag.span(aria: { hidden: "true" }) { "&times;".html_safe } },
+            tag.h4(title, class: "modal-title",
+                   id: "modal_header_#{identifier}") # turbo
+          ].safe_join
+        end,
+        tag.div(class: "modal-body", id: "modal_body_#{identifier}") do
+          [
+            tag.div("", id: "modal_flash"), # turbo
+            render(partial: form, locals: locals) # turbo
+          ].safe_join
+        end
+      ].safe_join
+    end
+  end
+end
+%>

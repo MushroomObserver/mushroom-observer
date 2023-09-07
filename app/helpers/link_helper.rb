@@ -155,9 +155,16 @@ module LinkHelper
     [path, identifier, icon, content]
   end
 
-  def modal_link_to(name, path, args)
+  # maybe need a modal identifier, in case of multiple form modals
+  def modal_link_to(identifier, name, path, args)
     link_to(name, path,
-            **args.merge({ remote: true, onclick: "MOEvents.whirly();" }))
+            **args.merge({ data: {
+                           turbo_frame: "modal_form_content",
+                           bs_toggle: "modal",
+                           bs_target: "#modal_#{identifier}",
+                           controller: "modal-form",
+                           action: "click->modal-form#modal"
+                         } }))
   end
 
   # Refactor to accept a tab array
