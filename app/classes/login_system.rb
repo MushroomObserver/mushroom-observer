@@ -32,6 +32,14 @@ module LoginSystem
     true
   end
 
+  # This allows our stats requests to get through, so we know if the site
+  # is getting slower or faster.
+  def allowed?(ip)
+    return true if ["127.0.0.1"].include?(ip.to_s)
+
+    false
+  end
+
   # login_required filter. add
   #
   #   before_action :login_required
@@ -42,10 +50,11 @@ module LoginSystem
   #   def authorize?(user)
   #
   def login_required
+    return true if allowed?(request.remote_ip) && Rails.env.production?
+
     return true unless protect?(action_name)
 
-    user = session_user
-    return true if user && authorize?(user)
+    return true if session_user && authorize?(session_user)
 
     # store current location so that we can
     # come back after the user logged in
