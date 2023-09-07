@@ -17,7 +17,7 @@ module LoginSystem
   #   before_action :login_required
   #
   def login_required
-    return true if allowed?(request.remote_ip)
+    return true if allowed?(request.remote_ip) && Rails.env.production?
 
     return true if session_user
 
