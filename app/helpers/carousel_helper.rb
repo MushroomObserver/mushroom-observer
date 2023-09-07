@@ -15,11 +15,11 @@ module CarouselHelper
     args[:top_img] ||= args[:images].first
     args[:title] ||= :IMAGES.t
     args[:links] ||= ""
-    args[:thumbnails] ||= true
-    identifier = args[:object]&.type_tag || "image"
-    args[:html_id] ||= "#{identifier}_carousel"
+    args[:thumbnails] = true if args[:thumbnails].nil?
+    type = args[:object]&.type_tag || "image"
+    args[:html_id] ||= "#{type}_#{args[:object].id}_carousel"
 
-    tag.div(class: "panel panel-default") do
+    capture do
       if !args[:images].nil? && args[:images].any?
         concat(carousel_basic_html(**args))
       else
@@ -40,7 +40,7 @@ module CarouselHelper
         end
         concat(carousel_controls(args[:html_id])) if args[:images].length > 1
       end)
-      concat(carousel_heading(args[:title], args[:links]))
+      concat(carousel_heading(args[:title], args[:links])) if args[:thumbnails]
       concat(carousel_thumbnails(**args)) if args[:thumbnails]
     end
   end
@@ -57,12 +57,13 @@ module CarouselHelper
     active = image == args[:top_img] ? "active" : ""
 
     tag.div(class: class_names("item", active)) do
-      [
-        image_tag(presenter.img_src, presenter.options_lazy),
-        image_stretched_link(presenter.image_link, presenter.image_link_method),
-        lightbox_link(presenter.lightbox_data),
-        carousel_caption(image, args[:object], presenter)
-      ].safe_join
+      concat(image_tag(presenter.img_src, presenter.options_lazy))
+      if presenter.image_link
+        concat(image_stretched_link(presenter.image_link,
+                                    presenter.image_link_method))
+      end
+      concat(lightbox_link(presenter.lightbox_data))
+      concat(carousel_caption(image, args[:object], presenter))
     end
   end
 

@@ -12,14 +12,21 @@ if presenter
   # presenter.image_data includes context: :matrix_box where appropriate
   if presenter.image_data
     images = presenter.image_data[:images]
+    # This is a lotta arg passing. Check if any view is actually sending these
+    # image_arg extra locals! AN 2023
     image_args = local_assigns.
                  except(:columns, :object, :object_counter, :object_iteration).
-                 merge(presenter.image_data.except(:image) || {})
+                 merge(presenter.image_data.except(:images) || {})
   end
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
-  link_heading = content_tag(:small, "(#{presenter.id})",
-                              class: "rss-id float-right") +
-                content_tag(:span, presenter.name, class: "rss-name")
+  link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
+                 tag.span(presenter.name, class: "rss-name")
+  top_img = if object.respond_to?(:thumb_image) && object.thumb_image
+              object.thumb_image
+            else
+              images[0]
+            end
+
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do %>
@@ -28,8 +35,8 @@ if presenter
       <div class="panel-sizing">
         <%= if presenter.image_data
           tag.div(class: "thumbnail-container") do
-            carousel_html(object: object, images: images,
-                          top_img: object&.thumb_image || nil, **image_args)
+            carousel_html(object: object, images: images, top_img: top_img,
+                          thumbnails: false, **image_args)
           end
         end %>
 

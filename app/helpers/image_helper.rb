@@ -111,7 +111,7 @@ module ImageHelper
   end
 
   def image_exif_link(image_id, classes)
-    link_to(:image_show_exif.t, exif_image_path(image_id),
+    link_to(:image_show_exif.t, exif_image_path(id: image_id),
             { class: classes, remote: true, onclick: "MOEvents.whirly();" })
   end
 

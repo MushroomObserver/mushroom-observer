@@ -51,16 +51,20 @@ class MatrixBoxPresenter < BasePresenter
     end
     self.time = rss_log.updated_at
 
+    # no link through if it's a carousel
+    img_link = if target.images.present? && target.images.length > 1
+                 false
+               else
+                 target.show_link_args
+               end
+
     if target&.respond_to?(:thumb_image) && target&.thumb_image
-      self.image_data = build_image_data(
-        target.images, target, obs_data: obs_data_hash(target)
-      )
-      # self.image_data = {
-      #   image: target.thumb_image,
-      #   image_link: target.show_link_args,
-      #   obs_data: obs_data_hash(target),
-      #   context: :matrix_box
-      # }
+      self.image_data = {
+        images: target.images,
+        image_link: img_link,
+        obs_data: obs_data_hash(target),
+        context: :matrix_box
+      }
     end
     return unless (temp = rss_log.detail)
 
@@ -83,12 +87,11 @@ class MatrixBoxPresenter < BasePresenter
     self.who  = image.user
     self.name = image.unique_format_name.t
     self.what = image
-    self.image_data = build_image_data(image, image)
-    # self.image_data = {
-    #   image: image,
-    #   image_link: image.show_link_args,
-    #   context: :matrix_box
-    # }
+    self.image_data = {
+      images: [image],
+      image_link: image.show_link_args,
+      context: :matrix_box
+    }
   end
 
   # Grabs all the information needed for view from Observation instance.
@@ -107,15 +110,12 @@ class MatrixBoxPresenter < BasePresenter
     end
     return unless observation.thumb_image
 
-    self.image_data = build_image_data(
-      observation.images, observation, obs_data: obs_data_hash(object)
-    )
-    # self.image_data = {
-    #   image: observation.thumb_image,
-    #   image_link: obs_or_other_link(observation),
-    #   obs_data: obs_data_hash(observation),
-    #   context: :matrix_box
-    # }
+    self.image_data = {
+      images: observation.images,
+      image_link: false, # so they can thumb thru images
+      obs_data: obs_data_hash(observation),
+      context: :matrix_box
+    }
   end
 
   # Grabs all the information needed for view from User instance.
@@ -135,33 +135,13 @@ class MatrixBoxPresenter < BasePresenter
     self.where = user.location if user.location
     return unless user.image_id
 
-    self.image_data = build_image_data(
-      [Image.find(user.image_id)], user, votes: false
-    )
-    # self.image_data = {
-    #   image: user.image_id,
-    #   image_link: user.show_link_args,
-    #   votes: false,
-    #   context: :matrix_box
-    # }
-  end
-
-  # Returns an array of data hashes for each image sent.
-  # User can't just send user.images because that's everything they've uploaded!
-  def build_image_data(images, object, **args)
-    return {} unless object&.images&.present?
-
-    if object&.respond_to?(:is_collection_location)
-      args = args.merge({ obs_data: obs_data_hash(object) })
-    end
-
-    images.map do |image|
-      {
-        image: image,
-        image_link: object.show_link_args,
-        context: :matrix_box
-      }.merge(args)
-    end
+    # Not user.images because that's every image they've uploaded
+    self.image_data = {
+      images: [Image.find(user.image_id)],
+      image_link: user.show_link_args,
+      votes: false,
+      context: :matrix_box
+    }
   end
 
   def display_time

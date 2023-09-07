@@ -22,7 +22,9 @@ carousel_locals = {
 
 <div class="row">
   <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
-    <%= carousel_html(**carousel_locals) %>
+    <%= tag.div(class: "panel panel-default") do
+      carousel_html(**carousel_locals)
+    end %>
   </div>
 
   <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
