@@ -13,13 +13,13 @@
 ) %>
 
 // reset title of obs if necessary
-var title = '<%= tag.div(
-  show_obs_title(obs: @observation).break_name.small_author,
-  title: show_obs_title(obs: @observation).strip_html.html_safe
-) %>';
+var new_title = '<%= show_obs_title(obs: @observation) %>',
+    new_title_tag = '<%= tag.h1(
+      show_obs_title(obs: @observation), class: "h3", id: "title"
+    ) %>';
 
-document.title = $(title).attr('title');
-$("#title").html(title);
+document.title = new_title;
+$("#title").replaceWith(new_title_tag);
 
 // Need to redo naming table bindings and hide cast vote buttons
 VoteByAjaxModule({
