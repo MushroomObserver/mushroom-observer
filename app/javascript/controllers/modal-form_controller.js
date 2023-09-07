@@ -9,6 +9,7 @@ export default class extends Controller {
 
   connect() {
     this.element.textContent = "Hello World!"
+    // document.querySelector('body').appendChild(targetModal);
   }
 
   fetchModalContent() {
