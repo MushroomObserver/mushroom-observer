@@ -189,6 +189,9 @@ class ObservationsController
       show_index_of_objects(query, args)
     end
 
+    # The { images: } hash is necessary for the index carousels.
+    # :projects required by Bullet because it's needed to compute
+    # `can_edit?` for an image.
     def define_index_args(query, args)
       args = { controller: "/observations",
                action: :index,
