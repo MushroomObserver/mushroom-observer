@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class AutologinTest < IntegrationTestCase
+class AutologinIntegrationTest < IntegrationTestCase
   # ----------------------------
   #  Test autologin cookies.
   # ----------------------------

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ObservationFormTest < CapybaraIntegrationTestCase
+class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
   # Uncomment this to try running tests with firefox_headless browser
   # def setup
   #   super

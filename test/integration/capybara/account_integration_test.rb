@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class AccountTest < CapybaraIntegrationTestCase
+class AccountIntegrationTest < CapybaraIntegrationTestCase
   # -------------------------------
   #  Test basic login.
   # -------------------------------
