@@ -4,35 +4,7 @@
 module LoginSystem
   protected
 
-  # overwrite this if you want to restrict access to only a few actions
-  # or if you want to check if the user has the correct rights
-  # example:
-  #
-  #  # only allow nonbobs
-  #  def authorize?(user)
-  #    user.login != "bob"
-  #  end
-  def authorize?(_user)
-    true
-  end
-
-  # overwrite this method if you only want to protect certain actions
-  # of the controller
-  # example:
-  #
-  #  # don't protect the login and the about method
-  #  def protect?(action)
-  #    if ['action', 'about'].include?(action)
-  #       return false
-  #    else
-  #       return true
-  #    end
-  #  end
-  def protect?(_action)
-    true
-  end
-
-  # This allows our stats requests to get through, so we know if the site
+  # Allow ip's like our stats requests to get through, so we know if the site
   # is getting slower or faster.
   def allowed?(ip)
     return true if ["127.0.0.1"].include?(ip.to_s)
@@ -44,18 +16,10 @@ module LoginSystem
   #
   #   before_action :login_required
   #
-  # if the controller should be under any rights management.
-  # for finer access control you can overwrite
-  #
-  #   def authorize?(user)
-  #
   def login_required
-    return false if allowed?(request.remote_ip)
+    return true if allowed?(request.remote_ip)
 
-    return true unless protect?(action_name)
-
-    user = session_user
-    return true if user && authorize?(user)
+    return true if session_user
 
     # store current location so that we can
     # come back after the user logged in
