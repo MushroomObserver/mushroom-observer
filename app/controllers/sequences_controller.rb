@@ -137,7 +137,8 @@ class SequencesController < ApplicationController
 
   def find_observation!
     @observation = Observation.includes(observation_includes).
-                   find_by(id: params[:observation_id]) || flash_error_and_goto_index(
+                   find_by(id: params[:observation_id]) ||
+                   flash_error_and_goto_index(
                      Observation, params[:observation_id]
                    )
   end

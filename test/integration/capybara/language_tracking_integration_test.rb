@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class LanguageTrackingTest < CapybaraIntegrationTestCase
+class LanguageTrackingIntegrationTest < CapybaraIntegrationTestCase
   # -----------------------------------------------------------------------
   #  Need integration test to make sure tags are being tracked and passed
   #  through redirects correctly.

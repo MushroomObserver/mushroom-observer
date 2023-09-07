@@ -37,12 +37,11 @@ class HerbariumRecordsController < ApplicationController
 
     @layout = calc_layout_params
     @canonical_url = HerbariumRecord.show_url(params[:id])
-    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    find_herbarium_record!
   end
 
   def new
     set_ivars_for_new
-    return unless @observation
 
     @back_object = @observation
     @herbarium_record = default_herbarium_record
@@ -59,7 +58,6 @@ class HerbariumRecordsController < ApplicationController
 
   def create
     set_ivars_for_new
-    return unless @observation
 
     @back_object = @observation
     create_herbarium_record # response handled here
@@ -67,7 +65,6 @@ class HerbariumRecordsController < ApplicationController
 
   def edit
     set_ivars_for_edit
-    return unless @herbarium_record
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!
@@ -88,7 +85,6 @@ class HerbariumRecordsController < ApplicationController
 
   def update
     set_ivars_for_edit
-    return unless @herbarium_record
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!
@@ -125,7 +121,20 @@ class HerbariumRecordsController < ApplicationController
 
   def set_ivars_for_edit
     @layout = calc_layout_params
-    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    find_herbarium_record!
+  end
+
+  def find_herbarium_record!
+    @herbarium_record = HerbariumRecord.includes(herbarium_record_includes).
+                        find_by(id: params[:id]) ||
+                        flash_error_and_goto_index(
+                          HerbariumRecord, params[:id]
+                        )
+  end
+
+  def herbarium_record_includes
+    [:user, { observations: [:user,
+                             { images: [:image_votes, :license, :user] }] }]
   end
 
   def render_modal_herbarium_record_form(title:)

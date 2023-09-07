@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
-class LurkerTest < CapybaraIntegrationTestCase
+class LurkerIntegrationTest < CapybaraIntegrationTestCase
   def test_poke_around
     # Start at index.
     reset_session!
@@ -34,7 +34,7 @@ class LurkerTest < CapybaraIntegrationTestCase
 
     # Click on the first image. (That's why we picked the one after this.)
     go_back_after do
-      first("#observation_carousel .image-link").click
+      first(".carousel .image-link").click
       assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end
     # back at Observation

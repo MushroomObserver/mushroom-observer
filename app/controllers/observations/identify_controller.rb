@@ -69,6 +69,7 @@ module Observations
                include: [:location, :user, :rss_log,
                          { name: :synonym },
                          { namings: :name },
+                         { images: [:image_votes, :license, :projects, :user] },
                          { thumb_image: :image_votes }] }
 
       show_index_of_objects(query, args)
