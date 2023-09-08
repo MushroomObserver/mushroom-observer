@@ -47,8 +47,8 @@ tag.div(
         tag.div(class: "modal-body", id: "modal_body_#{identifier}") do
           [
             tag.div("", id: "modal_flash_#{identifier}"), # turbo
-            render(partial: form_partial, formats: ["html"],
-                   locals: form_locals) # turbo
+            render(partial: form_partial, locals: form_locals) # turbo
+            # note: MUST REMOVE **.html**.erb file extension from form partial!
           ].safe_join
         end
       ].safe_join

@@ -165,7 +165,7 @@ module LinkHelper
                            bs_toggle: "modal",
                            bs_target: "#modal_#{identifier}",
                            controller: "modal-form-show",
-                           action: "click->modal-form-show#showModal"
+                           action: "click->modal-form-show#showModal:prevent"
                          } }))
   end
 
