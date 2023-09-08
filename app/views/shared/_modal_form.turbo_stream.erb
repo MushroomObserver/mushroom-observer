@@ -27,7 +27,7 @@ tag.div(
   class: "modal", id: "modal_#{identifier}", role: "dialog",
   aria: { labelledby: "modal_header_#{identifier}" },
   data: { busy: "true", target: "modal-form-cleanup.modal",
-          controller: "modal-form", identifier: identifier,
+          controller: "modal-form-cleanup", identifier: identifier,
           turbo: { frame: "modal_#{identifier}"} } # not sure
 ) do
   tag.div(class: "modal-dialog modal-lg", role: "document") do

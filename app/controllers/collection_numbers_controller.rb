@@ -48,7 +48,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_collection_number_form(
           title: helpers.collection_number_form_new_title
         )
@@ -75,7 +75,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js do
+      format.turbo_stream do
         render_modal_collection_number_form(
           title: helpers.collection_number_form_edit_title(
             c_n: @collection_number
@@ -116,15 +116,19 @@ class CollectionNumbersController < ApplicationController
   private
 
   def render_modal_collection_number_form(title:)
-    render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "collection_number" }) and return
+    turbo_stream.replace(
+      "modal_collection_number",
+      partial: "shared/modal_form",
+      locals: { title: title, identifier: "collection_number" }
+    )
   end
 
   def render_collection_numbers_section_update
-    render(
+    turbo_stream.replace(
+      "collection_numbers",
       partial: "observations/show/section_update",
       locals: { identifier: "collection_numbers" }
-    ) and return
+    )
   end
 
   def default_index_subaction
