@@ -7,7 +7,7 @@ module Observations
 
     def show
       pass_query_params
-      @observation = find_or_goto_index(params[:id])
+      @observation = find_or_goto_index(Observation, params[:id])
     end
 
     def new

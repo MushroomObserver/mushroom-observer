@@ -1,2 +1,4 @@
-<%= render(partial: "observations/namings/table",
-           locals: { obs: @observation }) %>
+<%= turbo_frame_tag(id: "observation_namings") do
+  render(partial: "observations/namings/table",
+         locals: { obs: @observation })
+end %>
