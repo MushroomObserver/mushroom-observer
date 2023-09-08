@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { get } from "@rails/request"
 
 export default class extends Controller {
   static targets = ["open", "modal"]
@@ -17,26 +18,24 @@ export default class extends Controller {
     // maybe: preventDefault
 
     // check if modal exists in DOM. bs-target has ID of modal with identifier
-    let modalSelector = this.element.getAttribute("bs-target")
-    if (modalSelector.length)
-      // if so, show.
-      modalSelector.modal.show
-    else
-      // if not, fetch the content.
-      fetchModalContent
-    end
+    let modalSelector = this.element.getAttribute("data-bs-target")
+    console.log(modalSelector)
+    let destination = this.element.getAttribute("href")
+    console.log(destination)
 
-    // document.querySelector('body').appendChild(targetModal);
+    if (document.querySelector(modalSelector)) {
+      // if so, show.
+      document.querySelector(modalSelector).modal('show')
+    } else {
+      // if not, fetch the content.
+      this.fetchModalAndAppendToBody(destination)
+    }
   }
 
-  fetchModalContent() {
-    let href = this.element.getAttribute("href")
-
-    let frame_id = "turbo-frame#" +
-      this.element.getAttribute("data-turbo-frame")
-    let frame = document.querySelector(frame_id)
-
-    frame.src = href
-    frame.reload()
+  // prob. this presumes a pre-existing modal
+  fetchModalAndAppendToBody(destination) {
+    get(destination)
+      .then(response => response.text())
+      .then(html => document.querySelector('body').appendChild(html))
   }
 }
