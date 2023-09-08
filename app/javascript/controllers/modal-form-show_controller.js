@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { get } from "@rails/request.js"
+import { modal } from "bootstrap" // try jQuery
 
 export default class extends Controller {
   static targets = ["open", "modal"]
