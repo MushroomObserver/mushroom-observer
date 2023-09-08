@@ -116,19 +116,26 @@ class CollectionNumbersController < ApplicationController
   private
 
   def render_modal_collection_number_form(title:)
-    turbo_stream.replace(
-      "modal_collection_number",
+    render(
       partial: "shared/modal_form",
       locals: { title: title, identifier: "collection_number" }
-    )
+    ) and return
   end
 
   def render_collection_numbers_section_update
-    turbo_stream.replace(
-      "collection_numbers",
+    render(
       partial: "observations/show/section_update",
       locals: { identifier: "collection_numbers" }
-    )
+    ) and return
+  end
+
+  # this updates both the form and the flash
+  def reload_collection_number_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: "collection_number",
+                form: "collection_numbers/form" }
+    ) and return true
   end
 
   def default_index_subaction
@@ -225,9 +232,7 @@ class CollectionNumbersController < ApplicationController
           redirect_to(redirect_params) and return true
         end
         format.turbo_stream do
-          render(partial: "shared/modal_form_reload",
-                 locals: { identifier: "collection_number",
-                           form: "collection_numbers/form" }) and return true
+          reload_collection_number_modal_form_and_flash
         end
       end
     end

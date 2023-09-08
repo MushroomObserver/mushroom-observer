@@ -8,8 +8,6 @@ form_locals ||= {}
   flash_notices_html
 end %>
 
-<%= turbo_stream.update("#{identifier}_form") do
-  turbo_frame_tag("#{identifier}_form") do
-    render(partial: form, locals: { format: :turbo_stream }.merge(form_locals))
-  end
+<%= turbo_stream.replace("#{identifier}_form") do
+  render(partial: form, locals: { format: :turbo_stream }.merge(form_locals))
 end %>
