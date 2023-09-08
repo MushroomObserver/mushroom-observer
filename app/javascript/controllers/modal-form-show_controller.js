@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { get } from "@rails/request.js"
-import { modal } from "bootstrap" // try jQuery
+// import { modal } from "bootstrap" // try jQuery
+// import { $ } from "jquery3"
 
 export default class extends Controller {
   static targets = ["open", "modal"]
@@ -45,7 +46,7 @@ export default class extends Controller {
       const formHtml = await response.text
       console.log(formHtml)
       document.querySelector('body').append(formHtml)
-      document.querySelector(modalSelector).modal('show')
+      $(modalSelector).modal('show')
     }
   }
 }

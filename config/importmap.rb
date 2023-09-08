@@ -4,6 +4,7 @@
 
 pin "application", preload: true
 pin "bootstrap", to: "bootstrap.min.js", preload: true
+pin "jquery3", to: "jquery.min.js", preload: true
 pin "@rails/ujs", to: "@rails--ujs.js" # @7.0.7
 pin "@rails/request.js", to: "requestjs.js", preload: true
 pin "@hotwired/turbo-rails", to: "turbo.min.js", preload: true

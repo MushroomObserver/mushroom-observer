@@ -3,9 +3,10 @@
 // If string literal error, it means the importmap is not functioning
 
 import "@hotwired/turbo-rails"
+import "jquery3"
+import "bootstrap"
 import Rails from "@rails/ujs"
 import "@rails/request.js"
-import "bootstrap"
 import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
 Rails.start(); import "controllers"

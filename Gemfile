@@ -42,6 +42,10 @@ gem("requestjs-rails")
 gem("sprockets-rails")
 gem("stimulus-rails")
 gem("turbo-rails")
+# Use SCSS for stylesheets
+gem("sassc-rails")
+# Use jquery as the JavaScript library
+gem("jquery-rails")
 
 # Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
 # Delete this dependency declaration if the issue gets resolved:
@@ -73,12 +77,6 @@ gem("arel_extensions")
 
 # Use bootstrap style generator
 gem("bootstrap-sass")
-
-# Use SCSS for stylesheets
-gem("sassc-rails")
-
-# Use jquery as the JavaScript library
-gem("jquery-rails")
 
 # Use mini_racer as a substitute for therubyracer
 # If having trouble installing this gem in Vagrant:
