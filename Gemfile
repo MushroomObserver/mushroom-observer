@@ -38,6 +38,7 @@ end
 gem("importmap-rails")
 gem("psych", "~> 4")
 gem("redis", "~> 4.0")
+gem("requestjs-rails")
 gem("sprockets-rails")
 gem("stimulus-rails")
 gem("turbo-rails")

@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { get } from "@rails/request"
+import { get, requestTurboStream } from "@rails/request.js"
 
 export default class extends Controller {
   static targets = ["open", "modal"]
@@ -34,7 +34,7 @@ export default class extends Controller {
 
   // prob. this presumes a pre-existing modal
   fetchModalAndAppendToBody(destination) {
-    get(destination)
+    get(destination) // not a method
       .then(response => response.text())
       .then(html => document.querySelector('body').appendChild(html))
   }
