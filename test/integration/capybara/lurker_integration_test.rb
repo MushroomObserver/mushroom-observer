@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Test typical sessions of user who never creates an account or contributes.
-class LurkerTest < CapybaraIntegrationTestCase
+class LurkerIntegrationTest < CapybaraIntegrationTestCase
   def test_poke_around
     # Start at index.
     reset_session!

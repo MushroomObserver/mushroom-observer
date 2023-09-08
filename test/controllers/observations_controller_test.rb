@@ -629,7 +629,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_displayed_title("Observations created by #{user.name}")
     assert_select(
-      "#results img[src = '#{Image.url(:small, obs.thumb_image_id)}']",
+      "#results img.image_#{obs.thumb_image_id}",
       true,
       "Observation thumbnail should display although this is not an rss_log"
     )

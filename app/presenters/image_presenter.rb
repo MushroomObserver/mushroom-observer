@@ -52,12 +52,12 @@ class ImagePresenter < BasePresenter
     args = default_args.merge(args)
     img_urls = Image.all_urls(image_id)
 
-    args_to_presenter(image, img_urls, args)
+    args_to_presenter(image, image_id, img_urls, args)
     sizing_info_to_presenter(image, args)
     lightbox_args_to_presenter(image_id, img_urls, args)
   end
 
-  def args_to_presenter(image, img_urls, args)
+  def args_to_presenter(image, image_id, img_urls, args)
     # Store these urls once, since they are computed
     img_src = img_urls[args[:size]]
     # img_srcset = thumbnail_srcset(img_urls[:small], img_urls[:medium],
@@ -77,13 +77,13 @@ class ImagePresenter < BasePresenter
     # <img> attributes
     html_options_lazy = {
       alt: args[:notes],
-      class: "#{img_class} lazy",
+      class: "#{img_class} lazy image_#{image_id}",
       data: img_data
     }
 
     html_options_noscript = {
       alt: args[:notes],
-      class: "#{img_class} img-noscript"
+      class: "#{img_class} img-noscript image_#{image_id}"
       #   srcset: img_srcset,
       #   sizes: img_sizes
     }

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class HerbariumCuratorTest < CapybaraIntegrationTestCase
+class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
   # ---------- Helpers ----------
 
   def nybg
