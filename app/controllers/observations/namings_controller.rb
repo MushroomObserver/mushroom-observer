@@ -5,6 +5,11 @@ module Observations
   class NamingsController < ApplicationController
     before_action :login_required
 
+    def show
+      pass_query_params
+      @observation = find_or_goto_index(params[:id])
+    end
+
     def new
       pass_query_params
       @params = NamingParams.new(params[:naming])

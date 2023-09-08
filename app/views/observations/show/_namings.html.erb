@@ -2,12 +2,13 @@
 # js needs to prepend observation_namings with fresh namings_table on update
 %>
 
-<div id="observation_namings">
-  <!--TABLE OF NAMES / REFRESHED BY AJAX -->
-  <%= render(partial: "observations/namings/table",
-             locals: { obs: obs }) %>
-  <!--/TABLE OF NAMES -->
-</div><!--#observation_namings-->
+<!--TABLE OF NAMES / REFRESHED BY TURBO -->
+<%= turbo_frame_tag(id: "observation_namings",
+                    src: naming_path(id: obs.id),
+                    loading: "lazy") do
+  render(partial: "observations/namings/table", locals: { obs: obs })
+end %>
+<!--/TABLE OF NAMES -->
 
 <!--NAME AUTOCOMPLETE INSTANCE FOR REUSE IN MODALS-->
 <%= render(partial: "shared/form_name_autocomplete") %>
