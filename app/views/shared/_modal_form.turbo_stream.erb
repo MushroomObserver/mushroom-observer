@@ -19,7 +19,7 @@
 
 # This thing could specify a target div to update, couldn't it?
 
-locals = local_assigns.except(:identifier, :title, :form)
+form_locals = local_assigns.except(:identifier, :title, :form_partial)
 %>
 
 <%=
@@ -47,7 +47,8 @@ tag.div(
         tag.div(class: "modal-body", id: "modal_body_#{identifier}") do
           [
             tag.div("", id: "modal_flash_#{identifier}"), # turbo
-            render(partial: form, locals: locals) # turbo
+            render(partial: form_partial, formats: ["html", "turbo-stream"],
+                   locals: form_locals) # turbo
           ].safe_join
         end
       ].safe_join

@@ -116,9 +116,11 @@ class CollectionNumbersController < ApplicationController
   private
 
   def render_modal_collection_number_form(title:)
+    puts("*" * 80)
     render(
       partial: "shared/modal_form",
-      locals: { title: title, identifier: "collection_number" }
+      locals: { title: title, identifier: "collection_number",
+                form_partial: "collection_numbers/form" }
     ) and return
   end
 

@@ -161,7 +161,7 @@ module LinkHelper
   def modal_link_to(identifier, name, path, args)
     link_to(name, path,
             **args.merge({ data: {
-                           turbo_frame: "modal_form_content",
+                           turbo_frame: "modal_#{identifier}",
                            bs_toggle: "modal",
                            bs_target: "#modal_#{identifier}",
                            controller: "modal-form-show",

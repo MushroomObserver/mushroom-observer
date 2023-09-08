@@ -68,7 +68,7 @@ module Tabs
 
     def new_collection_number_for_obs_tab(obs)
       [:create_collection_number.l,
-       add_query_param(new_collection_number_path(obs)),
+       add_query_param(new_collection_number_path(observation_id: obs.id)),
        { class: "#{tab_id(__method__.to_s)}_#{obs.id}" }]
     end
 
