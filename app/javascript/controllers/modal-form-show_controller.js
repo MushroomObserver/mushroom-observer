@@ -19,26 +19,32 @@ export default class extends Controller {
     event.preventDefault
 
     // check if modal exists in DOM. bs-target has ID of modal with identifier
-    let modalSelector = this.element.getAttribute("data-bs-target")
+    const modalSelector = this.element.getAttribute("data-bs-target")
     console.log(modalSelector)
-    let destination = this.element.getAttribute("href")
+    const destination = this.element.getAttribute("href")
 
     if (document.querySelector(modalSelector)) {
       // if so, show.
       document.querySelector(modalSelector).modal('show')
     } else {
       // if not, fetch the content.
-      this.fetchModalAndAppendToBody(destination)
+      this.fetchModalAndAppendToBody(modalSelector, destination)
     }
   }
 
   // prob. this presumes a pre-existing modal
   // https://discuss.hotwired.dev/t/is-this-correct-a-stimulus-controller-to-use-turbo-stream-get-requests-to-avoid-updating-browser-history/4146
-  fetchModalAndAppendToBody(destination) {
+  async fetchModalAndAppendToBody(modalSelector, destination) {
     console.log(destination)
 
-    get(destination, { responseKind: "turbo-stream" })
-      .then(response => response.text())
-      .then(html => document.querySelector('body').appendChild(html))
+    const response = await get(destination, { responseKind: "turbo-stream" })
+
+    if (response.ok) {
+      console.log(response)
+      const formHtml = await response.text
+      console.log(formHtml)
+      document.querySelector('body').append(formHtml)
+      document.querySelector(modalSelector).modal('show')
+    }
   }
 }
