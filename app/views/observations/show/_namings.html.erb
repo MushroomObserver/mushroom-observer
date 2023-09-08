@@ -3,7 +3,7 @@
 %>
 
 <!--TABLE OF NAMES / REFRESHED BY TURBO -->
-<%= turbo_frame_tag(id: "observation_namings",
+<%= turbo_frame_tag("observation_namings",
                     src: naming_path(id: obs.id),
                     loading: "lazy") do
   render(partial: "observations/namings/table", locals: { obs: obs })
