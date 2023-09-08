@@ -8,8 +8,8 @@ function VoteByAjaxModule(translations) {
       return $("[data-role='save_vote']");
     };
 
-    // Don't need these if AJAX available.
-    save_vote_buttons().hide();
+    // Don't need these if AJAX available. Put in <noscript> tag
+    // save_vote_buttons().hide();
 
     var change_vote_selects = function () {
       return $("[data-role='change_vote']");

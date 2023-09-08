@@ -141,8 +141,10 @@ module NamingsHelper
                       data: { role: "change_vote", id: naming.id } })
         end,
         hidden_field_tag(:context, context),
-        submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
-                      data: { role: "save_vote" })
+        tag.noscript do
+          submit_button(form: f, button: :show_namings_cast.l, class: "w-100",
+                        data: { role: "save_vote" })
+        end
       ].safe_join
     end
   end
