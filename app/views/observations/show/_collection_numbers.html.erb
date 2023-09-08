@@ -17,18 +17,22 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         tag.div do
           [
             "#{:Collection_numbers.t}:",
-            "[" + modal_link_to("collection_number",
-                                *new_collection_number_for_obs_tab(obs)) + "]"
+            [ # annoying: any html helper has to be safe_joined separately
+              "[",
+              modal_link_to("collection_number",
+                            *new_collection_number_for_obs_tab(obs)),
+              "]"
+            ].safe_join
           ].safe_join(" ")
         end,
         tag.ul(class: "tight-list") do
           numbers.map do |number|
             tag.li(id: "collection_number_#{number.id}") do
               [
-                link_to(*collection_number_show_tab(c_n)),
+                link_to(*collection_number_show_tab(number, obs)),
                 "[",
                 modal_link_to("collection_number",
-                              *edit_collection_number_tab(c_n)),
+                              *edit_collection_number_tab(number)),
                 "|",
                 patch_button(
                   name: :REMOVE.t,
@@ -53,7 +57,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         numbers.count > 1 ? "#{:Collection_numbers.t}:" :
                             "#{:Collection_number.t}:",
         numbers.map do |number|
-          link_to(*collection_number_show_tab(number))
+          link_to(*collection_number_show_tab(number, obs))
         end.safe_join(", ")
       ].safe_join(" ")
 
