@@ -8,11 +8,14 @@ export default class extends Controller {
   connect() {
     // console.log("Hello Modal");
     this.element.setAttribute("data-thing", "this")
-    // const modalSelector = this.element.getAttribute("data-turbo-frame")
   }
 
-  hideModal() {
+  removeModal() {
     console.log(this.modalTarget.html())
+    const modalSelector = this.element.getAttribute("data-updated-by")
+    console.log(modalSelector)
+    $(document.getElementById(modalSelector)).modal('hide')
+    document.getElementById(modalSelector).remove()
   }
 
 }
