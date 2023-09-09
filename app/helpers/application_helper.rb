@@ -66,9 +66,11 @@ module ApplicationHelper
             when 1 then "alert-warning"
             when 2 then "alert-danger"
             end
+    notices = flash_get_notices
+    flash_clear
 
-    tag.div(flash_get_notices, id: "flash_notices",
-                               class: class_names("alert mt-3", klass))
+    tag.div(notices, id: "flash_notices",
+                     class: class_names("alert mt-3", klass))
   end
 
   # ----------------------------------------------------------------------------
