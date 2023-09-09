@@ -116,7 +116,6 @@ class CollectionNumbersController < ApplicationController
   private
 
   def render_modal_collection_number_form(title:)
-    puts("*" * 80)
     render(
       partial: "shared/modal_form",
       locals: { title: title, identifier: "collection_number",
@@ -291,8 +290,8 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      @observation = @back_object # if we're here, we're on an obs page
       format.turbo_stream do
+        @observation = @back_object # if we're here, we're on an obs page
         render_collection_numbers_section_update
       end
     end
