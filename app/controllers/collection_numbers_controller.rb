@@ -292,10 +292,9 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       format.turbo_stream do
-        # FIXME: if we're here, we're on an obs page. but which obs?
-        # Not necessarily the first. We need a way to send the obs with
-        # the original request for the edit form, so it's set in the form.
-        @observation = @collection_number.observations.first
+        # if we're here, we're on an obs page.
+        # back_object should be the obs, sent via :back param from the link
+        @observation = @back_object
         render_collection_numbers_section_update
       end
     end
