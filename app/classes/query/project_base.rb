@@ -17,15 +17,25 @@ class Query::ProjectBase < Query::Base
       has_summary?: :boolean,
       title_has?: :string,
       summary_has?: :string,
-      comments_has?: :string
+      comments_has?: :string,
+      # member?: User
+      member?: [User]
     )
   end
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("projects")
+    initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
     super
+  end
+
+  def initialize_association_parameters
+    add_join(:user_groups, :user_group_users)
+    # where << "user_group_users.user_id = '#{params[:member]}'" if params[:member]
+    add_id_condition("user_group_users.user_id",
+                     lookup_users_by_name(params[:member]))
   end
 
   def initialize_boolean_parameters
@@ -57,6 +67,6 @@ class Query::ProjectBase < Query::Base
   end
 
   def self.default_order
-    "title"
+    "updated_at"
   end
 end
