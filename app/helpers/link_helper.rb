@@ -162,8 +162,8 @@ module LinkHelper
     link_to(name, path,
             **args.merge({ data: {
                            turbo_frame: "modal_#{identifier}",
-                           bs_toggle: "modal",
-                           bs_target: "#modal_#{identifier}",
+                           #  bs_toggle: "modal",
+                           #  bs_target: "#modal_#{identifier}",
                            controller: "modal-form-show",
                            action: "click->modal-form-show#showModal:prevent"
                          } }))
