@@ -10,14 +10,10 @@ obs_id = obs.id
 <%=
 unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
 
-  turbo_frame_tag(
-    "observation_collection_numbers",
+  tag.turbo_frame(
+    id: "observation_collection_numbers",
     class: "obs-collection",
-    data: {
-      controller: "modal-form-cleanup",
-      action: "turbo:frame-render->modal-form-cleanup#removeModal",
-      updated_by: "modal_collection_number"
-    }
+    data: { updated_by: "modal_collection_number" }
   ) do
 
     if numbers.any? && can_edit

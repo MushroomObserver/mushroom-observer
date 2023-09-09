@@ -14,6 +14,7 @@ form_args = {
   model: @collection_number, url: url_params, id: "collection_number_form"
 }
 form_args = form_args.merge({ local: true }) if local_assigns[:local] == true
+form_args = form_args.deep_merge({ data: local_assigns[:data] })
 %>
 
 <%= form_with(**form_args) do |f| %>

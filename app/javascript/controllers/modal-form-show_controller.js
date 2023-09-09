@@ -4,11 +4,11 @@ import { get } from "@rails/request.js"
 export default class extends Controller {
 
   initialize() {
-    console.log("Hello Modal");
+    console.log("Hello Turbo");
   }
 
   connect() {
-    this.element.textContent = "Hello Modal!"
+    this.element.textContent = "Hello Turbo!"
   }
 
   // TODO: Check if the default is to follow the link, which would return the

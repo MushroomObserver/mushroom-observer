@@ -1,5 +1,5 @@
 <%=
-turbo_frame_tag("observation_namings") do
+tag.turbo_frame(id: "observation_namings") do
   render(partial: "observations/namings/table",
          locals: { obs: @observation })
 end %>
