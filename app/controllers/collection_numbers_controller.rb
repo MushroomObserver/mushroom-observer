@@ -123,6 +123,7 @@ class CollectionNumbersController < ApplicationController
     ) and return
   end
 
+  # ivar @observation used in the partial
   def render_collection_numbers_section_update
     render(
       partial: "observations/show/section_update",
@@ -291,7 +292,10 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
       format.turbo_stream do
-        @observation = @back_object # if we're here, we're on an obs page
+        # FIXME: if we're here, we're on an obs page. but which obs?
+        # Not necessarily the first. We need a way to send the obs with
+        # the original request for the edit form, so it's set in the form.
+        @observation = @collection_number.observations.first
         render_collection_numbers_section_update
       end
     end
@@ -353,6 +357,7 @@ class CollectionNumbersController < ApplicationController
 
   def figure_out_where_to_go_back_to
     @back = params[:back]
+    # TODO: set params :back on the edit form
     @back_object = nil
     if @back == "show"
       @back_object = @collection_number
@@ -360,8 +365,8 @@ class CollectionNumbersController < ApplicationController
       @back_object = Observation.safe_find(@back)
       return if @back_object
 
-      @back_object = if @collection_number.observations.count == 1
-                       @collection_number.observations.first
+      @back_object = if @collection_number.observations.length == 1
+                       @collection_number.reload.observations.first
                      else
                        @collection_number
                      end
