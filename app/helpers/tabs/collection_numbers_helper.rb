@@ -72,9 +72,9 @@ module Tabs
        { class: "#{tab_id(__method__.to_s)}_#{obs.id}" }]
     end
 
-    def edit_collection_number_tab(c_n)
+    def edit_collection_number_tab(c_n, obs)
       [:edit_collection_number.t,
-       add_query_param(edit_collection_number_path(id: c_n.id, back: :show)),
+       add_query_param(edit_collection_number_path(id: c_n.id, back: obs.id)),
        { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
     end
 

@@ -38,7 +38,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                 link_to(*collection_number_show_tab(number, obs)),
                 "[",
                 modal_link_to("collection_number",
-                              *edit_collection_number_tab(number)),
+                              *edit_collection_number_tab(number, obs)),
                 "|",
                 patch_button(
                   name: :REMOVE.t,
