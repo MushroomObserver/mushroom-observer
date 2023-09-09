@@ -87,10 +87,10 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_displayed_title("Projects by Date Created")
   end
 
-  def test_index_has_member
+  def test_index_member
     login
 
-    get(:index, params: { has_member: dick.id })
+    get(:index, params: { member: dick.id })
 
     assert_template("index")
     assert_displayed_title("Project Index")
