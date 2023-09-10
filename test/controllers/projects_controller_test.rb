@@ -74,17 +74,26 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Projects by Title")
+    assert_displayed_title("Projects by Time Last Modified")
     assert_template("index")
   end
 
   def test_index_with_non_default_sort
     login
 
-    get(:index, params: { by: "updated_at" })
+    get(:index, params: { by: "created_at" })
 
     assert_template("index")
-    assert_displayed_title("Projects by Time Last Modified")
+    assert_displayed_title("Projects by Date Created")
+  end
+
+  def test_index_member
+    login
+
+    get(:index, params: { member: dick.id })
+
+    assert_template("index")
+    assert_displayed_title("Project Index")
   end
 
   def test_index_by_summary

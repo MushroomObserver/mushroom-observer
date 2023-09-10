@@ -9,7 +9,8 @@ class ProjectsController < ApplicationController
   # ApplicationController uses this to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,
-    :by
+    :by,
+    :member
   ].freeze
 
   @index_subaction_dispatch_table = {
@@ -183,6 +184,18 @@ class ProjectsController < ApplicationController
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
     end
+  end
+
+  # Display list of projects with a given member, sorted by date.
+  def member
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:member].to_s,
+      index_path: projects_path
+    )
+    return unless user
+
+    query = create_query(:Project, :all, member: user)
+    show_selected_projects(query)
   end
 
   # Show selected list of projects.
