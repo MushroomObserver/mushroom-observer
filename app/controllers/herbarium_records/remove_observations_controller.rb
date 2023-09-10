@@ -14,7 +14,7 @@ module HerbariumRecords
     # what the action does, with a remove button (to the :update action)
     # Should only be hit by turbo_stream
     def edit
-      init_ivars_for_edit
+      return unless init_ivars_for_edit
       return unless make_sure_can_delete!(@herbarium_record)
 
       render(
@@ -28,7 +28,7 @@ module HerbariumRecords
     end
 
     def update
-      init_ivars_for_edit
+      return unless init_ivars_for_edit
       return unless make_sure_can_delete!(@herbarium_record)
 
       @herbarium_record.remove_observation(@observation)
@@ -53,8 +53,11 @@ module HerbariumRecords
     def init_ivars_for_edit
       @herbarium_record = find_or_goto_index(HerbariumRecord,
                                              params[:herbarium_record_id])
+      return false unless @herbarium_record
+
       @observation = find_or_goto_index(Observation,
                                         params[:observation_id])
+      false unless @observation
     end
 
     def make_sure_can_delete!(herbarium_record)

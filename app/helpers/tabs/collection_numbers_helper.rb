@@ -93,7 +93,7 @@ module Tabs
     #      method: :patch, data: { confirm: :are_you_sure.t } }]
     # end
 
-    def collection_number_remove_obs_tab(c_n, obs)
+    def remove_collection_number_tab(c_n, obs)
       [:REMOVE.t,
        add_query_param(edit_collection_number_remove_observation_path(
                          collection_number_id: c_n.id, observation_id: obs.id

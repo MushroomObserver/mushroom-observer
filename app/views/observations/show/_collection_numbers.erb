@@ -40,7 +40,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                               *edit_collection_number_tab(number, obs)),
                 "|",
                 modal_link_to("collection_number_observation",
-                              *collection_number_remove_obs_tab(number, obs)),
+                              *remove_collection_number_tab(number, obs)),
                 "]"
               ].safe_join(" ")
             end

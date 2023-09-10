@@ -68,7 +68,7 @@ module Tabs
     end
 
     def show_herbarium_record_tab(h_r)
-      [record.accession_at_herbarium.t,
+      [h_r.accession_at_herbarium.t,
        herbarium_record_path(id: h_r.id, q: get_query_param),
        { class: "#{tab_id(__method__.to_s)}_#{h_r.id}" }]
     end
@@ -97,7 +97,7 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    def herbarium_record_remove_obs_tab(h_r, obs)
+    def remove_herbarium_record_tab(h_r, obs)
       [:REMOVE.t,
        add_query_param(edit_herbarium_record_remove_observation_path(
                          herbarium_record_id: h_r.id, observation_id: obs.id
