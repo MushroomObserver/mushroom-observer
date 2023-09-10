@@ -17,14 +17,21 @@ module CollectionNumbers
       return unless init_ivars_for_edit
       return unless make_sure_can_delete!(@collection_number)
 
-      render(
-        partial: "shared/modal_form",
-        locals: {
-          title: :show_observation_remove_collection_number.l,
-          identifier: "collection_number_observation",
-          form_partial: "collection_numbers/remove_observations/form"
-        }
-      ) and return
+      @title = :show_observation_remove_collection_number.l
+
+      respond_to do |format|
+        format.html
+        format.turbo_stream do
+          render(
+            partial: "shared/modal_form",
+            locals: {
+              title: @title,
+              identifier: "collection_number_observation",
+              form_partial: "collection_numbers/remove_observations/form"
+            }
+          ) and return
+        end
+      end
     end
 
     def update

@@ -17,14 +17,20 @@ module HerbariumRecords
       return unless init_ivars_for_edit
       return unless make_sure_can_delete!(@herbarium_record)
 
-      render(
-        partial: "shared/modal_form",
-        locals: {
-          title: :show_observation_remove_herbarium_record.l,
-          identifier: "herbarium_record_observation",
-          form_partial: "herbarium_records/remove_observations/form"
-        }
-      ) and return
+      @title = :show_observation_remove_herbarium_record.l
+      respond_to do |format|
+        format.html
+        format.turbo_stream do
+          render(
+            partial: "shared/modal_form",
+            locals: {
+              title: @title,
+              identifier: "herbarium_record_observation",
+              form_partial: "herbarium_records/remove_observations/form"
+            }
+          ) and return
+        end
+      end
     end
 
     def update
