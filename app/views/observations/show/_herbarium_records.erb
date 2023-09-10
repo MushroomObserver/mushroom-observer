@@ -51,8 +51,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
     elsif records.any? && !can_add
       [
         tag.div do
-          records.count > 1 ? "#{:Herbarium_records.t}:" :
-                              "#{:Herbarium_record.t}:"
+          records.length > 1 ? "#{:Herbarium_records.t}:" :
+                               "#{:Herbarium_record.t}:"
         end,
         tag.ul(class: "tight-list") do
           records.map do |record|

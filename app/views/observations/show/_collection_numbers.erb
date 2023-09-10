@@ -50,8 +50,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
 
     elsif numbers.any? && !can_edit
       [
-        numbers.count > 1 ? "#{:Collection_numbers.t}:" :
-                            "#{:Collection_number.t}:",
+        numbers.length > 1 ? "#{:Collection_numbers.t}:" :
+                             "#{:Collection_number.t}:",
         numbers.map do |number|
           link_to(*show_collection_number_tab(number, obs))
         end.safe_join(", ")
