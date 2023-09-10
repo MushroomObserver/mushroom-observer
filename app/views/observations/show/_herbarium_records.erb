@@ -18,7 +18,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
             updated_by: "modal_herbarium_record" }
   ) do
 
-    if records.any? && can_edit
+    if records.any? && can_add
       [
         tag.div do
           [
