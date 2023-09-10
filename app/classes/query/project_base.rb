@@ -18,8 +18,7 @@ class Query::ProjectBase < Query::Base
       title_has?: :string,
       summary_has?: :string,
       comments_has?: :string,
-      # member?: User
-      member?: [User]
+      member?: User
     )
   end
 
@@ -32,10 +31,11 @@ class Query::ProjectBase < Query::Base
   end
 
   def initialize_association_parameters
-    add_join(:user_groups, :user_group_users)
-    # where << "user_group_users.user_id = '#{params[:member]}'" if params[:member]
-    add_id_condition("user_group_users.user_id",
-                     lookup_users_by_name(params[:member]))
+    # No need to add join unless we're applying this condition.
+    return unless params[:member]
+
+    add_join(:"user_group_users.members")
+    where << "user_group_users.user_id = '#{params[:member]}'"
   end
 
   def initialize_boolean_parameters

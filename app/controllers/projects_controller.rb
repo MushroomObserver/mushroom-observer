@@ -186,7 +186,7 @@ class ProjectsController < ApplicationController
     end
   end
 
-  # Display list of user's projects, sorted by date.
+  # Display list of projects with a given member, sorted by date.
   def member
     user = find_obj_or_goto_index(
       model: User, obj_id: params[:member].to_s,
