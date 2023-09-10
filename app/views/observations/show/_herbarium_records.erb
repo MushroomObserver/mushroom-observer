@@ -25,8 +25,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
             "#{:Herbarium_records.t}:",
             [ # any html helper has to be safe_joined separately
               "[",
-              modal_link_to("herbarium_record",
-                            *new_herbarium_record_for_obs_tab(obs)),
+              modal_link_to("herbarium_record", *new_herbarium_record_tab),
               "]"
             ].safe_join
           ].safe_join(" ")
@@ -62,8 +61,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
       [
         :show_observation_no_herbarium_records.t,
         "[",
-        modal_link_to("herbarium_record",
-                      *new_herbarium_record_for_obs_tab(obs)),
+        modal_link_to("herbarium_record", *new_herbarium_record_tab),
         "]"
       ].safe_join(" ")
     end
