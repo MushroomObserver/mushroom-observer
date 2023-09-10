@@ -1,11 +1,3 @@
-<%#
-need to hide the modal. stimulus?
-https://stackoverflow.com/questions/76467781/run-custom-javascript-when-turbo-stream-is-received
-
-$('#mo_ajax_progress_caption').empty();
-$('#mo_ajax_progress').modal('hide');
-%>
-
 <%
 # Update observation view with results of update or create
 # Needs locals: identifier
@@ -30,8 +22,3 @@ end %>
 <%= turbo_stream.update("page_flash") do
   flash_notices_html
 end %>
-
-<%#
-// Remove the modal, because results on page
-$(".modal").attr('data-busy', 'false').modal('hide');
-%>

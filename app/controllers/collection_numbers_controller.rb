@@ -115,31 +115,6 @@ class CollectionNumbersController < ApplicationController
 
   private
 
-  def render_modal_collection_number_form(title:)
-    render(
-      partial: "shared/modal_form",
-      locals: { title: title, identifier: "collection_number",
-                form_partial: "collection_numbers/form" }
-    ) and return
-  end
-
-  # ivar @observation used in the partial
-  def render_collection_numbers_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers" }
-    ) and return
-  end
-
-  # this updates both the form and the flash
-  def reload_collection_number_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: { identifier: "collection_number",
-                form: "collection_numbers/form" }
-    ) and return true
-  end
-
   def default_index_subaction
     list_all
   end
@@ -384,5 +359,30 @@ class CollectionNumbersController < ApplicationController
                locals: { identifier: "collection_number" }) and return
       end
     end
+  end
+
+  def render_modal_collection_number_form(title:)
+    render(
+      partial: "shared/modal_form",
+      locals: { title: title, identifier: "collection_number",
+                form_partial: "collection_numbers/form" }
+    ) and return
+  end
+
+  # ivar @observation used in the partial
+  def render_collection_numbers_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "collection_numbers" }
+    ) and return
+  end
+
+  # this updates both the form and the flash
+  def reload_collection_number_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: "collection_number",
+                form: "collection_numbers/form" }
+    ) and return true
   end
 end

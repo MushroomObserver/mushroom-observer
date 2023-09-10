@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Controller just removes modal. it's a handler for page elements that
 // get updated on successful form submit, so it "cleans up"
 export default class extends Controller {
-  static targets = ["form"] // unused rn
+  // static targets = ["form"] // unused rn
 
   connect() {
     // console.log("Hello Modal");

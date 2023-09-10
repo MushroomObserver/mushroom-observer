@@ -17,16 +17,11 @@
 # Successful submit sets it "false".
 # Modals that are "busy" are not destroyed when closed.
 
-# This thing could specify a target div to update, couldn't it?
+# This thing could specify a turbo-frame to update, couldn't it?
 # note: MUST REMOVE **.html**.erb file extension from form partials!
 # Form submit button must deep merge the local_assigns[:data]
 
-form_stimulus_data = {
-  data: {
-          modal_form_target: "form" }
-}
-form_locals = local_assigns.except(:identifier, :title, :form_partial).
-                            merge(form_stimulus_data)
+form_locals = local_assigns.except(:identifier, :title, :form_partial)
 %>
 
 <%=

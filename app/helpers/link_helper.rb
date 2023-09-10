@@ -57,7 +57,7 @@ module LinkHelper
     return link_to(link, opts) { content } if icon_type.blank?
 
     opts = { title: content,
-             data: { toggle: "tooltip" } }.merge(opts.except(:icon))
+             data: { toggle: "tooltip" } }.deep_merge(opts.except(:icon))
 
     link_to(link, opts) do
       concat(tag.span(content, class: "sr-only"))
@@ -72,6 +72,25 @@ module LinkHelper
     icon_link_to(add_query_param(link), **opts) { content }
   end
 
+  # TODO: Accept icon arg
+  # maybe need a modal identifier, in case of multiple form modals
+  # Stimulus modal-form-show controller checks if it needs to generate the modal
+  # or just show the one already created
+  # Args from a *tab will be a hash.
+  def modal_link_to(identifier, name, path, args)
+    args = args.deep_merge({ data: {
+                             turbo_frame: "modal_#{identifier}",
+                             controller: "modal-form-show",
+                             action: "click->modal-form-show#showModal:prevent"
+                           } })
+
+    if args[:icon].present?
+      icon_link_to(name, path, **args)
+    else
+      link_to(name, path, **args)
+    end
+  end
+
   def link_icon(type)
     return "" unless (glyph = link_icon_index[type])
 
@@ -81,12 +100,17 @@ module LinkHelper
   def link_icon_index
     {
       edit: "edit",
-      destroy: "remove-circle",
+      delete: "remove-circle",
       add: "plus",
       back: "step-backward",
       hide: "eye-close",
       reuse: "share",
-      remove: "minus-sign"
+      x: "remove",
+      remove: "remove-circle",
+      send: "send",
+      ban: "ban-circle",
+      minus: "minus-sign",
+      trash: "trash"
     }.freeze
   end
 
@@ -153,18 +177,6 @@ module LinkHelper
       content = name
     end
     [path, identifier, icon, content]
-  end
-
-  # maybe need a modal identifier, in case of multiple form modals
-  # Stimulus needs to check if it needs to generate the modal
-  # or just show the one already created
-  def modal_link_to(identifier, name, path, args)
-    link_to(name, path,
-            **args.merge({ data: {
-                           turbo_frame: "modal_#{identifier}",
-                           controller: "modal-form-show",
-                           action: "click->modal-form-show#showModal:prevent"
-                         } }))
   end
 
   # Refactor to accept a tab array

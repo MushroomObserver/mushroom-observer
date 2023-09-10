@@ -14,7 +14,6 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
     id: "observation_collection_numbers",
     class: "obs-collection",
     data: { controller: "section-update",
-            # action: "section-update:updated->modal-form.hideModal",
             updated_by: "modal_collection_number" }
   ) do
 
@@ -23,7 +22,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         tag.div do
           [
             "#{:Collection_numbers.t}:",
-            [ # annoying: any html helper has to be safe_joined separately
+            [ # any html helper has to be safe_joined separately
               "[",
               modal_link_to("collection_number",
                             *new_collection_number_for_obs_tab(obs)),
@@ -46,6 +45,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                     collection_number_id: number.id, observation_id: obs_id,
                     q: get_query_param,
                   ),
+                  icon: :remove,
                   data: { confirm: :are_you_sure.t },
                   remote: true,
                   onclick: "MOEvents.whirly();",

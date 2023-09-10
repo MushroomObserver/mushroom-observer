@@ -4,8 +4,6 @@ Actions in modals may give flash warnings that don't interrupt flow.
 This shows the message in the modal to maintain attention on the msg, if any
 %>
 
-<%= "Hmm" %>
-
 <%= turbo_stream.update("modal_flash_#{identifier}") do
   flash_notices_html
 end %>
