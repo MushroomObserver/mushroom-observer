@@ -8,16 +8,27 @@
 module CollectionNumbers
   class RemoveObservationsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
+
+    # The edit action exists just to present a dialog box explaining
+    # what the action does, with a remove button (to the :update action)
+    # Should only be hit by turbo_stream
+    def edit
+      init_ivars_for_edit
+      return unless make_sure_can_delete!(@collection_number)
+
+      render(
+        partial: "shared/modal_form",
+        locals: {
+          title: nil,
+          identifier: "collection_number_observation",
+          form_partial: "collection_numbers/remove_observations/form"
+        }
+      ) and return
+    end
 
     def update
-      pass_query_params
-      @collection_number = find_or_goto_index(CollectionNumber,
-                                              params[:collection_number_id])
-      return unless @collection_number
-
-      @observation = find_or_goto_index(Observation, params[:observation_id])
-      return unless @observation
-
+      init_ivars_for_edit
       return unless make_sure_can_delete!(@collection_number)
 
       @collection_number.remove_observation(@observation)
@@ -27,7 +38,7 @@ module CollectionNumbers
         format.html do
           redirect_with_query(observation_path(@observation.id))
         end
-        format.js do
+        format.turbo_stream do
           render(
             partial: "observations/show/section_update",
             locals: { identifier: "collection_numbers" }
@@ -37,6 +48,14 @@ module CollectionNumbers
     end
 
     private
+
+    # NOTE: find_or_goto_index involves a return, no need for "return unless"
+    def init_ivars_for_edit
+      @collection_number = find_or_goto_index(CollectionNumber,
+                                              params[:collection_number_id])
+      @observation = find_or_goto_index(Observation,
+                                        params[:observation_id])
+    end
 
     def make_sure_can_delete!(collection_number)
       return true if collection_number.can_edit? || in_admin_mode?

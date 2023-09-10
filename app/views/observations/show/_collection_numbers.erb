@@ -39,18 +39,8 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                 modal_link_to("collection_number",
                               *edit_collection_number_tab(number, obs)),
                 "|",
-                patch_button(
-                  name: :REMOVE.t,
-                  path: collection_number_remove_observation_path(
-                    collection_number_id: number.id, observation_id: obs_id,
-                    q: get_query_param,
-                  ),
-                  icon: :remove,
-                  data: { confirm: :are_you_sure.t },
-                  remote: true,
-                  onclick: "MOEvents.whirly();",
-                  class: "remove_collection_number_link_#{number.id}"
-                ),
+                modal_link_to("collection_number_observation",
+                              *collection_number_remove_obs_tab(number, obs)),
                 "]"
               ].safe_join(" ")
             end

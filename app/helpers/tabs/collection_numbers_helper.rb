@@ -83,13 +83,21 @@ module Tabs
       [:delete_collection_number.t, c_n, { button: :destroy, icon: :delete }]
     end
 
+    # def collection_number_remove_obs_tab(c_n, obs)
+    #   [:REMOVE.t,
+    #    add_query_param(collection_number_remove_observation_path(
+    #                      collection_number_id: c_n.id, observation_id: obs.id
+    #                    )),
+    #    { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove,
+    #      method: :patch, data: { confirm: :are_you_sure.t } }]
+    # end
+
     def collection_number_remove_obs_tab(c_n, obs)
       [:REMOVE.t,
-       add_query_param(collection_number_remove_observation_path(
+       add_query_param(edit_collection_number_remove_observation_path(
                          collection_number_id: c_n.id, observation_id: obs.id
                        )),
-       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :edit,
-         method: :patch, data: { confirm: :are_you_sure.t } }]
+       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove }]
     end
   end
 end

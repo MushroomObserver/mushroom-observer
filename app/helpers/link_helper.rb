@@ -209,42 +209,37 @@ module LinkHelper
   end
 
   # Refactor to accept a tab array
-  # POST to a path; used instead of a link because POST link requires js
-  # post_button(name: herbarium.name.t,
-  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
-  #             data: { confirm: :are_you_sure.t })
-  def post_button(name:, path:, **args)
-    html_options = {
-      method: :post,
-      class: ""
-    }.deep_merge(args)
 
-    button_to(path, html_options) { name }
+  # POST to a path; used instead of a link because POST link requires js
+  def post_button(name:, path:, **args, &block)
+    any_method_button(method: :post, name:, path:, **args, &block)
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  # put_button(name: herbarium.name.t,
-  #            path: herbarium_path(id: @herbarium.id),
-  #            data: { confirm: :are_you_sure.t })
-  def put_button(name:, path:, **args)
-    html_options = {
-      method: :put,
-      class: ""
-    }.deep_merge(args)
-
-    button_to(path, html_options) { name }
+  def put_button(name:, path:, **args, &block)
+    any_method_button(method: :put, name:, path:, **args, &block)
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  # patch_button(name: herbarium.name.t,
-  #              path: herbarium_path(id: @herbarium.id),
-  #              data: { confirm: :are_you_sure.t })
-  def patch_button(name:, path:, **args)
-    html_options = {
-      method: :patch,
-      class: ""
-    }.deep_merge(args)
+  def patch_button(name:, path:, **args, &block)
+    any_method_button(method: :patch, name:, path:, **args, &block)
+  end
 
-    button_to(path, html_options) { name }
+  # any_method_button(method: :patch,
+  #                   name: herbarium.name.t,
+  #                   path: herbarium_path(id: @herbarium.id),
+  #                   data: { confirm: :are_you_sure.t })
+  # Pass a block and a name if you want an icon with tooltip
+  # NOTE: button_to with block generates a button, not an input #quirksmode
+  def any_method_button(name:, path:, method: :post, **args, &block)
+    content = block ? capture(&block) : name
+    tip = content ? { toggle: "tooltip", placement: "top", title: name } : ""
+    html_options = {
+      method: method,
+      class: "",
+      data: tip
+    }.merge(args) # currently don't have to merge class arg upstream
+
+    button_to(path, html_options) { content }
   end
 end

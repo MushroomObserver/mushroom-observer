@@ -1,0 +1,15 @@
+<%=
+# The patch_button is the whole form.
+patch_button(
+  name: :REMOVE.t,
+  path: collection_number_remove_observation_path(
+    collection_number_id: @collection_number.id,
+    observation_id: @observation.id,
+    q: get_query_param,
+  ),
+  class: class_names(
+    "remove_collection_number_link_#{@collection_number.id}",
+    "btn btn-default"
+  )
+)
+%>
