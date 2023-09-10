@@ -18,6 +18,7 @@ module HerbariumRecords
       return unless make_sure_can_delete!(@herbarium_record)
 
       @title = :show_observation_remove_herbarium_record.l
+
       respond_to do |format|
         format.html
         format.turbo_stream do

@@ -75,7 +75,7 @@ module Tabs
 
     def new_herbarium_record_tab
       [:create_herbarium_record.l,
-       new_herbarium_record_path(id: params[:id]),
+       new_herbarium_record_path(observation_id: params[:id]),
        { class: tab_id(__method__.to_s), icon: :add }]
     end
 
