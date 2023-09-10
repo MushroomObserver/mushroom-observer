@@ -971,8 +971,9 @@ class Observation < AbstractModel
   end
 
   # Has anyone proposed a given Name yet for this observation?
+  # Count is ok here because we have eager-loaded the namings.
   def name_been_proposed?(name)
-    namings.where(name: name).present?
+    namings.count { |n| n.name == name }.positive?
   end
 
   # Has the owner voted on a given Naming?
