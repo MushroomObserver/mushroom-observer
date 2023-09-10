@@ -34,7 +34,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
           numbers.map do |number|
             tag.li(id: "collection_number_#{number.id}") do
               [
-                link_to(*collection_number_show_tab(number, obs)),
+                link_to(*show_collection_number_tab(number, obs)),
                 "[",
                 modal_link_to("collection_number",
                               *edit_collection_number_tab(number, obs)),
@@ -53,7 +53,7 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
         numbers.count > 1 ? "#{:Collection_numbers.t}:" :
                             "#{:Collection_number.t}:",
         numbers.map do |number|
-          link_to(*collection_number_show_tab(number, obs))
+          link_to(*show_collection_number_tab(number, obs))
         end.safe_join(", ")
       ].safe_join(" ")
 

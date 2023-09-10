@@ -53,7 +53,7 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    def collection_number_show_tab(c_n, obs)
+    def show_collection_number_tab(c_n, obs)
       cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
 
       [tag.i(c_n.format_name.t),
@@ -73,9 +73,10 @@ module Tabs
        { class: "#{tab_id(__method__.to_s)}_#{obs.id}", icon: :add }]
     end
 
-    def edit_collection_number_tab(c_n, obs)
+    def edit_collection_number_tab(c_n, obs = nil)
+      back = obs&.id || :show
       [:edit_collection_number.t,
-       add_query_param(edit_collection_number_path(id: c_n.id, back: obs.id)),
+       add_query_param(edit_collection_number_path(id: c_n.id, back: back)),
        { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :edit }]
     end
 

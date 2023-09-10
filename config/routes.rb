@@ -428,7 +428,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Herbarium Records: standard actions --------------------------------
   resources :herbarium_records do
-    resource :remove_observation, only: [:update], module: :herbarium_records
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :herbarium_records
   end
 
   # ----- Images: Namespace differences are for memorable path names
