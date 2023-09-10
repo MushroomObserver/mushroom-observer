@@ -50,6 +50,8 @@ class ImagePresenter < BasePresenter
       context: false # false to constrain width
     }
     args = default_args.merge(args)
+    args[:size] = :medium if args[:context] == :matrix_box
+
     img_urls = Image.all_urls(image_id)
 
     args_to_presenter(image, image_id, img_urls, args)

@@ -98,7 +98,7 @@ class MatrixBoxPresenter < BasePresenter
 
     self.image_data = {
       images: observation.images,
-      image_link: false, # so they can thumb thru images
+      image_link: observation.show_link_args, # false for thumb thru images
       obs_data: obs_data_hash(observation),
       context: :matrix_box
     }

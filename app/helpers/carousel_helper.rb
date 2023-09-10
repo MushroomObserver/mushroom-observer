@@ -12,6 +12,7 @@ module CarouselHelper
   def carousel_html(**args)
     args[:images] ||= nil
     args[:object] ||= nil
+    args[:size] ||= :large
     args[:top_img] ||= args[:images].first
     args[:title] ||= :IMAGES.t
     args[:links] ||= ""
@@ -50,8 +51,7 @@ module CarouselHelper
     # Caption needs object for copyright info
     img_args = args.except(:images, :object, :top_img, :title, :links,
                            :thumbnails, :html_id)
-    presenter_args = img_args.merge({ size: :large, fit: :contain,
-                                      original: true,
+    presenter_args = img_args.merge({ fit: :contain, original: true,
                                       extra_classes: "carousel-image" })
     presenter = ImagePresenter.new(image, presenter_args)
     active = image == args[:top_img] ? "active" : ""
