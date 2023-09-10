@@ -13,7 +13,9 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
   tag.turbo_frame(
     id: "observation_collection_numbers",
     class: "obs-collection",
-    data: { updated_by: "modal_collection_number" }
+    data: { controller: "section-update",
+            # action: "section-update:updated->modal-form.hideModal",
+            updated_by: "modal_collection_number" }
   ) do
 
     if numbers.any? && can_edit

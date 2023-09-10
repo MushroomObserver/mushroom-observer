@@ -22,7 +22,7 @@
 # Form submit button must deep merge the local_assigns[:data]
 
 form_stimulus_data = {
-  data: { action: "turbo:submit-end->modal-form#maybeRemove",
+  data: {
           modal_form_target: "form" }
 }
 form_locals = local_assigns.except(:identifier, :title, :form_partial).
@@ -33,7 +33,8 @@ form_locals = local_assigns.except(:identifier, :title, :form_partial).
 tag.div(
   class: "modal", id: "modal_#{identifier}", role: "dialog",
   aria: { labelledby: "modal_header_#{identifier}" },
-  data: { busy: "true", controller: "modal-form",
+  data: { controller: "modal-form",
+          action: "section-update:updated@window->modal-form#remove",
           identifier: identifier } # not sure
 ) do
   tag.div(class: "modal-dialog modal-lg", role: "document") do

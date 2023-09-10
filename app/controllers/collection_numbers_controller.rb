@@ -381,7 +381,7 @@ class CollectionNumbersController < ApplicationController
       # to have a response here. are they getting sent back?
       format.turbo_stream do
         render(partial: "shared/modal_flash_update",
-               identifier: "collection_number") and return
+               locals: { identifier: "collection_number" }) and return
       end
     end
   end
