@@ -163,6 +163,7 @@ class Project < AbstractModel
   # Add image this project if not already done so.  Saves it.
   def add_image(img)
     images.push(img) unless images.include?(img)
+    touch
   end
 
   # Remove image this project. Saves it.
@@ -170,7 +171,7 @@ class Project < AbstractModel
     return unless images.include?(img)
 
     images.delete(img)
-    update_attribute(:updated_at, Time.zone.now)
+    touch
   end
 
   # Add observation (and its images) to this project if not already done so.
@@ -181,6 +182,7 @@ class Project < AbstractModel
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     observations.push(obs)
     imgs.each { |img| images.push(img) }
+    touch
   end
 
   # Remove observation (and its images) from this project. Saves it.
@@ -189,7 +191,7 @@ class Project < AbstractModel
 
     imgs_to_delete(obs).each { |img| images.delete(img) }
     observations.delete(obs)
-    update_attribute(:updated_at, Time.zone.now)
+    touch
   end
 
   def imgs_to_delete(obs)
@@ -221,7 +223,10 @@ class Project < AbstractModel
 
   # Add species_list to this project if not already done so.  Saves it.
   def add_species_list(spl)
-    species_lists.push(spl) unless species_lists.include?(spl)
+    return if species_lists.include?(spl)
+
+    species_lists.push(spl)
+    touch
   end
 
   # Remove species_list from this project. Saves it.
@@ -229,7 +234,7 @@ class Project < AbstractModel
     return unless species_lists.include?(spl)
 
     species_lists.delete(spl)
-    update_attribute(:updated_at, Time.zone.now)
+    touch
   end
 
   def self.find_by_title_with_wildcards(str)
