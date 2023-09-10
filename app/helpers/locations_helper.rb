@@ -11,7 +11,7 @@ module LocationsHelper
   # title of a link to Observations at a location, with observation count
   # Observations at this Location(nn)
   def show_obs_link_title_with_count(location)
-    "#{:show_location_observations.t} (#{location.observations.count})"
+    "#{:show_location_observations.t} (#{location.observations.length})"
   end
 
   def calc_counts(locations)

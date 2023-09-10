@@ -133,7 +133,7 @@ module ObjectLinkHelper
   def user_list(title, users = [])
     return safe_empty unless users&.any?
 
-    title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
+    title = users.length > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
     # interpolating would require inefficient #sanitize
     # or dangerous #html_safe
@@ -163,7 +163,7 @@ module ObjectLinkHelper
   end
 
   def observation_herbarium_record_link(obs)
-    count = obs.herbarium_records.count
+    count = obs.herbarium_records.length
     if count.positive?
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),

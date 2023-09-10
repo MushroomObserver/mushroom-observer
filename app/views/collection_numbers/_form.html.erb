@@ -15,7 +15,7 @@ end
 <%= form_with(model: @collection_number, url: url_params,
               local: local, id: "collection_number_form") do |f| %>
 
-  <% if @collection_number.observations.count > 1 %>
+  <% if @collection_number.observations.length > 1 %>
     <%= alert_block(
       :warning, :edit_affects_multiple_observations.t(type: :collection_number)
     ) %>

@@ -972,7 +972,7 @@ class Observation < AbstractModel
 
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
-    namings.count { |n| n.name == name }.positive?
+    namings.where(name: name).present?
   end
 
   # Has the owner voted on a given Naming?
