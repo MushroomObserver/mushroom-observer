@@ -4,7 +4,7 @@
 form_locals ||= {}
 %>
 
-<%= turbo_stream.update("modal_flash") do
+<%= turbo_stream.update("modal_flash_#{identifier}") do
   flash_notices_html
 end %>
 

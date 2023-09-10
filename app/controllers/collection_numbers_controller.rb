@@ -356,7 +356,6 @@ class CollectionNumbersController < ApplicationController
 
   def figure_out_where_to_go_back_to
     @back = params[:back]
-    # TODO: set params :back on the edit form
     @back_object = nil
     if @back == "show"
       @back_object = @collection_number
@@ -378,9 +377,11 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number) and
           return
       end
-      format.js do
-        # renders the flash in the modal via js
-        render(partial: "shared/modal_flash_update") and return
+      # renders the flash in the modal, but not sure it's necessary
+      # to have a response here. are they getting sent back?
+      format.turbo_stream do
+        render(partial: "shared/modal_flash_update",
+               identifier: "collection_number") and return
       end
     end
   end

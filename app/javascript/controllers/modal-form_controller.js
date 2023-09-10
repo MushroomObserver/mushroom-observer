@@ -10,17 +10,26 @@ export default class extends Controller {
     this.element.setAttribute("data-stimulus", "connected")
   }
 
+  // Target form has action turbo:submit-end->modal-form#maybeRemove
+  // that will fire the next event if response is ok.
   formTargetConnected(element) {
-    console.log("connecting target")
-
-    this.element.setAttribute("data-stimulus", "target-connected")
+    // console.log("connecting target")
+    // console.log(element)
+    element.setAttribute("data-stimulus", "target-connected")
   }
 
+  // We want to keep the modal around in case there were form errors
   maybeRemove(event) {
-    console.log("Remove Modal")
-    console.log(event.detail)
-    //   $(document.getElementById(modalSelector)).modal('hide')
-    //   document.getElementById(modalSelector).remove()
+    // console.log("maybe removing modal")
+    // console.log(event.detail)
+    // console.log(this.element)
+    if (event.detail.formSubmission.result.success) {
+      // console.log("removing modal")
+      $(this.element).modal('hide')
+      this.element.remove()
+    } else {
+      console.log("not removing modal")
+    }
   }
 
 }
