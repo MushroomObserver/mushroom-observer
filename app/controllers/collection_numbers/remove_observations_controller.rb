@@ -20,7 +20,7 @@ module CollectionNumbers
       render(
         partial: "shared/modal_form",
         locals: {
-          title: nil,
+          title: :show_observation_remove_collection_number.l,
           identifier: "collection_number_observation",
           form_partial: "collection_numbers/remove_observations/form"
         }
