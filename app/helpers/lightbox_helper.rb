@@ -33,7 +33,7 @@ module LightboxHelper
     end
     html << caption_obs_title(obs_data)
     html << observation_details_when_where_who(obs: obs_data[:obs])
-    # html << observation_details_notes(obs: obs_data[:obs])
+    html << observation_details_notes(obs: obs_data[:obs])
   end
 
   # This is different from show_obs_title, it's more like the matrix_box title
