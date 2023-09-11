@@ -2,19 +2,19 @@
 
 # buttons (forms) for observation identify UI
 module IdentifyHelper
-  def propose_naming_link(_id, btn_class: "btn-primary my-3",
+  def propose_naming_link(id, btn_class: "btn-primary my-3",
                           context: "namings_table",
                           text: :create_naming.t)
     link_to(
       text,
       new_observation_naming_path(
-        observation_id: obs_id,
+        observation_id: id,
         q: get_query_param,
         context: context
       ),
       { remote: true, onclick: "MOEvents.whirly();",
         class: "btn #{btn_class} d-inline-block propose-naming-button",
-        id: "propose_naming_button_#{obs_id}" }
+        id: "propose_naming_button_#{id}" }
     )
   end
 
