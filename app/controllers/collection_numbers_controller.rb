@@ -350,7 +350,7 @@ class CollectionNumbersController < ApplicationController
       @back_object = Observation.safe_find(@back)
       return if @back_object
 
-      @back_object = if @collection_number.observations.length == 1
+      @back_object = if @collection_number.observations.one?
                        @collection_number.observations.first
                      else
                        @collection_number
