@@ -19,7 +19,8 @@ if presenter
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
   link_heading = content_tag(:small, "(#{presenter.id})",
                               class: "rss-id float-right") +
-                content_tag(:span, presenter.name, class: "rss-name")
+                 content_tag(:span, presenter.name, class: "rss-name",
+                             id: "box_title_#{object_id}")
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do %>

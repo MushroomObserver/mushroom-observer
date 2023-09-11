@@ -23,7 +23,7 @@ module Observations
 
       respond_to do |format|
         format.html
-        format.js do
+        format.turbo_stream do
           render_modal_naming_form(
             title: helpers.naming_form_new_title(obs: @observation)
           )
@@ -63,7 +63,7 @@ module Observations
 
       respond_to do |format|
         format.html
-        format.js do
+        format.turbo_stream do
           render_modal_naming_form(
             title: helpers.naming_form_edit_title(obs: @observation)
           )
@@ -96,7 +96,7 @@ module Observations
       end
       respond_to do |format|
         format.html { default_redirect(naming.observation) }
-        format.js do
+        format.turbo_stream do
           @observation = naming.observation
           render(partial: "update_observation") and return
         end
@@ -110,7 +110,8 @@ module Observations
              locals: {
                title: title,
                identifier: "naming",
-               form_bindings: "observations/namings/form_bindings",
+               form: "observations/namings/form",
+               # form_bindings: "observations/namings/form_bindings",
                form_locals: { show_reasons: true,
                               context: params[:context] }
              }) and return
@@ -135,7 +136,7 @@ module Observations
     def respond_to_successful_create
       respond_to do |format|
         format.html { default_redirect(@params.observation, :show) }
-        format.js do
+        format.turbo_stream do
           case params[:context]
           when "lightbox", "matrix_box"
             render(partial: "observations/namings/update_lightbox")
@@ -156,7 +157,7 @@ module Observations
                     end
       respond_to do |format|
         format.html { render(action: redo_action) and return }
-        format.js do
+        format.turbo_stream do
           render(partial: "observations/namings/form_reload") and return
         end
       end
@@ -229,7 +230,7 @@ module Observations
     def respond_to_successful_update
       respond_to do |format|
         format.html { default_redirect(@params.observation) }
-        format.js do
+        format.turbo_stream do
           render(partial: "update_observation") and return
         end
       end

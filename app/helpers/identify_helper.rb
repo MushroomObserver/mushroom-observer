@@ -5,15 +5,15 @@ module IdentifyHelper
   def propose_naming_link(id, btn_class: "btn-primary my-3",
                           context: "namings_table",
                           text: :create_naming.t)
-    link_to(
+    modal_link_to(
       text,
       new_observation_naming_path(
         observation_id: id,
         q: get_query_param,
         context: context
       ),
-      { remote: true, onclick: "MOEvents.whirly();",
-        class: "btn #{btn_class} d-inline-block propose-naming-button",
+      { class: "btn #{btn_class} d-inline-block propose-naming-button",
+        # remote: true, onclick: "MOEvents.whirly();",
         id: "propose_naming_button_#{id}" }
     )
   end

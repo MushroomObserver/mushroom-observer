@@ -15,6 +15,19 @@ module MatrixBoxHelper
     end
   end
 
+  # This is called by turbo_stream to update the matrix_box title for an obs
+  # in the event that the title is changed by a "help_identify" naming.
+  # It can't be called by the matrix_box template currently because the title
+  # and its link comes from the presenter, so it has to be kept in sync.
+  # The matrix boxes should get separate templates with a dispatcher, and then
+  # this can be DRYd up.
+  def matrix_box_obs_title(obs)
+    link_to(
+      obs.format_name.t.break_name.small_author, # from matrix_box_presenter
+      observation_path(obs.id, q: get_query_param)
+    )
+  end
+
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
   # used if matrix_box local_assigns identify == true
   def matrix_box_vote_or_propose_ui(identify, object)
