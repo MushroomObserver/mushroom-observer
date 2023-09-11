@@ -48,8 +48,8 @@
 %>
 
 <div class="container-text">
-  <% if @stories.length > 900 %>
-    <b>Displaying <%= @stories.length %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/emails/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
+  <% if @stories.size > 900 %>
+    <b>Displaying <%= @stories.size %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/emails/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
   <% end %>
   <%= :pivotal_index_header.tp %>
 </div><!--.container-text-->

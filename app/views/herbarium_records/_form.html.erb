@@ -15,7 +15,7 @@ end
 <%= form_with(model: @herbarium_record, url: url_params,
               local: local, id: "herbarium_record_form") do |f| %>
 
-  <% if @herbarium_record.observations.length > 1 %>
+  <% if @herbarium_record.observations.size > 1 %>
     <%= alert_block(
       :warning, :edit_affects_multiple_observations.t(type: :herbarium_record)
     ) %>

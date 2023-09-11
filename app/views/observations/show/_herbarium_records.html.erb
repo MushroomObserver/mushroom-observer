@@ -53,7 +53,7 @@ query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
 
   <% elsif records.any? && !can_add %>
     <div>
-      <%= records.length > 1 ? :Herbarium_records.t : :Herbarium_record.t %>:
+      <%= records.size > 1 ? :Herbarium_records.t : :Herbarium_record.t %>:
     </div>
     <ul class="tight-list">
       <% records.each do |record| %>

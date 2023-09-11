@@ -1,6 +1,6 @@
 <%# existing synonyms %>
 
-<% if current_synonyms.length > 1 %>
+<% if current_synonyms.size > 1 %>
   <%= fields_for(:existing_synonyms) do |fes| %>
     <div class="form-group">
       <%= content_tag(:div, "#{:form_synonyms_current_synonyms.t}:",
