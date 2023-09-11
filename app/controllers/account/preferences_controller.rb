@@ -100,7 +100,7 @@ module Account
     def update_content_filter(pref, val)
       filter = ContentFilter.find(pref)
       @user.content_filter[pref] =
-        if filter.type == :boolean && filter.prefs_vals.count == 1
+        if filter.type == :boolean && filter.prefs_vals.one?
           val == "1" ? filter.prefs_vals.first : filter.off_val
         else
           val.to_s

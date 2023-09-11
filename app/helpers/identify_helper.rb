@@ -2,16 +2,20 @@
 
 # buttons (forms) for observation identify UI
 module IdentifyHelper
-  def propose_naming_link(id, btn_class: "btn-primary my-3", context: "",
+  def propose_naming_link(id, btn_class: "btn-primary my-3",
+                          context: "namings_table",
                           text: :create_naming.t)
-    render(partial: "observations/namings/propose_button",
-           locals: {
-             obs_id: id,
-             text: text,
-             btn_class: "#{btn_class} d-inline-block",
-             context: context
-           },
-           layout: false)
+    link_to(
+      text,
+      new_observation_naming_path(
+        observation_id: id,
+        q: get_query_param,
+        context: context
+      ),
+      { remote: true, onclick: "MOEvents.whirly();",
+        class: "btn #{btn_class} d-inline-block propose-naming-button",
+        id: "propose_naming_button_#{id}" }
+    )
   end
 
   # NOTE: There are potentially two of these toggles for the same obs, on
@@ -22,10 +26,25 @@ module IdentifyHelper
   # with some additions to the lightbox JS, to keep track of the checked
   # state on show, and cost an extra db lookup. Not worth it, IMO.
   # - Nimmo 20230215
-  def mark_as_reviewed_toggle(id, label_class = "",
-                              selector = "caption_reviewed")
-    render(partial: "observation_views/mark_as_reviewed",
-           locals: { id: id, selector: selector, label_class: label_class },
-           layout: false)
+  def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
+                              label_class = "")
+
+    form_with(url: observation_view_path(id: id),
+              class: "d-inline-block",
+              method: :put, local: false) do |f|
+      content_tag(:div, class: "d-inline form-group form-inline") do
+        f.label("#{selector}_#{id}",
+                class: "caption-reviewed-link #{label_class}") do
+          concat(:mark_as_reviewed.t)
+          concat(
+            f.check_box(
+              :reviewed,
+              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
+                onchange: "Rails.fire(this.closest('form'), 'submit')" }
+            )
+          )
+        end
+      end
+    end
   end
 end

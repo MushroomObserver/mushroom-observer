@@ -12,7 +12,7 @@ class Pivotal
       stories = []
 
       request_stories("", stories)
-      request_stories("&offset=501", stories) if stories.count == 500
+      request_stories("&offset=501", stories) if stories.size == 500
 
       stories
     end

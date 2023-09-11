@@ -68,7 +68,7 @@ class Suggestion
     best_name = nil
     best_count = -1
     names.each do |name|
-      count = name.observations.count
+      count = name.observations.size
       next if count <= best_count
 
       best_name = name
