@@ -133,7 +133,7 @@ module ObjectLinkHelper
   def user_list(title, users = [])
     return safe_empty unless users&.any?
 
-    title = users.length > 1 ? title.to_s.pluralize.to_sym.t : title.t
+    title = users.size > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
     # interpolating would require inefficient #sanitize
     # or dangerous #html_safe
