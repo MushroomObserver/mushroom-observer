@@ -41,7 +41,8 @@ module LightboxHelper
     tag.h4(class: "obs-what", id: "observation_what_#{obs_data[:id]}") do
       [
         link_to(obs_data[:id], add_query_param(obs_data[:obs].show_link_args),
-                class: "btn btn-primary mr-3"),
+                class: "btn btn-primary mr-3",
+                id: "caption_obs_link_#{obs_data[:id]}"),
         obs_data[:obs].format_name.t.small_author
       ].safe_join(" ")
     end
