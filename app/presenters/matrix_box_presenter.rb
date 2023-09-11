@@ -113,7 +113,7 @@ class MatrixBoxPresenter < BasePresenter
     # user.contribution and observations.count are just numbers.
     self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>
                    #{:list_users_contribution.t}: #{user.contribution}<br/>
-                   #{:Observations.t}: #{user.observations.count}".html_safe
+                   #{:Observations.t}: #{user.observations.size}".html_safe
     # rubocop:enable Rails/OutputSafety
     self.name = user.unique_text_name
     self.what = user

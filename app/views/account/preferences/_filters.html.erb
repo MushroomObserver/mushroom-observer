@@ -6,10 +6,10 @@
 
 <% ContentFilter.all.each do |filter| %>
 
-  <% if filter.type == :boolean && filter.prefs_vals.count == 1 %>
+  <% if filter.type == :boolean && filter.prefs_vals.one? %>
     <%= render(partial: "account/preferences/filters/checkbox",
                locals: { filter: filter, f: f }) %>
-  <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
+  <% elsif filter.type == :boolean && filter.prefs_vals.size > 1 %>
     <%= render(partial: "account/preferences/filters/select",
                locals: { filter: filter, f: f }) %>
   <% elsif filter.type == [:string] %>
