@@ -33,7 +33,7 @@ module Query::Modules::HighLevelQueries
 
   # Number of results the query returns.
   def num_results(_args = {})
-    @num_results ||= result_ids&.length || 0
+    @num_results ||= result_ids&.size || 0
   end
 
   # Array of all results, just ids.
@@ -67,7 +67,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid instances of +model+ -- no error checking is done!!
   def results=(list)
     @result_ids = list.map(&:id)
-    @num_results = list.length
+    @num_results = list.size
     @results = list.each_with_object({}) do |obj, map|
       map[obj.id] ||= obj
     end
@@ -78,7 +78,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid Integer ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
-    @num_results = list.length
+    @num_results = list.size
   end
 
   # Get index of a given record / id in the results.
@@ -112,7 +112,7 @@ module Query::Modules::HighLevelQueries
         ids = ids.select { |id| @letters[id] == letter }
       end
     end
-    paginator.num_total = ids.length
+    paginator.num_total = ids.size
     ids[paginator.from..paginator.to] || []
   end
 
