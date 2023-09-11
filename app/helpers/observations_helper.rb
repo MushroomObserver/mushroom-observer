@@ -32,29 +32,47 @@ module ObservationsHelper
   def obs_title_consensus_name_link(name:, owner_naming: nil)
     if name.deprecated &&
        (prefer_name = name.best_preferred_synonym).present?
-      obs_title_with_preferred_name_link(name, prefer_name)
+      obs_title_with_preferred_synonym_link(name, prefer_name)
     else
       obs_title_name_link(name, owner_naming)
     end
   end
 
-  def obs_title_with_preferred_name_link(name, prefer_name)
+  def obs_title_with_preferred_synonym_link(name, prefer_name)
     [
-      link_to_display_name_brief_authors(name),
+      link_to_display_name_brief_authors(
+        name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
+      ),
       # Differentiate deprecated consensus from preferred name
-      consensus_id_tag,
-      "(#{link_to_display_name_without_authors(prefer_name)})"
+      obs_consensus_id_flag,
+      obs_title_preferred_synonym(prefer_name)
     ].safe_join(" ")
   end
 
+  def obs_title_preferred_synonym(prefer_name)
+    tag.span(class: "smaller") do
+      [
+        "(",
+        link_to_display_name_without_authors(
+          prefer_name, class: "obs_preferred_synonym_link_#{prefer_name.id}"
+        ),
+        ")"
+      ].safe_join
+    end
+  end
+
   def obs_title_name_link(name, owner_naming)
-    text = [link_to_display_name_brief_authors(name)]
+    text = [
+      link_to_display_name_brief_authors(
+        name, class: "obs_consensus_naming_link_#{name.id}"
+      )
+    ]
     # Differentiate this Name from Observer Preference
-    text << consensus_id_tag if owner_naming
+    text << obs_consensus_id_flag if owner_naming
     text.safe_join(" ")
   end
 
-  def consensus_id_tag
+  def obs_consensus_id_flag
     tag.span("(#{:show_observation_site_id.t})", class: "smaller")
   end
 
@@ -72,7 +90,9 @@ module ObservationsHelper
 
   def owner_favorite_or_explanation(obs)
     if (name = obs.owner_preference)
-      link_to_display_name_brief_authors(name)
+      link_to_display_name_brief_authors(
+        name, class: "obs_owner_naming_link_#{name.id}"
+      )
     else
       :show_observation_no_clear_preference
     end
@@ -89,14 +109,14 @@ module ObservationsHelper
     end
   end
 
-  def link_to_display_name_brief_authors(name)
+  def link_to_display_name_brief_authors(name, **args)
     link_to(name.display_name_brief_authors.t,
-            name_path(id: name.id))
+            name_path(id: name.id), **args)
   end
 
-  def link_to_display_name_without_authors(name)
+  def link_to_display_name_without_authors(name, **args)
     link_to(name.display_name_without_authors.t,
-            name_path(id: name.id))
+            name_path(id: name.id), **args)
   end
 
   def observation_map_coordinates(obs:)
