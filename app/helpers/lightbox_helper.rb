@@ -26,8 +26,7 @@ module LightboxHelper
   # observation part of the caption. returns an array of html strings (to join)
   # template local assign "caption" skips the obs relations (projects, etc)
   def lightbox_obs_caption(html, obs_data, identify)
-    if identify ||
-       (obs_data[:obs].vote_cache.present? && obs_data[:obs].vote_cache <= 0)
+    if identify
       html << propose_naming_link(obs_data[:id], context: "lightbox")
       html << content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
       html << mark_as_reviewed_toggle(obs_data[:id])
@@ -37,9 +36,16 @@ module LightboxHelper
     html << observation_details_notes(obs: obs_data[:obs])
   end
 
+  # This is different from show_obs_title, it's more like the matrix_box title
   def caption_obs_title(obs_data)
-    tag.h4(show_obs_title(obs: obs_data[:obs]),
-           class: "obs-what", id: "observation_what_#{obs_data[:id]}")
+    tag.h4(class: "obs-what", id: "observation_what_#{obs_data[:id]}") do
+      [
+        link_to(obs_data[:id], add_query_param(obs_data[:obs].show_link_args),
+                class: "btn btn-primary mr-3",
+                id: "caption_obs_link_#{obs_data[:id]}"),
+        obs_data[:obs].format_name.t.small_author
+      ].safe_join(" ")
+    end
   end
 
   # links relating to the image object, pre-joined as a div
