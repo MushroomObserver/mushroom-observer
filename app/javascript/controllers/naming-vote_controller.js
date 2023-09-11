@@ -12,14 +12,14 @@ export default class extends Controller {
   // Pause the UI on change and show the progress modal. Maybe no need?
   // Send the vote submit
   sendVote() {
-    console.log("Sending Vote")
+    // console.log("Sending Vote")
     // console.log("Pausing UI")
     // $('#mo_ajax_progress_caption').html(
     //   translations.show_namings_saving + "... "
     // );
     // $("#mo_ajax_progress").modal({ backdrop: 'static', keyboard: false });
-    this.element.setAttribute("data-stimulus", "sending")
-    // this.element.submit()
+    // this.element.setAttribute("data-stimulus", "sending")
+    this.element.requestSubmit()
   }
 
   // Target form could have action turbo:submit-end->modal-form#maybeRemove nope
