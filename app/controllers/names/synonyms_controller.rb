@@ -155,7 +155,7 @@ module Names
       pick_one = other_group.shift
       pick_one.clear_synonym
       other_group.each { |n| pick_one.transfer_synonym(n) }
-      main_name.clear_synonym if main_name.reload.synonyms.length <= 1
+      main_name.clear_synonym if main_name.reload.synonyms.size <= 1
     end
 
     def dump_sorter(sorter)
