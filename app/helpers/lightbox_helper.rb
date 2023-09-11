@@ -39,8 +39,11 @@ module LightboxHelper
   # This is different from show_obs_title, it's more like the matrix_box title
   def caption_obs_title(obs_data)
     tag.h4(class: "obs-what", id: "observation_what_#{obs_data[:id]}") do
-      link_with_query(obs_data[:obs].format_name.t.small_author,
-                      obs_data[:obs].show_link_args)
+      [
+        link_to(obs_data[:id], add_query_param(obs_data[:obs].show_link_args),
+                class: "btn btn-primary mr-3"),
+        obs_data[:obs].format_name.t.small_author
+      ].safe_join(" ")
     end
   end
 
