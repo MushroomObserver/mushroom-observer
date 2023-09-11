@@ -2,16 +2,20 @@
 
 # buttons (forms) for observation identify UI
 module IdentifyHelper
-  def propose_naming_link(id, btn_class: "btn-primary my-3", context: "",
+  def propose_naming_link(_id, btn_class: "btn-primary my-3",
+                          context: "namings_table",
                           text: :create_naming.t)
-    render(partial: "observations/namings/propose_button",
-           locals: {
-             obs_id: id,
-             text: text,
-             btn_class: "#{btn_class} d-inline-block",
-             context: context
-           },
-           layout: false)
+    link_to(
+      text,
+      new_observation_naming_path(
+        observation_id: obs_id,
+        q: get_query_param,
+        context: context
+      ),
+      { remote: true, onclick: "MOEvents.whirly();",
+        class: "btn #{btn_class} d-inline-block propose-naming-button",
+        id: "propose_naming_button_#{obs_id}" }
+    )
   end
 
   # NOTE: There are potentially two of these toggles for the same obs, on
@@ -24,8 +28,23 @@ module IdentifyHelper
   # - Nimmo 20230215
   def mark_as_reviewed_toggle(id, selector = "caption_reviewed",
                               label_class = "")
-    render(partial: "observation_views/mark_as_reviewed",
-           locals: { id: id, selector: selector, label_class: label_class },
-           layout: false)
+
+    form_with(url: observation_view_path(id: id),
+              class: "d-inline-block",
+              method: :put, local: false) do |f|
+      content_tag(:div, class: "d-inline form-group form-inline") do
+        f.label("#{selector}_#{id}",
+                class: "caption-reviewed-link #{label_class}") do
+          concat(:mark_as_reviewed.t)
+          concat(
+            f.check_box(
+              :reviewed,
+              { checked: "1", class: "mx-3", id: "#{selector}_#{id}",
+                onchange: "Rails.fire(this.closest('form'), 'submit')" }
+            )
+          )
+        end
+      end
+    end
   end
 end
