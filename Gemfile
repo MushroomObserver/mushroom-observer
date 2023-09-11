@@ -36,7 +36,7 @@ end
 
 # gem irb now depends on psych, but version 5 will not bundle currently
 gem("importmap-rails")
-gem("psych", "~> 4")
+# gem("psych", "~> 4")
 gem("redis", "~> 4.0")
 gem("requestjs-rails")
 gem("sprockets-rails")
