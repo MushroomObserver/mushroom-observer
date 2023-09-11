@@ -6,11 +6,9 @@ module IdentifyHelper
                           context: "namings_table",
                           text: :create_naming.t)
     modal_link_to(
-      text,
+      "naming", text,
       new_observation_naming_path(
-        observation_id: id,
-        q: get_query_param,
-        context: context
+        observation_id: id, q: get_query_param, context: context
       ),
       { class: "btn #{btn_class} d-inline-block propose-naming-button",
         # remote: true, onclick: "MOEvents.whirly();",

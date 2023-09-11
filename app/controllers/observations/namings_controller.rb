@@ -106,9 +106,9 @@ module Observations
     private
 
     def render_modal_naming_form(title:)
-      render(partial: "shared/modal_form_show",
+      render(partial: "shared/modal_form",
              locals: {
-               title: title,
+               title: title, local: false,
                identifier: "naming",
                form: "observations/namings/form",
                # form_bindings: "observations/namings/form_bindings",

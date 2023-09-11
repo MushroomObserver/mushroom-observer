@@ -132,13 +132,15 @@ module NamingsHelper
 
     form_with(url: naming_vote_path(naming_id: naming.id), method: :patch,
               local: false, id: "naming_vote_#{naming.id}",
-              class: "naming-vote-form") do |f|
+              class: "naming-vote-form",
+              data: { controller: "naming-vote" }) do |f|
       [
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
                     { class: "form-control w-100",
-                      onchange: "Rails.fire(this.closest('form'), 'submit')",
-                      data: { role: "change_vote", id: naming.id } })
+                      # onchange: "Rails.fire(this.closest('form'), 'submit')",
+                      data: { role: "change_vote", id: naming.id,
+                              action: "change->naming-vote#sendVote" } })
         end,
         hidden_field_tag(:context, context),
         tag.noscript do

@@ -20,10 +20,12 @@ end
 show_reasons ||= true
 # if modal, context provided by propose_naming_button
 context ||= "page"
+
+form_args = { model: @naming, url: url, method: method, id: "naming_form" }
+form_args = form_args.merge({ local: true }) if local_assigns[:local] == true
 %>
 
-<%= form_with(model: @naming, url: url, method: method, local: local,
-              id: "naming_form") do |f| %>
+<%= form_with(**form_args) do |f| %>
 
   <%= submit_button(form: f, button: button_name, center: true) %>
 
