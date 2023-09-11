@@ -163,7 +163,7 @@ module ObjectLinkHelper
   end
 
   def observation_herbarium_record_link(obs)
-    count = obs.herbarium_records.length
+    count = obs.herbarium_records.size
     if count.positive?
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
