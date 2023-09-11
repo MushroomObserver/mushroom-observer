@@ -27,7 +27,7 @@ module HerbariumRecords
             locals: {
               title: @title,
               identifier: "herbarium_record_observation",
-              form_partial: "herbarium_records/remove_observations/form"
+              form: "herbarium_records/remove_observations/form"
             }
           ) and return
         end
@@ -64,7 +64,9 @@ module HerbariumRecords
 
       @observation = find_or_goto_index(Observation,
                                         params[:observation_id])
-      false unless @observation
+      return false unless @observation
+
+      true
     end
 
     def make_sure_can_delete!(herbarium_record)

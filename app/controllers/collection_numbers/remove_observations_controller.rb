@@ -27,7 +27,7 @@ module CollectionNumbers
             locals: {
               title: @title,
               identifier: "collection_number_observation",
-              form_partial: "collection_numbers/remove_observations/form"
+              form: "collection_numbers/remove_observations/form"
             }
           ) and return
         end
@@ -36,6 +36,7 @@ module CollectionNumbers
 
     def update
       return unless init_ivars_for_edit
+
       return unless make_sure_can_delete!(@collection_number)
 
       @collection_number.remove_observation(@observation)
@@ -63,7 +64,9 @@ module CollectionNumbers
 
       @observation = find_or_goto_index(Observation,
                                         params[:observation_id])
-      false unless @observation
+      return false unless @observation
+
+      true
     end
 
     def make_sure_can_delete!(collection_number)

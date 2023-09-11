@@ -422,7 +422,8 @@ class HerbariumRecordsController < ApplicationController
 
   def render_modal_herbarium_record_form(title:)
     render(partial: "shared/modal_form_show",
-           locals: { title: title, identifier: "herbarium_record" }) and return
+           locals: { title: title, identifier: "herbarium_record",
+                     form: "herbarium_records/form" }) and return
   end
 
   def render_herbarium_records_section_update

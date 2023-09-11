@@ -365,7 +365,7 @@ class CollectionNumbersController < ApplicationController
     render(
       partial: "shared/modal_form",
       locals: { title: title, identifier: "collection_number",
-                form_partial: "collection_numbers/form" }
+                form: "collection_numbers/form" }
     ) and return
   end
 
