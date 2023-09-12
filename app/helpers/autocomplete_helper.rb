@@ -8,6 +8,26 @@ module AutocompleteHelper
     ))
   end
 
+  # maybe could be a helper so it can be called in separate controllers?
+  # More like a view component
+  # stimulus-autocomplete:
+  # <li class="list-group-item" role="option"
+  #     data-autocomplete-value="1">Blackbird</li>
+  # <li class="list-group-item" role="option"
+  #     data-autocomplete-value="2">Bluebird</li>
+  # <li class="list-group-item" role="option"
+  #     data-autocomplete-value="3">Mockingbird</li>
+  # Note that we can return a value, i.e. record.id!
+  # matches = [[string, id], [string, id]]
+  def auto_complete_results(string)
+    ::AutoComplete.subclass(@type).new(string, params).
+      # matching_strings.join("\n") + "\n"
+      matching_strings.map do |string, id|
+        tag.li(string, class: "list-group-item", role: "option",
+               data: { autocomplete_value: id })
+      end.join("\n") + "\n"
+  end
+
   # Turn a text_field into an auto-completer.
   # id::   id of text_field
   # opts:: arguments (see autocomplete.js)
