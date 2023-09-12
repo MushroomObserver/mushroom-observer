@@ -138,7 +138,6 @@ module NamingsHelper
         fields_for(:vote) do |fv|
           fv.select(:value, menu, {},
                     { class: "form-control w-100",
-                      # onchange: "Rails.fire(this.closest('form'), 'submit')",
                       data: { role: "change_vote", id: naming.id,
                               action: "change->naming-vote#sendVote" } })
         end,
