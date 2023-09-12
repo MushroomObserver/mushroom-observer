@@ -41,6 +41,7 @@ class AjaxController < ApplicationController
   include APIKey
 
   disable_filters
+  skip_before_action :kick_out_robots # FIXME: remove after testing
   around_action :catch_ajax_errors
   layout false
 
