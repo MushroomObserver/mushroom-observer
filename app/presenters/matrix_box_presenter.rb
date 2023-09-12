@@ -94,10 +94,14 @@ class MatrixBoxPresenter < BasePresenter
       self.detail = observation.rss_log.detail
       self.time = observation.rss_log.updated_at
     end
-    return unless observation.thumb_image
+    return unless observation.thumb_image_id
+
+    # observation.images is eager-loaded, observation.thumb_image is not.
+    thumb_image = observation.images.select {|i| i.id == observation.thumb_image_id}.first
 
     self.image_data = {
       images: observation.images,
+      thumb_image: thumb_image,
       image_link: observation.show_link_args, # false for thumb thru images
       obs_data: obs_data_hash(observation),
       context: :matrix_box

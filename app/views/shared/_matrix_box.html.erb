@@ -3,7 +3,7 @@
 # NOTE panel-sizing div shd be deleted in bs4. thumbnail goes in card-img-top
 presenter = MatrixBoxPresenter.new(object)
 
-if presenter
+if presenter 
 
   link_method ||= :get
   identify ||= false
@@ -17,16 +17,11 @@ if presenter
     image_args = local_assigns.
                  except(:columns, :object, :object_counter, :object_iteration).
                  merge(presenter.image_data.except(:images) || {})
-    top_img = if object.respond_to?(:thumb_image) && object.thumb_image
-                object.thumb_image
-              else
-                images[0]
-              end
+    top_img = presenter.image_data[:thumb_image] || images.first
   end
   h_element = presenter.image_data ? :h5 : :h3 # bigger heading if no image
   link_heading = tag.small("(#{presenter.id})", class: "rss-id float-right") +
                  tag.span(presenter.name, class: "rss-name")
-
   %>
 
   <%= matrix_box(columns: columns, id: object_id) do %>

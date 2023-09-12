@@ -53,6 +53,7 @@ module ImageHelper
   # Needs object for copyright info
   def image_info(image, object, original: false)
     notes = []
+    # XXX Consider dropping this from indexes.
     notes << tag.div(image_owner_original_name(image, original),
                      class: "image-original-name")
     notes << tag.div(image_copyright(image, object), class: "image-copyright")

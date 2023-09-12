@@ -167,10 +167,10 @@ module ObservationsHelper
   # sub-partial. Here they're converted to helpers to speed up loading of index
   def observation_details_when_where_who(obs:)
     [
-      observation_details_when(obs: obs),
-      observation_details_where(obs: obs),
-      observation_details_where_gps(obs: obs),
-      observation_details_who(obs: obs)
+    observation_details_when(obs: obs),
+    observation_details_where(obs: obs),
+    observation_details_where_gps(obs: obs),
+    observation_details_who(obs: obs)
     ].safe_join
   end
 
@@ -203,6 +203,7 @@ module ObservationsHelper
     gps_hidden_msg = tag.i("(#{:show_observation_gps_hidden.t})")
 
     tag.p(class: "obs-where-gps", id: "observation_where_gps") do
+      # XXX Consider dropping this from indexes.
       concat(gps_display_link) if obs.reveal_location?
       concat(gps_hidden_msg) if obs.gps_hidden
     end
