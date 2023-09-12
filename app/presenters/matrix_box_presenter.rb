@@ -97,7 +97,8 @@ class MatrixBoxPresenter < BasePresenter
     return unless observation.thumb_image_id
 
     # observation.images is eager-loaded, observation.thumb_image is not.
-    thumb_image = observation.images.select {|i| i.id == observation.thumb_image_id}.first
+    thumb_image = observation.images.
+                  find { |i| i.id == observation.thumb_image_id }
 
     self.image_data = {
       images: observation.images,

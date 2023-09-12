@@ -167,10 +167,10 @@ module ObservationsHelper
   # sub-partial. Here they're converted to helpers to speed up loading of index
   def observation_details_when_where_who(obs:)
     [
-    observation_details_when(obs: obs),
-    observation_details_where(obs: obs),
-    observation_details_where_gps(obs: obs),
-    observation_details_who(obs: obs)
+      observation_details_when(obs: obs),
+      observation_details_where(obs: obs),
+      observation_details_where_gps(obs: obs),
+      observation_details_who(obs: obs)
     ].safe_join
   end
 
