@@ -2,6 +2,25 @@
 
   <%= submit_button(form: f, button: button, center: true) %>
 
+
+  <%= tag.div(
+    tag.p(:form_project_date_range.t) +
+    tag.p(:form_project_dates_explain.t)
+  ) %>
+
+  <div class="container-text">
+    <div>
+      <%= f.label(:start_date, "#{:form_projects_start_date.t}: ") %>
+      <%= f.date_select(:start_date,
+                        { class: "form-control mb-2" }) %>
+    </div>
+    <div>
+      <%= f.label(:end_date, "#{:form_projects_end_date.t}: ") %>
+      <%= f.date_select(:end_date,
+                        { class: "form-control mb-2" }) %>
+    </div>
+  </div>
+
   <%= check_box_with_label(form: f, field: :accepting_observations,
                            label: :form_projects_accepting_observations.t) %>
 
