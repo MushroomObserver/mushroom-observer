@@ -42,13 +42,22 @@ context ||= "blank"
       tag.div(class: "row mt-3") do
         [
           tag.div(class: "col-xs-12 col-sm-6") do
-            [
-              text_field_with_label(form: f_n, field: :name, size: 40,
-                                    label: :WHAT.t + ":",
-                                    value: what, autocomplete: "off",
-                                    data: { autofocus: focus_on_name }),
-              turn_into_name_auto_completer(:naming_name, primer: Name.primer)
-            ].safe_join
+            tag.div(
+              role: "combobox",
+              data: { controller: "autocomplete",
+                      autocomplete_url_value: "/ajax/auto_complete/name" }
+            ) do
+              [
+                text_field_with_label(form: f_n, field: :name, size: 40,
+                                      label: :WHAT.t + ":",
+                                      value: what, autocomplete: "off",
+                                      data: { autocomplete_target: "input",
+                                              autofocus: focus_on_name }),
+                f_n.hidden_field(:id, data: { autocomplete_target: "hidden" }),
+                tag.ul(class: "list-group",
+                       data: { autocomplete_target: "results" } )
+              ].safe_join
+            end
           end,
           tag.div(class: "col-xs-12 col-sm-6") do
             help_block_with_arrow("left", id: "naming_name_help") do
