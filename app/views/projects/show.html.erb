@@ -18,6 +18,8 @@ add_tab_set(project_show_tabs(project: @project, user: @user))
   <div class="col-md-6">
     <%= panel_block do %>
       <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
+      <p><b><%= :show_project_start_date.t %>:</b> <%= @project.start_date %><br/>
+      <b><%= :show_project_end_date.t %>:</b> <%= @project.end_date %></p>
       <% if false %>
         <p><b><%= :show_project_published.t %>:</b> <%= @name_count %></p>
       <% end %>

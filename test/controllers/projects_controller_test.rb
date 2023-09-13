@@ -56,6 +56,12 @@ class ProjectsControllerTest < FunctionalTestCase
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
     assert_select("form[action=?]", project_path(p_id), count: 0)
+    assert_select("#content",
+                  { text: /#{:show_project_start_date.t}/, count: 1 },
+                  "Missing Project Start Date")
+    assert_select("#content",
+                  { text: /#{:show_project_end_date.t}/, count: 1 },
+                  "Missing Project End Date")
   end
 
   def test_show_project_logged_in
