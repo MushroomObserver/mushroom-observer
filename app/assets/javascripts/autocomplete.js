@@ -948,6 +948,24 @@ Object.assign(MOAutocompleter.prototype, {
         this.process_ajax_response(text);
       }).bind(this)
     });
+
+    // this.headers = new Headers();
+    // this.headers.append("authorization", csrf_token())
+    // this.headers.append("accept", "text")
+
+    // this.ajax_request = async function (url) {
+    //   const response = await fetch(url, this.headers);
+    //   if (response.ok) {
+    //     if (200 <= response.status && response.status <= 299) {
+    //       const result = await response.text();
+    //       // do something awesome with result
+    //       this.process_ajax_response(result).bind(this)
+    //     } else {
+    //       this.ajax_request = null;
+    //       console.log(`got a ${response.status}`);
+    //     }
+    //   }
+    // };
   },
 
 
@@ -1032,7 +1050,7 @@ Object.assign(MOAutocompleter.prototype, {
       if (old_str != new_str) {
         var old_scroll = this.input_elem.scrollTop();
         this.input_elem.val(new_str);
-        setCursorPosition(this.input_elem[0], token.start + new_val.length);
+        this.setCursorPosition(this.input_elem[0], token.start + new_val.length);
         this.input_elem.scrollTop(old_scroll);
       }
     } else {
@@ -1043,7 +1061,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Get index of first character and character after last of current token.
   token_extents: function () {
-    var start, end, sel = getInputSelection(this.input_elem[0]);
+    var start, end, sel = this.getInputSelection(this.input_elem[0]);
     var val = this.input_elem.val();
     if (sel.start > 0)
       start = val.lastIndexOf(this.token, sel.start - 1);
@@ -1078,6 +1096,70 @@ Object.assign(MOAutocompleter.prototype, {
     this.options += "\n" + val;
   },
 
+  // ------------------------------ Input ------------------------------
+  // written by Tim Down
+  // http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
+
+  getInputSelection: function (el) {
+    var start, end, len, normalizedValue, range, textInputRange, len, endRange;
+    start = end = len = el.value.length;
+
+    if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+      start = el.selectionStart;
+      end = el.selectionEnd;
+    } else {
+      range = document.selection.createRange();
+
+      if (range && range.parentElement() == el) {
+        normalizedValue = el.value.replace(/\r\n/g, "\n");
+
+        // Create a working TextRange that lives only in the input
+        textInputRange = el.createTextRange();
+        textInputRange.moveToBookmark(range.getBookmark());
+
+        // Check if the start and end of the selection are at the very end
+        // of the input, since moveStart/moveEnd doesn't return what we want
+        // in those cases
+        endRange = el.createTextRange();
+        endRange.collapse(false);
+
+        if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
+          start = end = len;
+        } else {
+          start = -textInputRange.moveStart("character", -len);
+          start += normalizedValue.slice(0, start).split("\n").length - 1;
+
+          if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
+            end = len;
+          } else {
+            end = -textInputRange.moveEnd("character", -len);
+            end += normalizedValue.slice(0, end).split("\n").length - 1;
+          }
+        }
+      }
+    }
+
+    return {
+      start: start,
+      end: end,
+      len: len
+    };
+  },
+
+  setCursorPosition: function (el, pos) {
+    if (el.setSelectionRange) {
+      el.setSelectionRange(pos, pos);
+    } else if (el.createTextRange) {
+      var range = el.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', pos);
+      range.moveStart('character', pos);
+      range.select();
+    }
+  },
+
+  // ------------------------------- DEBUGGING ------------------------------
+
   debug: function (str) {
     document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   },
@@ -1087,66 +1169,4 @@ Object.assign(MOAutocompleter.prototype, {
     // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   }
 });
-
-// --------------------------------------------------------------------
-// written by Tim Down
-// http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
-
-function getInputSelection(el) {
-  var start, end, len, normalizedValue, range, textInputRange, len, endRange;
-  start = end = len = el.value.length;
-
-  if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
-    start = el.selectionStart;
-    end = el.selectionEnd;
-  } else {
-    range = document.selection.createRange();
-
-    if (range && range.parentElement() == el) {
-      normalizedValue = el.value.replace(/\r\n/g, "\n");
-
-      // Create a working TextRange that lives only in the input
-      textInputRange = el.createTextRange();
-      textInputRange.moveToBookmark(range.getBookmark());
-
-      // Check if the start and end of the selection are at the very end
-      // of the input, since moveStart/moveEnd doesn't return what we want
-      // in those cases
-      endRange = el.createTextRange();
-      endRange.collapse(false);
-
-      if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
-        start = end = len;
-      } else {
-        start = -textInputRange.moveStart("character", -len);
-        start += normalizedValue.slice(0, start).split("\n").length - 1;
-
-        if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
-          end = len;
-        } else {
-          end = -textInputRange.moveEnd("character", -len);
-          end += normalizedValue.slice(0, end).split("\n").length - 1;
-        }
-      }
-    }
-  }
-
-  return {
-    start: start,
-    end: end,
-    len: len
-  };
-}
-
-function setCursorPosition(el, pos) {
-  if (el.setSelectionRange) {
-    el.setSelectionRange(pos, pos);
-  } else if (el.createTextRange) {
-    var range = el.createTextRange();
-    range.collapse(true);
-    range.moveEnd('character', pos);
-    range.moveStart('character', pos);
-    range.select();
-  }
-}
 
