@@ -116,6 +116,30 @@ module FormsHelper
     end
   end
 
+  # TODO: figure out how to handle value: what
+  def autocomplete_field(**args)
+    tag.div(
+      role: "combobox",
+      data: { controller: "autocomplete",
+              autocomplete_url_value: "/ajax/auto_complete/name",
+              autocomplete_query_param_value: "id" }
+    ) do
+      [
+        text_field_with_label(form: args[:form], field: args[:field],
+                              label: args[:label],
+                              value: args[:value], autocomplete: "off",
+                              data: {
+                                autocomplete_target: "input",
+                                autofocus: args[:autofocus]
+                              }),
+        args[:form].hidden_field(:id,
+                                 data: { autocomplete_target: "hidden" }),
+        tag.ul(class: "list-group",
+               data: { autocomplete_target: "results" } )
+      ].safe_join
+    end
+  end
+
   # Bootstrap text_area
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
