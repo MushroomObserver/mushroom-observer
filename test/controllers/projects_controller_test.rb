@@ -177,6 +177,8 @@ class ProjectsControllerTest < FunctionalTestCase
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert(admin_group)
     assert_equal([rolf], admin_group.users)
+    assert_equal(Time.zone.today, project.start_date)
+    assert_equal(Time.zone.today, project.end_date)
   end
 
   def test_add_project_existing
