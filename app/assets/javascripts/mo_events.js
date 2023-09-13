@@ -14,13 +14,13 @@ MOEvents.whirly = function (text) {
 MOEvents.rebindAutoComplete = function (type) {
   // var type = this.value
   // alert(type)
-  var filter_term = $("#filter_term");
+  var filter_term = document.getElementById("filter_term");
   switch (type) {
     case "clade":
-      AUTOCOMPLETERS[$('#ur_clade').data('uuid')].reuse(filter_term)
+      AUTOCOMPLETERS[document.getElementById('ur_clade').dataset.uuid].reuse(filter_term)
     case "region":
-      AUTOCOMPLETERS[$('#ur_location').data('uuid')].reuse(filter_term)
+      AUTOCOMPLETERS[document.getElementById('ur_location').dataset.uuid].reuse(filter_term)
     case "user":
-      AUTOCOMPLETERS[$('#ur_user').data('uuid')].reuse(filter_term)
+      AUTOCOMPLETERS[document.getElementById('ur_user').dataset.uuid].reuse(filter_term)
   }
 }

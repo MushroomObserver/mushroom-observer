@@ -47,7 +47,7 @@ var AUTOCOMPLETERS = {};
 //       AJAX reply   -- process_ajax_response() -> schedule_refresh()...
 //         ...schedule_refresh() -> refresh_options(), update_matches(), draw_pulldown()
 var MOAutocompleter = function (opts) {
-
+  console.log(JSON.stringify(opts));
   // These are potentially useful parameters the user might want to tweak.
   const defaultOpts = {
     input_id: null,            // id of text field (after initialization becomes a unique identifier)
@@ -121,7 +121,8 @@ var MOAutocompleter = function (opts) {
   this.input_elem.setAttribute("data-uuid", this.uuid);
 
   // Figure out a few browser-dependent dimensions.
-  this.scrollbar_width = this.input_elem.getScrollBarWidth();
+  // Not worth caring about! AN 2023
+  // this.scrollbar_width = this.input_elem.getScrollBarWidth();
 
   // Initialize autocomplete options.
   this.options = "\n" + this.primer + "\n" + this.options;
@@ -162,7 +163,8 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function (elem) {
-    var id = elem.attr("id");
+    console.log(elem) // FIXME: elem is still a jQuery object
+    var id = elem.getAttribute("id");
 
     // (something to do with scope of closures below)
     var this2 = this;
@@ -281,8 +283,8 @@ Object.assign(MOAutocompleter.prototype, {
   // Input field has changed.
   our_change: function (do_refresh) {
     var old_val = this.old_value[this.uuid];
-    var new_val = this.input_elem.val();
-    // jQuery("#log").append("our_change(" + this.input_elem.val() + ")<br/>");
+    var new_val = this.input_elem.value;
+    // jQuery("#log").append("our_change(" + this.input_elem.value + ")<br/>");
     if (new_val != old_val) {
       this.old_value[this.uuid] = new_val;
       if (do_refresh)
@@ -353,8 +355,8 @@ Object.assign(MOAutocompleter.prototype, {
     this.clear_refresh();
     this.refresh_timer = setTimeout((function () {
       this.verbose("doing_refresh()");
-      // jQuery("#log").append("refresh_timer(" + this.input_elem.val() + ")<br/>");
-      this.old_value[this.uuid] = this.input_elem.val();
+      // jQuery("#log").append("refresh_timer(" + this.input_elem.value + ")<br/>");
+      this.old_value[this.uuid] = this.input_elem.value;
       if (this.ajax_url)
         this.refresh_options();
       this.update_matches();
@@ -490,7 +492,7 @@ Object.assign(MOAutocompleter.prototype, {
   // User has selected a value, either pressing tab/return or clicking on an option.
   select_row: function (row) {
     this.verbose("select_row()");
-    var old_val = this.input_elem.val();
+    var old_val = this.input_elem.value;
     var new_val = this.matches[this.scroll_offset + row];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
@@ -508,14 +510,16 @@ Object.assign(MOAutocompleter.prototype, {
 
   // ------------------------------ Pulldown ------------------------------
 
+  // Stimulus: put this in template instead of adding it here, then just modify
   // Create div for pulldown.
   create_pulldown: function () {
-    var div = document.createElement("<div><div><ul></ul></div></div>");
+    var div = document.createElement("div");
+    div.innerHTML = "<div><ul></ul></div>"
     var list = div.querySelector('ul');
     var i, row;
     div.classList.add(this.pulldown_class);
     for (i = 0; i < this.pulldown_size; i++) {
-      row = document.createElement("<li/>");
+      row = document.createElement("li");
       row.style.display = 'none';
       this.attach_row_events(row, i);
       list.append(row);
@@ -646,7 +650,7 @@ Object.assign(MOAutocompleter.prototype, {
 
       // Only show menu if it is nontrivial, i.e., show an option other than
       // the value that's already in the text field.
-      if (matches.length > 1 || this.input_elem.val() != matches[0]) {
+      if (matches.length > 1 || this.input_elem.value != matches[0]) {
         this.clear_hide();
         menu.style.display = 'block';
         this.menu_up = true;
@@ -677,8 +681,8 @@ Object.assign(MOAutocompleter.prototype, {
   update_width: function () {
     this.verbose("update_width()");
     var w = this.list_elem.width();
-    if (this.do_scrollbar && this.matches.length > this.pulldown_size)
-      w += this.scrollbar_width;
+    // if (this.do_scrollbar && this.matches.length > this.pulldown_size)
+    //   w += this.scrollbar_width;
     if (this.current_width < w) {
       this.current_width = w;
       this.set_width();
@@ -690,8 +694,8 @@ Object.assign(MOAutocompleter.prototype, {
     this.verbose("set_width()");
     var w1 = this.current_width;
     var w2 = w1;
-    if (this.matches.length > this.pulldown_size)
-      w2 -= this.scrollbar_width;
+    // if (this.matches.length > this.pulldown_size)
+    //   w2 -= this.scrollbar_width;
     this.list_elem.css("minWidth", w2 + 'px');
   },
 
@@ -746,7 +750,7 @@ Object.assign(MOAutocompleter.prototype, {
     this.update_current_row(last);
 
     // Reset width each time we change the options.
-    this.current_width = this.input_elem.width();
+    this.current_width = this.input_elem.width;
   },
 
   // When "acting like a select" make it display all options in the
@@ -1028,7 +1032,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Get token under or immediately in front of cursor.
   get_token: function () {
-    var val = this.input_elem.val();
+    var val = this.input_elem.value;
     if (this.token) {
       var token = this.token_extents();
       val = val.substring(token.start, token.end);
@@ -1038,7 +1042,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Change the token under or immediately in front of the cursor.
   set_token: function (new_val) {
-    var old_str = this.input_elem.val();
+    var old_str = this.input_elem.value;
     if (this.token) {
       var new_str = "";
       var token = this.token_extents();
@@ -1049,20 +1053,20 @@ Object.assign(MOAutocompleter.prototype, {
         new_str += old_str.substring(token.end);
       if (old_str != new_str) {
         var old_scroll = this.input_elem.scrollTop();
-        this.input_elem.val(new_str);
+        this.input_elem.value = new_str;
         this.setCursorPosition(this.input_elem[0], token.start + new_val.length);
         this.input_elem.scrollTop(old_scroll);
       }
     } else {
       if (old_str != new_val)
-        this.input_elem.val(new_val);
+        this.input_elem.value = new_val;
     }
   },
 
   // Get index of first character and character after last of current token.
   token_extents: function () {
     var start, end, sel = this.getInputSelection(this.input_elem[0]);
-    var val = this.input_elem.val();
+    var val = this.input_elem.value;
     if (sel.start > 0)
       start = val.lastIndexOf(this.token, sel.start - 1);
     else
@@ -1080,7 +1084,7 @@ Object.assign(MOAutocompleter.prototype, {
   // ------------------------------ Primer ------------------------------
 
   update_primer: function () {
-    var val = this.input_elem.val().replace(/^\s+/, '').replace(/\s+$/, '');
+    var val = this.input_elem.value.replace(/^\s+/, '').replace(/\s+$/, '');
     if (val == "") return;
     var primer = this.primer;
     if (!primer)

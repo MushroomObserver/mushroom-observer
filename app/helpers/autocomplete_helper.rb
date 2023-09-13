@@ -2,9 +2,10 @@
 
 module AutocompleteHelper
   # Add another input field onto an existing auto-completer.
+  # Now non-jQuery object
   def reuse_auto_completer(first_id, new_id)
     inject_javascript_at_end(%(
-      AUTOCOMPLETERS[jQuery('##{first_id}').data('uuid')].reuse('#{new_id}')
+      AUTOCOMPLETERS[document.getElementById('#{first_id}').dataset.uuid].reuse('#{new_id}')
     ))
   end
 
