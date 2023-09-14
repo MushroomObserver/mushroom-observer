@@ -251,8 +251,6 @@ Object.assign(MOAutocompleter.prototype, {
           break;
       }
     }
-    if (this.onkeydown)
-      this.onkeydown(event);
     if (this.menu_up && this.is_hot_key(key) &&
       !(key == EVENT_KEY_TAB || this.current_row < 0))
       return false;
@@ -263,8 +261,6 @@ Object.assign(MOAutocompleter.prototype, {
   our_keypress: function (event) {
     const key = event.which == 0 ? event.keyCode : event.which;
     // this.debug("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")");
-    if (this.onkeypress)
-      this.onkeypress(event);
     if (this.menu_up && this.is_hot_key(key) &&
       !(key == EVENT_KEY_TAB || this.current_row < 0))
       return false;
@@ -276,8 +272,6 @@ Object.assign(MOAutocompleter.prototype, {
     // this.debug("keyup()");
     this.clear_key();
     this.our_change(true);
-    if (this.onkeyup)
-      this.onkeyup(event);
     return true;
   },
 
@@ -290,8 +284,6 @@ Object.assign(MOAutocompleter.prototype, {
       this.old_value[this.uuid] = new_val;
       if (do_refresh)
         this.schedule_refresh();
-      if (this.onchange)
-        this.onchange(new_val);
     }
   },
 
@@ -307,8 +299,6 @@ Object.assign(MOAutocompleter.prototype, {
     // this.debug("our_focus()");
     if (!this.row_height)
       this.get_row_height();
-    if (this.onfocus)
-      this.onfocus(event);
     this.focused = true;
   },
 
@@ -316,8 +306,6 @@ Object.assign(MOAutocompleter.prototype, {
   our_blur: function (event) {
     // this.debug("our_blur()");
     this.schedule_hide();
-    if (this.onblur)
-      this.onblur(event);
     this.focused = false;
   },
 
