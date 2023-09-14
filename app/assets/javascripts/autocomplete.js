@@ -47,7 +47,7 @@ var AUTOCOMPLETERS = {};
 //       AJAX reply   -- process_ajax_response() -> schedule_refresh()...
 //         ...schedule_refresh() -> refresh_options(), update_matches(), draw_pulldown()
 const MOAutocompleter = function (opts) {
-  console.log(JSON.stringify(opts));
+  // console.log(JSON.stringify(opts));
   // These are potentially useful parameters the user might want to tweak.
   const defaultOpts = {
     input_id: null,            // id of text field (after initialization becomes a unique identifier)
@@ -163,7 +163,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function (elem) {
-    console.log(elem) // FIXME: elem is still a jQuery object
+    // console.log(elem)
     const id = elem.getAttribute("id");
 
     // (something to do with scope of closures below)
@@ -327,7 +327,7 @@ Object.assign(MOAutocompleter.prototype, {
     // and firefox will not remember the value of fields when you go back.
     // This hack re-enables native autocomplete before leaving the page.
     // [This only works for firefox; should work for chrome but doesn't.]
-    this.input_elem.setAttribute("autocomplete", "true");
+    this.input_elem.setAttribute("autocomplete", "on");
     return false;
   },
 
@@ -600,7 +600,7 @@ Object.assign(MOAutocompleter.prototype, {
 
     // Get row height if haven't been able to yet.
     this.set_row_height();
-    console.log(rows) // contains invalid characters, handle {}
+    // console.log(rows)
 
     // Update menu text first.
     for (i = 0; i < size; i++) {
