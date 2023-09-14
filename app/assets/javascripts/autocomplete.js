@@ -46,7 +46,7 @@ var AUTOCOMPLETERS = {};
 //       change text  -- our_change() -> schedule_refresh()...
 //       AJAX reply   -- process_ajax_response() -> schedule_refresh()...
 //         ...schedule_refresh() -> refresh_options(), update_matches(), draw_pulldown()
-var MOAutocompleter = function (opts) {
+const MOAutocompleter = function (opts) {
   console.log(JSON.stringify(opts));
   // These are potentially useful parameters the user might want to tweak.
   const defaultOpts = {
@@ -164,13 +164,14 @@ Object.assign(MOAutocompleter.prototype, {
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function (elem) {
     console.log(elem) // FIXME: elem is still a jQuery object
-    var id = elem.getAttribute("id");
+    const id = elem.getAttribute("id");
 
     // (something to do with scope of closures below)
-    var this2 = this;
+    const this2 = this;
 
     this.old_value[id] = null;
 
+    // Stimulus - these can be actions on the input
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
       elem.addEventListener("focus", function (event) {
@@ -200,7 +201,7 @@ Object.assign(MOAutocompleter.prototype, {
       });
     }
 
-    // Disable default browser autocomplete.
+    // Disable default browser autocomplete. Stimulus - do this on HTML element
     elem.setAttribute("autocomplete", "off");
   },
 
@@ -209,7 +210,7 @@ Object.assign(MOAutocompleter.prototype, {
   // User pressed a key in the text field.
   our_keydown: function (event) {
     const key = event.which == 0 ? event.keyCode : event.which;
-    // jQuery("#log").append("keydown(" + key + ")<br>");
+    // this.debug("keydown(" + key + ")");
     this.clear_key();
     this.focused = true;
     if (this.menu_up) {
@@ -260,8 +261,8 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Need to prevent these keys from being processed by form.
   our_keypress: function (event) {
-    var key = event.which == 0 ? event.keyCode : event.which;
-    // jQuery("#log").append("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")<br/>");
+    const key = event.which == 0 ? event.keyCode : event.which;
+    // this.debug("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")");
     if (this.onkeypress)
       this.onkeypress(event);
     if (this.menu_up && this.is_hot_key(key) &&
@@ -272,7 +273,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // User has released a key.
   our_keyup: function (event) {
-    // jQuery("#log").append("keyup()<br/>");
+    // this.debug("keyup()");
     this.clear_key();
     this.our_change(true);
     if (this.onkeyup)
@@ -282,9 +283,9 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Input field has changed.
   our_change: function (do_refresh) {
-    var old_val = this.old_value[this.uuid];
-    var new_val = this.input_elem.value;
-    // jQuery("#log").append("our_change(" + this.input_elem.value + ")<br/>");
+    const old_val = this.old_value[this.uuid];
+    const new_val = this.input_elem.value;
+    // this.debug("our_change(" + this.input_elem.value + ")");
     if (new_val != old_val) {
       this.old_value[this.uuid] = new_val;
       if (do_refresh)
@@ -303,7 +304,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // User entered text field.
   our_focus: function (event) {
-    // jQuery("#log").append("our_focus()<br/>");
+    // this.debug("our_focus()");
     if (!this.row_height)
       this.get_row_height();
     if (this.onfocus)
@@ -313,7 +314,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // User left the text field.
   our_blur: function (event) {
-    // jQuery("#log").append("our_blur()<br/>");
+    // this.debug("our_blur()");
     this.schedule_hide();
     if (this.onblur)
       this.onblur(event);
@@ -326,7 +327,7 @@ Object.assign(MOAutocompleter.prototype, {
     // and firefox will not remember the value of fields when you go back.
     // This hack re-enables native autocomplete before leaving the page.
     // [This only works for firefox; should work for chrome but doesn't.]
-    this.input_elem.removeAttr("autocomplete");
+    this.input_elem.setAttribute("autocomplete", "true");
     return false;
   },
 
@@ -355,7 +356,7 @@ Object.assign(MOAutocompleter.prototype, {
     this.clear_refresh();
     this.refresh_timer = setTimeout((function () {
       this.verbose("doing_refresh()");
-      // jQuery("#log").append("refresh_timer(" + this.input_elem.value + ")<br/>");
+      // this.debug("refresh_timer(" + this.input_elem.value + ")");
       this.old_value[this.uuid] = this.input_elem.value;
       if (this.ajax_url)
         this.refresh_options();
@@ -426,10 +427,10 @@ Object.assign(MOAutocompleter.prototype, {
   go_end: function () { this.move_cursor(this.matches.length) },
   move_cursor: function (rows) {
     this.verbose("move_cursor()");
-    var old_row = this.current_row;
-    var new_row = old_row + rows;
-    var old_scr = this.scroll_offset;
-    var new_scr = old_scr;
+    const old_row = this.current_row;
+    let new_row = old_row + rows;
+    const old_scr = this.scroll_offset;
+    let new_scr = old_scr;
 
     // Move cursor, but keep in bounds.
     if (new_row < 0)
@@ -457,8 +458,8 @@ Object.assign(MOAutocompleter.prototype, {
   // Mouse has moved over a menu item.
   highlight_row: function (new_hl) {
     this.verbose("highlight_row()");
-    var rows = this.list_elem.children();
-    var old_hl = this.current_highlight;
+    const rows = this.list_elem.children;
+    const old_hl = this.current_highlight;
     this.current_highlight = new_hl;
     this.current_row = this.scroll_offset + new_hl;
     if (old_hl != new_hl) {
@@ -474,10 +475,10 @@ Object.assign(MOAutocompleter.prototype, {
   // Called when users scrolls via scrollbar.
   our_scroll: function () {
     this.verbose("our_scroll()");
-    var old_scr = this.scroll_offset;
-    var new_scr = Math.round(this.pulldown_elem.scrollTop() / this.row_height);
-    var old_row = this.current_row;
-    var new_row = this.current_row;
+    const old_scr = this.scroll_offset;
+    const new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height);
+    const old_row = this.current_row;
+    const new_row = this.current_row;
     if (new_row < new_scr)
       new_row = new_scr;
     if (new_row >= new_scr + this.pulldown_size)
@@ -492,11 +493,12 @@ Object.assign(MOAutocompleter.prototype, {
   // User has selected a value, either pressing tab/return or clicking on an option.
   select_row: function (row) {
     this.verbose("select_row()");
-    var old_val = this.input_elem.value;
-    var new_val = this.matches[this.scroll_offset + row];
+    // const old_val = this.input_elem.value;
+    let new_val = this.matches[this.scroll_offset + row];
     // Close pulldown unless the value the user selected uncollapses into a set
     // of new options.  In that case schedule a refresh and leave it up.
-    if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse) {
+    if (this.collapse > 0 &&
+      (new_val.match(/ /g) || []).length < this.collapse) {
       new_val += ' ';
       this.schedule_refresh();
     } else {
@@ -513,10 +515,10 @@ Object.assign(MOAutocompleter.prototype, {
   // Stimulus: put this in template instead of adding it here, then just modify
   // Create div for pulldown.
   create_pulldown: function () {
-    var div = document.createElement("div");
+    const div = document.createElement("div");
     div.innerHTML = "<div><ul></ul></div>"
-    var list = div.querySelector('ul');
-    var i, row;
+    const list = div.querySelector('ul');
+    let i, row;
     div.classList.add(this.pulldown_class);
     for (i = 0; i < this.pulldown_size; i++) {
       row = document.createElement("li");
@@ -526,7 +528,7 @@ Object.assign(MOAutocompleter.prototype, {
     }
     if (this.do_scrollbar)
       div.addEventListener("scroll", this.our_scroll.bind(this));
-    this.input_elem.insertAdjacentHTML("afterend", div);
+    this.input_elem.insertAdjacentElement("afterend", div);
     this.pulldown_elem = div;
     this.list_elem = list;
   },
@@ -546,11 +548,12 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Stimulus: print this in the document already
   // Get actual row height when it becomes available.
+  // Experimentally creates a test row.
   get_row_height: function () {
-    var div = document.createElement('div');
-    var ul = document.createElement('ul');
-    var li = document.createElement('li');
-    var body = document.body || document.getElementsByTagName("body")[0];
+    const div = document.createElement('div');
+    const ul = document.createElement('ul');
+    const li = document.createElement('li');
+    const body = document.body || document.getElementsByTagName("body")[0];
     div.className = this.pulldown_class;
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
@@ -576,40 +579,43 @@ Object.assign(MOAutocompleter.prototype, {
   // Redraw the pulldown options.
   draw_pulldown: function () {
     this.verbose("draw_pulldown()");
-    var menu = this.pulldown_elem;
-    var inner = menu.children[0];
-    var list = this.list_elem;
-    var rows = list.children;
-    var size = this.pulldown_size;
-    var scroll = this.scroll_offset;
-    var cur = this.current_row;
-    var matches = this.matches;
-    var old_hl = this.current_highlight;
-    var new_hl = 0;
-    var i, x, y;
+    const menu = this.pulldown_elem;
+    const inner = menu.children[0];
+    const list = this.list_elem;
+    const rows = list.children;
+    const size = this.pulldown_size;
+    const scroll = this.scroll_offset;
+    const cur = this.current_row;
+    const matches = this.matches;
+    const old_hl = this.current_highlight;
+    let new_hl = 0;
+    let i, x, y;
 
-    if (this.log)
-      document.getElementById("log").insertAdjacentText("beforeend",
+    if (this.log) {
+      this.debug(
         "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur + "<br/>");
+        ", scroll=" + scroll + ", cursor=" + cur
+      );
+    }
 
     // Get row height if haven't been able to yet.
     this.set_row_height();
+    console.log(rows) // contains invalid characters, handle {}
 
     // Update menu text first.
     for (i = 0; i < size; i++) {
-      var row = document.createElement(rows[i]);
-      x = row.innerHTML();
+      let row = rows.item(i);
+      x = row.innerHTML;
       if (i + scroll < matches.length) {
-        y = matches[i + scroll].escapeHTML();
+        y = this.escapeHTML(matches[i + scroll]);
         if (x != y) {
           if (x == '')
             row.style.display = 'block';
-          row.innerHTML(y);
+          row.innerHTML = y;
         }
       } else {
         if (x != '') {
-          row.innerHTML('');
+          row.innerHTML = '';
           row.style.display = 'none';
         }
       }
@@ -622,26 +628,27 @@ Object.assign(MOAutocompleter.prototype, {
     this.current_highlight = new_hl;
     if (new_hl != old_hl) {
       if (old_hl >= 0)
-        jQuery(rows[old_hl]).removeClass(this.hot_class);
+        rows[old_hl].classList.remove(this.hot_class);
       if (new_hl >= 0)
-        jQuery(rows[new_hl]).addClass(this.hot_class);
+        rows[new_hl].classList.add(this.hot_class);
     }
 
     // Make menu visible if nonempty.
     if (matches.length > 0) {
-      var pos = this.input_elem.position();
-      var hgt = this.input_elem.outerHeight();
-      var scr = this.input_elem.scrollTop();
-      menu.css("top", "" + (pos.top + hgt + scr) + "px");
-      menu.css("left", "" + pos.left + "px");
+      const top = this.input_elem.offsetTop;
+      const left = this.input_elem.offsetLeft;
+      const hgt = this.input_elem.offsetHeight;
+      const scr = this.input_elem.scrollTop;
+      menu.style.top = (top + hgt + scr) + "px";
+      menu.style.left = left + "px";
 
       // Set height of menu.
       if (this.do_scrollbar) {
-        menu.css("overflowY", matches.length > size ? "scroll" : "hidden");
-        menu.css("height", "" + this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px");
-        inner.css("marginTop", "" + this.row_height * scroll + "px");
-        inner.css("height", "" + this.row_height * (matches.length - scroll) + "px");
-        menu.scrollTop(this.row_height * scroll);
+        menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
+        menu.style.height = this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+        inner.style.marginTop = this.row_height * scroll + "px";
+        inner.style.height = this.row_height * (matches.length - scroll) + "px";
+        menu.scrollTo({ top: this.row_height * scroll });
       }
 
       // Set width of menu.
@@ -680,9 +687,9 @@ Object.assign(MOAutocompleter.prototype, {
   // Update width of pulldown.
   update_width: function () {
     this.verbose("update_width()");
-    var w = this.list_elem.width();
-    // if (this.do_scrollbar && this.matches.length > this.pulldown_size)
-    //   w += this.scrollbar_width;
+    let w = this.list_elem.offsetWidth;
+    if (this.matches.length > this.pulldown_size)
+      w += this.scrollbar_width;
     if (this.current_width < w) {
       this.current_width = w;
       this.set_width();
@@ -692,11 +699,11 @@ Object.assign(MOAutocompleter.prototype, {
   // Set width of pulldown.
   set_width: function () {
     this.verbose("set_width()");
-    var w1 = this.current_width;
-    var w2 = w1;
-    // if (this.matches.length > this.pulldown_size)
-    //   w2 -= this.scrollbar_width;
-    this.list_elem.css("minWidth", w2 + 'px');
+    const w1 = this.current_width;
+    let w2 = w1;
+    if (this.matches.length > this.pulldown_size)
+      w2 -= this.scrollbar_width;
+    this.list_elem.style.minWidth = w2 + 'px';
   },
 
   // ------------------------------ Datalist ------------------------------
@@ -731,7 +738,7 @@ Object.assign(MOAutocompleter.prototype, {
     this.verbose("update_matches()");
 
     // Remember which option used to be highlighted.
-    var last = this.current_row < 0 ? null : this.matches[this.current_row];
+    const last = this.current_row < 0 ? null : this.matches[this.current_row];
 
     // Update list of options appropriately.
     if (this.act_like_select)
@@ -750,7 +757,7 @@ Object.assign(MOAutocompleter.prototype, {
     this.update_current_row(last);
 
     // Reset width each time we change the options.
-    this.current_width = this.input_elem.width;
+    this.current_width = this.input_elem.offsetWidth;
   },
 
   // When "acting like a select" make it display all options in the
@@ -761,11 +768,11 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal: function () {
-    var val = this.get_token().toLowerCase().normalize();
-    var options = this.options.normalize();
-    var matches = [];
+    const val = this.get_token().toLowerCase().normalize();
+    const options = this.options.normalize();
+    const matches = [];
     if (val != '') {
-      var i, j, s;
+      let i, j, s;
       for (i = options.indexOf("\n"); i >= 0; i = j) {
         j = options.indexOf("\n", i + 1);
         s = options.substring(i + 1, j > 0 ? j : options.length);
@@ -781,13 +788,13 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Grab matches ignoring order of words.
   update_unordered: function () {
-    var val = this.get_token().normalize().toLowerCase().
+    const val = this.get_token().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' ');
-    var vals = val.split(' ');
-    var options = this.options.normalize();
-    var matches = [];
+    const vals = val.split(' ');
+    const options = this.options.normalize();
+    const matches = [];
     if (val != '') {
-      var i, j, k, s, s2;
+      let i, j, k, s, s2;
       for (i = options.indexOf("\n"); i >= 0; i = j) {
         j = options.indexOf("\n", i + 1);
         s = options.substring(i + 1, j > 0 ? j : options.length);
@@ -808,15 +815,16 @@ Object.assign(MOAutocompleter.prototype, {
   // Grab all matches, preferring the ones with no additional words.
   // Note: order of options must have genera first, then species, then varieties.
   update_collapsed: function () {
-    var val = "\n" + this.get_token().toLowerCase();
-    var options = this.options;
-    var options2 = this.options.toLowerCase();
-    var matches = [];
+    const val = "\n" + this.get_token().toLowerCase();
+    const options = this.options;
+    const options2 = this.options.toLowerCase();
+    const matches = [];
     if (val != "\n") {
-      var the_rest = (val.match(/ /g) || []).length >= this.collapse;
-      for (var i = options2.indexOf(val); i >= 0; i = options2.indexOf(val, i + 1)) {
-        var j = options.indexOf("\n", i + 1);
-        var s = options.substring(i + 1, j > 0 ? j : options.length);
+      let the_rest = (val.match(/ /g) || []).length >= this.collapse;
+      for (let i = options2.indexOf(val); i >= 0;
+        i = options2.indexOf(val, i + 1)) {
+        let j = options.indexOf("\n", i + 1);
+        let s = options.substring(i + 1, j > 0 ? j : options.length);
         if (s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length - 1) < val.length - 1) {
             matches.push(s);
@@ -835,7 +843,8 @@ Object.assign(MOAutocompleter.prototype, {
         }
       }
       if (matches.length == 1 &&
-        (val == "\n" + matches[0].toLowerCase() || val == "\n" + matches[0].toLowerCase() + " "))
+        (val == "\n" + matches[0].toLowerCase() ||
+          val == "\n" + matches[0].toLowerCase() + " "))
         matches.pop();
     }
     this.matches = matches;
@@ -843,7 +852,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Remove duplicates from a sorted array.
   remove_dups: function (list) {
-    var i, j;
+    let i, j;
     for (i = 0, j = 1; j < list.length; j++) {
       if (list[j] != list[i])
         list[++i] = list[j];
@@ -856,11 +865,11 @@ Object.assign(MOAutocompleter.prototype, {
   // Look for 'val' in list of matches and highlight it, otherwise highlight first.
   update_current_row: function (val) {
     this.verbose("update_current_row()");
-    var matches = this.matches;
-    var size = this.pulldown_size;
-    var exact = -1;
-    var part = -1;
-    var new_scr, new_row, i;
+    const matches = this.matches;
+    const size = this.pulldown_size;
+    let exact = -1;
+    let part = -1;
+    let new_scr, new_row, i;
     if (val && val.length > 0) {
       for (i = 0; i < matches.length; i++) {
         if (matches[i] == val) {
@@ -891,8 +900,8 @@ Object.assign(MOAutocompleter.prototype, {
   // Send request for updated options.
   refresh_options: function () {
     this.verbose("refresh_options()");
-    var val = this.get_token().toLowerCase();
-    var url;
+    let val = this.get_token().toLowerCase();
+    // const url;
 
     // Don't make request on empty string!
     if (!val || val.length < 1)
@@ -928,11 +937,14 @@ Object.assign(MOAutocompleter.prototype, {
     if (val.length > this.max_request_length)
       val = val.substr(0, this.max_request_length);
 
-    if (this.log)
-      document.getElementById("log").insertAdjacentText("beforeend", "Sending AJAX request: " + val + "<br/>");
+    if (this.log) {
+      this.debug("Sending AJAX request: " + val);
+    }
 
     // Need to doubly-encode this to prevent router from interpreting slashes, dots, etc.
-    url = this.ajax_url.replace('@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e'))));
+    url = this.ajax_url.replace(
+      '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
+    );
 
     this.last_ajax_request = val;
 
@@ -979,7 +991,7 @@ Object.assign(MOAutocompleter.prototype, {
   // 3. the rest are matching results.
   process_ajax_response: function (response) {
     this.verbose("process_ajax_response()");
-    var new_opts, i;
+    let new_opts, i;
 
     // Clear flag telling us request is pending.
     this.ajax_request = null;
@@ -1008,9 +1020,9 @@ Object.assign(MOAutocompleter.prototype, {
 
     // Log requests and responses if in debug mode.
     if (this.log) {
-      document.getElementById("log").insertAdjacentText("beforeend", "Got response for " + this.last_ajax_request.escapeHTML() +
+      this.debug("Got response for " + this.escapeHTML(this.last_ajax_request) +
         ": " + (new_opts.split("\n").length - 2) + " strings (" +
-        (this.last_ajax_incomplete ? "incomplete" : "complete") + ").<br/>");
+        (this.last_ajax_incomplete ? "incomplete" : "complete") + ").");
     }
 
     // Tack on primer if available.
@@ -1032,9 +1044,9 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Get token under or immediately in front of cursor.
   get_token: function () {
-    var val = this.input_elem.value;
+    let val = this.input_elem.value;
     if (this.token) {
-      var token = this.token_extents();
+      let token = this.token_extents();
       val = val.substring(token.start, token.end);
     }
     return val;
@@ -1042,20 +1054,20 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Change the token under or immediately in front of the cursor.
   set_token: function (new_val) {
-    var old_str = this.input_elem.value;
+    const old_str = this.input_elem.value;
     if (this.token) {
-      var new_str = "";
-      var token = this.token_extents();
+      let new_str = "";
+      const token = this.token_extents();
       if (token.start > 0)
         new_str += old_str.substring(0, token.start);
       new_str += new_val;
       if (token.end < old_str.length)
         new_str += old_str.substring(token.end);
       if (old_str != new_str) {
-        var old_scroll = this.input_elem.scrollTop();
+        const old_scroll = this.input_elem.scrollTop;
         this.input_elem.value = new_str;
         this.setCursorPosition(this.input_elem[0], token.start + new_val.length);
-        this.input_elem.scrollTop(old_scroll);
+        this.input_elem.scrollTo({ top: old_scroll });
       }
     } else {
       if (old_str != new_val)
@@ -1065,8 +1077,8 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Get index of first character and character after last of current token.
   token_extents: function () {
-    var start, end, sel = this.getInputSelection(this.input_elem[0]);
-    var val = this.input_elem.value;
+    let start, end, sel = this.getInputSelection(this.input_elem[0]);
+    const val = this.input_elem.value;
     if (sel.start > 0)
       start = val.lastIndexOf(this.token, sel.start - 1);
     else
@@ -1084,13 +1096,13 @@ Object.assign(MOAutocompleter.prototype, {
   // ------------------------------ Primer ------------------------------
 
   update_primer: function () {
-    var val = this.input_elem.value.replace(/^\s+/, '').replace(/\s+$/, '');
+    const val = this.input_elem.value.replace(/^\s+/, '').replace(/\s+$/, '');
     if (val == "") return;
-    var primer = this.primer;
+    const primer = this.primer;
     if (!primer)
       this.primer = primer = "";
-    var j, s;
-    for (var i = primer.indexOf("\n"); i >= 0; i = j) {
+    let j, s;
+    for (let i = primer.indexOf("\n"); i >= 0; i = j) {
       j = primer.indexOf("\n", i + 1);
       s = primer.substring(i + 1, j > 0 ? j : primer.length);
       if (s == val)
@@ -1105,7 +1117,7 @@ Object.assign(MOAutocompleter.prototype, {
   // http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
 
   getInputSelection: function (el) {
-    var start, end, len, normalizedValue, range, textInputRange, len, endRange;
+    let start, end, len, normalizedValue, range, textInputRange, endRange;
     start = end = len = el.value.length;
 
     if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
@@ -1114,7 +1126,7 @@ Object.assign(MOAutocompleter.prototype, {
     } else {
       range = document.selection.createRange();
 
-      if (range && range.parentElement() == el) {
+      if (range && range.parentElement == el) {
         normalizedValue = el.value.replace(/\r\n/g, "\n");
 
         // Create a working TextRange that lives only in the input
@@ -1154,7 +1166,7 @@ Object.assign(MOAutocompleter.prototype, {
     if (el.setSelectionRange) {
       el.setSelectionRange(pos, pos);
     } else if (el.createTextRange) {
-      var range = el.createTextRange();
+      const range = el.createTextRange();
       range.collapse(true);
       range.moveEnd('character', pos);
       range.moveStart('character', pos);
@@ -1171,6 +1183,21 @@ Object.assign(MOAutocompleter.prototype, {
   verbose: function (str) {
     // console.log(str);
     // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
+  },
+
+  escapeHTML: function (str) {
+    const HTML_ENTITY_MAP = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': '&quot;',
+      "'": '&#39;',
+      "/": '&#x2F;'
+    };
+
+    return str.replace(/[&<>"'\/]/g, function (s) {
+      return HTML_ENTITY_MAP[s];
+    });
   }
 });
 
