@@ -128,8 +128,7 @@ class MOAutocompleter {
     this.input_elem.setAttribute("data-uuid", this.uuid);
 
     // Figure out a few browser-dependent dimensions.
-    // Not worth caring about! AN 2023
-    // this.scrollbar_width = this.input_elem.getScrollBarWidth();
+    this.scrollbar_width = this.input_elem.getScrollBarWidth();
 
     // Initialize autocomplete options.
     this.options = "\n" + this.primer + "\n" + this.options;
