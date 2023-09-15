@@ -935,6 +935,9 @@ Object.assign(MOAutocompleter.prototype, {
 
     this.last_ajax_request = val;
 
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     if (this.ajax_request)
       controller.abort();
 
@@ -953,9 +956,6 @@ Object.assign(MOAutocompleter.prototype, {
     //     this.process_ajax_response(text);
     //   }).bind(this)
     // });
-
-    const controller = new AbortController();
-    const signal = controller.signal;
 
     this.ajax_request = fetch(url, {
       method: 'GET',
