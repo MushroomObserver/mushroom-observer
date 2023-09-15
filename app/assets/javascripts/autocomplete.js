@@ -631,13 +631,13 @@ Object.assign(MOAutocompleter.prototype, {
       menu.style.left = left + "px";
 
       // Set height of menu.
-      if (this.do_scrollbar) {
-        menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
-        menu.style.height = this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
-        inner.style.marginTop = this.row_height * scroll + "px";
-        inner.style.height = this.row_height * (matches.length - scroll) + "px";
-        menu.scrollTo({ top: this.row_height * scroll });
-      }
+      // if (this.do_scrollbar) {
+      menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
+      menu.style.height = this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
+      inner.style.marginTop = this.row_height * scroll + "px";
+      inner.style.height = this.row_height * (matches.length - scroll) + "px";
+      menu.scrollTo({ top: this.row_height * scroll });
+      // }
 
       // Set width of menu.
       this.set_width();
