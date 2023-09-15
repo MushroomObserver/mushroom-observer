@@ -949,40 +949,52 @@ class MOAutocompleter {
 
     this.last_ajax_request = val;
 
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     if (this.ajax_request)
-      this.ajax_request.abort();
+      controller.abort();
 
-    this.ajax_request = jQuery.ajax(url, {
-      data: { authenticity_token: csrf_token() },
-      dataType: "text",
-      async: true,
-      error: (function (response) {
-        this.ajax_request = null;
-        if (this.show_errors)
-          alert(response.responseText);
-      }).bind(this),
-      success: (function (text) {
-        this.process_ajax_response(text);
-      }).bind(this)
+    const csrfToken = document.getElementsByName('csrf-token')[0].content
+
+    // this.ajax_request = jQuery.ajax(url, {
+    //   data: { authenticity_token: csrfToken },
+    //   dataType: "text",
+    //   async: true,
+    //   error: (function (response) {
+    //     this.ajax_request = null;
+    //     if (this.show_errors)
+    //       alert(response.responseText);
+    //   }).bind(this),
+    //   success: (function (text) {
+    //     this.process_ajax_response(text);
+    //   }).bind(this)
+    // });
+
+    this.ajax_request = fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-CSRF-Token': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'text/html',
+        'Accept': 'text/html'
+      },
+      credentials: 'same-origin',
+      signal
+    }).then((response) => {
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          response.text().then((content) => {
+            // console.log("content: " + content);
+            // do something awesome with result
+            this.process_ajax_response(content).bind(this)
+          });
+        } else {
+          this.ajax_request = null;
+          console.log(`got a ${response.status}`);
+        }
+      }
     });
-
-    // this.headers = new Headers();
-    // this.headers.append("authorization", csrf_token())
-    // this.headers.append("accept", "text")
-
-    // this.ajax_request = async function (url) {
-    //   const response = await fetch(url, this.headers);
-    //   if (response.ok) {
-    //     if (200 <= response.status && response.status <= 299) {
-    //       const result = await response.text();
-    //       // do something awesome with result
-    //       this.process_ajax_response(result).bind(this)
-    //     } else {
-    //       this.ajax_request = null;
-    //       console.log(`got a ${response.status}`);
-    //     }
-    //   }
-    // };
   }
 
 
