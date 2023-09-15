@@ -97,7 +97,7 @@ const MOAutocompleter = function (opts) {
     refresh_timer: null,            // timer used to delay update after typing
     hide_timer: null,            // timer used to delay hiding of pulldown
     key_timer: null,            // timer used to emulate key repeat
-    do_scrollbar: null,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+    do_scrollbar: true,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
     do_datalist: null,            // implement using <datalist> instead of doing pulldown ourselves
     row_height: null,            // height of a row in pixels (filled in automatically)
     scrollbar_width: null             // width of scrollbar (filled in automatically)
@@ -108,7 +108,7 @@ const MOAutocompleter = function (opts) {
   Object.assign(this, internalOpts);
 
   // Check if browser can handle doing scrollbar.
-  this.do_scrollbar = true;
+  // this.do_scrollbar = true;
 
   // Get the DOM element of the input field.
   if (!this.input_elem)
@@ -514,8 +514,8 @@ Object.assign(MOAutocompleter.prototype, {
       this.attach_row_events(row, i);
       list.append(row);
     }
-    if (this.do_scrollbar)
-      div.addEventListener("scroll", this.our_scroll.bind(this));
+    // if (this.do_scrollbar)
+    div.addEventListener("scroll", this.our_scroll.bind(this));
     this.input_elem.insertAdjacentElement("afterend", div);
     this.pulldown_elem = div;
     this.list_elem = list;
