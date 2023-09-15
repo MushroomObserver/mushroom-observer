@@ -99,7 +99,7 @@ class MOAutocompleter {
       refresh_timer: null,            // timer used to delay update after typing
       hide_timer: null,            // timer used to delay hiding of pulldown
       key_timer: null,            // timer used to emulate key repeat
-      do_scrollbar: null,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+      do_scrollbar: true,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
       do_datalist: null,            // implement using <datalist> instead of doing pulldown ourselves
       row_height: null,            // height of a row in pixels (filled in automatically)
       scrollbar_width: null             // width of scrollbar (filled in automatically)
@@ -519,8 +519,8 @@ class MOAutocompleter {
       this.attach_row_events(row, i);
       list.append(row);
     }
-    if (this.do_scrollbar)
-      div.addEventListener("scroll", this.our_scroll.bind(this));
+    // if (this.do_scrollbar)
+    div.addEventListener("scroll", this.our_scroll.bind(this));
     this.input_elem.insertAdjacentElement("afterend", div);
     this.pulldown_elem = div;
     this.list_elem = list;
@@ -648,11 +648,13 @@ class MOAutocompleter {
       menu.style.left = left + "px";
 
       // Set height of menu.
+      // if (this.do_scrollbar) {
       menu.style.overflowY = matches.length > size ? "scroll" : "hidden";
       menu.style.height = this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px";
       inner.style.marginTop = this.row_height * scroll + "px";
       inner.style.height = this.row_height * (matches.length - scroll) + "px";
       menu.scrollTo({ top: this.row_height * scroll });
+      // }
 
       // Set width of menu.
       this.set_width();
@@ -1184,6 +1186,10 @@ class MOAutocompleter {
     // document.getElementById("log").insertAdjacentText("beforeend", str + "<br/>");
   }
 
+  // ------------------------------- UTILITIES ------------------------------
+
+  // These methods are also used in name_lister.js
+  // Stimulus: May want to make a shared module
   escapeHTML(str) {
     const HTML_ENTITY_MAP = {
       "&": "&amp;",
@@ -1197,6 +1203,38 @@ class MOAutocompleter {
     return str.replace(/[&<>"'\/]/g, function (s) {
       return HTML_ENTITY_MAP[s];
     });
+  }
+
+  getScrollBarWidth() {
+    var inner, outer, w1, w2;
+    var body = document.body || document.getElementsByTagName("body")[0];
+
+    if (scroll_bar_width != null)
+      return scroll_bar_width;
+
+    var inner = document.createElement('p');
+    inner.style.width = "100%";
+    inner.style.height = "200px";
+
+    var outer = document.createElement('div');
+    outer.style.position = "absolute";
+    outer.style.top = "0px";
+    outer.style.left = "0px";
+    outer.style.visibility = "hidden";
+    outer.style.width = "200px";
+    outer.style.height = "150px";
+    outer.style.overflow = "hidden";
+    outer.appendChild(inner);
+
+    body.appendChild(outer);
+    var w1 = inner.offsetWidth;
+    outer.style.overflow = 'scroll';
+    var w2 = inner.offsetWidth;
+    if (w1 == w2) w2 = outer.clientWidth;
+    body.removeChild(outer);
+
+    scroll_bar_width = w1 - w2;
+    return scroll_bar_width;
   }
 };
 
