@@ -3000,7 +3000,6 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def assert_project_checks(project_states)
-    debugger
     project_states.each do |id, state|
       assert_checkbox_state("project_id_#{id}", state)
     end
