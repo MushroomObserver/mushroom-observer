@@ -986,13 +986,17 @@ class MOAutocompleter {
           response.text().then((content) => {
             // console.log("content: " + content);
             // do something awesome with result
-            this.process_ajax_response(content).bind(this)
+            this.process_ajax_response(content)
+          }).catch((error) => {
+            console.error("no_content:", error);
           });
         } else {
           this.ajax_request = null;
           console.log(`got a ${response.status}`);
         }
       }
+    }).catch((error) => {
+      console.error("Server Error:", error);
     });
   }
 
