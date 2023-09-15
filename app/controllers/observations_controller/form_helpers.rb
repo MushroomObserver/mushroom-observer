@@ -86,7 +86,8 @@ module ObservationsController::FormHelpers
     @project_checks = {}
     @projects.each do |proj|
       @project_checks[proj.id] = (proj.open_membership &&
-                                  proj.accepting_observations)
+                                  proj.accepting_observations &&
+                                  proj.current?)
     end
   end
 
