@@ -2979,6 +2979,17 @@ class ObservationsControllerTest < FunctionalTestCase
                           @proj2.id => :checked)
   end
 
+  def test_project_checkboxes_ongoing_projects
+    login("katrina")
+    get(:new)
+
+    assert_project_checks(
+      projects(:past_project).id => :unchecked,
+      projects(:current_project).id => :checked,
+      projects(:future_project).id => :checked
+    )
+  end
+
   def init_for_project_checkbox_tests
     @proj1 = projects(:eol_project)
     @proj2 = projects(:bolete_project)
@@ -2989,6 +3000,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def assert_project_checks(project_states)
+    debugger
     project_states.each do |id, state|
       assert_checkbox_state("project_id_#{id}", state)
     end
