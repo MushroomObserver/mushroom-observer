@@ -25,6 +25,7 @@
 #  is_admin?::      Is a given User an admin for this Project?
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
+#  current?::       Project (based on dates) has started and hasn't ended
 #  user_can_add_observation?:: Can user add observation to this Project
 #  text_name::      Alias for +title+ for debugging.
 #  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
@@ -134,6 +135,10 @@ class Project < AbstractModel
       return true if group_ids.member?(project.admin_group_id)
     end
     false
+  end
+
+  def current?
+    !future? && !past?
   end
 
   def add_images(imgs)
@@ -313,6 +318,18 @@ class Project < AbstractModel
       d.reader_groups.delete(user_group)
       d.save
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  def future?
+    start_date&.future?
+  end
+
+  def past?
+    end_date&.past?
   end
 
   ##############################################################################

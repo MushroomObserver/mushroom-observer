@@ -111,4 +111,10 @@ class ProjectTest < UnitTestCase
     proj.log_destroy
     assert_nil(log.reload.target_id)
   end
+
+  def test_dates_current
+    assert(projects(:current_project).current?)
+    assert_not(projects(:past_project).current?)
+    assert_not(projects(:future_project).current?)
+  end
 end
