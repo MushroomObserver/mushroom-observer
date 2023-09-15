@@ -49,7 +49,7 @@ var AUTOCOMPLETERS = {};
 
 class MOAutocompleter {
   constructor(opts = {}) {
-    console.log(JSON.stringify(opts));
+    // console.log(JSON.stringify(opts));
     // These are potentially useful parameters the user might want to tweak.
     const defaultOpts = {
       input_id: null,            // id of text field (after initialization becomes a unique identifier)
