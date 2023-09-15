@@ -116,8 +116,6 @@ past_project:
   user: roy
   user_group: burbank_users
   admin_group: burbank_admins
-  title: Burbank Project
-  summary: Project about Fungi of Burbank
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
@@ -129,8 +127,6 @@ future_project:
   user: roy
   user_group: burbank_users
   admin_group: burbank_admins
-  title: Burbank Project
-  summary: Project about Fungi of Burbank
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
@@ -142,8 +138,6 @@ current_project:
   user: roy
   user_group: burbank_users
   admin_group: burbank_admins
-  title: Burbank Project
-  summary: Project about Fungi of Burbank
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
