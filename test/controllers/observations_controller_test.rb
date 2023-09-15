@@ -2986,7 +2986,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_project_checks(
       projects(:past_project).id => :unchecked,
       projects(:current_project).id => :checked,
-      projects(:future_project).id => :checked
+      projects(:future_project).id => :unchecked
     )
   end
 
