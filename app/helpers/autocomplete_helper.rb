@@ -5,7 +5,7 @@ module AutocompleteHelper
   # Now non-jQuery object
   def reuse_auto_completer(first_id, new_id)
     inject_javascript_at_end(%(
-      AUTOCOMPLETERS[document.getElementById('#{first_id}').dataset.uuid].reuse('#{new_id}')
+      AUTOCOMPLETERS[document.getElementById('#{first_id}').dataset.uuid].reuse_for('#{new_id}')
     ))
   end
 

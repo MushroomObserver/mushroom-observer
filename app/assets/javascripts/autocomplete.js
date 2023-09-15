@@ -143,7 +143,7 @@ const MOAutocompleter = function (opts) {
 Object.assign(MOAutocompleter.prototype, {
 
   // Prepare another input element to share an existing autocompleter instance.
-  reuse: function (other_elem) {
+  reuse_for: function (other_elem) {
     if (typeof other_elem == "string")
       other_elem = getElementById(other_elem);
     this.prepare_input_element(other_elem);
@@ -152,6 +152,9 @@ Object.assign(MOAutocompleter.prototype, {
   // Move/attach this autocompleter to a new field.
   switch_inputs: function (event, elem) {
     // converted from jQuery input_elem.is(elem)
+    console.log(this.input_elem);
+    console.log(elem);
+    console.log(this.input_elem === elem);
     if (!this.input_elem === elem) {
       this.uuid = elem.dataset.uuid;
       this.input_elem = elem;
@@ -174,29 +177,29 @@ Object.assign(MOAutocompleter.prototype, {
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
       elem.addEventListener("focus", function (event) {
-        return this2.switch_inputs(event, elem)
+        this2.switch_inputs(event, elem)
       });
       elem.addEventListener("click", function (event) {
-        return this2.our_click(event)
+        this2.our_click(event)
       });
       elem.addEventListener("blur", function (event) {
-        return this2.our_blur(event)
+        this2.our_blur(event)
       });
       elem.addEventListener("keydown", function (event) {
-        return this2.our_keydown(event)
+        this2.our_keydown(event)
       });
       elem.addEventListener("keyup", function (event) {
-        return this2.our_keyup(event)
+        this2.our_keyup(event)
       });
       elem.addEventListener("keypress", function (event) {
-        return this2.our_keypress(event)
+        this2.our_keypress(event)
       });
       elem.addEventListener("change", function (event) {
-        return this2.our_change(false)
+        this2.our_change(false)
       });
       // Turbo: check this. May need to be turbo.before_render or before_visit
       window.addEventListener("beforeunload", function (event) {
-        return this2.our_unload()
+        this2.our_unload()
       });
     }
 

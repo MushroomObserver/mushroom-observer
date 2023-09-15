@@ -1,26 +1,32 @@
 // Reusable events intended to be callable from html tags
-var MOEvents = {}
+class MOEvents {
+  constructor() {
+  }
 
-MOEvents.alert = function (element) {
-  console.log(element)
-  alert(JSON.stringify(element));
-}
+  static alert(element) {
+    console.log(element)
+    alert(JSON.stringify(element));
+  }
 
-MOEvents.whirly = function (text) {
-  $('#mo_ajax_progress_caption').html(text);
-  $("#mo_ajax_progress").modal('show');
-}
+  static whirly(text) {
+    $('#mo_ajax_progress_caption').html(text);
+    $("#mo_ajax_progress").modal('show');
+  }
 
-MOEvents.rebindAutoComplete = function (type) {
-  // var type = this.value
-  // alert(type)
-  var filter_term = document.getElementById("filter_term");
-  switch (type) {
-    case "clade":
-      AUTOCOMPLETERS[document.getElementById('ur_clade').dataset.uuid].reuse(filter_term)
-    case "region":
-      AUTOCOMPLETERS[document.getElementById('ur_location').dataset.uuid].reuse(filter_term)
-    case "user":
-      AUTOCOMPLETERS[document.getElementById('ur_user').dataset.uuid].reuse(filter_term)
+  static rebindAutoComplete(type) {
+    // console.log(type)
+    // var type = this.value
+    const filter_term = document.getElementById("filter_term");
+    const ur_clade_i = document.getElementById('ur_clade').dataset.uuid
+    const ur_location_i = document.getElementById('ur_location').dataset.uuid
+    const ur_user_i = document.getElementById('ur_user').dataset.uuid
+    switch (type) {
+      case "clade":
+        AUTOCOMPLETERS[ur_clade_i].reuse_for(filter_term)
+      case "region":
+        AUTOCOMPLETERS[ur_location_i].reuse_for(filter_term)
+      case "user":
+        AUTOCOMPLETERS[ur_user_i].reuse_for(filter_term)
+    }
   }
 }

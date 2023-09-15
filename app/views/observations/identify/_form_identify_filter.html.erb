@@ -43,11 +43,11 @@ options = [
 
   <% turn_into_clade_auto_completer(:filter_term) %>
 
-  <% # initializes module with translations for js messages
-  inject_javascript_at_end %(
-    $("#filter_term").on("change", function() {
-      MOEvents.rebindAutoComplete(this.value)
-    })
-  ) %>
+  <%# initializes module with translations for js messages
+  # inject_javascript_at_end %(
+  #   document.getElementById("filter_term").onchange = function() {
+  #     MOEvents.rebindAutoComplete(this.value)
+  #   }
+  # ) %>
 
 <% end %>
