@@ -938,8 +938,10 @@ Object.assign(MOAutocompleter.prototype, {
     if (this.ajax_request)
       this.ajax_request.abort();
 
+    const csrfToken = document.querySelector("[name='csrf-token']").content
+
     this.ajax_request = jQuery.ajax(url, {
-      data: { authenticity_token: csrf_token() },
+      data: { authenticity_token: csrfToken },
       dataType: "text",
       async: true,
       error: (function (response) {
@@ -953,8 +955,8 @@ Object.assign(MOAutocompleter.prototype, {
     });
 
     // this.headers = new Headers();
-    // this.headers.append("authorization", csrf_token())
-    // this.headers.append("accept", "text")
+    // this.headers.append("X-CSRF-Token", csrfToken)
+    // this.headers.append("Content-Type", "text/html")
 
     // this.ajax_request = async function (url) {
     //   const response = await fetch(url, this.headers);
