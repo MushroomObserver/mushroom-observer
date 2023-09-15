@@ -10,6 +10,8 @@ DEFAULTS: &DEFAULTS
   title: $LABEL
   open_membership: false
   accepting_observations: true
+  start_date: nil
+  end_date: nil
 
 # admins: rolf (1), mary (2)
 # members: rolf (1), mary (2), katrina (5)
@@ -105,3 +107,45 @@ news_articles_project:
   admin_group: article_writers
   user_group:  article_writers
   summary:     Project members can create and modify News Articles.
+
+# admins: roy
+# members: katrina
+# observations: 1 (owner_accepts_general_questions - owned by roy)
+past_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  title: Burbank Project
+  summary: Project about Fungi of Burbank
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+  end_date: 2023-04-27
+
+future_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  title: Burbank Project
+  summary: Project about Fungi of Burbank
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+  start_date: <%= Date.tomorrow %>
+
+current_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  title: Burbank Project
+  summary: Project about Fungi of Burbank
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55
+  observations: owner_accepts_general_questions, unknown_with_lat_long
+  open_membership: true
+  end_date: <%= Date.tomorrow %>
