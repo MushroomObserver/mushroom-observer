@@ -2291,6 +2291,23 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_false(old_img2.reload.gps_stripped)
   end
 
+  def test_create_add_to_past_proect
+    proj = projects(:past_project)
+    user = users(:katrina)
+    assert(proj.is_member?(user), # Ensure fixtures not broken
+           "Need fixtures such that `user`` is a member of `proj`")
+
+    params = {
+      observation: { place_name: locations(:albion).name },
+      project: { "id_#{proj.id}" => 1 } # checks the checkbox for proj
+    }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash_warning
+  end
+
   ##############################################################################
 
   # ----------------------------------------------------------------
