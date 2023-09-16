@@ -19,31 +19,17 @@ class MOEvents {
     // Each autocompleter has a data-uuid that corresponds to its array index
     // in AUTOCOMPLETERS
     const filter_term = document.getElementById("filter_term");
+    const autocompleter = AUTOCOMPLETERS[filter_term.dataset.uuid]
 
     switch (type) {
       case "clade":
-        AUTOCOMPLETERS[filter_term.dataset.uuid].swap("clade");
-        // new MOAutocompleter({
-        //   input_id: "filter_term",
-        //   ajax_url: "/ajax/auto_complete/name_above_genus/@",
-        //   collapse: 1
-        // });
+        autocompleter.swap("clade");
         break;
       case "region":
-        AUTOCOMPLETERS[filter_term.dataset.uuid].swap("location");
-        // new MOAutocompleter({
-        //   input_id: "filter_term",
-        //   ajax_url: "/ajax/auto_complete/location/@",
-        //   collapse: 1
-        // });
+        autocompleter.swap("location");
         break;
       case "user":
-        AUTOCOMPLETERS[filter_term.dataset.uuid].swap("user");
-        // new MOAutocompleter({
-        //   input_id: "filter_term",
-        //   ajax_url: "/ajax/auto_complete/user/@",
-        //   collapse: 1
-        // });
+        autocompleter.swap("user");
         break;
     }
   }

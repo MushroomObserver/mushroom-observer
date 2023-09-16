@@ -253,7 +253,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // To swap out autocompleter properties, send a type
   swap: function (type, opts) {
-    if (!autocompleterTypes.hasOwnProperty(type)) {
+    if (!this.autocompleterTypes.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
     } else {
       this.type = type;
