@@ -30,12 +30,12 @@ options = [
                       autocomplete: "off", value: value,
                       placeholder: placeholder,
                       class: "form-control", size: 42,
-                      data: { autofocus: true }) %>
+                      data: { autofocus: true,
+                              autocompleter: :clade }) %>
   </div><!--.form-group-->
 
   <%= f.select(:type, options, { selected: selected },
                { class: "form-control",
-                 data: { autocompleter: :clade },
                  onchange: "MOEvents.swapFilterAutoComplete(this.value);" }) %>
 
   <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
