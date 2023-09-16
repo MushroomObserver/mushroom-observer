@@ -24,7 +24,8 @@ feedback_locals = {
              locals: feedback_locals.merge({ f: f })) if @what.present? %>
 
   <%= text_field_with_label(
-        form: f, field: :proposed_name, inline: true, value: @what,
+        form: f, field: :proposed_name, inline: true,
+        value: @what, placeholder: :start_typing.l,
         label: "#{:name_deprecate_preferred.t}:",
         append: help_note(:div, :name_deprecate_preferred_help.tp),
         data: { autofocus: true, autocompleter: :name }

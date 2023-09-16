@@ -9,7 +9,8 @@ action = { controller: "/species_lists/observations", action: :update,
   <%= content_tag(:p,
                   :species_list_add_remove_body.tp(num: @query.num_results)) %>
 
-  <%= text_field_with_label(form: f, field: :species_list, value: @id,
+  <%= text_field_with_label(form: f, field: :species_list,
+                            value: @id, placeholder: :start_typing.l,
                             label: :species_list_add_remove_label.t + ":",
                             data: { autocompleter: :species_list }) %>
   <%# turn_into_species_list_auto_completer(:species_list) %>

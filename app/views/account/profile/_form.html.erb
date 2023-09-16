@@ -7,8 +7,8 @@
                             label: :profile_name.t + ":") %>
 
   <%= text_field_with_label(form: f, field: :place_name,
-                            label: :profile_location.t + ":",
-                            between: "(33%)",
+                            placeholder: :start_typing.l,
+                            label: :profile_location.t + ":", between: "(33%)",
                             data: { autocompleter: :location }) %>
   <%# turn_into_location_auto_completer("user_place_name") %>
 

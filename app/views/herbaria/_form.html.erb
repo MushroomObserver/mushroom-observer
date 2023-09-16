@@ -10,6 +10,7 @@
 
   <% if in_admin_mode? %>
     <%= text_field_with_label(form: f, field: :personal_user_name, inline: true,
+                              placeholder: :start_typing.l,
                               label: :edit_herbarium_admin_make_personal.t,
                               data: { autocompleter: :user }) %>
     <%# turn_into_user_auto_completer(:herbarium_personal_user_name) %>
@@ -52,6 +53,7 @@
   <% end %>
 
   <%= text_field_with_label(form: f, field: :place_name,
+                            placeholder: :start_typing.l,
                             label: :LOCATION.t + ":", between: :optional,
                             data: { autocompleter: :location }) %>
   <%# turn_into_location_auto_completer(:herbarium_place_name) %>

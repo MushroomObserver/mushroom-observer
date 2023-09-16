@@ -13,7 +13,7 @@ action = { controller: "/projects/members", action: :create,
   <%= form_with(url: action, id: "project_member_form") do |f| %>
 
     <%= text_field_with_label(form: f, field: :candidate, size: 40,
-                              value: @candidate,
+                              value: @candidate, placeholder: :start_typing.l,
                               label: :LOGIN_NAME.t + ":",
                               data: { autofocus: true,
                                       autocompleter: :user }) %>

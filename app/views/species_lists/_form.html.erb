@@ -25,7 +25,7 @@
     <%= fields_for(:list) do |f_l|
       text_area_with_label(form: f_l, field: :members, rows: 8,
                            label: :form_species_lists_write_in_species.t + ":",
-                           value: @list_members,
+                           value: @list_members, placeholder: :start_typing.l,
                            data: { autocompleter: :name,
                                    autocomplete_separator: "\n" })
     end %>
@@ -52,7 +52,7 @@
              locals: { button: button } ) %>
 
   <%= text_field_with_label(form: f, field: :place_name, between: :required,
-                            label: :WHERE.t + ":",
+                            placeholder: :start_typing.l, label: :WHERE.t + ":",
                             data: { autocompleter: :location }) %>
   <%# turn_into_location_auto_completer(:species_list_place_name) %>
 

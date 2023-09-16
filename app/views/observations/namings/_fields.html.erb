@@ -40,8 +40,8 @@ context ||= "blank"
   <div class="row mt-3">
     <div class="col-sm-6">
       <%= text_field_with_label(form: f_n, field: :name, size: 40,
-                                label: :WHAT.t + ":",
-                                value: what, autocomplete: "off",
+                                value: what, placeholder: :start_typing.l,
+                                autocomplete: "off", label: :WHAT.t + ":",
                                 data: { autofocus: focus_on_name,
                                         autocompleter: :name }) %>
       <%# turn_into_name_auto_completer(:naming_name, primer: Name.primer) %>

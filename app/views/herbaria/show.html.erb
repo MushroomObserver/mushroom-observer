@@ -30,6 +30,7 @@ map = @herbarium.location ? true : false
                       id: "herbarium_curators_form")do |f| %>
           <div class="form-inline mt-3">
             <%= f.text_field(:add_curator, class: "form-control",
+                             placeholder: :start_typing.l,
                              data: { autocompleter: :user }) %>
             <%# turn_into_user_auto_completer(:add_curator) %>
             <label for="add_curator">

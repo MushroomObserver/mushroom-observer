@@ -90,6 +90,7 @@
           <td>
             <%= text_field_tag("writein_name[#{n}]", datum[:name],
                               class: "form-control",
+                              placeholder: :start_typing.l,
                               data: { autocompleter: :user }) %>
             <%# turn_into_user_auto_completer("writein_name_#{n}") %>
           </td>

@@ -22,6 +22,7 @@ end
   <% end %>
 
   <%= text_field_with_label(form: f, field: :herbarium_name,
+                            placeholder: :start_typing.l,
                             label: :NAME.t + ":", between: :required,
                             data: { autocompleter: :herbarium }) %>
   <%# turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
