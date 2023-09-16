@@ -110,7 +110,6 @@ news_articles_project:
 
 # admins: roy
 # members: katrina
-# observations: 1 (owner_accepts_general_questions - owned by roy)
 past_project:
   <<: *DEFAULTS
   user: roy
