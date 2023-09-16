@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
     elsif admin_group
       flash_error(:add_project_group_exists.t(group: admin_name))
     else
-      return create_project(title, admin_name)
+      return create_project(title, admin_name, params[:project][:where])
     end
     render(:new, location: new_project_path(q: get_query_param))
   end
@@ -218,14 +218,32 @@ class ProjectsController < ApplicationController
 
   def permitted_project_params
     params.require(:project).permit(:title, :summary, :open_membership,
-                                    :accepting_observations)
+                                    :accepting_observations, :where)
   end
 
   def find_project!
     @project = find_or_goto_index(Project, params[:id].to_s)
   end
 
-  def create_project(title, admin_name)
+  # def create_members_group(title)
+  #   user_group = UserGroup.new
+  #   user_group.name = title
+  #   user_group.users << @user
+  #   return user_group if user_group.save
+  #   flash_object_errors(user_group)
+  #   nil
+  # end
+
+  # def create_admin_group(admin_name)
+  #   admin_group = UserGroup.new
+  #   admin_group.name = admin_name
+  #   admin_group.users << @user
+  #   return admin_group if admin_group.save
+  #   flash_object_errors(admin_group)
+  #   nil
+  # end
+
+  def create_project(title, admin_name, where)
     # Create members group.
     user_group = UserGroup.new
     user_group.name = title
