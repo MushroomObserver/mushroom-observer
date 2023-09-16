@@ -46,6 +46,7 @@
 #
 class Project < AbstractModel
   belongs_to :admin_group, class_name: "UserGroup"
+  belongs_to :location
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
@@ -313,6 +314,10 @@ class Project < AbstractModel
       d.reader_groups.delete(user_group)
       d.save
     end
+  end
+
+  def place_name
+    location&.display_name || ""
   end
 
   ##############################################################################

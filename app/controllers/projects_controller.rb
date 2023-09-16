@@ -225,46 +225,48 @@ class ProjectsController < ApplicationController
     @project = find_or_goto_index(Project, params[:id].to_s)
   end
 
-  # def create_members_group(title)
-  #   user_group = UserGroup.new
-  #   user_group.name = title
-  #   user_group.users << @user
-  #   return user_group if user_group.save
-  #   flash_object_errors(user_group)
-  #   nil
-  # end
-
-  # def create_admin_group(admin_name)
-  #   admin_group = UserGroup.new
-  #   admin_group.name = admin_name
-  #   admin_group.users << @user
-  #   return admin_group if admin_group.save
-  #   flash_object_errors(admin_group)
-  #   nil
-  # end
-
-  def create_project(title, admin_name, where)
-    # Create members group.
+  def create_members_group(title)
     user_group = UserGroup.new
     user_group.name = title
     user_group.users << @user
+    return user_group if user_group.save
 
-    # Create admin group.
+    flash_object_errors(user_group)
+    nil
+  end
+
+  def create_admin_group(admin_name)
     admin_group = UserGroup.new
     admin_group.name = admin_name
     admin_group.users << @user
+    return admin_group if admin_group.save
+
+    flash_object_errors(admin_group)
+    nil
+  end
+
+  def find_location(where)
+    location = Location.find_by_name_or_reverse_name(where)
+    return location if location || !where
+
+    flash_warn(:add_project_no_location.t(where: where))
+    nil
+  end
+
+  def create_project(title, admin_name, where)
+    user_group = create_members_group(title)
+    admin_group = create_admin_group(admin_name)
+    location = find_location(where)
+    return unless user_group && admin_group && (location || !where)
 
     # Create project.
     @project = Project.new(permitted_project_params)
     @project.user = @user
     @project.user_group = user_group
     @project.admin_group = admin_group
+    @project.location = location
 
-    if !user_group.save
-      flash_object_errors(user_group)
-    elsif !admin_group.save
-      flash_object_errors(admin_group)
-    elsif !@project.save
+    if !@project.save
       flash_object_errors(@project)
     else
       @project.log_create
