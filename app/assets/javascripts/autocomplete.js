@@ -267,7 +267,7 @@ Object.assign(MOAutocompleter.prototype, {
     this.old_value[id] = null;
 
     // Attach events if we aren't using datalist thingy.
-    if (!this.do_datalist) add_event_listeners(elem);
+    if (!this.do_datalist) this.add_event_listeners(elem);
 
     // Disable default browser autocomplete. Stimulus - do this on HTML element
     elem.setAttribute("autocomplete", "off");
@@ -307,6 +307,8 @@ Object.assign(MOAutocompleter.prototype, {
       this.primer = primer.join("\n"),
       this.pulldown_size = length,
       this.act_like_select = true
+
+    this.add_event_listeners(new_elem);
   },
 
   // NOTE: `this` within an event listener function refers to the element
