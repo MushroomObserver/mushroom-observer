@@ -51,30 +51,51 @@ const MOAutocompleter = function (opts) {
   // These are potentially useful parameters the user might want to tweak.
 
   const defaultOpts = {
-    input_id: null,            // id of text field (after initialization becomes a unique identifier)
-    input_elem: null,            // jQuery element of text field
-    type: null,                  // what type of autocompleter, subclass of AutoComplete
-    pulldown_class: 'auto_complete', // class of pulldown div
-    hot_class: 'selected',      // class of <li> when highlighted
-    unordered: false,           // ignore order of words when matching
+    // id of text field (after initialization becomes a unique identifier)
+    input_id: null,
+    // JS element of text field
+    input_elem: null,
+    // what type of autocompleter, subclass of AutoComplete
+    type: null,
+    // class of pulldown div
+    pulldown_class: 'auto_complete',
+    // class of <li> when highlighted
+    hot_class: 'selected',
+    // ignore order of words when matching
     // (collapse must be 0 if this is true!)
-    collapse: 0,               // 0 = normal mode
+    unordered: false,
+    // 0 = normal mode
     // 1 = autocomplete first word, then the rest
     // 2 = autocomplete first word, then second word, then the rest
     // N = etc.
-    token: null,            // separator between options
-    primer: null,            // initial list of options (one string per line)
-    update_primer_on_blur: false,          // add each entered value into primer (useful if auto-completing a column of fields)
-    ajax_url: null,            // where to request options from
-    refresh_delay: 0.10,            // how long to wait before sending AJAX request (seconds)
-    hide_delay: 0.25,            // how long to wait before hiding pulldown (seconds)
-    key_delay1: 0.50,            // initial key repeat delay (seconds)
-    key_delay2: 0.03,            // subsequent key repeat delay (seconds)
-    pulldown_size: 10,              // maximum number of options shown at a time
-    page_size: 10,              // amount to move cursor on page up and down
-    max_request_length: 50,              // max length of string to send via AJAX
-    show_errors: false,           // show error messages returned via AJAX?
-    act_like_select: false            // include pulldown-icon on right, and always show all options
+    collapse: 0,
+    // separator between options
+    token: null,
+    // initial list of options (one string per line)
+    primer: null,
+    // add each entered value into primer
+    // (useful if auto-completing a column of fields)
+    update_primer_on_blur: false,
+    // where to request options from
+    ajax_url: null,
+    // how long to wait before sending AJAX request (seconds)
+    refresh_delay: 0.10,
+    // how long to wait before hiding pulldown (seconds)
+    hide_delay: 0.25,
+    // initial key repeat delay (seconds)
+    key_delay1: 0.50,
+    // subsequent key repeat delay (seconds)
+    key_delay2: 0.03,
+    // maximum number of options shown at a time
+    pulldown_size: 10,
+    // amount to move cursor on page up and down
+    page_size: 10,
+    // max length of string to send via AJAX
+    max_request_length: 50,
+    // show error messages returned via AJAX?
+    show_errors: false,
+    // include pulldown-icon on right, and always show all options
+    act_like_select: false
   }
 
   // Allowed types of autocompleter
@@ -106,35 +127,38 @@ const MOAutocompleter = function (opts) {
     },
     year: {
       // adapt date_select.js replace_date_select_with_text_field
+      // primer: primer.join("\n"),
+      pulldown_size: length,
+      act_like_select: true
     }
   }
 
   // These are internal state variables the user should leave alone.
   const internalOpts = {
     uuid: null,            // unique id for this object
-    datalist_elem: null,            // jQuery element of datalist
-    pulldown_elem: null,            // jQuery element of pulldown div
-    list_elem: null,            // jQuery element of pulldown ul
-    focused: false,           // is user in text field?
-    menu_up: false,           // is pulldown visible?
-    old_value: {},              // previous value of input field
-    options: '',              // list of all options
-    matches: [],              // list of options currently showing
-    current_row: -1,              // number of option currently highlighted (0 = none)
-    current_value: null,            // value currently highlighted (null = none)
-    current_highlight: -1,              // row of view highlighted (-1 = none)
-    current_width: 0,               // current width of menu
-    scroll_offset: 0,               // scroll offset
-    last_ajax_request: null,            // last ajax request we got results for
-    last_ajax_incomplete: true,            // did we get all the results we requested last time?
-    ajax_request: null,            // ajax request while underway
-    refresh_timer: null,            // timer used to delay update after typing
-    hide_timer: null,            // timer used to delay hiding of pulldown
-    key_timer: null,            // timer used to emulate key repeat
-    do_scrollbar: true,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
-    do_datalist: null,            // implement using <datalist> instead of doing pulldown ourselves
-    row_height: null,            // height of a row in pixels (filled in automatically)
-    scrollbar_width: null             // width of scrollbar (filled in automatically)
+    datalist_elem: null,   // jQuery element of datalist
+    pulldown_elem: null,   // jQuery element of pulldown div
+    list_elem: null,       // jQuery element of pulldown ul
+    focused: false,        // is user in text field?
+    menu_up: false,        // is pulldown visible?
+    old_value: {},         // previous value of input field
+    options: '',           // list of all options
+    matches: [],           // list of options currently showing
+    current_row: -1,       // number of option currently highlighted (0 = none)
+    current_value: null,   // value currently highlighted (null = none)
+    current_highlight: -1, // row of view highlighted (-1 = none)
+    current_width: 0,      // current width of menu
+    scroll_offset: 0,      // scroll offset
+    last_ajax_request: null, // last ajax request we got results for
+    last_ajax_incomplete: true, // did we get all the results we requested?
+    ajax_request: null,    // ajax request while underway
+    refresh_timer: null,   // timer used to delay update after typing
+    hide_timer: null,      // timer used to delay hiding of pulldown
+    key_timer: null,       // timer used to emulate key repeat
+    do_scrollbar: true,    // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+    do_datalist: null,     // implement using <datalist> instead of doing pulldown ourselves
+    row_height: null,      // height of a row in pixels (filled in automatically)
+    scrollbar_width: null  // width of scrollbar (filled in automatically)
   }
 
   Object.assign(this, defaultOpts);
@@ -178,7 +202,11 @@ const MOAutocompleter = function (opts) {
   }
 
   // Attach events, etc. to input element.
-  this.prepare_input_element(this.input_elem);
+  if (this.type == "year") {
+    this.prepare_year_input_element(this.input_elem)
+  } else {
+    this.prepare_input_element(this.input_elem);
+  }
 
   // Keep catalog of autocompleter objects so we can reuse them as needed.
   AUTOCOMPLETERS[this.uuid] = this;
@@ -217,17 +245,6 @@ Object.assign(MOAutocompleter.prototype, {
     }
   },
 
-  // remove_listeners: function () {
-  //   this.input_elem.removeEventListener("focus", this);
-  //   this.input_elem.removeEventListener("click", this);
-  //   this.input_elem.removeEventListener("blur", this);
-  //   this.input_elem.removeEventListener("keydown", this);
-  //   this.input_elem.removeEventListener("keyup", this);
-  //   this.input_elem.removeEventListener("keypress", this);
-  //   this.input_elem.removeEventListener("change", this);
-  //   window.removeEventListener("beforeunload", this);
-  // },
-
   // To swap out autocompleter properties, send a type
   swap: function (type, opts) {
     if (!this.autocompleterTypes.hasOwnProperty(type)) {
@@ -242,60 +259,70 @@ Object.assign(MOAutocompleter.prototype, {
     }
   },
 
-  // Prepare another input element to share an existing autocompleter instance.
-  // reuse_for: function (other_elem) {
-  //   console.log(this.input_id)
-  //   console.log(this.ajax_url)
-  //   if (typeof other_elem == "string")
-  //     other_elem = getElementById(other_elem);
-  //   this.switch_inputs(other_elem);
-  //   console.log(this)
-  //   this.prepare_input_element(this.input_elem);
-  // },
-
-  // Move/attach this autocompleter to a new field.
-  // switch_inputs: function (other_elem) {
-  //   // converted from jQuery input_elem.is(other_elem)
-  //   console.log(this.input_elem);
-  //   console.log(other_elem);
-  //   console.log(this.input_elem === other_elem);
-
-  //   if (!this.input_elem === other_elem) {
-  //     this.uuid = other_elem.dataset.uuid;
-  //     this.input_elem = other_elem;
-  //     this.input_elem.insertAdjacentHTML("afterend", this.pulldown_elem);
-  //   }
-  // },
-
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function (elem) {
     // console.log(elem)
     const id = elem.getAttribute("id");
 
-    // NOTE: `this` within an event listener function refers to the element
-    // (the eventTarget) -- unless you pass an arrow function as the listener.
-    // const this2 = this;
-
     this.old_value[id] = null;
 
-    // Stimulus - these can be actions on the input
     // Attach events if we aren't using datalist thingy.
-    if (!this.do_datalist) {
-      elem.addEventListener("focus", this);
-      elem.addEventListener("click", this);
-      elem.addEventListener("blur", this);
-      elem.addEventListener("keydown", this);
-      elem.addEventListener("keyup", this);
-      elem.addEventListener("keypress", this);
-      elem.addEventListener("change", this);
-      // Turbo: check this. May need to be turbo.before_render or before_visit
-      window.addEventListener("beforeunload", this);
-    }
+    if (!this.do_datalist) add_event_listeners(elem);
 
     // Disable default browser autocomplete. Stimulus - do this on HTML element
     elem.setAttribute("autocomplete", "off");
     // sanity check to show which autocompleter is currently on the element
     elem.setAttribute("data-ajax-url", this.ajax_url);
+  },
+
+  prepare_year_input_element: function (old_elem) {
+    const id = old_elem.getAttribute("id"),
+      name = old_elem.getAttribute("name"),
+      klass = old_elem.getAttribute("class"),
+      style = old_elem.getAttribute("style"),
+      value = old_elem.value,
+      opts = old_elem[0].options,
+      length = opts.length > 20 ? 20 : opts.length,
+      primer = [],
+      new_elem = document.createElement("input");
+    new_elem.type = "text";
+
+    for (let i = 0; i < opts.length; i++)
+      primer.push(opts.item(i).text);
+
+    new_elem.setAttribute("class", klass);
+    new_elem.style = style;
+    new_elem.value = value;
+    new_elem.setAttribute("size", 4);
+
+    // Not sure if this works yet...
+    if (old_elem[0].onchange)
+      new_elem.onchange = old_elem[0].onchange;
+
+    old_elem.replaceWith(new_elem);
+    new_elem.setAttribute("id", id);
+    new_elem.setAttribute("name", name);
+
+    this.input_elem = new_elem,
+      this.primer = primer.join("\n"),
+      this.pulldown_size = length,
+      this.act_like_select = true
+  },
+
+  // NOTE: `this` within an event listener function refers to the element
+  // (the eventTarget) -- unless you pass an arrow function as the listener.
+  // But writing a specially named function handleEvent() allows this:
+  add_event_listeners: function (elem) {
+    // Stimulus - data-actions on the input can route events to actions here
+    elem.addEventListener("focus", this);
+    elem.addEventListener("click", this);
+    elem.addEventListener("blur", this);
+    elem.addEventListener("keydown", this);
+    elem.addEventListener("keyup", this);
+    elem.addEventListener("keypress", this);
+    elem.addEventListener("change", this);
+    // Turbo: check this. May need to be turbo.before_render or before_visit
+    window.addEventListener("beforeunload", this);
   },
 
   // ------------------------------ Events ------------------------------
