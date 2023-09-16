@@ -78,14 +78,20 @@ jQuery(document).ready(function () {
 
 window.onload = (event) => {
   autocompleters = document.querySelectorAll('[data-autocompleter]');
-
+  // console.log(autocompleters);
   autocompleters.forEach(element => {
     // element will have "data-ajax-url" if initialized
     if (!element.hasAttribute("data-ajax-url") && element.hasAttribute("id")) {
-      new MOAutocompleter({
-        input_id: element.getAttribute("id"),
-        token: element.dataset.autocomplete_separator
-      });
+      const input_id = element.getAttribute("id");
+      const type = element.dataset.autocompleter;
+
+      // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
+      if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
+        new MOAutocompleter({
+          input_id: input_id,
+          token: element.dataset.autocomplete_separator
+        });
+      }
     }
   });
 }

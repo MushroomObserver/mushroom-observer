@@ -171,18 +171,22 @@ const MOAutocompleter = function (opts) {
   // Main option passed is token (item separator) via data-autocomplete-separator
   Object.assign(this, opts);
 
-  // Get the DOM element of the input field.
-  if (!this.input_elem)
-    this.input_elem = document.getElementById(this.input_id);
-  if (!this.input_elem)
-    alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
-
-  // console.log(this.input_elem.dataset)
-  this.type = this.input_elem.dataset.autocompleter;
+  // console.log("this.input_elem: " + this.input_elem.options.length)
+  // console.log("this.input_id: " + this.input_id)
+  // Don't set input_elem yet, so we can ignore month and day in year
+  this.type = document.getElementById(this.input_id).dataset.autocompleter;
   // Check if browser can handle doing scrollbar.
   // this.do_scrollbar = true;
   if (!autocompleterTypes.hasOwnProperty(this.type))
     alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+
+  // Get the DOM element of the input field.
+  if (!this.input_elem) {
+    this.input_elem = document.getElementById(this.input_id);
+  }
+
+  // if (!this.input_elem)
+  //   alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
 
   Object.assign(this, autocompleterTypes[this.type]);
   Object.assign(this, internalOpts);
@@ -200,22 +204,25 @@ const MOAutocompleter = function (opts) {
   // Initialize autocomplete options.
   this.options = "\n" + this.primer + "\n" + this.options;
 
-  // Create datalist if browser is capable.
-  if (this.do_datalist) {
-    this.create_datalist();
-  } else {
-    this.create_pulldown();
-  }
+  // Only do the rest if we have an element (ignoring some date fields)
+  if (this.input_elem) {
+    // Create datalist if browser is capable.
+    if (this.do_datalist) {
+      this.create_datalist();
+    } else {
+      this.create_pulldown();
+    }
 
-  // Attach events, etc. to input element.
-  if (this.type == "year") {
-    this.prepare_year_input_element(this.input_elem)
-  } else {
-    this.prepare_input_element(this.input_elem);
-  }
+    // Attach events, etc. to input element.
+    if (this.type == "year") {
+      this.prepare_year_input_element(this.input_elem);
+    } else {
+      this.prepare_input_element(this.input_elem);
+    }
 
-  // Keep catalog of autocompleter objects so we can reuse them as needed.
-  AUTOCOMPLETERS[this.uuid] = this;
+    // Keep catalog of autocompleter objects so we can reuse them as needed.
+    AUTOCOMPLETERS[this.uuid] = this;
+  }
 }
 
 Object.assign(MOAutocompleter.prototype, {
@@ -267,7 +274,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function (elem) {
-    // console.log(elem)
+    // console.log("elem: " + JSON.stringify(elem))
     const id = elem.getAttribute("id");
 
     this.old_value[id] = null;
@@ -281,17 +288,19 @@ Object.assign(MOAutocompleter.prototype, {
     elem.setAttribute("data-ajax-url", this.ajax_url);
   },
 
+  // This turns the Rails date selects into text inputs.
   prepare_year_input_element: function (old_elem) {
+    // console.log("old_elem: " + JSON.stringify(old_elem));
     const id = old_elem.getAttribute("id"),
       name = old_elem.getAttribute("name"),
       klass = old_elem.getAttribute("class"),
       style = old_elem.getAttribute("style"),
       value = old_elem.value,
-      opts = old_elem[0].options,
-      length = opts.length > 20 ? 20 : opts.length,
+      opts = old_elem.options,
       primer = [],
       new_elem = document.createElement("input");
     new_elem.type = "text";
+    const length = opts.length > 20 ? 20 : opts.length;
 
     for (let i = 0; i < opts.length; i++)
       primer.push(opts.item(i).text);
