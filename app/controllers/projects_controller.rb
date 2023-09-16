@@ -221,6 +221,11 @@ class ProjectsController < ApplicationController
                                     :accepting_observations, :where)
   end
 
+  def project_create_params
+    params.require(:project).permit(:title, :summary, :open_membership,
+                                    :accepting_observations)
+  end
+
   def find_project!
     @project = find_or_goto_index(Project, params[:id].to_s)
   end
@@ -249,7 +254,7 @@ class ProjectsController < ApplicationController
     location = Location.find_by_name_or_reverse_name(where)
     return location if location || !where
 
-    flash_warn(:add_project_no_location.t(where: where))
+    flash_warning(:add_project_no_location.t(where: where))
     nil
   end
 
@@ -260,7 +265,7 @@ class ProjectsController < ApplicationController
     return unless user_group && admin_group && (location || !where)
 
     # Create project.
-    @project = Project.new(permitted_project_params)
+    @project = Project.new(project_create_params)
     @project.user = @user
     @project.user_group = user_group
     @project.admin_group = admin_group

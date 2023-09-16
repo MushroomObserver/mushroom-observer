@@ -299,4 +299,60 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal("New Project", proj.title)
     assert_equal("New Summary", proj.summary)
   end
+
+  def test_user_group_save_fail
+    title = "Bad User Group"
+    user_group = Minitest::Mock.new
+    add_expectations(user_group, title)
+    add_expectations(user_group, title + ".admin")
+    UserGroup.stub :new, user_group do
+      params = {
+        project: {
+          title: title,
+          summary: title
+        }
+      }
+      post_requires_login(:create, params)
+      project = Project.find_by(title: title)
+      assert_nil(project)
+    end
+  end
+
+  def add_expectations(user_group, title)
+    user_group.expect :save, false
+    user_group.expect :name=, title, [String]
+    user_group.expect :users, []
+    user_group.expect :errors, title
+    user_group.expect :errors, title
+    user_group.expect :formatted_errors, []
+  end
+
+  def test_good_location
+    where = locations(:albion).name
+    title = "#{where} Project"
+    params = {
+      project: {
+        title: title,
+        summary: title,
+        where: where
+      }
+    }
+    post_requires_login(:create, params)
+    project = Project.find_by(title: title)
+    assert_equal(project.location.name, where)
+  end
+
+  def test_bad_location
+    where = "This is a bad place"
+    title = "#{where} Project"
+    params = {
+      project: {
+        title: title,
+        summary: title,
+        where: where
+      }
+    }
+    post_requires_login(:create, params)
+    assert_nil(Project.find_by(title: title))
+  end
 end
