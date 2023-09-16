@@ -101,17 +101,21 @@ const MOAutocompleter = function (opts) {
   // Allowed types of autocompleter
   // The type will govern the ajax_url and possibly other params
   const autocompleterTypes = {
-    name: {
-      ajax_url: "/ajax/auto_complete/name/@",
-      collapse: 1
-    },
     clade: {
       ajax_url: "/ajax/auto_complete/name_above_genus/@",
       collapse: 1
     },
+    herbarium: { // params[:user_id] handled in controller
+      ajax_url: "/ajax/auto_complete/herbarium/@",
+      unordered: true
+    },
     location: { // params[:format] handled in controller
       ajax_url: "/ajax/auto_complete/location/@",
       unordered: true
+    },
+    name: {
+      ajax_url: "/ajax/auto_complete/name/@",
+      collapse: 1
     },
     project: {
       ajax_url: "/ajax/auto_complete/project/@",
@@ -121,8 +125,8 @@ const MOAutocompleter = function (opts) {
       ajax_url: "/ajax/auto_complete/species_list/@",
       unordered: true
     },
-    herbarium: { // params[:user_id] handled in controller
-      ajax_url: "/ajax/auto_complete/herbarium/@",
+    user: {
+      ajax_url: "/ajax/auto_complete/user/@",
       unordered: true
     },
     year: {
@@ -183,6 +187,8 @@ const MOAutocompleter = function (opts) {
   Object.assign(this, autocompleterTypes[this.type]);
   Object.assign(this, internalOpts);
 
+  // not sure how else to make this available here
+  this.autocompleterTypes = autocompleterTypes
 
   // Create a unique ID for this instance.
   this.uuid = Object.keys(AUTOCOMPLETERS).length;
@@ -247,7 +253,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // To swap out autocompleter properties, send a type
   swap: function (type, opts) {
-    if (!this.autocompleterTypes.hasOwnProperty(type)) {
+    if (!autocompleterTypes.hasOwnProperty(type)) {
       alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
     } else {
       this.type = type;

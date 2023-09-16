@@ -19,11 +19,6 @@ class MOEvents {
     // Each autocompleter has a data-uuid that corresponds to its array index
     // in AUTOCOMPLETERS
     const filter_term = document.getElementById("filter_term");
-    // const ur_clade = document.getElementById('ur_clade');
-    // const ur_location = document.getElementById('ur_location');
-    // const ur_user = document.getElementById('ur_user');
-
-    AUTOCOMPLETERS[filter_term.dataset.uuid].remove_listeners();
 
     switch (type) {
       case "clade":
