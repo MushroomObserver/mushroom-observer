@@ -266,12 +266,12 @@ class ProjectsController < ApplicationController
     @project.admin_group = admin_group
     @project.location = location
 
-    if !@project.save
-      flash_object_errors(@project)
-    else
+    if @project.save
       @project.log_create
       flash_notice(:add_project_success.t)
       redirect_to(project_path(@project.id, q: get_query_param))
+    else
+      flash_object_errors(@project)
     end
   end
 end
