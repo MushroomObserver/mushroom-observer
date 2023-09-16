@@ -189,7 +189,7 @@ class MOAutocompleter {
     Object.assign(this, internalOpts);
 
     // not sure how else to make this available here
-    this.autocompleterTypes = autocompleterTypes
+    this.autocompleterTypes = autocompleterTypes;
 
     // Create a unique ID for this instance.
     this.uuid = Object.keys(AUTOCOMPLETERS).length;
@@ -222,7 +222,7 @@ class MOAutocompleter {
   // `handleEvent` is a special function name so the class itself can be a
   // designated event handler.
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-  handleEvent = event => {
+  handleEvent(event) {
     // this is bound to the class here!
     // console.log(this.name);
     switch (event.type) {
