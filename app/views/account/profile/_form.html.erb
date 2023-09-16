@@ -8,8 +8,9 @@
 
   <%= text_field_with_label(form: f, field: :place_name,
                             label: :profile_location.t + ":",
-                            between: "(33%)") %>
-  <% turn_into_location_auto_completer("user_place_name") %>
+                            between: "(33%)",
+                            data: { autocompleter: :location }) %>
+  <%# turn_into_location_auto_completer("user_place_name") %>
 
   <%= text_area_with_label(form: f, field: :notes,
                            label: :profile_notes.t + ":",

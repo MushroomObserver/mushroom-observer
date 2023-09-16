@@ -10,8 +10,9 @@ action = { controller: "/species_lists/observations", action: :update,
                   :species_list_add_remove_body.tp(num: @query.num_results)) %>
 
   <%= text_field_with_label(form: f, field: :species_list, value: @id,
-                            label: :species_list_add_remove_label.t + ":") %>
-  <% turn_into_species_list_auto_completer(:species_list) %>
+                            label: :species_list_add_remove_label.t + ":",
+                            data: { autocompleter: :species_list }) %>
+  <%# turn_into_species_list_auto_completer(:species_list) %>
 
   <div class="form-group center-block">
     <%= submit_button(form: f, button: :ADD.l) %>

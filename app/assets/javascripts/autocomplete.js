@@ -52,76 +52,144 @@ class MOAutocompleter {
     // console.log(JSON.stringify(opts));
     // These are potentially useful parameters the user might want to tweak.
     const defaultOpts = {
-      input_id: null,            // id of text field (after initialization becomes a unique identifier)
-      input_elem: null,            // jQuery element of text field
-      pulldown_class: 'auto_complete', // class of pulldown div
-      hot_class: 'selected',      // class of <li> when highlighted
-      unordered: false,           // ignore order of words when matching
+      // id of text field (after initialization becomes a unique identifier)
+      input_id: null,
+      // JS element of text field
+      input_elem: null,
+      // what type of autocompleter, subclass of AutoComplete
+      type: null,
+      // class of pulldown div
+      pulldown_class: 'auto_complete',
+      // class of <li> when highlighted
+      hot_class: 'selected',
+      // ignore order of words when matching
       // (collapse must be 0 if this is true!)
-      collapse: 0,               // 0 = normal mode
+      unordered: false,
+      // 0 = normal mode
       // 1 = autocomplete first word, then the rest
       // 2 = autocomplete first word, then second word, then the rest
       // N = etc.
-      token: null,            // separator between options
-      primer: null,            // initial list of options (one string per line)
-      update_primer_on_blur: false,          // add each entered value into primer (useful if auto-completing a column of fields)
-      ajax_url: null,            // where to request options from
-      refresh_delay: 0.10,            // how long to wait before sending AJAX request (seconds)
-      hide_delay: 0.25,            // how long to wait before hiding pulldown (seconds)
-      key_delay1: 0.50,            // initial key repeat delay (seconds)
-      key_delay2: 0.03,            // subsequent key repeat delay (seconds)
-      pulldown_size: 10,              // maximum number of options shown at a time
-      page_size: 10,              // amount to move cursor on page up and down
-      max_request_length: 50,              // max length of string to send via AJAX
-      show_errors: false,           // show error messages returned via AJAX?
-      act_like_select: false            // include pulldown-icon on right, and always show all options
+      collapse: 0,
+      // separator between options
+      token: null,
+      // initial list of options (one string per line)
+      primer: null,
+      // add each entered value into primer
+      // (useful if auto-completing a column of fields)
+      update_primer_on_blur: false,
+      // where to request options from
+      ajax_url: null,
+      // how long to wait before sending AJAX request (seconds)
+      refresh_delay: 0.10,
+      // how long to wait before hiding pulldown (seconds)
+      hide_delay: 0.25,
+      // initial key repeat delay (seconds)
+      key_delay1: 0.50,
+      // subsequent key repeat delay (seconds)
+      key_delay2: 0.03,
+      // maximum number of options shown at a time
+      pulldown_size: 10,
+      // amount to move cursor on page up and down
+      page_size: 10,
+      // max length of string to send via AJAX
+      max_request_length: 50,
+      // show error messages returned via AJAX?
+      show_errors: false,
+      // include pulldown-icon on right, and always show all options
+      act_like_select: false
+    }
+
+    // Allowed types of autocompleter
+    // The type will govern the ajax_url and possibly other params
+    const autocompleterTypes = {
+      clade: {
+        ajax_url: "/ajax/auto_complete/name_above_genus/@",
+        collapse: 1
+      },
+      herbarium: { // params[:user_id] handled in controller
+        ajax_url: "/ajax/auto_complete/herbarium/@",
+        unordered: true
+      },
+      location: { // params[:format] handled in controller
+        ajax_url: "/ajax/auto_complete/location/@",
+        unordered: true
+      },
+      name: {
+        ajax_url: "/ajax/auto_complete/name/@",
+        collapse: 1
+      },
+      project: {
+        ajax_url: "/ajax/auto_complete/project/@",
+        unordered: true
+      },
+      species_list: {
+        ajax_url: "/ajax/auto_complete/species_list/@",
+        unordered: true
+      },
+      user: {
+        ajax_url: "/ajax/auto_complete/user/@",
+        unordered: true
+      },
+      year: {
+        // adapt date_select.js replace_date_select_with_text_field
+        // primer: primer.join("\n"),
+        pulldown_size: length,
+        act_like_select: true
+      }
     }
 
     // These are internal state variables the user should leave alone.
     const internalOpts = {
       uuid: null,            // unique id for this object
-      datalist_elem: null,            // jQuery element of datalist
-      pulldown_elem: null,            // jQuery element of pulldown div
-      list_elem: null,            // jQuery element of pulldown ul
-      focused: false,           // is user in text field?
-      menu_up: false,           // is pulldown visible?
-      old_value: {},              // previous value of input field
-      options: '',              // list of all options
-      matches: [],              // list of options currently showing
-      current_row: -1,              // number of option currently highlighted (0 = none)
-      current_value: null,            // value currently highlighted (null = none)
-      current_highlight: -1,              // row of view highlighted (-1 = none)
-      current_width: 0,               // current width of menu
-      scroll_offset: 0,               // scroll offset
-      last_ajax_request: null,            // last ajax request we got results for
-      last_ajax_incomplete: true,            // did we get all the results we requested last time?
-      ajax_request: null,            // ajax request while underway
-      refresh_timer: null,            // timer used to delay update after typing
-      hide_timer: null,            // timer used to delay hiding of pulldown
-      key_timer: null,            // timer used to emulate key repeat
-      do_scrollbar: true,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
-      do_datalist: null,            // implement using <datalist> instead of doing pulldown ourselves
-      row_height: null,            // height of a row in pixels (filled in automatically)
-      scrollbar_width: null             // width of scrollbar (filled in automatically)
+      datalist_elem: null,   // jQuery element of datalist
+      pulldown_elem: null,   // jQuery element of pulldown div
+      list_elem: null,       // jQuery element of pulldown ul
+      focused: false,        // is user in text field?
+      menu_up: false,        // is pulldown visible?
+      old_value: {},         // previous value of input field
+      options: '',           // list of all options
+      matches: [],           // list of options currently showing
+      current_row: -1,       // number of option currently highlighted (0 = none)
+      current_value: null,   // value currently highlighted (null = none)
+      current_highlight: -1, // row of view highlighted (-1 = none)
+      current_width: 0,      // current width of menu
+      scroll_offset: 0,      // scroll offset
+      last_ajax_request: null, // last ajax request we got results for
+      last_ajax_incomplete: true, // did we get all the results we requested?
+      ajax_request: null,    // ajax request while underway
+      refresh_timer: null,   // timer used to delay update after typing
+      hide_timer: null,      // timer used to delay hiding of pulldown
+      key_timer: null,       // timer used to emulate key repeat
+      do_scrollbar: true,    // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+      do_datalist: null,     // implement using <datalist> instead of doing pulldown ourselves
+      row_height: null,      // height of a row in pixels (filled in automatically)
+      scrollbar_width: null  // width of scrollbar (filled in automatically)
     }
 
     Object.assign(this, defaultOpts);
+    // Assign ajax_url and a couple other options based on type.
+    // Let passed options override defaults and autocompleterTypes defaults
+    // Main option passed is token (item separator) via data-autocomplete-separator
     Object.assign(this, opts);
-    Object.assign(this, internalOpts);
-
-    // Check if browser can handle doing scrollbar.
-    // this.do_scrollbar = true;
 
     // Get the DOM element of the input field.
-    if (!this.input_elem) {
-      // document.onDOMContentLoaded = (event) => (
-      this.input_elem = document.getElementById(this.input_id)
-      // );
-    }
-    // If we still don't have one, alert the programmer
-    if (!this.input_elem) {
+    if (!this.input_elem)
+      this.input_elem = document.getElementById(this.input_id);
+    if (!this.input_elem)
       alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
-    }
+
+    // console.log(this.input_elem.dataset)
+    this.type = this.input_elem.dataset.autocompleter;
+    // Check if browser can handle doing scrollbar.
+    // this.do_scrollbar = true;
+    if (!autocompleterTypes.hasOwnProperty(this.type))
+      alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+
+    Object.assign(this, autocompleterTypes[this.type]);
+    Object.assign(this, internalOpts);
+
+    // not sure how else to make this available here
+    this.autocompleterTypes = autocompleterTypes
 
     // Create a unique ID for this instance.
     this.uuid = Object.keys(AUTOCOMPLETERS).length;
@@ -141,28 +209,59 @@ class MOAutocompleter {
     }
 
     // Attach events, etc. to input element.
-    this.prepare_input_element(this.input_elem);
+    if (this.type == "year") {
+      this.prepare_year_input_element(this.input_elem)
+    } else {
+      this.prepare_input_element(this.input_elem);
+    }
 
     // Keep catalog of autocompleter objects so we can reuse them as needed.
     AUTOCOMPLETERS[this.uuid] = this;
   }
 
-  // Prepare another input element to share an existing autocompleter instance.
-  reuse(other_elem) {
-    if (typeof other_elem == "string")
-      other_elem = getElementById(other_elem);
-    this.prepare_input_element(other_elem);
+  // `handleEvent` is a special function name so the class itself can be a
+  // designated event handler.
+  // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+  handleEvent = event => {
+    // this is bound to the class here!
+    // console.log(this.name);
+    switch (event.type) {
+      case "focus":
+        this.our_focus(event);
+        break;
+      case "click":
+        this.our_click(event);
+        break;
+      case "blur":
+        this.our_blur(event);
+        break;
+      case "keydown":
+        this.our_keydown(event);
+        break;
+      case "keyup":
+        this.our_keyup(event);
+        break;
+      case "change":
+        this.our_change(event);
+        break;
+      case "beforeunload":
+        this.our_unload(event);
+        break;
+    }
   }
 
-  // Move/attach this autocompleter to a new field.
-  switch_inputs(event, elem) {
-    // converted from jQuery input_elem.is(elem)
-    if (!this.input_elem === elem) {
-      this.uuid = elem.dataset.uuid;
-      this.input_elem = elem;
-      this.input_elem.insertAdjacentHTML("afterend", this.pulldown_elem);
+  // To swap out autocompleter properties, send a type
+  swap(type, opts) {
+    if (!this.autocompleterTypes.hasOwnProperty(type)) {
+      alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+    } else {
+      this.type = type;
+      this.input_elem.setAttribute("data-autocompleter", type)
+      // add dependent properties and allow overrides
+      Object.assign(this, this.autocompleterTypes[this.type]);
+      Object.assign(this, opts);
+      this.prepare_input_element(this.input_elem);
     }
-    this.our_focus(event);
   }
 
   // Prepare input element: attach elements, set properties.
@@ -170,43 +269,67 @@ class MOAutocompleter {
     // console.log(elem)
     const id = elem.getAttribute("id");
 
-    // (something to do with scope of closures below)
-    const this2 = this;
-
     this.old_value[id] = null;
 
-    // Stimulus - these can be actions on the input
     // Attach events if we aren't using datalist thingy.
-    if (!this.do_datalist) {
-      elem.addEventListener("focus", function (event) {
-        return this2.switch_inputs(event, elem)
-      });
-      elem.addEventListener("click", function (event) {
-        return this2.our_click(event)
-      });
-      elem.addEventListener("blur", function (event) {
-        return this2.our_blur(event)
-      });
-      elem.addEventListener("keydown", function (event) {
-        return this2.our_keydown(event)
-      });
-      elem.addEventListener("keyup", function (event) {
-        return this2.our_keyup(event)
-      });
-      elem.addEventListener("keypress", function (event) {
-        return this2.our_keypress(event)
-      });
-      elem.addEventListener("change", function (event) {
-        return this2.our_change(false)
-      });
-      // Turbo: check this. May need to be turbo.before_render or before_visit
-      window.addEventListener("beforeunload", function (event) {
-        return this2.our_unload()
-      });
-    }
+    if (!this.do_datalist) this.add_event_listeners(elem);
 
     // Disable default browser autocomplete. Stimulus - do this on HTML element
     elem.setAttribute("autocomplete", "off");
+    // sanity check to show which autocompleter is currently on the element
+    elem.setAttribute("data-ajax-url", this.ajax_url);
+  }
+
+  prepare_year_input_element(old_elem) {
+    const id = old_elem.getAttribute("id"),
+      name = old_elem.getAttribute("name"),
+      klass = old_elem.getAttribute("class"),
+      style = old_elem.getAttribute("style"),
+      value = old_elem.value,
+      opts = old_elem[0].options,
+      length = opts.length > 20 ? 20 : opts.length,
+      primer = [],
+      new_elem = document.createElement("input");
+    new_elem.type = "text";
+
+    for (let i = 0; i < opts.length; i++)
+      primer.push(opts.item(i).text);
+
+    new_elem.setAttribute("class", klass);
+    new_elem.style = style;
+    new_elem.value = value;
+    new_elem.setAttribute("size", 4);
+
+    // Not sure if this works yet...
+    if (old_elem[0].onchange)
+      new_elem.onchange = old_elem[0].onchange;
+
+    old_elem.replaceWith(new_elem);
+    new_elem.setAttribute("id", id);
+    new_elem.setAttribute("name", name);
+
+    this.input_elem = new_elem,
+      this.primer = primer.join("\n"),
+      this.pulldown_size = length,
+      this.act_like_select = true
+
+    this.add_event_listeners(new_elem);
+  }
+
+  // NOTE: `this` within an event listener function refers to the element
+  // (the eventTarget) -- unless you pass an arrow function as the listener.
+  // But writing a specially named function handleEvent() allows this:
+  add_event_listeners(elem) {
+    // Stimulus - data-actions on the input can route events to actions here
+    elem.addEventListener("focus", this);
+    elem.addEventListener("click", this);
+    elem.addEventListener("blur", this);
+    elem.addEventListener("keydown", this);
+    elem.addEventListener("keyup", this);
+    elem.addEventListener("keypress", this);
+    elem.addEventListener("change", this);
+    // Turbo: check this. May need to be turbo.before_render or before_visit
+    window.addEventListener("beforeunload", this);
   }
 
   // ------------------------------ Events ------------------------------

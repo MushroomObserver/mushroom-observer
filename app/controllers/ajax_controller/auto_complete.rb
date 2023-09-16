@@ -21,6 +21,17 @@ module AjaxController::AutoComplete
   private
 
   def auto_complete_results(string)
+    # handle user location format preference
+    if(@type == "location")
+      params[:format] = if @user && @user.location_format == "scientific"
+                          "scientific"
+                        else
+                          ""
+                        end
+    elsif(@type == "herbarium")
+      params[:user_id] = @user&.id || nil
+    end
+
     ::AutoComplete.subclass(@type).new(string, params).
       matching_strings.join("\n") + "\n"
   end

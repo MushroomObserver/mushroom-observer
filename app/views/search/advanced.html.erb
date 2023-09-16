@@ -25,20 +25,26 @@
 
   <% nam_betw = help_note(:span, :advanced_search_name_help.t) %>
   <%= text_field_with_label(form: f, field: :name,
-                            label: :NAME.t + ":", between: nam_betw) %>
-  <% turn_into_name_auto_completer(:search_name, primer: Name.primer,
+                            label: :NAME.t + ":", between: nam_betw,
+                            data: { autocompleter: :name,
+                                    autocomplete_separator: " OR " }) %>
+  <%# turn_into_name_auto_completer(:search_name, primer: Name.primer,
                                     token: " OR ") %>
 
   <% usr_betw = help_note(:span, :advanced_search_observer_help.t) %>
   <%= text_field_with_label(form: f, field: :user,
-                            label: :OBSERVER.t + ":", between: usr_betw) %>
-  <% turn_into_user_auto_completer(:search_user, primer: User.primer,
+                            label: :OBSERVER.t + ":", between: usr_betw,
+                            data: { autocompleter: :user,
+                                    autocomplete_separator: " OR " }) %>
+  <%# turn_into_user_auto_completer(:search_user, primer: User.primer,
                                     token: " OR ") %>
 
   <% loc_betw = help_note(:span, :advanced_search_location_help.t) %>
   <%= text_field_with_label(form: f, field: :location,
-                            label: :LOCATION.t + ":", between: loc_betw) %>
-  <% turn_into_location_auto_completer(:search_location,
+                            label: :LOCATION.t + ":", between: loc_betw,
+                            data: { autocompleter: :location,
+                                    autocomplete_separator: " OR " }) %>
+  <%# turn_into_location_auto_completer(:search_location,
                                         primer: Location.primer,
                                         token: " OR ") %>
 

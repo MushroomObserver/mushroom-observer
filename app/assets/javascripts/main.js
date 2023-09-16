@@ -75,3 +75,17 @@ jQuery(document).ready(function () {
   // Update lazy loads
   lazyLoadInstance.update();
 });
+
+window.onload = (event) => {
+  autocompleters = document.querySelectorAll('[data-autocompleter]');
+
+  autocompleters.forEach(element => {
+    // element will have "data-ajax-url" if initialized
+    if (!element.hasAttribute("data-ajax-url") && element.hasAttribute("id")) {
+      new MOAutocompleter({
+        input_id: element.getAttribute("id"),
+        token: element.dataset.autocomplete_separator
+      });
+    }
+  });
+}

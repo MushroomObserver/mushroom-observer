@@ -4,16 +4,19 @@
 %>
 
 <%= form_with(url: "", id: "ur_clade_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_clade", value: "", size: 40, class: "") %>
-  <% turn_into_clade_auto_completer(:ur_clade) %>
+  <%= f.hidden_field("ur_clade", value: "", size: 40, class: "",
+                      data: { autocompleter: :clade }) %>
+  <%# turn_into_clade_auto_completer(:ur_clade) %>
 <% end %>
 
 <%= form_with(url: "", id: "ur_location_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_location", value: "", size: 40, class: "") %>
-  <% turn_into_location_auto_completer(:ur_location) %>
+  <%= f.hidden_field("ur_location", value: "", size: 40, class: "",
+                      data: { autocompleter: :location }) %>
+  <%# turn_into_location_auto_completer(:ur_location) %>
 <% end %>
 
 <%= form_with(url: "", id: "ur_user_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_user", value: "", size: 40, class: "") %>
-  <% turn_into_user_auto_completer(:ur_user) %>
+  <%= f.hidden_field("ur_user", value: "", size: 40, class: "",
+                      data: { autocompleter: :user }) %>
+  <%# turn_into_user_auto_completer(:ur_user) %>
 <% end %>

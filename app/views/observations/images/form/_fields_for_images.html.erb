@@ -9,8 +9,9 @@
 <div class="form-group form-inline">
   <%= f.label(:when_1i, :WHEN.t + ":") %>
   <%= f.date_select(:when, date_select_opts(@image),
-                    { class: "form-control" }) %>
-  <% turn_into_year_auto_completer(:image_when_1i) %>
+                    { class: "form-control",
+                      data: { autocompleter: :year } }) %>
+  <%# turn_into_year_auto_completer(:image_when_1i) %>
   <%= help_block(:p, :form_images_when_help.t) %>
 </div>
 
