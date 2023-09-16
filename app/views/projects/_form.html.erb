@@ -12,9 +12,12 @@
                             label: :form_projects_title.t + ":",
                             data: { autofocus: true }) %>
 
-  <%= text_area_with_label(form: f, field: :summary, rows: 20,
+  <%= text_area_with_label(form: f, field: :summary, rows: 5,
                            label: :SUMMARY.t + ":") %>
 
   <%= render(partial: "shared/textilize_help") %>
+
+  <%= text_field_with_label(form: f, field: :where,
+                            label: :form_projects_where.t + ":") %>
 
 <% end %>

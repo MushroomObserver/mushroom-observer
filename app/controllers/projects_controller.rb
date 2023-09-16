@@ -252,7 +252,7 @@ class ProjectsController < ApplicationController
 
   def find_location(where)
     location = Location.find_by_name_or_reverse_name(where)
-    return location if location || !where
+    return location if location || where == ""
 
     flash_warning(:add_project_no_location.t(where: where))
     nil
@@ -262,21 +262,22 @@ class ProjectsController < ApplicationController
     user_group = create_members_group(title)
     admin_group = create_admin_group(admin_name)
     location = find_location(where)
-    return unless user_group && admin_group && (location || !where)
+    if user_group && admin_group && (location || !where)
+      @project = Project.new(project_create_params)
+      @project.user = @user
+      @project.user_group = user_group
+      @project.admin_group = admin_group
+      @project.location = location
 
-    # Create project.
-    @project = Project.new(project_create_params)
-    @project.user = @user
-    @project.user_group = user_group
-    @project.admin_group = admin_group
-    @project.location = location
-
-    if @project.save
-      @project.log_create
-      flash_notice(:add_project_success.t)
-      redirect_to(project_path(@project.id, q: get_query_param))
-    else
-      flash_object_errors(@project)
+      if @project.save
+        @project.log_create
+        flash_notice(:add_project_success.t)
+        redirect_to(project_path(@project.id, q: get_query_param))
+        return
+      else
+        flash_object_errors(@project)
+      end
     end
+    render(:new, location: new_project_path(q: get_query_param))
   end
 end
