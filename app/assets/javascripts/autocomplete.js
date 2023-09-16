@@ -4,10 +4,15 @@ var AUTOCOMPLETERS = {};
 //
 // Most autocompletes make a server request whenever the input changes, and the
 // server returns a small amount of data matching the string typed thus far.
+//
 // MOAutocompleter makes a request at the very first letter, and our server
 // returns *the first 1000 entries* corresponding to that letter.
 // MOAutocompleter stores that as an array in JS, and consults **it**, rather
 // than the server, to refine the results presented.
+//
+// Using a JS `class` not a `module` here because autocompleters may be
+// instantiated multiple times on the same page.
+// https://dev.to/giantmachines/stop-using-javascript-classes-33ij
 //
 // How to Use:
 //   <input type="text_field" id="field"/>
