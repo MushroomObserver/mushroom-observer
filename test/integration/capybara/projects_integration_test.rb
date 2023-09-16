@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-# Test adding, editing, and deleting a Sequence
+# Test relating to projects
 class ProjectsIntegrationTest < CapybaraIntegrationTestCase
-  def test_sequence
+  def test_add_project
     login(mary)
     title = "Super Grandiloquent National Fungal Foray"
 
