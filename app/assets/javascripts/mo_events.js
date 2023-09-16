@@ -13,20 +13,43 @@ class MOEvents {
     $("#mo_ajax_progress").modal('show');
   }
 
-  static rebindAutoComplete(type) {
+  static swapFilterAutoComplete(type) {
     // console.log(type)
     // var type = this.value
+    // Each autocompleter has a data-uuid that corresponds to its array index
+    // in AUTOCOMPLETERS
     const filter_term = document.getElementById("filter_term");
-    const ur_clade_i = document.getElementById('ur_clade').dataset.uuid
-    const ur_location_i = document.getElementById('ur_location').dataset.uuid
-    const ur_user_i = document.getElementById('ur_user').dataset.uuid
+    // const ur_clade = document.getElementById('ur_clade');
+    // const ur_location = document.getElementById('ur_location');
+    // const ur_user = document.getElementById('ur_user');
+
+    AUTOCOMPLETERS[filter_term.dataset.uuid].remove_listeners();
+
     switch (type) {
       case "clade":
-        AUTOCOMPLETERS[ur_clade_i].reuse_for(filter_term)
+        AUTOCOMPLETERS[filter_term.dataset.uuid].swap("clade");
+        // new MOAutocompleter({
+        //   input_id: "filter_term",
+        //   ajax_url: "/ajax/auto_complete/name_above_genus/@",
+        //   collapse: 1
+        // });
+        break;
       case "region":
-        AUTOCOMPLETERS[ur_location_i].reuse_for(filter_term)
+        AUTOCOMPLETERS[filter_term.dataset.uuid].swap("location");
+        // new MOAutocompleter({
+        //   input_id: "filter_term",
+        //   ajax_url: "/ajax/auto_complete/location/@",
+        //   collapse: 1
+        // });
+        break;
       case "user":
-        AUTOCOMPLETERS[ur_user_i].reuse_for(filter_term)
+        AUTOCOMPLETERS[filter_term.dataset.uuid].swap("user");
+        // new MOAutocompleter({
+        //   input_id: "filter_term",
+        //   ajax_url: "/ajax/auto_complete/user/@",
+        //   collapse: 1
+        // });
+        break;
     }
   }
 }

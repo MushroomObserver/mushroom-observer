@@ -4,6 +4,7 @@
 %>
 
 <%= form_with(url: "", id: "ur_name_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_name", value: "", size: 40, class: "") %>
-  <% turn_into_name_auto_completer(:ur_name, primer: Name.primer) %>
+  <%= f.hidden_field("ur_name", value: "", size: 40, class: "",
+                      data: { autocompleter: :name }) %>
+  <%# turn_into_name_auto_completer(:ur_name, primer: Name.primer) %>
 <% end %>

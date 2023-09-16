@@ -57,6 +57,7 @@ class AjaxController < ApplicationController
     @type  = params[:type].to_s
     @id    = params[:id].to_s
     @value = params[:value].to_s
+    @user  = session_user!
   end
 
   def backtrace(exception)

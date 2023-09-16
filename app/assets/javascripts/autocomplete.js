@@ -49,9 +49,11 @@ var AUTOCOMPLETERS = {};
 const MOAutocompleter = function (opts) {
   // console.log(JSON.stringify(opts));
   // These are potentially useful parameters the user might want to tweak.
+
   const defaultOpts = {
     input_id: null,            // id of text field (after initialization becomes a unique identifier)
     input_elem: null,            // jQuery element of text field
+    type: null,                  // what type of autocompleter, subclass of AutoComplete
     pulldown_class: 'auto_complete', // class of pulldown div
     hot_class: 'selected',      // class of <li> when highlighted
     unordered: false,           // ignore order of words when matching
@@ -73,6 +75,38 @@ const MOAutocompleter = function (opts) {
     max_request_length: 50,              // max length of string to send via AJAX
     show_errors: false,           // show error messages returned via AJAX?
     act_like_select: false            // include pulldown-icon on right, and always show all options
+  }
+
+  // Allowed types of autocompleter
+  // The type will govern the ajax_url and possibly other params
+  const autocompleterTypes = {
+    name: {
+      ajax_url: "/ajax/auto_complete/name/@",
+      collapse: 1
+    },
+    clade: {
+      ajax_url: "/ajax/auto_complete/name_above_genus/@",
+      collapse: 1
+    },
+    location: { // params[:format] handled in controller
+      ajax_url: "/ajax/auto_complete/location/@",
+      unordered: true
+    },
+    project: {
+      ajax_url: "/ajax/auto_complete/project/@",
+      unordered: true
+    },
+    species_list: {
+      ajax_url: "/ajax/auto_complete/species_list/@",
+      unordered: true
+    },
+    herbarium: { // params[:user_id] handled in controller
+      ajax_url: "/ajax/auto_complete/herbarium/@",
+      unordered: true
+    },
+    year: {
+      // adapt date_select.js replace_date_select_with_text_field
+    }
   }
 
   // These are internal state variables the user should leave alone.
@@ -104,17 +138,27 @@ const MOAutocompleter = function (opts) {
   }
 
   Object.assign(this, defaultOpts);
+  // Assign ajax_url and a couple other options based on type.
+  // Let passed options override defaults and autocompleterTypes defaults
+  // Main option passed is token (item separator) via data-autocomplete-separator
   Object.assign(this, opts);
-  Object.assign(this, internalOpts);
-
-  // Check if browser can handle doing scrollbar.
-  // this.do_scrollbar = true;
 
   // Get the DOM element of the input field.
   if (!this.input_elem)
     this.input_elem = document.getElementById(this.input_id);
   if (!this.input_elem)
     alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
+
+  // console.log(this.input_elem.dataset)
+  this.type = this.input_elem.dataset.autocompleter;
+  // Check if browser can handle doing scrollbar.
+  // this.do_scrollbar = true;
+  if (!autocompleterTypes.hasOwnProperty(this.type))
+    alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+
+  Object.assign(this, autocompleterTypes[this.type]);
+  Object.assign(this, internalOpts);
+
 
   // Create a unique ID for this instance.
   this.uuid = Object.keys(AUTOCOMPLETERS).length;
@@ -142,69 +186,116 @@ const MOAutocompleter = function (opts) {
 
 Object.assign(MOAutocompleter.prototype, {
 
-  // Prepare another input element to share an existing autocompleter instance.
-  reuse_for: function (other_elem) {
-    if (typeof other_elem == "string")
-      other_elem = getElementById(other_elem);
-    this.prepare_input_element(other_elem);
+  // `handleEvent` is a special function name so the class itself can be a
+  // designated event handler.
+  // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+  handleEvent: function (event) {
+    // this is bound to the class here!
+    // console.log(this.name);
+    switch (event.type) {
+      case "focus":
+        this.our_focus(event);
+        break;
+      case "click":
+        this.our_click(event);
+        break;
+      case "blur":
+        this.our_blur(event);
+        break;
+      case "keydown":
+        this.our_keydown(event);
+        break;
+      case "keyup":
+        this.our_keyup(event);
+        break;
+      case "change":
+        this.our_change(event);
+        break;
+      case "beforeunload":
+        this.our_unload(event);
+        break;
+    }
   },
 
-  // Move/attach this autocompleter to a new field.
-  switch_inputs: function (event, elem) {
-    // converted from jQuery input_elem.is(elem)
-    console.log(this.input_elem);
-    console.log(elem);
-    console.log(this.input_elem === elem);
-    if (!this.input_elem === elem) {
-      this.uuid = elem.dataset.uuid;
-      this.input_elem = elem;
-      this.input_elem.insertAdjacentHTML("afterend", this.pulldown_elem);
+  // remove_listeners: function () {
+  //   this.input_elem.removeEventListener("focus", this);
+  //   this.input_elem.removeEventListener("click", this);
+  //   this.input_elem.removeEventListener("blur", this);
+  //   this.input_elem.removeEventListener("keydown", this);
+  //   this.input_elem.removeEventListener("keyup", this);
+  //   this.input_elem.removeEventListener("keypress", this);
+  //   this.input_elem.removeEventListener("change", this);
+  //   window.removeEventListener("beforeunload", this);
+  // },
+
+  // To swap out autocompleter properties, send a type
+  swap: function (type, opts) {
+    if (!this.autocompleterTypes.hasOwnProperty(type)) {
+      alert("MOAutocompleter: Invalid type: \"" + this.type + "\"");
+    } else {
+      this.type = type;
+      this.input_elem.setAttribute("data-autocompleter", type)
+      // add dependent properties and allow overrides
+      Object.assign(this, this.autocompleterTypes[this.type]);
+      Object.assign(this, opts);
+      this.prepare_input_element(this.input_elem);
     }
-    this.our_focus(event);
   },
+
+  // Prepare another input element to share an existing autocompleter instance.
+  // reuse_for: function (other_elem) {
+  //   console.log(this.input_id)
+  //   console.log(this.ajax_url)
+  //   if (typeof other_elem == "string")
+  //     other_elem = getElementById(other_elem);
+  //   this.switch_inputs(other_elem);
+  //   console.log(this)
+  //   this.prepare_input_element(this.input_elem);
+  // },
+
+  // Move/attach this autocompleter to a new field.
+  // switch_inputs: function (other_elem) {
+  //   // converted from jQuery input_elem.is(other_elem)
+  //   console.log(this.input_elem);
+  //   console.log(other_elem);
+  //   console.log(this.input_elem === other_elem);
+
+  //   if (!this.input_elem === other_elem) {
+  //     this.uuid = other_elem.dataset.uuid;
+  //     this.input_elem = other_elem;
+  //     this.input_elem.insertAdjacentHTML("afterend", this.pulldown_elem);
+  //   }
+  // },
 
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function (elem) {
     // console.log(elem)
     const id = elem.getAttribute("id");
 
-    // (something to do with scope of closures below)
-    const this2 = this;
+    // NOTE: `this` within an event listener function refers to the element
+    // (the eventTarget) -- unless you pass an arrow function as the listener.
+    // const this2 = this;
 
     this.old_value[id] = null;
 
     // Stimulus - these can be actions on the input
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
-      elem.addEventListener("focus", function (event) {
-        this2.switch_inputs(event, elem)
-      });
-      elem.addEventListener("click", function (event) {
-        this2.our_click(event)
-      });
-      elem.addEventListener("blur", function (event) {
-        this2.our_blur(event)
-      });
-      elem.addEventListener("keydown", function (event) {
-        this2.our_keydown(event)
-      });
-      elem.addEventListener("keyup", function (event) {
-        this2.our_keyup(event)
-      });
-      elem.addEventListener("keypress", function (event) {
-        this2.our_keypress(event)
-      });
-      elem.addEventListener("change", function (event) {
-        this2.our_change(false)
-      });
+      elem.addEventListener("focus", this);
+      elem.addEventListener("click", this);
+      elem.addEventListener("blur", this);
+      elem.addEventListener("keydown", this);
+      elem.addEventListener("keyup", this);
+      elem.addEventListener("keypress", this);
+      elem.addEventListener("change", this);
       // Turbo: check this. May need to be turbo.before_render or before_visit
-      window.addEventListener("beforeunload", function (event) {
-        this2.our_unload()
-      });
+      window.addEventListener("beforeunload", this);
     }
 
     // Disable default browser autocomplete. Stimulus - do this on HTML element
     elem.setAttribute("autocomplete", "off");
+    // sanity check to show which autocompleter is currently on the element
+    elem.setAttribute("data-ajax-url", this.ajax_url);
   },
 
   // ------------------------------ Events ------------------------------

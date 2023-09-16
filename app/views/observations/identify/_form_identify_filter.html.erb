@@ -35,18 +35,19 @@ options = [
 
   <%= f.select(:type, options, { selected: selected },
                { class: "form-control",
-                 onchange: "MOEvents.rebindAutoComplete(this.value);" }) %>
+                 data: { autocompleter: :clade },
+                 onchange: "MOEvents.swapFilterAutoComplete(this.value);" }) %>
 
   <%= f.submit(:SEARCH.l, class: "btn btn-default") %>
 
   <%= f.submit(:CLEAR.l, class: "btn btn-default") %>
 
-  <% turn_into_clade_auto_completer(:filter_term) %>
+  <%# turn_into_clade_auto_completer(:filter_term) %>
 
   <%# initializes module with translations for js messages
   # inject_javascript_at_end %(
   #   document.getElementById("filter_term").onchange = function() {
-  #     MOEvents.rebindAutoComplete(this.value)
+  #     MOEvents.swapFilterAutoComplete(this.value)
   #   }
   # ) %>
 
