@@ -386,6 +386,7 @@
   specimens: specimens
   SUPPORT: Support
   support: support
+  TEST_PAGES: Test Pages
   THEME: Theme
   TRANSLATION: Translation
   translation: translation
