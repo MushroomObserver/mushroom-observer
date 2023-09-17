@@ -264,6 +264,7 @@ class AutoCompleteUser < AutoCompleteByString
   end
 end
 
+# Note this gets a params[:user_id] but we're ignoring it here
 class AutoCompleteHerbarium < AutoCompleteByWord
   def rough_matches(letter)
     # herbaria =
@@ -283,7 +284,10 @@ class AutoCompleteHerbarium < AutoCompleteByWord
       where(Herbarium[:name].matches("#{letter}%").
         or(Herbarium[:name].matches("% #{letter}%")).
         or(Herbarium[:code].matches("#{letter}%"))).
-      order(name: :asc, id: :asc).pluck(:code, :name, :id)
+      order(
+        Arel.when(Herbarium[:code].is_null).then(Herbarium[:name]).
+             else(Herbarium[:code]).asc, Herbarium[:name].asc
+      ).pluck(:code, :name, :id)
 
     herbaria.map do |code, name, id|
       text = code.empty? ? name : "#{code} - #{name}"
