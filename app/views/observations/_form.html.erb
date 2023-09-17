@@ -47,7 +47,7 @@
   <% end %>
 
   <% if @projects.any? %>
-    <%= render(partial: "observations/form/projects", locals: { f: f }) %>
+    <%= render(partial: "observations/form/projects", locals: { f: f, button_name: button_name }) %>
   <% end %>
 
   <% if @lists.any? %>

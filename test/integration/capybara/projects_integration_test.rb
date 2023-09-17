@@ -39,5 +39,14 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
+    assert_selector(
+      "#project_messages",
+      text: :form_observations_projects_out_of_range.t(
+        date: Time.zone.today # Observation.date
+      ).strip_html
+    )
+    assert_selector("#project_messages", text: proj.title)
+    assert_selector("#project_messages", text: proj.start_date)
+    assert_selector("#project_messages", text: proj.end_date)
   end
 end

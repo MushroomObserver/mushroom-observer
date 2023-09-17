@@ -1629,6 +1629,9 @@
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
   form_observations_there_is_a_problem_with_projects: There is a problem with Projects. "+See message below.+":#project_messages
+  form_observations_projects_out_of_range: "The Observation date ([date]) is outside the range of these checked Project(s)"
+  form_observations_projects_out_of_range_help: "Either: uncheck out-of-range Projects; \nchange the Observation date if it is incorrect; \nor (undesirably) do nothing to ignore the Project date range. \nThen click [button]."
+
 
   # observations/_form_species_list
   form_species_lists_title: Title

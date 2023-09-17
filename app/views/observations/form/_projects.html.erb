@@ -1,6 +1,16 @@
 <%# Projects section of create_observation form %>
   <% if @suspect_checked_projects.any? %>
     <% flash_error(:form_observations_there_is_a_problem_with_projects.t) %>
+
+    <div class="alert alert-danger" id="project_messages">
+      <p><%= :form_observations_projects_out_of_range.t(date: @observation.when) %>:</p>
+
+      <% @suspect_checked_projects.each do |proj| %>
+      <%= "#{proj.title} #{proj.start_date}-#{proj.end_date}" %><br/>
+      <% end %>
+
+      <p><%= :form_observations_projects_out_of_range_help.t(button_name: button_name)%></p>
+    </div>
   <% end %>
 
 <div class="mt-3 row" id="observation_projects">
