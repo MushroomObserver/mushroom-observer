@@ -10,6 +10,8 @@ module AjaxController::AutoComplete
   # type:: Type of string.
   # id::   String user has entered.
   def auto_complete
+    @user = User.current
+
     string = CGI.unescape(@id).strip_squeeze
     if string.blank?
       render(plain: "\n\n")
@@ -21,15 +23,15 @@ module AjaxController::AutoComplete
   private
 
   def auto_complete_results(string)
-    # handle user location format preference
-    if(@type == "location")
-      params[:format] = if @user && @user.location_format == "scientific"
+    case @type
+    when "location"
+      params[:format] = if @user&.location_format == "scientific"
                           "scientific"
                         else
                           ""
                         end
-    elsif(@type == "herbarium")
-      params[:user_id] = @user&.id || nil
+    when "herbarium"
+      params[:user_id] = @user&.id
     end
 
     ::AutoComplete.subclass(@type).new(string, params).
