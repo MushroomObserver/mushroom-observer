@@ -199,7 +199,7 @@ module ObservationsController::NewAndCreate
     return true if params[:project].empty?
 
     @suspect_checked_projects = checked_out_of_range_projects
-    false
+    @suspect_checked_projects.empty?
   end
 
   def checked_out_of_range_projects
