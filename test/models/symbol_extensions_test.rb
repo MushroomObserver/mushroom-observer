@@ -119,4 +119,10 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal(:AB, :aB.upcase_first)
     assert_equal(:Abc, :abc.upcase_first)
   end
+
+  def test_never_add
+    assert_equal("[:never_add]", :never_add.t)
+    assert_equal("[:never_add(an_arg=:arg)]", :never_add.t(an_arg: :arg))
+    Symbol.missing_tags = []
+  end
 end
