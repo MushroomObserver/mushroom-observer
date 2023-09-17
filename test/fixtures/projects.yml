@@ -119,7 +119,7 @@ past_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-  end_date: 2023-04-27
+  end_date: <%= Time.zone.today - 1.month %>
 
 future_project:
   <<: *DEFAULTS
@@ -130,7 +130,7 @@ future_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-  start_date: <%= Date.tomorrow %>
+  start_date: <%= Time.zone.tomorrow%>
 
 current_project:
   <<: *DEFAULTS
@@ -141,4 +141,4 @@ current_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-  end_date: <%= Date.tomorrow %>
+  end_date: <%= Time.zone.tomorrow %>
