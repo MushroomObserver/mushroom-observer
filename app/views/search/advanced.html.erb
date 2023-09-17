@@ -24,29 +24,23 @@
                         between: mod_betw) %>
 
   <% nam_betw = help_note(:span, :advanced_search_name_help.t) %>
-  <%= text_field_with_label(form: f, field: :name,
+  <%= text_field_with_label(form: f, field: :name, placeholder: :start_typing.l,
                             label: :NAME.t + ":", between: nam_betw,
                             data: { autocompleter: :name,
                                     autocomplete_separator: " OR " }) %>
-  <%# turn_into_name_auto_completer(:search_name, primer: Name.primer,
-                                    token: " OR ") %>
 
   <% usr_betw = help_note(:span, :advanced_search_observer_help.t) %>
-  <%= text_field_with_label(form: f, field: :user,
+  <%= text_field_with_label(form: f, field: :user, placeholder: :start_typing.l,
                             label: :OBSERVER.t + ":", between: usr_betw,
                             data: { autocompleter: :user,
                                     autocomplete_separator: " OR " }) %>
-  <%# turn_into_user_auto_completer(:search_user, primer: User.primer,
-                                    token: " OR ") %>
 
   <% loc_betw = help_note(:span, :advanced_search_location_help.t) %>
   <%= text_field_with_label(form: f, field: :location,
+                            placeholder: :start_typing.l,
                             label: :LOCATION.t + ":", between: loc_betw,
                             data: { autocompleter: :location,
                                     autocomplete_separator: " OR " }) %>
-  <%# turn_into_location_auto_completer(:search_location,
-                                        primer: Location.primer,
-                                        token: " OR ") %>
 
   <% cnt_betw = help_note(:span, :advanced_search_content_help.t) %>
   <% cnt_appd = help_block(:p, :advanced_search_content_notes.t) %>

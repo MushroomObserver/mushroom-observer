@@ -15,7 +15,7 @@ class MOEvents {
 
   static swapFilterAutoComplete(type) {
     // console.log(type)
-    // var type = this.value
+
     // Each autocompleter has a data-uuid that corresponds to its array index
     // in AUTOCOMPLETERS
     const filter_term = document.getElementById("filter_term");

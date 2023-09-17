@@ -44,11 +44,8 @@
         <%= fgi.date_select(:when,
               date_select_opts(image).merge(index: image.id),
               { class: "form-control form-control-sm",
-                onchange: "CHANGED_DATES[#{image.id}] = true"},
-                data: { autocompleter: :year }) %>
-        <%# turn_into_year_auto_completer(
-              "good_image_#{image.id}_when_1i"
-            ) %>
+                onchange: "CHANGED_DATES[#{image.id}] = true",
+                data: { autocompleter: :year } }) %>
       </div>
     </td>
   </tr>

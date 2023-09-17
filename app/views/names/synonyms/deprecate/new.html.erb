@@ -24,12 +24,12 @@ feedback_locals = {
              locals: feedback_locals.merge({ f: f })) if @what.present? %>
 
   <%= text_field_with_label(
-        form: f, field: :proposed_name, inline: true, value: @what,
+        form: f, field: :proposed_name, inline: true,
+        value: @what, placeholder: :start_typing.l,
         label: "#{:name_deprecate_preferred.t}:",
         append: help_note(:div, :name_deprecate_preferred_help.tp),
         data: { autofocus: true, autocompleter: :name }
       ) %>
-  <%# turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
 
   <%= check_box_with_label(form: f, field: :is_misspelling,
                            checked: @misspelling,

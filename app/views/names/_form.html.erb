@@ -75,13 +75,12 @@ statuses = [[:ACCEPTED.t, false], [:DEPRECATED.t, true]]
                                checked: @misspelling,
                                label: :form_names_misspelling.t) %>
       <%= text_field_with_label(
-            form: f, field: :correct_spelling, value: @correct_spelling,
+            form: f, field: :correct_spelling,
+            value: @correct_spelling, placeholder: :start_typing.l,
             label: :form_names_misspelling_it_should_be.t + ":",
             append: help_block(:p, :form_names_misspelling_note.t),
             data: { autocompleter: :name }
           ) %>
-      <%# turn_into_name_auto_completer(:name_correct_spelling,
-                                       primer: Name.primer) %>
     </div>
   <% end %>
 
