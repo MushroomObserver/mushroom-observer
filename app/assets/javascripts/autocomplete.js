@@ -75,7 +75,7 @@ const MOAutocompleter = function (opts) {
     // N = etc.
     collapse: 0,
     // separator between options
-    token: null,
+    separator: null,
     // initial list of options (one string per line)
     primer: null,
     // add each entered value into primer
@@ -135,7 +135,6 @@ const MOAutocompleter = function (opts) {
       unordered: true
     },
     year: {
-      // adapt date_select.js replace_date_select_with_text_field
       // primer: primer.join("\n"),
       pulldown_size: length,
       act_like_select: true
@@ -173,7 +172,7 @@ const MOAutocompleter = function (opts) {
   Object.assign(this, defaultOpts);
   // Assign ajax_url and a couple other options based on type.
   // Let passed options override defaults and autocompleterTypes defaults
-  // Main option passed is token (item separator) via data-autocomplete-separator
+  // Main option passed is separator (item separator) via data-autocomplete-separator
   Object.assign(this, opts);
 
   // console.log("this.input_elem: " + this.input_elem.options.length)
@@ -636,7 +635,7 @@ Object.assign(MOAutocompleter.prototype, {
     }
     this.input_elem.focus();
     this.focused = true;
-    this.set_token(new_val);
+    this.set_separator(new_val);
     this.our_change(false);
   },
 
@@ -898,7 +897,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal: function () {
-    const val = this.get_token().toLowerCase().normalize();
+    const val = this.get_separator().toLowerCase().normalize();
     const options = this.options.normalize();
     const matches = [];
     if (val != '') {
@@ -918,7 +917,7 @@ Object.assign(MOAutocompleter.prototype, {
 
   // Grab matches ignoring order of words.
   update_unordered: function () {
-    const val = this.get_token().normalize().toLowerCase().
+    const val = this.get_separator().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' ');
     const vals = val.split(' ');
     const options = this.options.normalize();
@@ -945,7 +944,7 @@ Object.assign(MOAutocompleter.prototype, {
   // Grab all matches, preferring the ones with no additional words.
   // Note: order of options must have genera first, then species, then varieties.
   update_collapsed: function () {
-    const val = "\n" + this.get_token().toLowerCase();
+    const val = "\n" + this.get_separator().toLowerCase();
     const options = this.options;
     const options2 = this.options.toLowerCase();
     const matches = [];
@@ -1030,7 +1029,7 @@ Object.assign(MOAutocompleter.prototype, {
   // Send request for updated options.
   refresh_options: function () {
     this.verbose("refresh_options()");
-    let val = this.get_token().toLowerCase();
+    let val = this.get_separator().toLowerCase();
     // const url;
 
     // Don't make request on empty string!
@@ -1189,7 +1188,7 @@ Object.assign(MOAutocompleter.prototype, {
   // ------------------------------ Tokens ------------------------------
 
   // Get token under or immediately in front of cursor.
-  get_token: function () {
+  get_separator: function () {
     let val = this.input_elem.value;
     if (this.token) {
       let token = this.token_extents();
@@ -1199,11 +1198,11 @@ Object.assign(MOAutocompleter.prototype, {
   },
 
   // Change the token under or immediately in front of the cursor.
-  set_token: function (new_val) {
+  set_separator: function (new_val) {
     const old_str = this.input_elem.value;
     if (this.token) {
       let new_str = "";
-      const token = this.token_extents();
+      const token = this.separator_extents();
       if (token.start > 0)
         new_str += old_str.substring(0, token.start);
       new_str += new_val;
@@ -1222,7 +1221,7 @@ Object.assign(MOAutocompleter.prototype, {
   },
 
   // Get index of first character and character after last of current token.
-  token_extents: function () {
+  separator_extents: function () {
     let start, end, sel = this.getInputSelection(this.input_elem[0]);
     const val = this.input_elem.value;
     if (sel.start > 0)
