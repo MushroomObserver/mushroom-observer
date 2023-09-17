@@ -10,7 +10,7 @@ module AjaxController::AutoComplete
   # type:: Type of string.
   # id::   String user has entered.
   def auto_complete
-    @user  = session_user!
+    @user = User.current
 
     string = CGI.unescape(@id).strip_squeeze
     if string.blank?
