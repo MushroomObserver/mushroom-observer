@@ -199,9 +199,10 @@ class AutoCompleteHerbarium < AutoCompleteByWord
       where(Herbarium[:name].matches("#{letter}%").
         or(Herbarium[:name].matches("% #{letter}%")).
         or(Herbarium[:code].matches("#{letter}%"))).
-      order(Herbarium[:code].
-        when(nil).then(name: :asc).else(code: :asc, name: :asc)).
-      pluck(:code, :name)
+      order(
+        Arel.when(Herbarium[:code].is_null).then(Herbarium[:name]).
+             else(Herbarium[:code]).asc, Herbarium[:name].asc
+      ).pluck(:code, :name)
 
     herbaria.map do |code, name|
       code.empty? ? name : "#{code} - #{name}"
