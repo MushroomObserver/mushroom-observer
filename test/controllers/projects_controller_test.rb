@@ -4,7 +4,7 @@ require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
   ##### Helpers (which also assert) ############################################
-  def add_project_helper(title, summary)
+  def add_project_helper(title, summary, action = :create, id = nil)
     params = {
       project: {
         title: title,
@@ -12,7 +12,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    assert_form_action(action: :create) # Failure
+    assert_form_action(action: action, id: id) # Failure
   end
 
   def edit_project_helper(title, project)
@@ -170,8 +170,10 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_add_project_existing
-    add_project_helper(projects(:eol_project).title,
-                       "The Entoloma On Line Project")
+    project = projects(:eol_project)
+    add_project_helper(project.title,
+                       "The Entoloma On Line Project",
+                       :update, project.id)
   end
 
   def test_add_project_empty_name

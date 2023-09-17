@@ -76,14 +76,14 @@ class ProjectsController < ApplicationController
 
   def create
     title = params[:project][:title].to_s
-    project = Project.find_by_title(title)
+    @project = Project.find_by_title(title)
     user_group = UserGroup.find_by_name(title)
     admin_name = "#{title}.admin"
     admin_group = UserGroup.find_by_name(admin_name)
     if title.blank?
       flash_error(:add_project_need_title.t)
-    elsif project
-      flash_error(:add_project_already_exists.t(title: project.title))
+    elsif @project
+      flash_error(:add_project_already_exists.t(title: @project.title))
     elsif user_group
       flash_error(:add_project_group_exists.t(group: title))
     elsif admin_group
