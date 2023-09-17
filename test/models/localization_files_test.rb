@@ -95,8 +95,9 @@ class LocalizationFilesTest < UnitTestCase
       n += 1
       line.sub!(/(^#| # ).*/, "")
       line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
-        unless tags.key?(Regexp.last_match(1).downcase)
-          errors << "#{file} line #{n} [:#{Regexp.last_match(1)}]\n"
+        tag = Regexp.last_match(1)
+        unless tags.key?(tag.downcase) || tag == "never_add"
+          errors << "#{file} line #{n} [:#{tag}]\n"
         end
       end
     end
