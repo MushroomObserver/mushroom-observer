@@ -1628,6 +1628,7 @@
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
+  form_observations_there_is_a_problem_with_projects: There is a problem with Projects. "+See message below.+":#project_messages
 
   # observations/_form_species_list
   form_species_lists_title: Title

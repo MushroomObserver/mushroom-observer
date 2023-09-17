@@ -104,6 +104,7 @@ module ObservationsController::NewAndCreate
     success = false unless validate_name(params)
     success = false unless validate_place_name(params)
     success = false unless validate_object(@observation)
+    success = false unless validate_project_checkboxes!
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
@@ -192,6 +193,25 @@ module ObservationsController::NewAndCreate
       success = false if @dubious_where_reasons != []
     end
     success
+  end
+
+  def validate_project_checkboxes!
+    return true if params[:project].empty?
+
+    @suspect_checked_projects = checked_out_of_range_projects
+    false
+  end
+
+  def checked_out_of_range_projects
+    checked_proj_check_boxes =
+      params[:project].select { |_, value| value == "1" }.keys
+    return [] if checked_proj_check_boxes.none?
+
+    checked_proj_ids =
+      checked_proj_check_boxes.map { |str| str.gsub("id_", "") }
+    # Get the AR records so that we can call Project methods on them
+    Project.where(id: checked_proj_ids).
+      filter { |proj| proj.dates_exclude?(@observation.when) }
   end
 
   def save_everything_else(reason)

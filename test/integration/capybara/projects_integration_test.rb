@@ -20,4 +20,24 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(Time.zone.today, project.start_date,
                  "Project Start Date should default to current date")
   end
+
+  def test_add_observation_to_non_current_out_of_range_project
+    proj = projects(:past_project)
+    user = users(:katrina)
+    assert(proj.is_member?(user), # Ensure fixtures not broken
+           "Need fixtures such that `user` is a member of `proj`")
+
+    login(user)
+    visit(new_observation_path)
+    assert_not(has_checked_field?("project_id_#{proj.id}"),
+               "Checkbox should be blank for Project which has ended")
+
+    fill_in(:WHERE.l, with: locations(:burbank).name)
+    check("project_id_#{proj.id}")
+    first(:button, "Create").click
+    assert_selector(
+      "#flash_notices",
+      text: :form_observations_there_is_a_problem_with_projects.t.strip_html
+    )
+  end
 end

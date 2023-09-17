@@ -1,4 +1,7 @@
 <%# Projects section of create_observation form %>
+  <% if @suspect_checked_projects.any? %>
+    <% flash_error(:form_observations_there_is_a_problem_with_projects.t) %>
+  <% end %>
 
 <div class="mt-3 row" id="observation_projects">
   <div class="col-xs-12 col-sm-6 col-sm-push-6">
@@ -6,6 +9,7 @@
       <%= :form_observations_project_help.t %>
     <% end %>
   </div><!--.col-->
+
   <div class="col-xs-12 col-sm-6 col-sm-pull-6">
     <strong><%= :PROJECTS.t %>:</strong>
 
