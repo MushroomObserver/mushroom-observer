@@ -328,6 +328,10 @@ class Project < AbstractModel
     !future? && !past?
   end
 
+  def dates_exclude?(date)
+    !dates_include?(date)
+  end
+
   def dates_include?(date)
     starts_no_later_than?(date) && ends_no_earlier_than?(date)
   end
