@@ -137,10 +137,6 @@ class Project < AbstractModel
     false
   end
 
-  def current?
-    !future? && !past?
-  end
-
   def add_images(imgs)
     imgs.each { |x| add_image(x) }
   end
@@ -321,6 +317,14 @@ class Project < AbstractModel
   end
 
   ##############################################################################
+  #
+  #  :section: Dates
+  #
+  ##############################################################################
+
+  def current?
+    !future? && !past?
+  end
 
   private
 
