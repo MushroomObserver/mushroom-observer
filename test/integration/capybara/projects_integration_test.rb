@@ -26,14 +26,16 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     user = users(:katrina)
     assert(proj.is_member?(user), # Ensure fixtures not broken
            "Need fixtures such that `user` is a member of `proj`")
+    proj_checkbox = "project_id_#{proj.id}"
+    observation_original_count = Observation.count
 
     login(user)
     visit(new_observation_path)
-    assert_not(has_checked_field?("project_id_#{proj.id}"),
+    assert_not(has_checked_field?(proj_checkbox),
                "Checkbox should be blank for Project which has ended")
 
     fill_in(:WHERE.l, with: locations(:burbank).name)
-    check("project_id_#{proj.id}")
+    check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(
       "#flash_notices",
@@ -48,5 +50,13 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#project_messages", text: proj.title)
     assert_selector("#project_messages", text: proj.start_date)
     assert_selector("#project_messages", text: proj.end_date)
+
+    uncheck(proj_checkbox)
+    assert_not(has_checked_field?(proj_checkbox))
+    first(:button, "Create").click
+    assert_equal(
+      observation_original_count + 1, Observation.count,
+      "Unchecking past Project checkbox should allow Observation creation"
+    )
   end
 end
