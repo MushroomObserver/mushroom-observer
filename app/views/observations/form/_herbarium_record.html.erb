@@ -11,9 +11,6 @@
             label: :herbarium_record_herbarium_name.t + ":",
             data: { autocompleter: :herbarium }
           ) %>
-      <%# turn_into_herbarium_auto_completer(
-            :herbarium_record_herbarium_name
-         ) %>
 
       <%= text_field_with_label(
             form: fhr, field: :herbarium_id, value: @herbarium_id,

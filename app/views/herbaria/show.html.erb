@@ -32,7 +32,6 @@ map = @herbarium.location ? true : false
             <%= f.text_field(:add_curator, class: "form-control",
                              placeholder: :start_typing.l,
                              data: { autocompleter: :user }) %>
-            <%# turn_into_user_auto_completer(:add_curator) %>
             <label for="add_curator">
               <%= submit_button(form: f,
                                 button: :show_herbarium_add_curator.t) %>

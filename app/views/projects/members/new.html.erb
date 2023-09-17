@@ -17,7 +17,6 @@ action = { controller: "/projects/members", action: :create,
                               label: :LOGIN_NAME.t + ":",
                               data: { autofocus: true,
                                       autocompleter: :user }) %>
-    <%# turn_into_user_auto_completer(:candidate) %>
 
     <%= submit_button(form: f, button: :ADD.t, class: "ml-3") %>
 
