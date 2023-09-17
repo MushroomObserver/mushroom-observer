@@ -86,7 +86,7 @@ module AutocompleteHelper
     return unless @user
 
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/herbarium/@?user_id=#{@user.id}",
+      ajax_url: "/ajax/auto_complete/herbarium/@",
       unordered: true
     }.merge(opts))
   end

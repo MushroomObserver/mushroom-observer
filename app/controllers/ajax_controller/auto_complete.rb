@@ -21,12 +21,15 @@ module AjaxController::AutoComplete
   private
 
   def auto_complete_results(string)
-    if(@type == "location")
+    case @type
+    when "location"
       params[:format] = if @user&.location_format == "scientific"
-        "scientific"
-      else
-        ""
-      end
+                          "scientific"
+                        else
+                          ""
+                        end
+    when "herbarium"
+      params[:user_id] = @user.id
     end
 
     ::AutoComplete.subclass(@type).new(string, params).
