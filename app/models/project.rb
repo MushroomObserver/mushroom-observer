@@ -18,6 +18,8 @@
 #  user_group::     UserGroup of members.
 #  title::          Title string.
 #  summary::        Summary of purpose.
+#  open_membership  Enable users to add themselves, disable shared editing
+#  accepting_observations Project is accepting new observations from members
 #
 #  == Methods
 #
