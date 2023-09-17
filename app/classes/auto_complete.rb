@@ -192,6 +192,7 @@ class AutoCompleteUser < AutoCompleteByString
   end
 end
 
+# Note this gets a params[:user_id] but we're ignoring it here
 class AutoCompleteHerbarium < AutoCompleteByWord
   def rough_matches(letter)
     herbaria =
