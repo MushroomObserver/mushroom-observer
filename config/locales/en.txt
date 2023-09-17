@@ -1356,6 +1356,9 @@
 
   # MOST POPULAR PAGES
 
+  # autocompleters
+  start_typing: Start typing...
+
   # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
   ask_observation_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this observation as well as your email address.
@@ -1421,6 +1424,7 @@
   obs_needing_id_intro: "Here you can quickly scan unidentified observations, propose a name, or vote on a current name. Use the search bar above to filter by location, taxon or user.\n\nIf you feel you can't improve on an identification, \"[:mark_as_reviewed]\" and it won't come up again. (It will still appear for others.)\n\n*\"Lightbox\" shortcuts:*\n&lsqb;&larr;&rsqb; &lsqb;&rarr;&rsqb; move between observations, &lsqb;return&rsqb; propose a name, &lsqb;/&rsqb; mark as reviewed."
   mark_as_reviewed: Mark as reviewed
   marked_as_reviewed: Marked as reviewed
+  filter_by: "Filter by:"
 
   # observer/create_observation
   create_observation_title: "[:create_object(type=:observation)]"

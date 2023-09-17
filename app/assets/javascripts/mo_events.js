@@ -18,9 +18,12 @@ MOEvents.rebindAutoComplete = function (type) {
   switch (type) {
     case "clade":
       AUTOCOMPLETERS[$('#ur_clade').data('uuid')].reuse(filter_term)
+      break;
     case "region":
       AUTOCOMPLETERS[$('#ur_location').data('uuid')].reuse(filter_term)
+      break;
     case "user":
       AUTOCOMPLETERS[$('#ur_user').data('uuid')].reuse(filter_term)
+      break;
   }
 }
