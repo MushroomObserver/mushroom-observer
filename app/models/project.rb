@@ -326,6 +326,10 @@ class Project < AbstractModel
     !future? && !past?
   end
 
+  def dates_include?(date)
+    starts_no_later_than?(date) && ends_no_earlier_than?(date)
+  end
+
   private
 
   def future?
@@ -336,6 +340,13 @@ class Project < AbstractModel
     end_date&.past?
   end
 
+  def starts_no_later_than?(date)
+    !start_date&.after?(date)
+  end
+
+  def ends_no_earlier_than?(date)
+    !end_date&.before?(date)
+  end
   ##############################################################################
 
   protected

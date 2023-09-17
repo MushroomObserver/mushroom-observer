@@ -117,4 +117,15 @@ class ProjectTest < UnitTestCase
     assert_not(projects(:past_project).current?)
     assert_not(projects(:future_project).current?)
   end
+
+  def test_dates_include
+    assert(projects(:past_project).
+      dates_include?(projects(:past_project).end_date))
+    assert(projects(:current_project).
+      dates_include?(Time.zone.today))
+    assert(projects(:future_project).
+      dates_include?(projects(:future_project).start_date))
+    assert_not(projects(:past_project).dates_include?(Time.zone.today))
+    assert_not(projects(:future_project).dates_include?(Time.zone.today))
+  end
 end
