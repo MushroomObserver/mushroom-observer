@@ -46,11 +46,6 @@ module AutocompleteHelper
 
   # Make text_field auto-complete for Location display name.
   def turn_into_location_auto_completer(id, opts = {})
-    # format = if @user && @user.location_format == "scientific"
-    #            "?format=scientific"
-    #          else
-    #            ""
-    #          end
     turn_into_auto_completer(id, {
       ajax_url: "/ajax/auto_complete/location/@",
       unordered: true
