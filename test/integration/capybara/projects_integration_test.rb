@@ -21,7 +21,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
                  "Project Start Date should default to current date")
   end
 
-  def test_add_observation_to_non_current_out_of_range_project
+  def test_add_observation_to_out_of_range_project
     proj = projects(:past_project)
     user = users(:katrina)
     assert(proj.is_member?(user), # Ensure fixtures not broken
@@ -37,6 +37,8 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     fill_in(:WHERE.l, with: locations(:burbank).name)
     check(proj_checkbox)
     first(:button, "Create").click
+
+    # Prove MO shows appropriate messages when user checks out-of-range project
     assert_selector(
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
@@ -51,11 +53,27 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#project_messages", text: proj.start_date)
     assert_selector("#project_messages", text: proj.end_date)
 
+    # Prove that Observation iis created if user unchecks out-of-range project
     uncheck(proj_checkbox)
     assert_not(has_checked_field?(proj_checkbox))
     first(:button, "Create").click
     assert_equal(
       observation_original_count + 1, Observation.count,
+      "Unchecking past Project checkbox should allow Observation creation"
+    )
+
+    # Again try to create Obs with out-of-range Project checked
+    visit(new_observation_path)
+    fill_in(:WHERE.l, with: locations(:burbank).name)
+    check(proj_checkbox)
+    first(:button, "Create").click
+    # Change the Obs date to be in range
+    select(proj.end_date.day, from: "observation_when_3i")
+    select(Date::MONTHNAMES[proj.end_date.month], from: "observation_when_2i")
+    select(proj.end_date.year, from: "observation_when_1i")
+    first(:button, "Create").click
+    assert_equal(
+      observation_original_count + 2, Observation.count,
       "Unchecking past Project checkbox should allow Observation creation"
     )
   end
