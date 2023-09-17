@@ -319,26 +319,4 @@ class Project < AbstractModel
   def place_name
     location&.display_name || ""
   end
-
-  ##############################################################################
-
-  protected
-
-  def validation # :nodoc:
-    if !user && !User.current
-      errors.add(:user, :validate_project_user_missing.t)
-    end
-    unless admin_group
-      errors.add(:admin_group, :validate_project_admin_group_missing.t)
-    end
-    unless user_group
-      errors.add(:user_group, :validate_project_user_group_missing.t)
-    end
-
-    if title.to_s.blank?
-      errors.add(:title, :validate_project_title_missing.t)
-    elsif title.size > 100
-      errors.add(:title, :validate_project_title_too_long.t)
-    end
-  end
 end
