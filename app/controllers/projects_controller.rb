@@ -91,7 +91,7 @@ class ProjectsController < ApplicationController
     else
       return create_project(title, admin_name)
     end
-    render(:new, location: new_project_path(q: get_query_param))
+    redirect_to(new_project_path(q: get_query_param))
   end
 
   def update
