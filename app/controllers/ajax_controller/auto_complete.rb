@@ -31,7 +31,7 @@ module AjaxController::AutoComplete
                           ""
                         end
     when "herbarium"
-      params[:user_id] = @user.id
+      params[:user_id] = @user&.id
     end
 
     ::AutoComplete.subclass(@type).new(string, params).
