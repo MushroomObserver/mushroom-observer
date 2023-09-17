@@ -25,9 +25,7 @@ module AjaxController::AutoComplete
   def auto_complete_results(string)
     case @type
     when "location"
-      if @user&.location_format == "scientific"
-        params[:format] = "scientific"
-      end
+      params[:format] = "scientific" if @user&.location_format == "scientific"
     when "herbarium"
       params[:user_id] = @user&.id
     end
