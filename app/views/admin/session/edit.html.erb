@@ -9,10 +9,10 @@ add_page_title(:app_switch_users.l)
               id: "admin_switch_users_form") do |f| %>
 
   <%= text_field_with_label(form: f, field: :id, value: @id, size: 40,
+                            placeholder: :start_typing.l,
                             label: :LOGIN_NAME.t + ":",
-                            data: { autofocus: true }) %>
-
-  <% turn_into_user_auto_completer(:id) %>
+                            data: { autofocus: true,
+                                    autocompleter: :user }) %>
 
   <%= submit_button(form: f, button: :SUBMIT.t, center: true) %>
 

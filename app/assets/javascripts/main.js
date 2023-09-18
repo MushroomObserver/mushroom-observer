@@ -75,3 +75,78 @@ jQuery(document).ready(function () {
   // Update lazy loads
   lazyLoadInstance.update();
 });
+
+// window.onload = (event) => {
+//   const autocompleters = document.querySelectorAll('[data-autocompleter]');
+//   // console.log(autocompleters);
+//   autocompleters.forEach(element => {
+//     // element will have "data-ajax-url" if initialized
+//     if (!element.hasAttribute("data-ajax-url") && element.hasAttribute("id")) {
+//       const input_id = element.getAttribute("id");
+//       const type = element.dataset.autocompleter;
+
+//       // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
+//       if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
+//         new MOAutocompleter({
+//           input_id: input_id,
+//           token: element.dataset.autocomplete_separator
+//         });
+//       }
+//     }
+//   });
+// }
+
+const moObserveContent = function () {
+  // Select the node that will be observed for mutations
+  const contentNode = document.getElementById("content");
+
+  // Options for the observer (which mutations to observe)
+  const config = { attributes: true, childList: true, subtree: true };
+
+  // Callback function to execute when mutations are observed
+  const callback = (mutationList, observer) => {
+    for (const mutation of mutationList) {
+      if (mutation.type === "childList") {
+        console.log("A child node has been added or removed.");
+        initializeAutocompleters();
+      } else if (mutation.type === "attributes") {
+        console.log(`The ${mutation.attributeName} attribute was modified.`);
+      }
+    }
+  };
+
+  // Create an observer instance linked to the callback function
+  const observer = new MutationObserver(callback);
+
+  // Start observing the target node for configured mutations
+  observer.observe(contentNode, config);
+
+  // Initialize autocompleters that are not already initialized
+  const initializeAutocompleters = function () {
+    const autocompleters = document.querySelectorAll(
+      '[data-autocompleter]:not([data-ajax-url])'
+    );
+    // console.log(autocompleters);
+    autocompleters.forEach(element => {
+      // element will have "data-ajax-url" if initialized
+      if (element.hasAttribute("id")) {
+        const input_id = element.getAttribute("id");
+        const type = element.dataset.autocompleter;
+
+        // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
+        if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
+          new MOAutocompleter({
+            input_id: input_id,
+            token: element.dataset.autocomplete_separator
+          });
+        }
+      }
+    });
+  }
+
+  window.onload = (event) => {
+    initializeAutocompleters();
+  }
+}
+
+moObserveContent();
