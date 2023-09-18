@@ -6,9 +6,4 @@
                      form: "observations/namings/form",
                      form_locals: { show_reasons: true } }) %>
 
-// re-bind autocomplete to naming_name from shared/form_name_autocomplete
-var naming_input = document.getElementById("naming_name");
-
-AUTOCOMPLETERS[document.getElementById('ur_name').dataset.uuid].reuse_for(naming_input)
-
 naming_input.focus();
