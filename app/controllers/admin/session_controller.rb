@@ -36,7 +36,7 @@ module Admin
     def update
       @id = params[:id].to_s
       # autocomplete returns "nathan <Nathan Wilson>" - we only want the login
-      @id = @id.split(" <")[0].strip if @id.is_a?(String) && !@id.include?("@")
+      @id = @id.split(" <")[0].strip if @id.is_a?(String) && @id.exclude?("@")
 
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
