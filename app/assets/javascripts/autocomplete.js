@@ -700,16 +700,12 @@ class MOAutocompleter {
   // Redraw the pulldown options.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
-    const menu = this.pulldown_elem;
-    const inner = menu.children[0];
     const list = this.list_elem;
     const rows = list.children;
     const size = this.pulldown_size;
     const scroll = this.scroll_offset;
     const cur = this.current_row;
     const matches = this.matches;
-    const old_hl = this.current_highlight;
-    let new_hl = 0;
 
     if (this.log) {
       this.debug(
@@ -721,8 +717,8 @@ class MOAutocompleter {
     // Get row height if haven't been able to yet.
     this.set_row_height();
     this.update_rows(rows, matches, size, scroll);
-    this.highlight_row(new_hl, old_hl, cur, scroll)
-    this.display_menu(matches, menu, inner, size, scroll)
+    this.highlight_new_row(rows, cur, size, scroll)
+    this.make_menu_visible(matches, size, scroll)
 
     // Make sure input focus stays on text field!
     this.input_elem.focus();
@@ -751,8 +747,10 @@ class MOAutocompleter {
   }
 
   // Highlight that row.
-  highlight_row(new_hl, old_hl, cur, scroll) {
-    new_hl = cur - scroll;
+  highlight_new_row(rows, cur, size, scroll) {
+    const old_hl = this.current_highlight;
+    let new_hl = cur - scroll;
+
     if (new_hl < 0 || new_hl >= size)
       new_hl = -1;
     this.current_highlight = new_hl;
@@ -765,7 +763,10 @@ class MOAutocompleter {
   }
 
   // Make menu visible if nonempty.
-  display_menu(matches, menu, inner, size, scroll) {
+  make_menu_visible(matches, size, scroll) {
+    const menu = this.pulldown_elem;
+    const inner = menu.children[0];
+
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
       const top = this.input_elem.offsetTop;
@@ -1125,7 +1126,7 @@ class MOAutocompleter {
         }
       }
     }).catch((error) => {
-      console.error("Server Error:", error);
+      // console.error("Server Error:", error);
     });
   }
 
