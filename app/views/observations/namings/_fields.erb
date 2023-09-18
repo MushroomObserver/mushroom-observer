@@ -42,8 +42,9 @@ context ||= "blank"
       tag.div(class: "row mt-3") do
         [
           tag.div(class: "col-xs-12 col-sm-6") do
-            autocomplete_field(form: f_n, field: :name, label: :WHAT.t + ":",
-                               value: what, autofocus: focus_on_name)
+            text_field_with_label(form: f_n, field: :name, label: :WHAT.t + ":",
+                                  value: what, autofocus: focus_on_name
+                                  data: { autocompleter: :name })
           end,
           tag.div(class: "col-xs-12 col-sm-6") do
             help_block_with_arrow("left", id: "naming_name_help") do
@@ -60,7 +61,7 @@ context ||= "blank"
                                 options: confidences,
                                 select_opts: select_opts,
                                 label: :form_naming_confidence.t + ":",
-                                data: { autofocus: focus_on_vote })
+                                autofocus: focus_on_vote)
             end,
             f_n.fields_for(:reasons) do |f_r|
               naming_form_reasons_fields(f_r, reasons)
