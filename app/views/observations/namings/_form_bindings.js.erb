@@ -3,13 +3,13 @@
 // Attaches all the bindings on shown
 
 $('#modal_naming').on('shown.bs.modal', function() {
-  var naming_input = $("#naming_name");
+  var naming_input = document.getElementById("naming_name");
   var naming_form = $("#naming_form");
   var namings_table = $("#namings_table");
   var observation_namings = $("#observation_namings");
   var this_modal = $(this);
 
-  AUTOCOMPLETERS[$('#ur_name').data('uuid')].reuse(naming_input)
+  AUTOCOMPLETERS[document.getElementById('ur_name').dataset.uuid].reuse_for(naming_input)
 
   naming_input.focus();
 

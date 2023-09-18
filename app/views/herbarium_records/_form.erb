@@ -25,8 +25,9 @@ form_args = form_args.merge({ local: true }) if local_assigns[:local] == true
   <% end %>
 
   <%= text_field_with_label(form: f, field: :herbarium_name,
-                            label: :NAME.t + ":", between: :required) %>
-  <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+                            placeholder: :start_typing.l,
+                            label: :NAME.t + ":", between: :required,
+                            data: { autocompleter: :herbarium }) %>
 
   <%= text_field_with_label(form: f, field: :initial_det,
                             label: :herbarium_record_initial_det.t + ":",

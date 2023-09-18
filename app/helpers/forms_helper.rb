@@ -140,6 +140,13 @@ module FormsHelper
     end
   end
 
+  # Not using either of these, but may.
+  def text_field_with_autocompleter(**args)
+    args[:data_autocompleter_type] = args[:type]
+
+    text_field_with_label(**args)
+  end
+
   # Bootstrap text_area
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
@@ -402,7 +409,7 @@ module FormsHelper
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
       :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace
+      :optional, :required, :monospace, :type
     ] + extras
 
     args.clone.except(*exceptions)

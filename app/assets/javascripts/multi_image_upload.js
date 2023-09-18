@@ -339,7 +339,7 @@ function MultiImageUploader(localized_text) {
       dateUpdater.refreshBox();
     });
 
-    replace_date_select_with_text_field(jQuery(_this.dom_element.find('select')[2]));
+    // replace_date_select_with_text_field(jQuery(_this.dom_element.find('select')[2]));
   };
 
   FileStoreItem.prototype.file_name = function () {

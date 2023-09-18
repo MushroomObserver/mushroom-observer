@@ -10,12 +10,10 @@
 <div class="row">
   <div class="col-xs-12 col-sm-6">
     <%= text_field_with_label(form: f, field: :place_name,
+                              placeholder: :start_typing.l,
                               label: :WHERE.t + ":",
-                              between: :required) %>
-
-    <% turn_into_location_auto_completer(
-        :observation_place_name, primer: Location.primer
-      ) %>
+                              between: :required,
+                              data: { autocompleter: :location }) %>
   </div>
   <div class="col-xs-12 col-sm-6">
     <%= help_block_with_arrow("left", id: "where_help") do %>

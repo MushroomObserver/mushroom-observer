@@ -7,7 +7,6 @@
 
 //= link advanced_search.js
 //= link account_api_keys.js
-//= link date_select.js
 //= link donate.js
 //= link edit_location.js
 //= link multi_image_upload.js
