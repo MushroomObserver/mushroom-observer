@@ -31,8 +31,8 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
 
     login(user)
     visit(new_observation_path)
-    assert_not(has_checked_field?(proj_checkbox),
-               "Checkbox should be blank for Project which has ended")
+    assert(has_unchecked_field?(proj_checkbox),
+           "Missing a unchecked box for Project which has ended")
 
     fill_in(:WHERE.l, with: locations(:burbank).name)
     check(proj_checkbox)
@@ -43,19 +43,21 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
-    assert_selector(
-      "#project_messages",
-      text: :form_observations_projects_out_of_range.t(
-        date: Time.zone.today # Observation.date
-      ).strip_html
-    )
-    assert_selector("#project_messages", text: proj.title)
-    assert_selector("#project_messages", text: proj.start_date)
-    assert_selector("#project_messages", text: proj.end_date)
+    within("#project_messages") do # out-of-range warning message
+      assert(has_text?(:form_observations_projects_out_of_range.t(
+                         date: Time.zone.today
+                       )),
+             "Missing out-of-range warning with observation date")
+
+      assert(has_text?(proj.title) &&
+             has_text?(proj.start_date) &&
+             has_text?(proj.end_date),
+             "Warning is missing out-of-range project's title and date range")
+    end
 
     # Prove that Observation iis created if user unchecks out-of-range project
     uncheck(proj_checkbox)
-    assert_not(has_checked_field?(proj_checkbox))
+    assert(has_unchecked_field?(proj_checkbox))
     first(:button, "Create").click
     assert_equal(
       observation_original_count + 1, Observation.count,
