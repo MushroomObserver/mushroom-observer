@@ -135,12 +135,13 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
+    login("roy") # prefers location_format: :scientific
     expect = m.map { |x| Location.reverse_name(x) }.sort.uniq
     expect.unshift("M")
-    good_ajax_request(:auto_complete,
-                      type: :location, id: "Modesto", format: "scientific")
+    good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
+    login("mary") # prefers location_format: :postal
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
   end
