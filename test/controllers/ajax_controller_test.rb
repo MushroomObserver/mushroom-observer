@@ -122,12 +122,12 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_location
     # names of Locations whose names have words starting with "m"
-    m_loc_names = Location.where("name REGEXP ?", "\\bM").
+    m_loc_names = Location.where(Location[:name].matches_regexp("\\bM")).
                   map(&:name)
     # wheres of Observations whose wheres have words starting with "m"
     # need extra "observation" to avoid confusing sql with bare "where".
-    m_obs_wheres = Observation.where("observations.where REGEXP ?", "\\bM").
-                   map(&:where)
+    m_obs_wheres = Observation.where(Observation[:where].
+                   matches_regexp("\\bM")).map(&:where)
     m = m_loc_names + m_obs_wheres
 
     expect = m.sort.uniq
@@ -135,12 +135,13 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
+    login("roy") # prefers location_format: :scientific
     expect = m.map { |x| Location.reverse_name(x) }.sort.uniq
     expect.unshift("M")
-    good_ajax_request(:auto_complete,
-                      type: :location, id: "Modesto", format: "scientific")
+    good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
+    login("mary") # prefers location_format: :postal
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
   end
@@ -160,11 +161,13 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_project
     # titles of Projects whose titles have words starting with "p"
-    b_titles = Project.where("title REGEXP ?", "\\bb").map(&:title).uniq
+    b_titles = Project.where(Project[:title].matches_regexp("\\bb")).
+               map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
     assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
 
-    p_titles = Project.where("title REGEXP ?", "\\bp").map(&:title).uniq
+    p_titles = Project.where(Project[:title].matches_regexp("\\bb")).
+               map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
     assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
 
