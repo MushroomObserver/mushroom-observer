@@ -27,7 +27,7 @@
       <% if @suspect_checked_projects.any? %>
         <%= check_box_with_label(
           form: f_p, field: :ignore_proj_dates, checked: true,
-          label: :form_observations_projects_out_of_range_ignore_project_dates.t,
+          label: :form_observations_projects_ignore_project_dates.t,
           class: "alert alert-danger"
         ) %>
       <% end %>

@@ -97,7 +97,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
     # Override Project date ranges
-    check(:form_observations_projects_out_of_range_ignore_project_dates.l)
+    check(:form_observations_projects_ignore_project_dates.l)
     first(:button, "Create").click
     assert_equal(
       observation_original_count + 3, Observation.count,
