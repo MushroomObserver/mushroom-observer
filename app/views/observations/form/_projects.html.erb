@@ -6,7 +6,7 @@
       <p><%= :form_observations_projects_out_of_range.t(date: @observation.when) %>:</p>
       <p>
         <% @suspect_checked_projects.each do |proj| %>
-        <%= "#{proj.title} (#{proj.start_date_text} - #{proj.end_date_text})" %>
+        <%= "#{proj.title} (#{proj.start_date_str} - #{proj.end_date_str})" %>
         <% end %>
       </p>
       <p><%= :form_observations_projects_out_of_range_help.t(button: button_name)%></p>

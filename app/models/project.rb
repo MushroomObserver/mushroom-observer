@@ -337,12 +337,12 @@ class Project < AbstractModel
   end
 
   # convenience methods for date range display
-  def start_date_text(format = "%Y-%m-%d")
-    start_date.nil? ? :UNDEFINED.t : start_date.strftime(format)
+  def start_date_str(format = "%Y-%m-%d")
+    start_date.nil? ? :project_nil_date_str.t : start_date.strftime(format)
   end
 
-  def end_date_text(format = "%Y-%m-%d")
-    end_date.nil? ? :UNDEFINED.t : end_date.strftime(format)
+  def end_date_str(format = "%Y-%m-%d")
+    end_date.nil? ? :project_nil_date_str.t : end_date.strftime(format)
   end
 
   private

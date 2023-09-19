@@ -825,9 +825,6 @@
   "NO": "No"
   "yes": "yes"
   "no": "no"
-  "UNDEFINED": Undefined
-  "undefined": undefined
-
 
   ##############################################################################
 
@@ -3267,6 +3264,9 @@
   # observer/send_feature_email
   send_feature_email_success: Delivered feature mail.
   send_feature_email_denied: Only the admin can send feature mail.
+
+  # project general
+  project_nil_date_str: "[:NONE]"
 
   # project/show_project
   show_project_add_members: Add Members

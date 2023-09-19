@@ -50,7 +50,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
              "Missing out-of-range warning with observation date")
 
       assert(has_text?(proj.title) &&
-               has_text?("#{proj.start_date_text} - #{proj.end_date_text}"),
+               has_text?("#{proj.start_date_str} - #{proj.end_date_str}"),
              "Warning is missing out-of-range project's title or date range")
     end
 
