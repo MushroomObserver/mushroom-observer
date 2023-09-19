@@ -90,7 +90,7 @@ legible_max_size = (max_size.to_f/1024/1024).round
 
 <% inject_javascript_at_end %(
 jQuery(document).ready(function () {
-  var uploader = new MultiImageUploader({
+  var uploader = new MOMultiImageUploader({
     uploading_text: "#{j :form_observations_uploading_images.t }",
     image_too_big_text:  "#{j :form_observations_image_too_big.t(max: legible_max_size) }",
     creating_observation_text: "#{j :form_observations_creating_observation.t }",

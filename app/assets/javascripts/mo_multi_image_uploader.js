@@ -3,17 +3,6 @@
 class MOMultiImageUploader {
 
   constructor(localization = {}) {
-    const localization_defaults = {
-      uploading_text: "Uploading",
-      image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
-      creating_observation_text: "Creating Observation...",
-      months: "January, February, March, April, May, June, July, August, September, October, November, December",
-      show_on_map: "Show on map",
-      something_went_wrong: "Something went wrong while uploading image."
-    }
-
-    this.localized_text = localization_defaults.merge(localization);
-
     // Internal Variable Definitions.
     const internal_config = {
       fileStore: new this.FileStore(),
@@ -47,6 +36,18 @@ class MOMultiImageUploader {
     }
 
     Object.assign(this, internal_config);
+
+    const localization_defaults = {
+      uploading_text: "Uploading",
+      image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
+      creating_observation_text: "Creating Observation...",
+      months: "January, February, March, April, May, June, July, August, September, October, November, December",
+      show_on_map: "Show on map",
+      something_went_wrong: "Something went wrong while uploading image."
+    }
+
+    Object.assign(this.localized_text, localization_defaults);
+    Object.assign(this.localized_text, localization);
 
     /*********************/
     /* Simple Date Class */
@@ -129,12 +130,14 @@ class MOMultiImageUploader {
       }
 
       makeObservationDateRadio(simpleDate) {
-        let html = "<div class='radio'><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
-        html = html.replace('{{date}}', JSON.stringify(simpleDate));
-        html = html.replace('{{dateStr}}', simpleDate.asDateString());
+        const _date = JSON.stringify(simpleDate);
+        const _date_string = simpleDate.asDateString();
+        const _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
+        // html = html.replace('{{date}}', JSON.stringify(simpleDate));
+        // html = html.replace('{{dateStr}}', simpleDate.asDateString());
 
         // const obs_radio = jQuery(html);
-        this.obs_radio_container.append(html);
+        this.obs_radio_container.append(_html);
       }
 
       updateObservationDateRadio() {
@@ -858,9 +861,4 @@ class MOMultiImageUploader {
 /*********************/
 /*   Bindings    */
 /*********************/
-
-
-return {
-  init: init
-}
 
