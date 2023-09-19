@@ -3,7 +3,7 @@
     <% flash_error(:form_observations_there_is_a_problem_with_projects.t) %>
 
     <div class="alert alert-danger" id="project_messages">
-      <p><%= :form_observations_projects_out_of_range.t(date: @observation.when) %>:</p>
+      <%= tag.p("#{:form_observations_projects_out_of_range.t(date: @observation.when)}:") %>
       <p>
         <% @suspect_checked_projects.each do |proj| %>
         <%= "#{proj.title} (#{proj.start_date_str} - #{proj.end_date_str})" %>
@@ -26,7 +26,7 @@
     <%= fields_for(:project) do |f_p| %>
       <% if @suspect_checked_projects.any? %>
         <%= check_box_with_label(
-          form: f_p, field: :ignore_proj_dates, checked: true,
+          form: f_p, field: :ignore_proj_dates,
           label: :form_observations_projects_ignore_project_dates.t,
           class: "alert alert-danger"
         ) %>

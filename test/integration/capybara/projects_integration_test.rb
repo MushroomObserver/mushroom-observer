@@ -21,21 +21,28 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
                  "Project Start Date should default to current date")
   end
 
-  def test_add_observation_to_out_of_range_project
+  def test_add_observation_to_project
     proj = projects(:past_project)
+    auto_proj = projects(:current_project)
     user = users(:katrina)
-    assert(proj.is_member?(user), # Ensure fixtures not broken
+    # Ensure fixtures not broken
+    assert(proj.is_member?(user),
            "Need fixtures such that `user` is a member of `proj`")
+    assert(auto_proj.is_member?(user),
+           "Need fixtures such that `user` is a member of `auto_proj`")
     proj_checkbox = "project_id_#{proj.id}"
+    auto_proj_checkbox = "project_id_#{auto_proj.id}"
     observation_original_count = Observation.count
 
     login(user)
     visit(new_observation_path)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
+    assert(has_checked_field?(auto_proj_checkbox),
+           "Missing checked box for Proj to which Obs should be auto-added")
 
     fill_in(:WHERE.l, with: locations(:burbank).name)
-    check(proj_checkbox)
+    check(proj_checkbox) # add out-of-range Obs to Project
     first(:button, "Create").click
 
     # Prove MO shows appropriate messages when user checks out-of-range Project
@@ -53,6 +60,10 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
                has_text?("#{proj.start_date_str} - #{proj.end_date_str}"),
              "Warning is missing out-of-range project's title or date range")
     end
+    assert(
+      has_unchecked_field?(:form_observations_projects_ignore_project_dates.l),
+      "Missing an unchecked box for ignoring Proj Dates"
+    )
 
     # Prove that Observation is created if user unchecks out-of-range Project
     uncheck(proj_checkbox)
