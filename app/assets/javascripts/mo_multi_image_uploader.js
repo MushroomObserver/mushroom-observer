@@ -2,7 +2,7 @@
 
 class MOMultiImageUploader {
 
-  constructor(localized_text = {}) {
+  constructor(localization = {}) {
     const localization_defaults = {
       uploading_text: "Uploading",
       image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
@@ -12,7 +12,7 @@ class MOMultiImageUploader {
       something_went_wrong: "Something went wrong while uploading image."
     }
 
-    this.localized_text = localization_defaults.merge(localized_text);
+    this.localized_text = localization_defaults.merge(localization);
 
     // Internal Variable Definitions.
     const internal_config = {
@@ -51,13 +51,11 @@ class MOMultiImageUploader {
     /*********************/
     /* Simple Date Class */
     /*********************/
-
     this.SimpleDate = class {
       constructor(day, month, year) {
         this.day = parseInt(day);
         this.month = parseInt(month);
         this.year = parseInt(year);
-
       }
 
       areEqual(simpleDate) { //returns true if same
@@ -66,7 +64,7 @@ class MOMultiImageUploader {
       }
 
       asDateString() {
-        const _months = localized_text.months.split(' ');
+        const _months = this.localized_text.months.split(' ');
         return this.day + "-" + _months[this.month - 1] + "-" + this.year;
       }
     };
@@ -74,10 +72,8 @@ class MOMultiImageUploader {
     /*********************/
     /*  DateUpdater  */
     /*********************/
-
     // Deals with synchronizing image and observation dates through
     // a message box.
-
     this.DateUpdater = class {
       constructor() { }
 
@@ -98,15 +94,14 @@ class MOMultiImageUploader {
       refreshBox() {
         const _this = this,
           _distinctImgDates = fileStore.getDistinctImageDates(),
-          obsDate = _this.observationDate();
+          _obsDate = _this.observationDate();
 
         this.img_radio_container.html = '';
         this.obs_radio_container.html = '';
         _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate) {
-          // FIXME areEqual
-          if (!obsDate.areEqual(simpleDate))
+          if (!_obsDate.areEqual(simpleDate))
             _this.makeImageDateRadio(simpleDate);
         });
 
@@ -115,7 +110,6 @@ class MOMultiImageUploader {
         } else {
           this.img_messages.hide('slow')
         }
-
       }
 
       fixDates = function (simpleDate, target) {
@@ -128,8 +122,6 @@ class MOMultiImageUploader {
       }
 
       makeImageDateRadio(simpleDate) {
-        const _this = this;
-
         let html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='{{date}}' name='fix_date'/>{{dateStr}}</label></div>"
         html = html.replace('{{date}}', JSON.stringify(simpleDate));
         html = html.replace('{{dateStr}}', simpleDate.asDateString());
@@ -137,8 +129,6 @@ class MOMultiImageUploader {
       }
 
       makeObservationDateRadio(simpleDate) {
-        // const _this = this;
-
         let html = "<div class='radio'><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
         html = html.replace('{{date}}', JSON.stringify(simpleDate));
         html = html.replace('{{dateStr}}', simpleDate.asDateString());
@@ -173,9 +163,7 @@ class MOMultiImageUploader {
     /*********************/
     /*   FileStore   */
     /*********************/
-
     // Container for the image files.
-
     this.FileStore = class {
       constructor() {
         const _this = this;
@@ -214,8 +202,7 @@ class MOMultiImageUploader {
           setTimeout(function () {
             if (!_this.areAllProcessed()) {
               checkStatus();
-            }
-            else {
+            } else {
               dateUpdater.refreshBox();
             }
           }, 30)
@@ -282,7 +269,7 @@ class MOMultiImageUploader {
             // now the form will be submitted without hitting the uploads.
             this.block_form_submission = false;
             this.submit_buttons.value =
-              localized_text.creating_observation_text;
+              this.localized_text.creating_observation_text;
             this.form.submit();
           }
         }
@@ -305,9 +292,7 @@ class MOMultiImageUploader {
     /*********************/
     /*   FileStoreItem   */
     /*********************/
-
     // Contains information about an image file.
-
     this.FileStoreItem = class {
 
       constructor(file_or_url, uuid) {
@@ -353,7 +338,8 @@ class MOMultiImageUploader {
         _this.dom_element = document.createElement(html_string);
 
         if (_this.file_size() > this.max_image_size)
-          _this.dom_element.querySelectorAll('.warn-text').text = localized_text.image_too_big_text;
+          _this.dom_element.querySelectorAll('.warn-text').text =
+            this.localized_text.image_too_big_text;
 
         // add it to the page
         this.add_img_container.append(_this.dom_element);
@@ -427,7 +413,6 @@ class MOMultiImageUploader {
           console.warn("Error: Dom element for this file has not been created, so cannot update it with exif data!");
           return;
         }
-
 
         //Geocode Logic
 
@@ -544,7 +529,7 @@ class MOMultiImageUploader {
         if (!_this.isUploading) {
           _this.isUploading = true;
           _container.html =
-            '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + localized_text.uploading_text + '</strong></div>' +
+            '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + this.localized_text.uploading_text + '</strong></div>' +
             '<div class="progress-bar position-absolute" style="width: 0%; height: 1.5em; background: #51B973; z-index: 0;"></div>'
 
           doDots(1);
@@ -559,7 +544,8 @@ class MOMultiImageUploader {
         function doDots(i) {
           setTimeout(function () {
             if (i < 900) {
-              _container.querySelectorAll(".progress-text").html = localized_text.uploading_text + this.dots[i % 3];
+              _container.querySelectorAll(".progress-text").html =
+                this.localized_text.uploading_text + this.dots[i % 3];
               doDots(++i);
             }
           }, 333)
@@ -569,22 +555,23 @@ class MOMultiImageUploader {
       upload(onUploadedCallback) {
         const _this = this,
           xhrReq = new XMLHttpRequest(),
-          progress = null,
-          update = null;
+          progress = null;
+        // let update = null;
 
-        this.submit_buttons.value = localized_text.uploading_text + '...';
+        this.submit_buttons.value = this.localized_text.uploading_text + '...';
         _this.incrementProgressBar();
 
-        xhrReq.onreadystatechange = function () { //after image has been created.
+        // after image has been created.
+        xhrReq.onreadystatechange = function () {
           if (xhrReq.readyState == 4) {
             if (xhrReq.status == 200) {
               const image = JSON.parse(xhrReq.response);
-              const good_image_vals = this.good_images.value ?
+              const _good_image_vals = this.good_images.value ?
                 this.good_images.value : "";
               // add id to the good images form field.
-              good_images.value = good_image_vals.length == 0 ?
-                image.id : goodImageVals + ' ' + image.id;
-              //set the thumbnail if it is selected
+              good_images.value = _good_image_vals.length == 0 ?
+                image.id : _good_image_vals + ' ' + image.id;
+              // set the thumbnail if it is selected
               if (_this.dom_element.querySelector('input[name="observation[thumb_image_id]"]').checked) {
                 document.getElementById('observation_thumb_image_id')
                   .value = image.id;
@@ -592,7 +579,7 @@ class MOMultiImageUploader {
             } else if (xhrReq.response) {
               alert(xhrReq.response);
             } else {
-              alert(localized_text.something_went_wrong);
+              alert(this.localized_text.something_went_wrong);
             }
             if (progress) window.clearTimeout(progress);
             _this.incrementProgressBar(1);
@@ -622,15 +609,14 @@ class MOMultiImageUploader {
         // };
         // progress = window.setTimeout(update, 1000);
 
-        // Note: You need to add the event listeners before calling open()
-        // on the request.
+        // Note: Add the event listeners before calling open() on the request.
         xhrReq.open("POST", this.upload_image_uri, true);
         xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
         const _fd = _this.asformData(); // Send the form
         if (_fd != null) {
           xhrReq.send(_fd);
         } else {
-          alert(localized_text.something_went_wrong);
+          alert(this.localized_text.something_went_wrong);
           onUploadedCallback();
         }
       }
@@ -662,11 +648,16 @@ class MOMultiImageUploader {
 
     // was bind('click.setGeoCodeBind'
     this.set_geocode_btn.onclick = function () {
-      const _selectedItemData = jQuery('input[name=fix_geocode]:checked').dataset;
+      const _selectedItemData = document
+        .querySelector('input[name=fix_geocode]:checked').dataset;
+
       if (_selectedItemData) {
-        document.getElementById('observation_lat').value = _selectedItemData.geocode.latitude;
-        document.getElementById('observation_long').value = _selectedItemData.geocode.longitude;
-        document.getElementById('observation_alt').value = _selectedItemData.geocode.altitude;
+        document.getElementById('observation_lat')
+          .value = _selectedItemData.geocode.latitude;
+        document.getElementById('observation_long')
+          .value = _selectedItemData.geocode.longitude;
+        document.getElementById('observation_alt')
+          .value = _selectedItemData.geocode.altitude;
         this.geocode_messages.hide('slow');
       }
     };
@@ -684,7 +675,7 @@ class MOMultiImageUploader {
     // was bind('click.fixDateBind
     this.fix_date_submit.onclick = function () {
       const _selectedItemData =
-        document.querySelectorAll('input[name=fix_date]:checked').dataset;
+        document.querySelector('input[name=fix_date]:checked').dataset;
 
       if (_selectedItemData && _selectedItemData.date) {
         this.dateUpdater.fixDates(
@@ -753,21 +744,21 @@ class MOMultiImageUploader {
 
     // IMPORTANT:  This allows the user to update the thumbnail on the edit
     // observation view.
-    document.querySelectorAll('input[type="radio"][name="observation[thumb_image_id]"]').onchange = function () {
-      document.getElementById('observation_thumb_image_id').value = this.value;
-    };
+    document
+      .querySelectorAll('[type="radio"][name="observation[thumb_image_id]"]')
+      .onchange = function () {
+        document.getElementById('observation_thumb_image_id').value = this.value;
+      };
 
     // Logic for setting the default thumbnail
     document.body
       .querySelectorAll('[data-role="set_as_default_thumbnail"]')
       .onclick = function (event) {
-
         const _this = this; //the link clicked to make default image
 
         event.preventDefault();
 
         // reset selections
-
         // remove hidden from the links
         document.querySelectorAll('[data-role="set_as_default_thumbnail"]')
           .classList.remove('hidden');
@@ -779,7 +770,6 @@ class MOMultiImageUploader {
 
 
         // set selections
-
         // add hidden to the link clicked
         _this.classList.add('hidden');
         // show that the image is default
@@ -818,7 +808,7 @@ class MOMultiImageUploader {
 
   makeGeocodeRadioBtn(latLngObjct) {
     const html = "<div class='radio'><label><input type='radio' data-geocode='{{geocode}}' name='fix_geocode'/>{{geoCodeStr}}</label> " +
-      "<a href='#geocode_map' data-role='show_on_map' class='ml-3' data-geocode='{{geocodeformap}}'>" + localized_text.show_on_map + "</a></div>";
+      "<a href='#geocode_map' data-role='show_on_map' class='ml-3' data-geocode='{{geocodeformap}}'>" + this.localized_text.show_on_map + "</a></div>";
     html = html.replace('{{geocode}}', JSON.stringify(latLngObjct));
     html = html.replace('{{geocodeformap}}', JSON.stringify(latLngObjct));
     html = html.replace('{{geoCodeStr}}', latLngObjct.latitude.toFixed(5) + ", " + latLngObjct.longitude.toFixed(5));
