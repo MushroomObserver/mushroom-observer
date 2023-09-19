@@ -32,13 +32,13 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     login(user)
     visit(new_observation_path)
     assert(has_unchecked_field?(proj_checkbox),
-           "Missing a unchecked box for Project which has ended")
+           "Missing an unchecked box for Project which has ended")
 
     fill_in(:WHERE.l, with: locations(:burbank).name)
     check(proj_checkbox)
     first(:button, "Create").click
 
-    # Prove MO shows appropriate messages when user checks out-of-range project
+    # Prove MO shows appropriate messages when user checks out-of-range Project
     assert_selector(
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
@@ -54,13 +54,13 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
              "Warning is missing out-of-range project's title or date range")
     end
 
-    # Prove that Observation is created if user unchecks out-of-range project
+    # Prove that Observation is created if user unchecks out-of-range Project
     uncheck(proj_checkbox)
     assert(has_unchecked_field?(proj_checkbox))
     first(:button, "Create").click
     assert_equal(
       observation_original_count + 1, Observation.count,
-      "Unchecking past Project checkbox should allow Observation creation"
+      "Failed to create Obs after unchecking out-if-range Projectx"
     )
 
     # Prove that Observation is created if user fixes dates to be in-range
@@ -79,7 +79,29 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     first(:button, "Create").click
     assert_equal(
       observation_original_count + 2, Observation.count,
-      "Making Obs date within Proj rangs should allow Observation creation"
+      "Failed to created Obs after setting When within Project date range"
+    )
+
+    # Prove Observation is created if user overrides Project date ranges
+    visit(new_observation_path)
+    fill_in(:WHERE.l, with: locations(:burbank).name)
+    check(proj_checkbox)
+    # reset Observation date, making it out-of-range
+    select(Time.zone.today.day, from: "observation_when_3i")
+    select(Date::MONTHNAMES[Time.zone.today.month],
+           from: "observation_when_2i")
+    select(Time.zone.today.year, from: "observation_when_1i")
+    first(:button, "Create").click
+    assert_selector(
+      "#flash_notices",
+      text: :form_observations_there_is_a_problem_with_projects.t.strip_html
+    )
+    # Override Project date ranges
+    check(:form_observations_projects_out_of_range_ignore_project_dates.l)
+    first(:button, "Create").click
+    assert_equal(
+      observation_original_count + 3, Observation.count,
+      "Failed to create Obs after overriding Project date ranges"
     )
   end
 end

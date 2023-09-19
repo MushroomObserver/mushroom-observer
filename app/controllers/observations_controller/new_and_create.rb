@@ -197,6 +197,7 @@ module ObservationsController::NewAndCreate
 
   def validate_project_checkboxes!
     return true if params[:project].empty?
+    return true if params[:project][:ignore_proj_dates]
 
     @suspect_checked_projects = checked_out_of_range_projects
     @suspect_checked_projects.empty?

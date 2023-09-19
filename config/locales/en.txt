@@ -1634,7 +1634,7 @@
   form_observations_there_is_a_problem_with_projects: There is a problem with Projects. "+See message below.+":#project_messages
   form_observations_projects_out_of_range: "The Observation date ([date]) is outside the range of these checked Project(s)"
   form_observations_projects_out_of_range_help: "Either: uncheck out-of-range Projects; \nchange the Observation date if it is incorrect; \nor (undesirably) check [:form_observations_projects_out_of_range_ignore_project_dates] to ignore the Project date ranges. \nThen click [button]."
-  form_observations_projects_out_of_range_ignore_project_dates: Ignore Project dates
+  form_observations_projects_out_of_range_ignore_project_dates: Ignore Project Dates
 
   # observations/_form_species_list
   form_species_lists_title: Title

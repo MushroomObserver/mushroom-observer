@@ -4,11 +4,11 @@
 
     <div class="alert alert-danger" id="project_messages">
       <p><%= :form_observations_projects_out_of_range.t(date: @observation.when) %>:</p>
-
-      <% @suspect_checked_projects.each do |proj| %>
-      <%= "#{proj.title} (#{proj.start_date_text} - #{proj.end_date_text})" %><br/>
-      <% end %>
-
+      <p>
+        <% @suspect_checked_projects.each do |proj| %>
+        <%= "#{proj.title} (#{proj.start_date_text} - #{proj.end_date_text})" %>
+        <% end %>
+      </p>
       <p><%= :form_observations_projects_out_of_range_help.t(button: button_name)%></p>
     </div>
   <% end %>
@@ -24,6 +24,14 @@
     <strong><%= :PROJECTS.t %>:</strong>
 
     <%= fields_for(:project) do |f_p| %>
+      <% if @suspect_checked_projects.any? %>
+        <%= check_box_with_label(
+          form: f_p, field: :ignore_proj_dates, checked: true,
+          label: :form_observations_projects_out_of_range_ignore_project_dates.t,
+          class: "alert alert-danger"
+        ) %>
+      <% end %>
+
       <% @projects.each do |project| %>
         <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
                                  checked: @project_checks[project.id],
