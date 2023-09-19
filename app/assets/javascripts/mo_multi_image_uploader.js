@@ -20,14 +20,14 @@ class MOMultiImageUploader {
       dateUpdater: new this.DateUpdater(),
       // container to insert images into
       add_img_container: document.getElementById("added_images_container"),
-      _max_image_size: this.add_img_container.dataset.upload_max_size,
-      _get_template_uri: "/ajax/multi_image_template",
-      _upload_image_uri: "/ajax/create_image_object",
-      _progress_uri: "/ajax/upload_progress",
-      _dots: [".", "..", "..."],
+      max_image_size: this.add_img_container.dataset.upload_max_size,
+      get_template_uri: "/ajax/multi_image_template",
+      upload_image_uri: "/ajax/create_image_object",
+      // progress_uri: "/ajax/upload_progress",
+      dots: [".", "..", "..."],
       block_form_submission: true,
       form: document.forms.namedItem("observation_form"),
-      submit_buttons: form.querySelectorAll('input[type="submit"]'),
+      submit_buttons: this.form.querySelectorAll('input[type="submit"]'),
       good_images: document.getElementById('good_images'),
       remove_links: document.querySelectorAll(".remove_image_link"),
       select_files_button: document.getElementById('multiple_images_button'),
@@ -100,19 +100,20 @@ class MOMultiImageUploader {
           _distinctImgDates = fileStore.getDistinctImageDates(),
           obsDate = _this.observationDate();
 
-        img_radio_container.html = '';
-        obs_radio_container.html = '';
+        this.img_radio_container.html = '';
+        this.obs_radio_container.html = '';
         _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate) {
+          // FIXME areEqual
           if (!obsDate.areEqual(simpleDate))
             _this.makeImageDateRadio(simpleDate);
         });
 
         if (_this.areDatesInconsistent()) {
-          img_messages.show('slow');
+          this.img_messages.show('slow');
         } else {
-          img_messages.hide('slow')
+          this.img_messages.hide('slow')
         }
 
       }
@@ -123,7 +124,7 @@ class MOMultiImageUploader {
           fileStore.updateImageDates(simpleDate);
         if (target == "observation")
           _this.observationDate(simpleDate);
-        img_messages.hide('slow');
+        this.img_messages.hide('slow');
       }
 
       makeImageDateRadio(simpleDate) {
@@ -132,7 +133,7 @@ class MOMultiImageUploader {
         let html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='{{date}}' name='fix_date'/>{{dateStr}}</label></div>"
         html = html.replace('{{date}}', JSON.stringify(simpleDate));
         html = html.replace('{{dateStr}}', simpleDate.asDateString());
-        img_radio_container.append(html);
+        this.img_radio_container.append(html);
       }
 
       makeObservationDateRadio(simpleDate) {
@@ -143,27 +144,29 @@ class MOMultiImageUploader {
         html = html.replace('{{dateStr}}', simpleDate.asDateString());
 
         // const obs_radio = jQuery(html);
-        obs_radio_container.append(html);
+        this.obs_radio_container.append(html);
       }
 
       updateObservationDateRadio() {
         const _this = this;
         const _currentObsDate = _this.observationDate();
-        obs_radio_container.querySelectorAll('input').dataset.date = _currentObsDate;
-        obs_radio_container.querySelectorAll('span').text = _currentObsDate.asDateString();
+
+        this.obs_radio_container.querySelectorAll('input').dataset.date = _currentObsDate;
+        this.obs_radio_container.querySelectorAll('span').text = _currentObsDate.asDateString();
+
         if (_this.areDatesInconsistent())
-          img_messages.show('slow');
+          this.img_messages.show('slow');
       }
 
       // undefined gets current date, simpledate object updates date
       observationDate = function (simpleDate) {
 
         if (simpleDate && simpleDate.day && simpleDate.month && simpleDate.year) {
-          obs_day.value = simpleDate.day;
-          obs_month.value = simpleDate.month;
-          obs_year.value = simpleDate.year;
+          this.obs_day.value = simpleDate.day;
+          this.obs_month.value = simpleDate.month;
+          this.obs_year.value = simpleDate.year;
         }
-        return new this.SimpleDate(obs_day.value, obs_month.value, obs_year.value);
+        return new this.SimpleDate(this.obs_day.value, this.obs_month.value, this.obs_year.value);
       }
     }
 
@@ -262,8 +265,8 @@ class MOMultiImageUploader {
         const _this = this;
 
         // disable submit and remove image buttons during upload process.
-        submit_buttons.setAttribute('disabled', 'true');
-        remove_links.hide();
+        this.submit_buttons.setAttribute('disabled', 'true');
+        this.remove_links.hide();
 
         // callback function to move through the the images to upload
         function getNextImage() {
@@ -277,9 +280,10 @@ class MOMultiImageUploader {
             nextInLine.upload(onUploadedCallback);
           else {
             // now the form will be submitted without hitting the uploads.
-            block_form_submission = false;
-            submit_buttons.value = localized_text.creating_observation_text;
-            form.submit();
+            this.block_form_submission = false;
+            this.submit_buttons.value =
+              localized_text.creating_observation_text;
+            this.form.submit();
           }
         }
 
@@ -290,8 +294,8 @@ class MOMultiImageUploader {
         }
         else {
           // no images to upload, submit form
-          block_form_submission = false;
-          form.submit();
+          this.block_form_submission = false;
+          this.form.submit();
         }
 
         return false;
@@ -325,7 +329,7 @@ class MOMultiImageUploader {
       // the format function adds to HTML
       getTemplateHtml() {
         const _this = this;
-        jQuery.get(_get_template_uri, {
+        jQuery.get(this.get_template_uri, {
           img_number: _this.uuid
         }, function (data) {
           // on success
@@ -348,7 +352,7 @@ class MOMultiImageUploader {
         // Create the DOM element and add it to FileStoreItem;
         _this.dom_element = document.createElement(html_string);
 
-        if (_this.file_size() > _max_image_size)
+        if (_this.file_size() > this.max_image_size)
           _this.dom_element.querySelectorAll('.warn-text').text = localized_text.image_too_big_text;
 
         // add it to the page
@@ -415,8 +419,8 @@ class MOMultiImageUploader {
       }
 
       applyExifData() {  //applys exif data to the DOM element, DOM element must already be attached
-        const _exif_date_taken,
-          _this = this,
+        let _exif_date_taken;
+        const _this = this,
           _exif = this.exif_data;
 
         if (this.dom_element == null) {
@@ -433,23 +437,27 @@ class MOMultiImageUploader {
             radioBtnToInsert = makeGeocodeRadioBtn(latLngObject);
 
           if (geocode_radio_container.find('input[type="radio"]').length === 0) {
-            geocode_messages.show('medium');
-            geocode_radio_container.append(radioBtnToInsert);
+            this.geocode_messages.show('medium');
+            this.geocode_radio_container.append(radioBtnToInsert);
           }
 
           else {
-            const shouldAddGeocode = true; //don't add geocodes that are only slightly different
-            geocode_radio_container.querySelectorAll('input[type="radio"]').forEach(function (index, element) {
-              const existingGeocode = element.dataset.geocode;
-              const latDif = Math.abs(latLngObject.latitude) - Math.abs(existingGeocode.latitude);
-              const longDif = Math.abs(latLngObject.longitude) - Math.abs(existingGeocode.longitude);
+            // don't add geocodes that are only slightly different
+            const shouldAddGeocode = true;
 
-              if ((Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
-                shouldAddGeocode = false;
-            });
+            this.geocode_radio_container
+              .querySelectorAll('input[type="radio"]')
+              .forEach(function (index, element) {
+                const existingGeocode = element.dataset.geocode;
+                const latDif = Math.abs(latLngObject.latitude) - Math.abs(existingGeocode.latitude);
+                const longDif = Math.abs(latLngObject.longitude) - Math.abs(existingGeocode.longitude);
+
+                if ((Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
+                  shouldAddGeocode = false;
+              });
 
             if (shouldAddGeocode)
-              geocode_radio_container.append(radioBtnToInsert);
+              this.geocode_radio_container.append(radioBtnToInsert);
           }
         }
 
@@ -494,12 +502,12 @@ class MOMultiImageUploader {
 
       getUserEnteredInfo() {
         return {
-          day: this.dom_element.querySelectorAll('select')[0]).value,
-          month: this.dom_element.querySelectorAll('select')[1]).value,
-          year: this.dom_element.querySelectorAll('input')[2]).value,
-          license: this.dom_element.querySelectorAll('select')[2]).value,
-          notes: this.dom_element.querySelectorAll('textarea')[0]).value,
-          copyright_holder: this.dom_element.querySelectorAll('input')[1]).value
+          day: this.dom_element.querySelectorAll('select')[0].value,
+          month: this.dom_element.querySelectorAll('select')[1].value,
+          year: this.dom_element.querySelectorAll('input')[2].value,
+          license: this.dom_element.querySelectorAll('select')[2].value,
+          notes: this.dom_element.querySelectorAll('textarea')[0].value,
+          copyright_holder: this.dom_element.querySelectorAll('input')[1].value
         };
       }
 
@@ -551,7 +559,7 @@ class MOMultiImageUploader {
         function doDots(i) {
           setTimeout(function () {
             if (i < 900) {
-              _container.querySelectorAll(".progress-text").html = localized_text.uploading_text + _dots[i % 3];
+              _container.querySelectorAll(".progress-text").html = localized_text.uploading_text + this.dots[i % 3];
               doDots(++i);
             }
           }, 333)
@@ -564,18 +572,22 @@ class MOMultiImageUploader {
           progress = null,
           update = null;
 
-        submit_buttons.value = localized_text.uploading_text + '...';
+        this.submit_buttons.value = localized_text.uploading_text + '...';
         _this.incrementProgressBar();
 
         xhrReq.onreadystatechange = function () { //after image has been created.
           if (xhrReq.readyState == 4) {
             if (xhrReq.status == 200) {
               const image = JSON.parse(xhrReq.response);
-              goodImageVals = good_images.value ? good_images.value : "";
-              good_images.value = goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id; //add id to the good images form field.
-              if (_this.dom_element.querySelectorAll('input[name="observation[thumb_image_id]"]')[0].checked) {
-                //set the thumbnail if it is selected
-                document.getElementById('observation_thumb_image_id').value = image.id;
+              const good_image_vals = this.good_images.value ?
+                this.good_images.value : "";
+              // add id to the good images form field.
+              good_images.value = good_image_vals.length == 0 ?
+                image.id : goodImageVals + ' ' + image.id;
+              //set the thumbnail if it is selected
+              if (_this.dom_element.querySelector('input[name="observation[thumb_image_id]"]').checked) {
+                document.getElementById('observation_thumb_image_id')
+                  .value = image.id;
               }
             } else if (xhrReq.response) {
               alert(xhrReq.response);
@@ -592,7 +604,7 @@ class MOMultiImageUploader {
         // This is currently disabled in nginx, so no sense making the request.
         // update = function() {
         //   const req = new XMLHttpRequest();
-        //   req.open("GET", _progress_uri, 1);
+        //   req.open("GET", this.progress_uri, 1);
         //   req.setRequestHeader("X-Progress-ID", _this.uuid);
         //   req.onreadystatechange = function () {
         //   if (req.readyState == 4 && req.status == 200) {
@@ -612,9 +624,9 @@ class MOMultiImageUploader {
 
         // Note: You need to add the event listeners before calling open()
         // on the request.
-        xhrReq.open("POST", _upload_image_uri, true);
+        xhrReq.open("POST", this.upload_image_uri, true);
         xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
-        const _fd = _this.asformData(); //Send the form
+        const _fd = _this.asformData(); // Send the form
         if (_fd != null) {
           xhrReq.send(_fd);
         } else {
@@ -670,7 +682,7 @@ class MOMultiImageUploader {
       };
 
     // was bind('click.fixDateBind
-    fix_date_submit.onclick = function () {
+    this.fix_date_submit.onclick = function () {
       const _selectedItemData =
         document.querySelectorAll('input[name=fix_date]:checked').dataset;
 
