@@ -10,7 +10,9 @@ module AjaxController::AutoComplete
   # type:: Type of string.
   # id::   String user has entered.
   def auto_complete
-    @user = User.current
+    # Could set `session_user!`` in ajax_controller, but that would force all
+    # ajax routes to have a logged-in user. Tests would need adjusting.
+    @user = User.current = session_user
 
     string = CGI.unescape(@id).strip_squeeze
     if string.blank?
@@ -25,7 +27,7 @@ module AjaxController::AutoComplete
   def auto_complete_results(string)
     case @type
     when "location"
-      params[:format] = "scientific" if @user&.location_format == "scientific"
+      params[:format] = @user&.location_format
     when "herbarium"
       params[:user_id] = @user&.id
     end

@@ -3,7 +3,7 @@
 //= require rails-ujs
 //= require bootstrap-sprockets
 //= require jstz
-//= require autocomplete
+//= require mo_autocompleter
 //= require box_resizer
 //= require lazyload_verlok
 //= require csrf_token

@@ -25,11 +25,11 @@
     <%= fields_for(:list) do |f_l|
       text_area_with_label(form: f_l, field: :members, rows: 8,
                            label: :form_species_lists_write_in_species.t + ":",
-                           value: @list_members)
+                           value: @list_members, placeholder: :start_typing.l,
+                           data: { autocompleter: :name,
+                                   autocomplete_separator: "\n" })
     end %>
   </div>
-  <% turn_into_name_auto_completer(:list_members, primer: Name.primer,
-                                   token: "\n") %>
 
   <%= text_field_with_label(form: f, field: :title, between: :required,
                             label: :form_species_lists_title.t + ":") %>
@@ -41,16 +41,16 @@
   <div class="form-group form-inline">
     <%= f.label(:when, :WHEN.t + ":") %>
     <%= f.date_select(:when, date_select_opts(@species_list),
-                      { class: "form-control" }) %>
+                      { class: "form-control",
+                        data: { autocompleter: :year } }) %>
   </div>
-  <% turn_into_year_auto_completer(:species_list_when_1i) %>
 
   <%= render(partial: "shared/form_location_feedback",
              locals: { button: button } ) %>
 
   <%= text_field_with_label(form: f, field: :place_name, between: :required,
-                            label: :WHERE.t + ":") %>
-  <% turn_into_location_auto_completer(:species_list_place_name) %>
+                            placeholder: :start_typing.l, label: :WHERE.t + ":",
+                            data: { autocompleter: :location }) %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>
