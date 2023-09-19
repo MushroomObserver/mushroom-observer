@@ -192,7 +192,7 @@ class MOMultiImageUploader {
             continue;
           }
 
-          // uuid is used as the index for the ruby form template.
+          // uuid is used as the index for the ruby form template. // **
           const _fileStoreItem = new FileStoreItem(files[i], generateUUID());
           // add an item to the dictionary with the file size as the key
           this.fileDictionary[files[i].size] = _fileStoreItem;
@@ -203,10 +203,10 @@ class MOMultiImageUploader {
         checkStatus();
         function checkStatus() {
           setTimeout(function () {
-            if (!_this.areAllProcessed()) {
+            if (!this.areAllProcessed()) {
               checkStatus();
             } else {
-              this.dateUpdater.refreshBox();
+              this.dateUpdater.refreshBox(); // **
             }
           }, 30)
         }
@@ -215,6 +215,7 @@ class MOMultiImageUploader {
       addUrl(url) {
         // const _this = this;
         if (this.fileDictionary[url] == undefined) {
+          // **
           const _fileStoreItem = new this.FileStoreItem(url, generateUUID());
           this.fileDictionary[url] = _fileStoreItem;
           this.fileStoreItems.push(_fileStoreItem);
