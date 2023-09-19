@@ -434,8 +434,10 @@ class MOMultiImageUploader {
               .querySelectorAll('input[type="radio"]')
               .forEach(function (index, element) {
                 const existingGeocode = element.dataset.geocode;
-                const latDif = Math.abs(latLngObject.latitude) - Math.abs(existingGeocode.latitude);
-                const longDif = Math.abs(latLngObject.longitude) - Math.abs(existingGeocode.longitude);
+                const latDif = Math.abs(latLngObject.latitude)
+                  - Math.abs(existingGeocode.latitude);
+                const longDif = Math.abs(latLngObject.longitude)
+                  - Math.abs(existingGeocode.longitude);
 
                 if ((Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
                   shouldAddGeocode = false;
