@@ -2,14 +2,22 @@
   <% if @suspect_checked_projects.any? %>
     <% flash_error(:form_observations_there_is_a_problem_with_projects.t) %>
 
-    <div class="alert alert-danger" id="project_messages">
-      <%= tag.p("#{:form_observations_projects_out_of_range.t(date: @observation.when)}:") %>
-      <p>
+    <div class="alert alert-danger"
+         id="project_messages">
+      <%= tag.p(
+        "#{:form_observations_projects_out_of_range.t(
+          date: @observation.when
+        )}:"
+      ) %>
+      <ul>
         <% @suspect_checked_projects.each do |proj| %>
-        <%= "#{proj.title} (#{proj.start_date_str} - #{proj.end_date_str})" %>
+        <%= tag.li("#{proj.title} (#{proj.start_date_str} -
+                    #{proj.end_date_str})") %>
         <% end %>
-      </p>
-      <p><%= :form_observations_projects_out_of_range_help.t(button: button_name)%></p>
+      </ul>
+      <%= tag.p(
+        :form_observations_projects_out_of_range_help.t(button: button_name)
+      )%>
     </div>
   <% end %>
 
