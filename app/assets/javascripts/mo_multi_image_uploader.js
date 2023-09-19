@@ -169,12 +169,12 @@ class MOMultiImageUploader {
     // Container for the image files.
     this.FileStore = class {
       constructor() {
-        const _this = this;
-        _this.fileStoreItems = [];
-        _this.fileDictionary = {};
-        _this.areAllProcessed = function () {
-          for (let i = 0; i < _this.fileStoreItems.length; i++) {
-            if (!_this.fileStoreItems[i].processed)
+        // const _this = this;
+        this.fileStoreItems = [];
+        this.fileDictionary = {};
+        this.areAllProcessed = function () {
+          for (let i = 0; i < this.fileStoreItems.length; i++) {
+            if (!this.fileStoreItems[i].processed)
               return false;
           }
           return true;
@@ -182,21 +182,21 @@ class MOMultiImageUploader {
       }
 
       addFiles(files) {
-        const _this = this;
+        // const _this = this;
 
         // loop through attached files, make sure we aren't adding duplicates
         for (let i = 0; i < files.length; i++) {
           // stop adding the file, one with this exact size is already attached
           // TODO: What are the odds of this?
-          if (_this.fileDictionary[files[i].size] != undefined) {
+          if (this.fileDictionary[files[i].size] != undefined) {
             continue;
           }
 
           // uuid is used as the index for the ruby form template.
           const _fileStoreItem = new FileStoreItem(files[i], generateUUID());
           // add an item to the dictionary with the file size as the key
-          _this.fileDictionary[files[i].size] = _fileStoreItem;
-          _this.fileStoreItems.push(_fileStoreItem)
+          this.fileDictionary[files[i].size] = _fileStoreItem;
+          this.fileStoreItems.push(_fileStoreItem)
         }
 
         // check status of when all the selected files have processed.
@@ -206,39 +206,39 @@ class MOMultiImageUploader {
             if (!_this.areAllProcessed()) {
               checkStatus();
             } else {
-              dateUpdater.refreshBox();
+              this.dateUpdater.refreshBox();
             }
           }, 30)
         }
       }
 
       addUrl(url) {
-        const _this = this;
-        if (_this.fileDictionary[url] == undefined) {
-          const _fileStoreItem = new FileStoreItem(url, generateUUID());
-          _this.fileDictionary[url] = _fileStoreItem;
-          _this.fileStoreItems.push(_fileStoreItem);
+        // const _this = this;
+        if (this.fileDictionary[url] == undefined) {
+          const _fileStoreItem = new this.FileStoreItem(url, generateUUID());
+          this.fileDictionary[url] = _fileStoreItem;
+          this.fileStoreItems.push(_fileStoreItem);
         }
       }
 
       updateImageDates(simpleDate) {
         const _this = this;
-        _this.fileStoreItems.forEach(function (fileStoreItem) {
+        this.fileStoreItems.forEach(function (fileStoreItem) {
           fileStoreItem.imageDate(simpleDate);
         });
       }
 
       getDistinctImageDates() {
-        const _this = this,
-          _testAgainst = "",
+        // const _this = this,
+        const _testAgainst = "",
           _distinct = [];
 
-        for (let i = 0; i < _this.fileStoreItems.length; i++) {
-          const _ds = _this.fileStoreItems[i].imageDate().asDateString();
+        for (let i = 0; i < this.fileStoreItems.length; i++) {
+          const _ds = this.fileStoreItems[i].imageDate().asDateString();
           if (_testAgainst.indexOf(_ds) != -1)
             continue;
           _testAgainst += _ds;
-          _distinct.push(_this.fileStoreItems[i].imageDate())
+          _distinct.push(this.fileStoreItems[i].imageDate())
         }
 
         return _distinct;
@@ -252,7 +252,7 @@ class MOMultiImageUploader {
       }
 
       uploadAll() {
-        const _this = this;
+        // const _this = this;
 
         // disable submit and remove image buttons during upload process.
         this.submit_buttons.setAttribute('disabled', 'true');
@@ -260,8 +260,8 @@ class MOMultiImageUploader {
 
         // callback function to move through the the images to upload
         function getNextImage() {
-          _this.fileStoreItems[0].destroy();
-          return _this.fileStoreItems[0];
+          this.fileStoreItems[0].destroy();
+          return this.fileStoreItems[0];
         }
 
         function onUploadedCallback() {
@@ -277,7 +277,7 @@ class MOMultiImageUploader {
           }
         }
 
-        const firstUpload = _this.fileStoreItems[0];
+        const firstUpload = this.fileStoreItems[0];
         if (firstUpload) {
           // uploads first image. if we have one.
           firstUpload.upload(onUploadedCallback);
@@ -331,17 +331,17 @@ class MOMultiImageUploader {
       }
 
       createTemplate(html_string) {
-        const _this = this;
+        // const _this = this;
 
         html_string = html_string
           .replace('{{img_file_name}}', _this.file_name())
           .replace('{{img_file_size}}', this.is_file ? Math.floor((_this.file_size() / 1024)) + "kb" : "");
 
         // Create the DOM element and add it to FileStoreItem;
-        _this.dom_element = document.createElement(html_string);
+        this.dom_element = document.createElement(html_string);
 
         if (_this.file_size() > this.max_image_size)
-          _this.dom_element.querySelectorAll('.warn-text').text =
+          this.dom_element.querySelectorAll('.warn-text').text =
             this.localized_text.image_too_big_text;
 
         // add it to the page
