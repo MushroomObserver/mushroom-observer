@@ -119,6 +119,7 @@ past_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
+  start_date: nil
   end_date: <%= Time.zone.today - 1.month %>
 
 future_project:
@@ -131,6 +132,7 @@ future_project:
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
   start_date: <%= Time.zone.tomorrow%>
+  end_date: nil
 
 current_project:
   <<: *DEFAULTS
@@ -142,3 +144,9 @@ current_project:
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
   end_date: <%= Time.zone.tomorrow %>
+
+pinned_date_range_project:
+  <<: *DEFAULTS
+  title: Appalachia NAMA 2023
+  start_date: 2023-08-24
+  end_date: 2023-08-27

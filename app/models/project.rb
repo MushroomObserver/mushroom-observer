@@ -336,6 +336,15 @@ class Project < AbstractModel
     starts_no_later_than?(date) && ends_no_earlier_than?(date)
   end
 
+  # convenience methods for date range display
+  def start_date_text(format = "%Y-%m-%d")
+    start_date.nil? ? :UNDEFINED.t : start_date.strftime(format)
+  end
+
+  def end_date_text(format = "%Y-%m-%d")
+    end_date.nil? ? :UNDEFINED.t : end_date.strftime(format)
+  end
+
   private
 
   def future?
