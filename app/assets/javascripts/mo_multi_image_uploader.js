@@ -586,23 +586,24 @@ class FileStoreItem {
     const url = this.Uploader.get_template_uri + "?img_number=" + this.uuid;
     // + new URLSearchParams({ img_number: this.uuid })
     console.log(url);
-    // fetch(url, {
-    //   method: 'GET',
-    //   headers: {
-    //     'X-CSRF-Token': csrfToken,
-    //     'X-Requested-With': 'XMLHttpRequest',
-    //     'Content-Type': 'text/html',
-    //     'Accept': 'text/html'
-    //   },
-    //   credentials: 'same-origin',
-    //   search: new URLSearchParams({ img_number: this.uuid })
-    // }).then((response) => {
-    fetch(url).then((response) => {
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        // 'X-CSRF-Token': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'text/html',
+        'Accept': 'text/html'
+      },
+      // credentials: 'same-origin',
+      search: new URLSearchParams({ img_number: this.uuid })
+    }).then((response) => {
+      // fetch(url).then((response) => {
       if (response.ok) {
-        console.log("response: " + response);
+        // console.log("response: " + JSON.stringify(response));
         if (200 <= response.status && response.status <= 299) {
           response.text().then((content) => {
-            console.log("content: " + content);
+            // console.log("content: " + content);
             // the data returned is the raw HTML template
             this.createTemplate(content)
             // extract the EXIF data (async) and then load it
@@ -623,13 +624,20 @@ class FileStoreItem {
   }
 
   createTemplate(html_string) {
-    html_string = html_string
+    // console.log("html_string: " + html_string);
+    html_string = html_string // .replace(/\s\s+/g, ' ')
       .replace('{{img_file_name}}', this.file_name())
       .replace('{{img_file_size}}', this.is_file ?
-        Math.floor((this.file_size() / 1024)) + "kb" : "");
+        Math.floor((this.file_size() / 1024)) + "kb" : "").trim();
+
+    // console.log("html_string now: " + html_string);
 
     // Create the DOM element and add it to FileStoreItem;
-    this.dom_element = document.createElement(html_string);
+    const template = document.createElement("template");
+    template.innerHTML = html_string;
+
+    this.dom_element = template.content;
+    console.log("this.dom_element: " + this.dom_element);
 
     if (this.file_size() > this.max_image_size)
       this.dom_element.querySelector('.warn-text').text =
@@ -640,13 +648,13 @@ class FileStoreItem {
 
     // bind the destroy function
     this.dom_element.querySelector('.remove_image_link')
-      .onclick = function () {
+      .onclick = () => {
         this.destroy();
         this.Uploader.dateUpdater.refreshBox();
       };
 
     this.dom_element.querySelector('select')
-      .onchange = function () {
+      .onchange = () => {
         this.Uploader.dateUpdater.refreshBox();
       };
   }
