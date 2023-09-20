@@ -68,12 +68,12 @@ class MOMultiImageUploader {
           .value = _selectedItemData.geocode.longitude;
         document.getElementById('observation_alt')
           .value = _selectedItemData.geocode.altitude;
-        this.geocode_messages.hide('slow');
+        this.hide(this.geocode_messages);
       }
     };
 
     this.ignore_geocode_btn.onclick = function () {
-      this.geocode_messages.hide('slow');
+      this.hide(this.geocode_messages);
     };
 
 
@@ -96,7 +96,7 @@ class MOMultiImageUploader {
 
     // was bind('click.ignoreDateBind'
     this.ignore_date_submit.onclick = function () {
-      this.img_messages.hide('slow');
+      this.hide(this.img_messages);
     };
 
     this.obs_year.onchange = function () {
@@ -198,6 +198,17 @@ class MOMultiImageUploader {
   /*********************/
   /*    Helpers    */
   /*********************/
+
+  // notice this is for block-level
+  show(element) {
+    element.style.display = 'block';
+    element.classList.add("in");
+  }
+
+  hide(element) {
+    element.classList.remove("in");
+    window.setTimeout(() => { element.style.display = 'none'; }, 600);
+  }
 
   generateUUID() {
     return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -325,9 +336,9 @@ class DateUpdater {
     });
 
     if (this.areDatesInconsistent()) {
-      this.Uploader.img_messages.show('slow');
+      this.Uploader.show(this.Uploader.img_messages);
     } else {
-      this.Uploader.img_messages.hide('slow')
+      this.Uploader.hide(this.Uploader.img_messages);
     }
   }
 
@@ -336,7 +347,7 @@ class DateUpdater {
       this.Uploader.fileStore.updateImageDates(simpleDate);
     if (target == "observation")
       this.observationDate(simpleDate);
-    this.Uploader.img_messages.hide('slow');
+    this.Uploader.hide(this.Uploader.img_messages);
   }
 
   makeImageDateRadio(simpleDate) {
@@ -372,7 +383,7 @@ class DateUpdater {
       .forEach((elem) => { elem.text = _currentObsDate.asDateString(); })
 
     if (this.areDatesInconsistent())
-      this.Uploader.img_messages.show('slow');
+      this.Uploader.show(this.Uploader.img_messages);
   }
 
   // undefined gets current date, simpledate object updates date
@@ -485,7 +496,7 @@ class FileStore {
   uploadAll() {
     // disable submit and remove image buttons during upload process.
     this.Uploader.submit_buttons.setAttribute('disabled', 'true');
-    this.Uploader.remove_links.hide();
+    this.Uploader.hide(this.Uploader.remove_links);
 
     // callback function to move through the the images to upload
     function getNextImage() {
@@ -546,23 +557,57 @@ class FileStoreItem {
   // does an ajax request to get the template, then formats it
   // the format function adds to HTML
   getTemplateHtml() {
-    // const _this = this;
-    jQuery.get(this.Uploader.get_template_uri, {
-      img_number: _this.uuid
-    }, function (data) {
-      // on success
-      // the data returned is the raw HTML template
-      this.createTemplate(data)
-      // extract the EXIF data (async) and then load it
-      this.getExifData();
-      // load image as base64 async
-      this.loadImage();
+    // jQuery.get(this.Uploader.get_template_uri, {
+    //   img_number: this.uuid
+    // }, function (data) {
+    //   // on success
+    //   // the data returned is the raw HTML template
+    //   this.createTemplate(data)
+    //   // extract the EXIF data (async) and then load it
+    //   this.getExifData();
+    //   // load image as base64 async
+    //   this.loadImage();
+    // });
+
+    const url = this.Uploader.get_template_uri;
+    url.search = new URLSearchParams({ img_number: this.uuid })
+
+    fetch(url).then((response) => {
+      // fetch(url, {
+      //   method: 'GET',
+      //   headers: {
+      //     'X-CSRF-Token': csrfToken,
+      //     'X-Requested-With': 'XMLHttpRequest',
+      //     'Content-Type': 'text/html',
+      //     'Accept': 'text/html'
+      //   },
+      //   credentials: 'same-origin',
+      //   search: new URLSearchParams({ img_number: this.uuid })
+      // }).then((response) => {
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          response.text().then((content) => {
+            // console.log("content: " + content);
+            // the data returned is the raw HTML template
+            this.createTemplate(content)
+            // extract the EXIF data (async) and then load it
+            this.getExifData();
+            // load image as base64 async
+            this.loadImage();
+          }).catch((error) => {
+            console.error("no_content:", error);
+          });
+        } else {
+          this.ajax_request = null;
+          console.log(`got a ${response.status}`);
+        }
+      }
+    }).catch((error) => {
+      // console.error("Server Error:", error);
     });
   }
 
   createTemplate(html_string) {
-    // const _this = this;
-
     html_string = html_string
       .replace('{{img_file_name}}', this.file_name())
       .replace('{{img_file_size}}', this.is_file ?
@@ -572,20 +617,20 @@ class FileStoreItem {
     this.dom_element = document.createElement(html_string);
 
     if (_this.file_size() > this.max_image_size)
-      this.dom_element.querySelectorAll('.warn-text').text =
+      this.dom_element.querySelector('.warn-text').text =
         this.Uploader.localized_text.image_too_big_text;
 
     // add it to the page
     this.Uploader.add_img_container.append(this.dom_element);
 
     // bind the destroy function
-    this.dom_element.querySelectorAll('.remove_image_link')
+    this.dom_element.querySelector('.remove_image_link')
       .onclick = function () {
         this.destroy();
         this.Uploader.dateUpdater.refreshBox();
       };
 
-    this.dom_element.querySelectorAll('select')
+    this.dom_element.querySelector('select')
       .onchange = function () {
         this.Uploader.dateUpdater.refreshBox();
       };
@@ -611,14 +656,14 @@ class FileStoreItem {
 
       fileReader.onload = function (fileLoadedEvent) {
         // find the actual image element
-        const _img = this.dom_element.querySelectorAll('.img-responsive')[0];
+        const _img = this.dom_element.querySelector('.img-responsive');
         // get image element in container and set the src to base64 img url
         _img.setAttribute('src', fileLoadedEvent.target.result);
       };
 
       fileReader.readAsDataURL(this.file);
     } else {
-      const _img = this.dom_element.querySelectorAll('.img-responsive')[0];
+      const _img = this.dom_element.querySelector('.img-responsive');
       _img.setAttribute('src', _this.url)
         .onerror = function () {
           alert("Couldn't read image from: " + _this.url);
@@ -630,7 +675,7 @@ class FileStoreItem {
   // extracts the exif data async;
   getExifData() {
     const _fsItem = this;
-    _fsItem.dom_element.querySelectorAll('.img-responsive')[0]
+    _fsItem.dom_element.querySelector('.img-responsive')
       .onload = function () {
         EXIF.getData(this, function () {
           _fsItem.exif_data = this.exifdata;
@@ -646,7 +691,7 @@ class FileStoreItem {
     const _exif = this.exif_data;
 
     if (this.dom_element == null) {
-      console.warn("Error: Dom element for this file has not been created, so cannot update it with exif data!");
+      console.warn("Error: DOM element for this file has not been created, so cannot update it with exif data!");
       return;
     }
 
@@ -659,7 +704,7 @@ class FileStoreItem {
 
       if (geocode_radio_container
         .querySelectorAll('input[type="radio"]').length === 0) {
-        this.Uploader.geocode_messages.show('medium');
+        this.Uploader.show(this.Uploader.geocode_messages);
         this.Uploader.geocode_radio_container.append(radioBtnToInsert);
       }
 
@@ -718,12 +763,16 @@ class FileStoreItem {
     const _day = this.dom_element.querySelectorAll('select')[0],
       _month = this.dom_element.querySelectorAll('select')[1],
       _year = this.dom_element.querySelectorAll('input')[2];
+    let _date_values;
+
     if (simpleDate) {
-      _day.value = simpleDate.day;
-      _month.value = simpleDate.month;
-      _year.value = simpleDate.year;
+      _date_values = [
+        _day.value = simpleDate.day,
+        _month.value = simpleDate.month,
+        _year.value = simpleDate.year
+      ]
     }
-    return new SimpleDate(_day.value, _month.value, _year.value);
+    return new SimpleDate(_date_values);
   }
 
   getUserEnteredInfo() {
@@ -828,9 +877,10 @@ class FileStoreItem {
         } else {
           alert(this.Uploader.localized_text.something_went_wrong);
         }
+
         if (progress) window.clearTimeout(progress);
         this.incrementProgressBar(1);
-        this.dom_element.hide('slow');
+        this.Uploader.hide(this.dom_element);
         onUploadedCallback(); // passed to this function
       }
     };
