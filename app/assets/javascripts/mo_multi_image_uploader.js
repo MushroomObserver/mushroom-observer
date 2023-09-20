@@ -128,12 +128,14 @@ class MOMultiImageUploader {
       });
     })
 
-    this.content.ondrop = function (e) {
+    // console.log("WTF");
+    // console.log(this.fileStore);
+    this.content.ondrop = (e) => {
       if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
       document.getElementById('right_side').classList.remove('dashed-border');
       const dataTransfer = e.originalEvent.dataTransfer;
       if (dataTransfer.files.length > 0)
-        this.fileStore.addFiles(dataTransfer.files);
+        this.fileStore.addFiles(dataTransfer.files); // ** this! nope
       // There are issues to work out concerning dragging and dropping
       // images from other websites into the observation form.
       // else
@@ -141,9 +143,10 @@ class MOMultiImageUploader {
     };
 
     // Detect when files are added from browser
-    this.select_files_button.onchange = function () {
-      const files = this[0].files; // Get the files from the browser
-      this.fileStore.addFiles(files);
+    // We need the outer `this`
+    this.select_files_button.onchange = (event) => {
+      // const files = this.files; // Get the files from the browser
+      this.fileStore.addFiles(event.target.files);
     };
 
     // IMPORTANT:  This allows the user to update the thumbnail on the edit
@@ -219,13 +222,21 @@ class MOMultiImageUploader {
     });
   }
 
+  simpleDateAsString(simpleDate) {
+    const _months = this.localized_text.months.split(' ');
+
+    return simpleDate.day + "-"
+      + _months[simpleDate.month - 1]
+      + "-" + simpleDate.year;
+  }
+
   /** Geocode Helpers **/
 
-  makeGeocodeRadioBtn(latLngObjct) {
-    const geocode = JSON.stringify(latLngObjct),
-      geocodeformap = JSON.stringify(latLngObjct),
-      geoCodeStr = latLngObjct.latitude.toFixed(5) + ", "
-        + latLngObjct.longitude.toFixed(5),
+  makeGeocodeRadioBtn(latLngAlt) {
+    const geocode = JSON.stringify(latLngAlt),
+      geocodeformap = JSON.stringify(latLngAlt),
+      geoCodeStr = latLngAlt.latitude.toFixed(5) + ", "
+        + latLngAlt.longitude.toFixed(5),
 
       html = "<div class='radio'><label><input type='radio' data-geocode='"
         + geocode + "' name='fix_geocode'/>" + geoCodeStr + "</label> "
@@ -236,7 +247,7 @@ class MOMultiImageUploader {
     return html;
   }
 
-  getLatitudeLongitudeFromEXIF(exifObject) {
+  getLatLongEXIF(exifObject) {
     let lat = exifObject.GPSLatitude[0]
       + (exifObject.GPSLatitude[1] / 60.0)
       + (exifObject.GPSLatitude[2] / 3600.0);
@@ -258,22 +269,23 @@ class MOMultiImageUploader {
     }
   }
 
-  showGeocodeonMap(latLngObj) {
+  showGeocodeonMap(latLngAlt) {
     // Create a map object and specify the DOM element for display.
-    const obsLatLongformat = {
-      lat: latLngObj.latitude, lng: latLngObj.longitude
-    }
-    // jQuery('#geocode_map').width('100%'); // css class w-100 on the div
-    document.getElementById('geocode_map').setAttribute('height', '250');
+    const _latLng = {
+      lat: latLngAlt.latitude, lng: latLngAlt.longitude
+    },
+      _map_container = document.getElementById('geocode_map');
 
-    const map = new google.maps.Map(document.getElementById('geocode_map'), {
-      center: obsLatLongformat,
+    _map_container.setAttribute('height', '250');
+
+    const map = new google.maps.Map(_map_container, {
+      center: _latLng,
       zoom: 12
     });
 
     const marker = new google.maps.Marker({
       map: map,
-      position: obsLatLongformat
+      position: obsLatLongFormat
     });
   }
 }
@@ -281,23 +293,22 @@ class MOMultiImageUploader {
 /*********************/
 /* Simple Date Class */
 /*********************/
+// This could just as well be three helper methods in the main class,
+// without having to pass the uploader and the methods needing an extra arg,
+// but maybe it's nice to have the constructor
 class SimpleDate {
-  constructor(day, month, year, uploader) {
-    this.Uploader = uploader;
+  // needs the uploader for localized_text only
+  constructor(day, month, year) {
     this.day = parseInt(day);
     this.month = parseInt(month);
     this.year = parseInt(year);
   }
 
-  areEqual(simpleDate) { //returns true if same
-    // const _this = this;
-    return this.month == simpleDate.month && this.day == simpleDate.day
+  // returns true if same
+  areEqual(simpleDate) {
+    return this.day == simpleDate.day
+      && this.month == simpleDate.month
       && this.year == simpleDate.year;
-  }
-
-  asDateString() {
-    const _months = this.Uploader.localized_text.months.split(' ');
-    return this.day + "-" + _months[this.month - 1] + "-" + this.year;
   }
 };
 
@@ -354,27 +365,21 @@ class DateUpdater {
 
   makeImageDateRadio(simpleDate) {
     const _date = JSON.stringify(simpleDate),
-      _date_string = simpleDate.asDateString(),
+      _date_string = this.Uploader.simpleDateAsString(simpleDate),
       _html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label></div>"
-    // html = html.replace('{{date}}', JSON.stringify(simpleDate));
-    // html = html.replace('{{dateStr}}', simpleDate.asDateString());
 
     this.Uploader.img_radio_container.append(_html);
   }
 
   makeObservationDateRadio(simpleDate) {
     const _date = JSON.stringify(simpleDate),
-      _date_string = simpleDate.asDateString(),
+      _date_string = this.Uploader.simpleDateAsString(simpleDate),
       _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
-    // html = html.replace('{{date}}', JSON.stringify(simpleDate));
-    // html = html.replace('{{dateStr}}', simpleDate.asDateString());
 
-    // const obs_radio = jQuery(html);
     this.Uploader.obs_radio_container.append(_html);
   }
 
   updateObservationDateRadio() {
-    // const _this = this;
     // _currentObsDate is an instance of Uploader.SimpleDate(values)
     const _currentObsDate = this.observationDate();
 
@@ -382,7 +387,9 @@ class DateUpdater {
       .forEach((elem) => { elem.dataset.date = _currentObsDate; })
 
     this.Uploader.obs_radio_container.querySelectorAll('span')
-      .forEach((elem) => { elem.text = _currentObsDate.asDateString(); })
+      .forEach((elem) => {
+        elem.text = this.Uploader.simpleDateAsString(_currentObsDate);
+      })
 
     if (this.areDatesInconsistent())
       this.Uploader.show(this.Uploader.img_messages);
@@ -424,8 +431,6 @@ class FileStore {
   }
 
   addFiles(files) {
-    // const _this = this;
-
     // loop through attached files, make sure we aren't adding duplicates
     for (let i = 0; i < files.length; i++) {
       // stop adding the file, one with this exact size is already attached
@@ -435,30 +440,33 @@ class FileStore {
       }
 
       // uuid is used as the index for the ruby form template. // **
-      const _fileStoreItem = new FileStoreItem(files[i], generateUUID());
+      const _fileStoreItem = new FileStoreItem(
+        files[i], this.Uploader.generateUUID(), this.Uploader
+      );
+
       // add an item to the dictionary with the file size as the key
       this.fileDictionary[files[i].size] = _fileStoreItem;
       this.fileStoreItems.push(_fileStoreItem)
     }
 
     // check status of when all the selected files have processed.
-    function checkStatus() {
-      setTimeout(function () {
-        if (!this.areAllProcessed()) {
-          checkStatus();
-        } else {
-          this.Uploader.dateUpdater.refreshBox(); // **
-        }
-      }, 30)
-    }
-    checkStatus();
+    this.checkStatus();
+  }
+
+  checkStatus() {
+    setTimeout(() => {
+      if (!this.areAllProcessed()) {
+        this.checkStatus();
+      } else {
+        this.Uploader.dateUpdater.refreshBox();
+      }
+    }, 30)
   }
 
   addUrl(url) {
-    // const _this = this;
     if (this.fileDictionary[url] == undefined) {
-      // **
-      const _fileStoreItem = new FileStoreItem(url, generateUUID());
+      const _fileStoreItem =
+        new FileStoreItem(url, this.Uploader.generateUUID(), this.Uploader);
 
       this.fileDictionary[url] = _fileStoreItem;
       this.fileStoreItems.push(_fileStoreItem);
@@ -466,21 +474,22 @@ class FileStore {
   }
 
   updateImageDates(simpleDate) {
-    // const _this = this;
     this.fileStoreItems.forEach(function (fileStoreItem) {
       fileStoreItem.imageDate(simpleDate);
     });
   }
 
   getDistinctImageDates() {
-    // const _this = this,
     const _testAgainst = "",
       _distinct = [];
 
     for (let i = 0; i < this.fileStoreItems.length; i++) {
-      const _ds = this.fileStoreItems[i].imageDate().asDateString();
+      const _ds =
+        this.Uploader.simpleDateAsString(this.fileStoreItems[i].imageDate());
+
       if (_testAgainst.indexOf(_ds) != -1)
         continue;
+
       _testAgainst += _ds;
       _distinct.push(this.fileStoreItems[i].imageDate())
     }
@@ -490,9 +499,7 @@ class FileStore {
 
   // remove all the images as they were uploaded!
   destroyAll() {
-    this.fileStoreItems.forEach((item) => {
-      item.destroy();
-    });
+    this.fileStoreItems.forEach((item) => { item.destroy(); });
   }
 
   uploadAll() {
@@ -576,25 +583,26 @@ class FileStoreItem {
     //   this.loadImage();
     // });
 
-    const url = this.Uploader.get_template_uri;
-    url.search = new URLSearchParams({ img_number: this.uuid })
-
+    const url = this.Uploader.get_template_uri + "?img_number=" + this.uuid;
+    // + new URLSearchParams({ img_number: this.uuid })
+    console.log(url);
+    // fetch(url, {
+    //   method: 'GET',
+    //   headers: {
+    //     'X-CSRF-Token': csrfToken,
+    //     'X-Requested-With': 'XMLHttpRequest',
+    //     'Content-Type': 'text/html',
+    //     'Accept': 'text/html'
+    //   },
+    //   credentials: 'same-origin',
+    //   search: new URLSearchParams({ img_number: this.uuid })
+    // }).then((response) => {
     fetch(url).then((response) => {
-      // fetch(url, {
-      //   method: 'GET',
-      //   headers: {
-      //     'X-CSRF-Token': csrfToken,
-      //     'X-Requested-With': 'XMLHttpRequest',
-      //     'Content-Type': 'text/html',
-      //     'Accept': 'text/html'
-      //   },
-      //   credentials: 'same-origin',
-      //   search: new URLSearchParams({ img_number: this.uuid })
-      // }).then((response) => {
       if (response.ok) {
+        console.log("response: " + response);
         if (200 <= response.status && response.status <= 299) {
           response.text().then((content) => {
-            // console.log("content: " + content);
+            console.log("content: " + content);
             // the data returned is the raw HTML template
             this.createTemplate(content)
             // extract the EXIF data (async) and then load it
@@ -618,12 +626,12 @@ class FileStoreItem {
     html_string = html_string
       .replace('{{img_file_name}}', this.file_name())
       .replace('{{img_file_size}}', this.is_file ?
-        Math.floor((_this.file_size() / 1024)) + "kb" : "");
+        Math.floor((this.file_size() / 1024)) + "kb" : "");
 
     // Create the DOM element and add it to FileStoreItem;
     this.dom_element = document.createElement(html_string);
 
-    if (_this.file_size() > this.max_image_size)
+    if (this.file_size() > this.max_image_size)
       this.dom_element.querySelector('.warn-text').text =
         this.Uploader.localized_text.image_too_big_text;
 
@@ -671,9 +679,9 @@ class FileStoreItem {
       fileReader.readAsDataURL(this.file);
     } else {
       const _img = this.dom_element.querySelector('.img-responsive');
-      _img.setAttribute('src', _this.url)
+      _img.setAttribute('src', this.url)
         .onerror = function () {
-          alert("Couldn't read image from: " + _this.url);
+          alert("Couldn't read image from: " + this.url);
           this.destroy();
         };
     }
@@ -706,8 +714,8 @@ class FileStoreItem {
     // check if there is geodata on the image
     if (_exif.GPSLatitude && _exif.GPSLongitude) {
 
-      const latLngObject = getLatitudeLongitudeFromEXIF(_exif),
-        radioBtnToInsert = makeGeocodeRadioBtn(latLngObject);
+      const latLngAlt = this.Uploader.getLatLongEXIF(_exif),
+        radioBtnToInsert = this.Uploader.makeGeocodeRadioBtn(latLngAlt);
 
       if (geocode_radio_container
         .querySelectorAll('input[type="radio"]').length === 0) {
@@ -722,13 +730,13 @@ class FileStoreItem {
         this.Uploader.geocode_radio_container
           .querySelectorAll('input[type="radio"]')
           .forEach((index, element) => {
-            const existingGeocode = element.dataset.geocode;
-            const latDif = Math.abs(latLngObject.latitude)
-              - Math.abs(existingGeocode.latitude);
-            const longDif = Math.abs(latLngObject.longitude)
+            const _existingGeocode = element.dataset.geocode;
+            const _latDif = Math.abs(latLngAlt.latitude)
+              - Math.abs(_existingGeocode.latitude);
+            const _longDif = Math.abs(latLngAlt.longitude)
               - Math.abs(existingGeocode.longitude);
 
-            if ((Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
+            if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
               shouldAddGeocode = false;
           });
 
@@ -750,7 +758,8 @@ class FileStoreItem {
       this.imageDate(_exifSimpleDate);
 
       const _camera_date = this.dom_element.find(".camera_date_text");
-      _camera_date.text = _exifSimpleDate.asDateString();//shows the exif date by the photo
+      // shows the exif date by the photo
+      _camera_date.text = this.Uploader.simpleDateAsString(_exifSimpleDate);
       _camera_date.dataset.exif_date = _exifSimpleDate;
       _camera_date.onclick = function () {
         this.imageDate(_exifSimpleDate);
@@ -852,9 +861,12 @@ class FileStoreItem {
     }
   }
 
+  // upload with readable stream not implemented yet for fetch
+  // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
+  // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   upload(onUploadedCallback) {
-    const // _this = this,
-      xhrReq = new XMLHttpRequest(),
+    const xhrReq = new XMLHttpRequest(),
       progress = null;
     // let update = null;
 
@@ -869,15 +881,17 @@ class FileStoreItem {
           const _image = JSON.parse(xhrReq.response);
           const _good_image_vals = this.Uploader.good_images.value ?
             this.Uploader.good_images.value : "";
+
           // add id to the good images form field.
           this.Uploader.good_images.value = _good_image_vals.length == 0 ?
             _image.id : _good_image_vals + ' ' + _image.id;
+
           // set the thumbnail if it is selected
           if (this.dom_element
             .querySelector('input[name="observation[thumb_image_id]"]')
             .checked) {
             document.getElementById('observation_thumb_image_id')
-              .value = image.id;
+              .value = _image.id;
           }
         } else if (xhrReq.response) {
           alert(xhrReq.response);
@@ -885,10 +899,14 @@ class FileStoreItem {
           alert(this.Uploader.localized_text.something_went_wrong);
         }
 
-        if (progress) window.clearTimeout(progress);
+        if (progress)
+          window.clearTimeout(progress);
+
         this.incrementProgressBar(1);
         this.Uploader.hide(this.dom_element);
-        onUploadedCallback(); // passed to this function
+
+        // onUploadedCallback() is a function passed to this function
+        onUploadedCallback();
       }
     };
 
