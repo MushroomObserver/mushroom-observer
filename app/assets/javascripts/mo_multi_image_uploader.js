@@ -49,6 +49,11 @@ class MOMultiImageUploader {
     Object.assign(this.localized_text, localization_defaults);
     Object.assign(this.localized_text, localization);
 
+    // Make MOMultiImageUploader instance properties available to sub-classes
+    // In the following sub-classes, `this` refers to the sub-class, and
+    // `Uploader` refers to the class MOMultiImageUploader
+    const Uploader = this;
+
     /*********************/
     /* Simple Date Class */
     /*********************/
@@ -60,12 +65,13 @@ class MOMultiImageUploader {
       }
 
       areEqual(simpleDate) { //returns true if same
-        const _this = this;
-        return _this.month == simpleDate.month && _this.day == simpleDate.day && _this.year == simpleDate.year;
+        // const _this = this;
+        return this.month == simpleDate.month && this.day == simpleDate.day
+          && this.year == simpleDate.year;
       }
 
       asDateString() {
-        const _months = this.localized_text.months.split(' ');
+        const _months = Uploader.localized_text.months.split(' ');
         return this.day + "-" + _months[this.month - 1] + "-" + this.year;
       }
     };
@@ -80,9 +86,8 @@ class MOMultiImageUploader {
 
       // will check differences between the image dates and observation dates
       areDatesInconsistent() {
-        const _this = this,
-          _obsDate = _this.observationDate(),
-          _distinctDates = fileStore.getDistinctImageDates();
+        const _obsDate = this.observationDate(),
+          _distinctDates = Uploader.fileStore.getDistinctImageDates();
 
         for (let i = 0; i < _distinctDates.length; i++) {
           if (!_distinctDates[i].areEqual(_obsDate))
@@ -93,73 +98,82 @@ class MOMultiImageUploader {
       }
 
       refreshBox() {
-        const _this = this,
-          _distinctImgDates = fileStore.getDistinctImageDates(),
-          _obsDate = _this.observationDate();
+        const _distinctImgDates = Uploader.fileStore.getDistinctImageDates(),
+          _obsDate = this.observationDate();
 
-        this.img_radio_container.html = '';
-        this.obs_radio_container.html = '';
-        _this.makeObservationDateRadio(obsDate);
+        Uploader.img_radio_container.html = '';
+        Uploader.obs_radio_container.html = '';
+        this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate) {
           if (!_obsDate.areEqual(simpleDate))
-            _this.makeImageDateRadio(simpleDate);
+            this.makeImageDateRadio(simpleDate);
         });
 
-        if (_this.areDatesInconsistent()) {
-          this.img_messages.show('slow');
+        if (this.areDatesInconsistent()) {
+          Uploader.img_messages.show('slow');
         } else {
-          this.img_messages.hide('slow')
+          Uploader.img_messages.hide('slow')
         }
       }
 
       fixDates = function (simpleDate, target) {
-        const _this = this;
         if (target == "image")
-          fileStore.updateImageDates(simpleDate);
+          Uploader.fileStore.updateImageDates(simpleDate);
         if (target == "observation")
-          _this.observationDate(simpleDate);
-        this.img_messages.hide('slow');
+          this.observationDate(simpleDate);
+        Uploader.img_messages.hide('slow');
       }
 
       makeImageDateRadio(simpleDate) {
-        let html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='{{date}}' name='fix_date'/>{{dateStr}}</label></div>"
-        html = html.replace('{{date}}', JSON.stringify(simpleDate));
-        html = html.replace('{{dateStr}}', simpleDate.asDateString());
-        this.img_radio_container.append(html);
+        const _date = JSON.stringify(simpleDate),
+          _date_string = simpleDate.asDateString(),
+          _html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label></div>"
+        // html = html.replace('{{date}}', JSON.stringify(simpleDate));
+        // html = html.replace('{{dateStr}}', simpleDate.asDateString());
+
+        Uploader.img_radio_container.append(_html);
       }
 
       makeObservationDateRadio(simpleDate) {
-        const _date = JSON.stringify(simpleDate);
-        const _date_string = simpleDate.asDateString();
-        const _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
+        const _date = JSON.stringify(simpleDate),
+          _date_string = simpleDate.asDateString(),
+          _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
         // html = html.replace('{{date}}', JSON.stringify(simpleDate));
         // html = html.replace('{{dateStr}}', simpleDate.asDateString());
 
         // const obs_radio = jQuery(html);
-        this.obs_radio_container.append(_html);
+        Uploader.obs_radio_container.append(_html);
       }
 
       updateObservationDateRadio() {
-        const _this = this;
-        const _currentObsDate = _this.observationDate();
+        // const _this = this;
+        // _currentObsDate is an instance of Uploader.SimpleDate(values)
+        const _currentObsDate = this.observationDate();
 
-        this.obs_radio_container.querySelectorAll('input').dataset.date = _currentObsDate;
-        this.obs_radio_container.querySelectorAll('span').text = _currentObsDate.asDateString();
+        Uploader.obs_radio_container.querySelectorAll('input')
+          .forEach((elem) => { elem.dataset.date = _currentObsDate; })
 
-        if (_this.areDatesInconsistent())
-          this.img_messages.show('slow');
+        Uploader.obs_radio_container.querySelectorAll('span')
+          .forEach((elem) => { elem.text = _currentObsDate.asDateString(); })
+
+        if (this.areDatesInconsistent())
+          Uploader.img_messages.show('slow');
       }
 
       // undefined gets current date, simpledate object updates date
       observationDate = function (simpleDate) {
+        let _date_values;
 
-        if (simpleDate && simpleDate.day && simpleDate.month && simpleDate.year) {
-          this.obs_day.value = simpleDate.day;
-          this.obs_month.value = simpleDate.month;
-          this.obs_year.value = simpleDate.year;
+        if (simpleDate && simpleDate.day && simpleDate.month &&
+          simpleDate.year) {
+          _date_values = [
+            Uploader.obs_day.value = simpleDate.day,
+            Uploader.obs_month.value = simpleDate.month,
+            Uploader.obs_year.value = simpleDate.year,
+          ]
         }
-        return new this.SimpleDate(this.obs_day.value, this.obs_month.value, this.obs_year.value);
+        return new Uploader.SimpleDate(_date_values);
       }
     }
 
@@ -193,37 +207,39 @@ class MOMultiImageUploader {
           }
 
           // uuid is used as the index for the ruby form template. // **
-          const _fileStoreItem = new FileStoreItem(files[i], generateUUID());
+          const _fileStoreItem =
+            new Uploader.FileStoreItem(files[i], generateUUID());
           // add an item to the dictionary with the file size as the key
           this.fileDictionary[files[i].size] = _fileStoreItem;
           this.fileStoreItems.push(_fileStoreItem)
         }
 
         // check status of when all the selected files have processed.
-        checkStatus();
         function checkStatus() {
           setTimeout(function () {
             if (!this.areAllProcessed()) {
               checkStatus();
             } else {
-              this.dateUpdater.refreshBox(); // **
+              Uploader.dateUpdater.refreshBox(); // **
             }
           }, 30)
         }
+        checkStatus();
       }
 
       addUrl(url) {
         // const _this = this;
         if (this.fileDictionary[url] == undefined) {
           // **
-          const _fileStoreItem = new this.FileStoreItem(url, generateUUID());
+          const _fileStoreItem =
+            new Uploader.FileStoreItem(url, generateUUID());
           this.fileDictionary[url] = _fileStoreItem;
           this.fileStoreItems.push(_fileStoreItem);
         }
       }
 
       updateImageDates(simpleDate) {
-        const _this = this;
+        // const _this = this;
         this.fileStoreItems.forEach(function (fileStoreItem) {
           fileStoreItem.imageDate(simpleDate);
         });
@@ -256,8 +272,8 @@ class MOMultiImageUploader {
         // const _this = this;
 
         // disable submit and remove image buttons during upload process.
-        this.submit_buttons.setAttribute('disabled', 'true');
-        this.remove_links.hide();
+        Uploader.submit_buttons.setAttribute('disabled', 'true');
+        Uploader.remove_links.hide();
 
         // callback function to move through the the images to upload
         function getNextImage() {
@@ -271,10 +287,10 @@ class MOMultiImageUploader {
             nextInLine.upload(onUploadedCallback);
           else {
             // now the form will be submitted without hitting the uploads.
-            this.block_form_submission = false;
-            this.submit_buttons.value =
-              this.localized_text.creating_observation_text;
-            this.form.submit();
+            Uploader.block_form_submission = false;
+            Uploader.submit_buttons.value =
+              Uploader.localized_text.creating_observation_text;
+            Uploader.form.submit();
           }
         }
 
@@ -285,8 +301,8 @@ class MOMultiImageUploader {
         }
         else {
           // no images to upload, submit form
-          this.block_form_submission = false;
-          this.form.submit();
+          Uploader.block_form_submission = false;
+          Uploader.form.submit();
         }
 
         return false;
@@ -317,17 +333,17 @@ class MOMultiImageUploader {
       // does an ajax request to get the template, then formats it
       // the format function adds to HTML
       getTemplateHtml() {
-        const _this = this;
-        jQuery.get(this.get_template_uri, {
+        // const _this = this;
+        jQuery.get(Uploader.get_template_uri, {
           img_number: _this.uuid
         }, function (data) {
           // on success
           // the data returned is the raw HTML template
-          _this.createTemplate(data)
+          this.createTemplate(data)
           // extract the EXIF data (async) and then load it
-          _this.getExifData();
+          this.getExifData();
           // load image as base64 async
-          _this.loadImage();
+          this.loadImage();
         });
       }
 
@@ -335,29 +351,30 @@ class MOMultiImageUploader {
         // const _this = this;
 
         html_string = html_string
-          .replace('{{img_file_name}}', _this.file_name())
-          .replace('{{img_file_size}}', this.is_file ? Math.floor((_this.file_size() / 1024)) + "kb" : "");
+          .replace('{{img_file_name}}', this.file_name())
+          .replace('{{img_file_size}}', this.is_file ?
+            Math.floor((_this.file_size() / 1024)) + "kb" : "");
 
         // Create the DOM element and add it to FileStoreItem;
         this.dom_element = document.createElement(html_string);
 
         if (_this.file_size() > this.max_image_size)
           this.dom_element.querySelectorAll('.warn-text').text =
-            this.localized_text.image_too_big_text;
+            Uploader.localized_text.image_too_big_text;
 
         // add it to the page
-        this.add_img_container.append(_this.dom_element);
+        Uploader.add_img_container.append(this.dom_element);
 
         // bind the destroy function
-        _this.dom_element.querySelectorAll('.remove_image_link')
+        this.dom_element.querySelectorAll('.remove_image_link')
           .onclick = function () {
-            _this.destroy();
-            dateUpdater.refreshBox();
+            this.destroy();
+            Uploader.dateUpdater.refreshBox();
           };
 
-        _this.dom_element.querySelectorAll('select')
+        this.dom_element.querySelectorAll('select')
           .onchange = function () {
-            dateUpdater.refreshBox();
+            Uploader.dateUpdater.refreshBox();
           };
       }
 
@@ -376,65 +393,70 @@ class MOMultiImageUploader {
       }
 
       loadImage() {
-        const _this = this;
+        // const _this = this;
 
-        if (_this.is_file) {
-          const fileReader = new FileReader();
+        if (this.is_file) {
+          const fileReader = new Uploader.FileReader();
+
           fileReader.onload = function (fileLoadedEvent) {
             // find the actual image element
-            const $img = _this.dom_element.querySelectorAll('.img-responsive')[0];
+            const _img = this.dom_element.querySelectorAll('.img-responsive')[0];
             // get image element in container and set the src to base64 img url
-            $img.setAttribute('src', fileLoadedEvent.target.result);
+            _img.setAttribute('src', fileLoadedEvent.target.result);
           };
-          fileReader.readAsDataURL(_this.file);
+
+          fileReader.readAsDataURL(this.file);
         } else {
-          const _img = _this.dom_element.querySelectorAll('.img-responsive')[0];
+          const _img = this.dom_element.querySelectorAll('.img-responsive')[0];
           _img.setAttribute('src', _this.url)
             .onerror = function () {
               alert("Couldn't read image from: " + _this.url);
-              _this.destroy();
+              this.destroy();
             };
         }
       }
 
-      getExifData() {  //extracts the exif data async;
+      // extracts the exif data async;
+      getExifData() {
         const _fsItem = this;
         _fsItem.dom_element.querySelectorAll('.img-responsive')[0]
           .onload = function () {
             EXIF.getData(this, function () {
               _fsItem.exif_data = this.exifdata;
-              _fsItem.applyExifData();  //apply the data to the DOM
+              // apply the data to the DOM
+              _fsItem.applyExifData();
             });
           };
       }
 
-      applyExifData() {  //applys exif data to the DOM element, DOM element must already be attached
+      // applies exif data to the DOM element, must already be attached
+      applyExifData() {
         let _exif_date_taken;
-        const _this = this,
-          _exif = this.exif_data;
+        const _exif = this.exif_data;
 
         if (this.dom_element == null) {
           console.warn("Error: Dom element for this file has not been created, so cannot update it with exif data!");
           return;
         }
 
-        //Geocode Logic
-
-        if (_exif.GPSLatitude && _exif.GPSLongitude) { //check if there is geodata on the image
+        // Geocode Logic
+        // check if there is geodata on the image
+        if (_exif.GPSLatitude && _exif.GPSLongitude) {
 
           const latLngObject = getLatitudeLongitudeFromEXIF(_exif),
             radioBtnToInsert = makeGeocodeRadioBtn(latLngObject);
 
-          if (geocode_radio_container.find('input[type="radio"]').length === 0) {
-            this.geocode_messages.show('medium');
-            this.geocode_radio_container.append(radioBtnToInsert);
+          if (geocode_radio_container
+            .querySelectorAll('input[type="radio"]').length === 0) {
+            Uploader.geocode_messages.show('medium');
+            Uploader.geocode_radio_container.append(radioBtnToInsert);
           }
 
           else {
             // don't add geocodes that are only slightly different
             const shouldAddGeocode = true;
 
-            this.geocode_radio_container
+            Uploader.geocode_radio_container
               .querySelectorAll('input[type="radio"]')
               .forEach(function (index, element) {
                 const existingGeocode = element.dataset.geocode;
@@ -448,47 +470,50 @@ class MOMultiImageUploader {
               });
 
             if (shouldAddGeocode)
-              this.geocode_radio_container.append(radioBtnToInsert);
+              Uploader.geocode_radio_container.append(radioBtnToInsert);
           }
         }
 
         // Image Date Logic
-        _exif_date_taken = _this.exif_data.DateTimeOriginal;
+        _exif_date_taken = this.exif_data.DateTimeOriginal;
 
         if (_exif_date_taken) {
           // we found the date taken, let's parse it down.
           // returns an array of [YYYY,MM,DD]
-          const _date_taken_array = _exif_date_taken.substring(' ', 10).split(':'),
-            _exifSimpleDate = new this.SimpleDate(_date_taken_array[2], _date_taken_array[1], _date_taken_array[0]);
-          _this.imageDate(_exifSimpleDate);
+          const _date_taken_array =
+            _exif_date_taken.substring(' ', 10).split(':'),
+            _exifSimpleDate = new Uploader.SimpleDate(_date_taken_array[2], _date_taken_array[1], _date_taken_array[0]);
 
-          const _camera_date = _this.dom_element.find(".camera_date_text");
+          this.imageDate(_exifSimpleDate);
+
+          const _camera_date = this.dom_element.find(".camera_date_text");
           _camera_date.text = _exifSimpleDate.asDateString();//shows the exif date by the photo
           _camera_date.dataset.exif_date = _exifSimpleDate;
           _camera_date.onclick = function () {
-            _this.imageDate(_exifSimpleDate);
-            dateUpdater.refreshBox();
+            this.imageDate(_exifSimpleDate);
+            Uploader.dateUpdater.refreshBox();
           }
         }
         // no date was found in EXIF data
         else {
           // Use observation date
-          _this.imageDate(dateUpdater.observationDate());
+          this.imageDate(Uploader.dateUpdater.observationDate());
         }
-        _this.processed = true;
+
+        this.processed = true;
       }
 
       imageDate(simpleDate) {
-        const _this = this,
-          _$day = _this.dom_element.querySelectorAll('select')[0],
-          _$month = _this.dom_element.querySelectorAll('select')[1],
-          _$year = _this.dom_element.querySelectorAll('input')[2];
+        const // _this = this,
+          _day = _this.dom_element.querySelectorAll('select')[0],
+          _month = _this.dom_element.querySelectorAll('select')[1],
+          _year = _this.dom_element.querySelectorAll('input')[2];
         if (simpleDate) {
-          _$day.value = simpleDate.day;
-          _$month.value = simpleDate.month;
-          _$year.value = simpleDate.year;
+          _day.value = simpleDate.day;
+          _month.value = simpleDate.month;
+          _year.value = simpleDate.year;
         }
-        return new this.SimpleDate(_$day.value, _$month.value, _$year.value);
+        return new this.SimpleDate(_day.value, _month.value, _year.value);
       }
 
       getUserEnteredInfo() {
@@ -503,39 +528,39 @@ class MOMultiImageUploader {
       }
 
       asformData() {
-        const _this = this,
-          _info = _this.getUserEnteredInfo(),
+        const // _this = this,
+          _info = this.getUserEnteredInfo(),
           _fd = new formData();
 
-        if (_this.file_size() > this._max_image_size)
+        if (this.file_size() > Uploader.max_image_size)
           return null;
 
-        if (_this.is_file)
-          _fd.append("image[upload]", _this.file, _this.file_name());
+        if (this.is_file)
+          _fd.append("image[upload]", this.file, this.file_name());
         else
-          _fd.append("image[url]", _this.url);
+          _fd.append("image[url]", this.url);
         _fd.append("image[when][3i]", _info.day);
         _fd.append("image[when][2i]", _info.month);
         _fd.append("image[when][1i]", _info.year);
         _fd.append("image[notes]", _info.notes);
         _fd.append("image[copyright_holder]", _info.copyright_holder);
         _fd.append("image[license]", _info.license);
-        _fd.append("image[original_name]", _this.file_name());
+        _fd.append("image[original_name]", this.file_name());
         return _fd;
       }
 
       incrementProgressBar(decimalPercentage) {
-        const _this = this,
-          _container = _this.dom_element
+        const // _this = this,
+          _container = this.dom_element
             .querySelectorAll(".added_image_name_container"),
           // if we don't have percentage,  just set it to 0 percent
           _percent_string = decimalPercentage ?
             parseInt(decimalPercentage * 100).toString() + "%" : "0%";
 
-        if (!_this.isUploading) {
-          _this.isUploading = true;
+        if (!this.isUploading) {
+          this.isUploading = true;
           _container.html =
-            '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + this.localized_text.uploading_text + '</strong></div>' +
+            '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + Uploader.localized_text.uploading_text + '</strong></div>' +
             '<div class="progress-bar position-absolute" style="width: 0%; height: 1.5em; background: #51B973; z-index: 0;"></div>'
 
           doDots(1);
@@ -551,7 +576,7 @@ class MOMultiImageUploader {
           setTimeout(function () {
             if (i < 900) {
               _container.querySelectorAll(".progress-text").html =
-                this.localized_text.uploading_text + this.dots[i % 3];
+                Uploader.localized_text.uploading_text + Uploader.dots[i % 3];
               doDots(++i);
             }
           }, 333)
@@ -559,38 +584,41 @@ class MOMultiImageUploader {
       }
 
       upload(onUploadedCallback) {
-        const _this = this,
+        const // _this = this,
           xhrReq = new XMLHttpRequest(),
           progress = null;
         // let update = null;
 
-        this.submit_buttons.value = this.localized_text.uploading_text + '...';
-        _this.incrementProgressBar();
+        Uploader.submit_buttons.value =
+          Uploader.localized_text.uploading_text + '...';
+        this.incrementProgressBar();
 
         // after image has been created.
         xhrReq.onreadystatechange = function () {
           if (xhrReq.readyState == 4) {
             if (xhrReq.status == 200) {
-              const image = JSON.parse(xhrReq.response);
-              const _good_image_vals = this.good_images.value ?
-                this.good_images.value : "";
+              const _image = JSON.parse(xhrReq.response);
+              const _good_image_vals = Uploader.good_images.value ?
+                Uploader.good_images.value : "";
               // add id to the good images form field.
-              good_images.value = _good_image_vals.length == 0 ?
-                image.id : _good_image_vals + ' ' + image.id;
+              Uploader.good_images.value = _good_image_vals.length == 0 ?
+                _image.id : _good_image_vals + ' ' + _image.id;
               // set the thumbnail if it is selected
-              if (_this.dom_element.querySelector('input[name="observation[thumb_image_id]"]').checked) {
+              if (this.dom_element
+                .querySelector('input[name="observation[thumb_image_id]"]')
+                .checked) {
                 document.getElementById('observation_thumb_image_id')
                   .value = image.id;
               }
             } else if (xhrReq.response) {
               alert(xhrReq.response);
             } else {
-              alert(this.localized_text.something_went_wrong);
+              alert(Uploader.localized_text.something_went_wrong);
             }
             if (progress) window.clearTimeout(progress);
-            _this.incrementProgressBar(1);
-            _this.dom_element.hide('slow');
-            onUploadedCallback();
+            this.incrementProgressBar(1);
+            this.dom_element.hide('slow');
+            onUploadedCallback(); // passed to this function
           }
         };
 
@@ -616,13 +644,13 @@ class MOMultiImageUploader {
         // progress = window.setTimeout(update, 1000);
 
         // Note: Add the event listeners before calling open() on the request.
-        xhrReq.open("POST", this.upload_image_uri, true);
-        xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
-        const _fd = _this.asformData(); // Send the form
+        xhrReq.open("POST", Uploader.upload_image_uri, true);
+        xhrReq.setRequestHeader("X-Progress-ID", this.uuid);
+        const _fd = this.asformData(); // Send the form
         if (_fd != null) {
           xhrReq.send(_fd);
         } else {
-          alert(this.localized_text.something_went_wrong);
+          alert(Uploader.localized_text.something_went_wrong);
           onUploadedCallback();
         }
       }
@@ -632,20 +660,20 @@ class MOMultiImageUploader {
         this.dom_element.remove();
         if (this.is_file)
           // remove the file from the dictionary
-          delete fileStore.fileDictionary[this.file_size()];
+          delete Uploader.fileStore.fileDictionary[this.file_size()];
         else
           // remove the file from the dictionary
-          delete fileStore.fileDictionary[this.url];
+          delete Uploader.fileStore.fileDictionary[this.url];
 
         // removes the file from the array
-        const idx = fileStore.fileStoreItems.indexOf(this);
+        const idx = Uploader.fileStore.fileStoreItems.indexOf(this);
         if (idx > -1)
           // removes the file from the array
-          fileStore.fileStoreItems.splice(idx, 1);
+          Uploader.fileStore.fileStoreItems.splice(idx, 1);
       }
     }
 
-    this.set_bindings();
+    set_bindings(); // function of the Uploader instance, not the constructor
   }
 
   set_bindings() {
@@ -760,7 +788,8 @@ class MOMultiImageUploader {
     document.body
       .querySelectorAll('[data-role="set_as_default_thumbnail"]')
       .onclick = function (event) {
-        const _this = this; //the link clicked to make default image
+        // `this` is the link clicked to make default image
+        // const _this = this;
 
         event.preventDefault();
 
@@ -777,7 +806,7 @@ class MOMultiImageUploader {
 
         // set selections
         // add hidden to the link clicked
-        _this.classList.add('hidden');
+        this.classList.add('hidden');
         // show that the image is default
         const siblings = _this.parentNode.childNodes
 
