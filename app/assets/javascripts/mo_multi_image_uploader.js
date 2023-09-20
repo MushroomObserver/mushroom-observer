@@ -54,7 +54,9 @@ class MOMultiImageUploader {
 
   set_bindings() {
     // make sure submit buttons are enabled when the dom is loaded!
-    this.submit_buttons.setAttribute('disabled', false);
+    this.submit_buttons.forEach((element) => {
+      element.setAttribute('disabled', false);
+    });
 
     // was bind('click.setGeoCodeBind'
     this.set_geocode_btn.onclick = function () {
@@ -112,18 +114,18 @@ class MOMultiImageUploader {
 
     // Drag and Drop bindings on the window
 
-    ['dragover', 'dragenter'].forEach(() => {
-      this.content.addEventListener(e, function (e) {
-        if (e.preventDefault) { e.preventDefault(); }
-        document.getElementById('right_side').classList.add('dashed-border');
-        return false;
-      })
-    })
+    // ['dragover', 'dragenter'].forEach((e) => {
+    //   this.content.addEventListener(e, function (e) {
+    //     if (e.preventDefault) { e.preventDefault(); }
+    //     document.getElementById('right_side').classList.add('dashed-border');
+    //     return false;
+    //   });
+    // })
 
-    ['dragend', 'dragleave', 'dragexit'].forEach(() => {
+    ['dragend', 'dragleave', 'dragexit'].forEach((e) => {
       this.content.addEventListener(e, function (e) {
         document.getElementById('right_side').classList.remove('dashed-border');
-      })
+      });
     })
 
     this.content.ondrop = function (e) {
@@ -330,7 +332,7 @@ class DateUpdater {
     this.Uploader.obs_radio_container.html = '';
     this.makeObservationDateRadio(obsDate);
 
-    _distinctImgDates.forEach(function (simpleDate) {
+    _distinctImgDates.forEach((simpleDate) => {
       if (!_obsDate.areEqual(simpleDate))
         this.makeImageDateRadio(simpleDate);
     });
@@ -342,7 +344,7 @@ class DateUpdater {
     }
   }
 
-  fixDates = function (simpleDate, target) {
+  fixDates(simpleDate, target) {
     if (target == "image")
       this.Uploader.fileStore.updateImageDates(simpleDate);
     if (target == "observation")
@@ -488,14 +490,16 @@ class FileStore {
 
   // remove all the images as they were uploaded!
   destroyAll() {
-    this.fileStoreItems.forEach(function (item) {
+    this.fileStoreItems.forEach((item) => {
       item.destroy();
     });
   }
 
   uploadAll() {
     // disable submit and remove image buttons during upload process.
-    this.Uploader.submit_buttons.setAttribute('disabled', 'true');
+    this.Uploader.submit_buttons.forEach(
+      (element) => { element.setAttribute('disabled', 'true') }
+    );
     this.Uploader.hide(this.Uploader.remove_links);
 
     // callback function to move through the the images to upload
@@ -511,8 +515,11 @@ class FileStore {
       else {
         // now the form will be submitted without hitting the uploads.
         this.Uploader.block_form_submission = false;
-        this.Uploader.submit_buttons.value =
-          this.Uploader.localized_text.creating_observation_text;
+        this.Uploader.submit_buttons.forEach((element) => {
+          element.value =
+            this.Uploader.localized_text.creating_observation_text;
+        }
+        );
         this.Uploader.form.submit();
       }
     }
@@ -714,7 +721,7 @@ class FileStoreItem {
 
         this.Uploader.geocode_radio_container
           .querySelectorAll('input[type="radio"]')
-          .forEach(function (index, element) {
+          .forEach((index, element) => {
             const existingGeocode = element.dataset.geocode;
             const latDif = Math.abs(latLngObject.latitude)
               - Math.abs(existingGeocode.latitude);
