@@ -49,8 +49,15 @@ class MOMultiImageUploader {
     Object.assign(this.localized_text, localization_defaults);
     Object.assign(this.localized_text, localization);
 
-    // Make MOMultiImageUploader instance properties available to sub-classes
-    // In the following sub-classes, `this` refers to the sub-class, and
+    /*********************/
+    /*    SUB CLASSES    */
+    /*********************/
+
+    // These could be modules, but they're currently only of use to this class.
+    // https://stackoverflow.com/questions/53448096/a-class-within-a-class
+    //
+    // Make Uploader instance properties, classes etc available to sub-classes.
+    // In the following sub-classes, `this` must refer to the sub-class, so
     // `Uploader` refers to the class MOMultiImageUploader
     const Uploader = this;
 
@@ -673,7 +680,8 @@ class MOMultiImageUploader {
       }
     }
 
-    set_bindings(); // function of the Uploader instance, not the constructor
+    // function of the Uploader instance, not the constructor
+    this.set_bindings();
   }
 
   set_bindings() {
