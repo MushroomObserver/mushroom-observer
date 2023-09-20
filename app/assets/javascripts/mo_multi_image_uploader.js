@@ -5,21 +5,18 @@ class MOMultiImageUploader {
   constructor(localization = {}) {
     // Internal Variable Definitions.
     const internal_config = {
-      fileStore: new this.FileStore(),
-      dateUpdater: new this.DateUpdater(),
+      form: document.forms.namedItem("observation_form"),
+      block_form_submission: true,
+      select_files_button: document.getElementById('multiple_images_button'),
+      content: document.getElementById('content'),
       // container to insert images into
       add_img_container: document.getElementById("added_images_container"),
-      max_image_size: this.add_img_container.dataset.upload_max_size,
       get_template_uri: "/ajax/multi_image_template",
       upload_image_uri: "/ajax/create_image_object",
       // progress_uri: "/ajax/upload_progress",
       dots: [".", "..", "..."],
-      block_form_submission: true,
-      form: document.forms.namedItem("observation_form"),
-      submit_buttons: this.form.querySelectorAll('input[type="submit"]'),
       good_images: document.getElementById('good_images'),
       remove_links: document.querySelectorAll(".remove_image_link"),
-      select_files_button: document.getElementById('multiple_images_button'),
       obs_day: document.getElementById('observation_when_3i'),
       obs_month: document.getElementById('observation_when_2i'),
       obs_year: document.getElementById('observation_when_1i'),
@@ -32,22 +29,24 @@ class MOMultiImageUploader {
       set_geocode_btn: document.getElementById('set_geocode'),
       ignore_geocode_btn: document.getElementById('ignore_geocode'),
       geocode_messages: document.getElementById('geocode_messages'),
-      content: document.getElementById('content')
+      localized_text: {
+        uploading_text: "Uploading",
+        image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
+        creating_observation_text: "Creating Observation...",
+        months: "January, February, March, April, May, June, July, August, September, October, November, December",
+        show_on_map: "Show on map",
+        something_went_wrong: "Something went wrong while uploading image."
+      }
     }
 
     Object.assign(this, internal_config);
-
-    const localization_defaults = {
-      uploading_text: "Uploading",
-      image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
-      creating_observation_text: "Creating Observation...",
-      months: "January, February, March, April, May, June, July, August, September, October, November, December",
-      show_on_map: "Show on map",
-      something_went_wrong: "Something went wrong while uploading image."
-    }
-
-    Object.assign(this.localized_text, localization_defaults);
     Object.assign(this.localized_text, localization);
+
+    this.submit_buttons = this.form.querySelectorAll('input[type="submit"]');
+    this.max_image_size = this.add_img_container.dataset.upload_max_size;
+
+    this.fileStore = new this.FileStore();
+    this.dateUpdater = new this.DateUpdater();
 
     /*********************/
     /*    SUB CLASSES    */
@@ -850,23 +849,35 @@ class MOMultiImageUploader {
   /** Geocode Helpers **/
 
   makeGeocodeRadioBtn(latLngObjct) {
-    const html = "<div class='radio'><label><input type='radio' data-geocode='{{geocode}}' name='fix_geocode'/>{{geoCodeStr}}</label> " +
-      "<a href='#geocode_map' data-role='show_on_map' class='ml-3' data-geocode='{{geocodeformap}}'>" + this.localized_text.show_on_map + "</a></div>";
-    html = html.replace('{{geocode}}', JSON.stringify(latLngObjct));
-    html = html.replace('{{geocodeformap}}', JSON.stringify(latLngObjct));
-    html = html.replace('{{geoCodeStr}}', latLngObjct.latitude.toFixed(5) + ", " + latLngObjct.longitude.toFixed(5));
+    const geocode = JSON.stringify(latLngObjct),
+      geocodeformap = JSON.stringify(latLngObjct),
+      geoCodeStr = latLngObjct.latitude.toFixed(5) + ", "
+        + latLngObjct.longitude.toFixed(5),
+
+      html = "<div class='radio'><label><input type='radio' data-geocode='"
+        + geocode + "' name='fix_geocode'/>" + geoCodeStr + "</label> "
+        + "<a href='#geocode_map' data-role='show_on_map' class='ml-3' "
+        + "data-geocode='" + geocodeformap + "'>"
+        + this.localized_text.show_on_map + "</a></div>";
+
     return html;
   }
 
   getLatitudeLongitudeFromEXIF(exifObject) {
 
-    const lat = exifObject.GPSLatitude[0] + (exifObject.GPSLatitude[1] / 60.0) + (exifObject.GPSLatitude[2] / 3600.0);
-    const long = exifObject.GPSLongitude[0] + (exifObject.GPSLongitude[1] / 60.0) + (exifObject.GPSLongitude[2] / 3600.0);
-    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.numerator / exifObject.GPSAltitude.denominator).toFixed(0) + " m" : ""
-    //make sure you don't end up on the wrong side of the world
+    let lat = exifObject.GPSLatitude[0]
+      + (exifObject.GPSLatitude[1] / 60.0)
+      + (exifObject.GPSLatitude[2] / 3600.0);
+    let long = exifObject.GPSLongitude[0]
+      + (exifObject.GPSLongitude[1] / 60.0)
+      + (exifObject.GPSLongitude[2] / 3600.0);
+
+    const alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.numerator
+      / exifObject.GPSAltitude.denominator).toFixed(0) + " m" : "";
+
+    // make sure you don't end up on the wrong side of the world
     long = exifObject.GPSLongitudeRef == "W" ? long * -1 : long;
     lat = exifObject.GPSLatitudeRef == "S" ? lat * -1 : lat;
-
 
     return {
       latitude: lat,
