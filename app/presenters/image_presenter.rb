@@ -18,7 +18,9 @@ class ImagePresenter < BasePresenter
   def initialize(image, args = {})
     super
 
-    # Sometimes it's prohibitive to do the extra join to images table,
+    # Pass an image instance (not id) whenever possible, to ensure access to
+    # the fallback image.url if the image server is unavailable. Sometimes it's
+    # prohibitive to do the extra join to images table, as when parsing Textile,
     # so we only have image_id. It's still possible to render the image with
     # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
