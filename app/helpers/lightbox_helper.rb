@@ -19,7 +19,7 @@ module LightboxHelper
     if obs_data[:id].present?
       html = lightbox_obs_caption(html, obs_data, lightbox_data[:identify])
     end
-    html << caption_image_links(lightbox_data[:image_id])
+    html << caption_image_links(lightbox_data[:image] || lightbox_data[:image_id])
     safe_join(html)
   end
 
@@ -43,11 +43,11 @@ module LightboxHelper
   end
 
   # links relating to the image object, pre-joined as a div
-  def caption_image_links(image_id)
+  def caption_image_links(image_or_image_id)
     links = []
-    links << original_image_link(image_id, "lightbox_link")
+    links << original_image_link(image_or_image_id, "lightbox_link")
     links << " | "
-    links << image_exif_link(image_id, "lightbox_link")
+    links << image_exif_link(image_or_image_id, "lightbox_link")
     tag.div(class: "caption-image-links my-3") do
       safe_join(links)
     end
