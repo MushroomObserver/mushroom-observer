@@ -576,7 +576,6 @@ class FileStore {
 
     // uploads first image. if we have one.
     if (_firstUpload) {
-      debugger
       _firstUpload.upload(onUploadedCallback);
     }
     // no images to upload, submit form
@@ -827,7 +826,7 @@ class FileStoreItem {
 
   asformData() {
     const _info = this.getUserEnteredInfo(),
-      _fd = new formData();
+      _fd = new FormData();
 
     if (this.file_size() > this.Uploader.max_image_size)
       return null;
@@ -849,7 +848,7 @@ class FileStoreItem {
   incrementProgressBar(decimalPercentage) {
     const _container =
       this.dom_element.querySelector(".added_image_name_container"),
-      // if we don't have percentage,  just set it to 0 percent
+      // if we don't have percentage, just set it to 0 percent
       _percent_string = decimalPercentage ?
         parseInt(decimalPercentage * 100).toString() + "%" : "0%";
 
@@ -863,7 +862,15 @@ class FileStoreItem {
         + 'style="width: 0%; height: 1.5em; background: #51B973; '
         + 'z-index: 0;"></div>'
 
-      doDots(1);
+      let i = 1;
+      while (i < 900) {
+        setTimeout(() => {
+          _container.querySelector(".progress-text").html =
+            context.Uploader.localized_text.uploading_text +
+            context.Uploader.dots[i % 3];
+          ++i;
+        }, 333)
+      }
     } else {
       const _progress_bar = _container.querySelector(".progress-bar"),
         _animation = [
@@ -878,17 +885,6 @@ class FileStoreItem {
       // for next progress update and actually receiving it, which occurs
       // after a second is up... but not after image is done, no more
       // progress updates required then.
-    }
-
-    function doDots(i) {
-      setTimeout(() => {
-        if (i < 900) {
-          _container.querySelector(".progress-text").html =
-            this.Uploader.localized_text.uploading_text +
-            this.Uploader.dots[i % 3];
-          doDots(++i);
-        }
-      }, 333)
     }
   }
 
@@ -909,13 +905,13 @@ class FileStoreItem {
     xhrReq.onreadystatechange = () => {
       if (xhrReq.readyState == 4) {
         if (xhrReq.status == 200) {
-          const _image = JSON.parse(xhrReq.response);
-          const _good_image_vals = this.Uploader.good_images.value ?
-            this.Uploader.good_images.value : "";
+          const _image = JSON.parse(xhrReq.response),
+            // #good_images is a hidden field
+            _good_image_vals = this.Uploader.good_images.value ?? "";
 
           // add id to the good images form field.
-          this.Uploader.good_images.value = _good_image_vals.length == 0 ?
-            _image.id : _good_image_vals + ' ' + _image.id;
+          this.Uploader.good_images.value =
+            [_good_image_vals, _image.id].join(' ').trim();
 
           // set the thumbnail if it is selected
           if (this.dom_element
