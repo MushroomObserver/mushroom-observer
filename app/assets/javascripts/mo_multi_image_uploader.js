@@ -525,8 +525,9 @@ class FileStore {
     this.Uploader.submit_buttons.forEach(
       (element) => { element.setAttribute('disabled', 'true') }
     );
+    // Note that remove image links are not present at initialization
     const _remove_links = document.querySelectorAll(".remove_image_link");
-    this.Uploader.hide(_remove_links);
+    _remove_links.forEach((elem) => { this.Uploader.hide(elem) });
 
     // callback function to move through the the images to upload
     function getNextImage() {
@@ -551,8 +552,10 @@ class FileStore {
     }
 
     const _firstUpload = this.fileStoreItems[0];
+
     // uploads first image. if we have one.
     if (_firstUpload) {
+      debugger
       _firstUpload.upload(onUploadedCallback);
     }
     // no images to upload, submit form
@@ -849,7 +852,7 @@ class FileStoreItem {
     }
 
     function doDots(i) {
-      setTimeout(function () {
+      setTimeout(() => {
         if (i < 900) {
           _container.querySelectorAll(".progress-text").html =
             this.Uploader.localized_text.uploading_text +
