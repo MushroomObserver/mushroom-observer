@@ -105,6 +105,7 @@ module ImageHelper
                       votes: true) + image_copyright(obs.thumb_image, obs)
   end
 
+  # pass an image instance if possible, to ensure access to fallback image.url
   def original_image_link(image_or_image_id, classes)
     url = if image_or_image_id.is_a?(Image)
             image_or_image_id.url(:original)
