@@ -16,7 +16,6 @@ class MOMultiImageUploader {
       // progress_uri: "/ajax/upload_progress",
       dots: [".", "..", "..."],
       good_images: document.getElementById('good_images'),
-      remove_links: document.querySelectorAll(".remove_image_link"),
       obs_day: document.getElementById('observation_when_3i'),
       obs_month: document.getElementById('observation_when_2i'),
       obs_year: document.getElementById('observation_when_1i'),
@@ -64,12 +63,12 @@ class MOMultiImageUploader {
         document.querySelector('input[name=fix_geocode]:checked').dataset;
 
       if (_selectedItemData) {
-        document.getElementById('observation_lat')
-          .value = _selectedItemData.geocode.latitude;
-        document.getElementById('observation_long')
-          .value = _selectedItemData.geocode.longitude;
-        document.getElementById('observation_alt')
-          .value = _selectedItemData.geocode.altitude;
+        document.getElementById('observation_lat').value =
+          _selectedItemData.geocode.latitude;
+        document.getElementById('observation_long').value =
+          _selectedItemData.geocode.longitude;
+        document.getElementById('observation_alt').value =
+          _selectedItemData.geocode.altitude;
         this.hide(this.geocode_messages);
       }
     };
@@ -115,27 +114,43 @@ class MOMultiImageUploader {
     // Drag and Drop bindings on the window
 
     // ['dragover', 'dragenter'].forEach((e) => {
-    //   this.content.addEventListener(e, function (e) {
-    //     if (e.preventDefault) { e.preventDefault(); }
-    //     document.getElementById('right_side').classList.add('dashed-border');
-    //     return false;
-    //   });
+    this.content.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      addDashedBorder();
+      return false;
+    });
+    this.content.addEventListener('dragenter', function (e) {
+      e.preventDefault();
+      addDashedBorder();
+      return false;
+    });
     // })
 
-    ['dragend', 'dragleave', 'dragexit'].forEach((e) => {
-      this.content.addEventListener(e, function (e) {
-        document.getElementById('right_side').classList.remove('dashed-border');
-      });
-    })
+    // ['dragend', 'dragleave', 'dragexit'].forEach((e) => {
+    //   this.content.addEventListener(e, function (e) {
+    //     removeDashedBorder();
+    //   });
+    // })
+    this.content.addEventListener('dragend', removeDashedBorder());
+    this.content.addEventListener('dragleave', removeDashedBorder());
+    this.content.addEventListener('dragexit', removeDashedBorder());
 
-    // console.log("WTF");
-    // console.log(this.fileStore);
-    this.content.ondrop = (e) => {
-      if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
+    function addDashedBorder() {
+      document.getElementById('right_side').classList.add('dashed-border');
+    }
+
+    function removeDashedBorder() {
       document.getElementById('right_side').classList.remove('dashed-border');
+    }
+
+    this.content.ondrop = (e) => {
+      // stops the browser from leaving page
+      if (e.preventDefault) { e.preventDefault(); }
+      removeDashedBorder();
+
       const dataTransfer = e.originalEvent.dataTransfer;
       if (dataTransfer.files.length > 0)
-        this.fileStore.addFiles(dataTransfer.files); // ** this! nope
+        this.fileStore.addFiles(dataTransfer.files);
       // There are issues to work out concerning dragging and dropping
       // images from other websites into the observation form.
       // else
@@ -143,13 +158,13 @@ class MOMultiImageUploader {
     };
 
     // Detect when files are added from browser
-    // We need the outer `this`
     this.select_files_button.onchange = (event) => {
-      // const files = this.files; // Get the files from the browser
-      this.fileStore.addFiles(event.target.files);
+      // Get the files from the browser
+      const files = event.target.files;
+      this.fileStore.addFiles(files);
     };
 
-    // IMPORTANT:  This allows the user to update the thumbnail on the edit
+    // IMPORTANT: This allows the user to update the thumbnail on the edit
     // observation view.
     document
       .querySelectorAll('[type="radio"][name="observation[thumb_image_id]"]')
@@ -172,9 +187,8 @@ class MOMultiImageUploader {
         // add hidden to the default thumbnail text
         document.querySelectorAll('.is_default_thumbnail')
           .classList.add('hidden');
-        // reset the chcked default thumbnail
+        // reset the checked default thumbnail
         document.querySelectorAll('input[type="radio"][name="observation[thumb_image_id]"]').setAttribute('checked', false);
-
 
         // set selections
         // add hidden to the link clicked
@@ -206,13 +220,17 @@ class MOMultiImageUploader {
 
   // notice this is for block-level
   show(element) {
-    element.style.display = 'block';
-    element.classList.add('in');
+    if (element !== undefined) {
+      element.style.display = 'block';
+      element.classList.add('in');
+    }
   }
 
   hide(element) {
-    element.classList.remove('in');
-    window.setTimeout(() => { element.style.display = 'none'; }, 600);
+    if (element !== undefined) {
+      element.classList.remove('in');
+      window.setTimeout(() => { element.style.display = 'none'; }, 600);
+    }
   }
 
   generateUUID() {
@@ -507,7 +525,8 @@ class FileStore {
     this.Uploader.submit_buttons.forEach(
       (element) => { element.setAttribute('disabled', 'true') }
     );
-    this.Uploader.hide(this.Uploader.remove_links);
+    const _remove_links = document.querySelectorAll(".remove_image_link");
+    this.Uploader.hide(_remove_links);
 
     // callback function to move through the the images to upload
     function getNextImage() {
@@ -519,8 +538,8 @@ class FileStore {
       const _nextInLine = getNextImage();
       if (_nextInLine)
         _nextInLine.upload(onUploadedCallback);
+      // now the form will be submitted without hitting the uploads.
       else {
-        // now the form will be submitted without hitting the uploads.
         this.Uploader.block_form_submission = false;
         this.Uploader.submit_buttons.forEach((element) => {
           element.value =
@@ -532,12 +551,12 @@ class FileStore {
     }
 
     const _firstUpload = this.fileStoreItems[0];
+    // uploads first image. if we have one.
     if (_firstUpload) {
-      // uploads first image. if we have one.
       _firstUpload.upload(onUploadedCallback);
     }
+    // no images to upload, submit form
     else {
-      // no images to upload, submit form
       this.Uploader.block_form_submission = false;
       this.Uploader.form.submit();
     }
@@ -551,7 +570,6 @@ class FileStore {
 /*********************/
 // Contains information about an image file.
 class FileStoreItem {
-
   constructor(file_or_url, uuid, uploader) {
     this.Uploader = uploader;
     if (typeof file_or_url == "string") {
