@@ -19,7 +19,8 @@ module LightboxHelper
     if obs_data[:id].present?
       html = lightbox_obs_caption(html, obs_data, lightbox_data[:identify])
     end
-    html << caption_image_links(lightbox_data[:image] || lightbox_data[:image_id])
+    html << caption_image_links(lightbox_data[:image] ||
+                                lightbox_data[:image_id])
     safe_join(html)
   end
 
