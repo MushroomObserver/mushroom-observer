@@ -44,6 +44,7 @@ module LightboxHelper
   end
 
   # links relating to the image object, pre-joined as a div
+  # pass an image instance if possible, to ensure access to fallback image.url
   def caption_image_links(image_or_image_id)
     links = []
     links << original_image_link(image_or_image_id, "lightbox_link")
