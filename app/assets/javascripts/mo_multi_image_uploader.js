@@ -59,7 +59,7 @@ class MOMultiImageUploader {
     });
 
     // was bind('click.setGeoCodeBind'
-    this.set_geocode_btn.onclick = function () {
+    this.set_geocode_btn.onclick = () => {
       const _selectedItemData =
         document.querySelector('input[name=fix_geocode]:checked').dataset;
 
@@ -74,18 +74,18 @@ class MOMultiImageUploader {
       }
     };
 
-    this.ignore_geocode_btn.onclick = function () {
+    this.ignore_geocode_btn.onclick = () => {
       this.hide(this.geocode_messages);
     };
 
 
     document.body.querySelectorAll('[data-role="show_on_map"]')
-      .onclick = function () {
+      .onclick = () => {
         this.showGeocodeonMap(this.dataset.geocode);
       };
 
     // was bind('click.fixDateBind
-    this.fix_date_submit.onclick = function () {
+    this.fix_date_submit.onclick = () => {
       const _selectedItemData =
         document.querySelector('input[name=fix_date]:checked').dataset;
 
@@ -97,17 +97,17 @@ class MOMultiImageUploader {
     };
 
     // was bind('click.ignoreDateBind'
-    this.ignore_date_submit.onclick = function () {
+    this.ignore_date_submit.onclick = () => {
       this.hide(this.img_messages);
     };
 
-    this.obs_year.onchange = function () {
+    this.obs_year.onchange = () => {
       this.dateUpdater.updateObservationDateRadio()
     };
-    this.obs_month.onchange = function () {
+    this.obs_month.onchange = () => {
       this.dateUpdater.updateObservationDateRadio()
     };
-    this.obs_day.onchange = function () {
+    this.obs_day.onchange = () => {
       this.dateUpdater.updateObservationDateRadio()
     };
 
@@ -190,7 +190,7 @@ class MOMultiImageUploader {
 
     // Detect when a user submits observation; includes upload logic
 
-    this.form.onsubmit = function (event) {
+    this.form.onsubmit = (event) => {
       // event.preventDefault();
       if (this.block_form_submission) {
         this.fileStore.uploadAll();
@@ -207,11 +207,11 @@ class MOMultiImageUploader {
   // notice this is for block-level
   show(element) {
     element.style.display = 'block';
-    element.classList.add("in");
+    element.classList.add('in');
   }
 
   hide(element) {
-    element.classList.remove("in");
+    element.classList.remove('in');
     window.setTimeout(() => { element.style.display = 'none'; }, 600);
   }
 
@@ -341,7 +341,7 @@ class DateUpdater {
 
     this.Uploader.img_radio_container.html = '';
     this.Uploader.obs_radio_container.html = '';
-    this.makeObservationDateRadio(obsDate);
+    this.makeObservationDateRadio(_obsDate);
 
     _distinctImgDates.forEach((simpleDate) => {
       if (!_obsDate.areEqual(simpleDate))
@@ -571,41 +571,16 @@ class FileStoreItem {
   // does an ajax request to get the template, then formats it
   // the format function adds to HTML
   getTemplateHtml() {
-    // jQuery.get(this.Uploader.get_template_uri, {
-    //   img_number: this.uuid
-    // }, function (data) {
-    //   // on success
-    //   // the data returned is the raw HTML template
-    //   this.createTemplate(data)
-    //   // extract the EXIF data (async) and then load it
-    //   this.getExifData();
-    //   // load image as base64 async
-    //   this.loadImage();
-    // });
-
     const url = this.Uploader.get_template_uri + "?img_number=" + this.uuid;
     // + new URLSearchParams({ img_number: this.uuid })
     console.log(url);
 
-    fetch(url, {
-      method: 'GET',
-      headers: {
-        // 'X-CSRF-Token': csrfToken,
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'text/html',
-        'Accept': 'text/html'
-      },
-      // credentials: 'same-origin',
-      search: new URLSearchParams({ img_number: this.uuid })
-    }).then((response) => {
-      // fetch(url).then((response) => {
+    fetch(url).then((response) => {
       if (response.ok) {
-        // console.log("response: " + JSON.stringify(response));
         if (200 <= response.status && response.status <= 299) {
-          response.text().then((content) => {
-            // console.log("content: " + content);
+          response.text().then((html) => {
             // the data returned is the raw HTML template
-            this.createTemplate(content)
+            this.createTemplate(html)
             // extract the EXIF data (async) and then load it
             this.getExifData();
             // load image as base64 async
@@ -619,25 +594,23 @@ class FileStoreItem {
         }
       }
     }).catch((error) => {
-      // console.error("Server Error:", error);
+      console.error("Server Error:", error);
     });
   }
 
   createTemplate(html_string) {
-    // console.log("html_string: " + html_string);
-    html_string = html_string // .replace(/\s\s+/g, ' ')
+    html_string = html_string.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '')
       .replace('{{img_file_name}}', this.file_name())
       .replace('{{img_file_size}}', this.is_file ?
         Math.floor((this.file_size() / 1024)) + "kb" : "").trim();
 
-    // console.log("html_string now: " + html_string);
-
     // Create the DOM element and add it to FileStoreItem;
-    const template = document.createElement("template");
+    // This should work if the html_string is valid!
+    const template = document.createElement('template');
     template.innerHTML = html_string;
 
-    this.dom_element = template.content;
-    console.log("this.dom_element: " + this.dom_element);
+    // Hard to find without dev tools, but this is where the goods are:
+    this.dom_element = template.content.childNodes[0];
 
     if (this.file_size() > this.max_image_size)
       this.dom_element.querySelector('.warn-text').text =
@@ -677,7 +650,7 @@ class FileStoreItem {
     if (this.is_file) {
       const fileReader = new FileReader();
 
-      fileReader.onload = function (fileLoadedEvent) {
+      fileReader.onload = (fileLoadedEvent) => {
         // find the actual image element
         const _img = this.dom_element.querySelector('.img-responsive');
         // get image element in container and set the src to base64 img url
@@ -688,7 +661,7 @@ class FileStoreItem {
     } else {
       const _img = this.dom_element.querySelector('.img-responsive');
       _img.setAttribute('src', this.url)
-        .onerror = function () {
+        .onerror = () => {
           alert("Couldn't read image from: " + this.url);
           this.destroy();
         };
@@ -699,7 +672,7 @@ class FileStoreItem {
   getExifData() {
     const _fsItem = this;
     _fsItem.dom_element.querySelector('.img-responsive')
-      .onload = function () {
+      .onload = () => {
         EXIF.getData(this, function () {
           _fsItem.exif_data = this.exifdata;
           // apply the data to the DOM
@@ -769,7 +742,7 @@ class FileStoreItem {
       // shows the exif date by the photo
       _camera_date.text = this.Uploader.simpleDateAsString(_exifSimpleDate);
       _camera_date.dataset.exif_date = _exifSimpleDate;
-      _camera_date.onclick = function () {
+      _camera_date.onclick = () => {
         this.imageDate(_exifSimpleDate);
         this.Uploader.dateUpdater.refreshBox();
       }
@@ -883,7 +856,7 @@ class FileStoreItem {
     this.incrementProgressBar();
 
     // after image has been created.
-    xhrReq.onreadystatechange = function () {
+    xhrReq.onreadystatechange = () => {
       if (xhrReq.readyState == 4) {
         if (xhrReq.status == 200) {
           const _image = JSON.parse(xhrReq.response);
@@ -898,8 +871,8 @@ class FileStoreItem {
           if (this.dom_element
             .querySelector('input[name="observation[thumb_image_id]"]')
             .checked) {
-            document.getElementById('observation_thumb_image_id')
-              .value = _image.id;
+            document.getElementById('observation_thumb_image_id').value =
+              _image.id;
           }
         } else if (xhrReq.response) {
           alert(xhrReq.response);
@@ -919,11 +892,11 @@ class FileStoreItem {
     };
 
     // This is currently disabled in nginx, so no sense making the request.
-    // update = function() {
+    // update = () => {
     //   const req = new XMLHttpRequest();
     //   req.open("GET", this.progress_uri, 1);
     //   req.setRequestHeader("X-Progress-ID", _this.uuid);
-    //   req.onreadystatechange = function () {
+    //   req.onreadystatechange = () => {
     //   if (req.readyState == 4 && req.status == 200) {
     //     const upload = eval(req.responseText);
     //     if (upload.state == "done" || upload.state == "uploading") {

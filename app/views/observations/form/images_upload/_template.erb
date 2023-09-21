@@ -17,7 +17,7 @@
     <div class="added_image_image_container col-xs-4">
 
       <div class="form-group mb-2">
-        <a href="#"
+        <a href="javascript:"
            data-role="set_as_default_thumbnail"
            class="btn btn-sm btn-default"><%= :image_set_default.t %></a>
         <label class="hidden is_default_thumbnail"><%= :image_add_default.t %></label>
@@ -39,7 +39,7 @@
 
       <div class="text-right mb-2">
         <a href="javascript:"
-           class="remove_image_link btn btn-sm btn-default"><%= :image_remove_remove.t %></a>
+           class="remove_image_link btn btn-sm btn-default fade in"><%= :image_remove_remove.t %></a>
       </div>
 
       <%= fields_for(:temp_image) do |fti| %>
