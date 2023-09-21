@@ -79,9 +79,12 @@ class MOMultiImageUploader {
 
 
     document.body.querySelectorAll('[data-role="show_on_map"]')
-      .onclick = () => {
-        this.showGeocodeonMap(this.dataset.geocode);
-      };
+      .forEach((elem) => {
+        elem.onclick = () => {
+          this.showGeocodeonMap(this.dataset.geocode);
+        }
+      })
+
 
     // was bind('click.fixDateBind
     this.fix_date_submit.onclick = () => {
@@ -168,39 +171,56 @@ class MOMultiImageUploader {
     // observation view.
     document
       .querySelectorAll('[type="radio"][name="observation[thumb_image_id]"]')
-      .onchange = function () {
-        document.getElementById('observation_thumb_image_id')
-          .value = this.value;
-      };
+      .forEach((elem) => {
+        elem.onchange = function () {
+          document.getElementById('observation_thumb_image_id')
+            .value = this.value;
+        }
+      })
 
     // Logic for setting the default thumbnail
     document.body
       .querySelectorAll('[data-role="set_as_default_thumbnail"]')
-      .onclick = function (event) {
-        // `this` is the link clicked to make default image
-        event.preventDefault();
+      .forEach((elem) => {
+        elem.onclick = function (event) {
+          // `this` is the link clicked to make default image
+          event.preventDefault();
 
-        // reset selections
-        // remove hidden from the links
-        document.querySelectorAll('[data-role="set_as_default_thumbnail"]')
-          .classList.remove('hidden');
-        // add hidden to the default thumbnail text
-        document.querySelectorAll('.is_default_thumbnail')
-          .classList.add('hidden');
-        // reset the checked default thumbnail
-        document.querySelectorAll('input[type="radio"][name="observation[thumb_image_id]"]').setAttribute('checked', false);
+          // reset selections
+          // remove hidden from the links
+          document.querySelectorAll('[data-role="set_as_default_thumbnail"]')
+            .forEach((elem) => {
+              elem.classList.remove('hidden');
+            })
+          // add hidden to the default thumbnail text
+          document.querySelectorAll('.is_default_thumbnail')
+            .forEach((elem) => {
+              elem.classList.add('hidden');
+            })
+          // reset the checked default thumbnail
+          document.querySelectorAll(
+            'input[type="radio"][name="observation[thumb_image_id]"]'
+          ).forEach((elem) => {
+            elem.setAttribute('checked', false);
+          })
 
-        // set selections
-        // add hidden to the link clicked
-        this.classList.add('hidden');
-        // show that the image is default
-        const siblings = _this.parentNode.childNodes
+          // set selections
+          // add hidden to the link clicked
+          this.classList.add('hidden');
+          // show that the image is default
+          const siblings = _this.parentNode.childNodes
 
-        siblings.querySelectorAll('.is_default_thumbnail')
-          .classList.remove('hidden');
-        // adjust hidden radio button to select default thumbnail
-        siblings.querySelectorAll('input[type="radio"][name="observation[thumb_image_id]"]').setAttribute('checked', true);
-      }
+          siblings.querySelectorAll('.is_default_thumbnail').forEach((elem) => {
+            elem.classList.remove('hidden');
+          })
+          // adjust hidden radio button to select default thumbnail
+          siblings.querySelectorAll(
+            'input[type="radio"][name="observation[thumb_image_id]"]'
+          ).forEach((elem) => {
+            elem.setAttribute('checked', true);
+          })
+        }
+      })
 
     // Detect when a user submits observation; includes upload logic
 
@@ -526,8 +546,9 @@ class FileStore {
       (element) => { element.setAttribute('disabled', 'true') }
     );
     // Note that remove image links are not present at initialization
-    const _remove_links = document.querySelectorAll(".remove_image_link");
-    _remove_links.forEach((elem) => { this.Uploader.hide(elem) });
+    document.querySelectorAll(".remove_image_link").forEach((elem) => {
+      this.Uploader.hide(elem);
+    });
 
     // callback function to move through the the images to upload
     function getNextImage() {
@@ -826,8 +847,8 @@ class FileStoreItem {
   }
 
   incrementProgressBar(decimalPercentage) {
-    const _container = this.dom_element
-      .querySelectorAll(".added_image_name_container"),
+    const _container =
+      this.dom_element.querySelector(".added_image_name_container"),
       // if we don't have percentage,  just set it to 0 percent
       _percent_string = decimalPercentage ?
         parseInt(decimalPercentage * 100).toString() + "%" : "0%";
@@ -844,7 +865,15 @@ class FileStoreItem {
 
       doDots(1);
     } else {
-      _container.querySelectorAll(".progress-bar").animate({ width: _percent_string }, decimalPercentage == 1 ? 1000 : 1500, "linear");
+      const _progress_bar = _container.querySelector(".progress-bar"),
+        _animation = [
+          { width: _progress_bar.width },
+          { width: _percent_string }
+        ],
+        _timing = { duration: decimalPercentage == 1 ? 1000 : 1500 };
+
+      _progress_bar.animate(_animation, _timing);
+
       // 1500: a little extra to patch over gap between sending request
       // for next progress update and actually receiving it, which occurs
       // after a second is up... but not after image is done, no more
@@ -854,7 +883,7 @@ class FileStoreItem {
     function doDots(i) {
       setTimeout(() => {
         if (i < 900) {
-          _container.querySelectorAll(".progress-text").html =
+          _container.querySelector(".progress-text").html =
             this.Uploader.localized_text.uploading_text +
             this.Uploader.dots[i % 3];
           doDots(++i);
