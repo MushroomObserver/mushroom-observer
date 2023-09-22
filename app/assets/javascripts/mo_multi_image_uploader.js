@@ -720,7 +720,7 @@ class MOMultiImageUploader {
     // progress = window.setTimeout(update, 1000);
 
     // Note: Add the event listeners before calling open() on the request.
-    debugger;
+    // debugger;
     xhrReq.open("POST", this.upload_image_uri, true);
     xhrReq.setRequestHeader("X-Progress-ID", this.uuid);
     const _fd = this.asformData(item); // Send the form
