@@ -14,6 +14,11 @@ feedback_locals = {
   parent_deprecated: @parent_deprecated,
   names: @names
 }
+
+deprecate_comments_help = capture do
+  concat(:name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")))
+  concat(:field_textile_link.tp)
+end
 %>
 
 <%= form_with(url: action, id: "name_deprecate_synonym_form") do |f| %>
@@ -26,9 +31,9 @@ feedback_locals = {
   <%= text_field_with_label(
         form: f, field: :proposed_name, inline: true,
         value: @what, placeholder: :start_typing.l,
-        label: "#{:name_deprecate_preferred.t}:",
+        label: "#{:name_deprecate_preferred.t}:", autofocus: true,
         append: help_note(:div, :name_deprecate_preferred_help.tp),
-        data: { autofocus: true, autocompleter: :name }
+        data: { autocompleter: :name }
       ) %>
 
   <%= check_box_with_label(form: f, field: :is_misspelling,
@@ -36,13 +41,8 @@ feedback_locals = {
                            label: :form_names_misspelling.t) %>
 
   <%= text_area_with_label(form: f, field: :comment, inline: true,
+                           value: @comment, cols: 80, rows: 5,
                            label: "#{:name_deprecate_comments.t}:",
-                           value: @comment, cols: 80, rows: 5) %>
-  <%= content_tag(:div, class: "help-note") do
-    concat(:name_deprecate_comments_help.tp(
-             name: @name.display_name.chomp(".")
-           ))
-    concat(:field_textile_link.tp)
-  end %>
+                           append: help_note(:div, deprecate_comments_help)) %>
 
 <% end %>
