@@ -317,6 +317,21 @@ class Project < AbstractModel
   end
 
   def place_name
-    location&.display_name || ""
+    if location
+      location.display_name
+    else
+      ""
+    end
+  end
+
+  def place_name=(place_name)
+    place_name = place_name.strip_squeeze
+    where = if User.current_location_format == "scientific"
+              Location.reverse_name(place_name)
+            else
+              place_name
+            end
+    loc = Location.find_by_name(where)
+    self.location = (loc)
   end
 end

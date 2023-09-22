@@ -12,7 +12,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    assert_redirected_to(new_project_path) # Failure
+    assert_form_action(action: :create)
   end
 
   def edit_project_helper(title, project)
@@ -24,7 +24,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     put_requires_user(:update, { action: :show }, params)
-    assert_form_action(action: :update, id: project.id) # Failure
+    assert_form_action(action: :update, id: project.id)
   end
 
   def destroy_project_helper(project, changer)
@@ -44,7 +44,7 @@ class ProjectsControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_show_project
-    login("zero") # NOt the owner of eol_project
+    login("zero") # Not the owner of eol_project
     p_id = projects(:eol_project).id
     get(:show, params: { id: p_id })
     assert_template("show")
@@ -151,7 +151,8 @@ class ProjectsControllerTest < FunctionalTestCase
     params = {
       project: {
         title: title,
-        summary: summary
+        summary: summary,
+        where: ""
       }
     }
     post_requires_login(:create, params)
@@ -206,6 +207,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: summary,
+        where: "",
         open_membership: true
       }
     }
@@ -293,7 +295,8 @@ class ProjectsControllerTest < FunctionalTestCase
     put(:update,
         params: {
           id: projects(:eol_project).id,
-          project: { title: "New Project", summary: "New Summary" }
+          project: { title: "New Project", summary: "New Summary",
+                     where: "" }
         })
     assert_flash_success
     proj = proj.reload
@@ -397,6 +400,8 @@ class ProjectsControllerTest < FunctionalTestCase
     project.expect :try, false
     project.expect :is_a?, false, [String]
     project.expect :is_a?, false, [Integer]
+    project.expect :location, nil
+    project.expect :location, nil
   end
 
   def test_project_destroy_fail

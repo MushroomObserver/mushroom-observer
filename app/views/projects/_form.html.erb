@@ -17,7 +17,10 @@
 
   <%= render(partial: "shared/textilize_help") %>
 
-  <%= text_field_with_label(form: f, field: :where,
-                            label: :form_projects_where.t + ":") %>
+  <%= text_field_with_label(form: f, field: :place_name,
+                            placeholder: :start_typing.l,
+                            label: :WHERE.t + ":",
+                            between: :required,
+                            data: { autocompleter: :location }) %>
 
 <% end %>

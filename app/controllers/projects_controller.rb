@@ -76,14 +76,14 @@ class ProjectsController < ApplicationController
 
   def create
     title = params[:project][:title].to_s
-    @project = Project.find_by_title(title)
+    project = Project.find_by_title(title)
     user_group = UserGroup.find_by_name(title)
     admin_name = "#{title}.admin"
     admin_group = UserGroup.find_by_name(admin_name)
     if title.blank?
       flash_error(:add_project_need_title.t)
-    elsif @project
-      flash_error(:add_project_already_exists.t(title: @project.title))
+    elsif project
+      flash_error(:add_project_already_exists.t(title: project.title))
     elsif user_group
       flash_error(:add_project_group_exists.t(group: title))
     elsif admin_group
@@ -91,7 +91,8 @@ class ProjectsController < ApplicationController
     else
       return create_project(title, admin_name, params[:project][:where])
     end
-    redirect_to(new_project_path(q: get_query_param))
+    @project = Project.new
+    render(:new, location: new_project_path(q: get_query_param))
   end
 
   def update
@@ -101,21 +102,40 @@ class ProjectsController < ApplicationController
       return redirect_to(project_path(@project.id, q: get_query_param))
     end
 
-    @title = params[:project][:title].to_s
     @summary = params[:project][:summary]
+    if valid_title && valid_where
+      if @project.update(project_create_params)
+        @project.save
+        @project.log_update
+        flash_notice(:runtime_edit_project_success.t(id: @project.id))
+        return redirect_to(project_path(@project.id, q: get_query_param))
+      else
+        flash_object_errors(@project)
+      end
+    end
+    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
+  end
+
+  def valid_title
+    @title = params[:project][:title].to_s
     if @title.blank?
       flash_error(:add_project_need_title.t)
     elsif (project2 = Project.find_by_title(@title)) &&
           (project2 != @project)
       flash_error(:add_project_already_exists.t(title: @title))
-    elsif !@project.update(permitted_project_params)
-      flash_object_errors(@project)
     else
-      @project.log_update
-      flash_notice(:runtime_edit_project_success.t(id: @project.id))
-      return redirect_to(project_path(@project.id, q: get_query_param))
+      return true
     end
-    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
+    false
+  end
+
+  def valid_where
+    where = params[:project][:where]
+    location = find_location(where)
+    return false if !location && where != ""
+
+    @project.location = location
+    @project.save
   end
 
   # Callback to destroy a project.
@@ -142,6 +162,7 @@ class ProjectsController < ApplicationController
   private ############################################################
 
   def set_ivars_for_show
+    @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
     @is_member = @project.is_member?(@user)
     @is_admin = @project.is_admin?(@user)
@@ -177,7 +198,6 @@ class ProjectsController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
-      # redirect_to(action: :show, id: project.id)
       set_ivars_for_show
       render("show", location: project_path(@project.id))
     else
@@ -228,6 +248,7 @@ class ProjectsController < ApplicationController
 
   def find_project!
     @project = find_or_goto_index(Project, params[:id].to_s)
+    @where = @project&.location&.display_name || ""
   end
 
   def create_members_group(title)
@@ -262,7 +283,7 @@ class ProjectsController < ApplicationController
     user_group = create_members_group(title)
     admin_group = create_admin_group(admin_name)
     location = find_location(where)
-    if user_group && admin_group && (location || !where)
+    if user_group && admin_group && (location || (where == ""))
       @project = Project.new(project_create_params)
       @project.user = @user
       @project.user_group = user_group
@@ -278,6 +299,9 @@ class ProjectsController < ApplicationController
         flash_object_errors(@project)
       end
     end
+    admin_group&.destroy
+    user_group&.destroy
+    @project = Project.new
     render(:new, location: new_project_path(q: get_query_param))
   end
 end
