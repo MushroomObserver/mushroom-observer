@@ -308,8 +308,8 @@ class ProjectsControllerTest < FunctionalTestCase
     title = "Bad User Group"
     user_group = Minitest::Mock.new
     add_user_group_expectations(user_group, title)
-    add_user_group_expectations(user_group, title + ".admin")
-    UserGroup.stub :new, user_group do
+    add_user_group_expectations(user_group, "#{title}.admin")
+    UserGroup.stub(:new, user_group) do
       params = {
         project: {
           title: title,
@@ -322,12 +322,12 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def add_user_group_expectations(user_group, title)
-    user_group.expect :save, false
-    user_group.expect :name=, title, [String]
-    user_group.expect :users, []
-    user_group.expect :errors, title
-    user_group.expect :errors, title
-    user_group.expect :formatted_errors, []
+    user_group.expect(:save, false)
+    user_group.expect(:name=, title, [String])
+    user_group.expect(:users, [])
+    user_group.expect(:errors, title)
+    user_group.expect(:errors, title)
+    user_group.expect(:formatted_errors, [])
   end
 
   def test_good_location
@@ -363,7 +363,7 @@ class ProjectsControllerTest < FunctionalTestCase
     title = "Bad Project"
     project = Minitest::Mock.new
     add_project_expectations(project)
-    Project.stub :new, project do
+    Project.stub(:new, project) do
       params = {
         project: {
           title: title,
@@ -376,38 +376,38 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def add_project_expectations(project)
-    project.expect :save, false
-    project.expect :user=, nil, [User]
-    project.expect :user_group=, nil, [UserGroup]
-    project.expect :admin_group=, nil, [UserGroup]
-    project.expect :location=, nil, [nil]
-    project.expect :errors, "A bad thing happened"
-    project.expect :errors, "A bad thing happened"
-    project.expect :formatted_errors, []
-    project.expect :to_model, projects(:eol_project)
-    project.expect :to_model, projects(:eol_project)
-    project.expect :is_a?, true, [Array]
-    project.expect :last, projects(:eol_project)
+    project.expect(:save, false)
+    project.expect(:user=, nil, [User])
+    project.expect(:user_group=, nil, [UserGroup])
+    project.expect(:admin_group=, nil, [UserGroup])
+    project.expect(:location=, nil, [nil])
+    project.expect(:errors, "A bad thing happened")
+    project.expect(:errors, "A bad thing happened")
+    project.expect(:formatted_errors, [])
+    project.expect(:to_model, projects(:eol_project))
+    project.expect(:to_model, projects(:eol_project))
+    project.expect(:is_a?, true, [Array])
+    project.expect(:last, projects(:eol_project))
   end
 
   def add_project_destroy_expectations(project)
-    project.expect :destroy, false
-    project.expect :user_id, users(:dick).id
-    project.expect :user_id, users(:dick).id
-    project.expect :id, projects(:eol_project).id
-    project.expect :id, projects(:eol_project).id
-    project.expect :id, projects(:eol_project).id
-    project.expect :try, false
-    project.expect :is_a?, false, [String]
-    project.expect :is_a?, false, [Integer]
-    project.expect :location, nil
-    project.expect :location, nil
+    project.expect(:destroy, false)
+    project.expect(:user_id, users(:dick).id)
+    project.expect(:user_id, users(:dick).id)
+    project.expect(:id, projects(:eol_project).id)
+    project.expect(:id, projects(:eol_project).id)
+    project.expect(:id, projects(:eol_project).id)
+    project.expect(:try, false)
+    project.expect(:is_a?, false, [String])
+    project.expect(:is_a?, false, [Integer])
+    project.expect(:location, nil)
+    project.expect(:location, nil)
   end
 
   def test_project_destroy_fail
     project = Minitest::Mock.new
     add_project_destroy_expectations(project)
-    Project.stub :safe_find, project do
+    Project.stub(:safe_find, project) do
       project_id = project.id
       params = { id: project_id.to_s }
       requires_user(:destroy, { action: :show }, params, "dick")
