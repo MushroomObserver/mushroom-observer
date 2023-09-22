@@ -44,8 +44,7 @@ class MOMultiImageUploader {
     this.submit_buttons = this.form.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.add_img_container.dataset.upload_max_size;
 
-    this.fileStore = new FileStore(this);
-    this.dateUpdater = new DateUpdater(this);
+    this.fileStore = new this.FileStore;
 
     // function of the Uploader instance, not the constructor
     this.set_bindings();
@@ -92,7 +91,7 @@ class MOMultiImageUploader {
         document.querySelector('input[name=fix_date]:checked').dataset;
 
       if (_selectedItemData && _selectedItemData.date) {
-        this.dateUpdater.fixDates(
+        this.fixDates(
           _selectedItemData.date, _selectedItemData.target
         );
       }
@@ -104,13 +103,13 @@ class MOMultiImageUploader {
     };
 
     this.obs_year.onchange = () => {
-      this.dateUpdater.updateObservationDateRadio()
+      this.updateObservationDateRadio()
     };
     this.obs_month.onchange = () => {
-      this.dateUpdater.updateObservationDateRadio()
+      this.updateObservationDateRadio()
     };
     this.obs_day.onchange = () => {
-      this.dateUpdater.updateObservationDateRadio()
+      this.updateObservationDateRadio()
     };
 
 
@@ -146,6 +145,7 @@ class MOMultiImageUploader {
       document.getElementById('right_side').classList.remove('dashed-border');
     }
 
+    // ADDING FILES
     this.content.ondrop = (e) => {
       // stops the browser from leaving page
       if (e.preventDefault) { e.preventDefault(); }
@@ -223,11 +223,10 @@ class MOMultiImageUploader {
       })
 
     // Detect when a user submits observation; includes upload logic
-
     this.form.onsubmit = (event) => {
       // event.preventDefault();
       if (this.block_form_submission) {
-        this.fileStore.uploadAll();
+        this.uploadAll();
         return false;
       }
       return true;
@@ -235,7 +234,634 @@ class MOMultiImageUploader {
   }
 
   /*********************/
-  /*    Helpers    */
+  /*     FileStore     */
+  /*********************/
+  // Container for the image files.
+  FileStore() {
+    this.items = [];
+    this.index = {};
+  }
+
+  areAllItemsProcessed() {
+    for (let i = 0; i < this.fileStore.items.length; i++) {
+      if (!this.fileStore.items[i].processed)
+        return false;
+    }
+    return true;
+  }
+
+  addFiles(files) {
+    // loop through attached files, make sure we aren't adding duplicates
+    for (let i = 0; i < files.length; i++) {
+      // stop adding the file, one with this exact size is already attached
+      // TODO: What are the odds of this?
+      if (this.fileStore.index[files[i].size] != undefined) {
+        continue;
+      }
+
+      // uuid is used as the index for the ruby form template. // **
+      const _item = new FileStoreItem(files[i], this.generateUUID());
+      this.loadAndDisplayItem(_item);
+
+      // add an item to the dictionary with the file size as the key
+      this.fileStore.index[files[i].size] = _item;
+      this.fileStore.items.push(_item)
+    }
+
+    // check status of when all the selected files have processed.
+    this.checkStoreStatus();
+  }
+
+  checkStoreStatus() {
+    setTimeout(() => {
+      if (!this.areAllItemsProcessed()) {
+        this.checkStoreStatus();
+      } else {
+        this.refreshBox();
+      }
+    }, 30)
+  }
+
+  addUrl(url) {
+    if (this.fileStore.index[url] == undefined) {
+      const _item = new FileStoreItem(url, this.generateUUID());
+      this.loadAndDisplayItem(_item);
+
+      this.fileStore.index[url] = _item;
+      this.fileStore.items.push(_item);
+    }
+  }
+
+  updateImageDates(simpleDate) {
+    this.fileStore.items.forEach(function (item) {
+      this.imageDate(item, simpleDate);
+    });
+  }
+
+  getDistinctImageDates() {
+    const _testAgainst = "",
+      _distinct = [];
+
+    for (let i = 0; i < this.fileStore.items.length; i++) {
+      const _ds =
+        this.simpleDateAsString(this.imageDate(this.fileStore.items[i]));
+
+      if (_testAgainst.indexOf(_ds) != -1)
+        continue;
+
+      _testAgainst += _ds;
+      _distinct.push(this.imageDate(this.fileStore.items[i]))
+    }
+
+    return _distinct;
+  }
+
+  // remove all the images as they were uploaded!
+  destroyAll() {
+    this.fileStore.items.forEach((item) => { item.destroy(); });
+  }
+
+  uploadAll() {
+    // disable submit and remove image buttons during upload process.
+    this.submit_buttons.forEach(
+      (element) => { element.setAttribute('disabled', 'true') }
+    );
+    // Note that remove image links are not present at initialization
+    document.querySelectorAll(".remove_image_link").forEach((elem) => {
+      this.hide(elem);
+    });
+
+    const _firstUpload = this.fileStore.items[0];
+
+    // uploads first image. if we have one.
+    if (_firstUpload) {
+      this.uploadItem(_firstUpload);
+    }
+    // no images to upload, submit form
+    else {
+      this.block_form_submission = false;
+      this.form.submit();
+    }
+
+    return false;
+  }
+
+  // callback function to move through the the images to upload
+  getNextImage() {
+    this.fileStore.items[0].destroy();
+    return this.fileStore.items[0];
+  }
+
+  onUploadedCallback() {
+    const _nextInLine = this.getNextImage();
+
+    if (_nextInLine)
+      this.uploadItem(_nextInLine);
+    // now the form will be submitted without hitting the uploads.
+    else {
+      this.block_form_submission = false;
+      this.submit_buttons.forEach((element) => {
+        element.value = this.localized_text.creating_observation_text;
+      });
+      this.form.submit();
+    }
+  }
+
+  /*********************/
+  /*   FileStoreItem   */
+  /*********************/
+  // When initializing this, also getTemplateHTML(FileStoreItem)
+  FileStoreItem(file_or_url, uuid) {
+    if (typeof file_or_url == "string") {
+      this.is_file = false;
+      this.url = file_or_url;
+      this.file_name = decodeURI(file_or_url.replace(/.*\//, ""));
+      this.file_size = 0;
+    } else {
+      this.is_file = true;
+      this.file = file_or_url;
+      this.file_name = file_or_url.name;
+      this.file_size = file_or_url.size;
+    }
+    this.uuid = uuid;
+    this.dom_element = null;
+    this.exif_data = null;
+    this.processed = false; // check the async status of files
+  }
+
+  // does an ajax request to get the template, then formats it
+  // the format function adds to HTML
+  loadAndDisplayItem(item) {
+    const url = this.get_template_uri + "?img_number=" + item.uuid;
+    // + new URLSearchParams({ img_number: this.uuid })
+    // console.log(url);
+
+    fetch(url).then((response) => {
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          response.text().then((html) => {
+            // the data returned is the raw HTML template
+            this.addTemplateToPage(item, html)
+            // extract the EXIF data (async) and then load it
+            this.getExifData(item);
+            // uses FileReader to load image as base64 async
+            this.fileReadImage(item);
+          }).catch((error) => {
+            console.error("no_content:", error);
+          });
+        } else {
+          // this.ajax_request = null;
+          console.log(`got a ${response.status}`);
+        }
+      }
+    }).catch((error) => {
+      console.error("Server Error:", error);
+    });
+  }
+
+  addTemplateToPage(item, html) {
+    html = html.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '')
+      .replace('{{img_file_name}}', item.file_name)
+      .replace('{{img_file_size}}', item.is_file ?
+        Math.floor((item.file_size / 1024)) + "kb" : "").trim();
+
+    // Create the DOM element and add it to FileStoreItem;
+    // This should work if the html is valid!
+    const template = document.createElement('template');
+    template.innerHTML = html;
+
+    // Hard to find without dev tools, but this is where the goods are:
+    item.dom_element = template.content.childNodes[0];
+
+    if (item.file_size > this.max_image_size)
+      item.dom_element.querySelector('.warn-text').text =
+        this.localized_text.image_too_big_text;
+
+    // add it to the page
+    this.add_img_container.append(item.dom_element);
+
+    // bind the destroy function
+    item.dom_element.querySelector('.remove_image_link')
+      .onclick = (event) => {
+        event.target.destroy();
+        this.refreshBox();
+      };
+
+    item.dom_element.querySelector('select')
+      .onchange = () => {
+        this.refreshBox();
+      };
+  }
+
+  fileReadImage(item) {
+    if (item.is_file) {
+      const fileReader = new FileReader();
+
+      fileReader.onload = (fileLoadedEvent) => {
+        // find the actual image element
+        const _img = item.dom_element.querySelector('.img-responsive');
+        // get image element in container and set the src to base64 img url
+        _img.setAttribute('src', fileLoadedEvent.target.result);
+      };
+
+      fileReader.readAsDataURL(item.file);
+    } else {
+      const _img = item.dom_element.querySelector('.img-responsive');
+      _img.setAttribute('src', item.url)
+        .onerror = (event) => {
+          alert("Couldn't read image from: " + item.url);
+          event.target.destroy();
+        };
+    }
+  }
+
+  // extracts the exif data async;
+  getExifData(item) {
+    item.dom_element.querySelector('.img-responsive')
+      .onload = () => {
+        EXIF.getData(this, function () {
+          item.exif_data = this.exifdata;
+          // apply the data to the DOM
+          item.applyExifData();
+        });
+      };
+  }
+
+  // applies exif data to the DOM element, must already be attached
+  applyExifData(item) {
+    let _exif_date_taken;
+    const _exif = item.exif_data;
+
+    if (item.dom_element == null) {
+      console.warn("Error: DOM element for this file has not been created, so cannot update it with exif data!");
+      return;
+    }
+
+    // Geocode Logic
+    // check if there is geodata on the image
+    if (_exif.GPSLatitude && _exif.GPSLongitude) {
+
+      const latLngAlt = this.getLatLongEXIF(_exif),
+        radioBtnToInsert = this.makeGeocodeRadioBtn(latLngAlt);
+
+      if (geocode_radio_container
+        .querySelectorAll('input[type="radio"]').length === 0) {
+        this.show(this.geocode_messages);
+        this.geocode_radio_container.append(radioBtnToInsert);
+      }
+
+      // don't add geocodes that are only slightly different
+      else {
+        const shouldAddGeocode = true;
+
+        this.geocode_radio_container
+          .querySelectorAll('input[type="radio"]').forEach((element) => {
+            const _existingGeocode = element.dataset.geocode;
+            const _latDif = Math.abs(latLngAlt.latitude)
+              - Math.abs(_existingGeocode.latitude);
+            const _longDif = Math.abs(latLngAlt.longitude)
+              - Math.abs(_existingGeocode.longitude);
+
+            if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
+              shouldAddGeocode = false;
+          });
+
+        if (shouldAddGeocode)
+          this.geocode_radio_container.append(radioBtnToInsert);
+      }
+    }
+
+    // Image Date Logic
+    _exif_date_taken = item.exif_data.DateTimeOriginal;
+
+    if (_exif_date_taken) {
+      // we found the date taken, let's parse it down.
+      // returns an array of [YYYY,MM,DD]
+      const _date_taken_array =
+        _exif_date_taken.substring(' ', 10).split(':'),
+        _exifSimpleDate = new SimpleDate(_date_taken_array.reverse());
+
+      this.imageDate(item, _exifSimpleDate);
+
+      const _camera_date = item.dom_element.find(".camera_date_text");
+      // shows the exif date by the photo
+      _camera_date.text = this.simpleDateAsString(_exifSimpleDate);
+      _camera_date.dataset.exif_date = _exifSimpleDate;
+      _camera_date.onclick = () => {
+        this.imageDate(item, _exifSimpleDate);
+        this.refreshBox();
+      }
+    }
+    // no date was found in EXIF data
+    else {
+      // Use observation date
+      this.imageDate(item, this.observationDate());
+    }
+
+    this.processed = true;
+  }
+
+  imageDate(item, simpleDate) {
+    const _day = item.dom_element.querySelectorAll('select')[0],
+      _month = item.dom_element.querySelectorAll('select')[1],
+      _year = item.dom_element.querySelectorAll('input')[2];
+    let _date_values;
+
+    if (simpleDate) {
+      _date_values = [
+        _day.value = simpleDate.day,
+        _month.value = simpleDate.month,
+        _year.value = simpleDate.year
+      ]
+    }
+    return new SimpleDate(_date_values);
+  }
+
+  getUserEnteredInfo(item) {
+    return {
+      day: item.dom_element.querySelectorAll('select')[0].value,
+      month: item.dom_element.querySelectorAll('select')[1].value,
+      year: item.dom_element.querySelectorAll('input')[2].value,
+      license: item.dom_element.querySelectorAll('select')[2].value,
+      notes: item.dom_element.querySelectorAll('textarea')[0].value,
+      copyright_holder: item.dom_element.querySelectorAll('input')[1].value
+    };
+  }
+
+  asformData(item) {
+    const _info = this.getUserEnteredInfo(item),
+      _fd = new FormData();
+
+    if (item.file_size() > this.max_image_size)
+      return null;
+
+    if (item.is_file)
+      _fd.append("image[upload]", item.file, item.file_name());
+    else
+      _fd.append("image[url]", item.url);
+    _fd.append("image[when][3i]", _info.day);
+    _fd.append("image[when][2i]", _info.month);
+    _fd.append("image[when][1i]", _info.year);
+    _fd.append("image[notes]", _info.notes);
+    _fd.append("image[copyright_holder]", _info.copyright_holder);
+    _fd.append("image[license]", _info.license);
+    _fd.append("image[original_name]", item.file_name());
+    return _fd;
+  }
+
+  // incrementProgressBar(item, decimalPercentage) {
+  //   const _container =
+  //     item.dom_element.querySelector(".added_image_name_container"),
+  //     // if we don't have percentage, just set it to 0 percent
+  //     _percent_string = decimalPercentage ?
+  //       parseInt(decimalPercentage * 100).toString() + "%" : "0%";
+
+  //   if (!item.isUploading) {
+  //     item.isUploading = true;
+  //     _container.html =
+  //       '<div class="col-xs-12" style="z-index: 1">'
+  //       + '<strong class="progress-text">'
+  //       + this.localized_text.uploading_text + '</strong></div>'
+  //       + '<div class="progress-bar position-absolute" '
+  //       + 'style="width: 0%; height: 1.5em; background: #51B973; '
+  //       + 'z-index: 0;"></div>'
+
+  //     let i = 1;
+  //     while (i < 900) {
+  //       setTimeout(() => {
+  //         _container.querySelector(".progress-text").html =
+  //           this.localized_text.uploading_text +
+  //           this.dots[i % 3];
+  //         ++i;
+  //       }, 333)
+  //     }
+  //   } else {
+  //     const _progress_bar = _container.querySelector(".progress-bar"),
+  //       _animation = [
+  //         { width: _progress_bar.width },
+  //         { width: _percent_string }
+  //       ],
+  //       _timing = { duration: decimalPercentage == 1 ? 1000 : 1500 };
+
+  //     _progress_bar.animate(_animation, _timing);
+
+  //     // 1500: a little extra to patch over gap between sending request
+  //     // for next progress update and actually receiving it, which occurs
+  //     // after a second is up... but not after image is done, no more
+  //     // progress updates required then.
+  //   }
+  // }
+
+  // upload with readable stream not implemented yet for fetch
+  // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
+  // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+  uploadItem(item) {
+    const xhrReq = new XMLHttpRequest(),
+      progress = null;
+    // let update = null;
+
+    this.submit_buttons.value = this.localized_text.uploading_text + '...';
+    // this.incrementProgressBar();
+
+    // after image has been created.
+    xhrReq.onreadystatechange = () => {
+      if (xhrReq.readyState == 4) {
+        if (xhrReq.status == 200) {
+          const _image = JSON.parse(xhrReq.response),
+            // #good_images is a hidden field
+            _good_image_vals = this.good_images.value ?? "";
+
+          // add id to the good images form field.
+          this.good_images.value =
+            [_good_image_vals, _image.id].join(' ').trim();
+
+          // set the thumbnail if it is selected
+          if (item.dom_element
+            .querySelector('input[name="observation[thumb_image_id]"]')
+            .checked) {
+            document.getElementById('observation_thumb_image_id').value =
+              _image.id;
+          }
+        } else if (xhrReq.response) {
+          alert(xhrReq.response);
+        } else {
+          alert(this.localized_text.something_went_wrong);
+        }
+
+        if (progress)
+          window.clearTimeout(progress);
+
+        // this.incrementProgressBar(item, 1);
+        this.hide(item.dom_element);
+
+        this.onUploadedCallback();
+      }
+    };
+
+    // This is currently disabled in nginx, so no sense making the request.
+    // update = () => {
+    //   const req = new XMLHttpRequest();
+    //   req.open("GET", this.progress_uri, 1);
+    //   req.setRequestHeader("X-Progress-ID", _this.uuid);
+    //   req.onreadystatechange = () => {
+    //   if (req.readyState == 4 && req.status == 200) {
+    //     const upload = eval(req.responseText);
+    //     if (upload.state == "done" || upload.state == "uploading") {
+    //     _this.incrementProgressBar(upload.received / upload.size);
+    //     progress = window.setTimeout(update, 1000);
+    //     } else {
+    //     window.clearTimeout(progress);
+    //     progress = null;
+    //     }
+    //   }
+    //   };
+    //   req.send(null);
+    // };
+    // progress = window.setTimeout(update, 1000);
+
+    // Note: Add the event listeners before calling open() on the request.
+    debugger;
+    xhrReq.open("POST", this.upload_image_uri, true);
+    xhrReq.setRequestHeader("X-Progress-ID", this.uuid);
+    const _fd = this.asformData(item); // Send the form
+    if (_fd != null) {
+      xhrReq.send(_fd);
+    } else {
+      alert(this.localized_text.something_went_wrong);
+      this.onUploadedCallback();
+    }
+  }
+
+  destroy(item) {
+    // remove element from the dom;
+    item.dom_element.remove();
+    if (item.is_file)
+      // remove the file from the dictionary
+      delete this.fileStore.index[this.file_size()];
+    else
+      // remove the file from the dictionary
+      delete this.fileStore.index[this.url];
+
+    // removes the file from the array
+    const idx = this.fileStore.items.indexOf(this);
+    if (idx > -1)
+      // removes the file from the array
+      this.fileStore.items.splice(idx, 1);
+  }
+
+  /*********************/
+  /*    DateUpdater    */
+  /*********************/
+  // Deals with synchronizing image and observation dates through
+  // a message box presenting radio buttons. Pick image date or obs date.
+
+  // will check differences between the image dates and observation dates
+  areDatesInconsistent() {
+    const _obsDate = this.observationDate(),
+      _distinctDates = this.getDistinctImageDates();
+
+    for (let i = 0; i < _distinctDates.length; i++) {
+      if (!this.simpleDatesAreEqual(_distinctDates[i], _obsDate))
+        return true;
+    }
+    return false;
+  }
+
+  refreshBox() {
+    const _distinctImgDates = this.getDistinctImageDates(),
+      _obsDate = this.observationDate();
+
+    this.img_radio_container.html = '';
+    this.obs_radio_container.html = '';
+    this.makeObservationDateRadio(_obsDate);
+
+    _distinctImgDates.forEach((simpleDate) => {
+      if (!this.simpleDatesAreEqual(_obsDate, simpleDate))
+        this.makeImageDateRadio(simpleDate);
+    });
+
+    if (this.areDatesInconsistent()) {
+      this.show(this.img_messages);
+    } else {
+      this.hide(this.img_messages);
+    }
+  }
+
+  fixDates(simpleDate, target) {
+    if (target == "image")
+      this.updateImageDates(simpleDate);
+    if (target == "observation")
+      this.observationDate(simpleDate);
+    this.hide(this.img_messages);
+  }
+
+  makeImageDateRadio(simpleDate) {
+    const _date = JSON.stringify(simpleDate),
+      _date_string = this.simpleDateAsString(simpleDate),
+      _html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label></div>"
+
+    this.img_radio_container.append(_html);
+  }
+
+  makeObservationDateRadio(simpleDate) {
+    const _date = JSON.stringify(simpleDate),
+      _date_string = this.simpleDateAsString(simpleDate),
+      _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
+
+    this.obs_radio_container.append(_html);
+  }
+
+  updateObservationDateRadio() {
+    // _currentObsDate is an instance of Uploader.SimpleDate(values)
+    const _currentObsDate = this.observationDate();
+
+    this.obs_radio_container.querySelectorAll('input')
+      .forEach((elem) => { elem.dataset.date = _currentObsDate; })
+
+    this.obs_radio_container.querySelectorAll('span')
+      .forEach((elem) => {
+        elem.text = this.simpleDateAsString(_currentObsDate);
+      })
+
+    if (this.areDatesInconsistent())
+      this.show(this.img_messages);
+  }
+
+  // undefined gets current date, simpledate object updates date
+  observationDate(simpleDate) {
+    let _date_values;
+
+    if (simpleDate && simpleDate.day && simpleDate.month &&
+      simpleDate.year) {
+      _date_values = [
+        this.obs_day.value = simpleDate.day,
+        this.obs_month.value = simpleDate.month,
+        this.obs_year.value = simpleDate.year,
+      ]
+    }
+    return new SimpleDate(_date_values);
+  }
+
+  /*********************/
+  /* Simple Date Class */
+  /*********************/
+
+  SimpleDate(day, month, year) {
+    this.day = parseInt(day);
+    this.month = parseInt(month);
+    this.year = parseInt(year);
+  }
+
+  // returns true if same
+  simpleDatesAreEqual(simpleDate1, simpleDate2) {
+    return simpleDate1.day == simpleDate2.day
+      && simpleDate1.month == simpleDate2.month
+      && simpleDate1.year == simpleDate2.year;
+  }
+
+  /*********************/
+  /*      Helpers      */
   /*********************/
 
   // notice this is for block-level
@@ -325,666 +951,6 @@ class MOMultiImageUploader {
       map: map,
       position: obsLatLongFormat
     });
-  }
-}
-
-/*********************/
-/* Simple Date Class */
-/*********************/
-// This could just as well be three helper methods in the main class,
-// without having to pass the uploader and the methods needing an extra arg,
-// but maybe it's nice to have the constructor
-class SimpleDate {
-  // needs the uploader for localized_text only
-  constructor(day, month, year) {
-    this.day = parseInt(day);
-    this.month = parseInt(month);
-    this.year = parseInt(year);
-  }
-
-  // returns true if same
-  areEqual(simpleDate) {
-    return this.day == simpleDate.day
-      && this.month == simpleDate.month
-      && this.year == simpleDate.year;
-  }
-};
-
-/*********************/
-/*    DateUpdater    */
-/*********************/
-// Deals with synchronizing image and observation dates through
-// a message box.
-class DateUpdater {
-  constructor(uploader) {
-    this.Uploader = uploader;
-  }
-
-  // will check differences between the image dates and observation dates
-  areDatesInconsistent() {
-    const _obsDate = this.observationDate(),
-      _distinctDates = this.Uploader.fileStore.getDistinctImageDates();
-
-    for (let i = 0; i < _distinctDates.length; i++) {
-      if (!_distinctDates[i].areEqual(_obsDate))
-        return true;
-    }
-
-    return false;
-  }
-
-  refreshBox() {
-    const _distinctImgDates = this.Uploader.fileStore.getDistinctImageDates(),
-      _obsDate = this.observationDate();
-
-    this.Uploader.img_radio_container.html = '';
-    this.Uploader.obs_radio_container.html = '';
-    this.makeObservationDateRadio(_obsDate);
-
-    _distinctImgDates.forEach((simpleDate) => {
-      if (!_obsDate.areEqual(simpleDate))
-        this.makeImageDateRadio(simpleDate);
-    });
-
-    if (this.areDatesInconsistent()) {
-      this.Uploader.show(this.Uploader.img_messages);
-    } else {
-      this.Uploader.hide(this.Uploader.img_messages);
-    }
-  }
-
-  fixDates(simpleDate, target) {
-    if (target == "image")
-      this.Uploader.fileStore.updateImageDates(simpleDate);
-    if (target == "observation")
-      this.observationDate(simpleDate);
-    this.Uploader.hide(this.Uploader.img_messages);
-  }
-
-  makeImageDateRadio(simpleDate) {
-    const _date = JSON.stringify(simpleDate),
-      _date_string = this.Uploader.simpleDateAsString(simpleDate),
-      _html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label></div>"
-
-    this.Uploader.img_radio_container.append(_html);
-  }
-
-  makeObservationDateRadio(simpleDate) {
-    const _date = JSON.stringify(simpleDate),
-      _date_string = this.Uploader.simpleDateAsString(simpleDate),
-      _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
-
-    this.Uploader.obs_radio_container.append(_html);
-  }
-
-  updateObservationDateRadio() {
-    // _currentObsDate is an instance of Uploader.SimpleDate(values)
-    const _currentObsDate = this.observationDate();
-
-    this.Uploader.obs_radio_container.querySelectorAll('input')
-      .forEach((elem) => { elem.dataset.date = _currentObsDate; })
-
-    this.Uploader.obs_radio_container.querySelectorAll('span')
-      .forEach((elem) => {
-        elem.text = this.Uploader.simpleDateAsString(_currentObsDate);
-      })
-
-    if (this.areDatesInconsistent())
-      this.Uploader.show(this.Uploader.img_messages);
-  }
-
-  // undefined gets current date, simpledate object updates date
-  observationDate = function (simpleDate) {
-    let _date_values;
-
-    if (simpleDate && simpleDate.day && simpleDate.month &&
-      simpleDate.year) {
-      _date_values = [
-        this.Uploader.obs_day.value = simpleDate.day,
-        this.Uploader.obs_month.value = simpleDate.month,
-        this.Uploader.obs_year.value = simpleDate.year,
-      ]
-    }
-    return new SimpleDate(_date_values);
-  }
-}
-
-/*********************/
-/*     FileStore     */
-/*********************/
-// Container for the image files.
-// Modifies attributes of the passed Uploader.
-class FileStore {
-  constructor(uploader) {
-    this.Uploader = uploader;
-    this.fileStoreItems = [];
-    this.fileDictionary = {};
-    this.areAllProcessed = function () {
-      for (let i = 0; i < this.fileStoreItems.length; i++) {
-        if (!this.fileStoreItems[i].processed)
-          return false;
-      }
-      return true;
-    }
-  }
-
-  addFiles(files) {
-    // loop through attached files, make sure we aren't adding duplicates
-    for (let i = 0; i < files.length; i++) {
-      // stop adding the file, one with this exact size is already attached
-      // TODO: What are the odds of this?
-      if (this.fileDictionary[files[i].size] != undefined) {
-        continue;
-      }
-
-      // uuid is used as the index for the ruby form template. // **
-      const _fileStoreItem = new FileStoreItem(
-        files[i], this.Uploader.generateUUID(), this.Uploader
-      );
-
-      // add an item to the dictionary with the file size as the key
-      this.fileDictionary[files[i].size] = _fileStoreItem;
-      this.fileStoreItems.push(_fileStoreItem)
-    }
-
-    // check status of when all the selected files have processed.
-    this.checkStatus();
-  }
-
-  checkStatus() {
-    setTimeout(() => {
-      if (!this.areAllProcessed()) {
-        this.checkStatus();
-      } else {
-        this.Uploader.dateUpdater.refreshBox();
-      }
-    }, 30)
-  }
-
-  addUrl(url) {
-    if (this.fileDictionary[url] == undefined) {
-      const _fileStoreItem =
-        new FileStoreItem(url, this.Uploader.generateUUID(), this.Uploader);
-
-      this.fileDictionary[url] = _fileStoreItem;
-      this.fileStoreItems.push(_fileStoreItem);
-    }
-  }
-
-  updateImageDates(simpleDate) {
-    this.fileStoreItems.forEach(function (fileStoreItem) {
-      fileStoreItem.imageDate(simpleDate);
-    });
-  }
-
-  getDistinctImageDates() {
-    const _testAgainst = "",
-      _distinct = [];
-
-    for (let i = 0; i < this.fileStoreItems.length; i++) {
-      const _ds =
-        this.Uploader.simpleDateAsString(this.fileStoreItems[i].imageDate());
-
-      if (_testAgainst.indexOf(_ds) != -1)
-        continue;
-
-      _testAgainst += _ds;
-      _distinct.push(this.fileStoreItems[i].imageDate())
-    }
-
-    return _distinct;
-  }
-
-  // remove all the images as they were uploaded!
-  destroyAll() {
-    this.fileStoreItems.forEach((item) => { item.destroy(); });
-  }
-
-  uploadAll() {
-    // disable submit and remove image buttons during upload process.
-    this.Uploader.submit_buttons.forEach(
-      (element) => { element.setAttribute('disabled', 'true') }
-    );
-    // Note that remove image links are not present at initialization
-    document.querySelectorAll(".remove_image_link").forEach((elem) => {
-      this.Uploader.hide(elem);
-    });
-
-    // callback function to move through the the images to upload
-    function getNextImage() {
-      this.fileStoreItems[0].destroy();
-      return this.fileStoreItems[0];
-    }
-
-    function onUploadedCallback() {
-      const _nextInLine = getNextImage();
-      if (_nextInLine)
-        _nextInLine.upload(onUploadedCallback);
-      // now the form will be submitted without hitting the uploads.
-      else {
-        this.Uploader.block_form_submission = false;
-        this.Uploader.submit_buttons.forEach((element) => {
-          element.value =
-            this.Uploader.localized_text.creating_observation_text;
-        }
-        );
-        this.Uploader.form.submit();
-      }
-    }
-
-    const _firstUpload = this.fileStoreItems[0];
-
-    // uploads first image. if we have one.
-    if (_firstUpload) {
-      _firstUpload.upload(onUploadedCallback);
-    }
-    // no images to upload, submit form
-    else {
-      this.Uploader.block_form_submission = false;
-      this.Uploader.form.submit();
-    }
-
-    return false;
-  }
-}
-
-/*********************/
-/*   FileStoreItem   */
-/*********************/
-// Contains information about an image file.
-class FileStoreItem {
-  constructor(file_or_url, uuid, uploader) {
-    this.Uploader = uploader;
-    if (typeof file_or_url == "string") {
-      this.is_file = false;
-      this.url = file_or_url;
-    } else {
-      this.is_file = true;
-      this.file = file_or_url;
-    }
-    this.uuid = uuid;
-    this.dom_element = null;
-    this.exif_data = null;
-    this.processed = false; // check the async status of files
-    this.getTemplateHtml(); // kicks off process of creating image and such
-  }
-
-  // does an ajax request to get the template, then formats it
-  // the format function adds to HTML
-  getTemplateHtml() {
-    const url = this.Uploader.get_template_uri + "?img_number=" + this.uuid;
-    // + new URLSearchParams({ img_number: this.uuid })
-    console.log(url);
-
-    fetch(url).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.text().then((html) => {
-            // the data returned is the raw HTML template
-            this.createTemplate(html)
-            // extract the EXIF data (async) and then load it
-            this.getExifData();
-            // load image as base64 async
-            this.loadImage();
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          this.ajax_request = null;
-          console.log(`got a ${response.status}`);
-        }
-      }
-    }).catch((error) => {
-      console.error("Server Error:", error);
-    });
-  }
-
-  createTemplate(html_string) {
-    html_string = html_string.replace(/\s\s+/g, ' ').replace(/[\n\r]/.gm, '')
-      .replace('{{img_file_name}}', this.file_name())
-      .replace('{{img_file_size}}', this.is_file ?
-        Math.floor((this.file_size() / 1024)) + "kb" : "").trim();
-
-    // Create the DOM element and add it to FileStoreItem;
-    // This should work if the html_string is valid!
-    const template = document.createElement('template');
-    template.innerHTML = html_string;
-
-    // Hard to find without dev tools, but this is where the goods are:
-    this.dom_element = template.content.childNodes[0];
-
-    if (this.file_size() > this.max_image_size)
-      this.dom_element.querySelector('.warn-text').text =
-        this.Uploader.localized_text.image_too_big_text;
-
-    // add it to the page
-    this.Uploader.add_img_container.append(this.dom_element);
-
-    // bind the destroy function
-    this.dom_element.querySelector('.remove_image_link')
-      .onclick = () => {
-        this.destroy();
-        this.Uploader.dateUpdater.refreshBox();
-      };
-
-    this.dom_element.querySelector('select')
-      .onchange = () => {
-        this.Uploader.dateUpdater.refreshBox();
-      };
-  }
-
-  file_name() {
-    if (this.is_file)
-      return this.file.name;
-    else
-      return decodeURI(this.url.replace(/.*\//, ""));
-  }
-
-  file_size() {
-    if (this.is_file)
-      return this.file.size;
-    else
-      return 0; // any way to get size from url??
-  }
-
-  loadImage() {
-    if (this.is_file) {
-      const fileReader = new FileReader();
-
-      fileReader.onload = (fileLoadedEvent) => {
-        // find the actual image element
-        const _img = this.dom_element.querySelector('.img-responsive');
-        // get image element in container and set the src to base64 img url
-        _img.setAttribute('src', fileLoadedEvent.target.result);
-      };
-
-      fileReader.readAsDataURL(this.file);
-    } else {
-      const _img = this.dom_element.querySelector('.img-responsive');
-      _img.setAttribute('src', this.url)
-        .onerror = () => {
-          alert("Couldn't read image from: " + this.url);
-          this.destroy();
-        };
-    }
-  }
-
-  // extracts the exif data async;
-  getExifData() {
-    const _fsItem = this;
-    _fsItem.dom_element.querySelector('.img-responsive')
-      .onload = () => {
-        EXIF.getData(this, function () {
-          _fsItem.exif_data = this.exifdata;
-          // apply the data to the DOM
-          _fsItem.applyExifData();
-        });
-      };
-  }
-
-  // applies exif data to the DOM element, must already be attached
-  applyExifData() {
-    let _exif_date_taken;
-    const _exif = this.exif_data;
-
-    if (this.dom_element == null) {
-      console.warn("Error: DOM element for this file has not been created, so cannot update it with exif data!");
-      return;
-    }
-
-    // Geocode Logic
-    // check if there is geodata on the image
-    if (_exif.GPSLatitude && _exif.GPSLongitude) {
-
-      const latLngAlt = this.Uploader.getLatLongEXIF(_exif),
-        radioBtnToInsert = this.Uploader.makeGeocodeRadioBtn(latLngAlt);
-
-      if (geocode_radio_container
-        .querySelectorAll('input[type="radio"]').length === 0) {
-        this.Uploader.show(this.Uploader.geocode_messages);
-        this.Uploader.geocode_radio_container.append(radioBtnToInsert);
-      }
-
-      // don't add geocodes that are only slightly different
-      else {
-        const shouldAddGeocode = true;
-
-        this.Uploader.geocode_radio_container
-          .querySelectorAll('input[type="radio"]')
-          .forEach((index, element) => {
-            const _existingGeocode = element.dataset.geocode;
-            const _latDif = Math.abs(latLngAlt.latitude)
-              - Math.abs(_existingGeocode.latitude);
-            const _longDif = Math.abs(latLngAlt.longitude)
-              - Math.abs(existingGeocode.longitude);
-
-            if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
-              shouldAddGeocode = false;
-          });
-
-        if (shouldAddGeocode)
-          this.Uploader.geocode_radio_container.append(radioBtnToInsert);
-      }
-    }
-
-    // Image Date Logic
-    _exif_date_taken = this.exif_data.DateTimeOriginal;
-
-    if (_exif_date_taken) {
-      // we found the date taken, let's parse it down.
-      // returns an array of [YYYY,MM,DD]
-      const _date_taken_array =
-        _exif_date_taken.substring(' ', 10).split(':'),
-        _exifSimpleDate = new SimpleDate(_date_taken_array.reverse());
-
-      this.imageDate(_exifSimpleDate);
-
-      const _camera_date = this.dom_element.find(".camera_date_text");
-      // shows the exif date by the photo
-      _camera_date.text = this.Uploader.simpleDateAsString(_exifSimpleDate);
-      _camera_date.dataset.exif_date = _exifSimpleDate;
-      _camera_date.onclick = () => {
-        this.imageDate(_exifSimpleDate);
-        this.Uploader.dateUpdater.refreshBox();
-      }
-    }
-    // no date was found in EXIF data
-    else {
-      // Use observation date
-      this.imageDate(this.Uploader.dateUpdater.observationDate());
-    }
-
-    this.processed = true;
-  }
-
-  imageDate(simpleDate) {
-    const _day = this.dom_element.querySelectorAll('select')[0],
-      _month = this.dom_element.querySelectorAll('select')[1],
-      _year = this.dom_element.querySelectorAll('input')[2];
-    let _date_values;
-
-    if (simpleDate) {
-      _date_values = [
-        _day.value = simpleDate.day,
-        _month.value = simpleDate.month,
-        _year.value = simpleDate.year
-      ]
-    }
-    return new SimpleDate(_date_values);
-  }
-
-  getUserEnteredInfo() {
-    return {
-      day: this.dom_element.querySelectorAll('select')[0].value,
-      month: this.dom_element.querySelectorAll('select')[1].value,
-      year: this.dom_element.querySelectorAll('input')[2].value,
-      license: this.dom_element.querySelectorAll('select')[2].value,
-      notes: this.dom_element.querySelectorAll('textarea')[0].value,
-      copyright_holder: this.dom_element.querySelectorAll('input')[1].value
-    };
-  }
-
-  asformData() {
-    const _info = this.getUserEnteredInfo(),
-      _fd = new FormData();
-
-    if (this.file_size() > this.Uploader.max_image_size)
-      return null;
-
-    if (this.is_file)
-      _fd.append("image[upload]", this.file, this.file_name());
-    else
-      _fd.append("image[url]", this.url);
-    _fd.append("image[when][3i]", _info.day);
-    _fd.append("image[when][2i]", _info.month);
-    _fd.append("image[when][1i]", _info.year);
-    _fd.append("image[notes]", _info.notes);
-    _fd.append("image[copyright_holder]", _info.copyright_holder);
-    _fd.append("image[license]", _info.license);
-    _fd.append("image[original_name]", this.file_name());
-    return _fd;
-  }
-
-  incrementProgressBar(decimalPercentage) {
-    const _container =
-      this.dom_element.querySelector(".added_image_name_container"),
-      // if we don't have percentage, just set it to 0 percent
-      _percent_string = decimalPercentage ?
-        parseInt(decimalPercentage * 100).toString() + "%" : "0%";
-
-    if (!this.isUploading) {
-      this.isUploading = true;
-      _container.html =
-        '<div class="col-xs-12" style="z-index: 1">'
-        + '<strong class="progress-text">'
-        + this.Uploader.localized_text.uploading_text + '</strong></div>'
-        + '<div class="progress-bar position-absolute" '
-        + 'style="width: 0%; height: 1.5em; background: #51B973; '
-        + 'z-index: 0;"></div>'
-
-      let i = 1;
-      while (i < 900) {
-        setTimeout(() => {
-          _container.querySelector(".progress-text").html =
-            context.Uploader.localized_text.uploading_text +
-            context.Uploader.dots[i % 3];
-          ++i;
-        }, 333)
-      }
-    } else {
-      const _progress_bar = _container.querySelector(".progress-bar"),
-        _animation = [
-          { width: _progress_bar.width },
-          { width: _percent_string }
-        ],
-        _timing = { duration: decimalPercentage == 1 ? 1000 : 1500 };
-
-      _progress_bar.animate(_animation, _timing);
-
-      // 1500: a little extra to patch over gap between sending request
-      // for next progress update and actually receiving it, which occurs
-      // after a second is up... but not after image is done, no more
-      // progress updates required then.
-    }
-  }
-
-  // upload with readable stream not implemented yet for fetch
-  // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
-  // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  upload(onUploadedCallback) {
-    const xhrReq = new XMLHttpRequest(),
-      progress = null;
-    // let update = null;
-
-    this.Uploader.submit_buttons.value =
-      this.Uploader.localized_text.uploading_text + '...';
-    this.incrementProgressBar();
-
-    // after image has been created.
-    xhrReq.onreadystatechange = () => {
-      if (xhrReq.readyState == 4) {
-        if (xhrReq.status == 200) {
-          const _image = JSON.parse(xhrReq.response),
-            // #good_images is a hidden field
-            _good_image_vals = this.Uploader.good_images.value ?? "";
-
-          // add id to the good images form field.
-          this.Uploader.good_images.value =
-            [_good_image_vals, _image.id].join(' ').trim();
-
-          // set the thumbnail if it is selected
-          if (this.dom_element
-            .querySelector('input[name="observation[thumb_image_id]"]')
-            .checked) {
-            document.getElementById('observation_thumb_image_id').value =
-              _image.id;
-          }
-        } else if (xhrReq.response) {
-          alert(xhrReq.response);
-        } else {
-          alert(this.Uploader.localized_text.something_went_wrong);
-        }
-
-        if (progress)
-          window.clearTimeout(progress);
-
-        this.incrementProgressBar(1);
-        this.Uploader.hide(this.dom_element);
-
-        // onUploadedCallback() is a function passed to this function
-        onUploadedCallback();
-      }
-    };
-
-    // This is currently disabled in nginx, so no sense making the request.
-    // update = () => {
-    //   const req = new XMLHttpRequest();
-    //   req.open("GET", this.progress_uri, 1);
-    //   req.setRequestHeader("X-Progress-ID", _this.uuid);
-    //   req.onreadystatechange = () => {
-    //   if (req.readyState == 4 && req.status == 200) {
-    //     const upload = eval(req.responseText);
-    //     if (upload.state == "done" || upload.state == "uploading") {
-    //     _this.incrementProgressBar(upload.received / upload.size);
-    //     progress = window.setTimeout(update, 1000);
-    //     } else {
-    //     window.clearTimeout(progress);
-    //     progress = null;
-    //     }
-    //   }
-    //   };
-    //   req.send(null);
-    // };
-    // progress = window.setTimeout(update, 1000);
-
-    // Note: Add the event listeners before calling open() on the request.
-    xhrReq.open("POST", this.Uploader.upload_image_uri, true);
-    xhrReq.setRequestHeader("X-Progress-ID", this.uuid);
-    const _fd = this.asformData(); // Send the form
-    if (_fd != null) {
-      xhrReq.send(_fd);
-    } else {
-      alert(this.Uploader.localized_text.something_went_wrong);
-      onUploadedCallback();
-    }
-  }
-
-  destroy() {
-    // remove element from the dom;
-    this.dom_element.remove();
-    if (this.is_file)
-      // remove the file from the dictionary
-      delete this.Uploader.fileStore.fileDictionary[this.file_size()];
-    else
-      // remove the file from the dictionary
-      delete this.Uploader.fileStore.fileDictionary[this.url];
-
-    // removes the file from the array
-    const idx = this.Uploader.fileStore.fileStoreItems.indexOf(this);
-    if (idx > -1)
-      // removes the file from the array
-      this.Uploader.fileStore.fileStoreItems.splice(idx, 1);
   }
 }
 
