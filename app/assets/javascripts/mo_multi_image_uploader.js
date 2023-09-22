@@ -311,7 +311,8 @@ class MOMultiImageUploader {
 
   // remove all the images as they were uploaded!
   destroyAll() {
-    this.fileStore.items.forEach((item) => { item.destroy(); });
+    // or maybe bump the item from the fileStore.items? indexOf and splice
+    this.fileStore.items.forEach((item) => { item.destroy() });
   }
 
   uploadAll() {
@@ -365,7 +366,8 @@ class MOMultiImageUploader {
   /*********************/
   /*   FileStoreItem   */
   /*********************/
-  // When initializing this, also getTemplateHTML(FileStoreItem)
+  // This is the object itself.
+  // When initializing, also loadAndDisplayItem(item)
   FileStoreItem(file_or_url, uuid) {
     const item = {};
 
@@ -388,8 +390,8 @@ class MOMultiImageUploader {
     return item;
   }
 
-  // does an ajax request to get the template, then formats it
-  // the format function adds to HTML
+  // Do a fetch request to get the template, populate it with the item data,
+  // then get EXIF data, and read the file with FileReader.
   loadAndDisplayItem(item) {
     const url = this.get_template_uri + "?img_number=" + item.uuid;
     // + new URLSearchParams({ img_number: this.uuid })
@@ -442,6 +444,7 @@ class MOMultiImageUploader {
     // bind the destroy function
     item.dom_element.querySelector('.remove_image_link')
       .onclick = (event) => {
+        // huh?
         event.target.destroy();
         this.refreshBox();
       };
@@ -469,6 +472,7 @@ class MOMultiImageUploader {
       _img.setAttribute('src', item.url)
         .onerror = (event) => {
           alert("Couldn't read image from: " + item.url);
+          // or maybe bump the item from the fileStore.items? indexOf and splice
           event.target.destroy();
         };
     }
@@ -655,7 +659,7 @@ class MOMultiImageUploader {
   // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
   // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
   // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  uploadItem(item) {
+  uploadItemXHR(item) {
     const xhrReq = new XMLHttpRequest(),
       progress = null;
     // let update = null;
@@ -667,21 +671,8 @@ class MOMultiImageUploader {
     xhrReq.onreadystatechange = () => {
       if (xhrReq.readyState == 4) {
         if (xhrReq.status == 200) {
-          const _image = JSON.parse(xhrReq.response),
-            // #good_images is a hidden field
-            _good_image_vals = this.good_images.value ?? "";
-
-          // add id to the good images form field.
-          this.good_images.value =
-            [_good_image_vals, _image.id].join(' ').trim();
-
-          // set the thumbnail if it is selected
-          if (item.dom_element
-            .querySelector('input[name="observation[thumb_image_id]"]')
-            .checked) {
-            document.getElementById('observation_thumb_image_id').value =
-              _image.id;
-          }
+          const _image = JSON.parse(xhrReq.response);
+          this.updateObsImages(_image);
         } else if (xhrReq.response) {
           alert(xhrReq.response);
         } else {
@@ -698,27 +689,6 @@ class MOMultiImageUploader {
       }
     };
 
-    // This is currently disabled in nginx, so no sense making the request.
-    // update = () => {
-    //   const req = new XMLHttpRequest();
-    //   req.open("GET", this.progress_uri, 1);
-    //   req.setRequestHeader("X-Progress-ID", _this.uuid);
-    //   req.onreadystatechange = () => {
-    //   if (req.readyState == 4 && req.status == 200) {
-    //     const upload = eval(req.responseText);
-    //     if (upload.state == "done" || upload.state == "uploading") {
-    //     _this.incrementProgressBar(upload.received / upload.size);
-    //     progress = window.setTimeout(update, 1000);
-    //     } else {
-    //     window.clearTimeout(progress);
-    //     progress = null;
-    //     }
-    //   }
-    //   };
-    //   req.send(null);
-    // };
-    // progress = window.setTimeout(update, 1000);
-
     // Note: Add the event listeners before calling open() on the request.
     // debugger;
     xhrReq.open("POST", this.upload_image_uri, true);
@@ -729,6 +699,59 @@ class MOMultiImageUploader {
     } else {
       alert(this.localized_text.something_went_wrong);
       this.onUploadedCallback();
+    }
+  }
+
+  uploadItem(item) {
+    this.submit_buttons.value = this.localized_text.uploading_text + '...';
+    const _fd = this.asformData(item);
+
+    fetch(url, {
+      method: 'POST',
+      // headers: {
+      // 'X-CSRF-Token': csrfToken,
+      // 'X-Requested-With': 'XMLHttpRequest',
+      // 'Content-Type': 'application/json',
+      // 'Accept': 'application/json'
+      // },
+      // credentials: 'same-origin',
+      body: _fd
+    }).then((response) => {
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          response.json().then((content) => {
+            // debugger;
+            const _image = content;
+            this.updateObsImages(_image);
+          }).catch((error) => {
+            console.error("no_content:", error);
+          });
+        } else {
+          console.log(`got a ${response.status}`);
+        }
+      }
+    }).catch((error) => {
+      // console.error("Server Error:", error);
+      alert(this.localized_text.something_went_wrong);
+      this.onUploadedCallback();
+    });
+  }
+
+  // add the image to `good_images` and maybe set the thumb_image_id
+  updateObsImages(item, _image) {
+    // #good_images is a hidden field
+    const _good_image_vals = this.good_images.value ?? "";
+
+    // add id to the good images form field.
+    this.good_images.value =
+      [_good_image_vals, _image.id].join(' ').trim();
+
+    // set the thumbnail if it is selected
+    if (item.dom_element
+      .querySelector('input[name="observation[thumb_image_id]"]')
+      .checked) {
+      document.getElementById('observation_thumb_image_id').value =
+        _image.id;
     }
   }
 
