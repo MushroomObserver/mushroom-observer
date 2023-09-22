@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_09_13_130435) do
+ActiveRecord::Schema.define(version: 2023_09_22_213920) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -511,7 +511,6 @@ ActiveRecord::Schema.define(version: 2023_09_13_130435) do
     t.datetime "updated_at"
     t.integer "rss_log_id"
     t.boolean "open_membership", default: false, null: false
-    t.boolean "accepting_observations", default: true, null: false
     t.date "start_date"
     t.date "end_date"
   end

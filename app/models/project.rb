@@ -19,7 +19,6 @@
 #  title::          Title string.
 #  summary::        Summary of purpose.
 #  open_membership  Enable users to add themselves, disable shared editing
-#  accepting_observations Project is accepting new observations from members
 #
 #  == Methods
 #
@@ -107,8 +106,7 @@ class Project < AbstractModel
   end
 
   def user_can_add_observation?(obs, user)
-    accepting_observations && (obs.user == user ||
-                               is_member?(user))
+    obs.user == user || is_member?(user)
   end
 
   # Check if user has permission to edit a given object.
@@ -180,7 +178,7 @@ class Project < AbstractModel
   # Add observation (and its images) to this project if not already done so.
   # Saves it.
   def add_observation(obs)
-    return if observations.include?(obs) || !accepting_observations
+    return if observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     observations.push(obs)
