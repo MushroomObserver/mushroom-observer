@@ -44,7 +44,7 @@ class MOMultiImageUploader {
     this.submit_buttons = this.form.querySelectorAll('input[type="submit"]');
     this.max_image_size = this.add_img_container.dataset.upload_max_size;
 
-    this.fileStore = new this.FileStore;
+    this.fileStore = { items: [], index: {} }
 
     // function of the Uploader instance, not the constructor
     this.set_bindings();
@@ -76,14 +76,12 @@ class MOMultiImageUploader {
       this.hide(this.geocode_messages);
     };
 
-
     document.body.querySelectorAll('[data-role="show_on_map"]')
       .forEach((elem) => {
         elem.onclick = () => {
           this.showGeocodeonMap(this.dataset.geocode);
         }
       })
-
 
     // was bind('click.fixDateBind
     this.fix_date_submit.onclick = () => {
@@ -111,7 +109,6 @@ class MOMultiImageUploader {
     this.obs_day.onchange = () => {
       this.updateObservationDateRadio()
     };
-
 
     // Drag and Drop bindings on the window
 
@@ -153,7 +150,7 @@ class MOMultiImageUploader {
 
       const dataTransfer = e.originalEvent.dataTransfer;
       if (dataTransfer.files.length > 0)
-        this.fileStore.addFiles(dataTransfer.files);
+        this.addFiles(dataTransfer.files);
       // There are issues to work out concerning dragging and dropping
       // images from other websites into the observation form.
       // else
@@ -164,7 +161,7 @@ class MOMultiImageUploader {
     this.select_files_button.onchange = (event) => {
       // Get the files from the browser
       const files = event.target.files;
-      this.fileStore.addFiles(files);
+      this.addFiles(files);
     };
 
     // IMPORTANT: This allows the user to update the thumbnail on the edit
@@ -237,10 +234,6 @@ class MOMultiImageUploader {
   /*     FileStore     */
   /*********************/
   // Container for the image files.
-  FileStore() {
-    this.items = [];
-    this.index = {};
-  }
 
   areAllItemsProcessed() {
     for (let i = 0; i < this.fileStore.items.length; i++) {
@@ -260,7 +253,7 @@ class MOMultiImageUploader {
       }
 
       // uuid is used as the index for the ruby form template. // **
-      const _item = new FileStoreItem(files[i], this.generateUUID());
+      const _item = this.FileStoreItem(files[i], this.generateUUID());
       this.loadAndDisplayItem(_item);
 
       // add an item to the dictionary with the file size as the key
@@ -284,7 +277,7 @@ class MOMultiImageUploader {
 
   addUrl(url) {
     if (this.fileStore.index[url] == undefined) {
-      const _item = new FileStoreItem(url, this.generateUUID());
+      const _item = this.FileStoreItem(url, this.generateUUID());
       this.loadAndDisplayItem(_item);
 
       this.fileStore.index[url] = _item;
@@ -331,14 +324,14 @@ class MOMultiImageUploader {
       this.hide(elem);
     });
 
-    const _firstUpload = this.fileStore.items[0];
+    // const _firstUpload = this.fileStore.items[0];
+    let item;
 
-    // uploads first image. if we have one.
-    if (_firstUpload) {
-      this.uploadItem(_firstUpload);
-    }
-    // no images to upload, submit form
-    else {
+    // uploads first image. if we have one, and bumps it off the list
+    if (item = this.fileStore.items.shift()) {
+      this.uploadItem(item, this.onUploadedCallback());
+    } else {
+      // no images to upload, submit form
       this.block_form_submission = false;
       this.form.submit();
     }
@@ -347,16 +340,18 @@ class MOMultiImageUploader {
   }
 
   // callback function to move through the the images to upload
-  getNextImage() {
-    this.fileStore.items[0].destroy();
-    return this.fileStore.items[0];
-  }
+  // getNextImage() {
+  //   this.fileStore.items.shift();
+  //   return this.fileStore.items[0];
+  // }
 
   onUploadedCallback() {
-    const _nextInLine = this.getNextImage();
+    // const _nextInLine = this.getNextImage();
+    let item;
 
-    if (_nextInLine)
-      this.uploadItem(_nextInLine);
+    // uploads next image. if we have one, and bumps it off the list
+    if (item = this.fileStore.items.shift())
+      this.uploadItem(_nextInLine, this.onUploadedCallback());
     // now the form will be submitted without hitting the uploads.
     else {
       this.block_form_submission = false;
@@ -372,21 +367,25 @@ class MOMultiImageUploader {
   /*********************/
   // When initializing this, also getTemplateHTML(FileStoreItem)
   FileStoreItem(file_or_url, uuid) {
+    const item = {};
+
     if (typeof file_or_url == "string") {
-      this.is_file = false;
-      this.url = file_or_url;
-      this.file_name = decodeURI(file_or_url.replace(/.*\//, ""));
-      this.file_size = 0;
+      item.is_file = false;
+      item.url = file_or_url;
+      item.file_name = decodeURI(file_or_url.replace(/.*\//, ""));
+      item.file_size = 0;
     } else {
-      this.is_file = true;
-      this.file = file_or_url;
-      this.file_name = file_or_url.name;
-      this.file_size = file_or_url.size;
+      item.is_file = true;
+      item.file = file_or_url;
+      item.file_name = file_or_url.name;
+      item.file_size = file_or_url.size;
     }
-    this.uuid = uuid;
-    this.dom_element = null;
-    this.exif_data = null;
-    this.processed = false; // check the async status of files
+    item.uuid = uuid;
+    item.dom_element = null;
+    item.exif_data = null;
+    item.processed = false; // check the async status of files
+
+    return item;
   }
 
   // does an ajax request to get the template, then formats it
@@ -592,11 +591,11 @@ class MOMultiImageUploader {
     const _info = this.getUserEnteredInfo(item),
       _fd = new FormData();
 
-    if (item.file_size() > this.max_image_size)
+    if (item.file_size > this.max_image_size)
       return null;
 
     if (item.is_file)
-      _fd.append("image[upload]", item.file, item.file_name());
+      _fd.append("image[upload]", item.file, item.file_name);
     else
       _fd.append("image[url]", item.url);
     _fd.append("image[when][3i]", _info.day);
@@ -605,7 +604,7 @@ class MOMultiImageUploader {
     _fd.append("image[notes]", _info.notes);
     _fd.append("image[copyright_holder]", _info.copyright_holder);
     _fd.append("image[license]", _info.license);
-    _fd.append("image[original_name]", item.file_name());
+    _fd.append("image[original_name]", item.file_name);
     return _fd;
   }
 
