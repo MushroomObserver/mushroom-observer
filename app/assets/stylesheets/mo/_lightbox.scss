@@ -54,7 +54,7 @@ body:after {
 .lb-outerContainer {
   position: relative;
   background-color: transparent;
-  *zoom: 1;
+  // *zoom: 1;
   width: 250px;
   height: 250px;
   margin: 0 auto;
@@ -157,7 +157,7 @@ body:after {
 .lb-dataContainer {
   margin: 0 auto;
   padding-top: 5px;
-  *zoom: 1;
+  // *zoom: 1;
   width: 100%;
   -moz-border-radius-bottomleft: 4px;
   -webkit-border-bottom-left-radius: 4px;
