@@ -18,7 +18,9 @@ class ImagePresenter < BasePresenter
   def initialize(image, args = {})
     super
 
-    # Sometimes it's prohibitive to do the extra join to images table,
+    # Pass an image instance (not id) whenever possible, to ensure access to
+    # the fallback image.url if the image server is unavailable. Sometimes it's
+    # prohibitive to do the extra join to images table, as when parsing Textile,
     # so we only have image_id. It's still possible to render the image with
     # nothing but the image_id. (But not votes, original name, etc.)
     image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
@@ -50,11 +52,11 @@ class ImagePresenter < BasePresenter
       context: false # false to constrain width
     }
     args = default_args.merge(args)
-    img_urls = Image.all_urls(image_id)
+    img_urls = image&.all_urls || Image.all_urls(image_id)
 
     args_to_presenter(image, image_id, img_urls, args)
     sizing_info_to_presenter(image, args)
-    lightbox_args_to_presenter(image_id, img_urls, args)
+    lightbox_args_to_presenter(image, image_id, img_urls, args)
   end
 
   def args_to_presenter(image, image_id, img_urls, args)
@@ -121,13 +123,14 @@ class ImagePresenter < BasePresenter
     end
   end
 
-  def lightbox_args_to_presenter(image_id, img_urls, args)
+  def lightbox_args_to_presenter(image, image_id, img_urls, args)
     # The src size appearing in the lightbox is a user pref
     lb_size = User.current&.image_size&.to_sym || :huge
 
     self.lightbox_data = {
       url: img_urls[lb_size],
       id: args[:is_set] ? "observation-set" : SecureRandom.uuid,
+      image: image,
       image_id: image_id,
       obs_data: args[:obs_data],
       identify: args[:identify]
