@@ -132,6 +132,11 @@ current_project:
   open_membership: true
   end_date: <%= Time.zone.tomorrow %>
 
+unlimited_project:
+  <<: *DEFAULTS
+  start_date: nil
+  end_date: nil
+
 pinned_date_range_project:
   <<: *DEFAULTS
   title: Appalachia NAMA 2023

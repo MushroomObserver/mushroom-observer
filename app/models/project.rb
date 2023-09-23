@@ -26,6 +26,7 @@
 #  is_admin?::      Is a given User an admin for this Project?
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
+#  duration_str::   String representing duration in days
 #  current?::       Project (based on dates) has started and hasn't ended
 #  user_can_add_observation?:: Can user add observation to this Project
 #  text_name::      Alias for +title+ for debugging.
@@ -341,6 +342,18 @@ class Project < AbstractModel
 
   def end_date_str(format = "%Y-%m-%d")
     end_date.nil? ? :NONE.t : end_date.strftime(format)
+  end
+
+  def duration_str
+    if start_date && end_date
+      (end_date - start_date + 1).to_i.to_s
+    elsif start_date
+      :show_project_duration_unlimited_no_end.t
+    elsif end_date
+      :show_project_duration_unlimited_no_start.t
+    else
+      :show_project_duration_unlimited.t
+    end
   end
 
   private

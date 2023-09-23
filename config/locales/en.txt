@@ -3287,6 +3287,10 @@
   show_project_summary: Summary
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
+  show_project_duration_unlimited: Unlimited
+  show_project_duration_unlimited_no_end: "No [:show_project_end_date]"
+  show_project_duration_unlimited_no_start: "No [:show_project_start_date]"
+
 
   # users/by_name
   users_by_name_title: Users by Name
