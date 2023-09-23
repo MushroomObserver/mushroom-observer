@@ -69,6 +69,8 @@ class Project < AbstractModel
 
   before_destroy :orphan_drafts
 
+  validate :valid_date_range
+
   # Project handles all of its own logging.
   self.autolog_events = []
 
@@ -368,9 +370,11 @@ class Project < AbstractModel
     if !user && !User.current
       errors.add(:user, :validate_project_user_missing.t)
     end
+
     unless admin_group
       errors.add(:admin_group, :validate_project_admin_group_missing.t)
     end
+
     unless user_group
       errors.add(:user_group, :validate_project_user_group_missing.t)
     end
@@ -380,5 +384,11 @@ class Project < AbstractModel
     elsif title.size > 100
       errors.add(:title, :validate_project_title_too_long.t)
     end
+  end
+
+  def valid_date_range
+    return if starts_no_later_than?(end_date)
+
+    errors.add(:date_order, :validate_project_starts_after_it_ends.t)
   end
 end
