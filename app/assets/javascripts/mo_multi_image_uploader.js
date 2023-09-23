@@ -327,7 +327,7 @@ class MOMultiImageUploader {
 
     // const _firstUpload = this.fileStore.items[0];
     let _firstUpload;
-    debugger;
+    // debugger;
     // uploads first image. if we have one, and bumps it off the list
     if (_firstUpload = this.fileStore.items.shift()) {
       this.uploadItem(_firstUpload);
@@ -610,7 +610,7 @@ class MOMultiImageUploader {
     return _fd;
   }
 
-  uploadItemXhr(item) {
+  uploadItem(item) {
     const xhrReq = new XMLHttpRequest(),
       progress = null;
     // let update = null;
@@ -659,21 +659,22 @@ class MOMultiImageUploader {
   // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
   // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
   // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  uploadItem(item) {
+  uploadItemFetch(item) {
     this.submit_buttons.forEach((element) => {
       element.value = this.localized_text.uploading_text + '...';
     });
 
-    const csrfToken = document.querySelector("[name='csrf-token']").content; const _fd = this.asformData(item);
-
+    // const csrfToken = document.querySelector("[name='csrf-token']").content;
+    const _fd = this.asformData(item);
+    debugger;
     fetch(this.upload_image_uri, {
       method: 'POST',
-      headers: {
-        'X-CSRF-Token': csrfToken,
-        //   'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json',
-        //   'Accept': 'application/json'
-      },
+      // headers: {
+      // 'X-CSRF-Token': csrfToken,
+      //   'X-Requested-With': 'XMLHttpRequest',
+      // 'Content-Type': 'application/json',
+      //   'Accept': 'application/json'
+      // },
       body: _fd
     }).then((response) => {
       if (response.ok) {
