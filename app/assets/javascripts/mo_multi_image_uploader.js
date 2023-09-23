@@ -312,7 +312,7 @@ class MOMultiImageUploader {
   // remove all the images as they were uploaded!
   destroyAll() {
     // or maybe bump the item from the fileStore.items? indexOf and splice
-    this.fileStore.items.forEach((item) => { item.destroy() });
+    this.fileStore.items.forEach((item) => { this.destroy(item) });
   }
 
   uploadAll() {
@@ -327,10 +327,10 @@ class MOMultiImageUploader {
 
     // const _firstUpload = this.fileStore.items[0];
     let _firstUpload;
-
+    debugger;
     // uploads first image. if we have one, and bumps it off the list
     if (_firstUpload = this.fileStore.items.shift()) {
-      this.uploadItem(_firstUpload, this.onUploadedCallback());
+      this.uploadItem(_firstUpload);
     } else {
       // no images to upload, submit form
       this.block_form_submission = false;
@@ -352,7 +352,7 @@ class MOMultiImageUploader {
 
     // uploads next image. if we have one, and bumps it off the list
     if (_nextInLine = this.fileStore.items.shift())
-      this.uploadItem(_nextInLine, this.onUploadedCallback());
+      this.uploadItem(_nextInLine);
     // now the form will be submitted without hitting the uploads.
     else {
       this.block_form_submission = false;
@@ -443,9 +443,8 @@ class MOMultiImageUploader {
 
     // bind the destroy function
     item.dom_element.querySelector('.remove_image_link')
-      .onclick = (event) => {
-        // huh?
-        event.target.destroy();
+      .onclick = () => {
+        this.destroy(item);
         this.refreshBox();
       };
 
@@ -470,10 +469,9 @@ class MOMultiImageUploader {
     } else {
       const _img = item.dom_element.querySelector('.img-responsive');
       _img.setAttribute('src', item.url)
-        .onerror = (event) => {
+        .onerror = () => {
           alert("Couldn't read image from: " + item.url);
-          // or maybe bump the item from the fileStore.items? indexOf and splice
-          event.target.destroy();
+          this.destroy(item);
         };
     }
   }
@@ -617,7 +615,9 @@ class MOMultiImageUploader {
       progress = null;
     // let update = null;
 
-    this.submit_buttons.value = this.localized_text.uploading_text + '...';
+    this.submit_buttons.forEach((element) => {
+      element.value = this.localized_text.uploading_text + '...';
+    });
     // this.incrementProgressBar();
 
     // after image has been created.
@@ -660,7 +660,9 @@ class MOMultiImageUploader {
   // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
   // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   uploadItem(item) {
-    this.submit_buttons.value = this.localized_text.uploading_text + '...';
+    this.submit_buttons.forEach((element) => {
+      element.value = this.localized_text.uploading_text + '...';
+    });
 
     const csrfToken = document.querySelector("[name='csrf-token']").content; const _fd = this.asformData(item);
 
@@ -694,7 +696,6 @@ class MOMultiImageUploader {
 
   // add the image to `good_images` and maybe set the thumb_image_id
   updateObsImages(item, image) {
-    debugger;
     // #good_images is a hidden field
     const _good_image_vals = this.good_images.value ?? "";
 
