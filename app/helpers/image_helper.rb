@@ -106,13 +106,24 @@ module ImageHelper
                       votes: true) + image_copyright(obs.thumb_image, obs)
   end
 
-  def original_image_link(image_id, classes)
-    link_to(:image_show_original.t, Image.url(:original, image_id),
+  # pass an image instance if possible, to ensure access to fallback image.url
+  def original_image_link(image_or_image_id, classes)
+    url = if image_or_image_id.is_a?(Image)
+            image_or_image_id.url(:original)
+          else
+            Image.url(:original, image_or_image_id)
+          end
+    link_to(:image_show_original.t, url,
             { class: classes, target: "_blank", rel: "noopener" })
   end
 
-  def image_exif_link(image_id, classes)
-    link_to(:image_show_exif.t, exif_image_path(id: image_id),
+  def image_exif_link(image_or_image_id, classes)
+    image_id = if image_or_image_id.is_a?(Image)
+                 image_or_image_id.id
+               else
+                 image_or_image_id
+               end
+    link_to(:image_show_exif.t, exif_image_path(image_id),
             { class: classes, remote: true, onclick: "MOEvents.whirly();" })
   end
 

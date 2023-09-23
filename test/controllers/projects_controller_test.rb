@@ -12,7 +12,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    assert_form_action(action: :create) # Failure
+    assert_redirected_to(new_project_path) # Failure
   end
 
   def edit_project_helper(title, project)
@@ -170,7 +170,8 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_add_project_existing
-    add_project_helper(projects(:eol_project).title,
+    project = projects(:eol_project)
+    add_project_helper(project.title,
                        "The Entoloma On Line Project")
   end
 

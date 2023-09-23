@@ -29,8 +29,9 @@ map = @herbarium.location ? true : false
                                                   q: get_query_param),
                       id: "herbarium_curators_form")do |f| %>
           <div class="form-inline mt-3">
-            <%= f.text_field(:add_curator, class: "form-control") %>
-            <% turn_into_user_auto_completer(:add_curator) %>
+            <%= f.text_field(:add_curator, class: "form-control",
+                             placeholder: :start_typing.l,
+                             data: { autocompleter: :user }) %>
             <label for="add_curator">
               <%= submit_button(form: f,
                                 button: :show_herbarium_add_curator.t) %>
