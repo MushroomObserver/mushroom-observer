@@ -133,16 +133,4 @@ class ProjectTest < UnitTestCase
     assert_equal(:NONE.l,
                  projects(:future_project).end_date_str)
   end
-
-  def test_invalid_date_range
-    proj = Project.create(
-      title: "Starts After It Ends",
-      user: dick,
-      open_membership: false,
-      start_date: "2023-08-27",
-      end_date: "2023-08-24"
-    )
-    assert(proj.invalid?)
-    assert(proj.errors[:date_order].present?)
-  end
 end

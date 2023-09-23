@@ -3710,7 +3710,6 @@
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"
   validate_project_user_missing: "[:validate_missing(field=:user)]"
-  validate_project_starts_after_it_ends: Project starts after it ends
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_sequence_accession_unique: "[:ACCESSIONS] for an [:OBSERVATION] must be unique"
