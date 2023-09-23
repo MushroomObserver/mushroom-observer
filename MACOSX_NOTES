@@ -26,7 +26,7 @@ brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick fin
 # Apple only includes Bash 3.2 from 2007 in all versions of Mac OS X even now,
 # because Bash > 4.0 uses GPLv3, and they don't want to support that license.
 # MO's scripts use syntax that requires Bash >= 4.0.
-# Reference: https://medium.com/p/7138bd1066ba
+# Description of the script error that occurs if you aren't running newer Bash:
 # https://stackoverflow.com/questions/6047648/associative-arrays-error-declare-a-invalid-option
 # To install the newest Bash alongside older versions:
 # brew install bash
@@ -40,12 +40,14 @@ brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick fin
 # /usr/local/bin/bash --version
 # /bin/bash --version
 # now check
-# bash --version
+# /usr/local/bin/bash --version
 # should be the new one.
 # So far, so good. Now you have make this version the default.
 # sudo vim /etc/shells
 # (add at the bottom of the list: /usr/local/bin/bash and save out)
-# Set the default shell:
+# For making the new version the default bash in a user or root shell,
+# see reference behind paywall in https://medium.com/p/7138bd1066ba
+# (shouldn't need to do these, but here for reference)
 # chsh -s /usr/local/bin/bash
 # Set the default shell for the root user:
 # sudo chsh -s /usr/local/bin/bash
