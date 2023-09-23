@@ -594,7 +594,6 @@ class MOMultiImageUploader {
   asformData(item) {
     const _info = this.getUserEnteredInfo(item),
       _fd = new FormData();
-    debugger;
 
     if (item.file_size > this.max_image_size)
       return null;
@@ -663,38 +662,38 @@ class MOMultiImageUploader {
   uploadItem(item) {
     this.submit_buttons.value = this.localized_text.uploading_text + '...';
     const _fd = this.asformData(item);
-    debugger;
+
     fetch(this.upload_image_uri, {
       method: 'POST',
-      headers: {
-        // 'X-CSRF-Token': csrfToken,
-        'X-Requested-With': 'XMLHttpRequest',
-        // 'Content-Type': 'application/json',
-        // 'Accept': 'application/json'
-      },
+      // headers: {
+      //   'X-CSRF-Token': csrfToken,
+      //   'X-Requested-With': 'XMLHttpRequest',
+      //   'Content-Type': 'application/json',
+      //   'Accept': 'application/json'
+      // },
       // credentials: 'same-origin',
       body: _fd
-    }).then((response) => {
-      if (response.ok) {
-        debugger;
-        if (200 <= response.status && response.status <= 299) {
-          response.json().then((content) => {
-            debugger;
-            const _image = content;
-            this.updateObsImages(item, _image);
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          console.log(`got a ${response.status}`);
-        }
-      }
-    }).catch((error) => {
-      debugger;
-      // console.error("Server Error:", error);
-      alert(this.localized_text.something_went_wrong);
-      this.onUploadedCallback();
-    });
+    }).then(response => response.text())
+      .then(image_obj => console.log(image_obj));
+    // }).then((response) => {
+    //   debugger;
+    //   if (response.ok) {
+    //     if (200 <= response.status && response.status <= 299) {
+    //       response.json().then((content) => {
+    //         const _image = content;
+    //         this.updateObsImages(item, _image);
+    //       }).catch((error) => {
+    //         console.error("no_content:", error);
+    //       });
+    //     } else {
+    //       console.log(`got a ${response.status}`);
+    //     }
+    //   }
+    // }).catch((error) => {
+    //   // console.error("Server Error:", error);
+    //   alert(this.localized_text.something_went_wrong);
+    //   this.onUploadedCallback();
+    // });
   }
 
   // add the image to `good_images` and maybe set the thumb_image_id
