@@ -3270,9 +3270,6 @@
   send_feature_email_success: Delivered feature mail.
   send_feature_email_denied: Only the admin can send feature mail.
 
-  # project general
-  project_nil_date_str: "[:NONE]"
-
   # project/show_project
   show_project_add_members: Add Members
   show_project_admin_group: Admin Group
