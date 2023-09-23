@@ -661,56 +661,53 @@ class MOMultiImageUploader {
   // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   uploadItem(item) {
     this.submit_buttons.value = this.localized_text.uploading_text + '...';
-    const _fd = this.asformData(item);
+
+    const csrfToken = document.querySelector("[name='csrf-token']").content; const _fd = this.asformData(item);
 
     fetch(this.upload_image_uri, {
       method: 'POST',
-      // headers: {
-      //   'X-CSRF-Token': csrfToken,
-      //   'X-Requested-With': 'XMLHttpRequest',
-      //   'Content-Type': 'application/json',
-      //   'Accept': 'application/json'
-      // },
-      // credentials: 'same-origin',
+      headers: {
+        'X-CSRF-Token': csrfToken,
+        //   'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        //   'Accept': 'application/json'
+      },
       body: _fd
-    }).then(response => response.text())
-      .then(image_obj => console.log(image_obj));
-    // }).then((response) => {
-    //   debugger;
-    //   if (response.ok) {
-    //     if (200 <= response.status && response.status <= 299) {
-    //       response.json().then((content) => {
-    //         const _image = content;
-    //         this.updateObsImages(item, _image);
-    //       }).catch((error) => {
-    //         console.error("no_content:", error);
-    //       });
-    //     } else {
-    //       console.log(`got a ${response.status}`);
-    //     }
-    //   }
-    // }).catch((error) => {
-    //   // console.error("Server Error:", error);
-    //   alert(this.localized_text.something_went_wrong);
-    //   this.onUploadedCallback();
-    // });
+    }).then((response) => {
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          response.json().then((image) => {
+            this.updateObsImages(item, image);
+          }).catch((error) => {
+            console.error("no_content:", error);
+          });
+        } else {
+          console.log(`got a ${response.status}`);
+        }
+      }
+    }).catch((error) => {
+      // console.error("Server Error:", error);
+      alert(this.localized_text.something_went_wrong);
+      this.onUploadedCallback();
+    });
   }
 
   // add the image to `good_images` and maybe set the thumb_image_id
-  updateObsImages(item, _image) {
+  updateObsImages(item, image) {
+    debugger;
     // #good_images is a hidden field
     const _good_image_vals = this.good_images.value ?? "";
 
     // add id to the good images form field.
     this.good_images.value =
-      [_good_image_vals, _image.id].join(' ').trim();
+      [_good_image_vals, image.id].join(' ').trim();
 
     // set the thumbnail if it is selected
     if (item.dom_element
       .querySelector('input[name="observation[thumb_image_id]"]')
       .checked) {
       document.getElementById('observation_thumb_image_id').value =
-        _image.id;
+        image.id;
     }
   }
 
