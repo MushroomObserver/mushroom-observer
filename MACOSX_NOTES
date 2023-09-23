@@ -19,8 +19,8 @@
 
 brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
 
-# If you haven't done so already, install a recent version of Bash and set it
-# as the default. You can find your installed version like this:
+# If you haven't done so already, install a more recent version of Bash and set
+# it as the default. You can find your installed version like this:
 # bash --version
 
 # Apple only includes Bash 3.2 from 2007 in all versions of Mac OS X even now,
