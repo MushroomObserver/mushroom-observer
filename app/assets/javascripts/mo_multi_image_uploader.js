@@ -326,11 +326,11 @@ class MOMultiImageUploader {
     });
 
     // const _firstUpload = this.fileStore.items[0];
-    let item;
+    let _firstUpload;
 
     // uploads first image. if we have one, and bumps it off the list
-    if (item = this.fileStore.items.shift()) {
-      this.uploadItem(item, this.onUploadedCallback());
+    if (_firstUpload = this.fileStore.items.shift()) {
+      this.uploadItem(_firstUpload, this.onUploadedCallback());
     } else {
       // no images to upload, submit form
       this.block_form_submission = false;
@@ -348,10 +348,10 @@ class MOMultiImageUploader {
 
   onUploadedCallback() {
     // const _nextInLine = this.getNextImage();
-    let item;
+    let _nextInLine;
 
     // uploads next image. if we have one, and bumps it off the list
-    if (item = this.fileStore.items.shift())
+    if (_nextInLine = this.fileStore.items.shift())
       this.uploadItem(_nextInLine, this.onUploadedCallback());
     // now the form will be submitted without hitting the uploads.
     else {
@@ -542,7 +542,7 @@ class MOMultiImageUploader {
       // returns an array of [YYYY,MM,DD]
       const _date_taken_array =
         _exif_date_taken.substring(' ', 10).split(':'),
-        _exifSimpleDate = new SimpleDate(_date_taken_array.reverse());
+        _exifSimpleDate = this.SimpleDate(_date_taken_array.reverse());
 
       this.imageDate(item, _exifSimpleDate);
 
@@ -577,7 +577,7 @@ class MOMultiImageUploader {
         _year.value = simpleDate.year
       ]
     }
-    return new SimpleDate(_date_values);
+    return this.SimpleDate(_date_values);
   }
 
   getUserEnteredInfo(item) {
@@ -594,6 +594,7 @@ class MOMultiImageUploader {
   asformData(item) {
     const _info = this.getUserEnteredInfo(item),
       _fd = new FormData();
+    debugger;
 
     if (item.file_size > this.max_image_size)
       return null;
@@ -612,54 +613,7 @@ class MOMultiImageUploader {
     return _fd;
   }
 
-  // incrementProgressBar(item, decimalPercentage) {
-  //   const _container =
-  //     item.dom_element.querySelector(".added_image_name_container"),
-  //     // if we don't have percentage, just set it to 0 percent
-  //     _percent_string = decimalPercentage ?
-  //       parseInt(decimalPercentage * 100).toString() + "%" : "0%";
-
-  //   if (!item.isUploading) {
-  //     item.isUploading = true;
-  //     _container.html =
-  //       '<div class="col-xs-12" style="z-index: 1">'
-  //       + '<strong class="progress-text">'
-  //       + this.localized_text.uploading_text + '</strong></div>'
-  //       + '<div class="progress-bar position-absolute" '
-  //       + 'style="width: 0%; height: 1.5em; background: #51B973; '
-  //       + 'z-index: 0;"></div>'
-
-  //     let i = 1;
-  //     while (i < 900) {
-  //       setTimeout(() => {
-  //         _container.querySelector(".progress-text").html =
-  //           this.localized_text.uploading_text +
-  //           this.dots[i % 3];
-  //         ++i;
-  //       }, 333)
-  //     }
-  //   } else {
-  //     const _progress_bar = _container.querySelector(".progress-bar"),
-  //       _animation = [
-  //         { width: _progress_bar.width },
-  //         { width: _percent_string }
-  //       ],
-  //       _timing = { duration: decimalPercentage == 1 ? 1000 : 1500 };
-
-  //     _progress_bar.animate(_animation, _timing);
-
-  //     // 1500: a little extra to patch over gap between sending request
-  //     // for next progress update and actually receiving it, which occurs
-  //     // after a second is up... but not after image is done, no more
-  //     // progress updates required then.
-  //   }
-  // }
-
-  // upload with readable stream not implemented yet for fetch
-  // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
-  // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  uploadItemXHR(item) {
+  uploadItemXhr(item) {
     const xhrReq = new XMLHttpRequest(),
       progress = null;
     // let update = null;
@@ -672,7 +626,7 @@ class MOMultiImageUploader {
       if (xhrReq.readyState == 4) {
         if (xhrReq.status == 200) {
           const _image = JSON.parse(xhrReq.response);
-          this.updateObsImages(_image);
+          this.updateObsImages(item, _image);
         } else if (xhrReq.response) {
           alert(xhrReq.response);
         } else {
@@ -702,27 +656,32 @@ class MOMultiImageUploader {
     }
   }
 
+  // upload with readable stream not implemented yet for fetch
+  // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
+  // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+  // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
   uploadItem(item) {
     this.submit_buttons.value = this.localized_text.uploading_text + '...';
     const _fd = this.asformData(item);
-
-    fetch(url, {
+    debugger;
+    fetch(this.upload_image_uri, {
       method: 'POST',
-      // headers: {
-      // 'X-CSRF-Token': csrfToken,
-      // 'X-Requested-With': 'XMLHttpRequest',
-      // 'Content-Type': 'application/json',
-      // 'Accept': 'application/json'
-      // },
+      headers: {
+        // 'X-CSRF-Token': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        // 'Content-Type': 'application/json',
+        // 'Accept': 'application/json'
+      },
       // credentials: 'same-origin',
       body: _fd
     }).then((response) => {
       if (response.ok) {
+        debugger;
         if (200 <= response.status && response.status <= 299) {
           response.json().then((content) => {
-            // debugger;
+            debugger;
             const _image = content;
-            this.updateObsImages(_image);
+            this.updateObsImages(item, _image);
           }).catch((error) => {
             console.error("no_content:", error);
           });
@@ -731,6 +690,7 @@ class MOMultiImageUploader {
         }
       }
     }).catch((error) => {
+      debugger;
       // console.error("Server Error:", error);
       alert(this.localized_text.something_went_wrong);
       this.onUploadedCallback();
@@ -835,7 +795,7 @@ class MOMultiImageUploader {
   }
 
   updateObservationDateRadio() {
-    // _currentObsDate is an instance of Uploader.SimpleDate(values)
+    // _currentObsDate is an instance of this.SimpleDate(values)
     const _currentObsDate = this.observationDate();
 
     this.obs_radio_container.querySelectorAll('input')
@@ -862,17 +822,19 @@ class MOMultiImageUploader {
         this.obs_year.value = simpleDate.year,
       ]
     }
-    return new SimpleDate(_date_values);
+    return this.SimpleDate(_date_values);
   }
 
-  /*********************/
-  /* Simple Date Class */
-  /*********************/
+  /**********************/
+  /* Simple Date Object */
+  /**********************/
 
   SimpleDate(day, month, year) {
-    this.day = parseInt(day);
-    this.month = parseInt(month);
-    this.year = parseInt(year);
+    return {
+      day: parseInt(day),
+      month: parseInt(month),
+      year: parseInt(year),
+    }
   }
 
   // returns true if same
