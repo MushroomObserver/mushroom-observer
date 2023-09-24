@@ -4,6 +4,9 @@ require("test_helper")
 
 class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
+    get(:index)
+    assert_redirected_to(new_account_login_path)
+
     login
     get(:index)
     assert_template("shared/_matrix_box")
