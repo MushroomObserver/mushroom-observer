@@ -6,16 +6,6 @@ module JavascriptHelper
     modern_browser?(browser) || browser.ie?(8) || Rails.env.test?
   end
 
-  # Use this test to determine if a user can upload multiple images at a time.
-  # It checks for support of the following requirements:
-  #   Select multiple files button
-  #   XHRHttpRequest2
-  #   FileAPI
-  # CanIuse.com is the source of this information.
-  def can_do_multifile_upload?
-    modern_browser?(browser) && !browser.ie?(9)
-  end
-
   # from https://github.com/fnando/browser/pull/435 2020-04-13
   def modern_browser?(browser)
     browser.chrome? && browser.version.to_i >= 65 ||
