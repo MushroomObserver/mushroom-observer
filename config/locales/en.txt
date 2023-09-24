@@ -1373,7 +1373,7 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  Please have a look at our \"feature tracker\":/pivotal/index or our \"account on Pivotal Tracker\":https://www.pivotaltracker.com/projects/224629 to see what we have planned.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
 
   # comments/new
   comment_add_title: Add Comment to [name]
@@ -2968,78 +2968,6 @@
   no_session_body: "It looks like your browser is refusing cookies.  Without cookies, our site has no way of remembering who you are from one page to the next.  This means that you will not be able to create an account and login, and therefore you will not be able to create [:observations], upload [:images], make [:comments], and much more.  You will still be able to view everything that the general public has access to, but you will just be an observer, you will not be able to participate actively.\n\nAll we will do is store a big long number on your computer.  Next time you go to our site, we will look up that number and use it to keep track of who you are.  (We get multiple requests every second from around the world -- without this ID we wouldn't stand a chance of keeping everyone straight!)  This ID is encrypted and keeps no sensitive information in it.\n\nIf you would like to turn cookies on, but aren't sure how, try looking it up on google with this search: \"How do I enable cookies in my browser?\":http://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search Note that most browsers will let you enable cookies for individual sites, allowing you to protect your privacy everywhere else.  For example, in Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions."
   no_session_title: You Have Cookies Disabled
 
-  # pivotal/index
-  pivotal_index_title: Directions for Future Development
-  pivotal_post_comment: Post Comment
-  pivotal_index_header: Use this page to browse through the many features requested by users and developers.  Some are very specific bug fixes or requests for new capabilities.  Others are just general areas people are interested in seeing Mushroom Observer grow.  Features are organized by use of the following set of labels.  Click on a label to see a list of features with that label. Click on a feature to see more detail and discussion.  If you are logged in, you will be able to vote features up or down, and you can add your own comments to the discussion.  If you would like to request a new feature, for now we request that you "send us an email":/emails/ask_webmaster_question describing what it is you'd like to do.  Please try to be as detailed as possible; concrete examples are generally the best.
-  pivotal_vote_failed: "We were unable to process your vote.\nIf the problem persists please notify to admins.\nSorry for the inconvenience!"
-  pivotal_story_failed: "We were unable to get the story you requested.\nIf the problem persists please notify to admins.\nSorry for the inconvenience!"
-  pivotal_comment_failed: "We were unable to post your comment.\nIf the problem persists please notify to admins.\nSorry for the inconvenience!"
-  pivotal_story_loading: Loading story details...
-  pivotal_posting_comment: Posting comment...
-  pivotal_posted_by: Posted by
-  pivotal_state_unscheduled: unscheduled
-  pivotal_state_unstarted: in the queue
-  pivotal_state_started: in progress
-  pivotal_head_critical: serious bugs or mission-critical work
-  pivotal_head_bottleneck: stuff required by lots of other things
-  pivotal_head_open: areas we are actively soliciting feedback
-  pivotal_head_started: areas developers are actively working
-  pivotal_head_unstarted: scheduled for work soon
-  pivotal_head_unscheduled: for the indefinite future
-  pivotal_head_day: has comments within last day
-  pivotal_head_week: has comments within last week
-  pivotal_head_month: has comments within last month
-  pivotal_head_none: has no recent comments
-  pivotal_head_all: show everything
-  pivotal_head_other: uncategorized
-  pivotal_label_critical: critical
-  pivotal_label_bottleneck: bottleneck
-  pivotal_label_open: open
-  pivotal_label_day: day
-  pivotal_label_week: week
-  pivotal_label_month: month
-  pivotal_label_none: none
-  pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
-  pivotal_label_unstarted: "[:pivotal_state_unstarted]"
-  pivotal_label_started: "[:pivotal_state_started]"
-  pivotal_label_all: "[:all]"
-  pivotal_label_other: other
-
-  pivotal_head_api: programmatic interface
-  pivotal_head_comments: commenting on observations, names, etc.
-  pivotal_head_descriptions: species descriptions and drafts
-  pivotal_head_email: email notifications
-  pivotal_head_i18n: translating site into other languages
-  pivotal_head_images: image information, manipulation
-  pivotal_head_lists: species lists, checklists
-  pivotal_head_locations: location names, geocoding
-  pivotal_head_maps: how observations are mapped
-  pivotal_head_names: taxonomy, synonymy, etc.
-  pivotal_head_observations: observation fields and interface
-  pivotal_head_performance: site performance
-  pivotal_head_projects: working on group projects
-  pivotal_head_search: search capabilities and data mining
-  pivotal_head_specimen: how fungarium specimens are documented
-  pivotal_head_voting: voting on observation names and images
-
-  pivotal_label_api: API
-  pivotal_label_comments: "[:comments]"
-  pivotal_label_descriptions: "[:descriptions]"
-  pivotal_label_email: email
-  pivotal_label_i18n: translations
-  pivotal_label_images: "[:images]"
-  pivotal_label_lists: lists
-  pivotal_label_locations: "[:locations]"
-  pivotal_label_maps: "[:maps]"
-  pivotal_label_names: "[:names]"
-  pivotal_label_observations: "[:observations]"
-  pivotal_label_performance: performance
-  pivotal_label_projects: "[:projects]"
-  pivotal_label_search: search
-  pivotal_label_specimen: "[:specimens]"
-  pivotal_label_voting: voting
-
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
@@ -3423,7 +3351,7 @@
   intro_title: Introduction
   intro_purpose: "*Purpose&#58;* The purpose of this site is to record observations about mushrooms, help people identify mushrooms they aren't familiar with, and expand the community around the scientific exploration of mushrooms (mycology).  Some have asked what counts as a mushroom.  This site takes a very broad view.  While the emphasis is on the large fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms such as slime-molds are all welcome.  Ultimately, I hope this site will become a valuable resource for both amateur and professional mycologists.  I like to think of it as a living field guide for mushrooms or a collaborative mushroom field journal.\n\nFor those new to mycology, there is a huge amount of basic research that still needs to be done.  By some estimates less than 5% of the world's species of fungi are known to science.  While things are slightly better for the large fleshy fungi known as mushrooms, it is still a common experience to come across a mushroom that cannot be easily identified in the available books or which doesn't really fit the definition of any recognized species. This site is intended to address that gap by creating a place for us to talk about and record what we've found, as well as connect to the existing literature about mushrooms.  Please do not feel intimidated by the scientific bent of the site.  Everyone is welcome to dive in and add their own mushroom observations, upload mushroom photos and make [:comments] on other people's observations."
   intro_image_sharing: "*Image Sharing:* This site follows the principles of cooperative sharing pioneered by the \"Free Software Foundation\":http://fsf.org, further expressed by the \"Open Source software movement\":http://opensource.org, and expanded to other creative efforts by the \"Creative Commons\":http://creativecommons.org. Consequently all images are made available under one of the Creative Commons licenses or are in the public domain.  In short this means that when anyone uploads one of their images to the site, they are giving others explicit permission to use those images under certain \"conditions\":/info/how_to_use#license in perpetuity.  This type of permission is very important for basic research.  It allows future researchers to freely use these data to expand our understanding of mushrooms.  It also significantly increases the likelihood that the data will continue to be available into the distant future.\n\nIf you upload your own images, this license does not mean you are giving up your copyright or your ability to make money off your images.  Depending on which license you choose, you can still require that anyone who wishes to use any of these images for commercial purposes get in touch with the copyright holder and work out the conditions for that use.  The site includes special links on the image pages to help create those relationships."
-  intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). Here's a list of \"planned features\":[todo_list]. All suggestions and comments are welcome.  If you would like to contribute, please send mail to *webmaster @ mushroomobserver.org* so we can coordinate our efforts."
+  intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). All suggestions and comments are welcome.  If you would like to contribute, please send mail to *webmaster @ mushroomobserver.org* so we can coordinate our efforts."
   intro_governance: "*Governance:* This site is owned and operated by \"Mushroom Observer, Inc.\":/support/governance."
   intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
 
@@ -3432,7 +3360,7 @@
   how_help_intro: This page provides a list of skills that we could really use some help with. If you're interested in helping out just "send an email":/emails/ask_webmaster_question and let us know what you want to do.
   how_help_contributors: "h4. 1. Contributors\n\np(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by \"describing species\":/info/how_to_use#describing_species or \"defining locations\":/info/how_to_use#defining_locations."
   how_help_scientists: "h4. 2. Scientists\n\np(normal).  Mention Mushroom Observer in your publications and \"add references to your publications\":/publications."
-  how_help_developers: "h4. 3. Developers\n\np(normal).  We have \"lots of ideas\":[todo_list] about how to improve the site.  The framework, Ruby on Rails, is really easy to pick up and we are more than happy to mentor anyone who wants to dive in."
+  how_help_developers: "h4. 3. Developers\n\np(normal).  We have lots of ideas about how to improve the site.  The framework, Ruby on Rails, is really easy to pick up and we are more than happy to mentor anyone who wants to dive in."
   how_help_translators: "h4. 4. Translators\n\np(normal). The site is set up to support foreign languages.  All we need is someone to do the translations."
   how_help_donors: "h4. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
   how_help_business_planning: "h4. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, after some time consuming false starts, we are now in the process of creating a new non-profit focused solely on Mushroom Observer. This is just getting going so let us know if you want to get involved or have any business related advice."
