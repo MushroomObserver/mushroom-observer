@@ -1,10 +1,10 @@
 <%
   add_page_title(:edit_translations_title.t)
-  javascript_include("translations")
+  javascript_include("mo_translations")
 %>
 
 <% inject_javascript_at_end %(
-  TranslationsModule({
+  MOTranslations({
     locale: "#{j @lang.locale}",
     confirm_string: "#{j :edit_translations_will_lose_changes.l}",
     loading_string: "#{j :edit_translations_loading.l}",

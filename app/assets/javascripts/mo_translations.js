@@ -1,4 +1,4 @@
-function TranslationsModule(localizedText) {
+function MOTranslations(localizedText) {
   window.onload = () => {
     const LOCALE = localizedText.locale,
       CONFIRM_STRING = localizedText.confirm_string,
