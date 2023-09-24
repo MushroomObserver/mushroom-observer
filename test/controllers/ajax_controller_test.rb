@@ -233,17 +233,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:export, type: :user, id: 1, value: "1")
   end
 
-  def test_get_pivotal_story
-    return unless MO.pivotal_enabled
-
-    good_ajax_request(:pivotal, type: "story", id: MO.pivotal_test_id)
-    assert_match(/This is a test story/, @response.body)
-    assert_match(/Posted by.*rolf/, @response.body)
-    assert_match(/This is a test comment/, @response.body)
-    assert_match(/By:.*mary/, @response.body)
-    assert_match(/Post Comment/, @response.body)
-  end
-
   def test_old_translation
     str = TranslationString::Version.find(1)
     bad_ajax_request(:old_translation, id: 0)

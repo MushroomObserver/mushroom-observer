@@ -165,7 +165,6 @@ ProjectController::     Deals with Project's.
 InterestsController::   Deals with Interest's.
 SupportController::     Deals with Donation's.
 APIController::         Handles AJAX and API requests.
-PivotalController::     Handles minimal interface with Pivotal Tracker website.
 
 These controllers are all subclasses of ActionController.  Actions are just
 instance methods.  These correspond directly to the URL of the request:
