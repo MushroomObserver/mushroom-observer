@@ -17,7 +17,6 @@
 //= require suggestions
 //= require thumbnail_map
 //= require naming_vote_ajax
-//= require pivotal
 //= require lightbox
 
 lightbox.option({

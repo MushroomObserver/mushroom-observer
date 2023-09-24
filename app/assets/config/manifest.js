@@ -8,7 +8,6 @@
 //= link mo_autocompleter.js
 //= link mo_multi_image_uploader.js
 //= link name_lister.js
-//= link pivotal.js
 //= link rss_log_type_filter_helper.js
 //= link single_image_uploader.js
 //= link suggestions.js
