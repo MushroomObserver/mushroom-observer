@@ -130,7 +130,7 @@ class ProjectsController < ApplicationController
   end
 
   def valid_where
-    where = params[:project][:where]
+    where = params[:project][:place_name]
     location = find_location(where)
     return false if !location && where != ""
 
