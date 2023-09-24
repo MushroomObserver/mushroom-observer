@@ -4,10 +4,10 @@ require("test_helper")
 
 class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
   # Uncomment this to try running tests with firefox_headless browser
-  # def setup
-  #   super
-  #   Capybara.current_driver = :firefox_headless
-  # end
+  def setup
+    super
+    Capybara.current_driver = :selenium_headless
+  end
 
   def test_create_minimal_observation
     rolf = users("rolf")
@@ -17,7 +17,8 @@ class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.observations__new")
 
     within("#observation_form") do
-      assert_select("observation_when_1i", text: Time.zone.today.year.to_s)
+      assert_field('observation_when_1i', with: Time.zone.today.year.to_s)
+      # assert_select("observation_when_1i", text: Time.zone.today.year.to_s)
       assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
       assert_select("observation_when_3i",
                     text: Time.zone.today.strftime("%d").to_i)
@@ -27,6 +28,8 @@ class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
       fill_in("observation_place_name", with: locations.first.name)
       click_commit
     end
+
+    page.has_selector?("#name_messages")
 
     assert_flash_warning
     assert_flash_text(

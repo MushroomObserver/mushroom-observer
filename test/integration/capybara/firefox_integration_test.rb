@@ -6,7 +6,7 @@ class FirefoxIntegrationTest < CapybaraIntegrationTestCase
   # Uncomment this to try running tests with firefox_headless browser
   def setup
     super
-    Capybara.current_driver = :firefox_headless
+    Capybara.current_driver = :selenium_headless # or :firefox_headless
   end
 
   def test_minimal_create_observation
