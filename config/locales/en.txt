@@ -1631,6 +1631,12 @@
   form_observations_upload_error: Something went wrong while uploading image. Skipping it for now. You can try uploading it again later after we've created the observation.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
+
+  form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+See message below.+":#project_messages
+  form_observations_projects_out_of_range: "The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)"
+  form_observations_projects_out_of_range_help: "Either: \n - Uncheck out-of-range projects; \n - Change the observation date or location if it is incorrect; or \n - (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints. \nThen click [button_name]."
+  form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
 
