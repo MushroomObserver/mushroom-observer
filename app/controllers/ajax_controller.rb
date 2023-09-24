@@ -32,7 +32,6 @@ class AjaxController < ApplicationController
   include VisualGroupStatus
   include UploadImage
   include Primers
-  include Pivotal
   include OldTranslation
   include ExternalLink
   include Export

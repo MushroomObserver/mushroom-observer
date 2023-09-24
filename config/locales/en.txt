@@ -3763,9 +3763,6 @@
   runtime_object_deleted: This object has been deleted.
   runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
   runtime_object_multiple_matches: Multiple [types] match "[match]".
-  runtime_pivotal_getting_token: Couldn't get access token from Pivotal.
-  runtime_pivotal_getting_stories: Couldn't get stories from Pivotal.
-  runtime_pivotal_parsing_story: Error parsing one or more stories from Pivotal.  Ignored them.
   runtime_prefs_password_no_match: Password and confirmation did not match.
   runtime_search_has_expired: Your query has expired, please try again.
   runtime_show_observation_success: Successfully changed vote.
