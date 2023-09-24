@@ -1,5 +1,5 @@
 function TranslationsModule(localizedText) {
-  jQuery(document).ready(function () {
+  window.onload = () => {
     const LOCALE = localizedText.locale,
       CONFIRM_STRING = localizedText.confirm_string,
       LOADING_STRING = localizedText.loading_string,
@@ -94,25 +94,53 @@ function TranslationsModule(localizedText) {
       setDisabledOnButtons(false);
     }
 
-    function show_tag(locale, tag) {
+    const csrfToken = document.querySelector("[name='csrf-token']").content;
+
+    async function show_tag(locale, tag) {
       LOCALE = locale;
       if (!CHANGED || confirm(CONFIRM_STRING)) {
         show_whirly(LOADING_STRING);
-        jQuery.ajax('/translation/edit_translations_ajax_get', {
-          data: { locale: locale, tag: tag, authenticity_token: csrf_token() },
-          dataType: 'text',
-          async: true,
-          error: function (response) {
-            hide_whirly();
-            alert(response.responseText);
+        // jQuery.ajax('/translation/edit_translations_ajax_get', {
+        //   data: { locale: locale, tag: tag, authenticity_token: csrf_token() },
+        //   dataType: 'text',
+        //   async: true,
+        //   error: function (response) {
+        //     hide_whirly();
+        //     alert(response.responseText);
+        //   },
+        //   success: function (html) {
+        //     hide_whirly();
+        //     $form_div.html(html);
+        //     CHANGED = false;
+        //     LOADED = true;
+        //   }
+        // });
+
+        let response = await fetch('/translation/edit_translations_ajax_get', {
+          method: 'GET',
+          headers: {
+            'X-CSRF-Token': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'text/html',
+            'Accept': 'text/html'
           },
-          success: function (html) {
+          credentials: 'same-origin',
+          body: JSON.encode({ locale: locale, tag: tag })
+        });
+        if (response.ok) {
+          if (200 <= response.status && response.status <= 299) {
+            let html = await response.text();
+            // console.log("html: " + html);
             hide_whirly();
-            $form_div.html(html);
+            $form_div.html = html;
             CHANGED = false;
             LOADED = true;
+          } else {
+            hide_whirly();
+            alert(response.responseText);
+            console.log(`got a ${response.status}`);
           }
-        });
+        }
       }
     }
 
@@ -122,17 +150,40 @@ function TranslationsModule(localizedText) {
       CHANGED = false;
     }
 
-    function show_old_version(id) {
+    async function show_old_version(id) {
       show_whirly(LOADING_STRING);
-      jQuery.ajax('/ajax/old_translation/' + id, {
-        data: { authenticity_token: csrf_token() },
-        dataType: 'text',
-        async: true,
-        success: function (text) {
-          hide_whirly();
-          alert(text);
-        }
+      // jQuery.ajax('/ajax/old_translation/' + id, {
+      //   data: { authenticity_token: csrf_token() },
+      //   dataType: 'text',
+      //   async: true,
+      //   success: function (text) {
+      //     hide_whirly();
+      //     alert(text);
+      //   }
+      // });
+      let response = await fetch('/ajax/old_translation/' + id, {
+        method: 'GET',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'text/html',
+          'Accept': 'text/html'
+        },
+        credentials: 'same-origin'
       });
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          let html = await response.text();
+          // console.log("html: " + html);
+          hide_whirly();
+          alert(html);
+        } else {
+          hide_whirly();
+          alert(response.responseText);
+          console.log(`got a ${response.status}`);
+        }
+      }
+
     }
 
     function setDisabledOnButtons(disabled) {
@@ -142,11 +193,32 @@ function TranslationsModule(localizedText) {
 
     function show_whirly(text) {
       document.getElementById('whirly_text').html = text;
-      $whirly.center().show();
+      // $whirly.center().show();
+      show($whirly);
     }
 
     function hide_whirly() {
-      $whirly.hide();
+      hide($whirly);
     }
-  });
+
+    /*********************/
+    /*      Helpers      */
+    /*********************/
+
+    // notice this is for block-level
+    function show(element) {
+      if (element !== undefined) {
+        element.style.display = 'block';
+        element.classList.add('in');
+      }
+    }
+
+    function hide(element) {
+      if (element !== undefined) {
+        element.classList.remove('in');
+        window.setTimeout(() => { element.style.display = 'none'; }, 600);
+      }
+    }
+
+  };
 }
