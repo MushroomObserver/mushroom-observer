@@ -2,10 +2,6 @@
 
 # added methods relating to js
 module JavascriptHelper
-  def can_do_ajax?
-    modern_browser?(browser) || browser.ie?(8) || Rails.env.test?
-  end
-
   # from https://github.com/fnando/browser/pull/435 2020-04-13
   def modern_browser?(browser)
     browser.chrome? && browser.version.to_i >= 65 ||
