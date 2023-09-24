@@ -135,7 +135,7 @@ class MOMultiImageUploader {
       if (e.preventDefault) { e.preventDefault(); }
       removeDashedBorder();
 
-      const dataTransfer = e.originalEvent.dataTransfer;
+      const dataTransfer = e.dataTransfer;
       if (dataTransfer.files.length > 0)
         this.addFiles(dataTransfer.files);
       // There are issues to work out concerning dragging and dropping
