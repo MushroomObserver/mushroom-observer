@@ -3240,9 +3240,9 @@
   # project/_form_projects
   form_projects_title: "[:Title]"
   form_project_date_range: Date Range
-  form_project_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
+  form_project_dates_explain: "Default earliest date and Project length (in number of days). Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
+  form_projects_duration: Duration
   form_projects_start_date: Project Start Date
-  form_projects_end_date: Project End Date
   form_projects_open_membership: Enable users to add themselves and disable shared editing
   form_projects_accepting_observations: Project is accepting new observations from members
 

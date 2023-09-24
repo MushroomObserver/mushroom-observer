@@ -6,17 +6,24 @@
     tag.p("*#{:form_project_date_range.t}*".t) +
     tag.p(:form_project_dates_explain.t)
   ) %>
+
   <div class="container-text">
     <div>
       <%= f.label(:start_date, "#{:form_projects_start_date.t}: ") %>
       <%= f.date_select(:start_date,
                         { class: "form-control mb-2" }) %>
     </div>
-    <div>
-      <%= f.label(:end_date, "#{:form_projects_end_date.t}: ") %>
-      <%= f.date_select(:end_date,
-                        { class: "form-control mb-2" }) %>
-    </div>
+
+    <% if show_duration_select?(@project) %>
+      <div>
+        <%= f.label(:duration, "#{:form_projects_duration.t}: ") %>
+        <%= f.select(
+          :duration,
+          options_for_select(1..366, duration_selected(@project)),
+          { class: "form-control mb-2" }
+        ) %> Days
+      </div>
+    <% end %>
   </div>
 
   <%= check_box_with_label(form: f, field: :open_membership,
@@ -30,5 +37,4 @@
                            label: :SUMMARY.t + ":") %>
 
   <%= render(partial: "shared/textilize_help") %>
-
 <% end %>
