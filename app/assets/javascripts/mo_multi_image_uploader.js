@@ -312,7 +312,7 @@ class MOMultiImageUploader {
   // remove all the images as they were uploaded!
   destroyAll() {
     // or maybe bump the item from the fileStore.items? indexOf and splice
-    this.fileStore.items.forEach((item) => { this.destroy(item) });
+    this.fileStore.items.forEach((item) => { this.removeItem(item) });
   }
 
   uploadAll() {
@@ -444,7 +444,7 @@ class MOMultiImageUploader {
     // bind the destroy function
     item.dom_element.querySelector('.remove_image_link')
       .onclick = () => {
-        this.destroy(item);
+        this.removeItem(item);
         this.refreshBox();
       };
 
@@ -471,7 +471,7 @@ class MOMultiImageUploader {
       _img.setAttribute('src', item.url)
         .onerror = () => {
           alert("Couldn't read image from: " + item.url);
-          this.destroy(item);
+          this.removeItem(item);
         };
     }
   }
@@ -610,79 +610,28 @@ class MOMultiImageUploader {
     return _fd;
   }
 
-  uploadItem(item) {
-    const xhrReq = new XMLHttpRequest(),
-      progress = null;
-    // let update = null;
-
-    this.submit_buttons.forEach((element) => {
-      element.value = this.localized_text.uploading_text + '...';
-    });
-    // this.incrementProgressBar();
-
-    // after image has been created.
-    xhrReq.onreadystatechange = () => {
-      if (xhrReq.readyState == 4) {
-        if (xhrReq.status == 200) {
-          const _image = JSON.parse(xhrReq.response);
-          this.updateObsImages(item, _image);
-        } else if (xhrReq.response) {
-          alert(xhrReq.response);
-        } else {
-          alert(this.localized_text.something_went_wrong);
-        }
-
-        if (progress)
-          window.clearTimeout(progress);
-
-        // this.incrementProgressBar(item, 1);
-        this.hide(item.dom_element);
-
-        this.onUploadedCallback();
-      }
-    };
-
-    // Note: Add the event listeners before calling open() on the request.
-    // debugger;
-    xhrReq.open("POST", this.upload_image_uri, true);
-    xhrReq.setRequestHeader("X-Progress-ID", this.uuid);
-    const _fd = this.asformData(item); // Send the form
-    if (_fd != null) {
-      xhrReq.send(_fd);
-    } else {
-      alert(this.localized_text.something_went_wrong);
-      this.onUploadedCallback();
-    }
-  }
-
   // upload with readable stream not implemented yet for fetch
   // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
   // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
   // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-  uploadItemFetch(item) {
+  uploadItem(item) {
     this.submit_buttons.forEach((element) => {
       element.value = this.localized_text.uploading_text + '...';
     });
 
     // const csrfToken = document.querySelector("[name='csrf-token']").content;
-    const _fd = this.asformData(item);
-    debugger;
+    const _formData = this.asformData(item);
     fetch(this.upload_image_uri, {
-      method: 'POST',
-      // headers: {
-      // 'X-CSRF-Token': csrfToken,
-      //   'X-Requested-With': 'XMLHttpRequest',
-      // 'Content-Type': 'application/json',
-      //   'Accept': 'application/json'
-      // },
-      body: _fd
+      method: 'POST', body: _formData
     }).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
           response.json().then((image) => {
             this.updateObsImages(item, image);
+            this.hide(item.dom_element);
+            this.onUploadedCallback();
           }).catch((error) => {
-            console.error("no_content:", error);
+            console.error("no_image:", error);
           });
         } else {
           console.log(`got a ${response.status}`);
@@ -694,6 +643,22 @@ class MOMultiImageUploader {
       this.onUploadedCallback();
     });
   }
+
+  // async uploadItemAsync(item) {
+  //   this.submit_buttons.forEach((element) => {
+  //     element.value = this.localized_text.uploading_text + '...';
+  //   });
+
+  //   const _formData = this.asformData(item);
+  //   let response = await fetch(this.upload_image_uri, {
+  //     method: 'POST', body: _formData
+  //   })
+  //   let image = await response.json();
+
+  //   this.updateObsImages(item, image);
+  //   this.hide(item.dom_element);
+  //   this.onUploadedCallback();
+  // }
 
   // add the image to `good_images` and maybe set the thumb_image_id
   updateObsImages(item, image) {
@@ -713,12 +678,12 @@ class MOMultiImageUploader {
     }
   }
 
-  destroy(item) {
+  removeItem(item) {
     // remove element from the dom;
     item.dom_element.remove();
     if (item.is_file)
       // remove the file from the dictionary
-      delete this.fileStore.index[this.file_size()];
+      delete this.fileStore.index[this.file_size];
     else
       // remove the file from the dictionary
       delete this.fileStore.index[this.url];
