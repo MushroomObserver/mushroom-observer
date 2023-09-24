@@ -70,6 +70,14 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("form[action=?]", project_path(p_id))
   end
 
+  def test_show_project_with_location
+    project = projects(:albion_project)
+    login
+    get(:show, params: { id: project.id })
+
+    assert_select("a[href*=?]", location_path(project.location.id))
+  end
+
   def test_index
     login
     get(:index)

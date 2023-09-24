@@ -511,6 +511,7 @@ Style/ClassAndModuleChildren:
     - 'app/controllers/observations_controller/destroy.rb'
     - 'app/controllers/observations_controller/edit_and_update.rb'
     - 'app/controllers/observations_controller/form_helpers.rb'
+    - 'app/controllers/observations_controller/validators.rb'
     - 'app/controllers/observations_controller/new_and_create.rb'
     - 'app/controllers/observations_controller/show.rb'
     - 'app/extensions/form_builder_extensions.rb'

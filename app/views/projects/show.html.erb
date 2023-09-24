@@ -22,6 +22,9 @@ add_tab_set(project_show_tabs(project: @project, user: @user))
         <p><b><%= :show_project_published.t %>:</b> <%= @name_count %></p>
       <% end %>
       <p><b><%= :show_project_by.t %>:</b> <%= user_link(@project.user) %></p>
+      <% if @project.location %>
+        <p><b><%= :show_project_location.t %>:</b> <%= location_link(@project.place_name, @project.location) %></p>
+      <% end %>
       <p><b><%= :show_project_user_group.t %>:</b> <%= @project.user_group.name.t %></p>
       <p><b><%= :show_project_admin_group.t %>:</b> <%= @project.admin_group.name.t %></p>
       <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
