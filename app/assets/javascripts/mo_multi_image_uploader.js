@@ -46,17 +46,15 @@ class MOMultiImageUploader {
 
     this.fileStore = { items: [], index: {} }
 
-    // function of the Uploader instance, not the constructor
     this.set_bindings();
   }
 
   set_bindings() {
-    // make sure submit buttons are enabled when the dom is loaded!
+    // make sure submit buttons are enabled when the dom is loaded
     this.submit_buttons.forEach((element) => {
       element.setAttribute('disabled', false);
     });
 
-    // was bind('click.setGeoCodeBind'
     this.set_geocode_btn.onclick = () => {
       const _selectedItemData =
         document.querySelector('input[name=fix_geocode]:checked').dataset;
@@ -83,7 +81,6 @@ class MOMultiImageUploader {
         }
       })
 
-    // was bind('click.fixDateBind
     this.fix_date_submit.onclick = () => {
       const _selectedItemData =
         document.querySelector('input[name=fix_date]:checked').dataset;
@@ -95,7 +92,6 @@ class MOMultiImageUploader {
       }
     };
 
-    // was bind('click.ignoreDateBind'
     this.ignore_date_submit.onclick = () => {
       this.hide(this.img_messages);
     };
@@ -111,8 +107,6 @@ class MOMultiImageUploader {
     };
 
     // Drag and Drop bindings on the window
-
-    // ['dragover', 'dragenter'].forEach((e) => {
     this.content.addEventListener('dragover', function (e) {
       e.preventDefault();
       addDashedBorder();
@@ -123,13 +117,6 @@ class MOMultiImageUploader {
       addDashedBorder();
       return false;
     });
-    // })
-
-    // ['dragend', 'dragleave', 'dragexit'].forEach((e) => {
-    //   this.content.addEventListener(e, function (e) {
-    //     removeDashedBorder();
-    //   });
-    // })
     this.content.addEventListener('dragend', removeDashedBorder());
     this.content.addEventListener('dragleave', removeDashedBorder());
     this.content.addEventListener('dragexit', removeDashedBorder());
@@ -164,8 +151,7 @@ class MOMultiImageUploader {
       this.addFiles(files);
     };
 
-    // IMPORTANT: This allows the user to update the thumbnail on the edit
-    // observation view.
+    // Allows the user to update the thumbnail on the edit observation view
     document
       .querySelectorAll('[type="radio"][name="observation[thumb_image_id]"]')
       .forEach((elem) => {
@@ -221,7 +207,6 @@ class MOMultiImageUploader {
 
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
-      // event.preventDefault();
       if (this.block_form_submission) {
         this.uploadAll();
         return false;
@@ -247,7 +232,7 @@ class MOMultiImageUploader {
     // loop through attached files, make sure we aren't adding duplicates
     for (let i = 0; i < files.length; i++) {
       // stop adding the file, one with this exact size is already attached
-      // TODO: What are the odds of this?
+      // What are the odds of this?
       if (this.fileStore.index[files[i].size] != undefined) {
         continue;
       }
@@ -309,8 +294,8 @@ class MOMultiImageUploader {
     return _distinct;
   }
 
-  // remove all the images as they were uploaded!
-  destroyAll() {
+  // remove all the images as they were uploaded. unused
+  removeAll() {
     // or maybe bump the item from the fileStore.items? indexOf and splice
     this.fileStore.items.forEach((item) => { this.removeItem(item) });
   }
@@ -325,9 +310,7 @@ class MOMultiImageUploader {
       this.hide(elem);
     });
 
-    // const _firstUpload = this.fileStore.items[0];
     let _firstUpload;
-    // debugger;
     // uploads first image. if we have one, and bumps it off the list
     if (_firstUpload = this.fileStore.items.shift()) {
       this.uploadItem(_firstUpload);
@@ -340,16 +323,8 @@ class MOMultiImageUploader {
     return false;
   }
 
-  // callback function to move through the the images to upload
-  // getNextImage() {
-  //   this.fileStore.items.shift();
-  //   return this.fileStore.items[0];
-  // }
-
   onUploadedCallback() {
-    // const _nextInLine = this.getNextImage();
     let _nextInLine;
-
     // uploads next image. if we have one, and bumps it off the list
     if (_nextInLine = this.fileStore.items.shift())
       this.uploadItem(_nextInLine);
@@ -394,14 +369,12 @@ class MOMultiImageUploader {
   // then get EXIF data, and read the file with FileReader.
   loadAndDisplayItem(item) {
     const url = this.get_template_uri + "?img_number=" + item.uuid;
-    // + new URLSearchParams({ img_number: this.uuid })
-    // console.log(url);
 
     fetch(url).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
           response.text().then((html) => {
-            // the data returned is the raw HTML template
+            // the text returned is the raw HTML template
             this.addTemplateToPage(item, html)
             // extract the EXIF data (async) and then load it
             this.getExifData(item);
@@ -411,7 +384,6 @@ class MOMultiImageUploader {
             console.error("no_content:", error);
           });
         } else {
-          // this.ajax_request = null;
           console.log(`got a ${response.status}`);
         }
       }
@@ -440,8 +412,13 @@ class MOMultiImageUploader {
 
     // add it to the page
     this.add_img_container.append(item.dom_element);
+    // scroll to it
+    window.scrollTo({
+      top: this.add_img_container.offsetTop,
+      behavior: 'smooth',
+    });
 
-    // bind the destroy function
+    // bind the removeItem function
     item.dom_element.querySelector('.remove_image_link')
       .onclick = () => {
         this.removeItem(item);
