@@ -1,8 +1,6 @@
 <%= tag.div("#{:app_more.t}:", class: classes[:heading]) %>
 <%= active_link_to(:app_how_to_help.t, info_how_to_help_path,
                    class: classes[:indent], id: "nav_how_to_help_link") %>
-<%= active_link_to(:app_feature_tracker.t, pivotal_index_path,
-                   class: classes[:indent], id: "nav_pivotal_link") %>
 <%= active_link_to(:app_report_a_bug.t, emails_ask_webmaster_question_path,
                    class: classes[:indent], id: "nav_bug_report_link") %>
 <%= active_link_to(:app_send_a_comment.t, emails_ask_webmaster_question_path,
