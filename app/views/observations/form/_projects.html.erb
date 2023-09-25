@@ -1,8 +1,8 @@
 <%# Projects section of create_observation form %>
   <% if @suspect_checked_projects.any? %>
-    <% flash_error(:form_observations_there_is_a_problem_with_projects.t) %>
+    <% flash_warning(:form_observations_there_is_a_problem_with_projects.t) %>
 
-    <div class="alert alert-danger"
+    <div class="alert alert-warning"
          id="project_messages">
       <%= tag.p(
         "#{:form_observations_projects_out_of_range.t(
@@ -37,7 +37,7 @@
         <%= check_box_with_label(
           form: f_p, field: :ignore_proj_dates,
           label: :form_observations_projects_ignore_project_constraints.t,
-          class: "alert alert-danger"
+          class: "alert alert-warning"
         ) %>
       <% end %>
 
@@ -45,7 +45,7 @@
         <%= check_box_with_label(form: f_p, field: :"id_#{project.id}",
                                  checked: @project_checks[project.id],
                                  disabled: !project.user_can_add_observation?(@observation, @user),
-                                 label: link_to_object(project)) %>
+                                 label: project.title) %>
       <% end %>
     <% end %>
 

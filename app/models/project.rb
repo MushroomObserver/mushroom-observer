@@ -120,6 +120,10 @@ class Project < AbstractModel
     !location.found_here?(obs)
   end
 
+  def constraints
+    "Location: #{place_name}"
+  end
+
   # Check if user has permission to edit a given object.
   def self.can_edit?(obj, user)
     return false unless user
