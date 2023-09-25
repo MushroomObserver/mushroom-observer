@@ -6,7 +6,11 @@ class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
   # Uncomment this to try running tests with firefox_headless browser
   def setup
     super
-    Capybara.current_driver = :selenium_headless
+    Capybara.current_driver = :selenium_chrome_headless
+  end
+
+  def teardown
+    Capybara.use_default_driver
   end
 
   def test_create_minimal_observation
@@ -15,6 +19,7 @@ class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
 
     click_on("Create Observation")
     assert_selector("body.observations__new")
+    binding.break
 
     within("#observation_form") do
       assert_field('observation_when_1i', with: Time.zone.today.year.to_s)

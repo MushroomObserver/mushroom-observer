@@ -176,7 +176,7 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara", "~> 3.37", ">= 3.37.1")
+  gem("capybara")
 
   # Use selenium to execute javascript in Capybara tests
   gem("selenium-webdriver")

@@ -3,6 +3,11 @@
 require("test_helper")
 
 class RandomIntegrationTest < CapybaraIntegrationTestCase
+  def setup
+    super
+    Capybara.use_default_driver
+  end
+
   # Test "/controller/action/type/id" route used by AJAX controller.
   def test_ajax_router
     visit("/ajax/auto_complete/name/Agaricus")

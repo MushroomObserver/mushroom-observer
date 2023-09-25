@@ -68,6 +68,7 @@ DatabaseCleaner.strategy = :transaction
 # -- AN 10/2022
 #
 ################################################################################
+require 'database_cleaner/active_record'
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests
@@ -81,12 +82,12 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   include CapybaraMacros
 
   # Javascript tests use this
-  Capybara.register_driver(:firefox_headless) do |app|
-    options = ::Selenium::WebDriver::Firefox::Options.new
-    options.args << "--headless"
+  # Capybara.register_driver(:firefox_headless) do |app|
+  #   options = ::Selenium::WebDriver::Firefox::Options.new
+  #   options.args << "--headless"
 
-    Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
-  end
+  #   Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+  # end
 
   # In case using screenshot
   # Capybara::Screenshot.register_driver(:firefox_headless) do |driver, path|
@@ -99,16 +100,17 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     ApplicationController.allow_forgery_protection = true
 
     # NOTE: Shouldn't be necessary, but in case:
-    # Capybara.reset_sessions!
+    Capybara.reset_sessions!
 
     # needed for selenium
     Capybara.server = :webrick
 
-    # Webdrivers.logger.level = :debug
+    Webdrivers.logger.level = :debug
     # TODO: Move this, it gets called tooo often
     # Webdrivers::Geckodriver.update
 
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
+    DatabaseCleaner.strategy = :truncation # :transaction
     DatabaseCleaner.start
 
     # Treat Rails html requests as coming from non-robots.
