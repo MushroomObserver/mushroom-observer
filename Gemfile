@@ -181,7 +181,7 @@ group :test do
   # Use selenium to execute javascript in Capybara tests
   gem("selenium-webdriver")
   # keeps selenium drivers updated
-  gem("webdrivers")
+  # gem("webdrivers")
   # Selenium recommends Database Cleaner for cleaning db between tests.
   # Maybe needed after JS db transactions, because they run in a separate thread
   # from the test server. https://github.com/DatabaseCleaner/database_cleaner
