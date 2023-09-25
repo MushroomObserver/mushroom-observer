@@ -4,26 +4,22 @@ require("test_helper")
 
 class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
   # Uncomment this to try running tests with firefox_headless browser
-  def setup
-    super
-    Capybara.current_driver = :selenium_chrome_headless
-  end
-
-  def teardown
-    Capybara.use_default_driver
-  end
+  # def setup
+  #   super
+  #   Capybara.current_driver = :selenium_chrome_headless
+  # end
 
   def test_create_minimal_observation
     rolf = users("rolf")
     login!(rolf)
 
+    assert(page.has_link?("Create Observation"))
     click_on("Create Observation")
-    assert_selector("body.observations__new")
-    binding.break
 
+    assert(page.has_selector?("body.observations__new"))
     within("#observation_form") do
-      assert_field('observation_when_1i', with: Time.zone.today.year.to_s)
-      # assert_select("observation_when_1i", text: Time.zone.today.year.to_s)
+      # MOAutocompleter has replaced year select with text field
+      assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
       assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
       assert_select("observation_when_3i",
                     text: Time.zone.today.strftime("%d").to_i)
@@ -34,19 +30,23 @@ class ObservationFormIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
 
-    page.has_selector?("#name_messages")
-
+    assert(page.has_selector?("#name_messages",
+                              text: "MO does not recognize the name"))
     assert_flash_warning
     assert_flash_text(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
-    assert_selector("#name_messages", text: "MO does not recognize the name")
 
+    assert(page.has_selector?("#observation_form"))
     within("#observation_form") do
       fill_in("naming_name", with: "Coprinus comatus")
       fill_in("observation_place_name", with: locations.first.name)
       click_commit
     end
+
+    assert(page.has_selector?("body.observations__show"))
+    assert_flash_success
+    assert_flash_text(:runtime_observation_success.t.html_to_ascii)
   end
 
   PASADENA_EXTENTS = {

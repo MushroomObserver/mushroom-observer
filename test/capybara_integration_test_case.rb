@@ -1,13 +1,5 @@
 # frozen_string_literal: true
 
-# Allow simuluation of user-browser interaction with capybara
-require("capybara/rails")
-require("capybara/minitest")
-require("webdrivers/geckodriver")
-
-require("database_cleaner/active_record")
-DatabaseCleaner.strategy = :transaction
-
 #  = Capybara Integration Test Case
 #
 #  The test case class that all Capybara integration tests currently derive
@@ -68,7 +60,11 @@ DatabaseCleaner.strategy = :transaction
 # -- AN 10/2022
 #
 ################################################################################
-require 'database_cleaner/active_record'
+
+# Allow simuluation of user-browser interaction with capybara
+require("capybara/rails")
+require("capybara/minitest")
+require("database_cleaner/active_record")
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests
@@ -81,36 +77,23 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   include CapybaraSessionExtensions
   include CapybaraMacros
 
-  # Javascript tests use this
-  # Capybara.register_driver(:firefox_headless) do |app|
-  #   options = ::Selenium::WebDriver::Firefox::Options.new
-  #   options.args << "--headless"
-
-  #   Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
-  # end
-
-  # In case using screenshot
-  # Capybara::Screenshot.register_driver(:firefox_headless) do |driver, path|
-  #   driver.browser.save_screenshot(path)
-  # end
-
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
   def setup
     ApplicationController.allow_forgery_protection = true
 
-    # NOTE: Shouldn't be necessary, but in case:
-    Capybara.reset_sessions!
+    Capybara.default_max_wait_time = 2
+    # default in test_helper = true. some SO threads suggest false
+    self.use_transactional_tests = false
 
     # needed for selenium
     Capybara.server = :webrick
+    Capybara.current_driver = :selenium
 
-    Webdrivers.logger.level = :debug
-    # TODO: Move this, it gets called tooo often
-    # Webdrivers::Geckodriver.update
-
+    # https://github.com/DatabaseCleaner/database_cleaner
+    # https://github.com/DatabaseCleaner/database_cleaner#minitest-example
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
-    DatabaseCleaner.strategy = :truncation # :transaction
+    DatabaseCleaner.strategy = :truncation # :transaction :truncation
     DatabaseCleaner.start
 
     # Treat Rails html requests as coming from non-robots.
