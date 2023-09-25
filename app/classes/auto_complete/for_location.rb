@@ -7,7 +7,7 @@
 # Or would this scatter the code?
 # Thinking the scope could be useful for graphQL, or it could use this class.
 #
-class AutoCompleteLocation < AutoCompleteByWord
+class AutoComplete::ForLocation < AutoComplete::ByWord
   attr_accessor :reverse
 
   def initialize(string, params)

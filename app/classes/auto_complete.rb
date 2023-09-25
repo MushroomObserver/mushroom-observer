@@ -18,7 +18,7 @@ class AutoComplete
   self.limit = 1000
 
   def self.subclass(type)
-    "AutoComplete#{type.camelize}".constantize
+    "AutoComplete::For#{type.camelize}".constantize
   rescue StandardError
     raise("Invalid auto-complete type: #{type.inspect}")
   end

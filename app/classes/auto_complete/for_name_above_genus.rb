@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoCompleteNameAboveGenus < AutoCompleteByString
+class AutoComplete::ForNameAboveGenus < AutoComplete::ByString
   def rough_matches(letter)
     # (this sort puts higher rank on top)
     Name.with_correct_spelling.with_rank_above_genus.

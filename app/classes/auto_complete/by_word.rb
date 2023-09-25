@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoCompleteByWord < AutoComplete
+class AutoComplete::ByWord < AutoComplete
   # Same as AutoCompleteByString#refine_matches, except words are allowed
   # to be out of order.
   def refine_matches

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoCompleteName < AutoCompleteByString
+class AutoComplete::ForName < AutoComplete::ByString
   def rough_matches(letter)
     # (this sort puts genera and higher on top, everything else
     # on bottom, and sorts alphabetically within each group)

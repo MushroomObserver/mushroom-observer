@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoCompleteUser < AutoCompleteByString
+class AutoComplete::ForUser < AutoComplete::ByString
   def rough_matches(letter)
     users = User.select(:login, :name).distinct.
             where(User[:login].matches("#{letter}%").
