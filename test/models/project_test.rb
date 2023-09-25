@@ -143,5 +143,6 @@ class ProjectTest < UnitTestCase
                  projects(:past_project).duration_str)
     assert_equal(:show_project_duration_unlimited.l,
                  projects(:unlimited_project).duration_str)
+
   end
 end

@@ -6,27 +6,19 @@ require("test_helper")
 class ProjectsIntegrationTest < CapybaraIntegrationTestCase
   def test_add_project
     login(mary)
-    title = "One Day Mycoblitz"
+    title = "Super Grandiloquent National Fungal Foray"
 
     visit(projects_path)
     click_on(:list_projects_add_project.l)
     fill_in(:form_projects_title.l, with: title)
-    assert_equal("4", find_field(:form_projects_duration.l).value,
-                 "Default Project Duration should be `4` (days)")
-    select("1", from: :form_projects_duration.l)
-
     click_on("Create")
 
-    proj = Project.order(created_at: :asc).last
-    assert_equal(title, proj.title)
-    assert_equal(Time.zone.today, proj.start_date,
+    project = Project.order(created_at: :asc).last
+    assert_equal(title, project.title)
+    assert_equal(Time.zone.today, project.start_date,
                  "Project Start Date should default to current date")
-    assert_equal(proj.end_date, proj.start_date,
-                 "A one-day Project should end on the day it starts")
-
-    click_on(:show_project_edit.l)
-    assert_equal("1", find_field(:form_projects_duration.l).value,
-                 "Edit form Duration field should equal current duration")
+    assert_equal(Time.zone.today, project.start_date,
+                 "Project Start Date should default to current date")
   end
 
   def test_add_observation_to_project

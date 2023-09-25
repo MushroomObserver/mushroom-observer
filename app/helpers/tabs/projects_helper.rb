@@ -98,13 +98,5 @@ module Tabs
         ["updated_at",  :sort_by_updated_at.t]
       ].freeze
     end
-
-    def show_duration_select?(project)
-      project.new_record? || project.start_date && project.end_date
-    end
-
-    def duration_selected(project)
-      project.new_record? ? "4" : project.duration_str
-    end
   end
 end

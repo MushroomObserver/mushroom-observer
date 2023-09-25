@@ -219,7 +219,8 @@ class ProjectsController < ApplicationController
   def permitted_project_params
     params.require(:project).
       permit(:title, :summary, :open_membership,
-             "start_date(1i)", "start_date(2i)", "start_date(3i)")
+             "start_date(1i)", "start_date(2i)", "start_date(3i)",
+             "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end
 
   def find_project!
@@ -239,9 +240,6 @@ class ProjectsController < ApplicationController
 
     # Create project.
     @project = Project.new(permitted_project_params)
-    @project.end_date =
-      # 1-day project ends on the day it starts
-      @project.start_date + (params[:project][:duration].to_i - 1).days
     @project.user = @user
     @project.user_group = user_group
     @project.admin_group = admin_group
