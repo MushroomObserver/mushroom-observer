@@ -475,7 +475,7 @@ class MOAutocompleter {
   schedule_refresh() {
     this.verbose("schedule_refresh()");
     this.clear_refresh();
-    this.refresh_timer = setTimeout((function () {
+    this.refresh_timer = window.setTimeout((() => {
       this.verbose("doing_refresh()");
       // this.debug("refresh_timer(" + this.input_elem.value + ")");
       this.old_value[this.uuid] = this.input_elem.value;
@@ -486,7 +486,7 @@ class MOAutocompleter {
         this.update_datalist();
       else
         this.draw_pulldown();
-    }).bind(this), this.refresh_delay * 1000);
+    }), this.refresh_delay * 1000);
   }
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
@@ -671,25 +671,29 @@ class MOAutocompleter {
   // Get actual row height when it becomes available.
   // Experimentally creates a test row.
   get_row_height() {
-    const div = document.createElement('div');
-    const ul = document.createElement('ul');
-    const li = document.createElement('li');
-    const body = document.body || document.getElementsByTagName("body")[0];
+    this.input_elem.disabled = true;
+    const div = document.createElement('div'),
+      ul = document.createElement('ul'),
+      li = document.createElement('li');
+
     div.className = this.pulldown_class;
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     li.innerHTML = 'test';
     ul.appendChild(li);
     div.appendChild(ul);
-    body.appendChild(div);
+    document.body.appendChild(div);
     this.temp_row = div;
-    setTimeout(this.set_row_height.bind(this), 100);
+    // window.setTimeout(this.set_row_height(), 100);
+    this.set_row_height();
+    this.input_elem.disabled = false;
   }
   set_row_height() {
     if (this.temp_row) {
       this.row_height = this.temp_row.offsetHeight;
       if (!this.row_height) {
-        setTimeout(this.set_row_height.bind(this), 100);
+        // window.setTimeout(this.set_row_height(), 100);
+        this.set_row_height();
       } else {
         document.body.removeChild(this.temp_row);
         this.temp_row = null;
@@ -715,7 +719,7 @@ class MOAutocompleter {
     }
 
     // Get row height if haven't been able to yet.
-    this.set_row_height();
+    this.get_row_height();
     this.update_rows(rows, matches, size, scroll);
     this.highlight_new_row(rows, cur, size, scroll)
     this.make_menu_visible(matches, size, scroll)
