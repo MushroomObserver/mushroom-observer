@@ -108,7 +108,7 @@ class MOAutocompleter {
     // The type will govern the ajax_url and possibly other params
     const autocompleterTypes = {
       clade: {
-        ajax_url: "/ajax/auto_complete/name_above_genus/@",
+        ajax_url: "/ajax/auto_complete/clade/@",
         collapse: 1
       },
       herbarium: { // params[:user_id] handled in controller
