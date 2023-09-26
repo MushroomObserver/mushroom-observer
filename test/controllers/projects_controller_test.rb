@@ -12,7 +12,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    assert_redirected_to(new_project_path) # Failure
+    assert_form_action(action: :create, id: nil) # Failure
   end
 
   def edit_project_helper(title, project)
@@ -222,10 +222,10 @@ class ProjectsControllerTest < FunctionalTestCase
       Project.find_by(title: title),
       "It chould not create a Project which ends before ti starts"
     )
-    assert_redirected_to(
-      new_project_path,
-      "It should redirect to form if Project ends before it starts"
-    )
+
+    assert_form_action(
+      { action: :create, id: nil },
+      "It should return to form if Project ends before it starts")
   end
 
   def test_add_project_existing
