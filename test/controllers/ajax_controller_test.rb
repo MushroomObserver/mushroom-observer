@@ -164,7 +164,7 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_name_above_genus
     expect = %w[F Fungi]
-    good_ajax_request(:auto_complete, type: :name_above_genus, id: "Fung")
+    good_ajax_request(:auto_complete, type: :clade, id: "Fung")
     assert_equal(expect, @response.body.split("\n"))
   end
 
