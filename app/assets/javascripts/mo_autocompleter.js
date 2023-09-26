@@ -354,6 +354,7 @@ class MOAutocompleter {
           break;
         case EVENT_KEY_RETURN:
         case EVENT_KEY_TAB:
+          event.preventDefault();
           if (this.current_row >= 0)
             this.select_row(this.current_row - this.scroll_offset);
           break;
