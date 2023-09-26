@@ -197,6 +197,37 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal([rolf], admin_group.users)
   end
 
+  def test_create_project_end_before_start
+    title = "Backward in Time"
+    summary = "Ends before it starts"
+    start_date = Time.zone.today
+    end_date = start_date - 1.day
+    params = {
+      project: {
+        title: title,
+        summary: summary,
+        "start_date(1i)" => start_date.year,
+        "start_date(2i)" => start_date.month,
+        "start_date(3i)" => start_date.day,
+        "end_date(1i)" => end_date.year,
+        "end_date(2i)" => end_date.month,
+        "end_date(3i)" => end_date.day
+      }
+    }
+
+    post_requires_login(:create, params)
+
+    assert_flash_error("Missing flash error when Project ends before it starts")
+    assert_nil(
+      Project.find_by(title: title),
+      "It chould not create a Project which ends before ti starts"
+    )
+    assert_redirected_to(
+      new_project_path,
+      "It should redirect to form if Project ends before it starts"
+    )
+  end
+
   def test_add_project_existing
     project = projects(:eol_project)
     add_project_helper(project.title,
@@ -229,12 +260,20 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(project)
     assert_not_equal(summary, project.summary)
     assert_not(project.open_membership)
+    start_date = Time.zone.today
+    end_date = start_date + 4.days
     params = {
       id: project.id,
       project: {
         title: title,
         summary: summary,
-        open_membership: true
+        open_membership: true,
+        "start_date(1i)" => start_date.year,
+        "start_date(2i)" => start_date.month,
+        "start_date(3i)" => start_date.day,
+        "end_date(1i)" => end_date.year,
+        "end_date(2i)" => end_date.month,
+        "end_date(3i)" => end_date.day
       }
     }
     put_requires_user(:update, { action: :show }, params)
@@ -243,6 +282,37 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(project)
     assert_equal(summary, project.summary)
     assert(project.open_membership)
+    assert_equal(start_date, project.start_date)
+    assert_equal(end_date, project.end_date)
+  end
+
+  def test_update_project_end_before_start
+    proj = projects(:pinned_date_range_project)
+    start_date = Time.zone.today
+    end_date = Time.zone.yesterday
+    params = {
+      id: proj.id,
+      project: {
+        title: proj.title,
+        summary: proj.summary,
+        user: proj.user,
+        user_group: proj.user_group,
+        admin_group: proj.admin_group,
+        "start_date(1i)" => start_date.year,
+        "start_date(2i)" => start_date.month,
+        "start_date(3i)" => start_date.day,
+        "end_date(1i)" => end_date.year,
+        "end_date(2i)" => end_date.month,
+        "end_date(3i)" => end_date.day
+      }
+    }
+
+    login(proj.user.login)
+    patch(:update, params: params)
+
+    assert_flash_error("Missing flash error when Project ends before it starts")
+    assert_select("#title", { text: /Edit Project/ },
+                  "It should return to form if Project ends before it starts")
   end
 
   def test_edit_project_empty_name

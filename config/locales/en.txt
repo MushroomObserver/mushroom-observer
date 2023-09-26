@@ -3180,6 +3180,7 @@
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
+  add_project_ends_before_start: Project ends before it starts.
   add_project_group_exists: Unable to create project because a [:user_group] named '[group]' already exists.
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
@@ -3710,6 +3711,7 @@
   validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
   validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
+  validate_project_ends_before_start: "End date is before the start date"
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"

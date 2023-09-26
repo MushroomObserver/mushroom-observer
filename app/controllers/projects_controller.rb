@@ -84,6 +84,8 @@ class ProjectsController < ApplicationController
       flash_error(:add_project_need_title.t)
     elsif @project
       flash_error(:add_project_already_exists.t(title: @project.title))
+    elsif ends_before_start?
+      flash_error(:add_project_ends_before_start.t)
     elsif user_group
       flash_error(:add_project_group_exists.t(group: title))
     elsif admin_group
@@ -108,6 +110,8 @@ class ProjectsController < ApplicationController
     elsif (project2 = Project.find_by_title(@title)) &&
           (project2 != @project)
       flash_error(:add_project_already_exists.t(title: @title))
+    elsif ends_before_start?
+      flash_error(:add_project_ends_before_start.t)
     elsif !@project.update(permitted_project_params)
       flash_object_errors(@project)
     else
@@ -149,6 +153,55 @@ class ProjectsController < ApplicationController
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
+  end
+
+  def ends_before_start?
+    start_date = if start_year.nil?
+                   nil
+                 elsif start_month && start_day
+                   Date.new(start_year.to_i, start_month.to_i, start_day.to_i)
+                 elsif start_month
+                   Date.new(start_year.to_i, start_month.to_i)
+                 else
+                   Date.new(start_year.to_i)
+                 end
+
+    end_date = if end_year.nil?
+                 nil
+               elsif end_month && end_day
+                 Date.new(end_year.to_i, end_month.to_i, end_day.to_i)
+               elsif end_month
+                 Date.new(end_year.to_i, end_month.to_i)
+               else
+                 Date.new(end_year.to_i)
+               end
+
+    # uses `present?` in order to return boolean rather than truthy
+    start_date.present? && end_date.present? && (end_date < start_date)
+  end
+
+  def start_year
+    params[:project]["start_date(1i)"]
+  end
+
+  def start_month
+    params[:project]["start_date(2i)"]
+  end
+
+  def start_day
+    params[:project]["start_date(3i)"]
+  end
+
+  def end_year
+    params[:project]["end_date(1i)"]
+  end
+
+  def end_month
+    params[:project]["end_date(2i)"]
+  end
+
+  def end_day
+    params[:project]["end_date(3i)"]
   end
 
   ############ Index private methods
