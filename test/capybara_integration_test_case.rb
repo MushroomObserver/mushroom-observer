@@ -88,7 +88,7 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
 
     # needed for selenium
     Capybara.server = :webrick
-    Capybara.current_driver = :selenium
+    Capybara.current_driver = :selenium_headless
 
     # https://github.com/DatabaseCleaner/database_cleaner
     # https://github.com/DatabaseCleaner/database_cleaner#minitest-example
