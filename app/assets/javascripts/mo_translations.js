@@ -1,12 +1,12 @@
 function MOTranslations(localizedText) {
   window.onload = () => {
-    const LOCALE = localizedText.locale,
+    let LOCALE = localizedText.locale,
       CONFIRM_STRING = localizedText.confirm_string,
       LOADING_STRING = localizedText.loading_string,
       SAVING_STRING = localizedText.saving_string,
       LOADED = false,
-      CHANGED = false,
-      $whirly = document.getElementById('whirly'),
+      CHANGED = false;
+    const $whirly = document.getElementById('whirly'),
       $save_button = document.getElementById('save_button'),
       $cancel_button = document.getElementById('cancel_button'),
       $form_div = document.getElementById('form_div'),
@@ -44,33 +44,35 @@ function MOTranslations(localizedText) {
       element.onkeydown = () => { form_changed() };
     });
 
-    $post_form.getElementById('cancel_button').onclick = () => {
-      clear_form();
-    };
+    $form_div.onload = () => {
+      document.getElementById('cancel_button').onclick = () => {
+        clear_form();
+      };
 
-    $post_form.getElementById('reload_button').onclick = () => {
-      show_tag(LOCALE, this.dataset.tag);
-    };
+      document.getElementById('reload_button').onclick = () => {
+        show_tag(LOCALE, this.dataset.tag);
+      };
 
-    $post_form.getElementById('locale').onchange = () => {
-      show_tag(this.value, this.dataset.tag);
-    };
+      document.getElementById('locale').onchange = () => {
+        show_tag(this.value, this.dataset.tag);
+      };
 
-    const $show_old_versions =
-      $post_form.querySelectorAll('[data-role="show_old_version"]');
+      const $show_old_versions =
+        $post_form.querySelectorAll('[data-role="show_old_version"]');
 
-    $show_old_versions.forEach((element) => {
-      element.onclick = function (event) {
-        event.preventDefault();
-        show_old_version(this.dataset.id);
-      }
-    });
+      $show_old_versions.forEach((element) => {
+        element.onclick = function (event) {
+          event.preventDefault();
+          show_old_version(this.dataset.id);
+        }
+      });
 
-    $post_form.submit(function () {
-      CHANGED = false;
-      show_whirly(SAVING_STRING);
-      setDisabledOnButtons(true);
-    });
+      $post_form.submit(function () {
+        CHANGED = false;
+        show_whirly(SAVING_STRING);
+        setDisabledOnButtons(true);
+      });
+    }
 
     // Helpers and callbacks
     function iframe_load() {
@@ -115,8 +117,10 @@ function MOTranslations(localizedText) {
         //     LOADED = true;
         //   }
         // });
+        const url = '/translation/edit_translations_ajax_get?locale=' + locale
+          + "&tag=" + tag;
 
-        let response = await fetch('/translation/edit_translations_ajax_get', {
+        fetch(url, {
           method: 'GET',
           headers: {
             'X-CSRF-Token': csrfToken,
@@ -124,23 +128,26 @@ function MOTranslations(localizedText) {
             'Content-Type': 'text/html',
             'Accept': 'text/html'
           },
-          credentials: 'same-origin',
-          body: JSON.encode({ locale: locale, tag: tag })
-        });
-        if (response.ok) {
-          if (200 <= response.status && response.status <= 299) {
-            let html = await response.text();
-            // console.log("html: " + html);
-            hide_whirly();
-            $form_div.html = html;
-            CHANGED = false;
-            LOADED = true;
-          } else {
-            hide_whirly();
-            alert(response.responseText);
-            console.log(`got a ${response.status}`);
+          credentials: 'same-origin'
+        }).then((response) => {
+          if (response.ok) {
+            if (200 <= response.status && response.status <= 299) {
+              response.text().then((html) => {
+                // console.log("html: " + html);
+                hide_whirly();
+                $form_div.html = html;
+                CHANGED = false;
+                LOADED = true;
+              }).catch((error) => {
+                console.error("no_content:", error);
+              });
+            } else {
+              hide_whirly();
+              alert(response.responseText);
+              console.log(`got a ${response.status}`);
+            }
           }
-        }
+        })
       }
     }
 
