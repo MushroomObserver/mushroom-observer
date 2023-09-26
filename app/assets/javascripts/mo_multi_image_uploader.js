@@ -640,7 +640,7 @@ class MOMultiImageUploader {
   // add the image to `good_images` and maybe set the thumb_image_id
   updateObsImages(item, image) {
     // #good_images is a hidden field
-    const _good_image_vals = this.good_images.value ?? "";
+    const _good_image_vals = this.good_images.value || "";
 
     // add id to the good images form field.
     this.good_images.value =
