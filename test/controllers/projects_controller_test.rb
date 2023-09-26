@@ -160,7 +160,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: summary,
-        where: ""
+        place_name: ""
       }
     }
     post_requires_login(:create, params)
@@ -215,7 +215,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: summary,
-        where: "",
+        place_name: "",
         open_membership: true
       }
     }
@@ -304,7 +304,7 @@ class ProjectsControllerTest < FunctionalTestCase
         params: {
           id: projects(:eol_project).id,
           project: { title: "New Project", summary: "New Summary",
-                     where: "" }
+                     place_name: "" }
         })
     assert_flash_success
     proj = proj.reload
@@ -345,7 +345,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: title,
-        where: where
+        place_name: where
       }
     }
     post_requires_login(:create, params)
@@ -360,7 +360,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: title,
-        where: where
+        place_name: where
       }
     }
     post_requires_login(:create, params)

@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
     elsif admin_group
       flash_error(:add_project_group_exists.t(group: admin_name))
     else
-      return create_project(title, admin_name, params[:project][:where])
+      return create_project(title, admin_name, params[:project][:place_name])
     end
     @project = Project.new
     render(:new, location: new_project_path(q: get_query_param))
