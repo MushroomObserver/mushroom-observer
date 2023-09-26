@@ -42,15 +42,6 @@ brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick fin
 # now check
 # /usr/local/bin/bash --version
 # should be the new one.
-# So far, so good. Now you have make this version the default.
-# sudo vim /etc/shells
-# (add at the bottom of the list: /usr/local/bin/bash and save out)
-# For making the new version the default bash in a user or root shell,
-# see reference behind paywall in https://medium.com/p/7138bd1066ba
-# (shouldn't need to do these, but here for reference)
-# chsh -s /usr/local/bin/bash
-# Set the default shell for the root user:
-# sudo chsh -s /usr/local/bin/bash
 
 # Configure MySQL
 brew services start mysql
