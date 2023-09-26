@@ -56,15 +56,6 @@ open_membership_project:
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
 
-closed_membership_project:
-  <<: *DEFAULTS
-  user: roy
-  user_group: burbank_users
-  admin_group: burbank_admins
-  summary: Closed project
-  observations: nil
-  open_membership: false
-
 empty_project:
   <<: *DEFAULTS
   user: mary

@@ -23,23 +23,17 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
 
   def test_add_observation_to_project
     proj = projects(:past_project)
-    auto_proj = projects(:current_project)
     user = users(:katrina)
     # Ensure fixtures not broken
     assert(proj.is_member?(user),
            "Need fixtures such that `user` is a member of `proj`")
-    assert(auto_proj.is_member?(user),
-           "Need fixtures such that `user` is a member of `auto_proj`")
     proj_checkbox = "project_id_#{proj.id}"
-    auto_proj_checkbox = "project_id_#{auto_proj.id}"
     observation_original_count = Observation.count
 
     login(user)
     visit(new_observation_path)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
-    assert(has_checked_field?(auto_proj_checkbox),
-           "Missing checked box for Proj to which Obs should be auto-added")
 
     fill_in(:WHERE.l, with: locations(:burbank).name)
     check(proj_checkbox) # add out-of-range Obs to Project

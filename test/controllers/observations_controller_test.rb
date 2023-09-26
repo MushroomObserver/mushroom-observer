@@ -2887,8 +2887,10 @@ class ObservationsControllerTest < FunctionalTestCase
     login("katrina")
     get(:new)
     assert_project_checks(
-      projects(:open_membership_project).id => :unchecked,
-      projects(:closed_membership_project).id => :unchecked
+      projects(:past_project).id => :unchecked,
+      projects(:current_project).id => :unchecked,
+      projects(:future_project).id => :unchecked,
+      projects(:open_membership_project).id => :unchecked
     )
 
     login("dick")
@@ -2909,14 +2911,6 @@ class ObservationsControllerTest < FunctionalTestCase
            project: { "id_#{@proj1.id}" => "0" }
          })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
-  end
-
-  def test_open_membership_project_checkboxes_in_create_observation
-    project = projects(:open_membership_project)
-
-    login("katrina")
-    get(:new)
-    assert_project_checks(project.id => :checked)
   end
 
   def test_project_checkboxes_in_update_observation
@@ -2984,17 +2978,6 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:edit, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
-  end
-
-  def test_project_checkboxes_ongoing_projects
-    login("katrina")
-    get(:new)
-
-    assert_project_checks(
-      projects(:past_project).id => :unchecked,
-      projects(:current_project).id => :checked,
-      projects(:future_project).id => :unchecked
-    )
   end
 
   def init_for_project_checkbox_tests

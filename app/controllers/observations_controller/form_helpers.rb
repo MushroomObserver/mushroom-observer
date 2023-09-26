@@ -83,10 +83,12 @@ module ObservationsController::FormHelpers
   def init_project_vars
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
-    @project_checks = {}
+    @project_checks = {} # All projectsz initially unchecked
+=begin
     @projects.each do |proj|
-      @project_checks[proj.id] = (proj.open_membership && proj.current?)
+      @project_checks[proj.id] = proj.current?
     end
+=end
   end
 
   def init_project_vars_for_reload(obs)
