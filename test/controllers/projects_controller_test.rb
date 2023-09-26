@@ -225,7 +225,8 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_form_action(
       { action: :create, id: nil },
-      "It should return to form if Project ends before it starts")
+      "Failed to return to form when Project ended before it started"
+    )
   end
 
   def test_add_project_existing
