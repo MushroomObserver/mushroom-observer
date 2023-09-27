@@ -694,8 +694,8 @@ class MOMultiImageUploader {
     const _distinctImgDates = this.getDistinctImageDates(),
       _obsDate = this.observationDate();
 
-    this.img_radio_container.html = '';
-    this.obs_radio_container.html = '';
+    this.img_radio_container.innerHTML = '';
+    this.obs_radio_container.innerHTML = '';
     this.makeObservationDateRadio(_obsDate);
 
     _distinctImgDates.forEach((simpleDate) => {
