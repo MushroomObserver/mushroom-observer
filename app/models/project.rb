@@ -123,9 +123,9 @@ class Project < AbstractModel
   def count_violations
     return 0 unless location
 
-    count = observations.where("lat IS NOT NULL").count
-    count -= observations.in_box(n: location.north, s: location.south,
-                                 e: location.east, w: location.west).count
+    count = observations.where.not(lat: nil).count
+    count - observations.in_box(n: location.north, s: location.south,
+                                e: location.east, w: location.west).count
   end
 
   def constraints

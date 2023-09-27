@@ -171,10 +171,10 @@ class ProjectsController < ApplicationController
                     @project.admin_group_id).
               includes(:name, :user)
     count = @project.count_violations
-    if count > 0
-      flash_warning(:show_project_violation_count.t(count: count,
-                                                    id: @project.id))
-    end
+    return unless count.positive?
+
+    flash_warning(:show_project_violation_count.t(count: count,
+                                                  id: @project.id))
   end
 
   ############ Index private methods
