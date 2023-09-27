@@ -277,8 +277,8 @@ class MOMultiImageUploader {
   }
 
   getDistinctImageDates() {
-    const _testAgainst = "",
-      _distinct = [];
+    let _testAgainst = "";
+    const _distinct = [];
 
     for (let i = 0; i < this.fileStore.items.length; i++) {
       const _ds =
