@@ -146,6 +146,28 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(["X"], @response.body.split("\n"))
   end
 
+  def test_auto_complete_herbarium
+    # names of Herbariums whose names have words starting with "m"
+    m = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
+        map(&:name)
+
+    expect = m.sort.uniq
+    expect.unshift("D")
+    good_ajax_request(:auto_complete, type: :herbarium, id: "Dick")
+    assert_equal(expect, @response.body.split("\n"))
+  end
+
+  def test_auto_complete_empty
+    good_ajax_request(:auto_complete, type: :name, id: "")
+    assert_equal([], @response.body.split("\n"))
+  end
+
+  def test_auto_complete_name_above_genus
+    expect = %w[F Fungi]
+    good_ajax_request(:auto_complete, type: :clade, id: "Fung")
+    assert_equal(expect, @response.body.split("\n"))
+  end
+
   def test_auto_complete_name
     expect = Name.all.reject(&:correct_spelling).
              map(&:text_name).uniq.select { |n| n[0] == "A" }.sort

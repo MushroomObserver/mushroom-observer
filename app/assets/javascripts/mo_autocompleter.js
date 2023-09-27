@@ -108,7 +108,7 @@ class MOAutocompleter {
     // The type will govern the ajax_url and possibly other params
     const autocompleterTypes = {
       clade: {
-        ajax_url: "/ajax/auto_complete/name_above_genus/@",
+        ajax_url: "/ajax/auto_complete/clade/@",
         collapse: 1
       },
       herbarium: { // params[:user_id] handled in controller
@@ -279,8 +279,6 @@ class MOAutocompleter {
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) this.add_event_listeners(elem);
 
-    // Disable default browser autocomplete. Stimulus - do this on HTML element
-    elem.setAttribute("autocomplete", "off");
     // sanity check to show which autocompleter is currently on the element
     elem.setAttribute("data-ajax-url", this.ajax_url);
   }
@@ -289,7 +287,7 @@ class MOAutocompleter {
   prepare_year_input_element(old_elem) {
     const id = old_elem.getAttribute("id"),
       name = old_elem.getAttribute("name"),
-      klass = old_elem.getAttribute("class"),
+      classList = old_elem.classList,
       style = old_elem.getAttribute("style"),
       value = old_elem.value,
       opts = old_elem.options,
@@ -301,7 +299,7 @@ class MOAutocompleter {
     for (let i = 0; i < opts.length; i++)
       primer.push(opts.item(i).text);
 
-    new_elem.setAttribute("class", klass);
+    new_elem.classList = classList;
     new_elem.style = style;
     new_elem.value = value;
     new_elem.setAttribute("size", 4);
@@ -354,6 +352,7 @@ class MOAutocompleter {
           break;
         case EVENT_KEY_RETURN:
         case EVENT_KEY_TAB:
+          event.preventDefault();
           if (this.current_row >= 0)
             this.select_row(this.current_row - this.scroll_offset);
           break;
@@ -475,7 +474,7 @@ class MOAutocompleter {
   schedule_refresh() {
     this.verbose("schedule_refresh()");
     this.clear_refresh();
-    this.refresh_timer = setTimeout((function () {
+    this.refresh_timer = window.setTimeout((() => {
       this.verbose("doing_refresh()");
       // this.debug("refresh_timer(" + this.input_elem.value + ")");
       this.old_value[this.uuid] = this.input_elem.value;
@@ -486,7 +485,7 @@ class MOAutocompleter {
         this.update_datalist();
       else
         this.draw_pulldown();
-    }).bind(this), this.refresh_delay * 1000);
+    }), this.refresh_delay * 1000);
   }
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
@@ -633,7 +632,7 @@ class MOAutocompleter {
 
   // ------------------------------ Pulldown ------------------------------
 
-  // Stimulus: put this in template instead of adding it here, then just modify
+  // Stimulus: maybe put empty list in template instead of adding it here
   // Create div for pulldown.
   create_pulldown() {
     const div = document.createElement("div");
@@ -671,25 +670,29 @@ class MOAutocompleter {
   // Get actual row height when it becomes available.
   // Experimentally creates a test row.
   get_row_height() {
-    const div = document.createElement('div');
-    const ul = document.createElement('ul');
-    const li = document.createElement('li');
-    const body = document.body || document.getElementsByTagName("body")[0];
+    // this.input_elem.disabled = true;
+    const div = document.createElement('div'),
+      ul = document.createElement('ul'),
+      li = document.createElement('li');
+
     div.className = this.pulldown_class;
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     li.innerHTML = 'test';
     ul.appendChild(li);
     div.appendChild(ul);
-    body.appendChild(div);
+    document.body.appendChild(div);
     this.temp_row = div;
-    setTimeout(this.set_row_height.bind(this), 100);
+    // window.setTimeout(this.set_row_height(), 100);
+    this.set_row_height();
+    // this.input_elem.disabled = false;
   }
   set_row_height() {
     if (this.temp_row) {
       this.row_height = this.temp_row.offsetHeight;
       if (!this.row_height) {
-        setTimeout(this.set_row_height.bind(this), 100);
+        // window.setTimeout(this.set_row_height(), 100);
+        this.set_row_height();
       } else {
         document.body.removeChild(this.temp_row);
         this.temp_row = null;
@@ -715,10 +718,12 @@ class MOAutocompleter {
     }
 
     // Get row height if haven't been able to yet.
-    this.set_row_height();
-    this.update_rows(rows, matches, size, scroll);
-    this.highlight_new_row(rows, cur, size, scroll)
-    this.make_menu_visible(matches, size, scroll)
+    this.get_row_height();
+    if (rows.length) {
+      this.update_rows(rows, matches, size, scroll);
+      this.highlight_new_row(rows, cur, size, scroll)
+      this.make_menu_visible(matches, size, scroll)
+    }
 
     // Make sure input focus stays on text field!
     this.input_elem.focus();
