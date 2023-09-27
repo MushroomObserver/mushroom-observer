@@ -146,6 +146,28 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(["X"], @response.body.split("\n"))
   end
 
+  def test_auto_complete_herbarium
+    # names of Herbariums whose names have words starting with "m"
+    m = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
+        map(&:name)
+
+    expect = m.sort.uniq
+    expect.unshift("D")
+    good_ajax_request(:auto_complete, type: :herbarium, id: "Dick")
+    assert_equal(expect, @response.body.split("\n"))
+  end
+
+  def test_auto_complete_empty
+    good_ajax_request(:auto_complete, type: :name, id: "")
+    assert_equal([], @response.body.split("\n"))
+  end
+
+  def test_auto_complete_name_above_genus
+    expect = %w[F Fungi]
+    good_ajax_request(:auto_complete, type: :clade, id: "Fung")
+    assert_equal(expect, @response.body.split("\n"))
+  end
+
   def test_auto_complete_name
     expect = Name.all.reject(&:correct_spelling).
              map(&:text_name).uniq.select { |n| n[0] == "A" }.sort
@@ -231,17 +253,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:export, type: :image, id: 999, value: "1")
     bad_ajax_request(:export, type: :image, id: img.id, value: "2")
     bad_ajax_request(:export, type: :user, id: 1, value: "1")
-  end
-
-  def test_get_pivotal_story
-    return unless MO.pivotal_enabled
-
-    good_ajax_request(:pivotal, type: "story", id: MO.pivotal_test_id)
-    assert_match(/This is a test story/, @response.body)
-    assert_match(/Posted by.*rolf/, @response.body)
-    assert_match(/This is a test comment/, @response.body)
-    assert_match(/By:.*mary/, @response.body)
-    assert_match(/Post Comment/, @response.body)
   end
 
   def test_old_translation

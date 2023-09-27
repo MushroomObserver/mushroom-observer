@@ -4,7 +4,7 @@ require("test_helper")
 
 require("auto_complete")
 
-class AutoCompleteMock < AutoCompleteByString
+class AutoCompleteMock < AutoComplete::ByString
   attr_accessor :rough_matches, :limit
 
   def truncate_matches
@@ -16,7 +16,7 @@ class AutoCompleteMock < AutoCompleteByString
   end
 end
 
-class AutoCompleteMockByWord < AutoCompleteByWord
+class AutoComplete::ForMock < AutoComplete::ByWord
   attr_accessor :rough_matches, :limit
 
   def truncate_matches
@@ -30,14 +30,14 @@ end
 
 class AutoCompleteTest < UnitTestCase
   def test_subclass
-    assert_equal("AutoCompleteName", AutoComplete.subclass("name").name)
-    assert_equal("AutoCompleteMockByWord",
-                 AutoComplete.subclass("mock_by_word").name)
+    assert_equal("AutoComplete::ForName", AutoComplete.subclass("name").name)
+    assert_equal("AutoComplete::ForMock",
+                 AutoComplete.subclass("mock").name)
     assert_raise(RuntimeError) { AutoComplete.subclass("bogus") }
   end
 
   def test_typical_use
-    auto = AutoCompleteName.new("Agaricus")
+    auto = AutoComplete::ForName.new("Agaricus")
     results = auto.matching_strings
     assert_equal("A", results.first)
     assert(results.include?("Agaricus"))
@@ -134,7 +134,7 @@ class AutoCompleteTest < UnitTestCase
       [2, 2, "one two shr"],
       [1, 2, "one two shree"]
     ].each do |limit, expected_matches, expected_string|
-      auto = AutoCompleteMockByWord.new(pattern)
+      auto = AutoComplete::ForMock.new(pattern)
       auto.matches = @list.sort_by { rand }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)
