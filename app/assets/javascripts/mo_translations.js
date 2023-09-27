@@ -82,7 +82,7 @@ function MOTranslations(localizedText) {
         // Make tag in left column gray because it's now been translated.
         // Want only untranslated tags to be bold black to stand out better.
         const _str_tag = document.getElementById('str_' + tag);
-        _str_tag.html = str;
+        _str_tag.innerHTML = str;
         _str_tag.classList.add('translated faint');
       } else if (LOADED) {
         CHANGED = true;
@@ -136,7 +136,7 @@ function MOTranslations(localizedText) {
                 debugger;
                 console.log("html: " + html);
                 hide_whirly();
-                $form_div.html = html;
+                $form_div.innerHTML = html;
                 CHANGED = false;
                 LOADED = true;
               }).catch((error) => {
@@ -153,12 +153,12 @@ function MOTranslations(localizedText) {
     }
 
     function clear_form() {
-      $form_div.html = '';
+      $form_div.innerHTML = '';
       LOADED = false;
       CHANGED = false;
     }
 
-    async function show_old_version(id) {
+    function show_old_version(id) {
       show_whirly(LOADING_STRING);
       // jQuery.ajax('/ajax/old_translation/' + id, {
       //   data: { authenticity_token: csrf_token() },
@@ -169,7 +169,7 @@ function MOTranslations(localizedText) {
       //     alert(text);
       //   }
       // });
-      let response = await fetch('/ajax/old_translation/' + id, {
+      fetch('/ajax/old_translation/' + id, {
         method: 'GET',
         headers: {
           'X-CSRF-Token': csrfToken,
@@ -178,19 +178,23 @@ function MOTranslations(localizedText) {
           'Accept': 'text/html'
         },
         credentials: 'same-origin'
-      });
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          let html = await response.text();
-          // console.log("html: " + html);
-          hide_whirly();
-          alert(html);
-        } else {
-          hide_whirly();
-          alert(response.responseText);
-          console.log(`got a ${response.status}`);
+      }).then((response) => {
+        if (response.ok) {
+          if (200 <= response.status && response.status <= 299) {
+            response.text().then((html) => {
+              // console.log("html: " + html);
+              hide_whirly();
+              alert(html);
+            }).catch((error) => {
+              console.error("no_content:", error);
+            });
+          } else {
+            hide_whirly();
+            alert(response.responseText);
+            console.log(`got a ${response.status}`);
+          }
         }
-      }
+      });
 
     }
 
@@ -200,7 +204,7 @@ function MOTranslations(localizedText) {
     }
 
     function show_whirly(text) {
-      document.getElementById('whirly_text').html = text;
+      document.getElementById('whirly_text').innerHTML = text;
       // $whirly.center().show();
       show($whirly);
     }
