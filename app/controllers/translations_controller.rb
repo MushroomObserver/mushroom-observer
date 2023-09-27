@@ -1,23 +1,17 @@
 # frozen_string_literal: true
 
-class TranslationController < ApplicationController
+class TranslationsController < ApplicationController
   before_action :login_required
 
-  # ----------------------------
-  #  :section: Edit Actions
-  # ----------------------------
-
-  def edit_translations
-    @lang = get_language_and_authorize_user
+  def index
+    @lang = set_language_and_authorize_user
     @ajax = false
-    @page = params[:page]
-    @tag = params[:commit] == :CANCEL.l ? nil : params[:tag]
+    @for_page = params[:for_page]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    @show_tags = tags_to_show(@page, @strings)
-    get_record_maps(@lang, @show_tags.keys + @edit_tags)
-    update_translations(@edit_tags) if params[:commit] == :SAVE.l
-    @form = build_form(@lang, @show_tags)
+    @show_tags = tags_to_show(@for_page, @strings)
+    build_record_maps(@lang, @show_tags.keys + @edit_tags)
+    @index = build_index(@lang, @show_tags)
   rescue StandardError => e
     raise(e) if Rails.env.test? && @lang
 
@@ -25,31 +19,37 @@ class TranslationController < ApplicationController
     redirect_back_or_default("/")
   end
 
-  def edit_translations_ajax_get
-    @lang = get_language_and_authorize_user
+  # ----------------------------
+  #  :section: Edit Actions
+  # ----------------------------
+
+  # Form is only accessed by ajax from the index
+  def edit
+    @lang = set_language_and_authorize_user
     @ajax = true
     @tag = params[:tag]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    get_record_maps(@lang, @edit_tags)
-    render(partial: "translation/form")
+    build_record_maps(@lang, @edit_tags)
+    render(partial: "translations/form")
   rescue StandardError => e
     msg = error_message(e).join("\n")
     render(plain: msg, status: :internal_server_error)
   end
 
-  def edit_translations_ajax_post
-    @lang = get_language_and_authorize_user
+  # Only accessed by ajax from the index
+  def update
+    @lang = set_language_and_authorize_user
     @ajax = true
-    @tag = params[:tag]
+    @tag = params[:commit] == :CANCEL.l ? nil : params[:tag]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    get_record_maps(@lang, @edit_tags)
-    update_translations(@edit_tags)
-    render(partial: "translation/ajax_post")
+    build_record_maps(@lang, @edit_tags)
+    update_translations(@edit_tags) if params[:commit] == :SAVE.l
+    render(partial: "translations/ajax_post")
   rescue StandardError => e
     @error = error_message(e).join("\n")
-    render(partial: "translation/ajax_error")
+    render(partial: "translations/ajax_error")
   end
 
   # -------------------------------
@@ -68,7 +68,7 @@ class TranslationController < ApplicationController
     msg
   end
 
-  def get_language_and_authorize_user
+  def set_language_and_authorize_user
     locale = params[:locale] || I18n.locale
     lang = Language.find_by(locale: locale)
     validate_language_and_user(locale, lang)
@@ -83,7 +83,7 @@ class TranslationController < ApplicationController
     raise(:edit_translations_reviewer_required.t) if lang.official && !reviewer?
   end
 
-  def get_record_maps(lang, tags)
+  def build_record_maps(lang, tags)
     @translated_records = build_record_map(lang, tags)
     @official_records = if lang.official
                           @translated_records
@@ -158,7 +158,7 @@ class TranslationController < ApplicationController
   def preview_string(str, limit = 250)
     str = @lang.clean_string(str)
     str = str.gsub("\n", " / ")
-    str = str[0..limit] + "..." if str.length > limit
+    str = "#{str[0..limit]}..." if str.length > limit
     str
   end
   helper_method :preview_string
@@ -166,7 +166,7 @@ class TranslationController < ApplicationController
   def tags_to_edit(tag, strings)
     tag_list = []
     if tag.present?
-      [tag, tag + "s", tag.upcase, (tag + "s").upcase].each do |t|
+      [tag, "#{tag}s", tag.upcase, "#{tag}s".upcase].each do |t|
         tag_list << t if strings.key?(t)
       end
       tag_list = [tag] if tag_list.empty?
@@ -174,18 +174,18 @@ class TranslationController < ApplicationController
     tag_list
   end
 
-  def tags_used_on_page(page)
+  def tags_used_on_page(for_page)
     tag_list = nil
-    if page.present?
-      tag_list = Language.load_tags(page)
+    if for_page.present?
+      tag_list = Language.load_tags(for_page)
       flash_error(:edit_translations_page_expired.t) unless tag_list
     end
     tag_list
   end
 
-  def tags_to_show(page, strings)
+  def tags_to_show(for_page, strings)
     hash = {}
-    (tags_used_on_page(page) || strings.keys).each do |tag|
+    (tags_used_on_page(for_page) || strings.keys).each do |tag|
       primary = primary_tag(tag, strings)
       hash[primary] = true
     end
@@ -193,7 +193,7 @@ class TranslationController < ApplicationController
   end
 
   def primary_tag(tag3, strings)
-    tag2 = tag3 + "s"
+    tag2 = "#{tag3}s"
     tag1 = tag3.sub(/s$/i, "")
     [
       tag1.downcase,
@@ -211,11 +211,11 @@ class TranslationController < ApplicationController
   end
 
   # ----------------------------
-  #  :section: Edit Form
+  #  :section: Translation index
   # ----------------------------
 
-  def build_form(lang, tags, file_handle = nil)
-    @form = []
+  def build_index(lang, tags, file_handle = nil)
+    @index = []
     @tags = tags
     @tags_used = {}
     file_handle ||= File.open(lang.export_file, "r:utf-8")
@@ -227,19 +227,19 @@ class TranslationController < ApplicationController
     process_blank_line
     include_unlisted_tags
     file_handle.close if file_handle.respond_to?(:close)
-    @form
+    @index
   end
 
   def include_unlisted_tags
     unlisted_tags = @tags.keys - @tags_used.keys
     return if unlisted_tags.none?
 
-    @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
-    @form << TranslationFormMinorHeader.new(
+    @index << TranslationsUIMajorHeader.new("UNLISTED STRINGS")
+    @index << TranslationsUIMinorHeader.new(
       "These tags are missing from the export files."
     )
     unlisted_tags.sort.each do |tag|
-      @form << TranslationFormTagField.new(tag)
+      @index << TranslationsUITagField.new(tag)
     end
   end
 
@@ -276,14 +276,14 @@ class TranslationController < ApplicationController
         @do_section = true
       else
         add_headers
-        @form << TranslationFormComment.new(*@comments) if @comments.any?
-        @form << TranslationFormTagField.new(tag)
+        @index << TranslationsUIComment.new(*@comments) if @comments.any?
+        @index << TranslationsUITagField.new(tag)
       end
     end
     if @on_pages
-      @section << TranslationFormComment.new(*@comments) if @comments.any?
+      @section << TranslationsUIComment.new(*@comments) if @comments.any?
       if @comments.any? || !secondary_tag?(tag)
-        @section << TranslationFormTagField.new(tag)
+        @section << TranslationsUITagField.new(tag)
       end
     end
     @tags_used[tag] = true
@@ -299,7 +299,7 @@ class TranslationController < ApplicationController
     if @on_pages
       if @do_section
         add_headers
-        @form += @section
+        @index += @section
       end
       @section.clear
       @do_section = false
@@ -322,13 +322,13 @@ class TranslationController < ApplicationController
   end
 
   def add_headers
-    @form << TranslationFormMajorHeader.new(*@major_head) if @major_head.any?
-    @form << TranslationFormMinorHeader.new(*@minor_head) if @minor_head.any?
+    @index << TranslationsUIMajorHeader.new(*@major_head) if @major_head.any?
+    @index << TranslationsUIMinorHeader.new(*@minor_head) if @minor_head.any?
     @major_head.clear
     @minor_head.clear
   end
 
-  class TranslationFormString
+  class TranslationsUIString
     attr_accessor :string
 
     def initialize(*strs)
@@ -337,16 +337,16 @@ class TranslationController < ApplicationController
     alias to_s string
   end
 
-  class TranslationFormMajorHeader < TranslationFormString
+  class TranslationsUIMajorHeader < TranslationsUIString
   end
 
-  class TranslationFormMinorHeader < TranslationFormString
+  class TranslationsUIMinorHeader < TranslationsUIString
   end
 
-  class TranslationFormComment < TranslationFormString
+  class TranslationsUIComment < TranslationsUIString
   end
 
-  class TranslationFormTagField < TranslationFormString
+  class TranslationsUITagField < TranslationsUIString
     alias tag string
   end
 end
