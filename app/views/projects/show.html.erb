@@ -25,8 +25,6 @@ add_tab_set(project_show_tabs(project: @project, user: @user))
       <% if @project.location %>
         <p><b><%= :show_project_location.t %>:</b> <%= location_link(@project.place_name, @project.location) %></p>
       <% end %>
-      <p><b><%= :show_project_user_group.t %>:</b> <%= @project.user_group.name.t %></p>
-      <p><b><%= :show_project_admin_group.t %>:</b> <%= @project.admin_group.name.t %></p>
       <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
       <%= if @user && @project.user_group.users.member?(@user)
         render(partial: "projects/groups", locals: { project: @project })
