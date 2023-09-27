@@ -18,7 +18,7 @@ function MOTranslations(localizedText) {
       if (CHANGED)
         return CONFIRM_STRING;
     };
-
+    debugger;
     // annoying, cannot attach to window.hidden_frame in FF!
     const iframe = document.getElementById('hidden_frame');
     iframe.addEventListener('load', iframe_load);
@@ -98,7 +98,7 @@ function MOTranslations(localizedText) {
 
     const csrfToken = document.querySelector("[name='csrf-token']").content;
 
-    async function show_tag(locale, tag) {
+    function show_tag(locale, tag) {
       LOCALE = locale;
       if (!CHANGED || confirm(CONFIRM_STRING)) {
         show_whirly(LOADING_STRING);
@@ -117,9 +117,9 @@ function MOTranslations(localizedText) {
         //     LOADED = true;
         //   }
         // });
-        const url = '/translation/edit_translations_ajax_get?locale=' + locale
-          + "&tag=" + tag;
-
+        const url = '/translation/edit_translations_ajax_get'
+          + '?locale=' + locale + "&tag=" + tag;
+        debugger;
         fetch(url, {
           method: 'GET',
           headers: {
@@ -133,7 +133,8 @@ function MOTranslations(localizedText) {
           if (response.ok) {
             if (200 <= response.status && response.status <= 299) {
               response.text().then((html) => {
-                // console.log("html: " + html);
+                debugger;
+                console.log("html: " + html);
                 hide_whirly();
                 $form_div.html = html;
                 CHANGED = false;
