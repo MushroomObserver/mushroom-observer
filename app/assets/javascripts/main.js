@@ -39,7 +39,8 @@ $(document).on("ready turbo:load", function () {
     var d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     var expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + "; " + expires + ";path=/";
+    document.cookie = cname + "=" + cvalue + "; " + expires
+      + ";samesite=lax;path=/";
   }
 
   jQuery('.file-field :file').on('change', function () {
@@ -99,7 +100,7 @@ $(document).on("ready turbo:load", function () {
 
 const moObserveContent = function () {
   // Select the node that will be observed for mutations
-  const contentNode = document.getElementById("content");
+  const contentNode = document.body;
 
   // Options for the observer (which mutations to observe)
   const config = { attributes: true, childList: true, subtree: true };
@@ -108,10 +109,10 @@ const moObserveContent = function () {
   const callback = (mutationList, observer) => {
     for (const mutation of mutationList) {
       if (mutation.type === "childList") {
-        console.log("A child node has been added or removed.");
+        // console.log("A child node has been added or removed.");
         initializeAutocompleters();
       } else if (mutation.type === "attributes") {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
       }
     }
   };
@@ -133,7 +134,7 @@ const moObserveContent = function () {
       if (element.hasAttribute("id")) {
         const input_id = element.getAttribute("id");
         const type = element.dataset.autocompleter;
-
+        // console.log("Adding autocompleter for " + type)
         // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
         if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
           new MOAutocompleter({

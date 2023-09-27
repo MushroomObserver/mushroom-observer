@@ -9,8 +9,6 @@ $('#modal_naming').on('shown.bs.modal', function() {
   var observation_namings = $("#observation_namings");
   var this_modal = $(this);
 
-  AUTOCOMPLETERS[document.getElementById('ur_name').dataset.uuid].reuse_for(naming_input)
-
   naming_input.focus();
 
   // Success now handled in create.js.erb or modal_form_reload.js.erb

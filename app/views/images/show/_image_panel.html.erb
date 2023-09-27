@@ -19,7 +19,7 @@
                                                   q: get_query_param,
                                                   size: @size)) %> |
       <% end %>
-      <%= original_image_link(@image.id, "") %> |
+      <%= original_image_link(@image, "") %> |
       <%= image_exif_link(@image.id, "") %>
 
     </div><!--.text-center-->
@@ -40,7 +40,7 @@
       function load_huge() {
         if (!huge_loaded && jQuery(window).width() >= 1200) {
           huge_loaded = true;
-          jQuery("img.huge-image").attr("src", "#{j Image.url(:huge, @image.id)}");
+          jQuery("img.huge-image").attr("src", "#{j @image.url(:huge)}");
         }
       }
       jQuery(window).resize(load_huge);

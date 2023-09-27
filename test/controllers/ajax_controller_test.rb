@@ -122,12 +122,12 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_location
     # names of Locations whose names have words starting with "m"
-    m_loc_names = Location.where("name REGEXP ?", "\\bM").
+    m_loc_names = Location.where(Location[:name].matches_regexp("\\bM")).
                   map(&:name)
     # wheres of Observations whose wheres have words starting with "m"
     # need extra "observation" to avoid confusing sql with bare "where".
-    m_obs_wheres = Observation.where("observations.where REGEXP ?", "\\bM").
-                   map(&:where)
+    m_obs_wheres = Observation.where(Observation[:where].
+                   matches_regexp("\\bM")).map(&:where)
     m = m_loc_names + m_obs_wheres
 
     expect = m.sort.uniq
@@ -135,14 +135,37 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
+    login("roy") # prefers location_format: :scientific
     expect = m.map { |x| Location.reverse_name(x) }.sort.uniq
     expect.unshift("M")
-    good_ajax_request(:auto_complete,
-                      type: :location, id: "Modesto", format: "scientific")
+    good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
+    login("mary") # prefers location_format: :postal
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
+  end
+
+  def test_auto_complete_herbarium
+    # names of Herbariums whose names have words starting with "m"
+    m = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
+        map(&:name)
+
+    expect = m.sort.uniq
+    expect.unshift("D")
+    good_ajax_request(:auto_complete, type: :herbarium, id: "Dick")
+    assert_equal(expect, @response.body.split("\n"))
+  end
+
+  def test_auto_complete_empty
+    good_ajax_request(:auto_complete, type: :name, id: "")
+    assert_equal([], @response.body.split("\n"))
+  end
+
+  def test_auto_complete_name_above_genus
+    expect = %w[F Fungi]
+    good_ajax_request(:auto_complete, type: :clade, id: "Fung")
+    assert_equal(expect, @response.body.split("\n"))
   end
 
   def test_auto_complete_name
@@ -160,11 +183,13 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_project
     # titles of Projects whose titles have words starting with "p"
-    b_titles = Project.where("title REGEXP ?", "\\bb").map(&:title).uniq
+    b_titles = Project.where(Project[:title].matches_regexp("\\bB")).
+               map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
     assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
 
-    p_titles = Project.where("title REGEXP ?", "\\bp").map(&:title).uniq
+    p_titles = Project.where(Project[:title].matches_regexp("\\bP")).
+               map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
     assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
 
@@ -228,17 +253,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:export, type: :image, id: 999, value: "1")
     bad_ajax_request(:export, type: :image, id: img.id, value: "2")
     bad_ajax_request(:export, type: :user, id: 1, value: "1")
-  end
-
-  def test_get_pivotal_story
-    return unless MO.pivotal_enabled
-
-    good_ajax_request(:pivotal, type: "story", id: MO.pivotal_test_id)
-    assert_match(/This is a test story/, @response.body)
-    assert_match(/Posted by.*rolf/, @response.body)
-    assert_match(/This is a test comment/, @response.body)
-    assert_match(/By:.*mary/, @response.body)
-    assert_match(/Post Comment/, @response.body)
   end
 
   def test_old_translation

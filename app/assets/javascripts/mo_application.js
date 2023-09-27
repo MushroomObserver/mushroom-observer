@@ -2,7 +2,7 @@
 //= require jquery_extensions
 // = require bootstrap-sprockets
 //= require jstz
-//= require autocomplete
+//= require mo_autocompleter
 //= require box_resizer
 //= require lazyload_verlok
 //= require csrf_token
@@ -11,12 +11,11 @@
 //= require validate_file_input_fields
 //= require main
 //= require mo_events
-//= require multi_image_upload
+//= require mo_multi_image_uploader
 //= require observation_form_map
 //= require suggestions
 //= require thumbnail_map
 //= require naming_vote_ajax
-//= require pivotal
 //= require lightbox
 
 lightbox.option({

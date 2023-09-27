@@ -29,7 +29,6 @@ ACTIONS = {
     name_primer: {},
     multi_image_template: {},
     old_translation: {},
-    pivotal: {},
     test: {},
     visual_group_status: {}
   },
@@ -68,9 +67,6 @@ ACTIONS = {
     sequences: {},
     species_lists: {},
     users: {}
-  },
-  pivotal: {
-    index: {}
   },
   support: {
     confirm: {},

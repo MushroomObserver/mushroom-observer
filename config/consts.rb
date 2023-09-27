@@ -96,16 +96,6 @@ MushroomObserver::Application.configure do
   # File where we keep name_lister data cache.
   config.name_lister_cache_file = "#{config.root}/public/name_list_data.js"
 
-  # Access data for Pivotal Tracker's API.
-  config.pivotal_enabled  = false
-  config.pivotal_url      = "www.pivotaltracker.com"
-  config.pivotal_path     = "/services/v5"
-  config.pivotal_project  = "224629"
-  config.pivotal_token    = "xxx"
-  config.pivotal_max_vote = 1
-  config.pivotal_min_vote = -1
-  config.pivotal_test_id  = 77_165_602
-
   # Configuration files for location validator.
   location_path = "#{config.root}/config/location/"
   config.location_continents_file = "#{location_path}continents.yml"

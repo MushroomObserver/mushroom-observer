@@ -1,9 +1,0 @@
-<%
-# Hidden form for copying autocomplete instances to other inputs in the page
-# (saves on reloading the primer)
-%>
-
-<%= form_with(url: "", id: "ur_name_autocomplete") do |f| %>
-  <%= f.hidden_field("ur_name", value: "", size: 40, class: "",
-                      data: { autocompleter: :name }) %>
-<% end %>

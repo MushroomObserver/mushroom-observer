@@ -12,7 +12,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    assert_redirected_to(new_project_path) # Failure
+    assert_form_action(action: :create, id: nil) # Failure
   end
 
   def edit_project_helper(title, project)
