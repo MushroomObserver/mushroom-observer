@@ -407,7 +407,7 @@ class MOMultiImageUploader {
     item.dom_element = template.content.childNodes[0];
 
     if (item.file_size > this.max_image_size)
-      item.dom_element.querySelector('.warn-text').text =
+      item.dom_element.querySelector('.warn-text').innerText =
         this.localized_text.image_too_big_text;
 
     // add it to the page
@@ -523,7 +523,7 @@ class MOMultiImageUploader {
 
       const _camera_date = item.dom_element.find(".camera_date_text");
       // shows the exif date by the photo
-      _camera_date.text = this.simpleDateAsString(_exifSimpleDate);
+      _camera_date.innerText = this.simpleDateAsString(_exifSimpleDate);
       _camera_date.dataset.exif_date = _exifSimpleDate;
       _camera_date.onclick = () => {
         this.imageDate(item, _exifSimpleDate);
@@ -694,8 +694,8 @@ class MOMultiImageUploader {
     const _distinctImgDates = this.getDistinctImageDates(),
       _obsDate = this.observationDate();
 
-    this.img_radio_container.html = '';
-    this.obs_radio_container.html = '';
+    this.img_radio_container.innerHTML = '';
+    this.obs_radio_container.innerHTML = '';
     this.makeObservationDateRadio(_obsDate);
 
     _distinctImgDates.forEach((simpleDate) => {
@@ -743,7 +743,7 @@ class MOMultiImageUploader {
 
     this.obs_radio_container.querySelectorAll('span')
       .forEach((elem) => {
-        elem.text = this.simpleDateAsString(_currentObsDate);
+        elem.innerText = this.simpleDateAsString(_currentObsDate);
       })
 
     if (this.areDatesInconsistent())
