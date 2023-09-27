@@ -6,12 +6,11 @@
     <%= fields_for(:herbarium_record) do |fhr| %>
 
       <%= text_field_with_label(
-            form: fhr, field: :herbarium_name, value: @herbarium_name,
-            label: :herbarium_record_herbarium_name.t + ":"
+            form: fhr, field: :herbarium_name,
+            value: @herbarium_name, placeholder: :start_typing.l,
+            label: :herbarium_record_herbarium_name.t + ":",
+            data: { autocompleter: :herbarium }
           ) %>
-      <% turn_into_herbarium_auto_completer(
-            :herbarium_record_herbarium_name
-         ) %>
 
       <%= text_field_with_label(
             form: fhr, field: :herbarium_id, value: @herbarium_id,

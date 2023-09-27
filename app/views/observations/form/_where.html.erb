@@ -15,18 +15,11 @@
 <div class="row">
   <div class="col-12 col-md-6">
     <div class="form-group">
-      <%= f.label(:place_name, :WHERE.t + ":") %>
-      <%= content_tag(:span, "(#{:required.t})", class: "help-text") %>
-      <%= content_tag(:div, class: "input-group") do
-        concat(f.text_field(:place_name, class: "form-control"))
-        concat(content_tag(:div, class: "input-group-append") do
-                 js_button(button: :form_observations_locate_on_map.t,
-                           name: "locate_on_map", class: "map-locate").html_safe
-               end )
-      end %>
-      <% turn_into_location_auto_completer(
-          :observation_place_name, primer: Location.primer
-        ) %>
+      <%= text_field_with_label(form: f, field: :place_name,
+                                placeholder: :start_typing.l,
+                                label: :WHERE.t + ":",
+                                between: :required,
+                                data: { autocompleter: :location }) %>
     </div><!--.form-group-->
     <div class="form-group">
       <%= help_block_with_arrow("up", id: "where_help") do %>

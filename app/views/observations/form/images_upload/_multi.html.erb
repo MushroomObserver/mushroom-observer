@@ -18,30 +18,25 @@ legible_max_size = (max_size.to_f/1024/1024).round
   </div><!--.col-->
   <div class="col-12 col-md-6">
     <%= help_block_with_arrow("left", id: "upload_multi_help") do
-      content_tag(:p, :form_observations_upload_help_multi_select.t)
+      tag.p(:form_observations_upload_help_multi_select.t)
     end %>
   </div><!--.col-->
 </div><!--.row-->
 
 
 <!-- Container to show messages relating to the selected images -->
-<div id="image_messages" style="display: none;">
+<div id="image_messages" class="fade" style="display: none;">
   <div class="card">
     <div class="row">
 
       <div class="col-12 col-md-7">
         <div class="inconsistent_date_options">
-          <%= content_tag(
-                :div, :form_observations_set_observation_date_to.t + ":",
-                class: "font-weight-bold"
-              ) %>
-          <%= content_tag(:div, "", id: "image_date_radio_container") %>
-          <%= content_tag(
-                :div, :form_observations_set_image_dates_to.t + ":",
-                class: "font-weight-bold"
-              ) %>
-          <%= content_tag(:div, "",
-                          id: "observation_date_radio_container") %>
+          <%= tag.div(:form_observations_set_observation_date_to.t + ":",
+                      class: "font-weight-bold") %>
+          <%= tag.div("", id: "image_date_radio_container") %>
+          <%= tag.div(:form_observations_set_image_dates_to.t + ":",
+                      class: "font-weight-bold") %>
+          <%= tag.div("", id: "observation_date_radio_container") %>
         </div>
         <div class="mt-3">
           <%= js_button(button: :form_observations_use_date.t,
@@ -52,22 +47,21 @@ legible_max_size = (max_size.to_f/1024/1024).round
       </div><!--.col-->
 
       <div class="col-12 col-md-4">
-        <%= content_tag(:span, :form_observations_date_warning.t) %>
+        <%= tag.span(:form_observations_date_warning.t) %>
       </div><!--.col-->
 
     </div><!--.row-->
   </div><!--.well-->
 </div><!--#image_messages-->
 
-<div id="geocode_messages" style="display: none;">
+<div id="geocode_messages" class="fade" style="display: none;">
   <div class="card">
     <div class="row">
 
       <div class="col-12 col-md-7">
-        <%= content_tag(:div, "Set observation Latitude/Longitude to:",
-                        class: "font-weight-bold") %>
-        <%= content_tag(:div, "",
-                        id: "geocode_radio_container", class: "mb-3") %>
+        <%= tag.div("Set observation Latitude/Longitude to:",
+                    class: "font-weight-bold") %>
+        <%= tag.div("", id: "geocode_radio_container", class: "mb-3") %>
         <%= js_button(button: :UPDATE.t, name: "set_geocode",
                       id: "set_geocode") %>
         <%= js_button(button: :IGNORE.t, name: "ignore_geocode",
@@ -75,8 +69,8 @@ legible_max_size = (max_size.to_f/1024/1024).round
       </div>
 
       <div class="col-12 col-md-4">
-        <%= content_tag(:span, :form_observations_gps_info.t) %>
-        <%= content_tag(:div, "", id: "geocode_map", class: "w-100") %>
+        <%= tag.span(:form_observations_gps_info.t) %>
+        <%= tag.div("", id: "geocode_map", class: "w-100") %>
       </div>
 
     </div><!--.row-->
@@ -85,21 +79,20 @@ legible_max_size = (max_size.to_f/1024/1024).round
 
 <!--Container for appending images-->
 <div class="images_container">
-  <%= content_tag(:div, "", id: "added_images_container",
-                            data: { upload_max_size: max_size }) %>
+  <%= tag.div("", id: "added_images_container",
+              data: { upload_max_size: max_size }) %>
 </div>
 
 <% inject_javascript_at_end %(
-jQuery(document).ready(function () {
-  var uploader = new MultiImageUploader({
+document.addEventListener("DOMContentLoaded", function () {
+  new MOMultiImageUploader({
     uploading_text: "#{j :form_observations_uploading_images.t }",
-    image_too_big_text:  "#{j :form_observations_image_too_big.t(max: legible_max_size) }",
+    image_too_big_text: "#{j :form_observations_image_too_big.t(max: legible_max_size) }",
     creating_observation_text: "#{j :form_observations_creating_observation.t }",
     months: "#{j :all_months.t }",
     show_on_map: "#{j :show_on_map.t }",
     something_went_wrong: "#{j :form_observations_upload_error.t }"
   })
-  uploader.init();
 });
 ) %>
 <!-- /MULTIFILE_UPLOAD_FORM -->

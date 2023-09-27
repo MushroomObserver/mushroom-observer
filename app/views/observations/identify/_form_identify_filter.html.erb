@@ -9,16 +9,16 @@
 filter_type = params.dig(:filter, :type) || false
 selected = filter_type ? filter_type.to_sym : :clade
 value = filter_type ? params.dig(:filter, :term) : ""
-placeholder = "Filter by:"
 filter_types = [
   [:CLADE.l, :clade],
   [:REGION.l, :region],
   # [:USER.l, :user],
 ]
-search_icon = content_tag(:i, class: "fa-solid fa-magnifying-glass") do
+# TODO: make helpers for these
+search_icon = tag.i(class: "fa-solid fa-magnifying-glass") do
                 content_tag(:span, :SEARCH.l, class: "sr-only")
               end
-clear_icon = content_tag(:i, class: "fa-solid fa-delete-left") do
+clear_icon = tag.i(class: "fa-solid fa-delete-left") do
                content_tag(:span, :CLEAR.l, class: "sr-only")
              end
 %>
@@ -27,18 +27,19 @@ clear_icon = content_tag(:i, class: "fa-solid fa-delete-left") do
               class: "form-inline", scope: :filter,
               id: "identify_filter") do |f| %>
 
-  <%= content_tag(:div, class: "input-group") do
+  <%= tag.div(class: "input-group") do
     [f.text_field(:term,
                   # turn off browser autocomplete
                   autocomplete: "off", value: value,
-                  placeholder: placeholder,
+                  placeholder: :filter_by.l,
                   style: "flex-grow: 2;",
                   class: "form-control", size: 42,
-                  data: { autofocus: true }),
+                  data: { autofocus: true,
+                          autocompleter: :clade }),
      f.select(:type, filter_types, { selected: selected },
               { class: "form-control",
-                onchange: "MOEvents.rebindAutoComplete(this.value);" }),
-     content_tag(:div, class: "input-group-append") do
+                onchange: "MOEvents.swapFilterAutoComplete(this.value);" }),
+     tag.div(class: "input-group-append") do
        [button_tag(type: :submit, value: :SEARCH.l,
                    class: "btn btn-outline-secondary") do
           search_icon
@@ -49,14 +50,5 @@ clear_icon = content_tag(:i, class: "fa-solid fa-delete-left") do
         end].safe_join
      end].safe_join
   end %>
-
-  <% turn_into_clade_auto_completer(:filter_term) %>
-
-  <% # initializes module with translations for js messages
-  inject_javascript_at_end %(
-    $("#filter_term").on("change", function() {
-      MOEvents.rebindAutoComplete(this.value)
-    })
-  ) %>
 
 <% end %>

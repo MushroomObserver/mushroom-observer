@@ -10,10 +10,6 @@ flash_error(@error) if @error && @objects.empty?
   <%# render(partial: "observations/identify/form_identify_filter") %>
 </div>
 
-<!--NAME AUTOCOMPLETE INSTANCE FOR REUSE IN NAMING MODALS-->
-<%= render(partial: "shared/form_name_autocomplete") %>
-<%= render(partial: "shared/form_identify_filter_autocomplete") %>
-
 <% # initializes module with translations for js messages
 inject_javascript_at_end %(
   VoteByAjaxModule({

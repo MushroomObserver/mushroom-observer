@@ -523,7 +523,8 @@ class ApplicationController < ActionController::Base
   def autologin_cookie_set(user)
     cookies["mo_user"] = {
       value: "#{user.id} #{user.auth_code}",
-      expires: 1.month.from_now
+      expires: 1.month.from_now,
+      same_site: :lax
     }
   end
 

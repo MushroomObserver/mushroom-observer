@@ -1,5 +1,4 @@
-<%# bs4 %>
-<div class="added_image_wrapper">
+<div class="added_image_wrapper" data-image-number="<%= img_number %>">
 
   <div class="added_image_name_container row">
     <!--Replaced by javascript-->
@@ -17,8 +16,9 @@
 
     <div class="added_image_image_container col-4">
 
+      <!-- TODO: MULTI IMAGE UPLOAD - ALTER SCRIPT -->
       <div class="form-group mb-2">
-        <a href="#"
+        <a href="javascript:"
            data-role="set_as_default_thumbnail"
            class="btn btn-sm btn-outline-secondary"><%= :image_set_default.t %></a>
         <label class="is_default_thumbnail d-none"><%= :image_add_default.t %></label>
@@ -40,10 +40,10 @@
 
       <div class="text-right mb-2">
         <a href="javascript:"
-           class="remove_image_link btn btn-sm btn-outline-secondary"><%= :image_remove_remove.t %></a>
+           class="remove_image_link btn btn-sm btn-outline-secondary fade in"><%= :image_remove_remove.t %></a>
       </div>
 
-      <%= fields_for(:temp_image) do |fti| %>
+      <%= fields_for(:"#{img_number}_temp_image") do |fti| %>
 
         <div class="row">
 
@@ -81,7 +81,8 @@
             </div>
             <div class="col-12 col-md-8 form-inline">
               <%= fti.date_select(:when, date_select_opts(@temp_image),
-                              class: "form-control form-control-sm") %>
+                                  { class: "form-control form-control-sm",
+                                    data: { autocompleter: :year } }) %>
               <div>
                 <small><%= :form_images_camera_date.t %>:</small>
                 <small><a href="javascript:"><span class="camera_date_text"></span></a></small>

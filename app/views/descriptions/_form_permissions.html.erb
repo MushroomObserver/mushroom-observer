@@ -89,8 +89,9 @@
         <tr>
           <td>
             <%= text_field_tag("writein_name[#{n}]", datum[:name],
-                              class: "form-control") %>
-            <% turn_into_user_auto_completer("writein_name_#{n}") %>
+                              class: "form-control",
+                              placeholder: :start_typing.l,
+                              data: { autocompleter: :user }) %>
           </td>
           <td>
             <%= check_box_tag("writein_reader[#{n}]", "1", datum[:reader],

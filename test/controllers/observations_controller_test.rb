@@ -175,8 +175,9 @@ class ObservationsControllerTest < FunctionalTestCase
   # other subactions in order of @index_subaction_param_keys
   # miscellaneous tests using get(:index)
 
-  def test_index
-    login
+  # First, test that the index does not require login - AN 20230923
+  def test_index_no_login
+    # login
     get(:index)
 
     assert_template("shared/_matrix_box")
