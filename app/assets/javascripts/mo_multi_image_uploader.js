@@ -485,7 +485,8 @@ class MOMultiImageUploader {
       if (geocode_radio_container
         .querySelectorAll('input[type="radio"]').length === 0) {
         this.show(this.geocode_messages);
-        this.geocode_radio_container.append(radioBtnToInsert);
+        this.geocode_radio_container
+          .insertAdjacentHTML("beforeend", radioBtnToInsert);
       }
 
       // don't add geocodes that are only slightly different
@@ -505,7 +506,8 @@ class MOMultiImageUploader {
           });
 
         if (shouldAddGeocode)
-          this.geocode_radio_container.append(radioBtnToInsert);
+          this.geocode_radio_container
+            .insertAdjacentHTML("beforeend", radioBtnToInsert);
       }
     }
 
@@ -721,17 +723,23 @@ class MOMultiImageUploader {
   makeImageDateRadio(simpleDate) {
     const _date = JSON.stringify(simpleDate),
       _date_string = this.simpleDateAsString(simpleDate),
-      _html = "<div class='radio'><label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label></div>"
+      _html = document.createElement('div');
 
-    this.img_radio_container.append(_html);
+    _html.classList.add("radio");
+    _html.innerHTML = "<label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label>"
+
+    this.img_radio_container.insertAdjacentHTML("beforeend", _html);
   }
 
   makeObservationDateRadio(simpleDate) {
     const _date = JSON.stringify(simpleDate),
       _date_string = this.simpleDateAsString(simpleDate),
-      _html = "<div class='radio'><label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label></div>";
+      _html = document.createElement('div');
 
-    this.obs_radio_container.append(_html);
+    _html.classList.add("radio");
+    _html.innerHTML = "<label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label>";
+
+    this.obs_radio_container.insertAdjacentHTML("beforeend", _html);
   }
 
   updateObservationDateRadio() {
@@ -825,14 +833,16 @@ class MOMultiImageUploader {
       geocodeformap = JSON.stringify(latLngAlt),
       geoCodeStr = latLngAlt.latitude.toFixed(5) + ", "
         + latLngAlt.longitude.toFixed(5),
+      _html = document.createElement('div');
 
-      html = "<div class='radio'><label><input type='radio' data-geocode='"
-        + geocode + "' name='fix_geocode'/>" + geoCodeStr + "</label> "
-        + "<a href='#geocode_map' data-role='show_on_map' class='ml-3' "
-        + "data-geocode='" + geocodeformap + "'>"
-        + this.localized_text.show_on_map + "</a></div>";
+    _html.classList.add("radio");
+    _html.innerHTML = "<label><input type='radio' data-geocode='"
+      + geocode + "' name='fix_geocode'/>" + geoCodeStr + "</label> "
+      + "<a href='#geocode_map' data-role='show_on_map' class='ml-3' "
+      + "data-geocode='" + geocodeformap + "'>"
+      + this.localized_text.show_on_map + "</a>";
 
-    return html;
+    return _html;
   }
 
   getLatLongEXIF(exifObject) {
