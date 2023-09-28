@@ -21,8 +21,8 @@ class MOMultiImageUploader {
       obs_year: document.getElementById('observation_when_1i'),
       img_radio_container: document.getElementById('image_date_radio_container'),
       obs_radio_container: document.getElementById('observation_date_radio_container'),
-      fix_date_submit: document.getElementById('fix_dates'),
-      ignore_date_submit: document.getElementById('ignore_dates'),
+      fix_dates: document.getElementById('fix_dates'),
+      ignore_dates: document.getElementById('ignore_dates'),
       img_messages: document.getElementById("image_messages"),
       geocode_radio_container: document.getElementById('geocode_radio_container'),
       set_geocode_btn: document.getElementById('set_geocode'),
@@ -55,6 +55,8 @@ class MOMultiImageUploader {
       element.setAttribute('disabled', false);
     });
 
+    // GEOCODE_MESSAGES - hidden but present in document
+    // Obs gps: set to whichever radio [name=fix_geocode] is selected, or ignore
     this.set_geocode_btn.onclick = () => {
       const _selectedItem =
         document.querySelector('input[name=fix_geocode]:checked');
@@ -68,19 +70,13 @@ class MOMultiImageUploader {
         this.hide(this.geocode_messages);
       }
     };
-
     this.ignore_geocode_btn.onclick = () => {
       this.hide(this.geocode_messages);
     };
 
-    document.body.querySelectorAll('[data-role="show_on_map"]')
-      .forEach((elem) => {
-        elem.onclick = () => {
-          this.showGeocodeonMap(JSON.parse(this.dataset.geocode));
-        }
-      })
-
-    this.fix_date_submit.onclick = () => {
+    // IMG_MESSAGES - hidden but present in document
+    // image dates don't match obs date: fix or ignore
+    this.fix_dates.onclick = () => {
       const _selectedItem =
         document.querySelector('input[name=fix_date]:checked');
 
@@ -90,20 +86,11 @@ class MOMultiImageUploader {
         this.fixDates(_itemData.date, _itemData.target);
       }
     };
+    this.ignore_dates.onclick = () => { this.hide(this.img_messages); };
 
-    this.ignore_date_submit.onclick = () => {
-      this.hide(this.img_messages);
-    };
-
-    this.obs_year.onchange = () => {
-      this.updateObservationDateRadio()
-    };
-    this.obs_month.onchange = () => {
-      this.updateObservationDateRadio()
-    };
-    this.obs_day.onchange = () => {
-      this.updateObservationDateRadio()
-    };
+    this.obs_year.onchange = () => { this.updateObservationDateRadio() };
+    this.obs_month.onchange = () => { this.updateObservationDateRadio() };
+    this.obs_day.onchange = () => { this.updateObservationDateRadio() };
 
     // Drag and Drop bindings on the window
     this.content.addEventListener('dragover', function (e) {
@@ -150,60 +137,6 @@ class MOMultiImageUploader {
       this.addFiles(files);
     };
 
-    // Allows the user to update the thumbnail on the edit observation view
-    document
-      .querySelectorAll('[type="radio"][name="observation[thumb_image_id]"]')
-      .forEach((elem) => {
-        elem.onchange = function () {
-          document.getElementById('observation_thumb_image_id')
-            .value = this.value;
-        }
-      })
-
-    // Logic for setting the default thumbnail
-    document.body
-      .querySelectorAll('[data-role="set_as_default_thumbnail"]')
-      .forEach((elem) => {
-        elem.onclick = function (event) {
-          // `this` is the link clicked to make default image
-          event.preventDefault();
-
-          // reset selections
-          // remove hidden from the links
-          document.querySelectorAll('[data-role="set_as_default_thumbnail"]')
-            .forEach((elem) => {
-              elem.classList.remove('hidden');
-            })
-          // add hidden to the default thumbnail text
-          document.querySelectorAll('.is_default_thumbnail')
-            .forEach((elem) => {
-              elem.classList.add('hidden');
-            })
-          // reset the checked default thumbnail
-          document.querySelectorAll(
-            'input[type="radio"][name="observation[thumb_image_id]"]'
-          ).forEach((elem) => {
-            elem.setAttribute('checked', false);
-          })
-
-          // set selections
-          // add hidden to the link clicked
-          this.classList.add('hidden');
-          // show that the image is default
-          const siblings = _this.parentNode.childNodes
-
-          siblings.querySelectorAll('.is_default_thumbnail').forEach((elem) => {
-            elem.classList.remove('hidden');
-          })
-          // adjust hidden radio button to select default thumbnail
-          siblings.querySelectorAll(
-            'input[type="radio"][name="observation[thumb_image_id]"]'
-          ).forEach((elem) => {
-            elem.setAttribute('checked', true);
-          })
-        }
-      })
-
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
       if (this.block_form_submission) {
@@ -212,6 +145,69 @@ class MOMultiImageUploader {
       }
       return true;
     };
+  }
+
+  setItemBindings() {
+    const _show_on_map_links =
+      document.querySelectorAll('[data-role="show_on_map"]'),
+      _obs_thumb_image_radios =
+        document.querySelectorAll('input[name="observation[thumb_image_id]"]'),
+      _set_thumb_image_btns = document.querySelectorAll('.set_thumb_image'),
+      _is_thumb_image_inputs = document.querySelectorAll('.is_thumb_image');
+
+    // show the item's gps on a map.
+    // there's one link for each different gps coord, NOT present at load
+
+    _show_on_map_links.forEach((elem) => {
+      elem.onclick = () => {
+        this.showGeocodeonMap(JSON.parse(this.dataset.geocode));
+      }
+    });
+
+    // Update the obs "observation_thumb_image_id" form field,
+    // when the hidden "set_as_thumb_image" for an image is changed.
+    // _obs_thumb_image_radios.forEach((elem) => {
+    _obs_thumb_image_radios.forEach((elem) => {
+      elem.onchange = function () {
+        document.getElementById('observation_thumb_image_id')
+          .value = this.value;
+      }
+    });
+
+    // Logic for setting the default thumbnail.
+    // Problem: needs binding after filestore item created.
+    // _set_thumb_image_btns.forEach((elem) => {
+    _set_thumb_image_btns.forEach((elem) => {
+      elem.onclick = function (event) {
+        // `this` is the link clicked to make default image
+        event.preventDefault();
+        // reset selections
+        // remove hidden from the links
+        _set_thumb_image_btns.forEach((elem) => {
+          elem.classList.remove('hidden');
+        });
+        // add hidden to the default thumbnail text
+        _is_thumb_image_inputs.forEach((elem) => {
+          elem.classList.add('hidden');
+        });
+        // reset the checked default thumbnail
+        _obs_thumb_image_radios.forEach((elem) => {
+          elem.setAttribute('checked', false);
+        });
+
+        // set sibling selections
+        // add hidden to the link clicked
+        elem.classList.add('hidden');
+        // show that the image is default
+        elem.parentNode.querySelector(
+          '.is_thumb_image'
+        ).classList.remove('hidden');
+        // adjust hidden radio button to select obs thumbnail
+        elem.parentNode.querySelector(
+          'input[type="radio"][name="observation[thumb_image_id]"]'
+        ).setAttribute('checked', true);
+      }
+    });
   }
 
   /*********************/
@@ -254,6 +250,7 @@ class MOMultiImageUploader {
       if (!this.areAllItemsProcessed()) {
         this.checkStoreStatus();
       } else {
+        this.setItemBindings();
         this.refreshBox();
       }
     }, 30)
@@ -494,7 +491,7 @@ class MOMultiImageUploader {
 
       // don't add geocodes that are only slightly different
       else {
-        const shouldAddGeocode = true;
+        let _shouldAddGeocode = true;
 
         this.geocode_radio_container
           .querySelectorAll('input[type="radio"]').forEach((element) => {
@@ -505,10 +502,10 @@ class MOMultiImageUploader {
               - Math.abs(_existingGeocode.longitude);
 
             if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
-              shouldAddGeocode = false;
+              _shouldAddGeocode = false;
           });
 
-        if (shouldAddGeocode)
+        if (_shouldAddGeocode)
           this.geocode_radio_container.appendChild(radioBtnToInsert);
       }
     }
@@ -538,26 +535,30 @@ class MOMultiImageUploader {
     // no date was found in EXIF data
     else {
       // Use observation date
+
       this.imageDate(item, this.observationDate());
     }
 
-    this.processed = true;
+    item.processed = true;
   }
 
+  // gets or sets image date
   imageDate(item, simpleDate) {
-    const _day = item.dom_element.querySelectorAll('select')[0],
-      _month = item.dom_element.querySelectorAll('select')[1],
-      _year = item.dom_element.querySelectorAll('input')[2];
-    let _date_values;
+    const _img_day_field = item.dom_element.querySelectorAll('select')[0],
+      _img_month_field = item.dom_element.querySelectorAll('select')[1],
+      _img_year_field = item.dom_element.querySelectorAll('input')[2];
 
+    // set it if we've got a date
     if (simpleDate) {
-      _date_values = [
-        _day.value = simpleDate.day,
-        _month.value = simpleDate.month,
-        _year.value = simpleDate.year
-      ]
+      _img_day_field.value = simpleDate.day,
+        _img_month_field.value = simpleDate.month,
+        _img_year_field.value = simpleDate.year
+      return simpleDate;
+    } else {
+      return this.SimpleDate(_img_day_field.value,
+        _img_month_field.value,
+        _img_year_field.value)
     }
-    return this.SimpleDate(..._date_values);
   }
 
   getUserEnteredInfo(item) {
@@ -761,7 +762,7 @@ class MOMultiImageUploader {
       this.show(this.img_messages);
   }
 
-  // undefined gets current date, simpledate object updates date
+  // gets or sets current obs date, simpledate object updates date
   observationDate(simpleDate) {
     let _date_values;
 
@@ -772,8 +773,12 @@ class MOMultiImageUploader {
         this.obs_month.value = simpleDate.month,
         this.obs_year.value = simpleDate.year,
       ]
+      return this.SimpleDate(..._date_values);
+    } else {
+      return this.SimpleDate(this.obs_day.value,
+        this.obs_month.value,
+        this.obs_year.value)
     }
-    return this.SimpleDate(..._date_values);
   }
 
   /**********************/
