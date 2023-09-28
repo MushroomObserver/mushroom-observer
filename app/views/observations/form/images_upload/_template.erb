@@ -19,10 +19,10 @@
       <!-- TODO: MULTI IMAGE UPLOAD - ALTER SCRIPT -->
       <div class="form-group mb-2">
         <a href="javascript:"
-           data-role="set_as_default_thumbnail"
-           class="btn btn-sm btn-outline-secondary"><%= :image_set_default.t %></a>
-        <label class="is_default_thumbnail d-none"><%= :image_add_default.t %></label>
-        <input type="radio" name="observation[thumb_image_id]" value="true" class="d-none">
+           class="set_thumb_image btn btn-sm btn-outline-secondary"><%= :image_set_default.t %></a>
+        <label class="hidden is_thumb_image"><%= :image_add_default.t %></label>
+        <input type="radio" name="observation[thumb_image_id]"
+               style="display: none;">
       </div>
 
       <div class="form-group">
