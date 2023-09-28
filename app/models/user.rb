@@ -191,7 +191,6 @@
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
-#  primer::             Primer for auto-complete.
 #  erase_user::         Erase all references to a given User (by id).
 #  remove_image::       Ensures that this user doesn't reference this image
 #
@@ -734,54 +733,6 @@ class User < AbstractModel
   def self.parse_notes_template(str)
     str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
       split(",").map(&:squish).compact_blank
-  end
-
-  ##############################################################################
-  #
-  #  :section: Other
-  #
-  ##############################################################################
-
-  # Get list of users to prime auto-completer.  Returns a simple Array of up to
-  # 1000 (by contribution or created within the last month) login String's
-  # (with full name in parens).
-  def self.primer
-    if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < 1.day.ago
-      data = primer_data
-      write_primer_file(data)
-      data
-    else
-      read_primer_file
-    end
-  end
-
-  private_class_method def self.write_primer_file(data)
-    File.open(MO.user_primer_cache_file, "w:utf-8").
-      write("#{data.join("\n")}\n")
-  end
-
-  private_class_method def self.read_primer_file
-    File.open(MO.user_primer_cache_file, "r:UTF-8").
-      readlines.map(&:chomp)
-  end
-
-  def self.primer_data
-    users = User.select(:login, :name).order(
-      orderby_last_login_if_recent.desc, User[:contribution].desc
-    ).limit(1000).pluck(:login, :name)
-
-    users.map do |login, name|
-      name.empty? ? login : "#{login} <#{name}>"
-    end.sort
-  end
-
-  private_class_method def self.orderby_last_login_if_recent
-    User[:last_login].when(
-      User[:last_login] > 1.month.ago
-    ).then(
-      User[:last_login]
-    ).else(nil)
   end
 
   # Erase all references to a given user (by id).  Missing:
