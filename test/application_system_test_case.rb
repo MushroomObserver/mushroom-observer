@@ -17,11 +17,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # needed for selenium
     Capybara.server = :webrick
     # Capybara.current_driver = :selenium
-    Capybara.server_host = "localhost"
-    Capybara.server_port = 3000
+    # Capybara.server_host = "localhost"
+    # Capybara.server_port = 3000
     Capybara.default_max_wait_time = 6
-    Capybara.always_include_port = true
-    Capybara.raise_server_errors = true
+    # Capybara.always_include_port = true
+    # Capybara.raise_server_errors = true
     # default in test_helper = true. some SO threads suggest false
     self.use_transactional_tests = false
 
