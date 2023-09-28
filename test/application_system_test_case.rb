@@ -4,7 +4,7 @@ require("test_helper")
 require("database_cleaner/active_record")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
-  driven_by :selenium, using: :firefox
+  driven_by :selenium, using: :headless_firefox
   # Include MO's helpers
   include GeneralExtensions
   include FlashExtensions
