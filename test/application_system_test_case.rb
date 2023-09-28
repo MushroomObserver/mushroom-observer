@@ -4,7 +4,7 @@ require("test_helper")
 require("database_cleaner/active_record")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
-  driven_by :selenium, using: :headless_firefox, screen_size: [1400, 1400]
+  driven_by :selenium, using: :headless_firefox
   # Include MO's helpers
   include GeneralExtensions
   include FlashExtensions
@@ -12,15 +12,18 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   include CapybaraMacros
 
   def setup
-    ApplicationController.allow_forgery_protection = true
-
-    Capybara.default_max_wait_time = 2
-    # default in test_helper = true. some SO threads suggest false
-    self.use_transactional_tests = false
+    # ApplicationController.allow_forgery_protection = true
 
     # needed for selenium
     Capybara.server = :webrick
-    Capybara.current_driver = :selenium
+    # Capybara.current_driver = :selenium
+    Capybara.server_host = "localhost"
+    Capybara.server_port = 3000
+    Capybara.default_max_wait_time = 6
+    Capybara.always_include_port = true
+    Capybara.raise_server_errors = true
+    # default in test_helper = true. some SO threads suggest false
+    self.use_transactional_tests = false
 
     # https://github.com/DatabaseCleaner/database_cleaner
     # https://github.com/DatabaseCleaner/database_cleaner#minitest-example
