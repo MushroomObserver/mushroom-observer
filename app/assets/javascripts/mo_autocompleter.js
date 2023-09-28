@@ -1072,27 +1072,27 @@ class MOAutocompleter {
   // 3. the rest are matching results.
   process_fetch_response(response) {
     this.verbose("process_fetch_response()");
-    let new_opts, i;
+    let new_primer, i;
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
 
     // Grab list of matching strings.
     i = response.indexOf("\n");
-    new_opts = response.substring(i);
+    new_primer = response.substring(i);
 
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
     this.last_fetch_request = response.substr(0, i);
 
     // Make sure there's a trailing newline.
-    if (new_opts.charAt(new_opts.length - 1) != "\n")
-      new_opts += "\n";
+    if (new_primer.charAt(new_primer.length - 1) != "\n")
+      new_primer += "\n";
 
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_opts.substr(new_opts.length - 5, 5) == "\n...\n") {
+    if (new_primer.substr(new_primer.length - 5, 5) == "\n...\n") {
       this.last_fetch_incomplete = true;
-      new_opts = new_opts.substr(0, new_opts.length - 4);
+      new_primer = new_primer.substr(0, new_primer.length - 4);
       if (this.focused)
         // (just in case we need to refine the request due to
         //  activity while waiting for this response)
@@ -1104,13 +1104,13 @@ class MOAutocompleter {
     // Log requests and responses if in debug mode.
     if (this.log) {
       this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_opts.split("\n").length - 2) + " strings (" +
+        ": " + (new_primer.split("\n").length - 2) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
     // Update menu if anything has changed.
-    if (this.primer != new_opts && this.focused) {
-      this.primer = new_opts;
+    if (this.primer != new_primer && this.focused) {
+      this.primer = new_primer;
       this.update_matches();
       this.draw_pulldown();
     }
