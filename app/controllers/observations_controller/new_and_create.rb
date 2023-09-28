@@ -104,7 +104,7 @@ module ObservationsController::NewAndCreate
     success = false unless validate_name(params)
     success = false unless validate_place_name(params)
     success = false unless validate_object(@observation)
-    success = false unless validate_project_checkboxes!
+    success = false unless validate_project_checkboxes
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
@@ -195,7 +195,7 @@ module ObservationsController::NewAndCreate
     success
   end
 
-  def validate_project_checkboxes!
+  def validate_project_checkboxes
     return true if params[:project].empty? ||
                    params[:project][:ignore_proj_dates]
 
