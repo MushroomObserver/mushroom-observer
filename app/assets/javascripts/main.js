@@ -99,7 +99,7 @@ jQuery(document).ready(function () {
 
 const moObserveContent = function () {
   // Select the node that will be observed for mutations
-  const contentNode = document.getElementById("content");
+  const contentNode = document.body;
 
   // Options for the observer (which mutations to observe)
   const config = { attributes: true, childList: true, subtree: true };
@@ -133,7 +133,7 @@ const moObserveContent = function () {
       if (element.hasAttribute("id")) {
         const input_id = element.getAttribute("id");
         const type = element.dataset.autocompleter;
-
+        // console.log("Adding autocompleter for " + type)
         // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
         if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
           new MOAutocompleter({

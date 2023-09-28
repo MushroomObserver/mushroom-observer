@@ -12,14 +12,15 @@
   locals: { identifier: "name_info" }
 ) %>
 
-// reset title of obs if necessary
-var new_title = '<%= show_obs_title(obs: @observation) %>',
-    new_title_tag = '<%= tag.h1(
-      show_obs_title(obs: @observation), class: "h3", id: "title"
-    ) %>';
+<%
+new_title = show_obs_title(obs: @observation)
+new_title_doc = new_title.strip_html.html_to_ascii
+new_title_tag = tag.h1(new_title, class: "h3", id: "title")
+%>
 
-document.title = new_title;
-$("#title").replaceWith(new_title_tag);
+// reset title of obs if necessary
+document.title = '<%= new_title_doc %>';
+$("#title").replaceWith('<%= new_title_tag %>');
 
 // Need to redo naming table bindings and hide cast vote buttons
 VoteByAjaxModule({
