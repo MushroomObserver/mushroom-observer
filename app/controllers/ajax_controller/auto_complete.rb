@@ -16,9 +16,9 @@ module AjaxController::AutoComplete
 
     string = CGI.unescape(@id).strip_squeeze
     if string.blank?
-      render(plain: "\n\n")
+      render(json: ActiveSupport::JSON.encode(%W[\n \n]))
     else
-      render(plain: auto_complete_results(string))
+      render(json: ActiveSupport::JSON.encode(auto_complete_results(string)))
     end
   end
 
@@ -33,6 +33,6 @@ module AjaxController::AutoComplete
     end
 
     ::AutoComplete.subclass(@type).new(string, params).
-      matching_strings.join("\n") + "\n"
+      matching_strings.push("\n")
   end
 end

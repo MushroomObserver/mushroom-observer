@@ -852,6 +852,7 @@ class MOAutocompleter {
 
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field.
+  // FIXME - make the year thing do an array
   update_select() {
     this.matches = this.primer.split("\n");
   }
@@ -859,13 +860,13 @@ class MOAutocompleter {
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
     const val = this.input_elem.value.normalize().toLowerCase();
-    const primer = this.primer.normalize();
+    const primer = this.primer.map((str) => { return str.normalize() });
+    // FIXME this iterator!
     const matches = [];
     if (val != '') {
-      let i, j, s;
-      for (i = primer.indexOf("\n"); i >= 0; i = j) {
-        j = primer.indexOf("\n", i + 1);
-        s = primer.substring(i + 1, j > 0 ? j : primer.length);
+      let i, s;
+      for (i = 0; i >= 0; i = primer.length - 1) {
+        s = primer[i + 1];
         if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
           if (matches.length >= this.max_matches)
@@ -881,13 +882,12 @@ class MOAutocompleter {
     const val = this.input_elem.value.normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' ');
     const vals = val.split(' ');
-    const primer = this.primer.normalize();
+    const primer = this.primer.map((str) => { return str.normalize() });
     const matches = [];
     if (val != '') {
-      let i, j, k, s, s2;
-      for (i = primer.indexOf("\n"); i >= 0; i = j) {
-        j = primer.indexOf("\n", i + 1);
-        s = primer.substring(i + 1, j > 0 ? j : primer.length);
+      let i, k, s, s2;
+      for (i = 0; i >= 0; i = primer.length - 1) {
+        s = primer[i + 1];
         s2 = ' ' + s.toLowerCase() + ' ';
         for (k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
@@ -914,8 +914,7 @@ class MOAutocompleter {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
       for (let i = primer_lc.indexOf(val); i >= 0;
         i = primer_lc.indexOf(val, i + 1)) {
-        let j = primer.indexOf("\n", i + 1);
-        let s = primer.substring(i + 1, j > 0 ? j : primer.length);
+        let s = primer[i + 1];
         if (s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length - 1) < val.length - 1) {
             matches.push(s);
@@ -924,7 +923,7 @@ class MOAutocompleter {
           } else if (matches.length > 1) {
             break;
           } else {
-            if ("\n" + matches[0] == val)
+            if (matches[0] == val)
               matches.pop();
             matches.push(s);
             if (matches.length >= this.max_matches)
@@ -934,8 +933,8 @@ class MOAutocompleter {
         }
       }
       if (matches.length == 1 &&
-        (val == "\n" + matches[0].toLowerCase() ||
-          val == "\n" + matches[0].toLowerCase() + " "))
+        (val == matches[0].toLowerCase() ||
+          val == matches[0].toLowerCase() + " "))
         matches.pop();
     }
     this.matches = matches;
@@ -1051,9 +1050,9 @@ class MOAutocompleter {
     this.fetch_request = fetch(url, { signal }).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
-          response.text().then((content) => {
-            // console.log("content: " + content);
-            this.process_fetch_response(content)
+          response.json().then((json) => {
+            // console.log("json: " + json);
+            this.process_fetch_response(json)
           }).catch((error) => {
             console.error("no_content:", error);
           });
@@ -1072,31 +1071,26 @@ class MOAutocompleter {
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
-  process_fetch_response(response) {
+  process_fetch_response(new_primer) {
     this.verbose("process_fetch_response()");
-    let new_primer, i;
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
-
-    // Grab list of matching strings.
-    i = response.indexOf("\n");
-    new_primer = response.substring(i);
-
+    debugger;
     // console.log("new_primer: " + new_primer);
 
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_fetch_request = response.substr(0, i);
+    this.last_fetch_request = new_primer[0];
 
     // Make sure there's a trailing newline.
-    if (new_primer.charAt(new_primer.length - 1) != "\n")
-      new_primer += "\n";
+    if (new_primer[new_primer.length - 1] != '\n')
+      new_primer.push("\n");
 
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer.substr(new_primer.length - 5, 5) == "\n...\n") {
+    if (new_primer[new_primer.length - 2] == "...") {
       this.last_fetch_incomplete = true;
-      new_primer = new_primer.substr(0, new_primer.length - 4);
+      new_primer = new_primer.slice(0, new_primer.length - 2);
       if (this.focused)
         // (just in case we need to refine the request due to
         //  activity while waiting for this response)
@@ -1108,7 +1102,7 @@ class MOAutocompleter {
     // Log requests and responses if in debug mode.
     if (this.log) {
       this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_primer.split("\n").length - 2) + " strings (" +
+        ": " + (new_primer.length - 2) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
