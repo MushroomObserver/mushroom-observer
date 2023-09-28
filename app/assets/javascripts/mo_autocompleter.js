@@ -7,8 +7,8 @@ var AUTOCOMPLETERS = {};
 //
 // MOAutocompleter makes a request at the very first letter, and our server
 // returns *the first 1000 entries* corresponding to that letter.
-// MOAutocompleter stores that as an array in JS, and consults this list of
-// `options`, rather than the server, to refine the results presented.
+// MOAutocompleter stores that as an array in JS, and consults this `primer`,
+// rather than the server, to refine the results presented.
 //
 // Code convention note: this is a JS `class` not a `module` here because
 // autocompleters may be instantiated multiple times on the same page.
@@ -51,8 +51,8 @@ var AUTOCOMPLETERS = {};
 //       arrow keys   -- move_cursor() -> draw_pulldown()
 //       click/return -- select_row() -> hide_pulldown()
 //       change text  -- our_change() -> schedule_refresh()...
-//       AJAX reply   -- process_ajax_response() -> schedule_refresh()...
-//         ...schedule_refresh() -> refresh_options(), update_matches(), draw_pulldown()
+//       AJAX reply   -- process_fetch_response() -> schedule_refresh()...
+//         ...schedule_refresh() -> refresh_primer(), update_matches(), draw_pulldown()
 
 class MOAutocompleter {
   constructor(opts = {}) {
@@ -77,7 +77,7 @@ class MOAutocompleter {
       // 2 = autocomplete first word, then second word, then the rest
       // N = etc.
       collapse: 0,
-      // where to request options from
+      // where to request primer from
       ajax_url: null,
       // how long to wait before sending AJAX request (seconds)
       refresh_delay: 0.10,
@@ -145,21 +145,21 @@ class MOAutocompleter {
       focused: false,        // is user in text field?
       menu_up: false,        // is pulldown visible?
       old_value: {},         // previous value of input field
-      options: '',           // list of all options
+      primer: '',            // initial server-supplied list of many options
       matches: [],           // list of options currently showing
       current_row: -1,       // number of option currently highlighted (0 = none)
       current_value: null,   // value currently highlighted (null = none)
       current_highlight: -1, // row of view highlighted (-1 = none)
       current_width: 0,      // current width of menu
       scroll_offset: 0,      // scroll offset
-      last_ajax_request: null, // last ajax request we got results for
-      last_ajax_incomplete: true, // did we get all the results we requested?
-      ajax_request: null,    // ajax request while underway
+      last_fetch_request: null, // last fetch request we got results for
+      last_fetch_incomplete: true, // did we get all the results we requested?
+      fetch_request: null,    // ajax request while underway
       refresh_timer: null,   // timer used to delay update after typing
       hide_timer: null,      // timer used to delay hiding of pulldown
       key_timer: null,       // timer used to emulate key repeat
-      row_height: null,      // height of a row in pixels (filled in automatically)
-      scrollbar_width: null  // width of scrollbar (filled in automatically)
+      row_height: null,      // height of a row in pixels (determined below)
+      scrollbar_width: null  // width of scrollbar (determined below)
     }
 
     Object.assign(this, defaultOpts);
@@ -191,8 +191,8 @@ class MOAutocompleter {
     // Figure out a few browser-dependent dimensions.
     this.scrollbar_width = this.getScrollBarWidth();
 
-    // Initialize autocomplete options.
-    this.options = "\n" + this.options;
+    // Initialize autocomplete primer.
+    this.primer = "\n" + this.primer;
 
     // Create pulldown.
     this.create_pulldown();
@@ -266,7 +266,7 @@ class MOAutocompleter {
     new_elem.setAttribute("name", name);
 
     this.input_elem = new_elem,
-      this.options = options.join("\n"),
+      this.primer = options.join("\n"),
       this.pulldown_size = length,
       this.act_like_select = true
 
@@ -454,7 +454,7 @@ class MOAutocompleter {
 
   // ------------------------------ Timers ------------------------------
 
-  // Schedule options to be refreshed after polite delay.
+  // Schedule primer to be refreshed after polite delay.
   schedule_refresh() {
     this.verbose("schedule_refresh()");
     this.clear_refresh();
@@ -463,7 +463,7 @@ class MOAutocompleter {
       // this.debug("refresh_timer(" + this.input_elem.value + ")");
       this.old_value[this.uuid] = this.input_elem.value;
       if (this.ajax_url)
-        this.refresh_options();
+        this.refresh_primer();
       this.update_matches();
       this.draw_pulldown();
     }), this.refresh_delay * 1000);
@@ -853,19 +853,19 @@ class MOAutocompleter {
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field.
   update_select() {
-    this.matches = this.options.split("\n");
+    this.matches = this.primer.split("\n");
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
     const val = this.input_elem.value.normalize().toLowerCase();
-    const options = this.options.normalize();
+    const primer = this.primer.normalize();
     const matches = [];
     if (val != '') {
       let i, j, s;
-      for (i = options.indexOf("\n"); i >= 0; i = j) {
-        j = options.indexOf("\n", i + 1);
-        s = options.substring(i + 1, j > 0 ? j : options.length);
+      for (i = primer.indexOf("\n"); i >= 0; i = j) {
+        j = primer.indexOf("\n", i + 1);
+        s = primer.substring(i + 1, j > 0 ? j : primer.length);
         if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
           if (matches.length >= this.max_matches)
@@ -881,13 +881,13 @@ class MOAutocompleter {
     const val = this.input_elem.value.normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' ');
     const vals = val.split(' ');
-    const options = this.options.normalize();
+    const primer = this.primer.normalize();
     const matches = [];
     if (val != '') {
       let i, j, k, s, s2;
-      for (i = options.indexOf("\n"); i >= 0; i = j) {
-        j = options.indexOf("\n", i + 1);
-        s = options.substring(i + 1, j > 0 ? j : options.length);
+      for (i = primer.indexOf("\n"); i >= 0; i = j) {
+        j = primer.indexOf("\n", i + 1);
+        s = primer.substring(i + 1, j > 0 ? j : primer.length);
         s2 = ' ' + s.toLowerCase() + ' ';
         for (k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
@@ -906,15 +906,15 @@ class MOAutocompleter {
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
     const val = "\n" + this.input_elem.value.toLowerCase();
-    const options = this.options;
-    const options2 = this.options.toLowerCase();
+    const primer = this.primer;
+    const primer2 = this.primer.toLowerCase();
     const matches = [];
     if (val != "\n") {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
-      for (let i = options2.indexOf(val); i >= 0;
-        i = options2.indexOf(val, i + 1)) {
-        let j = options.indexOf("\n", i + 1);
-        let s = options.substring(i + 1, j > 0 ? j : options.length);
+      for (let i = primer2.indexOf(val); i >= 0;
+        i = primer2.indexOf(val, i + 1)) {
+        let j = primer.indexOf("\n", i + 1);
+        let s = primer.substring(i + 1, j > 0 ? j : primer.length);
         if (s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length - 1) < val.length - 1) {
             matches.push(s);
@@ -988,9 +988,9 @@ class MOAutocompleter {
 
   // ------------------------------ Fetch matches ------------------------------
 
-  // Send request for updated options.
-  refresh_options() {
-    this.verbose("refresh_options()");
+  // Send request for updated primer.
+  refresh_primer() {
+    this.verbose("refresh_primer()");
     let val = this.input_elem.value.toLowerCase();
 
     // Don't make request on empty string!
@@ -998,32 +998,32 @@ class MOAutocompleter {
       return;
 
     // Don't repeat last request accidentally!
-    if (this.last_ajax_request == val)
+    if (this.last_fetch_request == val)
       return;
 
     // No need to make more constrained request if we got all results last time.
-    if (this.last_ajax_request &&
-      this.last_ajax_request.length > 0 &&
-      !this.last_ajax_incomplete &&
-      this.last_ajax_request.length < val.length &&
-      this.last_ajax_request == val.substr(0, this.last_ajax_request.length))
+    if (this.last_fetch_request &&
+      this.last_fetch_request.length > 0 &&
+      !this.last_fetch_incomplete &&
+      this.last_fetch_request.length < val.length &&
+      this.last_fetch_request == val.substr(0, this.last_fetch_request.length))
       return;
 
     // If a less constrained request is pending, wait for it to return before
     // refining the request, just in case it returns complete results
     // (rendering the more refined request unnecessary).
-    if (this.ajax_request &&
-      this.last_ajax_request.length < val.length &&
-      this.last_ajax_request == val.substr(0, this.last_ajax_request.length))
+    if (this.fetch_request &&
+      this.last_fetch_request.length < val.length &&
+      this.last_fetch_request == val.substr(0, this.last_fetch_request.length))
       return;
 
     // Make request.
-    this.send_ajax_request(val);
+    this.send_fetch_request(val);
   }
 
   // Send AJAX request for more matching strings.
-  send_ajax_request(val) {
-    this.verbose("send_ajax_request()");
+  send_fetch_request(val) {
+    this.verbose("send_fetch_request()");
     if (val.length > this.max_request_length)
       val = val.substr(0, this.max_request_length);
 
@@ -1036,52 +1036,27 @@ class MOAutocompleter {
       '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
     );
 
-    this.last_ajax_request = val;
+    this.last_fetch_request = val;
 
     const controller = new AbortController();
     const signal = controller.signal;
 
-    if (this.ajax_request)
+    if (this.fetch_request)
       controller.abort();
 
     const csrfToken = document.getElementsByName('csrf-token')[0].content
 
-    // this.ajax_request = jQuery.ajax(url, {
-    //   data: { authenticity_token: csrfToken },
-    //   dataType: "text",
-    //   async: true,
-    //   error: (function (response) {
-    //     this.ajax_request = null;
-    //     if (this.show_errors)
-    //       alert(response.responseText);
-    //   }).bind(this),
-    //   success: (function (text) {
-    //     this.process_ajax_response(text);
-    //   }).bind(this)
-    // });
-
-    this.ajax_request = fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-CSRF-Token': csrfToken,
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'text/html',
-        'Accept': 'text/html'
-      },
-      credentials: 'same-origin',
-      signal
-    }).then((response) => {
+    this.fetch_request = fetch(url, { signal }).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
           response.text().then((content) => {
             // console.log("content: " + content);
-            // do something awesome with result
-            this.process_ajax_response(content)
+            this.process_fetch_response(content)
           }).catch((error) => {
             console.error("no_content:", error);
           });
         } else {
-          this.ajax_request = null;
+          this.fetch_request = null;
           console.log(`got a ${response.status}`);
         }
       }
@@ -1095,12 +1070,12 @@ class MOAutocompleter {
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
-  process_ajax_response(response) {
-    this.verbose("process_ajax_response()");
+  process_fetch_response(response) {
+    this.verbose("process_fetch_response()");
     let new_opts, i;
 
     // Clear flag telling us request is pending.
-    this.ajax_request = null;
+    this.fetch_request = null;
 
     // Grab list of matching strings.
     i = response.indexOf("\n");
@@ -1108,7 +1083,7 @@ class MOAutocompleter {
 
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_ajax_request = response.substr(0, i);
+    this.last_fetch_request = response.substr(0, i);
 
     // Make sure there's a trailing newline.
     if (new_opts.charAt(new_opts.length - 1) != "\n")
@@ -1116,24 +1091,26 @@ class MOAutocompleter {
 
     // Check for trailing "..." signaling incomplete set of results.
     if (new_opts.substr(new_opts.length - 5, 5) == "\n...\n") {
-      this.last_ajax_incomplete = true;
+      this.last_fetch_incomplete = true;
       new_opts = new_opts.substr(0, new_opts.length - 4);
       if (this.focused)
-        this.schedule_refresh(); // (just in case we need to refine the request due to activity while waiting for this response)
+        // (just in case we need to refine the request due to
+        //  activity while waiting for this response)
+        this.schedule_refresh();
     } else {
-      this.last_ajax_incomplete = false;
+      this.last_fetch_incomplete = false;
     }
 
     // Log requests and responses if in debug mode.
     if (this.log) {
-      this.debug("Got response for " + this.escapeHTML(this.last_ajax_request) +
+      this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
         ": " + (new_opts.split("\n").length - 2) + " strings (" +
-        (this.last_ajax_incomplete ? "incomplete" : "complete") + ").");
+        (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
     // Update menu if anything has changed.
-    if (this.options != new_opts && this.focused) {
-      this.options = new_opts;
+    if (this.primer != new_opts && this.focused) {
+      this.primer = new_opts;
       this.update_matches();
       this.draw_pulldown();
     }
