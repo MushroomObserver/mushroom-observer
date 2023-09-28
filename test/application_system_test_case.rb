@@ -12,6 +12,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   include CapybaraMacros
 
   def setup
+    # Does not work if set to true
     # ApplicationController.allow_forgery_protection = true
 
     # needed for selenium
@@ -44,6 +45,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
     DatabaseCleaner.clean
 
-    ApplicationController.allow_forgery_protection = false
+    # ApplicationController.allow_forgery_protection = false
   end
 end
