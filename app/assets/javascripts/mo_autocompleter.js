@@ -907,12 +907,13 @@ class MOAutocompleter {
   update_collapsed() {
     const val = "\n" + this.input_elem.value.toLowerCase();
     const primer = this.primer;
-    const primer2 = this.primer.toLowerCase();
+
+    const primer_lc = this.primer.toLowerCase();
     const matches = [];
     if (val != "\n") {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
-      for (let i = primer2.indexOf(val); i >= 0;
-        i = primer2.indexOf(val, i + 1)) {
+      for (let i = primer_lc.indexOf(val); i >= 0;
+        i = primer_lc.indexOf(val, i + 1)) {
         let j = primer.indexOf("\n", i + 1);
         let s = primer.substring(i + 1, j > 0 ? j : primer.length);
         if (s.length > 0) {
