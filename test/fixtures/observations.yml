@@ -600,6 +600,13 @@ california_obs:
   location: california
   where: California, USA
 
+perkatkun_obs:
+  <<: *DEFAULTS
+  created_at: 2023-09-28 17:51:04
+  when: 2023-09-28
+  location: perkatkun
+  where: Perkatkun, Wrangel Island, Russia
+
 # has alternative preferred name
 chlorophyllum_rachodes_obs:
   <<: *DEFAULTS

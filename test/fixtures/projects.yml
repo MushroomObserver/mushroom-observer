@@ -109,3 +109,7 @@ news_articles_project:
 albion_project:
   <<: *DEFAULTS
   location: albion
+
+wrangel_island_project:
+  <<: *DEFAULTS
+  location: east_lt_west_location
