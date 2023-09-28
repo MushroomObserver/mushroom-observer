@@ -56,16 +56,15 @@ class MOMultiImageUploader {
     });
 
     this.set_geocode_btn.onclick = () => {
-      const _selectedItemData =
-        document.querySelector('input[name=fix_geocode]:checked').dataset;
+      const _selectedItem =
+        document.querySelector('input[name=fix_geocode]:checked');
 
-      if (_selectedItemData) {
-        document.getElementById('observation_lat').value =
-          _selectedItemData.geocode.latitude;
-        document.getElementById('observation_long').value =
-          _selectedItemData.geocode.longitude;
-        document.getElementById('observation_alt').value =
-          _selectedItemData.geocode.altitude;
+      if (_selectedItem && _selectedItem.hasAttribute('data-geocode')) {
+        const _gps = JSON.parse(_selectedItem.dataset.geocode);
+
+        document.getElementById('observation_lat').value = _gps.latitude;
+        document.getElementById('observation_long').value = _gps.longitude;
+        document.getElementById('observation_alt').value = _gps.altitude;
         this.hide(this.geocode_messages);
       }
     };
@@ -77,18 +76,18 @@ class MOMultiImageUploader {
     document.body.querySelectorAll('[data-role="show_on_map"]')
       .forEach((elem) => {
         elem.onclick = () => {
-          this.showGeocodeonMap(this.dataset.geocode);
+          this.showGeocodeonMap(JSON.parse(this.dataset.geocode));
         }
       })
 
     this.fix_date_submit.onclick = () => {
-      const _selectedItemData =
-        document.querySelector('input[name=fix_date]:checked').dataset;
+      const _selectedItem =
+        document.querySelector('input[name=fix_date]:checked');
 
-      if (_selectedItemData && _selectedItemData.date) {
-        this.fixDates(
-          _selectedItemData.date, _selectedItemData.target
-        );
+      if (_selectedItem && _selectedItem.hasAttribute('data-date')) {
+        const _itemData = _selectedItem.dataset;
+
+        this.fixDates(_itemData.date, _itemData.target);
       }
     };
 
@@ -455,20 +454,25 @@ class MOMultiImageUploader {
 
   // extracts the exif data async;
   getExifData(item) {
-    item.dom_element.querySelector('.img-responsive')
-      .onload = () => {
-        EXIF.getData(this, function () {
-          item.exif_data = this.exifdata;
-          // apply the data to the DOM
-          item.applyExifData();
-        });
-      };
+    const _image = item.dom_element.querySelector('.img-responsive');
+
+    _image.onload = () => {
+
+      EXIF.getData(_image, () => {
+        item.exif_data = _image.exifdata;
+        // apply the data to the DOM
+        this.applyExifData(item);
+      });
+    };
   }
 
   // applies exif data to the DOM element, must already be attached
   applyExifData(item) {
     let _exif_date_taken;
-    const _exif = item.exif_data;
+    const _exif = item.exif_data,
+      _camera_date = item.dom_element.querySelector(".camera_date_text");
+
+    _camera_date.dataset.found = 'false';
 
     if (item.dom_element == null) {
       console.warn("Error: DOM element for this file has not been created, so cannot update it with exif data!");
@@ -485,8 +489,7 @@ class MOMultiImageUploader {
       if (geocode_radio_container
         .querySelectorAll('input[type="radio"]').length === 0) {
         this.show(this.geocode_messages);
-        this.geocode_radio_container
-          .insertAdjacentHTML("beforeend", radioBtnToInsert);
+        this.geocode_radio_container.appendChild(radioBtnToInsert);
       }
 
       // don't add geocodes that are only slightly different
@@ -495,7 +498,7 @@ class MOMultiImageUploader {
 
         this.geocode_radio_container
           .querySelectorAll('input[type="radio"]').forEach((element) => {
-            const _existingGeocode = element.dataset.geocode;
+            const _existingGeocode = JSON.parse(element.dataset.geocode);
             const _latDif = Math.abs(latLngAlt.latitude)
               - Math.abs(_existingGeocode.latitude);
             const _longDif = Math.abs(latLngAlt.longitude)
@@ -506,8 +509,7 @@ class MOMultiImageUploader {
           });
 
         if (shouldAddGeocode)
-          this.geocode_radio_container
-            .insertAdjacentHTML("beforeend", radioBtnToInsert);
+          this.geocode_radio_container.appendChild(radioBtnToInsert);
       }
     }
 
@@ -518,15 +520,16 @@ class MOMultiImageUploader {
       // we found the date taken, let's parse it down.
       // returns an array of [YYYY,MM,DD]
       const _date_taken_array =
-        _exif_date_taken.substring(' ', 10).split(':'),
-        _exifSimpleDate = this.SimpleDate(_date_taken_array.reverse());
+        _exif_date_taken.substring(' ', 10).split(':').reverse(),
+        _exifSimpleDate = this.SimpleDate(..._date_taken_array);
 
       this.imageDate(item, _exifSimpleDate);
 
-      const _camera_date = item.dom_element.find(".camera_date_text");
       // shows the exif date by the photo
       _camera_date.innerText = this.simpleDateAsString(_exifSimpleDate);
+      _camera_date.dataset.found = "true";
       _camera_date.dataset.exif_date = _exifSimpleDate;
+      // bind _camera_date so it will set the image date if clicked
       _camera_date.onclick = () => {
         this.imageDate(item, _exifSimpleDate);
         this.refreshBox();
@@ -554,7 +557,7 @@ class MOMultiImageUploader {
         _year.value = simpleDate.year
       ]
     }
-    return this.SimpleDate(_date_values);
+    return this.SimpleDate(..._date_values);
   }
 
   getUserEnteredInfo(item) {
@@ -728,7 +731,7 @@ class MOMultiImageUploader {
     _html.classList.add("radio");
     _html.innerHTML = "<label><input type='radio' data-target='observation' data-date='" + _date + "' name='fix_date'/>" + _date_string + "</label>"
 
-    this.img_radio_container.insertAdjacentHTML("beforeend", _html);
+    this.img_radio_container.appendChild(_html);
   }
 
   makeObservationDateRadio(simpleDate) {
@@ -739,7 +742,7 @@ class MOMultiImageUploader {
     _html.classList.add("radio");
     _html.innerHTML = "<label><input type='radio' data-target='image' data-date='" + _date + "' name='fix_date'/><span>" + _date_string + "</span></label>";
 
-    this.obs_radio_container.insertAdjacentHTML("beforeend", _html);
+    this.obs_radio_container.appendChild(_html);
   }
 
   updateObservationDateRadio() {
@@ -770,7 +773,7 @@ class MOMultiImageUploader {
         this.obs_year.value = simpleDate.year,
       ]
     }
-    return this.SimpleDate(_date_values);
+    return this.SimpleDate(..._date_values);
   }
 
   /**********************/
@@ -829,18 +832,29 @@ class MOMultiImageUploader {
   /** Geocode Helpers **/
 
   makeGeocodeRadioBtn(latLngAlt) {
-    const geocode = JSON.stringify(latLngAlt),
-      geocodeformap = JSON.stringify(latLngAlt),
-      geoCodeStr = latLngAlt.latitude.toFixed(5) + ", "
-        + latLngAlt.longitude.toFixed(5),
-      _html = document.createElement('div');
+    const _geocode_string = latLngAlt.latitude.toFixed(5) + ", "
+      + latLngAlt.longitude.toFixed(5),
+      _html = document.createElement('div'),
+      _label = document.createElement('label'),
+      _input = document.createElement('input'),
+      _a = document.createElement('a');
+
+    _input.type = 'radio';
+    _input.name = 'fix_geocode';
+    _input.dataset.geocode = JSON.stringify(latLngAlt);
+
+    _label.appendChild(_input);
+    _label.insertAdjacentText('beforeend', _geocode_string)
+
+    _a.href = '#geocode_map';
+    _a.dataset.role = 'show_on_map';
+    _a.dataset.geocode = JSON.stringify(latLngAlt);
+    _a.classList.add('ml-3');
+    _a.textContent = this.localized_text.show_on_map;
 
     _html.classList.add("radio");
-    _html.innerHTML = "<label><input type='radio' data-geocode='"
-      + geocode + "' name='fix_geocode'/>" + geoCodeStr + "</label> "
-      + "<a href='#geocode_map' data-role='show_on_map' class='ml-3' "
-      + "data-geocode='" + geocodeformap + "'>"
-      + this.localized_text.show_on_map + "</a>";
+    _html.appendChild(_label);
+    _html.appendChild(_a);
 
     return _html;
   }
