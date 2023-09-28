@@ -3017,7 +3017,7 @@ class ObservationsControllerTest < FunctionalTestCase
         project: {
           "id_#{project.id}" => "1",
           :ignore_proj_conflicts => "1"
-        },
+        }
       }
     )
     assert_response(:redirect)
