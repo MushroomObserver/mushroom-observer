@@ -12,8 +12,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   include CapybaraMacros
 
   def setup
-    # Does not work if set to true
-    # ApplicationController.allow_forgery_protection = true
+    # Be sure your test sets up/waits on authenticated requests correctly!
+    ApplicationController.allow_forgery_protection = true
 
     # needed for selenium
     Capybara.server = :webrick
