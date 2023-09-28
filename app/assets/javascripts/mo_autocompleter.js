@@ -1031,7 +1031,10 @@ class MOAutocompleter {
       this.debug("Sending AJAX request: " + val);
     }
 
-    // Need to doubly-encode this to prevent router from interpreting slashes, dots, etc.
+    // console.log("Sending AJAX request: " + val);
+
+    // Need to doubly-encode this to prevent router from interpreting slashes,
+    // dots, etc.
     const url = this.ajax_url.replace(
       '@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e')))
     );
@@ -1043,8 +1046,6 @@ class MOAutocompleter {
 
     if (this.fetch_request)
       controller.abort();
-
-    const csrfToken = document.getElementsByName('csrf-token')[0].content
 
     this.fetch_request = fetch(url, { signal }).then((response) => {
       if (response.ok) {
@@ -1080,6 +1081,8 @@ class MOAutocompleter {
     // Grab list of matching strings.
     i = response.indexOf("\n");
     new_primer = response.substring(i);
+
+    // console.log("new_primer: " + new_primer);
 
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
