@@ -83,7 +83,7 @@ class MOMultiImageUploader {
       if (_selectedItem && _selectedItem.hasAttribute('data-date')) {
         const _itemData = _selectedItem.dataset;
 
-        this.fixDates(_itemData.date, _itemData.target);
+        this.fixDates(JSON.parse(_itemData.date), _itemData.target);
       }
     };
     this.ignore_dates.onclick = () => { this.hide(this.img_messages); };
@@ -764,17 +764,14 @@ class MOMultiImageUploader {
 
   // gets or sets current obs date, simpledate object updates date
   observationDate(simpleDate) {
-    let _date_values;
-
+    // set the obs date, if passed a simpleDate
     if (simpleDate && simpleDate.day && simpleDate.month &&
       simpleDate.year) {
-      _date_values = [
-        this.obs_day.value = simpleDate.day,
-        this.obs_month.value = simpleDate.month,
-        this.obs_year.value = simpleDate.year,
-      ]
-      return this.SimpleDate(..._date_values);
-    } else {
+      this.obs_day.value = simpleDate.day;
+      this.obs_month.value = simpleDate.month;
+      this.obs_year.value = simpleDate.year;
+      return simpleDate;
+    } else { // or get it
       return this.SimpleDate(this.obs_day.value,
         this.obs_month.value,
         this.obs_year.value)
