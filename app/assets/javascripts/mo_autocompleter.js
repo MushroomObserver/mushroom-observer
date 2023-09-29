@@ -526,10 +526,10 @@ class MOAutocompleter {
   go_end() { this.move_cursor(this.matches.length) }
   move_cursor(rows) {
     this.verbose("move_cursor()");
-    const old_row = this.current_row;
-    let new_row = old_row + rows;
-    const old_scr = this.scroll_offset;
-    let new_scr = old_scr;
+    const old_row = this.current_row,
+      old_scr = this.scroll_offset;
+    let new_row = old_row + rows,
+      new_scr = old_scr;
 
     // Move cursor, but keep in bounds.
     if (new_row < 0)
@@ -557,10 +557,12 @@ class MOAutocompleter {
   // Mouse has moved over a menu item.
   highlight_row(new_hl) {
     this.verbose("highlight_row()");
-    const rows = this.list_elem.children;
-    const old_hl = this.current_highlight;
+    const rows = this.list_elem.children,
+      old_hl = this.current_highlight;
+
     this.current_highlight = new_hl;
     this.current_row = this.scroll_offset + new_hl;
+
     if (old_hl != new_hl) {
       if (old_hl >= 0)
         rows[old_hl].classList.remove(this.hot_class);
@@ -574,10 +576,11 @@ class MOAutocompleter {
   // Called when users scrolls via scrollbar.
   our_scroll() {
     this.verbose("our_scroll()");
-    const old_scr = this.scroll_offset;
-    const new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height);
-    const old_row = this.current_row;
-    const new_row = this.current_row;
+    const old_scr = this.scroll_offset,
+      new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height),
+      old_row = this.current_row;
+    let new_row = this.current_row;
+
     if (new_row < new_scr)
       new_row = new_scr;
     if (new_row >= new_scr + this.pulldown_size)
@@ -650,7 +653,6 @@ class MOAutocompleter {
   // Get actual row height when it becomes available.
   // Experimentally creates a test row.
   get_row_height() {
-    // this.input_elem.disabled = true;
     const div = document.createElement('div'),
       ul = document.createElement('ul'),
       li = document.createElement('li');
@@ -665,7 +667,6 @@ class MOAutocompleter {
     this.temp_row = div;
     // window.setTimeout(this.set_row_height(), 100);
     this.set_row_height();
-    // this.input_elem.disabled = false;
   }
   set_row_height() {
     if (this.temp_row) {
@@ -683,12 +684,12 @@ class MOAutocompleter {
   // Redraw the pulldown options.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
-    const list = this.list_elem;
-    const rows = list.children;
-    const size = this.pulldown_size;
-    const scroll = this.scroll_offset;
-    const cur = this.current_row;
-    const matches = this.matches;
+    const list = this.list_elem,
+      rows = list.children,
+      size = this.pulldown_size,
+      scroll = this.scroll_offset,
+      cur = this.current_row,
+      matches = this.matches;
 
     if (this.log) {
       this.debug(
@@ -749,15 +750,15 @@ class MOAutocompleter {
 
   // Make menu visible if nonempty.
   make_menu_visible(matches, size, scroll) {
-    const menu = this.pulldown_elem;
-    const inner = menu.children[0];
+    const menu = this.pulldown_elem,
+      inner = menu.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.input_elem.offsetTop;
-      const left = this.input_elem.offsetLeft;
-      const hgt = this.input_elem.offsetHeight;
-      const scr = this.input_elem.scrollTop;
+      const top = this.input_elem.offsetTop,
+        left = this.input_elem.offsetLeft,
+        hgt = this.input_elem.offsetHeight,
+        scr = this.input_elem.scrollTop;
       menu.style.top = (top + hgt + scr) + "px";
       menu.style.left = left + "px";
 
@@ -842,26 +843,24 @@ class MOAutocompleter {
 
     // Sort and remove duplicates.
     this.matches = this.remove_dups(this.matches.sort());
-
     // Try to find old highlighted row in new set of options.
     this.update_current_row(last);
-
     // Reset width each time we change the options.
     this.current_width = this.input_elem.offsetWidth;
   }
 
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field.
-  // FIXME - make the year thing do an array
   update_select() {
     this.matches = this.primer;
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const val = this.input_elem.value.normalize().toLowerCase();
-    const primer = this.primer.map((str) => { return str.normalize() });
-    const matches = [];
+    const val = this.input_elem.value.normalize().toLowerCase(),
+      primer = this.primer.map((str) => { return str.normalize() }),
+      matches = [];
+
     if (val != '') {
       for (let i = 0; i < primer.length; i++) {
         let s = primer[i + 1];
@@ -870,21 +869,24 @@ class MOAutocompleter {
         }
       }
     }
+
     this.matches = matches;
   }
 
   // Grab matches ignoring order of words.
   update_unordered() {
     const val = this.input_elem.value.normalize().toLowerCase().
-      replace(/^ */, '').replace(/  +/g, ' ');
-    const vals = val.split(' ');
-    const primer = this.primer.map((str) => { return str.normalize() });
-    const matches = [];
+      replace(/^ */, '').replace(/  +/g, ' '),
+      vals = val.split(' '),
+      primer = this.primer.map((str) => { return str.normalize() }),
+      matches = [];
+
     if (val != '') {
       for (let i = 0; i < primer.length; i++) {
-        let s = primer[i + 1] || '';
-        let s2 = ' ' + s.toLowerCase() + ' ';
-        for (let k = 0; k < vals.length; k++) {
+        let s = primer[i + 1] || '',
+          s2 = ' ' + s.toLowerCase() + ' ',
+          k;
+        for (k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
         }
         if (k >= vals.length) {
@@ -892,17 +894,18 @@ class MOAutocompleter {
         }
       }
     }
+
     this.matches = matches;
   }
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = this.input_elem.value.toLowerCase();
-    const primer = this.primer;
+    const val = this.input_elem.value.toLowerCase(),
+      primer = this.primer,
+      primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
+      matches = [];
 
-    const primer_lc = this.primer.map((str) => { return str.toLowerCase() });
-    const matches = [];
     if (val != "\n") {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
 
@@ -945,11 +948,12 @@ class MOAutocompleter {
   // otherwise highlight first match.
   update_current_row(val) {
     this.verbose("update_current_row()");
-    const matches = this.matches;
-    const size = this.pulldown_size;
-    let exact = -1;
-    let part = -1;
-    let new_scr, new_row, i;
+    const matches = this.matches,
+      size = this.pulldown_size;
+    let exact = -1,
+      part = -1,
+      new_scr, new_row, i;
+
     if (val && val.length > 0) {
       for (i = 0; i < matches.length; i++) {
         if (matches[i] == val) {
@@ -1030,8 +1034,8 @@ class MOAutocompleter {
 
     this.last_fetch_request = val;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
+    const controller = new AbortController(),
+      signal = controller.signal;
 
     if (this.fetch_request)
       controller.abort();
@@ -1195,17 +1199,17 @@ class MOAutocompleter {
   }
 
   getScrollBarWidth() {
-    var inner, outer, w1, w2;
-    var body = document.body || document.getElementsByTagName("body")[0];
+    let inner, outer, w1, w2;
+    const body = document.body || document.getElementsByTagName("body")[0];
 
     if (scroll_bar_width != null)
       return scroll_bar_width;
 
-    var inner = document.createElement('p');
+    inner = document.createElement('p');
     inner.style.width = "100%";
     inner.style.height = "200px";
 
-    var outer = document.createElement('div');
+    outer = document.createElement('div');
     outer.style.position = "absolute";
     outer.style.top = "0px";
     outer.style.left = "0px";
@@ -1216,9 +1220,9 @@ class MOAutocompleter {
     outer.appendChild(inner);
 
     body.appendChild(outer);
-    var w1 = inner.offsetWidth;
+    w1 = inner.offsetWidth;
     outer.style.overflow = 'scroll';
-    var w2 = inner.offsetWidth;
+    w2 = inner.offsetWidth;
     if (w1 == w2) w2 = outer.clientWidth;
     body.removeChild(outer);
 
