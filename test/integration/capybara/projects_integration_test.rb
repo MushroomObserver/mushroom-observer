@@ -135,16 +135,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     # Make project non-current
     proj.end_date = Time.zone.yesterday
     proj.save
-=begin
-    login(proj.user)
-    debugger
-    visit(edit_project_path(proj))
-    select(Time.zone.yesterday.day, from: "project_end_date_3i")
-    select(Date::MONTHNAMES[Time.zone.yesterday.month],
-           from: "project_end_date_2i")
-    select(Time.zone.yesterday.year, from: "project_end_date_1i")
-    click_on("Save Edits")
-=end
+
     # Test that Project is not re-checked for the next Observation
     login(:katrina)
     visit(new_observation_path)
