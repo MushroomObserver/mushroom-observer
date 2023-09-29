@@ -918,7 +918,7 @@ class MOAutocompleter {
         i = primer_lc.indexOf(val, i + 1)) {
         s = primer[i + 1];
         if (s.length > 0) {
-          if (the_rest || s.indexOf(' ', val.length - 1) < val.length - 1) {
+          if (the_rest || s.indexOf(' ', val.length) < val.length) {
             matches.push(s);
             if (matches.length >= this.max_matches)
               break;
