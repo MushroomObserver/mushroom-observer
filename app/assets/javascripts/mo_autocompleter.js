@@ -977,11 +977,10 @@ class MOAutocompleter {
     const matches = this.matches,
       size = this.pulldown_size;
     let exact = -1,
-      part = -1,
-      new_scr, new_row, i;
+      part = -1;
 
     if (val && val.length > 0) {
-      for (i = 0; i < matches.length; i++) {
+      for (let i = 0; i < matches.length; i++) {
         if (matches[i] == val) {
           exact = i;
           break;
@@ -991,18 +990,19 @@ class MOAutocompleter {
           part = i;
       }
     }
-    new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
-    new_scr = this.scroll_offset;
-    if (new_scr > new_row)
-      new_scr = new_row;
-    if (new_scr > matches.length - size)
-      new_scr = matches.length - size;
-    if (new_scr < new_row - size + 1)
-      new_scr = new_row - size + 1;
-    if (new_scr < 0)
-      new_scr = 0;
+    let new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
+    let new_scroll = this.scroll_offset;
+    if (new_scroll > new_row)
+      new_scroll = new_row;
+    if (new_scroll > matches.length - size)
+      new_scroll = matches.length - size;
+    if (new_scroll < new_row - size + 1)
+      new_scroll = new_row - size + 1;
+    if (new_scroll < 0)
+      new_scroll = 0;
+
     this.current_row = new_row;
-    this.scroll_offset = new_scr;
+    this.scroll_offset = new_scroll;
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -1050,8 +1050,6 @@ class MOAutocompleter {
       this.debug("Sending AJAX request: " + val);
     }
 
-    // console.log("Sending AJAX request: " + val);
-
     // Need to doubly-encode this to prevent router from interpreting slashes,
     // dots, etc.
     const url = this.ajax_url.replace(
@@ -1070,7 +1068,6 @@ class MOAutocompleter {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
           response.json().then((json) => {
-            // console.log("json: " + json);
             this.process_fetch_response(json)
           }).catch((error) => {
             console.error("no_content:", error);
@@ -1095,7 +1092,6 @@ class MOAutocompleter {
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
-    // console.log("new_primer: " + new_primer);
 
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
