@@ -884,10 +884,11 @@ class MOAutocompleter {
     const vals = val.split(' ');
     const primer = this.primer.map((str) => { return str.normalize() });
     const matches = [];
+    debugger;
     if (val != '') {
       let i, k, s, s2;
-      for (i = 0; i >= 0; i = primer.length - 1) {
-        s = primer[i + 1];
+      for (i = 0; i >= 0; i = primer.length) {
+        s = primer[i + 1] || '';
         s2 = ' ' + s.toLowerCase() + ' ';
         for (k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
