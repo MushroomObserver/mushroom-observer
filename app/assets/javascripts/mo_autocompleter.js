@@ -887,7 +887,7 @@ class MOAutocompleter {
       matches = [];
 
     if (val != '' && primer.length > 1) {
-      for (let i = 1; i <= primer.length; i++) {
+      for (let i = 1; i < primer.length; i++) {
         let s = primer[i] || '',
           s2 = ' ' + s.toLowerCase() + ' ',
           k;
@@ -914,10 +914,10 @@ class MOAutocompleter {
       matches = [];
 
     if (val != '' && primer.length > 1) {
-      let the_rest = (val.match(/ /g) || []).length >= this.collapse,
-        i = this.get_primer_index_of_substr(primer_lc, val);
+      let the_rest = (val.match(/ /g) || []).length >= this.collapse;
 
-      for (i; i <= primer_lc.length; i++) {
+      for (let i = this.get_primer_index_of_substr(primer_lc, val);
+        i < primer_lc.length; i++) {
         let s = primer[i];
 
         if (s.length > 0) {
