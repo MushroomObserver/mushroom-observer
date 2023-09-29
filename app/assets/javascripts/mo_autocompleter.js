@@ -106,7 +106,6 @@ class MOAutocompleter {
     const autocompleterTypes = {
       clade: {
         ajax_url: "/ajax/auto_complete/clade/@",
-        collapse: 1
       },
       herbarium: { // params[:user_id] handled in controller
         ajax_url: "/ajax/auto_complete/herbarium/@",
