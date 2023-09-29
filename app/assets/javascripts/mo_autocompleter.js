@@ -915,7 +915,7 @@ class MOAutocompleter {
 
       for (let i = primer_lc.indexOf(val); i < primer_lc.length; i++) {
         let s = primer[i + 1];
-        if (s.length > 0) {
+        if (s && s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length) < val.length) {
             matches.push(s);
             // if (matches.length >= this.pulldown_size)
