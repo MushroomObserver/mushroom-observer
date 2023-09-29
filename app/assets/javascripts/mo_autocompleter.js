@@ -693,8 +693,7 @@ class MOAutocompleter {
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + matches.length + ", scroll=" + scroll + ", cursor=" + cur
       );
     }
 
@@ -915,7 +914,7 @@ class MOAutocompleter {
     if (val != '' && primer.length > 1) {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse,
         // val will have a trailing space, if a word has already been matched
-        i = primer_lc.indexOf(val.trim()) + 1;
+        i = this.get_primer_index_of_substr(primer_lc, val);
 
       for (i; i <= primer_lc.length; i++) {
         let s = primer[i];
@@ -941,16 +940,27 @@ class MOAutocompleter {
     this.matches = matches;
   }
 
+  // index of substr within the primer values
+  get_primer_index_of_substr(primer, val) {
+    for (let i = 0; i < primer.length; i++) {
+      // For multidimensional this would be primer[i][0], the text
+      const index = primer[i].indexOf(val);
+      if (index > -1) {
+        return i;
+      }
+    }
+  }
+
   /**
    * Index of string in primer array with IDs
    * where primer == [[text_string, id], [text_string, id]]
    * @param primer {!Array} - the input array
-   * @param k {object} - the value to search
+   * @param val {object} - the value to search
    * @return {Array} or just i
    */
-  // get_primer_index_of(primer, k) {
+  // get_primer_index_of(primer, val) {
   //   for (let i = 0; i < primer.length; i++) {
-  //     const index = primer[i].indexOf(k);
+  //     const index = primer[i].indexOf(val);
   //     if (index > -1) {
   //       // return [i, index];
   //       return i;
