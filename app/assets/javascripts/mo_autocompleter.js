@@ -869,7 +869,7 @@ class MOAutocompleter {
         s = primer[i + 1];
         if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
-          if (matches.length >= this.max_matches)
+          if (matches.length >= this.pulldown_size)
             break;
         }
       }
@@ -894,7 +894,7 @@ class MOAutocompleter {
         }
         if (k >= vals.length) {
           matches.push(s);
-          if (matches.length >= this.max_matches)
+          if (matches.length >= this.pulldown_size)
             break;
         }
       }
@@ -914,13 +914,12 @@ class MOAutocompleter {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
       let i, s;
       debugger;
-      for (i = primer_lc.indexOf(val); i >= 0;
-        i = primer_lc.indexOf(val, i + 1)) {
+      for (i = primer_lc.indexOf(val); i < primer_lc.length; i++) {
         s = primer[i + 1];
         if (s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length) < val.length) {
             matches.push(s);
-            if (matches.length >= this.max_matches)
+            if (matches.length >= this.pulldown_size)
               break;
           } else if (matches.length > 1) {
             break;
@@ -928,7 +927,7 @@ class MOAutocompleter {
             if (matches[0] == val)
               matches.pop();
             matches.push(s);
-            if (matches.length >= this.max_matches)
+            if (matches.length >= this.pulldown_size)
               break;
             the_rest = true;
           }
