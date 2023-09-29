@@ -109,4 +109,48 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
       "Failed to create Obs after overriding Project date ranges"
     )
   end
+
+  def test_project_checkbox_state_persistence
+    proj = projects(:current_closed_project)
+    user = users(:katrina)
+    # Ensure fixtures not broken
+    assert(proj.is_member?(user),
+           "Need fixtures such that `user` is a member of `proj`")
+    proj_checkbox = "project_id_#{proj.id}"
+    login(user)
+
+    # create an Observation with Project selected
+    visit(new_observation_path)
+    fill_in(:WHERE.l, with: locations(:burbank).name)
+    check(proj_checkbox)
+    first(:button, "Create").click
+
+    # Test that Project is re-checked for the next Observation
+    visit(new_observation_path)
+    assert(
+      has_checked_field?(proj_checkbox),
+      "current Project checkbox state should persist from recent Observation"
+    )
+
+    # Make project non-current
+    proj.end_date = Time.zone.yesterday
+    proj.save
+=begin
+    login(proj.user)
+    debugger
+    visit(edit_project_path(proj))
+    select(Time.zone.yesterday.day, from: "project_end_date_3i")
+    select(Date::MONTHNAMES[Time.zone.yesterday.month],
+           from: "project_end_date_2i")
+    select(Time.zone.yesterday.year, from: "project_end_date_1i")
+    click_on("Save Edits")
+=end
+    # Test that Project is not re-checked for the next Observation
+    login(:katrina)
+    visit(new_observation_path)
+    assert(
+      has_unchecked_field?(proj_checkbox),
+      "non-current Project should never be auto-rechecked"
+    )
+  end
 end

@@ -132,6 +132,14 @@ current_project:
   open_membership: true
   end_date: <%= Time.zone.tomorrow %>
 
+current_closed_project:
+  <<: *DEFAULTS
+  user: roy
+  user_group: burbank_users
+  admin_group: burbank_admins
+  open_membership: false
+  end_date: <%= Time.zone.tomorrow %>
+
 unlimited_project:
   <<: *DEFAULTS
   start_date: nil

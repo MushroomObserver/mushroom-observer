@@ -90,8 +90,13 @@ module ObservationsController::FormHelpers
     init_project_vars
     @projects = @projects.union(obs.projects)
     @projects.each do |proj|
-      p = params[:project]
-      @project_checks[proj.id] = p.nil? ? false : p["id_#{proj.id}"] == "1"
+      @project_checks[proj.id] =
+        if params[:project].nil? ||
+           !proj.current?
+          false
+        else
+          params[:project]["id_#{proj.id}"] == "1"
+        end
     end
   end
 
