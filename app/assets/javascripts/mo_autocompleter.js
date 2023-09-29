@@ -93,6 +93,8 @@ class MOAutocompleter {
       page_size: 10,
       // max length of string to send via AJAX
       max_request_length: 50,
+      // allowed separators (e.g. " OR ") - restarts autocomplete afterwards
+      separator: null,
       // show error messages returned via AJAX?
       show_errors: false,
       // include pulldown-icon on right, and always show all options
@@ -608,7 +610,8 @@ class MOAutocompleter {
     }
     this.input_elem.focus();
     this.focused = true;
-    this.input_elem.value = new_val;
+    // this.input_elem.value = new_val;
+    this.set_search_token(new_val);
     this.our_change(false);
   }
 
@@ -856,7 +859,7 @@ class MOAutocompleter {
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const val = this.input_elem.value.normalize().toLowerCase(),
+    const val = this.get_search_token().normalize().toLowerCase(),
       // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
@@ -876,7 +879,7 @@ class MOAutocompleter {
   // Grab matches ignoring order of words.
   update_unordered() {
     // regularize spacing in the input
-    const val = this.input_elem.value.normalize().toLowerCase().
+    const val = this.get_search_token().normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
       // get the separate words as vals
       vals = val.split(' '),
@@ -905,7 +908,7 @@ class MOAutocompleter {
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = this.input_elem.value.toLowerCase(),
+    const val = this.get_search_token().toLowerCase(),
       primer = this.primer,
       // make a lowercased duplicate of primer to regularize search
       primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
@@ -1015,12 +1018,76 @@ class MOAutocompleter {
     this.scroll_offset = new_scroll;
   }
 
+  /**
+  * ------------------------------ Search Token ------------------------------
+  *
+  * This is the part of the user input for which we're currently requesting a
+  * server response for matches. In cases where the autocompleter accepts a
+  * `separator` (currently only ' OR ', on the advanced search page) the search
+  * token would be the part of the user input after that separator.
+  */
+
+  // Get search token under or immediately in front of cursor.
+  get_search_token() {
+    const val = this.input_elem.value;
+    let token = val;
+    if (this.separator) {
+      const s_ext = this.search_token_extents();
+      token = val.substring(s_ext.start, s_ext.end);
+    }
+    return token;
+  }
+
+  // Change the token under or immediately in front of the cursor.
+  set_search_token(new_val) {
+    const old_str = this.input_elem.value;
+    if (this.separator) {
+      let new_str = "";
+      const s_ext = this.search_token_extents();
+
+      if (s_ext.start > 0)
+        new_str += old_str.substring(0, s_ext.start);
+      new_str += new_val;
+
+      if (s_ext.end < old_str.length)
+        new_str += old_str.substring(s_ext.end);
+      if (old_str != new_str) {
+        var old_scroll = this.input_elem.offsetTop;
+        this.input_elem.value = new_str;
+        setCursorPosition(this.input_elem[0], s_ext.start + new_val.length);
+        this.input_elem.offsetTop = old_scroll;
+      }
+    } else {
+      if (old_str != new_val)
+        this.input_elem.value = new_val;
+    }
+  }
+
+  // Get index of first character and character after last of current token.
+  search_token_extents() {
+    let start, end, sel = getInputSelection(this.input_elem[0]);
+    const val = this.input_elem.value;
+    if (sel.start > 0)
+      start = val.lastIndexOf(this.separator, sel.start - 1);
+    else
+      start = 0;
+    if (start < 0)
+      start = 0;
+    else
+      start += this.separator.length;
+    end = val.indexOf(this.separator, start);
+    if (end <= start || end > sel.length)
+      end = sel.length;
+    return { start: start, end: end };
+  }
+
   // ------------------------------ Fetch matches ------------------------------
 
   // Send request for updated primer.
   refresh_primer() {
     this.verbose("refresh_primer()");
-    let val = this.input_elem.value.toLowerCase();
+    // let val = this.input_elem.value.toLowerCase();
+    let val = this.get_search_token().toLowerCase();
 
     // Don't make request on empty string!
     if (!val || val.length < 1)
