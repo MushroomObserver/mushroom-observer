@@ -145,9 +145,9 @@ class MOAutocompleter {
       focused: false,        // is user in text field?
       menu_up: false,        // is pulldown visible?
       old_value: {},         // previous value of input field
-      primer: '',            // initial server-supplied list of many options
+      primer: [],            // initial server-supplied list of many options
       matches: [],           // list of options currently showing
-      current_row: -1,       // number of option currently highlighted (0 = none)
+      current_row: -1,       // index of option currently highlighted (0 = none)
       current_value: null,   // value currently highlighted (null = none)
       current_highlight: -1, // row of view highlighted (-1 = none)
       current_width: 0,      // current width of menu
@@ -191,8 +191,8 @@ class MOAutocompleter {
     // Figure out a few browser-dependent dimensions.
     this.scrollbar_width = this.getScrollBarWidth();
 
-    // Initialize autocomplete primer.
-    this.primer = "\n" + this.primer;
+    // Initialize autocomplete primer with a blank newline.
+    this.primer.unshift('\n');
 
     // Create pulldown.
     this.create_pulldown();
@@ -244,13 +244,13 @@ class MOAutocompleter {
       style = old_elem.getAttribute("style"),
       value = old_elem.value,
       opts = old_elem.options,
-      options = [],
+      primer = [],
       new_elem = document.createElement("input");
     new_elem.type = "text";
     const length = opts.length > 20 ? 20 : opts.length;
 
     for (let i = 0; i < opts.length; i++)
-      options.push(opts.item(i).text);
+      primer.push(opts.item(i).text);
 
     new_elem.classList = classList;
     new_elem.style = style;
@@ -266,7 +266,7 @@ class MOAutocompleter {
     new_elem.setAttribute("name", name);
 
     this.input_elem = new_elem,
-      this.primer = options.join("\n"),
+      this.primer = primer,
       this.pulldown_size = length,
       this.act_like_select = true
 
@@ -854,7 +854,7 @@ class MOAutocompleter {
   // order given right from the moment they enter the field.
   // FIXME - make the year thing do an array
   update_select() {
-    this.matches = this.primer.split("\n");
+    this.matches = this.primer;
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -1076,7 +1076,6 @@ class MOAutocompleter {
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
-    debugger;
     // console.log("new_primer: " + new_primer);
 
     // Record string actually used to do matching: might be less strict
