@@ -861,16 +861,12 @@ class MOAutocompleter {
   update_normal() {
     const val = this.input_elem.value.normalize().toLowerCase();
     const primer = this.primer.map((str) => { return str.normalize() });
-    // FIXME this iterator!
     const matches = [];
     if (val != '') {
-      let i, s;
-      for (i = 0; i < primer.length; i++) {
-        s = primer[i + 1];
-        if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
+      for (let i = 0; i < primer.length; i++) {
+        let s = primer[i + 1];
+        if (s && s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
-          // if (matches.length >= this.pulldown_size)
-          //   break;
         }
       }
     }
@@ -885,17 +881,14 @@ class MOAutocompleter {
     const primer = this.primer.map((str) => { return str.normalize() });
     const matches = [];
     if (val != '') {
-      let i, k, s, s2;
-      for (i = 0; i < primer.length; i++) {
-        s = primer[i + 1] || '';
-        s2 = ' ' + s.toLowerCase() + ' ';
-        for (k = 0; k < vals.length; k++) {
+      for (let i = 0; i < primer.length; i++) {
+        let s = primer[i + 1] || '';
+        let s2 = ' ' + s.toLowerCase() + ' ';
+        for (let k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
         }
         if (k >= vals.length) {
           matches.push(s);
-          // if (matches.length >= this.pulldown_size)
-          //   break;
         }
       }
     }
@@ -918,16 +911,12 @@ class MOAutocompleter {
         if (s && s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length) < val.length) {
             matches.push(s);
-            // if (matches.length >= this.pulldown_size)
-            //   break;
           } else if (matches.length > 1) {
             break;
           } else {
             if (matches[0] == val)
               matches.pop();
             matches.push(s);
-            // if (matches.length >= this.pulldown_size)
-            //   break;
             the_rest = true;
           }
         }
