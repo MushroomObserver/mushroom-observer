@@ -858,6 +858,7 @@ class MOAutocompleter {
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
     const val = this.input_elem.value.normalize().toLowerCase(),
+      // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
 
@@ -875,17 +876,21 @@ class MOAutocompleter {
 
   // Grab matches ignoring order of words.
   update_unordered() {
+    // regularize spacing in the input
     const val = this.input_elem.value.normalize().toLowerCase().
       replace(/^ */, '').replace(/  +/g, ' '),
+      // get the separate words as vals
       vals = val.split(' '),
+      // normalize the Unicode of each string in primer for search
       primer = this.primer.map((str) => { return str.normalize() }),
       matches = [];
 
-    if (val != '') {
+    if (val != '' && primer.length > 1) {
       for (let i = 1; i <= primer.length; i++) {
         let s = primer[i] || '',
           s2 = ' ' + s.toLowerCase() + ' ',
           k;
+        // check each word in the primer entry for a matching word
         for (k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
         }
@@ -903,16 +908,19 @@ class MOAutocompleter {
   update_collapsed() {
     const val = this.input_elem.value.toLowerCase(),
       primer = this.primer,
+      // make a lowercased duplicate of primer to regularize search
       primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
       matches = [];
 
-    if (val != "\n") {
-      let the_rest = (val.match(/ /g) || []).length >= this.collapse;
-      let i = primer_lc.indexOf(val.trim()) + 1;
+    if (val != '' && primer.length > 1) {
+      let the_rest = (val.match(/ /g) || []).length >= this.collapse,
+        // val will have a trailing space, if a word has already been matched
+        i = primer_lc.indexOf(val.trim()) + 1;
 
       for (i; i <= primer_lc.length; i++) {
         let s = primer[i];
-        if (s && s.length > 0) {
+
+        if (s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length) < val.length) {
             matches.push(s);
           } else if (matches.length > 1) {
@@ -927,11 +935,28 @@ class MOAutocompleter {
       }
       if (matches.length == 1 &&
         (val == matches[0].toLowerCase() ||
-          val == matches[0].toLowerCase() + " "))
+          val == matches[0].toLowerCase() + ' '))
         matches.pop();
     }
     this.matches = matches;
   }
+
+  /**
+   * Index of string in primer array with IDs
+   * where primer == [[text_string, id], [text_string, id]]
+   * @param primer {!Array} - the input array
+   * @param k {object} - the value to search
+   * @return {Array} or just i
+   */
+  // get_primer_index_of(primer, k) {
+  //   for (let i = 0; i < primer.length; i++) {
+  //     const index = primer[i].indexOf(k);
+  //     if (index > -1) {
+  //       // return [i, index];
+  //       return i;
+  //     }
+  //   }
+  // }
 
   // Remove duplicates from a sorted array.
   remove_dups(list) {
