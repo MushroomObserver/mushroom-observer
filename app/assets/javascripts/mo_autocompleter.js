@@ -905,14 +905,15 @@ class MOAutocompleter {
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = "\n" + this.input_elem.value.toLowerCase();
+    const val = this.input_elem.value.toLowerCase();
     const primer = this.primer;
 
-    const primer_lc = this.primer.toLowerCase();
+    const primer_lc = this.primer.map((str) => { return str.toLowerCase() });
     const matches = [];
     if (val != "\n") {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
       let i, s;
+      debugger;
       for (i = primer_lc.indexOf(val); i >= 0;
         i = primer_lc.indexOf(val, i + 1)) {
         s = primer[i + 1];
