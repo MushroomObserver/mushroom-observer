@@ -192,6 +192,9 @@ Style/AccessorGrouping:
 Style/AsciiComments:
   # Allow non-ascii characters in comments; we need to use accented chars
   Enabled: false
+Style/ClassAndModuleChildren:
+  # Allow nested or compact module declaration
+  Enabled: false
 Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it
   # Is this still true? JDC 2020-08-17

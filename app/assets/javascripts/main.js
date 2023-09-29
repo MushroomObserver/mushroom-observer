@@ -38,7 +38,8 @@ jQuery(document).ready(function () {
     var d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     var expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + "; " + expires + ";path=/";
+    document.cookie = cname + "=" + cvalue + "; " + expires
+      + ";samesite=lax;path=/";
   }
 
   jQuery('.file-field :file').on('change', function () {
@@ -107,10 +108,10 @@ const moObserveContent = function () {
   const callback = (mutationList, observer) => {
     for (const mutation of mutationList) {
       if (mutation.type === "childList") {
-        console.log("A child node has been added or removed.");
+        // console.log("A child node has been added or removed.");
         initializeAutocompleters();
       } else if (mutation.type === "attributes") {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
       }
     }
   };
