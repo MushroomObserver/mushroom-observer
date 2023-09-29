@@ -66,6 +66,7 @@
 #  parse_latitude::     Validate and parse latitude from a string.
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
+#  found_here?::        Was the given obs found here?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -267,6 +268,26 @@ class Location < AbstractModel
     self.south = center_lat - 0.0001
     self.east = center_lon + 0.0001
     self.west = center_lon - 0.0001
+  end
+
+  def found_here?(obs)
+    return true if obs.location == self
+    return contains?(obs.lat, obs.long) if obs.lat && obs.long
+
+    loc = obs.location
+    return false unless loc
+
+    contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
+  end
+
+  def contains?(lat, long)
+    (lat <= north) && (lat >= south) && contains_longitude(long)
+  end
+
+  def contains_longitude(long)
+    return (long >= west) && (long <= east) if west <= east
+
+    (long >= west) || (long <= east)
   end
 
   ##############################################################################

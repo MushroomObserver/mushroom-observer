@@ -3,6 +3,7 @@
 # see observations_controller.rb
 module ObservationsController::EditAndUpdate
   include ObservationsController::FormHelpers
+  include ObservationsController::Validators
 
   # Form to edit an existing observation.
   # Linked from: left panel
@@ -112,14 +113,9 @@ module ObservationsController::EditAndUpdate
   end
 
   def validate_edit_place_name
-    @place_name = @observation.place_name
-    @dubious_where_reasons = []
-    return unless @place_name != params[:approved_where] &&
-                  @observation.location.nil?
+    return if validate_place_name(params) && validate_projects(params)
 
-    db_name = Location.user_name(@user, @place_name)
-    @dubious_where_reasons = Location.dubious_name?(db_name, true)
-    @any_errors = true if @dubious_where_reasons.any?
+    @any_errors = true
   end
 
   def try_to_upload_images

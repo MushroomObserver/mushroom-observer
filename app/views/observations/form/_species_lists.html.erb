@@ -14,7 +14,7 @@
         <%= check_box_with_label(form: f_l, field: :"id_#{list.id}",
                                  checked: @list_checks[list.id],
                                  disabled: !check_permission(list),
-                                 label: link_to_object(list)) %>
+                                 label: list.title) %>
       <% end %>
     <% end %>
 
