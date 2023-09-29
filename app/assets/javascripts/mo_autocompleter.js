@@ -915,7 +915,6 @@ class MOAutocompleter {
 
     if (val != '' && primer.length > 1) {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse,
-        // val will have a trailing space, if a word has already been matched
         i = this.get_primer_index_of_substr(primer_lc, val);
 
       for (i; i <= primer_lc.length; i++) {
@@ -1020,10 +1019,13 @@ class MOAutocompleter {
   /**
   * ------------------------------ Search Token ------------------------------
   *
-  * This is the part of the user input for which we're currently requesting a
-  * server response for matches. In cases where the autocompleter accepts a
-  * `separator` (currently only ' OR ', on the advanced search page) the search
-  * token would be the part of the user input after that separator.
+  * The user input string for which we're currently requesting a server response
+  * for matches. Usually that's the whole string, but in cases where the
+  * autocompleter accepts a `separator` argument (currently only ' OR ', on the
+  * advanced search page) the new search token would be the segment of the user
+  * input string *after* that separator.
+  *
+  * That way, you get autocompletes for each part of "Agaricaceae OR Agaricales"
   */
 
   // Get search token under or immediately in front of cursor.
