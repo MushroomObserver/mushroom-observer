@@ -865,7 +865,7 @@ class MOAutocompleter {
     const matches = [];
     if (val != '') {
       let i, s;
-      for (i = 0; i >= 0; i = primer.length - 1) {
+      for (i = 0; i < primer.length; i++) {
         s = primer[i + 1];
         if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
@@ -912,9 +912,10 @@ class MOAutocompleter {
     const matches = [];
     if (val != "\n") {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
-      for (let i = primer_lc.indexOf(val); i >= 0;
+      let i, s;
+      for (i = primer_lc.indexOf(val); i >= 0;
         i = primer_lc.indexOf(val, i + 1)) {
-        let s = primer[i + 1];
+        s = primer[i + 1];
         if (s.length > 0) {
           if (the_rest || s.indexOf(' ', val.length - 1) < val.length - 1) {
             matches.push(s);
