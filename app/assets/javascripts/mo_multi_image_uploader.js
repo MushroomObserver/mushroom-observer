@@ -267,7 +267,7 @@ class MOMultiImageUploader {
   }
 
   updateImageDates(simpleDate) {
-    this.fileStore.items.forEach(function (item) {
+    this.fileStore.items.forEach((item) => {
       this.imageDate(item, simpleDate);
     });
   }
