@@ -786,9 +786,9 @@ class MOMultiImageUploader {
 
       return simpleDate;
     } else { // or get it
-      return this.SimpleDate(this.obs_day.value,
-        this.obs_month.value,
-        this.obs_year.value)
+      return this.SimpleDate(
+        this.obs_day.value, this.obs_month.value, this.obs_year.value
+      )
     }
   }
 
