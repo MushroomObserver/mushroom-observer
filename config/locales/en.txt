@@ -1635,8 +1635,7 @@
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
   form_observations_there_is_a_problem_with_projects: This Observation violates the constraints of one or more selected Projects. "+See message below.+":#project_messages
   form_observations_projects_out_of_range: "The Observation date ([date]) is outside the range of these checked Project(s)"
-  form_observations_projects_out_of_range_help: "Either: \n - uncheck out-of-range Projects; \n - change the Observation date if it is incorrect; or \n - (undesirably) check [:form_observations_projects_ignore_project_dates] to ignore the Project date ranges. \nThen click [button_name]."
-  form_observations_projects_ignore_project_dates: Ignore Project Dates
+  form_observations_projects_out_of_range_help: "Either: \n - uncheck out-of-range Projects; \n - change the Observation date if it is incorrect; or \n - (undesirably) ignore this warning and add the Observation to all selected Projects. \nThen click [button_name]."
 
   # observations/_form_species_list
   form_species_lists_title: Title

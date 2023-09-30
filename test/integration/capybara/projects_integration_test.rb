@@ -22,25 +22,27 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
                  "Project Start Date should default to current date")
   end
 
-  def test_add_observation_to_project
+  def test_add_out_of_range_observation_to_project
     proj = projects(:past_project)
     user = users(:katrina)
     # Ensure fixtures not broken
     assert(proj.is_member?(user),
            "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "project_id_#{proj.id}"
-    observation_original_count = Observation.count
-
     login(user)
+
+    # Try adding out-of-range Observation to Project
+    # It should reload the form with warnings and a hidden field
     visit(new_observation_path)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
-
     fill_in(:WHERE.l, with: locations(:burbank).name)
-    check(proj_checkbox) # add out-of-range Obs to Project
-    first(:button, "Create").click
-
-    # Prove MO shows appropriate messages when user checks out-of-range Project
+    check(proj_checkbox)
+    assert_selector("##{proj_checkbox}[checked='checked']")
+    assert_no_difference("Observation.count",
+                         "Out-of-range Observation should not be created") do
+      first(:button, "Create").click
+    end
     assert_selector(
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
@@ -55,21 +57,25 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
                has_text?("#{proj.start_date_str} - #{proj.end_date_str}"),
              "Warning is missing out-of-range project's title or date range")
     end
-    assert(
-      has_unchecked_field?(:form_observations_projects_ignore_project_dates.l),
-      "Missing an unchecked box for ignoring Proj Dates"
-    )
+    assert_selector("#ignore_project_dates", visible: :hidden)
+    assert_selector("##{proj_checkbox}[checked='checked']")
 
-    # Prove that Observation is created if user unchecks out-of-range Project
+    # Test the different ways to overcome the warning
+    # 1. Prove that Obs is created if user unchecks out-of-range Project
     uncheck(proj_checkbox)
     assert(has_unchecked_field?(proj_checkbox))
-    first(:button, "Create").click
-    assert_equal(
-      observation_original_count + 1, Observation.count,
-      "Failed to create Obs after unchecking out-if-range Projectx"
+    assert_difference(
+      "Observation.count", 1,
+      "Out-of-range Obs should be created if user unchecks Project"
+    ) do
+      first(:button, "Create").click
+    end
+    assert(
+      proj.observations.exclude?(Observation.order(created_at: :asc).last),
+      "Observation should not be added to Project if user unchecks Project"
     )
 
-    # Prove that Observation is created if user fixes dates to be in-range
+    # 2. Prove that Observation is created if user fixes dates to be in-range
     visit(new_observation_path)
     fill_in(:WHERE.l, with: locations(:burbank).name)
     check(proj_checkbox)
@@ -82,13 +88,18 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     select(proj.end_date.day, from: "observation_when_3i")
     select(Date::MONTHNAMES[proj.end_date.month], from: "observation_when_2i")
     select(proj.end_date.year, from: "observation_when_1i")
-    first(:button, "Create").click
-    assert_equal(
-      observation_original_count + 2, Observation.count,
+    assert_difference(
+      "Observation.count", 1,
       "Failed to created Obs after setting When within Project date range"
+    ) do
+      first(:button, "Create").click
+    end
+    assert(
+      proj.observations.include?(Observation.order(created_at: :asc).last),
+      "Failed to include Obs in Project when user fixes Observation When"
     )
 
-    # Prove Observation is created if user overrides Project date ranges
+    # 3. Prove Obs is created if user overrides Project date ranges
     visit(new_observation_path)
     fill_in(:WHERE.l, with: locations(:burbank).name)
     check(proj_checkbox)
@@ -102,12 +113,15 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
-    # Override Project date ranges
-    check(:form_observations_projects_ignore_project_dates.l)
-    first(:button, "Create").click
-    assert_equal(
-      observation_original_count + 3, Observation.count,
-      "Failed to create Obs after overriding Project date ranges"
+    assert_difference(
+      "Observation.count", 1,
+      "Failed to create Obs after ignoring Project date range"
+    ) do
+      first(:button, "Create").click # override warning by clicking button
+    end
+    assert(
+      proj.observations.include?(Observation.order(created_at: :asc).last),
+      "Failed to include Obs in Project when user overrides warning"
     )
   end
 
