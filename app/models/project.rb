@@ -105,6 +105,16 @@ class Project < AbstractModel
     is_member?(user) && user.id != user_id
   end
 
+  def member_status(user)
+    if user == self.user
+      :OWNER.t
+    elsif is_admin?(user)
+      :ADMIN.t
+    else
+      :MEMBER.t
+    end
+  end
+
   def user_can_add_observation?(obs, user)
     accepting_observations && (obs.user == user ||
                                is_member?(user))
@@ -356,5 +366,9 @@ class Project < AbstractModel
             end
     loc = Location.find_by_name(where)
     self.location = (loc)
+  end
+
+  def name_count
+    Checklist::ForProject.new(self).num_names
   end
 end

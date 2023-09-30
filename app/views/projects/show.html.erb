@@ -14,63 +14,55 @@ add_tab_set(project_show_tabs(project: @project, user: @user))
                  path: project_member_path(project_id: @project.id,
                                            candidate: @user.id)) %>
 <% end %>
-<div class="row">
-  <div class="col-md-6">
-    <%= panel_block do %>
-      <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
-      <% if @project.location %>
-        <p><b><%= :show_project_location.t %>:</b> <%= location_link(@project.place_name, @project.location) %></p>
+
+<%= panel_block do %>
+  <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
+  <p><b><%= link_to(:Members.t + ": #{@project.user_group.users.count}",
+                    project_members_path(project_id: @project.id)) %></b></p>
+
+  <% if @project.location %>
+    <p><b><%= link_to("#{:show_project_location.t}: #{@project.place_name}",
+	              location_path(@project.location.id)) %></b></p>
+  <% end %>
+
+  <% if @project.observations.any? %>
+    <p><b><%= link_to("#{:OBSERVATIONS.t}: #{@project.observations.length}",
+                      observations_path(project: @project.id)) %></b></p>
+    <p><b><%= link_to("#{:NAMES.t}: #{@project.name_count}",
+                      checklist_path(project_id: @project.id)) %></b></p>
+  <% end %>
+
+  <% if @project.images.any? %>
+    <p><b><%= :IMAGES.t %>:</b>
+    <%= @project.images.length %>
+    (<%= link_to(:SHOW.t, images_path(for_project: @project.id)) %>)
+    </p>
+  <% end %>
+
+  <% if @project.species_lists.any? %>
+    <p><b><%= :SPECIES_LISTS.t %>:</b>
+    <%= @project.species_lists.length %>
+    (<%= link_to(:SHOW.t,
+                  species_lists_path(for_project: @project.id)) %>)
+    </p>
+  <% end %>
+
+  <% if @drafts.any? %>
+    <p><b><%= :show_project_drafts.t %>:</b>
+    <%= @drafts.length %><br/>
+    <div class="ml-3">
+      <% @drafts.each do |draft| %>
+        <%= link_with_query(draft.name&.display_name&.t,
+                            name_description_path(draft.id)) %>
+        (<%= user_link(draft.user) %>)<br/>
       <% end %>
-      <%= if @user && @project.user_group.users.member?(@user)
-        render(partial: "projects/groups", locals: { project: @project })
-      end %>
-      <p><b><%= :show_project_by.t %>:</b> <%= user_link(@project.user) %></p>
-      <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-    <% end %>
-  </div>
+    </div>
+    </p>
+  <% end %>
 
-  <div class="col-md-6">
-    <%= panel_block do %>
+  <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
 
-      <% if @project.observations.any? %>
-        <b><%= :OBSERVATIONS.t %>:</b>
-        <%= @project.observations.length %>
-        (<%= link_to(:SHOW.t, observations_path(project: @project.id)) %> |
-        <%= link_to(:app_checklist.t,
-                    checklist_path(project_id: @project.id)) %>)
-        <br/>
-      <% end %>
-
-      <% if @project.images.any? %>
-        <b><%= :IMAGES.t %>:</b>
-        <%= @project.images.length %>
-        (<%= link_to(:SHOW.t, images_path(for_project: @project.id)) %>)
-        <br/>
-      <% end %>
-
-      <% if @project.species_lists.any? %>
-        <b><%= :SPECIES_LISTS.t %>:</b>
-        <%= @project.species_lists.length %>
-        (<%= link_to(:SHOW.t,
-                      species_lists_path(for_project: @project.id)) %>)
-        <br/>
-      <% end %>
-
-      <% if @drafts.any? %>
-        <b><%= :show_project_drafts.t %>:</b>
-        <%= @drafts.length %><br/>
-        <div class="ml-3">
-          <% @drafts.each do |draft| %>
-            <%= link_with_query(draft.name&.display_name&.t,
-                                name_description_path(draft.id)) %>
-            (<%= user_link(draft.user) %>)<br/>
-          <% end %>
-        </div>
-      <% end %>
-
-    <% end %>
-  </div>
-</div><!--.row-->
+<% end %>
 
 <%= render(partial: "comments/comments_for_object",
            locals: { object: @project, controls: true, limit: nil }) %>

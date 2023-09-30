@@ -111,4 +111,20 @@ class ProjectTest < UnitTestCase
     proj.log_destroy
     assert_nil(log.reload.target_id)
   end
+
+  def test_place_name
+    proj = projects(:eol_project)
+    loc = locations(:albion)
+    proj.place_name = loc.display_name
+    assert_equal(proj.location, loc)
+  end
+
+  def test_scientific_place_name
+    User.current_location_format = "scientific"
+    proj = projects(:eol_project)
+    loc = locations(:albion)
+    proj.place_name = loc.display_name
+    assert_equal(proj.location, loc)
+    User.current_location_format = "postal"
+  end
 end
