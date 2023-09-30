@@ -544,20 +544,20 @@ class MOMultiImageUploader {
 
   // gets or sets image date
   imageDate(item, simpleDate) {
-    const _img_day_field = item.dom_element.querySelectorAll('select')[0],
-      _img_month_field = item.dom_element.querySelectorAll('select')[1],
-      _img_year_field = item.dom_element.querySelectorAll('input')[2];
+    const _img_day_select = item.dom_element.querySelector('[id$="_when_3i"]'),
+      _img_month_select = item.dom_element.querySelector('[id$="_when_2i"]'),
+      _img_year_field = item.dom_element.querySelector('[id$="_when_1i"]');
 
     // set it if we've got a date
     if (simpleDate) {
-      _img_day_field.value = simpleDate.day;
-      _img_month_field.value = simpleDate.month;
+      _img_day_select.value = simpleDate.day;
+      _img_month_select.value = simpleDate.month;
       _img_year_field.value = simpleDate.year;
 
       // Make these easier to find with Capybara by explicitly setting the HTML
-      _img_day_field.options[_img_day_field.options.selectedIndex]
+      _img_day_select.options[_img_day_select.options.selectedIndex]
         .setAttribute('selected', 'true');
-      _img_month_field.options[_img_month_field.options.selectedIndex]
+      _img_month_select.options[_img_month_select.options.selectedIndex]
         .setAttribute('selected', 'true');
 
       return simpleDate;
