@@ -168,7 +168,7 @@ class MOMultiImageUploader {
     // when the hidden "set_as_thumb_image" for an image is changed.
     // _obs_thumb_image_radios.forEach((elem) => {
     _obs_thumb_image_radios.forEach((elem) => {
-      elem.onchange = function () {
+      elem.onchange = () => {
         document.getElementById('observation_thumb_image_id')
           .value = this.value;
       }
@@ -544,15 +544,22 @@ class MOMultiImageUploader {
 
   // gets or sets image date
   imageDate(item, simpleDate) {
-    const _img_day_field = item.dom_element.querySelectorAll('select')[0],
-      _img_month_field = item.dom_element.querySelectorAll('select')[1],
-      _img_year_field = item.dom_element.querySelectorAll('input')[2];
+    const _img_day_select = item.dom_element.querySelector('[id$="_when_3i"]'),
+      _img_month_select = item.dom_element.querySelector('[id$="_when_2i"]'),
+      _img_year_field = item.dom_element.querySelector('[id$="_when_1i"]');
 
     // set it if we've got a date
     if (simpleDate) {
-      _img_day_field.value = simpleDate.day,
-        _img_month_field.value = simpleDate.month,
-        _img_year_field.value = simpleDate.year
+      _img_day_select.value = simpleDate.day;
+      _img_month_select.value = simpleDate.month;
+      _img_year_field.value = simpleDate.year;
+
+      // Make these easier to find with Capybara by explicitly setting the HTML
+      _img_day_select.options[_img_day_select.options.selectedIndex]
+        .setAttribute('selected', 'true');
+      _img_month_select.options[_img_month_select.options.selectedIndex]
+        .setAttribute('selected', 'true');
+
       return simpleDate;
     } else {
       return this.SimpleDate(_img_day_field.value,
@@ -770,6 +777,13 @@ class MOMultiImageUploader {
       this.obs_day.value = simpleDate.day;
       this.obs_month.value = simpleDate.month;
       this.obs_year.value = simpleDate.year;
+
+      // Make these easier to find with Capybara by explicitly setting the HTML
+      this.obs_day.options[this.obs_day.options.selectedIndex]
+        .setAttribute('selected', 'true');
+      this.obs_month.options[this.obs_month.options.selectedIndex]
+        .setAttribute('selected', 'true');
+
       return simpleDate;
     } else { // or get it
       return this.SimpleDate(this.obs_day.value,
