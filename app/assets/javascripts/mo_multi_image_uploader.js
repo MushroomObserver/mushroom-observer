@@ -483,7 +483,7 @@ class MOMultiImageUploader {
       const latLngAlt = this.getLatLongEXIF(_exif),
         radioBtnToInsert = this.makeGeocodeRadioBtn(latLngAlt);
 
-      if (geocode_radio_container
+      if (this.geocode_radio_container
         .querySelectorAll('input[type="radio"]').length === 0) {
         this.show(this.geocode_messages);
         this.geocode_radio_container.appendChild(radioBtnToInsert);
