@@ -328,7 +328,7 @@ class MOMultiImageUploader {
     else {
       this.block_form_submission = false;
       this.submit_buttons.forEach((element) => {
-        element.innerText = this.localized_text.creating_observation_text;
+        element.value = this.localized_text.creating_observation_text;
       });
       this.form.submit();
     }
