@@ -550,9 +550,16 @@ class MOMultiImageUploader {
 
     // set it if we've got a date
     if (simpleDate) {
-      _img_day_field.value = simpleDate.day,
-        _img_month_field.value = simpleDate.month,
-        _img_year_field.value = simpleDate.year
+      _img_day_field.value = simpleDate.day;
+      _img_month_field.value = simpleDate.month;
+      _img_year_field.value = simpleDate.year;
+
+      // Make these easier to find with Capybara by explicitly setting the HTML
+      _img_day_field.options[_img_day_field.options.selectedIndex]
+        .setAttribute('selected', 'true');
+      _img_month_field.options[_img_month_field.options.selectedIndex]
+        .setAttribute('selected', 'true');
+
       return simpleDate;
     } else {
       return this.SimpleDate(_img_day_field.value,
@@ -770,6 +777,13 @@ class MOMultiImageUploader {
       this.obs_day.value = simpleDate.day;
       this.obs_month.value = simpleDate.month;
       this.obs_year.value = simpleDate.year;
+
+      // Make these easier to find with Capybara by explicitly setting the HTML
+      this.obs_day.options[this.obs_day.options.selectedIndex]
+        .setAttribute('selected', 'true');
+      this.obs_month.options[this.obs_month.options.selectedIndex]
+        .setAttribute('selected', 'true');
+
       return simpleDate;
     } else { // or get it
       return this.SimpleDate(this.obs_day.value,
