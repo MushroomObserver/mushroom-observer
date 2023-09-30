@@ -562,9 +562,9 @@ class MOMultiImageUploader {
 
       return simpleDate;
     } else {
-      return this.SimpleDate(_img_day_field.value,
-        _img_month_field.value,
-        _img_year_field.value)
+      return this.SimpleDate(
+        _img_day_select.value, _img_month_select.value, _img_year_field.value
+      )
     }
   }
 
