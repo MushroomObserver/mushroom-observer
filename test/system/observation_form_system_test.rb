@@ -148,8 +148,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       find(".file-field").click
     end
 
-    binding.break
-
     # scroll_to(0, 2400)
     assert_selector(".added_image_wrapper")
     assert_selector("#image_messages")
