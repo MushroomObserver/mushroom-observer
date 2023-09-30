@@ -188,6 +188,35 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal(image_wrappers.length, 2)
     second_image_wrapper = image_wrappers[1]
 
+    # Check that it's the right image: this is geotagged.jpg's date
+    within(second_image_wrapper) do
+      assert_equal("2018", find('[id$="_temp_image_when_1i"]').value)
+      assert_equal("12", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("31", find('[id$="_temp_image_when_3i"]').value)
+    end
+
+    # Try removing it
+    within(second_image_wrapper) { find(".remove_image_link").click }
+
+    # Be sure we have only one image wrapper now
+    image_wrappers = all(".added_image_wrapper")
+    assert_equal(image_wrappers.length, 1)
+
+    binding.break
+
+    # Add it again
+    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
+      find(".file-field").click
+    end
+
+    # We should now get the option to set obs GPS
+    assert_selector("#geocode_messages")
+
+    # Be sure we have two image wrappers
+    image_wrappers = all(".added_image_wrapper")
+    assert_equal(image_wrappers.length, 2)
+    second_image_wrapper = image_wrappers[1]
+
     within(second_image_wrapper) do
       assert_equal("2018", find('[id$="_temp_image_when_1i"]').value)
       assert_equal("12", find('[id$="_temp_image_when_2i"]').value)
@@ -234,11 +263,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Set the first one as the thumb_image
     within(first_image_wrapper) do
-      click_button(".set_thumb_image")
+      find(".set_thumb_image").click
       assert_selector(".is_thumb_image")
     end
 
     binding.break
+
+    # assert_field('observation_thumb_image_id', type: :hidden, with: ??)
 
     # within("#observation_form") do
     #   click_commit
