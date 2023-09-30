@@ -199,6 +199,32 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal([rolf], admin_group.users)
   end
 
+  def test_create_project_indefinite_dates
+    title = "Project without start or end"
+    start_date = Time.zone.today
+    end_date = start_date
+
+    params = {
+      project: {
+        title: title,
+        "start_date(1i)" => start_date.year,
+        "start_date(2i)" => start_date.month,
+        "start_date(3i)" => start_date.day,
+        "end_date(1i)" => end_date.year,
+        "end_date(2i)" => end_date.month,
+        "end_date(3i)" => end_date.day
+      },
+      start_date: { fixed: false },
+      end_date: { fixed: false }
+    }
+    post_requires_login(:create, params)
+
+    project = Project.find_by(title: title)
+    assert_redirected_to(project_path(project.id))
+    assert_nil(project.start_date)
+    assert_nil(project.end_date)
+  end
+
   def test_create_project_end_before_start
     title = "Backward in Time"
     summary = "Ends before it starts"
