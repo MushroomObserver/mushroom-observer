@@ -172,8 +172,11 @@ module CapybaraSessionExtensions
   # Not sure the assertions need `form` or `within() do` needs `|form|`
   def assert_form_has_correct_values(expected_fields, form_selector,
                                      session: self)
+    binding.break
     session.within(form_selector) do |form|
       expected_fields.each do |key, field|
+        puts(key)
+        puts(field)
         if field[:type] == :select
           assert(form.has_select?(key, selected: field[:value]))
         elsif field[:type].in?([:check, :radio]) && field[:value] == true
@@ -183,6 +186,7 @@ module CapybaraSessionExtensions
         elsif field[:type] == :text && field[:value] == ""
           assert(form.has_field?(key, text: field[:value]))
         else
+          sleep(1)
           assert(form.has_field?(key, with: field[:value]))
         end
       end
@@ -205,7 +209,7 @@ module CapybaraSessionExtensions
           form.uncheck(key)
         elsif change[:type] == :radio
           form.choose(change[:value])
-        elsif change[:type] == :autocomplete
+        elsif change[:type] == :autocompleter
           form.fill_in(key, with: change[:value])
           form.assert_field(key, with: change[:value])
         elsif change[:type] == :text
