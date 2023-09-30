@@ -27,8 +27,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("observation_place_name", with: locations.first.name[0, 10])
       # wait for the autocompleter...
       assert_selector(".auto_complete")
-      send_keys(:down) # cursor down to the first match
-      send_keys(:tab) # select currently highlighted row
+      send_keys(:down, :tab) # cursor down to first match + select row
       assert_field("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -43,8 +42,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("naming_name", with: "Coprinus com")
       # wait for the autocompleter!
       assert_selector(".auto_complete")
-      send_keys(:down) # cursor down to the first match
-      send_keys(:tab) # select currently highlighted row
+      send_keys(:down, :tab) # cursor down to first match + select row
       # unfocus, let field validate. send_keys(:tab) doesn't work here
       find("#observation_place_name").click
       assert_field("naming_name", with: "Coprinus comatus")
@@ -67,9 +65,116 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def test_post_edit_and_destroy_with_details_and_location
     setup_image_dirs # in general_extensions
-    open_create_observation_form
+    local_now = Time.zone.now.in_time_zone
+
+    # open_create_observation_form
+    visit(new_observation_path)
+    assert_selector("body.login__new")
+    login!(katrina)
+    assert_selector("body.observations__new")
+
+    # check new observation form defaults
+    assert_field("observation_when_1i", with: local_now.year.to_s)
+    assert_select("observation_when_2i", text: local_now.strftime("%B"))
+    assert_select("observation_when_3i", text: local_now.day.to_s)
+
+    assert_field("observation_place_name", text: "")
+    assert_field("observation_lat", text: "")
+    assert_field("observation_long", text: "")
+    assert_field("observation_alt", text: "")
+
+    assert_field("naming_name", text: "")
+    assert_checked_field("observation_is_collection_location")
+    assert_no_checked_field("observation_specimen")
+    assert_field(other_notes_id, text: "")
+
     # submit_observation_form_with_errors
+    fill_in("observation_when_1i", with: "2010")
+    select("March", from: "observation_when_2i")
+    select("14", from: "observation_when_3i")
+
+    fill_in("observation_place_name", with: "USA, California, Pasadena")
+    assert_field("observation_place_name", with: "USA, California, Pasadena")
+    uncheck("observation_is_collection_location")
+
+    check("observation_specimen")
+    assert_selector("#collection_number_number")
+    fill_in("collection_number_number", with: "17-034a")
+    fill_in(other_notes_id, with: "Notes for observation")
+
+    within("#observation_form") do
+      click_commit
+    end
+
+    # rejected
+    assert_selector("body.observations__create")
+    assert_has_location_warning(/Unknown country/)
+
+    # check form values after first changes
+    assert_field("observation_when_1i", with: "2010")
+    assert_select("observation_when_2i", text: "March")
+    assert_select("observation_when_3i", text: "14")
+
+    assert_field("observation_place_name", with: "USA, California, Pasadena")
+    assert_field("observation_lat", text: "")
+    assert_field("observation_long", text: "")
+    assert_field("observation_alt", text: "")
+
+    assert_field("naming_name", text: "")
+    assert_no_checked_field("observation_is_collection_location")
+    assert_checked_field("observation_specimen")
+    assert_field("collection_number_number", with: "17-034a")
+    assert_field(other_notes_id, with: "Notes for observation")
+
     # submit_observation_form_without_errors
+    fill_in("observation_place_name", with: "Pasadena, Calif")
+    assert_selector(".auto_complete")
+    send_keys(:down, :tab) # cursor down to first match + select row
+    assert_field("observation_place_name", with: "Pasadena, California, USA")
+    fill_in("observation_lat", with: " 12deg 34.56min N ")
+    fill_in("observation_long", with: " 123 45 6.78 W ")
+    fill_in("observation_alt", with: " 56 ft. ")
+
+    fill_in("naming_name", with: "Agaricus campe")
+    assert_selector(".auto_complete ul li", text: "Agaricus campestris")
+    send_keys(:down, :down, :down, :tab) # down to second match + select row
+    assert_field("naming_name", with: "Agaricus campestris")
+    select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
+
+    scroll_to(0, 1500)
+    attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
+      find(".file-field").click
+    end
+
+    assert_selector(".added_image_wrapper")
+    scroll_to(0, 2400)
+    # NOTE: these fields are regex matched, would be ambiguous with > 1 image
+    find('[id$="_temp_image_when_1i"]').set("2010")
+    find('[id$="_temp_image_when_2i"]').select("March")
+    find('[id$="_temp_image_when_3i"]').select("14")
+    find('[id$="_temp_image_copyright_holder"]').set(katrina.legal_name)
+    find('[id$="_temp_image_notes"]').set("Notes for image")
+
+    within("#observation_form") do
+      click_commit
+    end
+
+    # It should take us to create a new location
+    assert_selector("body.locations__new")
+    # The observation shoulda been created OK.
+    assert_flash_for_create_observation
+    assert_new_observation_is_correct(expected_values_after_create)
+
+    # check default values of location form
+    assert_field("location_display_name", with: "Pasadena, California, USA")
+    assert_field("location_high", text: "")
+    assert_field("location_low", text: "")
+    assert_field("location_notes", text: "")
+    assert_field("location_north", with: PASADENA_EXTENTS[:north])
+    assert_field("location_south", with: PASADENA_EXTENTS[:south])
+    assert_field("location_east", with: PASADENA_EXTENTS[:east])
+    assert_field("location_west", with: PASADENA_EXTENTS[:west])
+
     # submit_location_form_with_errors
     # submit_location_form_without_errors
     # open_edit_observation_form
@@ -78,37 +183,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # visit(observation_path(obs.id))
     # destroy_observation
     # make_sure_observation_is_not_in_log_index(obs)
-  end
-
-  def open_create_observation_form
-    visit(new_observation_path)
-    assert_selector("body.login__new")
-    login!(katrina)
-    assert_selector("body.observations__new")
-    sleep(3)
-    assert_form_has_correct_values(create_observation_form_defaults,
-                                   "#observation_form")
-  end
-
-  def submit_observation_form_with_errors
-    submit_form_with_changes(create_observation_form_first_changes,
-                             "#observation_form")
-    assert_selector("body.observations__create")
-    assert_has_location_warning(/Unknown country/)
-    assert_form_has_correct_values(
-      create_observation_form_values_after_first_changes,
-      "#observation_form"
-    )
-  end
-
-  def submit_observation_form_without_errors
-    submit_form_with_changes(create_observation_form_second_changes,
-                             "#observation_form")
-    assert_flash_for_create_observation
-    assert_selector("body.locations__new")
-    assert_new_observation_is_correct(expected_values_after_create)
-    assert_form_has_correct_values(create_location_form_defaults,
-                                   "#location_form")
   end
 
   def submit_location_form_with_errors
@@ -305,82 +379,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def other_notes_id
     Observation.notes_part_id(Observation.other_notes_part)
-  end
-
-  def create_observation_form_defaults
-    local_now = Time.zone.now.in_time_zone
-    {
-      "observation_when_1i" => { type: :text, value: local_now.year.to_s },
-      "observation_when_2i" => { type: :select, # month
-                                 value: local_now.strftime("%B") },
-      "observation_when_3i" => { type: :select, value: local_now.day.to_s },
-      "observation_place_name" => { type: :autocompleter, value: "" },
-      "observation_lat" => { type: :text, value: "" },
-      "observation_long" => { type: :text, value: "" },
-      "observation_alt" => { type: :text, value: "" },
-      "naming_name" => { type: :autocompleter, value: "" },
-      "observation_is_collection_location" => { type: :check, value: true },
-      "observation_specimen" => { type: :check, value: false },
-      other_notes_id => { type: :text, value: "" }
-    }
-  end
-
-  def create_observation_form_first_changes
-    {
-      "observation_when_1i" => { type: :text, value: "2010" },
-      "observation_when_2i" => { type: :select, value: "March" },
-      "observation_when_3i" => { type: :select, value: "14" },
-      "observation_place_name" => { type: :autocompleter, # wrong order
-                                    value: "USA, California, Pasadena" },
-      "observation_is_collection_location" => { type: :check, value: false },
-      "observation_specimen" => { type: :check, value: true },
-      "collection_number_number" => { type: :text, value: "17-034a" },
-      other_notes_id => { type: :text, value: "Notes for observation" }
-    }
-  end
-
-  def create_observation_form_second_changes
-    {
-      "observation_when_1i" => { type: :text, value: "2010" },
-      "observation_when_2i" => { type: :select, value: "March" },
-      "observation_when_3i" => { type: :select, value: "14" },
-      "observation_place_name" => { type: :autocompleter, # user preferred order
-                                    value: "Pasadena, California, USA" },
-      "observation_is_collection_location" => { type: :check, value: false },
-      "observation_specimen" => { type: :check, value: true },
-      other_notes_id => { type: :text, value: "Notes for observation" },
-      "observation_lat" => { type: :text, value: " 12deg 34.56min N " },
-      "observation_long" => { type: :text, value: " 123 45 6.78 W " },
-      "observation_alt" => { type: :text, value: " 56 ft. " },
-      "naming_name" => { type: :autocompleter,
-                         value: " Agaricus  campestris " },
-      "naming_vote_value" => { type: :select,
-                               value: Vote.confidence(Vote.next_best_vote) },
-      "image_0_image" => {
-        type: :file,
-        value: Rails.root.join("test/images/Coprinus_comatus.jpg")
-      },
-      "image_0_when_1i" => { type: :text, value: "2010", visible: false },
-      "image_0_when_2i" => { type: :select, value: "March", visible: false },
-      "image_0_when_3i" => { type: :select, value: "14", visible: false },
-      "image_0_copyright_holder" => { type: :text, value: katrina.legal_name,
-                                      visible: false },
-      "image_0_notes" => { type: :text, value: "Notes for image" }
-    }
-  end
-
-  def create_location_form_defaults
-    {
-      "location_display_name" => { type: :text,
-                                   value: "Pasadena, California, USA" },
-      "location_high" => { type: :text, value: "" },
-      "location_low" => { type: :text, value: "" },
-      "location_notes" => { type: :text, value: "" },
-      "location_north" => { type: :text, value: PASADENA_EXTENTS[:north] },
-      "location_south" => { type: :text, value: PASADENA_EXTENTS[:south] },
-      "location_east" => { type: :text, value: PASADENA_EXTENTS[:east] },
-      "location_west" => { type: :text, value: PASADENA_EXTENTS[:west] }
-    }
   end
 
   def create_location_form_first_changes
