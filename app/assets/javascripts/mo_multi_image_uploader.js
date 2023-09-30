@@ -168,7 +168,7 @@ class MOMultiImageUploader {
     // when the hidden "set_as_thumb_image" for an image is changed.
     // _obs_thumb_image_radios.forEach((elem) => {
     _obs_thumb_image_radios.forEach((elem) => {
-      elem.onchange = function () {
+      elem.onchange = () => {
         document.getElementById('observation_thumb_image_id')
           .value = this.value;
       }
@@ -328,7 +328,7 @@ class MOMultiImageUploader {
     else {
       this.block_form_submission = false;
       this.submit_buttons.forEach((element) => {
-        element.value = this.localized_text.creating_observation_text;
+        element.innerText = this.localized_text.creating_observation_text;
       });
       this.form.submit();
     }
