@@ -1,8 +1,8 @@
 <%# Projects section of create_observation form %>
   <% if @suspect_checked_projects.any? %>
-    <% flash_error(:form_observations_there_is_a_problem_with_projects.t) %>
+    <% flash_warning(:form_observations_there_is_a_problem_with_projects.t) %>
 
-    <div class="alert alert-danger"
+    <div class="alert alert-warning"
          id="project_messages">
       <%= tag.p(
         "#{:form_observations_projects_out_of_range.t(
