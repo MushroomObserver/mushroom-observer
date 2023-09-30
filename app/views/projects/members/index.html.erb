@@ -31,7 +31,7 @@ action = { controller: "/projects/members", action: :create,
 <table class="table table-striped table-project-members mt-3">
   <thead>
     <tr>
-      <th><%= :Login_name.t %></th>
+      <th class="text-center"><%= :Login_name.t %></th>
       <th><%= :Full_name.t %></th>
       <th><%= :Status.t %></th>
       <th></th>
@@ -40,16 +40,20 @@ action = { controller: "/projects/members", action: :create,
   <tbody>
     <% @users.sort_by(&:login).each do |user| %>
       <tr>
-        <td>
+        <td class="text-center">
+	  <%= if user.image_id
+                interactive_image(Image.find(user.image_id), votes: false,
+	                          size: :thumbnail)
+	      end %>
           <%= user_link(user, user.login) %>
         </td>
-        <td>
+        <td class="align-middle">
           <%= user.name %>
         </td>
-        <td>
+        <td class="align-middle">
           <%= @project.member_status(user) %>
         </td>
-        <td>
+        <td class="align-middle">
 	  <% if @project.is_admin?(@user) %>
 	    <%= link_with_query(:change_member_status_change_status.t,
                     edit_project_member_path(project_id: @project.id,
