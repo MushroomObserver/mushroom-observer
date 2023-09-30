@@ -148,6 +148,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       find(".file-field").click
     end
 
+    binding.break
+
     # scroll_to(0, 2400)
     assert_selector(".added_image_wrapper")
     assert_selector("#image_messages")
@@ -197,19 +199,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Try removing it
     within(second_image_wrapper) { find(".remove_image_link").click }
+    # FIXME: when removing only image w geocode, it doesn't remove geocode msg
 
+    binding.break
     # Be sure we have only one image wrapper now
     image_wrappers = all(".added_image_wrapper")
     assert_equal(image_wrappers.length, 1)
 
-    binding.break
-
-    # Add it again
+    # Add geotagged.jpg again
     attach_file(Rails.root.join("test/images/geotagged.jpg")) do
       find(".file-field").click
     end
 
-    # We should now get the option to set obs GPS
+    # We should now get the option to set obs GPS again
     assert_selector("#geocode_messages")
 
     # Be sure we have two image wrappers
