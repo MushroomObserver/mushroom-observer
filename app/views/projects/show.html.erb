@@ -18,8 +18,12 @@ add_tab_set(project_show_tabs(project: @project, user: @user))
   <div class="col-md-6">
     <%= panel_block do %>
       <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-      <p><b><%= :show_project_start_date.t %>:</b> <%= @project.start_date %><br/>
-      <b><%= :show_project_end_date.t %>:</b> <%= @project.end_date %></p>
+      <p>
+        <b><%= :show_project_start_date.t %>:</b>
+          <%= @project.start_date || :form_projects_date_indefinite.t%><br/>
+        <b><%= :show_project_end_date.t %>:</b>
+          <%= @project.end_date || :form_projects_date_indefinite.t %>
+      </p>
       <p><b><%= :show_project_by.t %>:</b> <%= user_link(@project.user) %></p>
       <p><b><%= :show_project_user_group.t %>:</b> <%= @project.user_group.name.t %></p>
       <p><b><%= :show_project_admin_group.t %>:</b> <%= @project.admin_group.name.t %></p>

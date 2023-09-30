@@ -177,7 +177,9 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date.year,
         "end_date(2i)" => end_date.month,
         "end_date(3i)" => end_date.day
-      }
+      },
+      start_date: { fixed: true },
+      end_date: { fixed: true }
     }
     post_requires_login(:create, params)
 
@@ -212,7 +214,9 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date.year,
         "end_date(2i)" => end_date.month,
         "end_date(3i)" => end_date.day
-      }
+      },
+      start_date: { fixed: true },
+      end_date: { fixed: true }
     }
 
     post_requires_login(:create, params)
@@ -305,7 +309,9 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date.year,
         "end_date(2i)" => end_date.month,
         "end_date(3i)" => end_date.day
-      }
+      },
+      start_date: { fixed: true },
+      end_date: { fixed: true }
     }
 
     login(proj.user.login)

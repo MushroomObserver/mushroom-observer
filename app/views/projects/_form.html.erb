@@ -11,11 +11,31 @@
       <%= f.label(:start_date, "#{:form_projects_start_date.t}: ") %>
       <%= f.date_select(:start_date,
                         { class: "form-control mb-2" }) %>
+      <p>
+        <%= radio_button(
+              "start_date", "fixed", true, checked: @start_date_fixed
+            ) %> <%= :form_projects_date_fixed.t %>
+      </p>
+      <p>
+        <%= radio_button(
+            "start_date", "fixed", false, checked: !@start_date_fixed
+            ) %> <%= :form_projects_date_indefinite.t %>
+      </p>
     </div>
     <div>
       <%= f.label(:end_date, "#{:form_projects_end_date.t}: ") %>
       <%= f.date_select(:end_date,
                         { class: "form-control mb-2" }) %>
+      <p>
+        <%= radio_button(
+              "end_date", "fixed", true, checked: @end_date_fixed
+            ) %> <%= :form_projects_date_fixed.t %>
+      </p>
+      <p>
+        <%= radio_button(
+              "end_date", "fixed", false, checked: !@end_date_fixed
+            ) %> <%= :form_projects_date_indefinite.t %>
+      </p>
     </div>
   </div>
 

@@ -51,6 +51,8 @@ class ProjectsController < ApplicationController
   #   Outputs: @project
   # def add_project
   def new
+    @start_date_fixed = true
+    @end_date_fixed = true
     @project = Project.new
   end
 
@@ -69,6 +71,8 @@ class ProjectsController < ApplicationController
   def edit
     return unless find_project!
 
+    @start_date_fixed = @project.start_date.present?
+    @end_date_fixed = @project.end_date.present?
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))
@@ -116,6 +120,10 @@ class ProjectsController < ApplicationController
     elsif !@project.update(permitted_project_params)
       flash_object_errors(@project)
     else
+      @project.start_date = nil if params.dig(:start_date,:fixed) == "false"
+      @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
+      @project.save
+
       @project.log_update
       flash_notice(:runtime_edit_project_success.t(id: @project.id))
       return redirect_to(project_path(@project.id, q: get_query_param))
@@ -157,24 +165,12 @@ class ProjectsController < ApplicationController
   end
 
   def ends_before_start?
-    start_date = if start_year.nil?
-                   nil
-                 elsif start_month && start_day
+    start_date = if params.dig(:start_date,:fixed) == "true"
                    Date.new(start_year.to_i, start_month.to_i, start_day.to_i)
-                 elsif start_month
-                   Date.new(start_year.to_i, start_month.to_i)
-                 else
-                   Date.new(start_year.to_i)
                  end
 
-    end_date = if end_year.nil?
-                 nil
-               elsif end_month && end_day
+    end_date = if params.dig(:end_date, :fixed) == "true"
                  Date.new(end_year.to_i, end_month.to_i, end_day.to_i)
-               elsif end_month
-                 Date.new(end_year.to_i, end_month.to_i)
-               else
-                 Date.new(end_year.to_i)
                end
 
     # uses `present?` in order to return boolean rather than truthy
@@ -294,6 +290,8 @@ class ProjectsController < ApplicationController
 
     # Create project.
     @project = Project.new(permitted_project_params)
+    @project.start_date = nil if params.dig(:start_date, :fixed) == "false"
+    @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
     @project.user = @user
     @project.user_group = user_group
     @project.admin_group = admin_group

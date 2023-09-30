@@ -3172,6 +3172,8 @@
   form_project_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
   form_projects_start_date: Project Start Date
   form_projects_end_date: Project End Date
+  form_projects_date_fixed: Use above date
+  form_projects_date_indefinite: Indefinite
   form_projects_open_membership: Enable users to add themselves and disable shared editing
   form_projects_accepting_observations: Project is accepting new observations from members
 
@@ -3545,7 +3547,7 @@
   privacy_how_we_protect_content: "We strive to protect your information from unauthorized access, use, or disclosure. We use a variety of physical and technical measures, policies, and procedures (such as access control procedures, network firewalls, and physical security) designed to protect our systems and your Personal Information. Unfortunately, there's no such thing as completely secure data transmission or storage, so we can't guarantee that our security will not be breached (by technical measures or through violation of our policies and procedures).\n\nWe will never ask for your password by email. If you ever receive an email that requests your password, please let us know by sending it to webmaster@mushroomobserver.org, so we can investigate the source of the email."
 
   privacy_how_long_do_we_keep_data_header: "*How Long Do We Keep Your Data?*"
-  privacy_how_long_do_we_keep_data_content: "We store your Personal Information for an indefinite amount of time.  You are free to edit most of this information through your preference page.\n\nPlease remember that certain information, such as your IP address, username, and any public contributions to the Mushroom Observer, is archived and displayed indefinitely by design; the transparency of the projects’ contribution and revision histories is critical to their efficacy and trustworthiness.\n\nFor the protection of the Mushroom Observer and other users, if you do not agree with this Privacy Policy, you may not use the Mushroom Observer."
+  privacy_how_long_do_we_keep_data_content: "We store your Personal Information for an indefinite amount of time.  You are free to edit most of this   information through your preference page.\n\nPlease remember that certain information, such as your IP address, username, and any public contributions to the Mushroom Observer, is archived and displayed indefinitely by design; the transparency of the projects’ contribution and revision histories is critical to their efficacy and trustworthiness.\n\nFor the protection of the Mushroom Observer and other users, if you do not agree with this Privacy Policy, you may not use the Mushroom Observer."
 
   privacy_where_is_mo_header: "*Where is Mushroom Observer, Inc. & What Does That Mean for Me?*"
   privacy_where_is_mo_content: Mushroom Observer, Inc. is a non-profit organization incorporated in Massachusetts, with servers and data centers located in the U.S. If you decide to use the Mushroom Observer, whether from inside or outside of the U.S., you understand that your Personal Information will be collected, transferred, stored, processed, disclosed and otherwise used in the U.S. as described in this Privacy Policy. You also understand that your information may be transferred by us from the U.S. to other countries, which may have different or less stringent data protection laws than your country, in connection with providing services to you.
