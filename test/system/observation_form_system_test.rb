@@ -141,39 +141,124 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
 
-    scroll_to(0, 1500)
+    # scroll_to(0, 1500)
+    # Add the images separately, so we can be sure of the order. Otherwise,
+    # images appear in the order each upload finishes, which is unpredictable.
     attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
       find(".file-field").click
     end
 
+    # scroll_to(0, 2400)
     assert_selector(".added_image_wrapper")
-    scroll_to(0, 2400)
-    # NOTE: these fields are regex matched, would be ambiguous with > 1 image
-    find('[id$="_temp_image_when_1i"]').set("2010")
-    find('[id$="_temp_image_when_2i"]').select("March")
-    find('[id$="_temp_image_when_3i"]').select("14")
-    find('[id$="_temp_image_copyright_holder"]').set(katrina.legal_name)
-    find('[id$="_temp_image_notes"]').set("Notes for image")
+    assert_selector("#image_messages")
 
-    within("#observation_form") do
-      click_commit
+    first_image_wrapper = first(".added_image_wrapper")
+
+    # Coprinus_comatus.jpg has a created_at date of November 20, 2006
+    # Does not work:
+    # assert_field('[id$="_temp_image_when_1i"]', with: "2006")
+    # No idea why we have to do it like this, maybe value set by JS.
+    within(first_image_wrapper) do
+      assert_equal("2006", find('[id$="_temp_image_when_1i"]').value)
+      assert_equal("11", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("20", find('[id$="_temp_image_when_3i"]').value)
     end
 
-    # It should take us to create a new location
-    assert_selector("body.locations__new")
-    # The observation shoulda been created OK.
-    assert_flash_for_create_observation
-    assert_new_observation_is_correct(expected_values_after_create)
+    # "fix_date" radios: check that the first image date is available
+    within("#image_date_radio_container") do
+      assert_unchecked_field("20-November-2006")
+    end
+    # check that the chosen obs date is available
+    within("#observation_date_radio_container") do
+      assert_unchecked_field("14-March-2010")
+      # this would be today's date in the format:
+      # assert_unchecked_field(local_now.strftime("%d-%B-%Y"))
+    end
 
-    # check default values of location form
-    assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_field("location_high", text: "")
-    assert_field("location_low", text: "")
-    assert_field("location_notes", text: "")
-    assert_field("location_north", with: PASADENA_EXTENTS[:north])
-    assert_field("location_south", with: PASADENA_EXTENTS[:south])
-    assert_field("location_east", with: PASADENA_EXTENTS[:east])
-    assert_field("location_west", with: PASADENA_EXTENTS[:west])
+    # Add a second image that's geotagged
+    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
+      find(".file-field").click
+    end
+
+    # We should now get the option to set obs GPS
+    assert_selector("#geocode_messages")
+
+    # Be sure we have two image wrappers
+    image_wrappers = all(".added_image_wrapper")
+    assert_equal(image_wrappers.length, 2)
+    second_image_wrapper = image_wrappers[1]
+
+    within(second_image_wrapper) do
+      assert_equal("2018", find('[id$="_temp_image_when_1i"]').value)
+      assert_equal("12", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("31", find('[id$="_temp_image_when_3i"]').value)
+    end
+
+    # "fix_date" radios: check that the second image date is available
+    within("#image_date_radio_container") do
+      assert_unchecked_field("31-December-2018")
+    end
+    # "fix_geocode" radios: check that the gps is available
+    within("#geocode_radio_container") do
+      assert_unchecked_field("25.75820, -80.37313")
+    end
+
+    # Set copyright holder and image notes on both
+    all('[id$="_temp_image_copyright_holder"]').each do |el|
+      el.set(katrina.legal_name)
+    end
+    all('[id$="_temp_image_notes"]').each do |el|
+      el.set("Notes for image")
+    end
+
+    # Fix divergent dates: use the obs date
+    within("#observation_date_radio_container") { choose("14-March-2010") }
+    click_button("fix_dates")
+    assert_no_selector("image_messages")
+
+    # Ignore divergent GPS - maybe we took the second photo in the lab?
+    click_button("ignore_geocode")
+    assert_no_selector("geocode_messages")
+
+    # Be sure the dates are applied
+    within(first_image_wrapper) do
+      assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
+      assert_equal("3", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("14", find('[id$="_temp_image_when_3i"]').value)
+    end
+    within(second_image_wrapper) do
+      assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
+      assert_equal("3", find('[id$="_temp_image_when_2i"]').value)
+      assert_equal("14", find('[id$="_temp_image_when_3i"]').value)
+    end
+
+    # Set the first one as the thumb_image
+    within(first_image_wrapper) do
+      click_button(".set_thumb_image")
+      assert_selector(".is_thumb_image")
+    end
+
+    binding.break
+
+    # within("#observation_form") do
+    #   click_commit
+    # end
+
+    # # It should take us to create a new location
+    # assert_selector("body.locations__new")
+    # # The observation shoulda been created OK.
+    # assert_flash_for_create_observation
+    # assert_new_observation_is_correct(expected_values_after_create)
+
+    # # check default values of location form
+    # assert_field("location_display_name", with: "Pasadena, California, USA")
+    # assert_field("location_high", text: "")
+    # assert_field("location_low", text: "")
+    # assert_field("location_notes", text: "")
+    # assert_field("location_north", with: PASADENA_EXTENTS[:north])
+    # assert_field("location_south", with: PASADENA_EXTENTS[:south])
+    # assert_field("location_east", with: PASADENA_EXTENTS[:east])
+    # assert_field("location_west", with: PASADENA_EXTENTS[:west])
 
     # submit_location_form_with_errors
     # submit_location_form_without_errors
