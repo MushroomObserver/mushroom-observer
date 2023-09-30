@@ -2995,6 +2995,52 @@ class ObservationsControllerTest < FunctionalTestCase
     end
   end
 
+  def test_project_observation_location
+    project = projects(:albion_project)
+    obs = observations(:california_obs)
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_project_checks(project.id => :checked)
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: {
+          "id_#{project.id}" => "1",
+          :ignore_proj_conflicts => "1"
+        }
+      }
+    )
+    assert_response(:redirect)
+    assert_obj_arrays_equal([project], obs.reload.projects)
+  end
+
+  def test_project_observation_good_location
+    project = projects(:wrangel_island_project)
+    obs = observations(:perkatkun_obs)
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_response(:redirect)
+    assert_obj_arrays_equal([project], obs.reload.projects)
+  end
+
   def test_list_checkboxes_in_create_observation
     init_for_list_checkbox_tests
 
