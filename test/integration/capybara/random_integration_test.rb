@@ -6,7 +6,7 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
   # Test "/controller/action/type/id" route used by AJAX controller.
   def test_ajax_router
     visit("/ajax/auto_complete/name/Agaricus")
-    lines = page.html.split("\n")
+    lines = JSON.parse(page.html)
     assert_equal("A", lines.first)
     assert(lines.include?("Agaricus"))
     assert(lines.include?("Agaricus campestris"))

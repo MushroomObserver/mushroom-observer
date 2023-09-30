@@ -93,6 +93,8 @@ class MOAutocompleter {
       page_size: 10,
       // max length of string to send via AJAX
       max_request_length: 50,
+      // allowed separators (e.g. " OR ") - restarts autocomplete afterwards
+      separator: null,
       // show error messages returned via AJAX?
       show_errors: false,
       // include pulldown-icon on right, and always show all options
@@ -104,7 +106,6 @@ class MOAutocompleter {
     const autocompleterTypes = {
       clade: {
         ajax_url: "/ajax/auto_complete/clade/@",
-        collapse: 1
       },
       herbarium: { // params[:user_id] handled in controller
         ajax_url: "/ajax/auto_complete/herbarium/@",
@@ -145,9 +146,9 @@ class MOAutocompleter {
       focused: false,        // is user in text field?
       menu_up: false,        // is pulldown visible?
       old_value: {},         // previous value of input field
-      primer: '',            // initial server-supplied list of many options
+      primer: [],            // initial server-supplied list of many options
       matches: [],           // list of options currently showing
-      current_row: -1,       // number of option currently highlighted (0 = none)
+      current_row: -1,       // index of option currently highlighted (0 = none)
       current_value: null,   // value currently highlighted (null = none)
       current_highlight: -1, // row of view highlighted (-1 = none)
       current_width: 0,      // current width of menu
@@ -191,8 +192,8 @@ class MOAutocompleter {
     // Figure out a few browser-dependent dimensions.
     this.scrollbar_width = this.getScrollBarWidth();
 
-    // Initialize autocomplete primer.
-    this.primer = "\n" + this.primer;
+    // Initialize autocomplete primer with a blank newline.
+    this.primer.unshift('\n');
 
     // Create pulldown.
     this.create_pulldown();
@@ -244,13 +245,13 @@ class MOAutocompleter {
       style = old_elem.getAttribute("style"),
       value = old_elem.value,
       opts = old_elem.options,
-      options = [],
+      primer = [],
       new_elem = document.createElement("input");
     new_elem.type = "text";
     const length = opts.length > 20 ? 20 : opts.length;
 
     for (let i = 0; i < opts.length; i++)
-      options.push(opts.item(i).text);
+      primer.push(opts.item(i).text);
 
     new_elem.classList = classList;
     new_elem.style = style;
@@ -266,7 +267,7 @@ class MOAutocompleter {
     new_elem.setAttribute("name", name);
 
     this.input_elem = new_elem,
-      this.primer = options.join("\n"),
+      this.primer = primer,
       this.pulldown_size = length,
       this.act_like_select = true
 
@@ -526,10 +527,10 @@ class MOAutocompleter {
   go_end() { this.move_cursor(this.matches.length) }
   move_cursor(rows) {
     this.verbose("move_cursor()");
-    const old_row = this.current_row;
-    let new_row = old_row + rows;
-    const old_scr = this.scroll_offset;
-    let new_scr = old_scr;
+    const old_row = this.current_row,
+      old_scr = this.scroll_offset;
+    let new_row = old_row + rows,
+      new_scr = old_scr;
 
     // Move cursor, but keep in bounds.
     if (new_row < 0)
@@ -557,10 +558,12 @@ class MOAutocompleter {
   // Mouse has moved over a menu item.
   highlight_row(new_hl) {
     this.verbose("highlight_row()");
-    const rows = this.list_elem.children;
-    const old_hl = this.current_highlight;
+    const rows = this.list_elem.children,
+      old_hl = this.current_highlight;
+
     this.current_highlight = new_hl;
     this.current_row = this.scroll_offset + new_hl;
+
     if (old_hl != new_hl) {
       if (old_hl >= 0)
         rows[old_hl].classList.remove(this.hot_class);
@@ -574,10 +577,11 @@ class MOAutocompleter {
   // Called when users scrolls via scrollbar.
   our_scroll() {
     this.verbose("our_scroll()");
-    const old_scr = this.scroll_offset;
-    const new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height);
-    const old_row = this.current_row;
-    const new_row = this.current_row;
+    const old_scr = this.scroll_offset,
+      new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height),
+      old_row = this.current_row;
+    let new_row = this.current_row;
+
     if (new_row < new_scr)
       new_row = new_scr;
     if (new_row >= new_scr + this.pulldown_size)
@@ -605,7 +609,8 @@ class MOAutocompleter {
     }
     this.input_elem.focus();
     this.focused = true;
-    this.input_elem.value = new_val;
+    // this.input_elem.value = new_val;
+    this.set_search_token(new_val);
     this.our_change(false);
   }
 
@@ -650,7 +655,6 @@ class MOAutocompleter {
   // Get actual row height when it becomes available.
   // Experimentally creates a test row.
   get_row_height() {
-    // this.input_elem.disabled = true;
     const div = document.createElement('div'),
       ul = document.createElement('ul'),
       li = document.createElement('li');
@@ -665,7 +669,6 @@ class MOAutocompleter {
     this.temp_row = div;
     // window.setTimeout(this.set_row_height(), 100);
     this.set_row_height();
-    // this.input_elem.disabled = false;
   }
   set_row_height() {
     if (this.temp_row) {
@@ -683,17 +686,16 @@ class MOAutocompleter {
   // Redraw the pulldown options.
   draw_pulldown() {
     this.verbose("draw_pulldown()");
-    const list = this.list_elem;
-    const rows = list.children;
-    const size = this.pulldown_size;
-    const scroll = this.scroll_offset;
-    const cur = this.current_row;
-    const matches = this.matches;
+    const list = this.list_elem,
+      rows = list.children,
+      size = this.pulldown_size,
+      scroll = this.scroll_offset,
+      cur = this.current_row,
+      matches = this.matches;
 
     if (this.log) {
       this.debug(
-        "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur
+        "Redraw: matches=" + matches.length + ", scroll=" + scroll + ", cursor=" + cur
       );
     }
 
@@ -749,15 +751,15 @@ class MOAutocompleter {
 
   // Make menu visible if nonempty.
   make_menu_visible(matches, size, scroll) {
-    const menu = this.pulldown_elem;
-    const inner = menu.children[0];
+    const menu = this.pulldown_elem,
+      inner = menu.children[0];
 
     if (matches.length > 0) {
       // console.log("Matches:" + matches)
-      const top = this.input_elem.offsetTop;
-      const left = this.input_elem.offsetLeft;
-      const hgt = this.input_elem.offsetHeight;
-      const scr = this.input_elem.scrollTop;
+      const top = this.input_elem.offsetTop,
+        left = this.input_elem.offsetLeft,
+        hgt = this.input_elem.offsetHeight,
+        scr = this.input_elem.scrollTop;
       menu.style.top = (top + hgt + scr) + "px";
       menu.style.left = left + "px";
 
@@ -842,10 +844,8 @@ class MOAutocompleter {
 
     // Sort and remove duplicates.
     this.matches = this.remove_dups(this.matches.sort());
-
     // Try to find old highlighted row in new set of options.
     this.update_current_row(last);
-
     // Reset width each time we change the options.
     this.current_width = this.input_elem.offsetWidth;
   }
@@ -853,93 +853,121 @@ class MOAutocompleter {
   // When "acting like a select" make it display all options in the
   // order given right from the moment they enter the field.
   update_select() {
-    this.matches = this.primer.split("\n");
+    this.matches = this.primer;
   }
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal() {
-    const val = this.input_elem.value.normalize().toLowerCase();
-    const primer = this.primer.normalize();
-    const matches = [];
+    const val = this.get_search_token().normalize().toLowerCase(),
+      // normalize the Unicode of each string in primer for search
+      primer = this.primer.map((str) => { return str.normalize() }),
+      matches = [];
+
     if (val != '') {
-      let i, j, s;
-      for (i = primer.indexOf("\n"); i >= 0; i = j) {
-        j = primer.indexOf("\n", i + 1);
-        s = primer.substring(i + 1, j > 0 ? j : primer.length);
-        if (s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
+      for (let i = 0; i < primer.length; i++) {
+        let s = primer[i + 1];
+        if (s && s.length > 0 && s.toLowerCase().indexOf(val) >= 0) {
           matches.push(s);
-          if (matches.length >= this.max_matches)
-            break;
         }
       }
     }
+
     this.matches = matches;
   }
 
   // Grab matches ignoring order of words.
   update_unordered() {
-    const val = this.input_elem.value.normalize().toLowerCase().
-      replace(/^ */, '').replace(/  +/g, ' ');
-    const vals = val.split(' ');
-    const primer = this.primer.normalize();
-    const matches = [];
-    if (val != '') {
-      let i, j, k, s, s2;
-      for (i = primer.indexOf("\n"); i >= 0; i = j) {
-        j = primer.indexOf("\n", i + 1);
-        s = primer.substring(i + 1, j > 0 ? j : primer.length);
-        s2 = ' ' + s.toLowerCase() + ' ';
+    // regularize spacing in the input
+    const val = this.get_search_token().normalize().toLowerCase().
+      replace(/^ */, '').replace(/  +/g, ' '),
+      // get the separate words as vals
+      vals = val.split(' '),
+      // normalize the Unicode of each string in primer for search
+      primer = this.primer.map((str) => { return str.normalize() }),
+      matches = [];
+
+    if (val != '' && primer.length > 1) {
+      for (let i = 1; i < primer.length; i++) {
+        let s = primer[i] || '',
+          s2 = ' ' + s.toLowerCase() + ' ',
+          k;
+        // check each word in the primer entry for a matching word
         for (k = 0; k < vals.length; k++) {
           if (s2.indexOf(' ' + vals[k]) < 0) break;
         }
         if (k >= vals.length) {
           matches.push(s);
-          if (matches.length >= this.max_matches)
-            break;
         }
       }
     }
+
     this.matches = matches;
   }
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order must have genera first, then species, then varieties.
   update_collapsed() {
-    const val = "\n" + this.input_elem.value.toLowerCase();
-    const primer = this.primer;
+    const val = this.get_search_token().toLowerCase(),
+      primer = this.primer,
+      // make a lowercased duplicate of primer to regularize search
+      primer_lc = this.primer.map((str) => { return str.toLowerCase() }),
+      matches = [];
 
-    const primer_lc = this.primer.toLowerCase();
-    const matches = [];
-    if (val != "\n") {
+    if (val != '' && primer.length > 1) {
       let the_rest = (val.match(/ /g) || []).length >= this.collapse;
-      for (let i = primer_lc.indexOf(val); i >= 0;
-        i = primer_lc.indexOf(val, i + 1)) {
-        let j = primer.indexOf("\n", i + 1);
-        let s = primer.substring(i + 1, j > 0 ? j : primer.length);
+
+      for (let i = this.get_primer_index_of_substr(primer_lc, val);
+        i < primer_lc.length; i++) {
+        let s = primer[i];
+
         if (s.length > 0) {
-          if (the_rest || s.indexOf(' ', val.length - 1) < val.length - 1) {
+          if (the_rest || s.indexOf(' ', val.length) < val.length) {
             matches.push(s);
-            if (matches.length >= this.max_matches)
-              break;
           } else if (matches.length > 1) {
             break;
           } else {
-            if ("\n" + matches[0] == val)
+            if (matches[0] == val)
               matches.pop();
             matches.push(s);
-            if (matches.length >= this.max_matches)
-              break;
             the_rest = true;
           }
         }
       }
       if (matches.length == 1 &&
-        (val == "\n" + matches[0].toLowerCase() ||
-          val == "\n" + matches[0].toLowerCase() + " "))
+        (val == matches[0].toLowerCase() ||
+          val == matches[0].toLowerCase() + ' '))
         matches.pop();
     }
     this.matches = matches;
   }
+
+  // index of substr within the primer values
+  get_primer_index_of_substr(primer, val) {
+    for (let i = 0; i < primer.length; i++) {
+      // For multidimensional this would be primer[i][0], the text
+      const index = primer[i].indexOf(val);
+      if (index > -1) {
+        return i;
+      }
+    }
+  }
+
+  /**
+   * Index of string in primer array with IDs
+   * where primer == [[text_string, id], [text_string, id]]
+   * @param primer {!Array} - the input array
+   * @param val {object} - the value to search
+   * @return {Array} or just i
+   */
+  // get_primer_index_of(primer, val) {
+  //   for (let i = 0; i < primer.length; i++) {
+  //     const index = primer[i].indexOf(val);
+  //     if (index > -1) {
+  //       // return [i, index];
+  //       return i;
+  //     }
+  //   }
+  // }
 
   // Remove duplicates from a sorted array.
   remove_dups(list) {
@@ -957,13 +985,13 @@ class MOAutocompleter {
   // otherwise highlight first match.
   update_current_row(val) {
     this.verbose("update_current_row()");
-    const matches = this.matches;
-    const size = this.pulldown_size;
-    let exact = -1;
-    let part = -1;
-    let new_scr, new_row, i;
+    const matches = this.matches,
+      size = this.pulldown_size;
+    let exact = -1,
+      part = -1;
+
     if (val && val.length > 0) {
-      for (i = 0; i < matches.length; i++) {
+      for (let i = 0; i < matches.length; i++) {
         if (matches[i] == val) {
           exact = i;
           break;
@@ -973,18 +1001,85 @@ class MOAutocompleter {
           part = i;
       }
     }
-    new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
-    new_scr = this.scroll_offset;
-    if (new_scr > new_row)
-      new_scr = new_row;
-    if (new_scr > matches.length - size)
-      new_scr = matches.length - size;
-    if (new_scr < new_row - size + 1)
-      new_scr = new_row - size + 1;
-    if (new_scr < 0)
-      new_scr = 0;
+    let new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
+    let new_scroll = this.scroll_offset;
+    if (new_scroll > new_row)
+      new_scroll = new_row;
+    if (new_scroll > matches.length - size)
+      new_scroll = matches.length - size;
+    if (new_scroll < new_row - size + 1)
+      new_scroll = new_row - size + 1;
+    if (new_scroll < 0)
+      new_scroll = 0;
+
     this.current_row = new_row;
-    this.scroll_offset = new_scr;
+    this.scroll_offset = new_scroll;
+  }
+
+  /**
+  * ------------------------------ Search Token ------------------------------
+  *
+  * The user input string for which we're currently requesting a server response
+  * for matches. Usually that's the whole string, but in cases where the
+  * autocompleter accepts a `separator` argument (currently only ' OR ', on the
+  * advanced search page) the new search token would be the segment of the user
+  * input string *after* that separator.
+  *
+  * That way, you get autocompletes for each part of "Agaricaceae OR Agaricales"
+  */
+
+  // Get search token under or immediately in front of cursor.
+  get_search_token() {
+    const val = this.input_elem.value;
+    let token = val;
+    if (this.separator) {
+      const s_ext = this.search_token_extents();
+      token = val.substring(s_ext.start, s_ext.end);
+    }
+    return token;
+  }
+
+  // Change the token under or immediately in front of the cursor.
+  set_search_token(new_val) {
+    const old_str = this.input_elem.value;
+    if (this.separator) {
+      let new_str = "";
+      const s_ext = this.search_token_extents();
+
+      if (s_ext.start > 0)
+        new_str += old_str.substring(0, s_ext.start);
+      new_str += new_val;
+
+      if (s_ext.end < old_str.length)
+        new_str += old_str.substring(s_ext.end);
+      if (old_str != new_str) {
+        var old_scroll = this.input_elem.offsetTop;
+        this.input_elem.value = new_str;
+        setCursorPosition(this.input_elem[0], s_ext.start + new_val.length);
+        this.input_elem.offsetTop = old_scroll;
+      }
+    } else {
+      if (old_str != new_val)
+        this.input_elem.value = new_val;
+    }
+  }
+
+  // Get index of first character and character after last of current token.
+  search_token_extents() {
+    let start, end, sel = getInputSelection(this.input_elem[0]);
+    const val = this.input_elem.value;
+    if (sel.start > 0)
+      start = val.lastIndexOf(this.separator, sel.start - 1);
+    else
+      start = 0;
+    if (start < 0)
+      start = 0;
+    else
+      start += this.separator.length;
+    end = val.indexOf(this.separator, start);
+    if (end <= start || end > sel.length)
+      end = sel.length;
+    return { start: start, end: end };
   }
 
   // ------------------------------ Fetch matches ------------------------------
@@ -992,7 +1087,8 @@ class MOAutocompleter {
   // Send request for updated primer.
   refresh_primer() {
     this.verbose("refresh_primer()");
-    let val = this.input_elem.value.toLowerCase();
+    // let val = this.input_elem.value.toLowerCase();
+    let val = this.get_search_token().toLowerCase();
 
     // Don't make request on empty string!
     if (!val || val.length < 1)
@@ -1032,8 +1128,6 @@ class MOAutocompleter {
       this.debug("Sending AJAX request: " + val);
     }
 
-    // console.log("Sending AJAX request: " + val);
-
     // Need to doubly-encode this to prevent router from interpreting slashes,
     // dots, etc.
     const url = this.ajax_url.replace(
@@ -1042,8 +1136,8 @@ class MOAutocompleter {
 
     this.last_fetch_request = val;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
+    const controller = new AbortController(),
+      signal = controller.signal;
 
     if (this.fetch_request)
       controller.abort();
@@ -1051,9 +1145,8 @@ class MOAutocompleter {
     this.fetch_request = fetch(url, { signal }).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
-          response.text().then((content) => {
-            // console.log("content: " + content);
-            this.process_fetch_response(content)
+          response.json().then((json) => {
+            this.process_fetch_response(json)
           }).catch((error) => {
             console.error("no_content:", error);
           });
@@ -1072,31 +1165,24 @@ class MOAutocompleter {
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
   // 3. the rest are matching results.
-  process_fetch_response(response) {
+  process_fetch_response(new_primer) {
     this.verbose("process_fetch_response()");
-    let new_primer, i;
 
     // Clear flag telling us request is pending.
     this.fetch_request = null;
 
-    // Grab list of matching strings.
-    i = response.indexOf("\n");
-    new_primer = response.substring(i);
-
-    // console.log("new_primer: " + new_primer);
-
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    this.last_fetch_request = response.substr(0, i);
+    this.last_fetch_request = new_primer[0];
 
     // Make sure there's a trailing newline.
-    if (new_primer.charAt(new_primer.length - 1) != "\n")
-      new_primer += "\n";
+    if (new_primer[new_primer.length - 1] != '\n')
+      new_primer.push("\n");
 
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer.substr(new_primer.length - 5, 5) == "\n...\n") {
+    if (new_primer[new_primer.length - 2] == "...") {
       this.last_fetch_incomplete = true;
-      new_primer = new_primer.substr(0, new_primer.length - 4);
+      new_primer = new_primer.slice(0, new_primer.length - 2);
       if (this.focused)
         // (just in case we need to refine the request due to
         //  activity while waiting for this response)
@@ -1108,7 +1194,7 @@ class MOAutocompleter {
     // Log requests and responses if in debug mode.
     if (this.log) {
       this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_primer.split("\n").length - 2) + " strings (" +
+        ": " + (new_primer.length - 2) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
@@ -1213,17 +1299,17 @@ class MOAutocompleter {
   }
 
   getScrollBarWidth() {
-    var inner, outer, w1, w2;
-    var body = document.body || document.getElementsByTagName("body")[0];
+    let inner, outer, w1, w2;
+    const body = document.body || document.getElementsByTagName("body")[0];
 
     if (scroll_bar_width != null)
       return scroll_bar_width;
 
-    var inner = document.createElement('p');
+    inner = document.createElement('p');
     inner.style.width = "100%";
     inner.style.height = "200px";
 
-    var outer = document.createElement('div');
+    outer = document.createElement('div');
     outer.style.position = "absolute";
     outer.style.top = "0px";
     outer.style.left = "0px";
@@ -1234,9 +1320,9 @@ class MOAutocompleter {
     outer.appendChild(inner);
 
     body.appendChild(outer);
-    var w1 = inner.offsetWidth;
+    w1 = inner.offsetWidth;
     outer.style.overflow = 'scroll';
-    var w2 = inner.offsetWidth;
+    w2 = inner.offsetWidth;
     if (w1 == w2) w2 = outer.clientWidth;
     body.removeChild(outer);
 
