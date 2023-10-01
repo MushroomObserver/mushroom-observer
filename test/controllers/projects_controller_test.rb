@@ -298,13 +298,21 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(project)
     assert_not_equal(summary, project.summary)
     assert_not(project.open_membership)
+    start_date = Time.zone.today
+    end_date = start_date + 4.days
     params = {
       id: project.id,
       project: {
         title: title,
         summary: summary,
         place_name: "",
-        open_membership: true
+        open_membership: true,
+        "start_date(1i)" => start_date.year,
+        "start_date(2i)" => start_date.month,
+        "start_date(3i)" => start_date.day,
+        "end_date(1i)" => end_date.year,
+        "end_date(2i)" => end_date.month,
+        "end_date(3i)" => end_date.day
       }
     }
     put_requires_user(:update, { action: :show }, params)
@@ -313,6 +321,8 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(project)
     assert_equal(summary, project.summary)
     assert(project.open_membership)
+    assert_equal(start_date, project.start_date)
+    assert_equal(end_date, project.end_date)
   end
 
   def test_edit_project_empty_name
