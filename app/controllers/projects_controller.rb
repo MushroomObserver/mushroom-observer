@@ -105,7 +105,7 @@ class ProjectsController < ApplicationController
     end
 
     @summary = params[:project][:summary]
-    if valid_title && valid_where
+    if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
         @project.save
         @project.log_update
@@ -138,6 +138,13 @@ class ProjectsController < ApplicationController
 
     @project.location = location
     @project.save
+  end
+
+  def valid_dates
+    return true unless ends_before_start?
+
+    flash_error(:add_project_ends_before_start.t)
+    false
   end
 
   # Callback to destroy a project.
