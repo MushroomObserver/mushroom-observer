@@ -318,7 +318,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_flash_for_create_location
     assert_selector("body.observations__show")
-    binding.break
+
+    # sleep(5)
+    # binding.break
     # erroring on image src="/remote_images/960/1062212457.jpg”
     # https://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails
     # 1) Put your file to be uploaded in the test in your
@@ -357,7 +359,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__edit")
 
     # check the fields
-    img_id = Image.last.id
     assert_field("observation_when_1i", with: "2010")
     assert_select("observation_when_2i", text: "March")
     assert_select("observation_when_3i", text: "14")
@@ -369,12 +370,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_unchecked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
     assert_field(other_notes_id, with: "Notes for observation")
-    assert_field("good_image_#{img_id}_when_1i", with: "2010")
-    assert_select("good_image_#{img_id}_when_2i", text: "March")
-    assert_select("good_image_#{img_id}_when_3i", text: "14")
-    assert_field("good_image_#{img_id}_copyright_holder",
-                 with: katrina.legal_name)
-    assert_field("good_image_#{img_id}_notes", with: "Notes for image")
+
+    img_ids = Image.last(2).map(&:id)
+    img_ids.each do |img_id|
+      assert_field("good_image_#{img_id}_when_1i", with: "2010")
+      assert_select("good_image_#{img_id}_when_2i", text: "March")
+      assert_select("good_image_#{img_id}_when_3i", text: "14")
+      assert_field("good_image_#{img_id}_copyright_holder",
+                   with: katrina.legal_name)
+      assert_field("good_image_#{img_id}_notes", with: "Notes for image")
+    end
 
     # submit_observation_form_with_changes
     fill_in("observation_when_1i", with: "2011")
@@ -385,13 +390,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_alt", with: "987m")
     check("observation_is_collection_location")
     fill_in(other_notes_id, with: "New notes for observation")
-    fill_in("good_image_#{img_id}_when_1i", with: "2011")
-    select("April", from: "good_image_#{img_id}_when_2i")
-    select("15", from: "good_image_#{img_id}_when_3i")
-    fill_in("good_image_#{img_id}_notes", with: "New notes for image")
 
-    assert_flash_for_edit_observation
+    img_ids.each do |img_id|
+      fill_in("good_image_#{img_id}_when_1i", with: "2011")
+      select("April", from: "good_image_#{img_id}_when_2i")
+      select("15", from: "good_image_#{img_id}_when_3i")
+      fill_in("good_image_#{img_id}_notes", with: "New notes for image")
+    end
+
+    within("#observation_form") { click_commit }
+
     assert_selector("body.observations__show")
+    assert_flash_for_edit_observation
     assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
 
@@ -404,7 +414,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     visit(observation_path(obs.id))
     new_obs = Observation.last
     assert_selector("body.observations__show")
-    click_button(class: "destroy_observation_link_#{new_obs.id}")
+    accept_confirm do
+      click_button(class: "destroy_observation_link_#{new_obs.id}")
+    end
     assert_flash_for_destroy_observation
     assert_selector("body.observations__index")
 
