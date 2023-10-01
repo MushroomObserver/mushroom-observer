@@ -2885,6 +2885,15 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
 
+    login("katrina")
+    get(:new)
+    assert_project_checks(
+      projects(:past_project).id => :unchecked,
+      projects(:current_project).id => :unchecked,
+      projects(:future_project).id => :unchecked,
+      projects(:open_membership_project).id => :unchecked
+    )
+
     login("dick")
     get(:new)
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
