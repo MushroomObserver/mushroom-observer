@@ -141,14 +141,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
 
-    # scroll_to(0, 1500)
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
     attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
       find(".file-field").click
     end
 
-    # scroll_to(0, 2400)
     assert_selector(".added_image_wrapper")
     assert_selector("#image_messages")
 
@@ -205,6 +203,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     image_wrappers = all(".added_image_wrapper")
     assert_equal(1, image_wrappers.length)
 
+    sleep(1)
     # Add geotagged.jpg again
     attach_file(Rails.root.join("test/images/geotagged.jpg")) do
       find(".file-field").click
@@ -212,6 +211,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # We should now get the option to set obs GPS again
     assert_selector("#geocode_messages")
+    assert_selector("#geocode_radio_container")
 
     # Be sure we have two image wrappers
     image_wrappers = all(".added_image_wrapper")
