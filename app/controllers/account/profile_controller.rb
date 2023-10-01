@@ -7,10 +7,15 @@ module Account
     def edit
       @licenses = License.current_names_and_ids(@user.license)
       @place_name        = @user.location ? @user.location.display_name : ""
-      @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.zone.now.year
-      # NOTE: @user.license is not set by default
-      @upload_license_id = @user.license ? @user.license.id : nil
+      if @user.image
+        @copyright_holder  = @user.image.copyright_holder
+        @copyright_year    = @user.image.when.year
+        @upload_license_id = @user.image.license.id
+      else
+        @copyright_holder  = @user.legal_name
+        @copyright_year    = Time.zone.now.year
+        @upload_license_id = @user.license ? @user.license.id : nil
+      end
     end
 
     def update
