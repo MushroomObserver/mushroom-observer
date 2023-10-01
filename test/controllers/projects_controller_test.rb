@@ -144,7 +144,16 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_add_project
     requires_login(:new)
+
     assert_form_action(action: :create)
+    assert_select(
+      'select[id ^= "project_start_date"]', { count: 3 },
+      "Form should have fields to select starting month, day, year"
+    )
+    assert_select(
+      'select[id ^= "project_end_date"]', { count: 3 },
+      "Form should have fields to select ending month, day, year"
+    )
   end
 
   def test_create_project
