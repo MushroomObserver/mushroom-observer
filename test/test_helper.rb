@@ -42,9 +42,9 @@ require("minitest/autorun")
 require("webmock/minitest")
 
 # Disable external requests while allowing localhost.
-# WebMock.disable_net_connect!(
-#   allow_localhost: true
-# )
+WebMock.disable_net_connect!(
+  allow_localhost: true
+)
 
 ENV["RAILS_ENV"] ||= "test"
 require(File.expand_path("../config/environment", __dir__))
