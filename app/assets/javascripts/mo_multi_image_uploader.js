@@ -154,7 +154,7 @@ class MOMultiImageUploader {
       // Get the files from the browser
       const files = event.target.files;
       this.addFiles(files);
-      this.select_files_button.value = "";
+      event.target.value = "";
     };
 
     // Detect when a user submits observation; includes upload logic
@@ -233,14 +233,8 @@ class MOMultiImageUploader {
   }
 
   addFiles(files) {
-    // loop through attached files, make sure we aren't adding duplicates
+    // loop through attached files
     for (let i = 0; i < files.length; i++) {
-      // stop adding the file, one with this exact size is already attached
-      // What are the odds of this?
-      if (this.fileStore.index[files[i].size] != undefined) {
-        continue;
-      }
-
       // uuid is used as the index for the ruby form template. // **
       const _item = this.FileStoreItem(files[i], this.generateUUID());
       this.loadAndDisplayItem(_item);
