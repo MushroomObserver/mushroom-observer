@@ -175,8 +175,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       # assert_unchecked_field(local_now.strftime("%d-%B-%Y"))
     end
 
-    # Add a second image that's geotagged
-    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
+    # FIXME: cannot reattach same image twice
+    # Add a second image that's not geotagged. Must explicitly attach both.
+    attach_file([Rails.root.join("test/images/Coprinus_comatus.jpg"),
+                 Rails.root.join("test/images/perf.jpg")],
+                multiple: true) do
       find(".file-field").click
     end
 
@@ -197,15 +200,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Try removing it
     within(second_image_wrapper) { find(".remove_image_link").click }
-    # FIXME: when removing only image w geocode, it doesn't remove geocode msg
 
-    binding.break
+    # We should now get no option to set obs GPS
+    assert_no_selector("#geocode_messages")
+
     # Be sure we have only one image wrapper now
     image_wrappers = all(".added_image_wrapper")
     assert_equal(image_wrappers.length, 1)
 
     # Add geotagged.jpg again
-    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
+    attach_file([Rails.root.join("test/images/Coprinus_comatus.jpg"),
+                 Rails.root.join("test/images/geotagged.jpg")],
+                multiple: true) do
       find(".file-field").click
     end
 
@@ -265,6 +271,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within(first_image_wrapper) do
       find(".set_thumb_image").click
       assert_selector(".is_thumb_image")
+      assert_no_selector(".set_thumb_image")
     end
 
     binding.break
