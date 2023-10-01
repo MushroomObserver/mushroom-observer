@@ -357,4 +357,63 @@ class Project < AbstractModel
     loc = Location.find_by_name(where)
     self.location = (loc)
   end
+
+  ##############################################################################
+  #
+  #  :section: Dates
+  #
+  ##############################################################################
+
+  def current?
+    !future? && !past?
+  end
+
+  def dates_exclude?(date)
+    !dates_include?(date)
+  end
+
+  def dates_include?(date)
+    starts_no_later_than?(date) && ends_no_earlier_than?(date)
+  end
+
+  # convenience methods for date range display
+  def start_date_str(format = "%Y-%m-%d")
+    start_date.nil? ? :NONE.t : start_date.strftime(format)
+  end
+
+  def end_date_str(format = "%Y-%m-%d")
+    end_date.nil? ? :NONE.t : end_date.strftime(format)
+  end
+
+  def duration_str
+    if start_date && end_date
+      (end_date - start_date + 1).to_i.to_s
+    elsif start_date
+      :show_project_duration_unlimited_no_end.t
+    elsif end_date
+      :show_project_duration_unlimited_no_start.t
+    else
+      :show_project_duration_unlimited.t
+    end
+  end
+
+  ##############################################################################
+
+  private
+
+  def future?
+    start_date&.future?
+  end
+
+  def past?
+    end_date&.past?
+  end
+
+  def starts_no_later_than?(date)
+    !start_date&.after?(date)
+  end
+
+  def ends_no_earlier_than?(date)
+    !end_date&.before?(date)
+  end
 end
