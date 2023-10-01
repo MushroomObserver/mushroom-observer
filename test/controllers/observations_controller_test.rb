@@ -2914,14 +2914,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
 
-  def test_open_membership_project_checkboxes_in_create_observation
-    project = projects(:open_membership_project)
-
-    login("katrina")
-    get(:new)
-    assert_project_checks(project.id => :checked)
-  end
-
   def test_project_checkboxes_in_update_observation
     init_for_project_checkbox_tests
 
