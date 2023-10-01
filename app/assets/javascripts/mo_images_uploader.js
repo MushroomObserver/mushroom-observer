@@ -165,6 +165,8 @@ class MOImagesUploader {
       _show_on_map_links = _images
         .querySelectorAll('[data-role="show_on_map"]'),
       _set_thumb_image_btns = _images.querySelectorAll('.set_thumb_image'),
+      _obs_thumb_image_radios = _images
+        .querySelectorAll('input[name="observation[thumb_image_id]"]'),
       _is_thumb_image_labels = _images.querySelectorAll('.is_thumb_image');
 
     // show the item's gps on a map.
