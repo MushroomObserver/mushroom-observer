@@ -165,19 +165,33 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(user_group)
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert_nil(admin_group)
+    start_date = Date.tomorrow
+    end_date = start_date + 3.days
     params = {
       project: {
         title: title,
         summary: summary,
-        place_name: ""
-      }
+        place_name: "",
+        "start_date(1i)" => start_date.year,
+        "start_date(2i)" => start_date.month,
+        "start_date(3i)" => start_date.day,
+        "end_date(1i)" => end_date.year,
+        "end_date(2i)" => end_date.month,
+        "end_date(3i)" => end_date.day
+      },
+      start_date: { fixed: true },
+      end_date: { fixed: true }
     }
+
     post_requires_login(:create, params)
+
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
     assert(project)
     assert_equal(title, project.title)
     assert_equal(summary, project.summary)
+    assert_equal(start_date, project.start_date)
+    assert_equal(end_date, project.end_date)
     assert_equal(rolf, project.user)
     user_group = UserGroup.find_by(name: title)
     assert(user_group)
