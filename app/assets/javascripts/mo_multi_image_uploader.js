@@ -130,11 +130,18 @@ class MOMultiImageUploader {
       //   fileStore.addUrl(dataTransfer.getData('Text'));
     };
 
+    // https://stackoverflow.com/questions/12030686/html-input-file-selection-event-not-firing-upon-selecting-the-same-file
+    // this.select_files_button.onclick = (event) => {
+    //   // alert(event.target.value);
+    //   event.target.value = "";
+    // }
+
     // Detect when files are added from browser
     this.select_files_button.onchange = (event) => {
       // Get the files from the browser
       const files = event.target.files;
       this.addFiles(files);
+      this.select_files_button.value = "";
     };
 
     // Detect when a user submits observation; includes upload logic
@@ -251,7 +258,8 @@ class MOMultiImageUploader {
         this.checkStoreStatus();
       } else {
         this.setItemBindings();
-        this.refreshBox();
+        this.refreshImageMessages();
+        this.refreshGeocodeMessages();
       }
     }, 30)
   }
@@ -401,6 +409,8 @@ class MOMultiImageUploader {
 
     // Hard to find without dev tools, but this is where the goods are:
     item.dom_element = template.content.childNodes[0];
+    // Give it a blank dataset
+    item.dom_element.dataset.geocode = "";
 
     if (item.file_size > this.max_image_size)
       item.dom_element.querySelector('.warn-text').innerText =
@@ -418,12 +428,13 @@ class MOMultiImageUploader {
     item.dom_element.querySelector('.remove_image_link')
       .onclick = () => {
         this.removeItem(item);
-        this.refreshBox();
+        this.refreshImageMessages();
+        this.refreshGeocodeMessages();
       };
 
     item.dom_element.querySelector('select')
       .onchange = () => {
-        this.refreshBox();
+        this.refreshImageMessages();
       };
   }
 
@@ -465,7 +476,6 @@ class MOMultiImageUploader {
 
   // applies exif data to the DOM element, must already be attached
   applyExifData(item) {
-    let _exif_date_taken;
     const _exif = item.exif_data,
       _camera_date = item.dom_element.querySelector(".camera_date_text");
 
@@ -476,48 +486,22 @@ class MOMultiImageUploader {
       return;
     }
 
+    item.dom_element.dataset.initialized = "true"
+
     // Geocode Logic
     // check if there is geodata on the image
     if (_exif.GPSLatitude && _exif.GPSLongitude) {
-
-      const latLngAlt = this.getLatLongEXIF(_exif),
-        radioBtnToInsert = this.makeGeocodeRadioBtn(latLngAlt);
-
-      if (this.geocode_radio_container
-        .querySelectorAll('input[type="radio"]').length === 0) {
-        this.show(this.geocode_messages);
-        this.geocode_radio_container.appendChild(radioBtnToInsert);
-      }
-
-      // don't add geocodes that are only slightly different
-      else {
-        let _shouldAddGeocode = true;
-
-        this.geocode_radio_container
-          .querySelectorAll('input[type="radio"]').forEach((element) => {
-            const _existingGeocode = JSON.parse(element.dataset.geocode);
-            const _latDif = Math.abs(latLngAlt.latitude)
-              - Math.abs(_existingGeocode.latitude);
-            const _longDif = Math.abs(latLngAlt.longitude)
-              - Math.abs(_existingGeocode.longitude);
-
-            if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
-              _shouldAddGeocode = false;
-          });
-
-        if (_shouldAddGeocode)
-          this.geocode_radio_container.appendChild(radioBtnToInsert);
-      }
+      const latLngAlt = this.getLatLongEXIF(_exif);
+      // Set item's data-geocode attribute so we can have a record
+      item.dom_element.dataset.geocode = JSON.stringify(latLngAlt)
     }
 
     // Image Date Logic
-    _exif_date_taken = item.exif_data.DateTimeOriginal;
-
-    if (_exif_date_taken) {
+    if (_exif.DateTimeOriginal) {
       // we found the date taken, let's parse it down.
       // returns an array of [YYYY,MM,DD]
       const _date_taken_array =
-        _exif_date_taken.substring(' ', 10).split(':').reverse(),
+        _exif.DateTimeOriginal.substring(' ', 10).split(':').reverse(),
         _exifSimpleDate = this.SimpleDate(..._date_taken_array);
 
       this.imageDate(item, _exifSimpleDate);
@@ -529,17 +513,72 @@ class MOMultiImageUploader {
       // bind _camera_date so it will set the image date if clicked
       _camera_date.onclick = () => {
         this.imageDate(item, _exifSimpleDate);
-        this.refreshBox();
+        this.refreshImageMessages();
       }
     }
     // no date was found in EXIF data
     else {
       // Use observation date
-
       this.imageDate(item, this.observationDate());
     }
 
     item.processed = true;
+  }
+
+  // Maybe add a radio button option to set obs gps to this item's gps.
+  // Or, if there are no more images with that location, remove the option.
+  // Or, remove the whole geocode_messages box.
+  refreshGeocodeMessages() {
+    const _geoOptions = this.geocode_radio_container;
+    let _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
+
+    if (this.fileStore.items.length > 0) {
+      let itemsHadGeocode = false;
+      // We're comparing items in the FileStore against existing gps options.
+      this.fileStore.items.forEach((item) => {
+        let itemData = item.dom_element.dataset;
+        if (itemData && itemData.geocode) {
+          const itemGeocode = JSON.parse(item.dom_element.dataset.geocode)
+          let _addGeoRadio = true;
+          itemsHadGeocode = true;
+
+          // check all current radio buttons
+          if (_currentOptions.length > 0) {
+            _currentOptions.forEach((element) => {
+              const _existingGeocode = JSON.parse(element.dataset.geocode);
+              const _latDif = Math.abs(itemGeocode.latitude)
+                - Math.abs(_existingGeocode.latitude);
+              const _longDif = Math.abs(itemGeocode.longitude)
+                - Math.abs(_existingGeocode.longitude);
+
+              // don't add geocodes that are only slightly different
+              if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
+                _addGeoRadio = false;
+            });
+          }
+
+          if (_addGeoRadio) {
+            const _radioBtnToInsert = this.makeGeocodeRadioBtn(itemGeocode);
+            this.geocode_radio_container.appendChild(_radioBtnToInsert);
+          }
+        }
+      })
+
+      // Clean up if there's no images with geocodes (approximates may linger)
+      if (!itemsHadGeocode) {
+        _geoOptions.querySelectorAll('input[type="radio"]')
+          .forEach((elem) => { elem.remove(); })
+      }
+
+      // now check buttons again
+      _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
+
+      if (_currentOptions.length > 0) {
+        this.show(this.geocode_messages);
+      } else {
+        this.hide(this.geocode_messages);
+      }
+    }
   }
 
   // gets or sets image date
@@ -669,19 +708,41 @@ class MOMultiImageUploader {
   }
 
   removeItem(item) {
+    // // remove file from the button's FileList
+    // const input = this.select_files_button;
+
+    // // find the index in the FileList
+    // // Array.prototype.forEach.call(oldfiles, (file, i) => {
+    // //   if (file.name == item.file_name)
+    // //     index = i;
+    // // });
+
+    // // https://stackoverflow.com/a/64019766/3357635
+    // const dt = new DataTransfer()
+    // const { files } = input
+
+    // // backwards to not mess up index
+    // for (let i = files.length - 1; i > -1; i--) {
+    //   const file = files[i]
+    //   if (file.name !== item.file_name)
+    //     dt.items.add(file) // here you exclude the file. thus removing it.
+    // }
+
+    // input.files = dt.files // Assign the updates list
+    // debugger;
+
     // remove element from the dom;
     item.dom_element.remove();
+
+    // remove the file from the dictionary
     if (item.is_file)
-      // remove the file from the dictionary
       delete this.fileStore.index[this.file_size];
     else
-      // remove the file from the dictionary
       delete this.fileStore.index[this.url];
 
-    // removes the file from the array
-    const idx = this.fileStore.items.indexOf(this);
+    // remove item from items
+    const idx = this.fileStore.items.indexOf(item);
     if (idx > -1)
-      // removes the file from the array
       this.fileStore.items.splice(idx, 1);
   }
 
@@ -703,7 +764,7 @@ class MOMultiImageUploader {
     return false;
   }
 
-  refreshBox() {
+  refreshImageMessages() {
     const _distinctImgDates = this.getDistinctImageDates(),
       _obsDate = this.observationDate();
 
