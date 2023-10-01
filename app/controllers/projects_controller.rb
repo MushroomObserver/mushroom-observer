@@ -84,6 +84,8 @@ class ProjectsController < ApplicationController
       flash_error(:add_project_need_title.t)
     elsif project
       flash_error(:add_project_already_exists.t(title: project.title))
+    elsif ends_before_start?
+      flash_error(:add_project_ends_before_start.t)
     elsif user_group
       flash_error(:add_project_group_exists.t(group: title))
     elsif admin_group
@@ -313,5 +315,42 @@ class ProjectsController < ApplicationController
     user_group&.destroy
     @project = Project.new
     render(:new, location: new_project_path(q: get_query_param))
+  end
+
+  def ends_before_start?
+    start_date = if params.dig(:start_date,:fixed) == "true"
+                   Date.new(start_year.to_i, start_month.to_i, start_day.to_i)
+                 end
+
+    end_date = if params.dig(:end_date, :fixed) == "true"
+                 Date.new(end_year.to_i, end_month.to_i, end_day.to_i)
+               end
+
+    # uses `present?` in order to return boolean rather than truthy
+    start_date.present? && end_date.present? && (end_date < start_date)
+  end
+
+  def start_year
+    params[:project]["start_date(1i)"]
+  end
+
+  def start_month
+    params[:project]["start_date(2i)"]
+  end
+
+  def start_day
+    params[:project]["start_date(3i)"]
+  end
+
+  def end_year
+    params[:project]["end_date(1i)"]
+  end
+
+  def end_month
+    params[:project]["end_date(2i)"]
+  end
+
+  def end_day
+    params[:project]["end_date(3i)"]
   end
 end

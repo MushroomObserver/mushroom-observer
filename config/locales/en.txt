@@ -3110,6 +3110,7 @@
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
+  add_project_ends_before_start: Project ends before it starts.
   add_project_group_exists: Unable to create project because a [:user_group] named '[group]' already exists.
   add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
