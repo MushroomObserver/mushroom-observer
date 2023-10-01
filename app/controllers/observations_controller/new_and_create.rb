@@ -67,9 +67,14 @@ module ObservationsController::NewAndCreate
     %w[when where location is_collection_location gps_hidden].each do |attr|
       @observation.send("#{attr}=", last_observation.send(attr))
     end
+
     last_observation.projects.each do |project|
-      @project_checks[project.id] = true unless project.open_membership
+      next if project.open_membership ||
+              !project.current?
+
+      @project_checks[project.id] = true
     end
+
     last_observation.species_lists.each do |list|
       if check_permission(list)
         @lists << list unless @lists.include?(list)

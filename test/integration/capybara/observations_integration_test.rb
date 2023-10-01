@@ -196,4 +196,39 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_text(:obss_taxon_proposed.l)
     assert_text(:obss_name_proposed.l)
   end
+
+  def test_observation_project_checkbox_state_persistence
+    proj = projects(:current_closed_project)
+    user = users(:katrina)
+    # Ensure fixtures not broken
+    assert(proj.is_member?(user),
+           "Need fixtures such that `user` is a member of `proj`")
+    proj_checkbox = "project_id_#{proj.id}"
+    login(user)
+
+    # create an Observation with Project selected
+    visit(new_observation_path)
+    fill_in(:WHERE.l, with: locations(:burbank).name)
+    check(proj_checkbox)
+    first(:button, "Create").click
+
+    # Porve that Project is re-checked for the next Observation
+    visit(new_observation_path)
+    assert(
+      has_checked_field?(proj_checkbox),
+      "current Project checkbox state should persist from recent Observation"
+    )
+
+    # Make project non-current
+    proj.end_date = Time.zone.yesterday
+    proj.save
+
+    # Prove that Project is not re-checked for the next Observation
+    login(:katrina)
+    visit(new_observation_path)
+    assert(
+      has_unchecked_field?(proj_checkbox),
+      "non-current Project should never be auto-rechecked"
+    )
+  end
 end
