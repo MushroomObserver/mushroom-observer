@@ -111,4 +111,44 @@ class ProjectTest < UnitTestCase
     proj.log_destroy
     assert_nil(log.reload.target_id)
   end
+
+  def test_dates_current
+    assert(projects(:current_project).current?)
+    assert_not(projects(:past_project).current?)
+    assert_not(projects(:future_project).current?)
+  end
+
+  def test_dates_include
+    assert(projects(:past_project).
+      dates_include?(projects(:past_project).end_date))
+    assert(projects(:current_project).
+      dates_include?(Time.zone.today))
+    assert(projects(:future_project).
+      dates_include?(projects(:future_project).start_date))
+    assert_not(projects(:past_project).dates_include?(Time.zone.today))
+    assert_not(projects(:future_project).dates_include?(Time.zone.today))
+  end
+
+  def test_date_strings
+    nama2023 = projects(:pinned_date_range_project)
+    assert_equal("2023-08-24", nama2023.start_date_str)
+    assert_equal("2023-08-27", nama2023.end_date_str)
+    assert_equal("Thu Aug 24 2023", nama2023.start_date_str("%a %b %d %Y"))
+
+    assert_equal(:NONE.l,
+                 projects(:past_project).start_date_str)
+    assert_equal(:NONE.l,
+                 projects(:future_project).end_date_str)
+  end
+
+  def test_duration_in_days
+    assert_equal("4",
+                 projects(:pinned_date_range_project).duration_str)
+    assert_equal(:show_project_duration_unlimited_no_end.l,
+                 projects(:future_project).duration_str)
+    assert_equal(:show_project_duration_unlimited_no_start.l,
+                 projects(:past_project).duration_str)
+    assert_equal(:show_project_duration_unlimited.l,
+                 projects(:unlimited_project).duration_str)
+  end
 end
