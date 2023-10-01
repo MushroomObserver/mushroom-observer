@@ -3206,12 +3206,17 @@
   show_project_created_at: Created
   show_project_destroy: Destroy Project
   show_project_drafts: Drafts
+  show_project_duration_unlimited: Unlimited
+  show_project_duration_unlimited_no_end: "No [:show_project_end_date]"
+  show_project_duration_unlimited_no_start: "No [:show_project_start_date]"
   show_project_edit: Edit Project
+  show_project_end_date: End Date
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project
   show_project_published: Reviewed Published Names
   show_project_summary: Summary
+  show_project_start_date: Start Date
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
