@@ -33,9 +33,11 @@ module TitleAndTabsetHelper
   end
 
   def add_background_image(image)
-    presenter = ImagePresenter.new(image, size: :large)
-    content_for(:background_image) do
-      image_tag(presenter.img_src, class: "image-title")
+    if image
+      presenter = ImagePresenter.new(image, size: :large)
+      content_for(:background_image) do
+        image_tag(presenter.img_src, class: "image-title")
+      end
     end
   end
 

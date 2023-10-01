@@ -1,6 +1,6 @@
 <%
 add_page_title(:show_project_title.t(title: @project.title))
-add_background_image(Image.first)
+add_background_image(@project.image)
 add_tab_set(project_show_tabs(project: @project, user: @user))
 @container = :wide
 %>
