@@ -1,6 +1,6 @@
 //= require exif.js
 
-class MOMultiImageUploader {
+class MOImagesUploader {
 
   constructor(localization = {}) {
     // Internal Variable Definitions.
@@ -119,8 +119,7 @@ class MOMultiImageUploader {
       document.getElementById('right_side').classList.remove('dashed-border');
     }
 
-    // EDITING OBS
-    // Update the obs "observation_thumb_image_id" form field,
+    // EDIT OBS - Update the "observation_thumb_image_id" form field,
     // when the hidden "set_as_thumb_image" for an image is changed.
     this.obs_thumb_image_radios.forEach((elem) => {
       elem.onchange = (event) => {
@@ -142,12 +141,6 @@ class MOMultiImageUploader {
       // else
       //   fileStore.addUrl(dataTransfer.getData('Text'));
     };
-
-    // https://stackoverflow.com/questions/12030686/html-input-file-selection-event-not-firing-upon-selecting-the-same-file
-    // this.select_files_button.onclick = (event) => {
-    //   // alert(event.target.value);
-    //   event.target.value = "";
-    // }
 
     // Detect when files are added from browser
     this.select_files_button.onchange = (event) => {
@@ -704,29 +697,6 @@ class MOMultiImageUploader {
   }
 
   removeItem(item) {
-    // // remove file from the button's FileList
-    // const input = this.select_files_button;
-
-    // // find the index in the FileList
-    // // Array.prototype.forEach.call(oldfiles, (file, i) => {
-    // //   if (file.name == item.file_name)
-    // //     index = i;
-    // // });
-
-    // // https://stackoverflow.com/a/64019766/3357635
-    // const dt = new DataTransfer()
-    // const { files } = input
-
-    // // backwards to not mess up index
-    // for (let i = files.length - 1; i > -1; i--) {
-    //   const file = files[i]
-    //   if (file.name !== item.file_name)
-    //     dt.items.add(file) // here you exclude the file. thus removing it.
-    // }
-
-    // input.files = dt.files // Assign the updates list
-    // debugger;
-
     // remove element from the dom;
     item.dom_element.remove();
 
