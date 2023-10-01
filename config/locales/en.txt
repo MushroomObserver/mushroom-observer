@@ -3169,10 +3169,10 @@
   edit_project_title: "[:edit_object(type=:project)]: [title]"
 
   # project/_form_projects
-  form_project_date_range: Date Range
+  form_projects_date_range: Date Range
   form_projects_date_fixed: Use above date
   form_projects_date_indefinite: Indefinite
-  form_project_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
+  form_projects_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
   form_projects_end_date: Project End Date
   form_projects_start_date: Project Start Date
   form_projects_title: "[:Title]"
