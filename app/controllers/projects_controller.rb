@@ -69,6 +69,7 @@ class ProjectsController < ApplicationController
   def edit
     return unless find_project!
 
+    image_ivars
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))
@@ -102,6 +103,7 @@ class ProjectsController < ApplicationController
       return redirect_to(project_path(@project.id, q: get_query_param))
     end
 
+    upload_the_image_if_present
     @summary = params[:project][:summary]
     if valid_title && valid_where
       if @project.update(project_create_params)
@@ -161,6 +163,19 @@ class ProjectsController < ApplicationController
 
   private ############################################################
 
+  def image_ivars
+    @licenses = License.current_names_and_ids(@user.license)
+    if @project.image
+      @copyright_holder  = @project.image.copyright_holder
+      @copyright_year    = @project.image.when.year
+      @upload_license_id = @project.image.license.id
+    else
+      @copyright_holder  = @user.legal_name
+      @copyright_year    = Time.zone.now.year
+      @upload_license_id = @user.license ? @user.license.id : nil
+    end
+  end
+
   def set_ivars_for_show
     @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
@@ -175,6 +190,41 @@ class ProjectsController < ApplicationController
 
     flash_warning(:show_project_violation_count.t(count: count,
                                                   id: @project.id))
+  end
+
+  def upload_the_image_if_present
+    debugger
+    # Check if we need to upload an image.
+    upload = params[:project][:upload_image]
+    return if upload.blank?
+
+    date = Date.parse("#{params[:upload][:copyright_year]}0101")
+    license = License.safe_find(params[:upload][:license_id])
+    holder = params[:upload][:copyright_holder]
+    image = Image.new(
+      image: upload,
+      user: @user,
+      when: date,
+      copyright_holder: holder,
+      license: license
+    )
+    deal_with_upload_errors_or_success(image)
+  end
+
+  def deal_with_upload_errors_or_success(image)
+    if !image.save
+      flash_object_errors(image)
+    elsif !image.process_image
+      name = image.original_name
+      name = "???" if name.empty?
+      flash_error(:runtime_profile_invalid_image.t(name: name))
+      flash_object_errors(image)
+    else
+      @project.image = image
+      name = image.original_name
+      name = "##{image.id}" if name.empty?
+      flash_notice(:runtime_profile_uploaded_image.t(name: name))
+    end
   end
 
   ############ Index private methods
@@ -254,6 +304,7 @@ class ProjectsController < ApplicationController
   def find_project!
     @project = find_or_goto_index(Project, params[:id].to_s)
     @where = @project&.location&.display_name || ""
+    @project
   end
 
   def create_members_group(title)
