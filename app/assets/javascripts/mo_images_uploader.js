@@ -556,7 +556,7 @@ class MOImagesUploader {
       // Clean up if there's no images with geocodes (approximates may linger)
       if (!itemsHadGeocode) {
         _geoOptions.querySelectorAll('input[type="radio"]')
-          .forEach((elem) => { elem.remove(); })
+          .forEach((elem) => { elem.closest('.radio').remove(); })
       }
 
       // now check buttons again
