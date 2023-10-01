@@ -1,6 +1,6 @@
 //= require exif.js
 
-class MOMultiImageUploader {
+class MOImagesUploader {
 
   constructor(localization = {}) {
     // Internal Variable Definitions.
@@ -8,6 +8,10 @@ class MOMultiImageUploader {
       form: document.forms.namedItem("observation_form"),
       block_form_submission: true,
       select_files_button: document.getElementById('multiple_images_button'),
+      obs_thumb_input: document.getElementById('observation_thumb_image_id'),
+      // for edit form only. hidden radios in the create form added dynamically
+      obs_thumb_image_radios:
+        document.querySelectorAll('input[name="observation[thumb_image_id]"]'),
       content: document.getElementById('content'),
       // container to insert images into
       add_img_container: document.getElementById("added_images_container"),
@@ -115,6 +119,14 @@ class MOMultiImageUploader {
       document.getElementById('right_side').classList.remove('dashed-border');
     }
 
+    // EDIT OBS - Update the "observation_thumb_image_id" form field,
+    // when the hidden "set_as_thumb_image" for an image is changed.
+    this.obs_thumb_image_radios.forEach((elem) => {
+      elem.onchange = (event) => {
+        this.obs_thumb_input.setAttribute('value', event.target.value);
+      }
+    });
+
     // ADDING FILES
     this.content.ondrop = (e) => {
       // stops the browser from leaving page
@@ -135,6 +147,7 @@ class MOMultiImageUploader {
       // Get the files from the browser
       const files = event.target.files;
       this.addFiles(files);
+      event.target.value = "";
     };
 
     // Detect when a user submits observation; includes upload logic
@@ -148,12 +161,13 @@ class MOMultiImageUploader {
   }
 
   setItemBindings() {
-    const _show_on_map_links =
-      document.querySelectorAll('[data-role="show_on_map"]'),
-      _obs_thumb_image_radios =
-        document.querySelectorAll('input[name="observation[thumb_image_id]"]'),
-      _set_thumb_image_btns = document.querySelectorAll('.set_thumb_image'),
-      _is_thumb_image_inputs = document.querySelectorAll('.is_thumb_image');
+    const _images = document.getElementById("added_images_container"),
+      _show_on_map_links = _images
+        .querySelectorAll('[data-role="show_on_map"]'),
+      _set_thumb_image_btns = _images.querySelectorAll('.set_thumb_image'),
+      _obs_thumb_image_radios = _images
+        .querySelectorAll('input[name="observation[thumb_image_id]"]'),
+      _is_thumb_image_labels = _images.querySelectorAll('.is_thumb_image');
 
     // show the item's gps on a map.
     // there's one link for each different gps coord, NOT present at load
@@ -164,21 +178,11 @@ class MOMultiImageUploader {
       }
     });
 
-    // Update the obs "observation_thumb_image_id" form field,
-    // when the hidden "set_as_thumb_image" for an image is changed.
-    // _obs_thumb_image_radios.forEach((elem) => {
-    _obs_thumb_image_radios.forEach((elem) => {
-      elem.onchange = function () {
-        document.getElementById('observation_thumb_image_id')
-          .value = this.value;
-      }
-    });
-
     // Logic for setting the default thumbnail.
-    // Problem: needs binding after filestore item created.
+    // Needs binding after filestore item created.
     // _set_thumb_image_btns.forEach((elem) => {
     _set_thumb_image_btns.forEach((elem) => {
-      elem.onclick = function (event) {
+      elem.onclick = (event) => {
         // `this` is the link clicked to make default image
         event.preventDefault();
         // reset selections
@@ -187,7 +191,7 @@ class MOMultiImageUploader {
           elem.classList.remove('hidden');
         });
         // add hidden to the default thumbnail text
-        _is_thumb_image_inputs.forEach((elem) => {
+        _is_thumb_image_labels.forEach((elem) => {
           elem.classList.add('hidden');
         });
         // reset the checked default thumbnail
@@ -224,14 +228,8 @@ class MOMultiImageUploader {
   }
 
   addFiles(files) {
-    // loop through attached files, make sure we aren't adding duplicates
+    // loop through attached files
     for (let i = 0; i < files.length; i++) {
-      // stop adding the file, one with this exact size is already attached
-      // What are the odds of this?
-      if (this.fileStore.index[files[i].size] != undefined) {
-        continue;
-      }
-
       // uuid is used as the index for the ruby form template. // **
       const _item = this.FileStoreItem(files[i], this.generateUUID());
       this.loadAndDisplayItem(_item);
@@ -251,7 +249,8 @@ class MOMultiImageUploader {
         this.checkStoreStatus();
       } else {
         this.setItemBindings();
-        this.refreshBox();
+        this.refreshImageMessages();
+        this.refreshGeocodeMessages();
       }
     }, 30)
   }
@@ -267,7 +266,7 @@ class MOMultiImageUploader {
   }
 
   updateImageDates(simpleDate) {
-    this.fileStore.items.forEach(function (item) {
+    this.fileStore.items.forEach((item) => {
       this.imageDate(item, simpleDate);
     });
   }
@@ -401,6 +400,8 @@ class MOMultiImageUploader {
 
     // Hard to find without dev tools, but this is where the goods are:
     item.dom_element = template.content.childNodes[0];
+    // Give it a blank dataset
+    item.dom_element.dataset.geocode = "";
 
     if (item.file_size > this.max_image_size)
       item.dom_element.querySelector('.warn-text').innerText =
@@ -418,12 +419,13 @@ class MOMultiImageUploader {
     item.dom_element.querySelector('.remove_image_link')
       .onclick = () => {
         this.removeItem(item);
-        this.refreshBox();
+        this.refreshImageMessages();
+        this.refreshGeocodeMessages();
       };
 
     item.dom_element.querySelector('select')
       .onchange = () => {
-        this.refreshBox();
+        this.refreshImageMessages();
       };
   }
 
@@ -465,7 +467,6 @@ class MOMultiImageUploader {
 
   // applies exif data to the DOM element, must already be attached
   applyExifData(item) {
-    let _exif_date_taken;
     const _exif = item.exif_data,
       _camera_date = item.dom_element.querySelector(".camera_date_text");
 
@@ -476,48 +477,22 @@ class MOMultiImageUploader {
       return;
     }
 
+    item.dom_element.dataset.initialized = "true"
+
     // Geocode Logic
     // check if there is geodata on the image
     if (_exif.GPSLatitude && _exif.GPSLongitude) {
-
-      const latLngAlt = this.getLatLongEXIF(_exif),
-        radioBtnToInsert = this.makeGeocodeRadioBtn(latLngAlt);
-
-      if (geocode_radio_container
-        .querySelectorAll('input[type="radio"]').length === 0) {
-        this.show(this.geocode_messages);
-        this.geocode_radio_container.appendChild(radioBtnToInsert);
-      }
-
-      // don't add geocodes that are only slightly different
-      else {
-        let _shouldAddGeocode = true;
-
-        this.geocode_radio_container
-          .querySelectorAll('input[type="radio"]').forEach((element) => {
-            const _existingGeocode = JSON.parse(element.dataset.geocode);
-            const _latDif = Math.abs(latLngAlt.latitude)
-              - Math.abs(_existingGeocode.latitude);
-            const _longDif = Math.abs(latLngAlt.longitude)
-              - Math.abs(_existingGeocode.longitude);
-
-            if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
-              _shouldAddGeocode = false;
-          });
-
-        if (_shouldAddGeocode)
-          this.geocode_radio_container.appendChild(radioBtnToInsert);
-      }
+      const latLngAlt = this.getLatLongEXIF(_exif);
+      // Set item's data-geocode attribute so we can have a record
+      item.dom_element.dataset.geocode = JSON.stringify(latLngAlt)
     }
 
     // Image Date Logic
-    _exif_date_taken = item.exif_data.DateTimeOriginal;
-
-    if (_exif_date_taken) {
+    if (_exif.DateTimeOriginal) {
       // we found the date taken, let's parse it down.
       // returns an array of [YYYY,MM,DD]
       const _date_taken_array =
-        _exif_date_taken.substring(' ', 10).split(':').reverse(),
+        _exif.DateTimeOriginal.substring(' ', 10).split(':').reverse(),
         _exifSimpleDate = this.SimpleDate(..._date_taken_array);
 
       this.imageDate(item, _exifSimpleDate);
@@ -529,35 +504,97 @@ class MOMultiImageUploader {
       // bind _camera_date so it will set the image date if clicked
       _camera_date.onclick = () => {
         this.imageDate(item, _exifSimpleDate);
-        this.refreshBox();
+        this.refreshImageMessages();
       }
     }
     // no date was found in EXIF data
     else {
       // Use observation date
-
       this.imageDate(item, this.observationDate());
     }
 
     item.processed = true;
   }
 
+  // Maybe add a radio button option to set obs gps to this item's gps.
+  // Or, if there are no more images with that location, remove the option.
+  // Or, remove the whole geocode_messages box.
+  refreshGeocodeMessages() {
+    const _geoOptions = this.geocode_radio_container;
+    let _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
+
+    if (this.fileStore.items.length > 0) {
+      let itemsHadGeocode = false;
+      // We're comparing items in the FileStore against existing gps options.
+      this.fileStore.items.forEach((item) => {
+        let itemData = item.dom_element.dataset;
+        if (itemData && itemData.geocode) {
+          const itemGeocode = JSON.parse(item.dom_element.dataset.geocode)
+          let _addGeoRadio = true;
+          itemsHadGeocode = true;
+
+          // check all current radio buttons
+          if (_currentOptions.length > 0) {
+            _currentOptions.forEach((element) => {
+              const _existingGeocode = JSON.parse(element.dataset.geocode);
+              const _latDif = Math.abs(itemGeocode.latitude)
+                - Math.abs(_existingGeocode.latitude);
+              const _longDif = Math.abs(itemGeocode.longitude)
+                - Math.abs(_existingGeocode.longitude);
+
+              // don't add geocodes that are only slightly different
+              if ((Math.abs(_latDif) < 0.0002) || Math.abs(_longDif) < 0.0002)
+                _addGeoRadio = false;
+            });
+          }
+
+          if (_addGeoRadio) {
+            const _radioBtnToInsert = this.makeGeocodeRadioBtn(itemGeocode);
+            this.geocode_radio_container.appendChild(_radioBtnToInsert);
+          }
+        }
+      })
+
+      // Clean up if there's no images with geocodes (approximates may linger)
+      if (!itemsHadGeocode) {
+        _geoOptions.querySelectorAll('input[type="radio"]')
+          .forEach((elem) => { elem.closest('.radio').remove(); })
+      }
+
+      // now check buttons again
+      _currentOptions = _geoOptions.querySelectorAll('input[type="radio"]');
+
+      if (_currentOptions.length > 0) {
+        this.show(this.geocode_messages);
+      } else {
+        this.hide(this.geocode_messages);
+      }
+    }
+  }
+
   // gets or sets image date
   imageDate(item, simpleDate) {
-    const _img_day_field = item.dom_element.querySelectorAll('select')[0],
-      _img_month_field = item.dom_element.querySelectorAll('select')[1],
-      _img_year_field = item.dom_element.querySelectorAll('input')[2];
+    const _img_day_select = item.dom_element.querySelector('[id$="_when_3i"]'),
+      _img_month_select = item.dom_element.querySelector('[id$="_when_2i"]'),
+      _img_year_field = item.dom_element.querySelector('[id$="_when_1i"]');
 
     // set it if we've got a date
     if (simpleDate) {
-      _img_day_field.value = simpleDate.day,
-        _img_month_field.value = simpleDate.month,
-        _img_year_field.value = simpleDate.year
+      _img_day_select.value = simpleDate.day;
+      _img_month_select.value = simpleDate.month;
+      _img_year_field.value = simpleDate.year;
+
+      // Make these easier to find with Capybara by explicitly setting the HTML
+      _img_day_select.options[_img_day_select.options.selectedIndex]
+        .setAttribute('selected', 'true');
+      _img_month_select.options[_img_month_select.options.selectedIndex]
+        .setAttribute('selected', 'true');
+
       return simpleDate;
     } else {
-      return this.SimpleDate(_img_day_field.value,
-        _img_month_field.value,
-        _img_year_field.value)
+      return this.SimpleDate(
+        _img_day_select.value, _img_month_select.value, _img_year_field.value
+      )
     }
   }
 
@@ -647,34 +684,33 @@ class MOMultiImageUploader {
   updateObsImages(item, image) {
     // #good_images is a hidden field
     const _good_image_vals = this.good_images.value || "";
+    const _radio = item.dom_element.querySelector(
+      'input[name="observation[thumb_image_id]"]'
+    )
 
     // add id to the good images form field.
-    this.good_images.value =
-      [_good_image_vals, image.id].join(' ').trim();
+    this.good_images.value = [_good_image_vals, image.id].join(' ').trim();
 
-    // set the thumbnail if it is selected
-    if (item.dom_element
-      .querySelector('input[name="observation[thumb_image_id]"]')
-      .checked) {
-      document.getElementById('observation_thumb_image_id').value =
-        image.id;
+    // set the hidden thumb_image_id field if the item's radio is checked
+    if (_radio.checked) {
+      _radio.value = image.id; // it's grabbing the val from the radio
+      this.obs_thumb_input.value = image.id; // does not matter!
     }
   }
 
   removeItem(item) {
     // remove element from the dom;
     item.dom_element.remove();
+
+    // remove the file from the dictionary
     if (item.is_file)
-      // remove the file from the dictionary
       delete this.fileStore.index[this.file_size];
     else
-      // remove the file from the dictionary
       delete this.fileStore.index[this.url];
 
-    // removes the file from the array
-    const idx = this.fileStore.items.indexOf(this);
+    // remove item from items
+    const idx = this.fileStore.items.indexOf(item);
     if (idx > -1)
-      // removes the file from the array
       this.fileStore.items.splice(idx, 1);
   }
 
@@ -696,7 +732,7 @@ class MOMultiImageUploader {
     return false;
   }
 
-  refreshBox() {
+  refreshImageMessages() {
     const _distinctImgDates = this.getDistinctImageDates(),
       _obsDate = this.observationDate();
 
@@ -770,11 +806,18 @@ class MOMultiImageUploader {
       this.obs_day.value = simpleDate.day;
       this.obs_month.value = simpleDate.month;
       this.obs_year.value = simpleDate.year;
+
+      // Make these easier to find with Capybara by explicitly setting the HTML
+      this.obs_day.options[this.obs_day.options.selectedIndex]
+        .setAttribute('selected', 'true');
+      this.obs_month.options[this.obs_month.options.selectedIndex]
+        .setAttribute('selected', 'true');
+
       return simpleDate;
     } else { // or get it
-      return this.SimpleDate(this.obs_day.value,
-        this.obs_month.value,
-        this.obs_year.value)
+      return this.SimpleDate(
+        this.obs_day.value, this.obs_month.value, this.obs_year.value
+      )
     }
   }
 
