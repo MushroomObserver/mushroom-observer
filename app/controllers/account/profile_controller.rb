@@ -6,7 +6,7 @@ module Account
 
     def edit
       @licenses = License.current_names_and_ids(@user.license)
-      @place_name        = @user.location ? @user.location.display_name : ""
+      @place_name = @user.location ? @user.location.display_name : ""
       if @user.image
         @copyright_holder  = @user.image.copyright_holder
         @copyright_year    = @user.image.when.year

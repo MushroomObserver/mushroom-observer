@@ -168,7 +168,7 @@ module FormsHelper
 
   # default select_opts - also generate year options if start_year given
   def select_generate_default_options(args)
-    args[:select_opts] ||= (args[:value] ? { selected: args[:value] } :  {})
+    args[:select_opts] ||= (args[:value] ? { selected: args[:value] } : {})
 
     return args unless args[:start_year].present? && args[:end_year].present?
 
