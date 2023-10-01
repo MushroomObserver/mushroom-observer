@@ -247,8 +247,11 @@ class ProjectsController < ApplicationController
   end
 
   def project_create_params
-    params.require(:project).permit(:title, :summary, :open_membership,
-                                    :accepting_observations)
+    params.require(:project).
+      permit(:title, :summary, :open_membership,
+             :accepting_observations,
+             "start_date(1i)", "start_date(2i)", "start_date(3i)",
+             "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end
 
   def find_project!
@@ -294,6 +297,8 @@ class ProjectsController < ApplicationController
       @project.user_group = user_group
       @project.admin_group = admin_group
       @project.location = location
+      @project.start_date = nil if params.dig(:start_date, :fixed) == "false"
+      @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
 
       if @project.save
         @project.log_create
