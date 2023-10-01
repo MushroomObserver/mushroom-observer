@@ -318,8 +318,32 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_flash_for_create_location
     assert_selector("body.observations__show")
-    # binding.break
+    binding.break
     # erroring on image src="/remote_images/960/1062212457.jpg”
+    # https://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails
+    # 1) Put your file to be uploaded in the test in your
+    # fixtures/files subdirectory for testing.
+
+    # 2) In your unit test you can get your testing file by
+    # calling fixture_file_upload('path','mime-type'). e.g.:
+
+    # `bulk_json = fixture_file_upload(
+    #   'files/bulk_bookmark.json','application/json'
+    # )`
+
+    # 3) call the post method to hit the controller action you want, passing
+    # the object returned by fixture_file_upload as the parameter for the
+    # upload. e.g.:
+
+    # post :bookmark, params: { bulkfile: bulk_json }
+
+    # file_fixture_path
+    # fixture_file_upload
+
+    # https://gorails.com/episodes/rails-system-testing-file-uploads
+    #
+    # attach_file "user[avatar]", file_fixture("avatar.jpg")
+    # find(".dropzone").drop File.join(file_fixture_path, "avatar.jpg")
 
     assert_new_location_is_correct(expected_values_after_location)
     assert_new_observation_is_correct(expected_values_after_location)
