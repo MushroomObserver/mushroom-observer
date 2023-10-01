@@ -1,7 +1,6 @@
 <%
 add_page_title(:show_project_title.t(title: @project.title))
-add_pager_for(@project)
-add_interest_icons(@user, @project)
+add_background_image(Image.find(1570418))
 add_tab_set(project_show_tabs(project: @project, user: @user))
 @container = :wide
 %>

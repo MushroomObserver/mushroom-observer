@@ -29,7 +29,14 @@ left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
 
     <!-- Title -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+    <% if content_for?(:background_image) %>
+      <%= yield(:background_image) %>
+      <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
+	  <%= tag.h1(yield(:title), class: "h3 image-title-text", id: "title") -%>
+      <% end %>
+    <% else %>
+      <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+    <% end %>
     <%= yield(:filter_help) -%>
     <%= yield(:owner_naming) %>
   <% end %>

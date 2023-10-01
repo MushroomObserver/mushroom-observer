@@ -109,3 +109,20 @@ svg.placeholder {
 }
 
 
+//
+// project title image
+//
+
+.image-title {
+  height: 300px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.image-title-text {
+  background: $BODY_BG_COLOR;
+  color: $BODY_FG_COLOR;
+  padding: 0.5em;
+  margin-top: 18px;
+  margin-left: 18px;
+}
