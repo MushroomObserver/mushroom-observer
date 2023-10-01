@@ -8,6 +8,10 @@ class MOMultiImageUploader {
       form: document.forms.namedItem("observation_form"),
       block_form_submission: true,
       select_files_button: document.getElementById('multiple_images_button'),
+      obs_thumb_input: document.getElementById('observation_thumb_image_id'),
+      // for edit form only. hidden radios in the create form added dynamically
+      obs_thumb_image_radios:
+        document.querySelectorAll('input[name="observation[thumb_image_id]"]'),
       content: document.getElementById('content'),
       // container to insert images into
       add_img_container: document.getElementById("added_images_container"),
@@ -115,6 +119,15 @@ class MOMultiImageUploader {
       document.getElementById('right_side').classList.remove('dashed-border');
     }
 
+    // EDITING OBS
+    // Update the obs "observation_thumb_image_id" form field,
+    // when the hidden "set_as_thumb_image" for an image is changed.
+    this.obs_thumb_image_radios.forEach((elem) => {
+      elem.onchange = (event) => {
+        this.obs_thumb_input.setAttribute('value', event.target.value);
+      }
+    });
+
     // ADDING FILES
     this.content.ondrop = (e) => {
       // stops the browser from leaving page
@@ -155,12 +168,11 @@ class MOMultiImageUploader {
   }
 
   setItemBindings() {
-    const _show_on_map_links =
-      document.querySelectorAll('[data-role="show_on_map"]'),
-      _obs_thumb_image_radios =
-        document.querySelectorAll('input[name="observation[thumb_image_id]"]'),
-      _set_thumb_image_btns = document.querySelectorAll('.set_thumb_image'),
-      _is_thumb_image_inputs = document.querySelectorAll('.is_thumb_image');
+    const _images = document.getElementById("added_images_container"),
+      _show_on_map_links = _images
+        .querySelectorAll('[data-role="show_on_map"]'),
+      _set_thumb_image_btns = _images.querySelectorAll('.set_thumb_image'),
+      _is_thumb_image_labels = _images.querySelectorAll('.is_thumb_image');
 
     // show the item's gps on a map.
     // there's one link for each different gps coord, NOT present at load
@@ -171,21 +183,11 @@ class MOMultiImageUploader {
       }
     });
 
-    // Update the obs "observation_thumb_image_id" form field,
-    // when the hidden "set_as_thumb_image" for an image is changed.
-    // _obs_thumb_image_radios.forEach((elem) => {
-    _obs_thumb_image_radios.forEach((elem) => {
-      elem.onchange = () => {
-        document.getElementById('observation_thumb_image_id')
-          .value = this.value;
-      }
-    });
-
     // Logic for setting the default thumbnail.
-    // Problem: needs binding after filestore item created.
+    // Needs binding after filestore item created.
     // _set_thumb_image_btns.forEach((elem) => {
     _set_thumb_image_btns.forEach((elem) => {
-      elem.onclick = function (event) {
+      elem.onclick = (event) => {
         // `this` is the link clicked to make default image
         event.preventDefault();
         // reset selections
@@ -194,7 +196,7 @@ class MOMultiImageUploader {
           elem.classList.remove('hidden');
         });
         // add hidden to the default thumbnail text
-        _is_thumb_image_inputs.forEach((elem) => {
+        _is_thumb_image_labels.forEach((elem) => {
           elem.classList.add('hidden');
         });
         // reset the checked default thumbnail
@@ -693,17 +695,17 @@ class MOMultiImageUploader {
   updateObsImages(item, image) {
     // #good_images is a hidden field
     const _good_image_vals = this.good_images.value || "";
+    const _radio = item.dom_element.querySelector(
+      'input[name="observation[thumb_image_id]"]'
+    )
 
     // add id to the good images form field.
-    this.good_images.value =
-      [_good_image_vals, image.id].join(' ').trim();
+    this.good_images.value = [_good_image_vals, image.id].join(' ').trim();
 
-    // set the thumbnail if it is selected
-    if (item.dom_element
-      .querySelector('input[name="observation[thumb_image_id]"]')
-      .checked) {
-      document.getElementById('observation_thumb_image_id').value =
-        image.id;
+    // set the hidden thumb_image_id field if the item's radio is checked
+    if (_radio.checked) {
+      _radio.value = image.id; // it's grabbing the val from the radio
+      this.obs_thumb_input.value = image.id; // does not matter!
     }
   }
 
