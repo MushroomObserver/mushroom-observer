@@ -175,11 +175,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       # assert_unchecked_field(local_now.strftime("%d-%B-%Y"))
     end
 
-    # FIXME: cannot reattach same image twice
-    # Add a second image that's not geotagged. Must explicitly attach both.
-    attach_file([Rails.root.join("test/images/Coprinus_comatus.jpg"),
-                 Rails.root.join("test/images/perf.jpg")],
-                multiple: true) do
+    # Add a second image that's not geotagged.
+    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
       find(".file-field").click
     end
 
@@ -188,7 +185,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Be sure we have two image wrappers
     image_wrappers = all(".added_image_wrapper")
-    assert_equal(image_wrappers.length, 2)
+    assert_equal(2, image_wrappers.length)
     second_image_wrapper = image_wrappers[1]
 
     # Check that it's the right image: this is geotagged.jpg's date
@@ -206,12 +203,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Be sure we have only one image wrapper now
     image_wrappers = all(".added_image_wrapper")
-    assert_equal(image_wrappers.length, 1)
+    assert_equal(1, image_wrappers.length)
 
     # Add geotagged.jpg again
-    attach_file([Rails.root.join("test/images/Coprinus_comatus.jpg"),
-                 Rails.root.join("test/images/geotagged.jpg")],
-                multiple: true) do
+    attach_file(Rails.root.join("test/images/geotagged.jpg")) do
       find(".file-field").click
     end
 
