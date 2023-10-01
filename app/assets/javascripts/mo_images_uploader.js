@@ -1,6 +1,6 @@
 //= require exif.js
 
-class MOMultiImageUploader {
+class MOImagesUploader {
 
   constructor(localization = {}) {
     // Internal Variable Definitions.
@@ -119,8 +119,7 @@ class MOMultiImageUploader {
       document.getElementById('right_side').classList.remove('dashed-border');
     }
 
-    // EDITING OBS
-    // Update the obs "observation_thumb_image_id" form field,
+    // EDIT OBS - Update the "observation_thumb_image_id" form field,
     // when the hidden "set_as_thumb_image" for an image is changed.
     this.obs_thumb_image_radios.forEach((elem) => {
       elem.onchange = (event) => {
@@ -143,18 +142,12 @@ class MOMultiImageUploader {
       //   fileStore.addUrl(dataTransfer.getData('Text'));
     };
 
-    // https://stackoverflow.com/questions/12030686/html-input-file-selection-event-not-firing-upon-selecting-the-same-file
-    // this.select_files_button.onclick = (event) => {
-    //   // alert(event.target.value);
-    //   event.target.value = "";
-    // }
-
     // Detect when files are added from browser
     this.select_files_button.onchange = (event) => {
       // Get the files from the browser
       const files = event.target.files;
       this.addFiles(files);
-      this.select_files_button.value = "";
+      event.target.value = "";
     };
 
     // Detect when a user submits observation; includes upload logic
@@ -172,6 +165,8 @@ class MOMultiImageUploader {
       _show_on_map_links = _images
         .querySelectorAll('[data-role="show_on_map"]'),
       _set_thumb_image_btns = _images.querySelectorAll('.set_thumb_image'),
+      _obs_thumb_image_radios = _images
+        .querySelectorAll('input[name="observation[thumb_image_id]"]'),
       _is_thumb_image_labels = _images.querySelectorAll('.is_thumb_image');
 
     // show the item's gps on a map.
@@ -233,14 +228,8 @@ class MOMultiImageUploader {
   }
 
   addFiles(files) {
-    // loop through attached files, make sure we aren't adding duplicates
+    // loop through attached files
     for (let i = 0; i < files.length; i++) {
-      // stop adding the file, one with this exact size is already attached
-      // What are the odds of this?
-      if (this.fileStore.index[files[i].size] != undefined) {
-        continue;
-      }
-
       // uuid is used as the index for the ruby form template. // **
       const _item = this.FileStoreItem(files[i], this.generateUUID());
       this.loadAndDisplayItem(_item);
@@ -569,7 +558,7 @@ class MOMultiImageUploader {
       // Clean up if there's no images with geocodes (approximates may linger)
       if (!itemsHadGeocode) {
         _geoOptions.querySelectorAll('input[type="radio"]')
-          .forEach((elem) => { elem.remove(); })
+          .forEach((elem) => { elem.closest('.radio').remove(); })
       }
 
       // now check buttons again
@@ -710,29 +699,6 @@ class MOMultiImageUploader {
   }
 
   removeItem(item) {
-    // // remove file from the button's FileList
-    // const input = this.select_files_button;
-
-    // // find the index in the FileList
-    // // Array.prototype.forEach.call(oldfiles, (file, i) => {
-    // //   if (file.name == item.file_name)
-    // //     index = i;
-    // // });
-
-    // // https://stackoverflow.com/a/64019766/3357635
-    // const dt = new DataTransfer()
-    // const { files } = input
-
-    // // backwards to not mess up index
-    // for (let i = files.length - 1; i > -1; i--) {
-    //   const file = files[i]
-    //   if (file.name !== item.file_name)
-    //     dt.items.add(file) // here you exclude the file. thus removing it.
-    // }
-
-    // input.files = dt.files // Assign the updates list
-    // debugger;
-
     // remove element from the dom;
     item.dom_element.remove();
 
