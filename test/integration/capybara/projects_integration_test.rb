@@ -6,13 +6,15 @@ require("test_helper")
 class ProjectsIntegrationTest < CapybaraIntegrationTestCase
   def test_add_project_dates
     login(mary)
-    title = "Super Grandiloquent National Fungal Foray"
+    title = "Super International Fungal Foray"
 
     # Add project, default dates
     visit(projects_path)
     click_on(:list_projects_add_project.l)
-    fill_in(:form_projects_title.l, with: title)
-    assert_difference("Observation.count", 1, "Failed to created Project" ) do
+    fill_in("project_title", with: title)
+    fill_in(:WHERE.l, with: locations(:unknown_location).name)
+
+    assert_difference("Project.count", 1, "Failed to created Project") do
       click_on("Create")
     end
 

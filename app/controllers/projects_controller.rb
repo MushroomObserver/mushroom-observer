@@ -52,6 +52,8 @@ class ProjectsController < ApplicationController
   # def add_project
   def new
     @project = Project.new
+    @start_date_fixed = true
+    @end_date_fixed = true
   end
 
   # Form to edit a project
@@ -69,6 +71,8 @@ class ProjectsController < ApplicationController
   def edit
     return unless find_project!
 
+    @start_date_fixed = @project.start_date.present?
+    @end_date_fixed = @project.end_date.present?
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))
