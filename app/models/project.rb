@@ -48,6 +48,7 @@
 class Project < AbstractModel
   belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :location
+  belongs_to :image
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
