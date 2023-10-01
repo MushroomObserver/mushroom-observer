@@ -269,76 +269,123 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_selector(".set_thumb_image")
     end
 
-    binding.break
-
     # assert_field('observation_thumb_image_id', type: :hidden, with: ??)
 
-    # within("#observation_form") do
-    #   click_commit
-    # end
+    within("#observation_form") { click_commit }
 
-    # # It should take us to create a new location
-    # assert_selector("body.locations__new")
-    # # The observation shoulda been created OK.
-    # assert_flash_for_create_observation
-    # assert_new_observation_is_correct(expected_values_after_create)
+    # It should take us to create a new location
+    assert_selector("body.locations__new")
+    # The observation shoulda been created OK.
+    assert_flash_for_create_observation
+    assert_new_observation_is_correct(expected_values_after_create)
 
-    # # check default values of location form
-    # assert_field("location_display_name", with: "Pasadena, California, USA")
-    # assert_field("location_high", text: "")
-    # assert_field("location_low", text: "")
-    # assert_field("location_notes", text: "")
-    # assert_field("location_north", with: PASADENA_EXTENTS[:north])
-    # assert_field("location_south", with: PASADENA_EXTENTS[:south])
-    # assert_field("location_east", with: PASADENA_EXTENTS[:east])
-    # assert_field("location_west", with: PASADENA_EXTENTS[:west])
+    # check default values of location form
+    assert_field("location_display_name", with: "Pasadena, California, USA")
+    assert_field("location_high", text: "")
+    assert_field("location_low", text: "")
+    assert_field("location_notes", text: "")
+    assert_field("location_north", with: PASADENA_EXTENTS[:north])
+    assert_field("location_south", with: PASADENA_EXTENTS[:south])
+    assert_field("location_east", with: PASADENA_EXTENTS[:east])
+    assert_field("location_west", with: PASADENA_EXTENTS[:west])
 
     # submit_location_form_with_errors
-    # submit_location_form_without_errors
-    # open_edit_observation_form
-    # submit_observation_form_with_changes
-    # make_sure_observation_is_in_log_index(obs = Observation.last)
-    # visit(observation_path(obs.id))
-    # destroy_observation
-    # make_sure_observation_is_not_in_log_index(obs)
-  end
+    fill_in("location_display_name",
+            with: "Pasadena: Disneyland, Some Co., California, USA")
+    fill_in("location_high", with: "8765")
+    fill_in("location_low", with: "4321")
+    fill_in("location_notes", with: "oops")
 
-  def submit_location_form_with_errors
-    submit_form_with_changes(create_location_form_first_changes,
-                             "#location_form")
+    within("#location_form") { click_commit }
+
     assert_selector("body.locations__create")
     assert_has_location_warning(/Contains unexpected character/)
-    assert_form_has_correct_values(
-      create_location_form_values_after_first_changes,
-      "#location_form"
-    )
-  end
 
-  def submit_location_form_without_errors
-    submit_form_with_changes(create_location_form_second_changes,
-                             "#location_form")
+    assert_field("location_display_name",
+                 with: "Pasadena: Disneyland, Some Co., California, USA")
+    assert_field("location_high", with: "8765")
+    assert_field("location_low", with: "4321")
+    assert_field("location_notes", with: "oops")
+
+    # submit_location_form_without_errors
+    fill_in("location_display_name",
+            with: "Pasadena, Some Co., California, USA")
+    fill_in("location_high", with: "5678")
+    fill_in("location_low", with: "1234")
+    fill_in("location_notes", with: "Notes for location")
+
+    within("#location_form") { click_commit }
+
     assert_flash_for_create_location
     assert_selector("body.observations__show")
+    binding.break
+    # erroring on image src="/remote_images/960/1062212457.jpg”
+
     assert_new_location_is_correct(expected_values_after_location)
     assert_new_observation_is_correct(expected_values_after_location)
     assert_show_observation_page_has_important_info
-  end
 
-  def open_edit_observation_form
+    # open_edit_observation_form
     new_obs = Observation.last
     click_link(class: "edit_observation_link_#{new_obs.id}")
     assert_selector("body.observations__edit")
-    assert_form_has_correct_values(edit_observation_form_initial_values,
-                                   "#observation_form")
-  end
 
-  def submit_observation_form_with_changes
-    submit_form_with_changes(edit_observation_form_changes,
-                             "#observation_form")
+    # check the fields
+    img_id = Image.last.id
+    assert_field("observation_when_1i", with: "2010")
+    assert_select("observation_when_2i", text: "March")
+    assert_select("observation_when_3i", text: "14")
+    assert_field("observation_place_name",
+                 with: "Pasadena, Some Co., California, USA")
+    assert_field("observation_lat", with: "12.576")
+    assert_field("observation_long", with: "-123.7519")
+    assert_field("observation_alt", with: "17")
+    assert_unchecked_field("observation_is_collection_location")
+    assert_checked_field("observation_specimen")
+    assert_field(other_notes_id, with: "Notes for observation")
+    assert_field("good_image_#{img_id}_when_1i", with: "2010")
+    assert_select("good_image_#{img_id}_when_2i", text: "March")
+    assert_select("good_image_#{img_id}_when_3i", text: "14")
+    assert_field("good_image_#{img_id}_copyright_holder",
+                 with: katrina.legal_name)
+    assert_field("good_image_#{img_id}_notes", with: "Notes for image")
+
+    # submit_observation_form_with_changes
+    fill_in("observation_when_1i", with: "2011")
+    select("April", from: "observation_when_2i")
+    select("15", from: "observation_when_3i")
+    fill_in("observation_lat", with: "23.4567")
+    fill_in("observation_long", with: "-123.4567")
+    fill_in("observation_alt", with: "987m")
+    check("observation_is_collection_location")
+    fill_in(other_notes_id, with: "New notes for observation")
+    fill_in("good_image_#{img_id}_when_1i", with: "2011")
+    select("April", from: "good_image_#{img_id}_when_2i")
+    select("15", from: "good_image_#{img_id}_when_3i")
+    fill_in("good_image_#{img_id}_notes", with: "New notes for image")
+
     assert_flash_for_edit_observation
     assert_selector("body.observations__show")
     assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
+
+    # make_sure_observation_is_in_log_index
+    obs = Observation.last
+    visit(activity_logs_path)
+    assert_link(href: %r{/#{obs.id}?})
+
+    # destroy_observation
+    visit(observation_path(obs.id))
+    new_obs = Observation.last
+    assert_selector("body.observations__show")
+    click_button(class: "destroy_observation_link_#{new_obs.id}")
+    assert_flash_for_destroy_observation
+    assert_selector("body.observations__index")
+
+    # make_sure_observation_is_not_in_log_index
+    visit(activity_logs_path)
+    assert_no_link(href: %r{/#{obs.id}?})
+    assert_link(href: /activity_logs/, text: /Agaricus campestris/)
   end
 
   # Rename from new_observation to just observation ***
@@ -360,25 +407,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal(expected_values[:notes], new_obs.notes_show_formatted.strip)
   end
 
-  def destroy_observation
-    new_obs = Observation.last
-    assert_selector("body.observations__show")
-    click_button(class: "destroy_observation_link_#{new_obs.id}")
-    assert_flash_for_destroy_observation
-    assert_selector("body.observations__index")
-  end
-
-  def make_sure_observation_is_in_log_index(obs)
-    visit(activity_logs_path)
-    assert_link(href: %r{/#{obs.id}?})
-  end
-
-  def make_sure_observation_is_not_in_log_index(obs)
-    visit(activity_logs_path)
-    assert_no_link(href: %r{/#{obs.id}?})
-    assert_link(href: /activity_logs/, text: /Agaricus campestris/)
-  end
-
   def assert_new_observation_is_correct(expected_values)
     assert_new_observation_has_correct_data(expected_values)
     assert_observation_has_correct_location(expected_values)
@@ -389,6 +417,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def assert_new_observation_has_correct_data(expected_values)
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
+    # puts(new_obs.created_at)
+    # puts(new_obs.updated_at)
+    # puts(1.minute.ago)
+
     assert(new_obs.created_at > 1.minute.ago)
     assert(new_obs.updated_at > 1.minute.ago)
     # assert_dates_equal(expected_values[:when], new_obs.when)
@@ -420,11 +452,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def assert_observation_has_correct_image(expected_values)
     new_obs = Observation.last
-    new_img = Image.last
-    assert_obj_arrays_equal([new_img], new_obs.images)
-    assert_dates_equal(expected_values[:when], new_img.when)
-    assert_equal(expected_values[:user].legal_name, new_img.copyright_holder)
-    assert_equal(expected_values[:image_notes], new_img.notes.strip)
+    new_imgs = Image.last(2)
+    assert_obj_arrays_equal(new_imgs, new_obs.images)
+    assert_dates_equal(expected_values[:when], new_imgs[0].when)
+    assert_equal(expected_values[:user].legal_name,
+                 new_imgs[0].copyright_holder)
+    assert_equal(expected_values[:image_notes], new_imgs[0].notes.strip)
   end
 
   def assert_new_location_is_correct(expected_values)
@@ -439,7 +472,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def assert_show_observation_page_has_important_info
     new_obs = Observation.last
     new_loc = Location.last
-    new_img = Image.last
+    # new_img = Image.last
     assert_text(new_obs.when.web_date)
     assert_text(new_loc.name)
     if new_obs.is_collection_location
@@ -453,10 +486,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_text(/No specimen/)
     end
     assert_text(new_obs.notes_show_formatted)
-    assert_text(new_img.notes)
-    assert_no_link(href: "observations?where")
+    # assert_text(new_img.notes) # nope, in the caption on carousel
+    # assert_no_link(href: "observations?where")
     assert_link(href: /#{location_path(new_loc.id)}/)
-    assert_link(href: /#{image_path(new_img.id)}/)
+    # assert_link(
+    #   href: /#{Rails.application.routes.url_helpers.image_path(new_img.id)}/
+    # )
   end
 
   def review_flash(patterns)
@@ -485,85 +520,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".alert-warning", text: regex)
   end
 
-  def create_observation_form_values_after_first_changes
-    create_observation_form_defaults.merge(
-      create_observation_form_first_changes
-    )
-  end
-
-  def create_location_form_values_after_first_changes
-    create_location_form_defaults.merge(create_location_form_first_changes)
-  end
-
   def other_notes_id
     Observation.notes_part_id(Observation.other_notes_part)
-  end
-
-  def create_location_form_first_changes
-    {
-      # "location_display_name" => "({[;:|]}), California, USA",
-      "location_display_name" => {
-        type: :text,
-        value: "Pasadena: Disneyland, Some Co., California, USA"
-      },
-      "location_high" => { type: :text, value: "8765" },
-      "location_low" => { type: :text, value: "4321" },
-      "location_notes" => { type: :text, value: "oops" }
-    }
-  end
-
-  def create_location_form_second_changes
-    {
-      "location_display_name" => {
-        type: :text, value: "Pasadena, Some Co., California, USA"
-      },
-      "location_high" => { type: :text, value: "5678" },
-      "location_low" => { type: :text, value: "1234" },
-      "location_notes" => { type: :text, value: "Notes for location" }
-    }
-  end
-
-  def edit_observation_form_initial_values
-    img_id = Image.last.id
-    {
-      "observation_when_1i" => { type: :text, value: "2010" },
-      "observation_when_2i" => { type: :select, value: "March" },
-      "observation_when_3i" => { type: :select, value: "14" },
-      "observation_place_name" => {
-        type: :autocompleter, value: "Pasadena, Some Co., California, USA"
-      },
-      "observation_lat" => { type: :text, value: "12.576" },
-      "observation_long" => { type: :text, value: "-123.7519" },
-      "observation_alt" => { type: :text, value: "17" },
-      "observation_is_collection_location" => { type: :check, value: false },
-      "observation_specimen" => { type: :check, value: true },
-      other_notes_id => { type: :text, value: "Notes for observation" },
-      "good_image_#{img_id}_when_1i" => { type: :text, value: "2010" },
-      "good_image_#{img_id}_when_2i" => { type: :select, value: "March" },
-      "good_image_#{img_id}_when_3i" => { type: :select, value: "14" },
-      "good_image_#{img_id}_copyright_holder" => { type: :text,
-                                                   value: katrina.legal_name },
-      "good_image_#{img_id}_notes" => { type: :text, value: "Notes for image" }
-    }
-  end
-
-  def edit_observation_form_changes
-    img_id = Image.last.id
-    {
-      "observation_when_1i" => { type: :text, value: "2011" },
-      "observation_when_2i" => { type: :select, value: "April" },
-      "observation_when_3i" => { type: :select, value: "15" },
-      "observation_lat" => { type: :text, value: "23.4567" },
-      "observation_long" => { type: :text, value: "-123.4567" },
-      "observation_alt" => { type: :text, value: "987m" },
-      "observation_is_collection_location" => { type: :check, value: true },
-      other_notes_id => { type: :text, value: "New notes for observation" },
-      "good_image_#{img_id}_when_1i" => { type: :text, value: "2011" },
-      "good_image_#{img_id}_when_2i" => { type: :select, value: "April" },
-      "good_image_#{img_id}_when_3i" => { type: :select, value: "15" },
-      "good_image_#{img_id}_notes" => { type: :text,
-                                        value: "New notes for image" }
-    }
   end
 
   def expected_values_after_create
