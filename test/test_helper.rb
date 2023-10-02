@@ -49,7 +49,7 @@ require("webmock/minitest")
 WebMock.disable_net_connect!(
   allow_localhost: true,
   allow: [
-    # "chromedriver.storage.googleapis.com", # in case we install Chrome
+    "chromedriver.storage.googleapis.com", # in case we install Chrome
     "github.com", # for Firefox
     "objects.githubusercontent.com" # for Firefox
   ]
