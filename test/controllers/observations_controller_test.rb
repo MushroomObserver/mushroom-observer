@@ -175,8 +175,9 @@ class ObservationsControllerTest < FunctionalTestCase
   # other subactions in order of @index_subaction_param_keys
   # miscellaneous tests using get(:index)
 
-  def test_index
-    login
+  # First, test that the index does not require login - AN 20230923
+  def test_index_no_login
+    # login
     get(:index)
 
     assert_template("shared/_matrix_box")
@@ -2992,6 +2993,52 @@ class ObservationsControllerTest < FunctionalTestCase
     project_states.each do |id, state|
       assert_checkbox_state("project_id_#{id}", state)
     end
+  end
+
+  def test_project_observation_location
+    project = projects(:albion_project)
+    obs = observations(:california_obs)
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_project_checks(project.id => :checked)
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: {
+          "id_#{project.id}" => "1",
+          :ignore_proj_conflicts => "1"
+        }
+      }
+    )
+    assert_response(:redirect)
+    assert_obj_arrays_equal([project], obs.reload.projects)
+  end
+
+  def test_project_observation_good_location
+    project = projects(:wrangel_island_project)
+    obs = observations(:perkatkun_obs)
+
+    login("dick")
+    put(
+      :update,
+      params: {
+        id: obs.id,
+        observation: { place_name: obs.place_name },
+        project: { "id_#{project.id}" => "1" }
+      }
+    )
+    assert_response(:redirect)
+    assert_obj_arrays_equal([project], obs.reload.projects)
   end
 
   def test_list_checkboxes_in_create_observation

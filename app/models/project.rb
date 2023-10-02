@@ -26,6 +26,7 @@
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
 #  user_can_add_observation?:: Can user add observation to this Project
+#  violates_constraints?:: Does a given obs violate the Project constraints
 #  text_name::      Alias for +title+ for debugging.
 #  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
 #  Proj.admin_power?:: Check for admin for a project of this Obs
@@ -46,6 +47,7 @@
 #
 class Project < AbstractModel
   belongs_to :admin_group, class_name: "UserGroup"
+  belongs_to :location
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
@@ -106,6 +108,28 @@ class Project < AbstractModel
   def user_can_add_observation?(obs, user)
     accepting_observations && (obs.user == user ||
                                is_member?(user))
+  end
+
+  def violates_constraints?(obs)
+    violates_location?(obs) # || violates_date?(obs)
+  end
+
+  def violates_location?(obs)
+    return false if location.blank?
+
+    !location.found_here?(obs)
+  end
+
+  def count_violations
+    return 0 unless location
+
+    count = observations.where.not(lat: nil).count
+    count - observations.in_box(n: location.north, s: location.south,
+                                e: location.east, w: location.west).count
+  end
+
+  def constraints
+    "Location: #{place_name}"
   end
 
   # Check if user has permission to edit a given object.
@@ -315,25 +339,22 @@ class Project < AbstractModel
     end
   end
 
-  ##############################################################################
+  def place_name
+    if location
+      location.display_name
+    else
+      ""
+    end
+  end
 
-  protected
-
-  def validation # :nodoc:
-    if !user && !User.current
-      errors.add(:user, :validate_project_user_missing.t)
-    end
-    unless admin_group
-      errors.add(:admin_group, :validate_project_admin_group_missing.t)
-    end
-    unless user_group
-      errors.add(:user_group, :validate_project_user_group_missing.t)
-    end
-
-    if title.to_s.blank?
-      errors.add(:title, :validate_project_title_missing.t)
-    elsif title.size > 100
-      errors.add(:title, :validate_project_title_too_long.t)
-    end
+  def place_name=(place_name)
+    place_name = place_name.strip_squeeze
+    where = if User.current_location_format == "scientific"
+              Location.reverse_name(place_name)
+            else
+              place_name
+            end
+    loc = Location.find_by_name(where)
+    self.location = (loc)
   end
 end

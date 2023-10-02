@@ -6,7 +6,7 @@ class RssLogsController < ApplicationController
   require "set"
 
   before_action :login_required, except: [
-    :index,
+    # :index,
     :rss,
     :show
   ]
