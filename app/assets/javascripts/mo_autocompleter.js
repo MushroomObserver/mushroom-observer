@@ -192,9 +192,6 @@ class MOAutocompleter {
     // Figure out a few browser-dependent dimensions.
     this.scrollbar_width = this.getScrollBarWidth();
 
-    // Initialize autocomplete primer with a blank newline.
-    this.primer.unshift('\n');
-
     // Create pulldown.
     this.create_pulldown();
 
@@ -953,7 +950,7 @@ class MOAutocompleter {
   }
 
   /**
-   * Index of string in primer array with IDs
+   * Index of string in future primer array with IDs
    * where primer == [[text_string, id], [text_string, id]]
    * @param primer {!Array} - the input array
    * @param val {object} - the value to search
@@ -1160,7 +1157,6 @@ class MOAutocompleter {
     });
   }
 
-
   // Process response from server:
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
@@ -1175,14 +1171,10 @@ class MOAutocompleter {
     // than one sent in request.
     this.last_fetch_request = new_primer[0];
 
-    // Make sure there's a trailing newline.
-    if (new_primer[new_primer.length - 1] != '\n')
-      new_primer.push("\n");
-
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer[new_primer.length - 2] == "...") {
+    if (new_primer[new_primer.length - 1] == "...") {
       this.last_fetch_incomplete = true;
-      new_primer = new_primer.slice(0, new_primer.length - 2);
+      new_primer = new_primer.slice(0, new_primer.length - 1);
       if (this.focused)
         // (just in case we need to refine the request due to
         //  activity while waiting for this response)
@@ -1194,7 +1186,7 @@ class MOAutocompleter {
     // Log requests and responses if in debug mode.
     if (this.log) {
       this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_primer.length - 2) + " strings (" +
+        ": " + (new_primer.length - 1) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
