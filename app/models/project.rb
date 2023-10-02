@@ -113,7 +113,7 @@ class Project < AbstractModel
   end
 
   def violates_constraints?(obs)
-    violates_location?(obs) # || violates_date?(obs)
+    violates_location?(obs) || violates_dates?(obs)
   end
 
   def violates_location?(obs)
@@ -122,12 +122,18 @@ class Project < AbstractModel
     !location.found_here?(obs)
   end
 
-  def count_violations
-    return 0 unless location
+  def violates_dates?(obs)
+    dates_exclude?(obs.when)
+  end
 
-    count = observations.where.not(lat: nil).count
-    count - observations.in_box(n: location.north, s: location.south,
-                                e: location.east, w: location.west).count
+  def count_violations
+    return out_of_range_observations.count unless location
+
+    count =
+      out_of_range_observations.or(observations.where.not(lat: nil)).count
+    count - in_range_observations.
+            in_box(n: location.north, s: location.south,
+                   e: location.east, w: location.west).count
   end
 
   def constraints
@@ -370,12 +376,41 @@ class Project < AbstractModel
     !future? && !past?
   end
 
-  def dates_exclude?(date)
+  def dates_exclude?(date
+  )
     !dates_include?(date)
   end
 
   def dates_include?(date)
     starts_no_later_than?(date) && ends_no_earlier_than?(date)
+  end
+
+  def out_of_range_observations
+    if start_date.nil? && end_date.nil?
+      # performant query that returns empty ActiveRecord_Relation
+      # (gps_hidden column has null: false)
+      observations.where(gps_hidden: nil)
+    elsif start_date.nil?
+      observations.where(Observation[:when] > end_date)
+    elsif end_date.nil?
+      observations.where(Observation[:when] < start_date)
+    else
+      observations.where(Observation[:when] > end_date).
+        or(observations.where(Observation[:when] < start_date))
+    end
+  end
+
+  def in_range_observations
+    if start_date.nil? && end_date.nil?
+      observations
+    elsif start_date.nil?
+      observations.where(Observation[:when] <= end_date)
+    elsif end_date.nil?
+      observations.where(Observation[:when] >= start_date)
+    else
+      observations.where(Observation[:when] <= end_date).
+        and(observations.where(Observation[:when] >= start_date))
+    end
   end
 
   # convenience methods for date range display

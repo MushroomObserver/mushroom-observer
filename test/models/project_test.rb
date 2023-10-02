@@ -151,4 +151,20 @@ class ProjectTest < UnitTestCase
     assert_equal(:show_project_duration_unlimited.l,
                  projects(:unlimited_project).duration_str)
   end
+
+  def test_out_of_range_observations
+    assert_out_of_range_observations(projects(:current_project), expect: 0)
+    assert_out_of_range_observations(projects(:unlimited_project), expect: 0)
+    assert_out_of_range_observations(projects(:future_project))
+    assert_out_of_range_observations(projects(:pinned_date_range_project))
+  end
+
+  def assert_out_of_range_observations(project,
+                                       expect: project.observations.count)
+    assert(
+      project.observations.count.positive?,
+      "Test needs fixture with some Observations; #{project.title} has none"
+    )
+    assert_equal(expect, project.out_of_range_observations.count)
+  end
 end
