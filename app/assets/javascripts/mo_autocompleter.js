@@ -56,7 +56,6 @@ var AUTOCOMPLETERS = {};
 
 class MOAutocompleter {
   constructor(opts = {}) {
-    // console.log(JSON.stringify(opts));
     // These are potentially useful parameters the user might want to tweak.
     const defaultOpts = {
       // id of text field (after initialization becomes a unique identifier)
@@ -1052,7 +1051,8 @@ class MOAutocompleter {
       if (old_str != new_str) {
         var old_scroll = this.input_elem.offsetTop;
         this.input_elem.value = new_str;
-        setCursorPosition(this.input_elem[0], s_ext.start + new_val.length);
+        this.setCursorPosition(this.input_elem[0],
+          s_ext.start + new_val.length);
         this.input_elem.offsetTop = old_scroll;
       }
     } else {
@@ -1063,19 +1063,15 @@ class MOAutocompleter {
 
   // Get index of first character and character after last of current token.
   search_token_extents() {
-    let start, end, sel = getInputSelection(this.input_elem[0]);
     const val = this.input_elem.value;
-    if (sel.start > 0)
-      start = val.lastIndexOf(this.separator, sel.start - 1);
-    else
-      start = 0;
+    let start = val.lastIndexOf(this.separator),
+      end = val.length;
+
     if (start < 0)
       start = 0;
     else
       start += this.separator.length;
-    end = val.indexOf(this.separator, start);
-    if (end <= start || end > sel.length)
-      end = sel.length;
+
     return { start: start, end: end };
   }
 
@@ -1202,51 +1198,53 @@ class MOAutocompleter {
   // written by Tim Down
   // http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
 
-  getInputSelection(el) {
-    let start, end, len, normalizedValue, range, textInputRange, endRange;
-    start = end = len = el.value.length;
+  // getInputSelection(el) {
+  //   let start, end, len, normalizedValue, range, textInputRange, endRange;
+  //   start = end = len = el.value.length;
 
-    if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
-      start = el.selectionStart;
-      end = el.selectionEnd;
-    } else {
-      range = document.selection.createRange();
+  //   if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+  //     start = el.selectionStart;
+  //     end = el.selectionEnd;
+  //   } else {
+  //     range = document.selection.createRange();
 
-      if (range && range.parentElement == el) {
-        normalizedValue = el.value.replace(/\r\n/g, "\n");
+  //     if (range && range.parentElement == el) {
+  //       normalizedValue = el.value.replace(/\r\n/g, "\n");
 
-        // Create a working TextRange that lives only in the input
-        textInputRange = el.createTextRange();
-        textInputRange.moveToBookmark(range.getBookmark());
+  //       // Create a working TextRange that lives only in the input
+  //       textInputRange = el.createTextRange();
+  //       textInputRange.moveToBookmark(range.getBookmark());
 
-        // Check if the start and end of the selection are at the very end
-        // of the input, since moveStart/moveEnd doesn't return what we want
-        // in those cases
-        endRange = el.createTextRange();
-        endRange.collapse(false);
+  //       // Check if the start and end of the selection are at the very end
+  //       // of the input, since moveStart/moveEnd doesn't return what we want
+  //       // in those cases
+  //       endRange = el.createTextRange();
+  //       endRange.collapse(false);
 
-        if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
-          start = end = len;
-        } else {
-          start = -textInputRange.moveStart("character", -len);
-          start += normalizedValue.slice(0, start).split("\n").length - 1;
+  //       if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
+  //         start = end = len;
+  //       } else {
+  //         start = -textInputRange.moveStart("character", -len);
+  //         start += normalizedValue.slice(0, start).split("\n").length - 1;
 
-          if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
-            end = len;
-          } else {
-            end = -textInputRange.moveEnd("character", -len);
-            end += normalizedValue.slice(0, end).split("\n").length - 1;
-          }
-        }
-      }
-    }
+  //         if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
+  //           end = len;
+  //         } else {
+  //           end = -textInputRange.moveEnd("character", -len);
+  //           end += normalizedValue.slice(0, end).split("\n").length - 1;
+  //         }
+  //       }
+  //     }
+  //   }
 
-    return {
-      start: start,
-      end: end,
-      len: len
-    };
-  }
+  //   // debugger;
+  //   return [start, end, len];
+  //   // return {
+  //   //   start: start,
+  //   //   end: end,
+  //   //   len: len
+  //   // };
+  // }
 
   setCursorPosition(el, pos) {
     if (el.setSelectionRange) {
