@@ -208,7 +208,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # create an Observation with Project selected
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: locations(:burbank).name)
+    fill_in(:WHERE.l, with: obs_location.name)
     check(proj_checkbox)
     first(:button, "Create").click
 
@@ -241,15 +241,15 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert(proj.is_member?(user),
            "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "project_id_#{proj.id}"
+    obs_location = locations(:burbank)
     login(user)
 
     # Try adding out-of-range Observation to Project
     # It should reload the form with warnings and a hidden field
-    obs_loc = locations(:burbank)
     visit(new_observation_path)
     assert(has_unchecked_field?(proj_checkbox),
            "Missing an unchecked box for Project which has ended")
-    fill_in(:WHERE.l, with: obs_loc.name)
+    fill_in(:WHERE.l, with: obs_location.name)
     check(proj_checkbox)
     assert_selector("##{proj_checkbox}[checked='checked']")
     assert_no_difference("Observation.count",
@@ -290,7 +290,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # 2. Prove that Observation is created if user fixes dates to be in-range
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: locations(:burbank).name)
+    fill_in(:WHERE.l, with: obs_location.name)
     check(proj_checkbox)
     first(:button, "Create").click
     assert_selector(
@@ -314,7 +314,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # 3. Prove Obs is created if user overrides Project date ranges
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: locations(:burbank).name)
+    fill_in(:WHERE.l, with: obs_location.name)
     check(proj_checkbox)
     # reset Observation date, making it out-of-range
     select(Time.zone.today.day, from: "observation_when_3i")
