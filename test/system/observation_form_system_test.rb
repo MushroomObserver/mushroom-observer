@@ -7,7 +7,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    assert_link("Break the test")
     assert_link("Create Observation")
     click_on("Create Observation")
 
