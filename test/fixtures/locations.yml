@@ -237,6 +237,14 @@ east_lt_west_location:
   east: -177.433
   south: 70.759
 
+perkatkun:
+  <<: *DEFAULTS
+  name: Perkatkun, Wrangel Island, Russia
+  north: 71.154802
+  west: -179.809370
+  south: 71.104900
+  east: -179.613214
+
 loc_edited_by_katrina:
   <<: *DEFAULTS
   user: roy

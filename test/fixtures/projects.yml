@@ -105,3 +105,11 @@ news_articles_project:
   admin_group: article_writers
   user_group:  article_writers
   summary:     Project members can create and modify News Articles.
+
+albion_project:
+  <<: *DEFAULTS
+  location: albion
+
+wrangel_island_project:
+  <<: *DEFAULTS
+  location: east_lt_west_location

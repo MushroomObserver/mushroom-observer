@@ -1631,6 +1631,12 @@
   form_observations_upload_error: Something went wrong while uploading image. Skipping it for now. You can try uploading it again later after we've created the observation.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
+
+  form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+See message below.+":#project_messages
+  form_observations_projects_out_of_range: "The observation date ([date]) or location ([place_name]) is outside the range of these checked project(s)"
+  form_observations_projects_out_of_range_help: "Either: \n - Uncheck out-of-range projects; \n - Change the observation date or location if it is incorrect; or \n - (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints. \nThen click [button_name]."
+  form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
 
@@ -3109,6 +3115,7 @@
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
   add_project_group_exists: Unable to create project because a [:user_group] named '[group]' already exists.
+  add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
   add_project_title: Create New Project
@@ -3169,6 +3176,8 @@
   form_projects_title: "[:Title]"
   form_projects_open_membership: Enable users to add themselves and disable shared editing
   form_projects_accepting_observations: Project is accepting new observations from members
+  form_projects_where: Optional Project Location
+
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
@@ -3203,11 +3212,14 @@
   show_project_drafts: Drafts
   show_project_edit: Edit Project
   show_project_join: Join Project
+  show_project_location: Location
   show_project_leave: Leave Project
   show_project_published: Reviewed Published Names
   show_project_summary: Summary
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
+  show_project_violation_count: Project has [count] constraint violation(s)
+  # show_project_violation_count: Project has "+[count] constraint violation(s)+":/project_review/[id]
 
   # users/by_name
   users_by_name_title: Users by Name

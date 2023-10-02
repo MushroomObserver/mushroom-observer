@@ -12,7 +12,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    assert_form_action(action: :create, id: nil) # Failure
+    assert_form_action(action: :create)
   end
 
   def edit_project_helper(title, project)
@@ -24,7 +24,7 @@ class ProjectsControllerTest < FunctionalTestCase
       }
     }
     put_requires_user(:update, { action: :show }, params)
-    assert_form_action(action: :update, id: project.id) # Failure
+    assert_form_action(action: :update, id: project.id)
   end
 
   def destroy_project_helper(project, changer)
@@ -44,7 +44,7 @@ class ProjectsControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_show_project
-    login("zero") # NOt the owner of eol_project
+    login("zero") # Not the owner of eol_project
     p_id = projects(:eol_project).id
     get(:show, params: { id: p_id })
     assert_template("show")
@@ -68,6 +68,14 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*=?]", edit_project_path(p_id))
     assert_select("a[href*=?]", new_project_member_path(project_id: p_id))
     assert_select("form[action=?]", project_path(p_id))
+  end
+
+  def test_show_project_with_location
+    project = projects(:albion_project)
+    login
+    get(:show, params: { id: project.id })
+
+    assert_select("a[href*=?]", location_path(project.location.id))
   end
 
   def test_index
@@ -151,7 +159,8 @@ class ProjectsControllerTest < FunctionalTestCase
     params = {
       project: {
         title: title,
-        summary: summary
+        summary: summary,
+        place_name: ""
       }
     }
     post_requires_login(:create, params)
@@ -206,6 +215,7 @@ class ProjectsControllerTest < FunctionalTestCase
       project: {
         title: title,
         summary: summary,
+        place_name: "",
         open_membership: true
       }
     }
@@ -293,11 +303,123 @@ class ProjectsControllerTest < FunctionalTestCase
     put(:update,
         params: {
           id: projects(:eol_project).id,
-          project: { title: "New Project", summary: "New Summary" }
+          project: { title: "New Project", summary: "New Summary",
+                     place_name: "" }
         })
     assert_flash_success
     proj = proj.reload
     assert_equal("New Project", proj.title)
     assert_equal("New Summary", proj.summary)
+  end
+
+  def test_user_group_save_fail
+    title = "Bad User Group"
+    user_group = Minitest::Mock.new
+    add_user_group_expectations(user_group, title)
+    add_user_group_expectations(user_group, "#{title}.admin")
+    UserGroup.stub(:new, user_group) do
+      params = {
+        project: {
+          title: title,
+          summary: title
+        }
+      }
+      post_requires_login(:create, params)
+      assert_nil(Project.find_by(title: title))
+    end
+  end
+
+  def add_user_group_expectations(user_group, title)
+    user_group.expect(:save, false)
+    user_group.expect(:name=, title, [String])
+    user_group.expect(:users, [])
+    user_group.expect(:errors, title)
+    user_group.expect(:errors, title)
+    user_group.expect(:formatted_errors, [])
+  end
+
+  def test_good_location
+    where = locations(:albion).name
+    title = "#{where} Project"
+    params = {
+      project: {
+        title: title,
+        summary: title,
+        place_name: where
+      }
+    }
+    post_requires_login(:create, params)
+    project = Project.find_by(title: title)
+    assert_equal(project.location.name, where)
+  end
+
+  def test_bad_location
+    where = "This is a bad place"
+    title = "#{where} Project"
+    params = {
+      project: {
+        title: title,
+        summary: title,
+        place_name: where
+      }
+    }
+    post_requires_login(:create, params)
+    assert_nil(Project.find_by(title: title))
+  end
+
+  def test_project_save_fail
+    title = "Bad Project"
+    project = Minitest::Mock.new
+    add_project_expectations(project)
+    Project.stub(:new, project) do
+      params = {
+        project: {
+          title: title,
+          summary: title
+        }
+      }
+      post_requires_login(:create, params)
+      assert_nil(Project.find_by(title: title))
+    end
+  end
+
+  def add_project_expectations(project)
+    project.expect(:save, false)
+    project.expect(:user=, nil, [User])
+    project.expect(:user_group=, nil, [UserGroup])
+    project.expect(:admin_group=, nil, [UserGroup])
+    project.expect(:location=, nil, [nil])
+    project.expect(:errors, "A bad thing happened")
+    project.expect(:errors, "A bad thing happened")
+    project.expect(:formatted_errors, [])
+    project.expect(:to_model, projects(:eol_project))
+    project.expect(:to_model, projects(:eol_project))
+    project.expect(:is_a?, true, [Array])
+    project.expect(:last, projects(:eol_project))
+  end
+
+  def add_project_destroy_expectations(project)
+    project.expect(:destroy, false)
+    project.expect(:user_id, users(:dick).id)
+    project.expect(:user_id, users(:dick).id)
+    project.expect(:id, projects(:eol_project).id)
+    project.expect(:id, projects(:eol_project).id)
+    project.expect(:id, projects(:eol_project).id)
+    project.expect(:try, false)
+    project.expect(:is_a?, false, [String])
+    project.expect(:is_a?, false, [Integer])
+    project.expect(:location, nil)
+    project.expect(:location, nil)
+  end
+
+  def test_project_destroy_fail
+    project = Minitest::Mock.new
+    add_project_destroy_expectations(project)
+    Project.stub(:safe_find, project) do
+      project_id = project.id
+      params = { id: project_id.to_s }
+      requires_user(:destroy, { action: :show }, params, "dick")
+      assert_flash_error
+    end
   end
 end

@@ -102,7 +102,7 @@ context ||= "blank"
 
 <%= hidden_field_tag(:context, context) %>
 
-<%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
+<%= hidden_field_tag(:was_js_on, "yes") %>
 <% inject_javascript_at_end %(
   jQuery(document).ready(function() {
     jQuery(document).on('shown.bs.collapse', '.collapse', function () {

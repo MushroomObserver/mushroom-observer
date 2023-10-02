@@ -89,10 +89,6 @@ MushroomObserver::Application.configure do
   config.webmaster_email_address = "webmaster@#{config.domain}"
   config.donation_business = "UQ23P3G6FBYKN"
 
-  # File where the list of most commonly used names lives.
-  config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"
-  config.user_primer_cache_file = "#{config.root}/tmp/user_primer.#{config.env}"
-
   # File where we keep name_lister data cache.
   config.name_lister_cache_file = "#{config.root}/public/name_list_data.js"
 
