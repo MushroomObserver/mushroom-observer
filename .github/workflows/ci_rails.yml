@@ -28,6 +28,14 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install exiftool
 
+      - name: Install Firefox
+        run: sudo apt-get install firefox
+
+      # - name: Install chromedriver and geckodriver (Firefox Webdriver)
+      #   run: |
+      #     seleniumbase install chromedriver
+      #     seleniumbase install geckodriver
+
       # MySQL is installed but does not run by default
       # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql
       - name: Start mySQL
@@ -64,13 +72,6 @@ jobs:
 
       - name: Update translation files
         run: bundle exec rake lang:update
-
-      - name: Setup Firefox
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: latest
-        run: firefox
 
       # And finally we can run the test suite
       - name: Run tests
