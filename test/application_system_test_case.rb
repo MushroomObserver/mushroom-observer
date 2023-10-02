@@ -25,12 +25,12 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # Capybara.always_include_port = true
     # Capybara.raise_server_errors = true
     # default in test_helper = true. some SO threads suggest false
-    self.use_transactional_tests = false
+    self.use_transactional_tests = true
 
     # https://github.com/DatabaseCleaner/database_cleaner
     # https://github.com/DatabaseCleaner/database_cleaner#minitest-example
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
-    DatabaseCleaner.strategy = :truncation # :transaction :truncation
+    DatabaseCleaner.strategy = :transaction # :transaction :truncation
     DatabaseCleaner.start
 
     # Treat Rails html requests as coming from non-robots.
@@ -46,6 +46,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
     DatabaseCleaner.clean
 
-    # ApplicationController.allow_forgery_protection = false
+    ApplicationController.allow_forgery_protection = false
   end
 end
