@@ -128,8 +128,8 @@ class ReportTest < UnitTestCase
       "2006",
       "2006-05-11",
       "https://mushroomobserver.org/#{obs.id}",
-      "/remote_images/orig/#{img1.id}.jpg " \
-        "/remote_images/orig/#{img2.id}.jpg",
+      "file://#{Rails.root.join("public/test_server1/orig/#{img1.id}.jpg ")}" \
+        "file://#{Rails.root.join("public/test_server1/orig/#{img2.id}.jpg")}",
       "FunDiS",
       "",
       "",
