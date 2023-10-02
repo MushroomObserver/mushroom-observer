@@ -27,7 +27,7 @@ module Account
       end
 
       check_and_maybe_update_user_place_name
-      upload_the_image_if_present
+      upload_image_if_present
       deal_with_possible_profile_changes
     end
 
@@ -49,38 +49,17 @@ module Account
       end
     end
 
-    def upload_the_image_if_present
+    def upload_image_if_present
       # Check if we need to upload an image.
       upload = params[:user][:upload_image]
       return if upload.blank?
 
-      date = Date.parse("#{params[:date][:copyright_year]}0101")
-      license = License.safe_find(params[:upload][:license_id])
-      holder = params[:copyright_holder]
-      image = Image.new(
-        image: upload,
-        user: @user,
-        when: date,
-        copyright_holder: holder,
-        license: license
-      )
-      deal_with_upload_errors_or_success(image)
-    end
+      image = upload_image(upload, params[:upload][:copyright_holder],
+                           params[:upload][:license_id],
+                           params[:upload][:copyright_year])
+      return unless image
 
-    def deal_with_upload_errors_or_success(image)
-      if !image.save
-        flash_object_errors(image)
-      elsif !image.process_image
-        name = image.original_name
-        name = "???" if name.empty?
-        flash_error(:runtime_profile_invalid_image.t(name: name))
-        flash_object_errors(image)
-      else
-        @user.image = image
-        name = image.original_name
-        name = "##{image.id}" if name.empty?
-        flash_notice(:runtime_profile_uploaded_image.t(name: name))
-      end
+      @user.image = image
     end
 
     def deal_with_possible_profile_changes

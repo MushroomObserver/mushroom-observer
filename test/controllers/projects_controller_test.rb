@@ -3,26 +3,31 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
-  ##### Helpers (which also assert) ############################################
-  def add_project_helper(title, summary)
-    params = {
+  def build_params(title, summary)
+    {
       project: {
         title: title,
-        summary: summary
+        summary: summary,
+        place_name: "",
+        open_membership: false
+      },
+      upload: {
+        license_id: licenses(:ccnc25).id,
+        copyright_holder: "Someone Else",
+        copyright_year: "2003"
       }
     }
-    post_requires_login(:create, params)
+  end
+
+  ##### Helpers (which also assert) ############################################
+  def add_project_helper(title, summary)
+    post_requires_login(:create, build_params(title, summary))
     assert_form_action(action: :create)
   end
 
   def edit_project_helper(title, project)
-    params = {
-      id: project.id,
-      project: {
-        title: title,
-        summary: project.summary
-      }
-    }
+    params = build_params(title, project.summary)
+    params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     assert_form_action(action: :update, id: project.id)
   end
@@ -156,14 +161,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(user_group)
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert_nil(admin_group)
-    params = {
-      project: {
-        title: title,
-        summary: summary,
-        place_name: ""
-      }
-    }
-    post_requires_login(:create, params)
+    post_requires_login(:create, build_params(title, summary))
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
     assert(project)
@@ -210,15 +208,9 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(project)
     assert_not_equal(summary, project.summary)
     assert_not(project.open_membership)
-    params = {
-      id: project.id,
-      project: {
-        title: title,
-        summary: summary,
-        place_name: "",
-        open_membership: true
-      }
-    }
+    params = build_params(title, summary)
+    params[:project][:open_membership] = true
+    params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
@@ -300,12 +292,9 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_changing_project_name
     proj = projects(:eol_project)
     login("rolf")
-    put(:update,
-        params: {
-          id: projects(:eol_project).id,
-          project: { title: "New Project", summary: "New Summary",
-                     place_name: "" }
-        })
+    params = build_params("New Project", "New Summary")
+    params[:id] = projects(:eol_project).id
+    put(:update, params: params)
     assert_flash_success
     proj = proj.reload
     assert_equal("New Project", proj.title)
@@ -318,13 +307,7 @@ class ProjectsControllerTest < FunctionalTestCase
     add_user_group_expectations(user_group, title)
     add_user_group_expectations(user_group, "#{title}.admin")
     UserGroup.stub(:new, user_group) do
-      params = {
-        project: {
-          title: title,
-          summary: title
-        }
-      }
-      post_requires_login(:create, params)
+      post_requires_login(:create, build_params(title, title))
       assert_nil(Project.find_by(title: title))
     end
   end
@@ -341,13 +324,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_good_location
     where = locations(:albion).name
     title = "#{where} Project"
-    params = {
-      project: {
-        title: title,
-        summary: title,
-        place_name: where
-      }
-    }
+    params = build_params(title, title)
+    params[:project][:place_name] = where
     post_requires_login(:create, params)
     project = Project.find_by(title: title)
     assert_equal(project.location.name, where)
@@ -356,13 +334,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_bad_location
     where = "This is a bad place"
     title = "#{where} Project"
-    params = {
-      project: {
-        title: title,
-        summary: title,
-        place_name: where
-      }
-    }
+    params = build_params(title, title)
+    params[:project][:place_name] = where
     post_requires_login(:create, params)
     assert_nil(Project.find_by(title: title))
   end
@@ -372,13 +345,7 @@ class ProjectsControllerTest < FunctionalTestCase
     project = Minitest::Mock.new
     add_project_expectations(project)
     Project.stub(:new, project) do
-      params = {
-        project: {
-          title: title,
-          summary: title
-        }
-      }
-      post_requires_login(:create, params)
+      post_requires_login(:create, build_params(title, title))
       assert_nil(Project.find_by(title: title))
     end
   end
@@ -396,6 +363,7 @@ class ProjectsControllerTest < FunctionalTestCase
     project.expect(:to_model, projects(:eol_project))
     project.expect(:is_a?, true, [Array])
     project.expect(:last, projects(:eol_project))
+    project.expect(:image, nil)
   end
 
   def add_project_destroy_expectations(project)

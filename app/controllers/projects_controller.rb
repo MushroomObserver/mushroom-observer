@@ -51,6 +51,7 @@ class ProjectsController < ApplicationController
   #   Outputs: @project
   # def add_project
   def new
+    image_ivars
     @project = Project.new
   end
 
@@ -67,9 +68,9 @@ class ProjectsController < ApplicationController
   #   Outputs: @project
   # def edit_project
   def edit
+    image_ivars
     return unless find_project!
 
-    image_ivars
     return if check_permission!(@project)
 
     redirect_to(project_path(@project.id, q: get_query_param))
@@ -93,6 +94,7 @@ class ProjectsController < ApplicationController
       return create_project(title, admin_name, params[:project][:place_name])
     end
     @project = Project.new
+    image_ivars
     render(:new, location: new_project_path(q: get_query_param))
   end
 
@@ -103,7 +105,7 @@ class ProjectsController < ApplicationController
       return redirect_to(project_path(@project.id, q: get_query_param))
     end
 
-    upload_the_image_if_present
+    upload_image_if_present
     @summary = params[:project][:summary]
     if valid_title && valid_where
       if @project.update(project_create_params)
@@ -115,6 +117,7 @@ class ProjectsController < ApplicationController
         flash_object_errors(@project)
       end
     end
+    image_ivars
     render(:edit, location: edit_project_path(@project.id, q: get_query_param))
   end
 
@@ -165,14 +168,14 @@ class ProjectsController < ApplicationController
 
   def image_ivars
     @licenses = License.current_names_and_ids(@user.license)
-    if @project.image
+    if @project&.image
       @copyright_holder  = @project.image.copyright_holder
       @copyright_year    = @project.image.when.year
       @upload_license_id = @project.image.license.id
     else
       @copyright_holder  = @user.legal_name
       @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license ? @user.license.id : nil
+      @upload_license_id = @user.license&.id
     end
   end
 
@@ -192,39 +195,17 @@ class ProjectsController < ApplicationController
                                                   id: @project.id))
   end
 
-  def upload_the_image_if_present
-    debugger
+  def upload_image_if_present
     # Check if we need to upload an image.
     upload = params[:project][:upload_image]
     return if upload.blank?
 
-    date = Date.parse("#{params[:upload][:copyright_year]}0101")
-    license = License.safe_find(params[:upload][:license_id])
-    holder = params[:upload][:copyright_holder]
-    image = Image.new(
-      image: upload,
-      user: @user,
-      when: date,
-      copyright_holder: holder,
-      license: license
-    )
-    deal_with_upload_errors_or_success(image)
-  end
+    image = upload_image(upload, params[:upload][:copyright_holder],
+                         params[:upload][:license_id],
+                         params[:upload][:copyright_year])
+    return unless image
 
-  def deal_with_upload_errors_or_success(image)
-    if !image.save
-      flash_object_errors(image)
-    elsif !image.process_image
-      name = image.original_name
-      name = "???" if name.empty?
-      flash_error(:runtime_profile_invalid_image.t(name: name))
-      flash_object_errors(image)
-    else
-      @project.image = image
-      name = image.original_name
-      name = "##{image.id}" if name.empty?
-      flash_notice(:runtime_profile_uploaded_image.t(name: name))
-    end
+    @project.image = image
   end
 
   ############ Index private methods
@@ -358,6 +339,7 @@ class ProjectsController < ApplicationController
     admin_group&.destroy
     user_group&.destroy
     @project = Project.new
+    image_ivars
     render(:new, location: new_project_path(q: get_query_param))
   end
 end
