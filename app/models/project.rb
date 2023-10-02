@@ -129,7 +129,7 @@ class Project < AbstractModel
   end
 
   def constraints
-    "Location: #{place_name}"
+    "#{:LOCATION.t}: #{place_name}; #{:DATES.t}: #{date_range}"
   end
 
   # Check if user has permission to edit a given object.
@@ -377,12 +377,16 @@ class Project < AbstractModel
   end
 
   # convenience methods for date range display
+  def date_range(format = "%Y-%m-%d")
+    "#{start_date_str(format)} - #{end_date_str(format)}"
+  end
+
   def start_date_str(format = "%Y-%m-%d")
-    start_date.nil? ? :NONE.t : start_date.strftime(format)
+    start_date.nil? ? :INDEFINITE.t : start_date.strftime(format)
   end
 
   def end_date_str(format = "%Y-%m-%d")
-    end_date.nil? ? :NONE.t : end_date.strftime(format)
+    end_date.nil? ? :INDEFINITE.t : end_date.strftime(format)
   end
 
   def duration_str

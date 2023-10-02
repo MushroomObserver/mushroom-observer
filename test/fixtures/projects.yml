@@ -120,6 +120,7 @@ wrangel_island_project:
 # members: katrina
 past_project:
   <<: *DEFAULTS
+  location: albion
   user: roy
   user_group: burbank_users
   admin_group: burbank_admins

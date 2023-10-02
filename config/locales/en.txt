@@ -728,6 +728,8 @@
   destroyed: destroyed
   FILTERED: Filtered
   filtered: filtered
+  INDEFINITE: Indefinite
+  indefinite: indefinite
   MODIFIED: Modified
   modified: modified
   OPTIONAL: Optional
