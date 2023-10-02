@@ -43,7 +43,12 @@ require("webmock/minitest")
 
 # Disable external requests while allowing localhost.
 WebMock.disable_net_connect!(
-  allow_localhost: true
+  allow_localhost: true,
+  allow: [
+    "chromedriver.storage.googleapis.com", # in case we install Chrome
+    "github.com", # for Firefox
+    "objects.githubusercontent.com" # for Firefox
+  ]
 )
 
 ENV["RAILS_ENV"] ||= "test"
