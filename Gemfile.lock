@@ -120,9 +120,9 @@ GEM
       reline (>= 0.3.1)
     docile (1.4.0)
     erubi (1.12.0)
-    execjs (2.9.0)
+    execjs (2.9.1)
     fastimage (2.2.7)
-    ffi (1.15.5)
+    ffi (1.16.2)
     globalid (1.2.1)
       activesupport (>= 6.1)
     hashdiff (1.0.1)
@@ -181,9 +181,9 @@ GEM
       net-protocol
     net-protocol (0.2.1)
       timeout
-    net-smtp (0.3.3)
+    net-smtp (0.4.0)
       net-protocol
-    newrelic_rpm (9.4.2)
+    newrelic_rpm (9.5.0)
     nio4r (2.5.9)
     nokogiri (1.15.4-arm64-darwin)
       racc (~> 1.4)
@@ -248,7 +248,7 @@ GEM
       rails (>= 6.0.0)
     rexml (3.2.6)
     rtf (0.3.3)
-    rubocop (1.56.3)
+    rubocop (1.56.4)
       base64 (~> 0.1.1)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
@@ -262,10 +262,10 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.29.0)
       parser (>= 3.2.1.0)
-    rubocop-performance (1.19.0)
+    rubocop-performance (1.19.1)
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
-    rubocop-rails (2.21.0)
+    rubocop-rails (2.21.2)
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.33.0, < 2.0)
@@ -280,7 +280,7 @@ GEM
       sprockets (> 3.0)
       sprockets-rails
       tilt
-    selenium-webdriver (4.12.0)
+    selenium-webdriver (4.13.1)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
@@ -306,7 +306,7 @@ GEM
       railties (>= 6.0.0)
     stringio (3.0.8)
     thor (1.2.2)
-    tilt (2.2.0)
+    tilt (2.3.0)
     timeout (0.4.0)
     turbo-rails (1.4.0)
       actionpack (>= 6.0.0)
@@ -331,7 +331,7 @@ GEM
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.8.1)
-    websocket (1.2.9)
+    websocket (1.2.10)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -339,7 +339,7 @@ GEM
       webrick
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.6.11)
+    zeitwerk (2.6.12)
 
 PLATFORMS
   arm64-darwin-21
@@ -415,7 +415,7 @@ DEPENDENCIES
   xmlrpc
 
 RUBY VERSION
-   ruby 3.1.2p20
+   ruby 3.1.4p223
 
 BUNDLED WITH
-   2.3.15
+   2.3.26
