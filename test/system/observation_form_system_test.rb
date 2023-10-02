@@ -64,7 +64,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     west: -118.198139
   }.freeze
 
-  def notest_post_edit_and_destroy_with_details_and_location
+  def test_post_edit_and_destroy_with_details_and_location
     setup_image_dirs # in general_extensions
     local_now = Time.zone.now.in_time_zone
 
