@@ -111,6 +111,8 @@ class ProjectsController < ApplicationController
     @summary = params[:project][:summary]
     if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
+        @project.start_date = nil if params.dig(:start_date,:fixed) == "false"
+        @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
