@@ -263,7 +263,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     )
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: Time.zone.today, place_name: obs_loc.name
+                         date: Time.zone.today,
+                         place_name: obs_location.name
                        )),
              "Missing out-of-range warning with observation date")
 
