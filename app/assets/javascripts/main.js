@@ -139,7 +139,7 @@ const moObserveContent = function () {
         if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
           new MOAutocompleter({
             input_id: input_id,
-            token: element.dataset.autocomplete_separator
+            separator: element.dataset.autocomplete_separator
           });
         }
       }
