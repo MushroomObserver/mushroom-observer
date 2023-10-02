@@ -133,17 +133,39 @@ class AjaxControllerTest < FunctionalTestCase
     expect = m.sort.uniq
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
-    assert_equal(expect, @response.body.split("\n"))
+    assert_equal(expect, JSON.parse(@response.body))
 
     login("roy") # prefers location_format: :scientific
     expect = m.map { |x| Location.reverse_name(x) }.sort.uniq
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
-    assert_equal(expect, @response.body.split("\n"))
+    assert_equal(expect, JSON.parse(@response.body))
 
     login("mary") # prefers location_format: :postal
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_herbarium
+    # names of Herbariums whose names have words starting with "m"
+    m = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
+        map(&:name)
+
+    expect = m.sort.uniq
+    expect.unshift("D")
+    good_ajax_request(:auto_complete, type: :herbarium, id: "Dick")
+    assert_equal(expect, JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_empty
+    good_ajax_request(:auto_complete, type: :name, id: "")
+    assert_equal([], JSON.parse(@response.body))
+  end
+
+  def test_auto_complete_name_above_genus
+    expect = %w[F Fungi]
+    good_ajax_request(:auto_complete, type: :clade, id: "Fung")
+    assert_equal(expect, JSON.parse(@response.body))
   end
 
   def test_auto_complete_name
@@ -153,10 +175,10 @@ class AjaxControllerTest < FunctionalTestCase
     expect_species = expect.select { |n| n.include?(" ") }
     expect = ["A"] + expect_genera + expect_species
     good_ajax_request(:auto_complete, type: :name, id: "Agaricus")
-    assert_equal(expect, @response.body.split("\n"))
+    assert_equal(expect, JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :name, id: "Umbilicaria")
-    assert_equal(["U"], @response.body.split("\n"))
+    assert_equal(["U"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_project
@@ -164,15 +186,15 @@ class AjaxControllerTest < FunctionalTestCase
     b_titles = Project.where(Project[:title].matches_regexp("\\bB")).
                map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
-    assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
+    assert_equal((["B"] + b_titles).sort, JSON.parse(@response.body).sort)
 
     p_titles = Project.where(Project[:title].matches_regexp("\\bP")).
                map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
-    assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
+    assert_equal((["P"] + p_titles).sort, JSON.parse(@response.body).sort)
 
     good_ajax_request(:auto_complete, type: :project, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_species_list
@@ -183,13 +205,13 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal("List of mysteries", list3)
 
     good_ajax_request(:auto_complete, type: :species_list, id: "List")
-    assert_equal(["L", list1, list2, list3], @response.body.split("\n"))
+    assert_equal(["L", list1, list2, list3], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Mojo")
-    assert_equal(["M", list3], @response.body.split("\n"))
+    assert_equal(["M", list3], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_user
@@ -197,18 +219,18 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(
       ["R", "rolf <Rolf Singer>", "roy <Roy Halling>",
        "second_roy <Roy Rogers>"],
-      @response.body.split("\n")
+      JSON.parse(@response.body)
     )
 
     good_ajax_request(:auto_complete, type: :user, id: "Dodo")
-    assert_equal(["D", "dick <Tricky Dick>"], @response.body.split("\n"))
+    assert_equal(["D", "dick <Tricky Dick>"], JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :user, id: "Komodo")
     assert_equal(["K", "#{katrina.login} <#{katrina.name}>"],
-                 @response.body.split("\n"))
+                 JSON.parse(@response.body))
 
     good_ajax_request(:auto_complete, type: :user, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    assert_equal(["X"], JSON.parse(@response.body))
   end
 
   def test_auto_complete_bogus

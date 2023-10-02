@@ -1,4 +1,8 @@
-//
+// root: smooth scrolling for on-page links
+html {
+  scroll-behavior: smooth;
+}
+
 // layout: sidebar offcanvas and right_side
 // --------------------------------------------------
 $sidebar-max-width: 18rem;

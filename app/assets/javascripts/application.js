@@ -12,7 +12,7 @@
 //= require validate_file_input_fields
 //= require main
 //= require mo_events
-//= require multi_image_upload
+//= require mo_images_uploader
 //= require observation_form_map
 //= require suggestions
 //= require thumbnail_map
