@@ -3,12 +3,12 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
-  def notest_create_minimal_observation
+  def test_create_minimal_observation
     rolf = users("rolf")
     login!(rolf)
 
-    assert_link("Create Observation")
     assert_link("Break the test")
+    assert_link("Create Observation")
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
