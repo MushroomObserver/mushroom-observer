@@ -55,6 +55,5 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show")
     assert_flash_success
     assert_flash_text(/#{:runtime_observation_success.t.html_to_ascii}/)
-    assert_link("Break the test")
   end
 end
