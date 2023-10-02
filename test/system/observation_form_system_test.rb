@@ -41,7 +41,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("naming_name", with: "Coprinus com")
       # wait for the autocompleter!
       assert_selector(".auto_complete")
-      send_keys(:down, :down, :tab) # cursor down to first match + select row
+      send_keys(:down, :tab) # cursor down to first match + select row
       # unfocus, let field validate. send_keys(:tab) doesn't work without sleep
       sleep(1)
       send_keys(:tab)
@@ -136,7 +136,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     fill_in("naming_name", with: "Agaricus campe")
     assert_selector(".auto_complete ul li", text: "Agaricus campestris")
-    send_keys(:down, :down, :down, :tab) # down to second match + select row
+    send_keys(:down, :down, :tab) # down to second match + select row
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
 
