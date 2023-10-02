@@ -1194,58 +1194,6 @@ class MOAutocompleter {
     }
   }
 
-  // ------------------------------ Input ------------------------------
-  // written by Tim Down
-  // http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
-
-  // getInputSelection(el) {
-  //   let start, end, len, normalizedValue, range, textInputRange, endRange;
-  //   start = end = len = el.value.length;
-
-  //   if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
-  //     start = el.selectionStart;
-  //     end = el.selectionEnd;
-  //   } else {
-  //     range = document.selection.createRange();
-
-  //     if (range && range.parentElement == el) {
-  //       normalizedValue = el.value.replace(/\r\n/g, "\n");
-
-  //       // Create a working TextRange that lives only in the input
-  //       textInputRange = el.createTextRange();
-  //       textInputRange.moveToBookmark(range.getBookmark());
-
-  //       // Check if the start and end of the selection are at the very end
-  //       // of the input, since moveStart/moveEnd doesn't return what we want
-  //       // in those cases
-  //       endRange = el.createTextRange();
-  //       endRange.collapse(false);
-
-  //       if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
-  //         start = end = len;
-  //       } else {
-  //         start = -textInputRange.moveStart("character", -len);
-  //         start += normalizedValue.slice(0, start).split("\n").length - 1;
-
-  //         if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
-  //           end = len;
-  //         } else {
-  //           end = -textInputRange.moveEnd("character", -len);
-  //           end += normalizedValue.slice(0, end).split("\n").length - 1;
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   // debugger;
-  //   return [start, end, len];
-  //   // return {
-  //   //   start: start,
-  //   //   end: end,
-  //   //   len: len
-  //   // };
-  // }
-
   setCursorPosition(el, pos) {
     if (el.setSelectionRange) {
       el.setSelectionRange(pos, pos);
