@@ -33,8 +33,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    assert_flash_warning
-    assert_flash_text(
+    assert_flash_warning(
       :form_observations_there_is_a_problem_with_name.t.html_to_ascii
     )
     assert_selector("#observation_form")
@@ -53,8 +52,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     assert_selector("body.observations__show")
-    assert_flash_success
-    assert_flash_text(/#{:runtime_observation_success.t.html_to_ascii}/)
+    assert_flash_success(/created observation/i)
   end
 
   PASADENA_EXTENTS = {
