@@ -208,7 +208,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # create an Observation with Project selected
     visit(new_observation_path)
-    fill_in(:WHERE.l, with: obs_location.name)
+    fill_in(:WHERE.l, with: locations(:unknown_location).name)
     check(proj_checkbox)
     first(:button, "Create").click
 
