@@ -72,13 +72,7 @@ jobs:
       - name: Run tests
         env:
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-        run: bundle exec rails test
-
-      # And finally we can run the system tests
-      - name: Run system tests
-        env:
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-        run: bundle exec rails test:system
+        run: bundle exec rails test:all
 
       # https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls
