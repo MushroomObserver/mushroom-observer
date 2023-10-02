@@ -135,9 +135,9 @@ class ProjectTest < UnitTestCase
     assert_equal("2023-08-27", nama2023.end_date_str)
     assert_equal("Thu Aug 24 2023", nama2023.start_date_str("%a %b %d %Y"))
 
-    assert_equal(:NONE.l,
+    assert_equal(:INDEFINITE.l,
                  projects(:past_project).start_date_str)
-    assert_equal(:NONE.l,
+    assert_equal(:INDEFINITE.l,
                  projects(:future_project).end_date_str)
   end
 
