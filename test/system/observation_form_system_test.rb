@@ -7,7 +7,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    assert_link("Break Test")
+    assert_link("Create Observation")
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
@@ -42,9 +42,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("naming_name", with: "Coprinus com")
       # wait for the autocompleter!
       assert_selector(".auto_complete")
-      send_keys(:down, :tab) # cursor down to first match + select row
-      # unfocus, let field validate. send_keys(:tab) doesn't work here
-      find("#observation_place_name").click
+      send_keys(:down, :down, :tab) # cursor down to first match + select row
+      # unfocus, let field validate. send_keys(:tab) doesn't work without sleep
+      sleep(1)
+      send_keys(:tab)
       assert_field("naming_name", with: "Coprinus comatus")
       # Place name should stay filled
       assert_field("observation_place_name", with: locations.first.name)
