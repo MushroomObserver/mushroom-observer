@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
     elsif admin_group
       flash_error(:add_project_group_exists.t(group: admin_name))
     else
-      return create_project(title, admin_name)
+      return create_project(title, admin_name, params[:project][:place_name])
     end
     @project = Project.new
     render(:new, location: new_project_path(q: get_query_param))
@@ -102,21 +102,40 @@ class ProjectsController < ApplicationController
       return redirect_to(project_path(@project.id, q: get_query_param))
     end
 
-    @title = params[:project][:title].to_s
     @summary = params[:project][:summary]
+    if valid_title && valid_where
+      if @project.update(project_create_params)
+        @project.save
+        @project.log_update
+        flash_notice(:runtime_edit_project_success.t(id: @project.id))
+        return redirect_to(project_path(@project.id, q: get_query_param))
+      else
+        flash_object_errors(@project)
+      end
+    end
+    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
+  end
+
+  def valid_title
+    @title = params[:project][:title].to_s
     if @title.blank?
       flash_error(:add_project_need_title.t)
     elsif (project2 = Project.find_by_title(@title)) &&
           (project2 != @project)
       flash_error(:add_project_already_exists.t(title: @title))
-    elsif !@project.update(permitted_project_params)
-      flash_object_errors(@project)
     else
-      @project.log_update
-      flash_notice(:runtime_edit_project_success.t(id: @project.id))
-      return redirect_to(project_path(@project.id, q: get_query_param))
+      return true
     end
-    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
+    false
+  end
+
+  def valid_where
+    where = params[:project][:place_name]
+    location = find_location(where)
+    return false if !location && where != ""
+
+    @project.location = location
+    @project.save
   end
 
   # Callback to destroy a project.
@@ -143,6 +162,7 @@ class ProjectsController < ApplicationController
   private ############################################################
 
   def set_ivars_for_show
+    @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
     @is_member = @project.is_member?(@user)
     @is_admin = @project.is_admin?(@user)
@@ -150,6 +170,11 @@ class ProjectsController < ApplicationController
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
+    count = @project.count_violations
+    return unless count.positive?
+
+    flash_warning(:show_project_violation_count.t(count: count,
+                                                  id: @project.id))
   end
 
   ############ Index private methods
@@ -178,7 +203,6 @@ class ProjectsController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
-      # redirect_to(action: :show, id: project.id)
       set_ivars_for_show
       render("show", location: project_path(@project.id))
     else
@@ -219,40 +243,70 @@ class ProjectsController < ApplicationController
 
   def permitted_project_params
     params.require(:project).permit(:title, :summary, :open_membership,
+                                    :accepting_observations, :where)
+  end
+
+  def project_create_params
+    params.require(:project).permit(:title, :summary, :open_membership,
                                     :accepting_observations)
   end
 
   def find_project!
     @project = find_or_goto_index(Project, params[:id].to_s)
+    @where = @project&.location&.display_name || ""
   end
 
-  def create_project(title, admin_name)
-    # Create members group.
+  def create_members_group(title)
     user_group = UserGroup.new
     user_group.name = title
     user_group.users << @user
+    return user_group if user_group.save
 
-    # Create admin group.
+    flash_object_errors(user_group)
+    nil
+  end
+
+  def create_admin_group(admin_name)
     admin_group = UserGroup.new
     admin_group.name = admin_name
     admin_group.users << @user
+    return admin_group if admin_group.save
 
-    # Create project.
-    @project = Project.new(permitted_project_params)
-    @project.user = @user
-    @project.user_group = user_group
-    @project.admin_group = admin_group
+    flash_object_errors(admin_group)
+    nil
+  end
 
-    if !user_group.save
-      flash_object_errors(user_group)
-    elsif !admin_group.save
-      flash_object_errors(admin_group)
-    elsif !@project.save
-      flash_object_errors(@project)
-    else
-      @project.log_create
-      flash_notice(:add_project_success.t)
-      redirect_to(project_path(@project.id, q: get_query_param))
+  def find_location(where)
+    location = Location.find_by_name_or_reverse_name(where)
+    return location if location || where == ""
+
+    flash_warning(:add_project_no_location.t(where: where))
+    nil
+  end
+
+  def create_project(title, admin_name, where)
+    user_group = create_members_group(title)
+    admin_group = create_admin_group(admin_name)
+    location = find_location(where)
+    if user_group && admin_group && (location || (where == ""))
+      @project = Project.new(project_create_params)
+      @project.user = @user
+      @project.user_group = user_group
+      @project.admin_group = admin_group
+      @project.location = location
+
+      if @project.save
+        @project.log_create
+        flash_notice(:add_project_success.t)
+        redirect_to(project_path(@project.id, q: get_query_param))
+        return
+      else
+        flash_object_errors(@project)
+      end
     end
+    admin_group&.destroy
+    user_group&.destroy
+    @project = Project.new
+    render(:new, location: new_project_path(q: get_query_param))
   end
 end

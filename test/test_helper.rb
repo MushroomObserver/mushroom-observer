@@ -41,15 +41,11 @@ require("minitest/autorun")
 #  disabling of internet requests.
 require("webmock/minitest")
 
-# Disable external requests while allowing localhost,
-# but also allow gem webdrivers to download the latest browser drivers.
-# These are always being updated and Selenium is pretty useless without them.
-# https://bloggie.io/@kinopyo/migrate-from-chromedriver-helper-to-webdrivers
-# https://github.com/titusfortner/webdrivers/issues/4
+# Disable external requests while allowing localhost.
 WebMock.disable_net_connect!(
   allow_localhost: true,
   allow: [
-    # "chromedriver.storage.googleapis.com", # in case we install Chrome
+    "chromedriver.storage.googleapis.com", # in case we install Chrome
     "github.com", # for Firefox
     "objects.githubusercontent.com" # for Firefox
   ]

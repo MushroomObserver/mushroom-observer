@@ -2,6 +2,7 @@
 
 module ObservationsController::NewAndCreate
   include ObservationsController::FormHelpers
+  include ObservationsController::Validators
 
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
@@ -45,27 +46,15 @@ module ObservationsController::NewAndCreate
     @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
-    init_specimen_vars_for_create
-    init_project_vars_for_create
-    init_list_vars_for_create
+    init_specimen_vars
+    init_project_vars
+    init_list_vars
     defaults_from_last_observation_created
   end
 
   ##############################################################################
 
   private
-
-  def init_specimen_vars_for_create
-    init_specimen_vars
-  end
-
-  def init_project_vars_for_create
-    init_project_vars
-  end
-
-  def init_list_vars_for_create
-    init_list_vars
-  end
 
   def defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
@@ -101,8 +90,7 @@ module ObservationsController::NewAndCreate
 
     rough_cut(params)
     success = true
-    success = false unless validate_name(params)
-    success = false unless validate_place_name(params)
+    success = false unless validate_params(params)
     success = false unless validate_object(@observation)
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
@@ -170,28 +158,6 @@ module ObservationsController::NewAndCreate
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
-  end
-
-  def validate_name(params)
-    given_name = param_lookup([:naming, :name], "").to_s
-    chosen_name = param_lookup([:chosen_name, :name_id], "").to_s
-    (success, @what, @name, @names, @valid_names, @parent_deprecated,
-     @suggest_corrections) =
-      Name.resolve_name(given_name, params[:approved_name], chosen_name)
-    @naming.name = @name if @name
-    success
-  end
-
-  def validate_place_name(params)
-    success = true
-    @place_name = @observation.place_name
-    @dubious_where_reasons = []
-    if @place_name != params[:approved_where] && @observation.location.nil?
-      db_name = Location.user_name(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      success = false if @dubious_where_reasons != []
-    end
-    success
   end
 
   def save_everything_else(reason)

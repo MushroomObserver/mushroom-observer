@@ -399,9 +399,10 @@ california_obs_rss_log:
 chlorophyllum_rachodes_obs_rss_log:
   <<: *DEFAULTS
   observation: chlorophyllum_rachodes_obs
-  # updated_at:
-  # created_at:
-  # notes: " log_observation_created user \n"
+
+perkatkun_obs_rss_log:
+  <<: *DEFAULTS
+  observation: perkatkun_obs
 
 
 

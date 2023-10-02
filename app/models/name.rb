@@ -226,7 +226,6 @@
 #  parse_form::               Parse "Xxx yyy f. zzz".
 #
 #  ==== Other
-#  primer::                  List of names used for priming auto-completer.
 #  format_name::             Add itallics and/or boldness to string.
 #  clean_incoming_string::   Preprocess string from user before parsing.
 #  standardize_name::        Standardize abbreviations in parsed name string.
@@ -333,7 +332,6 @@ class Name < AbstractModel
   include Synonymy
   include Resolve
   include PropagateGenericClassifications
-  include Primer
   include Notify
   include Spelling
   include Merge
@@ -678,6 +676,15 @@ class Name < AbstractModel
   def self.count_observations(names)
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
+  end
+
+  # For NameController#needed_descriptions
+  # Returns a list of the most popular 100 names that don't have descriptions.
+  def self.descriptions_needed
+    names = description_needed.limit(100).map(&:id)
+
+    ::Query.lookup(:Name, :in_set, ids: names,
+                                   title: :needed_descriptions_title.l)
   end
 
   ##############################################################################
