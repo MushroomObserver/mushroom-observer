@@ -65,7 +65,7 @@ jobs:
       - name: Update translation files
         run: bundle exec rake lang:update
 
-      - name: Setup firefox
+      - name: Setup Firefox
         id: setup-firefox
         uses: browser-actions/setup-firefox@v1
         with:
