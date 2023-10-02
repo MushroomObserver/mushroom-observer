@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
-  def notest_create_minimal_observation
+  def test_create_minimal_observation
     rolf = users("rolf")
     login!(rolf)
 
