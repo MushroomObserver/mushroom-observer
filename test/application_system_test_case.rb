@@ -4,6 +4,7 @@ require("test_helper")
 require("database_cleaner/active_record")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  # Set it to :headless_firefox to run faster, or :firefox to enjoy the show
   driven_by :selenium, using: :headless_firefox
   # Include MO's helpers
   include GeneralExtensions
