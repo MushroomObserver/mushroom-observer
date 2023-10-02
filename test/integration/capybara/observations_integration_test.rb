@@ -101,7 +101,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     login(user)
 
-    # Edit the Observation, unchecking the Project.
+    # Edit the Observation, unchecking the Species List.
     visit(edit_observation_path(id: observation.id).to_s)
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
