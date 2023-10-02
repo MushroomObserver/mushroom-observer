@@ -178,7 +178,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # We should now get the option to set obs GPS
-    assert_selector("#geocode_messages")
+    assert_selector("#geocode_messages", wait: 6)
 
     # Be sure we have two image wrappers
     image_wrappers = all(".added_image_wrapper")
