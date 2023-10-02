@@ -8,6 +8,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     assert_link("Create Observation")
+    assert_link("Break the test")
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
