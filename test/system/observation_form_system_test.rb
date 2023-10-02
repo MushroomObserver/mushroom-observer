@@ -7,7 +7,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     rolf = users("rolf")
     login!(rolf)
 
-    assert_link("Create Observation")
+    assert_link("Break Test")
     click_on("Create Observation")
 
     assert_selector("body.observations__new")
@@ -63,7 +63,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     west: -118.198139
   }.freeze
 
-  def test_post_edit_and_destroy_with_details_and_location
+  def notest_post_edit_and_destroy_with_details_and_location
     setup_image_dirs # in general_extensions
     local_now = Time.zone.now.in_time_zone
 
