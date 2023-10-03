@@ -8,26 +8,10 @@ add_background_image(@project.image)
 
 <%= panel_block do %>
   <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
-  <p><b><%= link_to(:Members.t + ": #{@project.user_group.users.count}",
-                    project_members_path(project_id: @project.id)) %></b></p>
 
   <% if @project.location %>
     <p><b><%= link_to("#{:show_project_location.t}: #{@project.place_name}",
 	              location_path(@project.location.id)) %></b></p>
-  <% end %>
-
-  <% if @project.observations.any? %>
-    <p><b><%= link_to("#{:OBSERVATIONS.t}: #{@project.observations.length}",
-                      observations_path(project: @project.id)) %></b></p>
-    <p><b><%= link_to("#{:NAMES.t}: #{@project.name_count}",
-                      checklist_path(project_id: @project.id)) %></b></p>
-  <% end %>
-
-  <% if @project.images.any? %>
-    <p><b><%= :IMAGES.t %>:</b>
-    <%= @project.images.length %>
-    (<%= link_to(:SHOW.t, images_path(for_project: @project.id)) %>)
-    </p>
   <% end %>
 
   <% if @project.species_lists.any? %>
@@ -37,7 +21,6 @@ add_background_image(@project.image)
                   species_lists_path(for_project: @project.id)) %>)
     </p>
   <% end %>
-
   <% if @drafts.any? %>
     <p><b><%= :show_project_drafts.t %>:</b>
     <%= @drafts.length %><br/>
@@ -55,6 +38,20 @@ add_background_image(@project.image)
 
 <% end %>
 
+<p>
+  <% if @project.observations.any? %>
+    <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
+                   observations_path(project: @project.id),
+                   { class: "btn btn-default btn-lg" }) %></b>
+    <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
+                   checklist_path(project_id: @project.id),
+                   { class: "btn btn-default btn-lg" }) %></b>
+  <% end %>
+  <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
+                 project_members_path(project_id: @project.id),
+                 { class: "btn btn-default btn-lg" }) %></b>
+</p>
+<br/>
 <p>
 <% if @project.can_join?(@user) %>
   <%= post_button(name: :show_project_join.t,
