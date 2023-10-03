@@ -1,6 +1,5 @@
 <%
-add_page_title(:show_project_title.t(title: @project.title))
-add_background_image(@project.image)
+add_project_banner(@project)
 @container = :wide
 %>
 
@@ -8,11 +7,6 @@ add_background_image(@project.image)
 
 <%= panel_block do %>
   <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
-
-  <% if @project.location %>
-    <p><b><%= link_to("#{:show_project_location.t}: #{@project.place_name}",
-	              location_path(@project.location.id)) %></b></p>
-  <% end %>
 
   <% if @project.species_lists.any? %>
     <p><b><%= :SPECIES_LISTS.t %>:</b>

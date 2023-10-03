@@ -74,5 +74,24 @@ module Tabs
         ["updated_at",  :sort_by_updated_at.t]
       ].freeze
     end
+
+    def add_project_banner(project)
+      add_page_title(project.title)
+      if project.location
+        content_for(:location) do
+          tag.b(link_to(project.place_name, location_path(project.location.id)))
+        end
+      end
+      add_background_image(project.image)
+    end
+
+    def add_background_image(image)
+      return unless image
+
+      presenter = ImagePresenter.new(image, size: :large)
+      content_for(:background_image) do
+        image_tag(presenter.img_src, class: "image-title")
+      end
+    end
   end
 end

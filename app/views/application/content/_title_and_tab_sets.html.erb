@@ -32,10 +32,16 @@ left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
     <% if content_for?(:background_image) %>
       <%= yield(:background_image) %>
       <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
-	  <%= tag.h1(yield(:title), class: "h3 image-title-text", id: "title") -%>
+          <%= tag.h1(yield(:title), class: "h3 image-title-text", id: "title") -%>
+          <% if content_for?(:location) %>
+              <%= tag.div(yield(:location), class: "image-title-text") %>
+          <% end %>
       <% end %>
     <% else %>
       <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+      <% if content_for?(:location) %>
+          <%= tag.div(yield(:location), class: "image-title-text") %>
+      <% end %>
     <% end %>
     <%= yield(:filter_help) -%>
     <%= yield(:owner_naming) %>

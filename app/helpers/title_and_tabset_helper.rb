@@ -32,15 +32,6 @@ module TitleAndTabsetHelper
     end
   end
 
-  def add_background_image(image)
-    return unless image
-
-    presenter = ImagePresenter.new(image, size: :large)
-    content_for(:background_image) do
-      image_tag(presenter.img_src, class: "image-title")
-    end
-  end
-
   # contents of the <title> in html <head>
   def title_tag_contents(title, action: controller.action_name)
     if title.present?

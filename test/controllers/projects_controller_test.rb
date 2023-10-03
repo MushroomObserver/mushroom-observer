@@ -140,7 +140,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: project.id.to_s })
 
     assert_response(:success)
-    assert_displayed_title("Project: #{project.title}")
+    assert_displayed_title(project.title)
   end
 
   def test_add_project
