@@ -326,7 +326,7 @@ class ProjectsController < ApplicationController
       @project.user_group = user_group
       @project.admin_group = admin_group
       @project.location = location
-
+      upload_image_if_present
       if @project.save
         @project.log_create
         flash_notice(:add_project_success.t)

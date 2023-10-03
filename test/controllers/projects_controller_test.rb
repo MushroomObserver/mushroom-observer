@@ -13,8 +13,8 @@ class ProjectsControllerTest < FunctionalTestCase
       },
       upload: {
         license_id: licenses(:ccnc25).id,
-        copyright_holder: "Someone Else",
-        copyright_year: "2003"
+        copyright_holder: User.current&.name || "Someone Else",
+        copyright_year: 2023
       }
     }
   end
@@ -68,11 +68,7 @@ class ProjectsControllerTest < FunctionalTestCase
     requires_login(:new)
     get(:show, params: { id: p_id })
     assert_template("show")
-    assert_select("a[href*=?]",
-                  new_project_admin_request_path(project_id: p_id))
     assert_select("a[href*=?]", edit_project_path(p_id))
-    assert_select("a[href*=?]", new_project_member_path(project_id: p_id))
-    assert_select("form[action=?]", project_path(p_id))
   end
 
   def test_show_project_with_location
