@@ -43,7 +43,7 @@ context ||= "blank"
         [
           tag.div(class: "col-xs-12 col-sm-6") do
             text_field_with_label(form: f_n, field: :name, label: :WHAT.t + ":",
-                                  value: what, autofocus: focus_on_name
+                                  value: what, autofocus: focus_on_name,
                                   data: { autocompleter: :name })
           end,
           tag.div(class: "col-xs-12 col-sm-6") do
