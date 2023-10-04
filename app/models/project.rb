@@ -377,6 +377,10 @@ class Project < AbstractModel
     self.location = (loc)
   end
 
+  def name_count
+    Checklist::ForProject.new(self).num_names
+  end
+
   ##############################################################################
   #
   #  :section: Dates
@@ -467,8 +471,5 @@ class Project < AbstractModel
 
   def ends_no_earlier_than?(date)
     !end_date&.before?(date)
-
-  def name_count
-    Checklist::ForProject.new(self).num_names
   end
 end

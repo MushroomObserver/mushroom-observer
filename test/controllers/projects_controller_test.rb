@@ -6,27 +6,28 @@ class ProjectsControllerTest < FunctionalTestCase
   def build_params(
     title, summary, start_date: nil, end_date: nil,
     start_date_fixed: false, end_date_fixed: false)
-    {
-      project: {
-        title: title,
-        summary: summary,
-        place_name: "",
-        open_membership: false,
-        "start_date(1i)" => start_date.year,
-        "start_date(2i)" => start_date.month,
-        "start_date(3i)" => start_date.day,
-        "end_date(1i)" => end_date.year,
-        "end_date(2i)" => end_date.month,
-        "end_date(3i)" => end_date.day
-      },
-      start_date: { fixed: start_date_fixed },
-      end_date: { fixed: end_date_fixed },
-      upload: {
-        license_id: licenses(:ccnc25).id,
-        copyright_holder: User.current&.name || "Someone Else",
-        copyright_year: 2023
+    params =
+      {
+        project: {
+          title: title,
+          summary: summary,
+          place_name: "",
+          open_membership: false,
+          "start_date(1i)" => start_date&.year,
+          "start_date(2i)" => start_date&.month,
+          "start_date(3i)" => start_date&.day,
+          "end_date(1i)" => end_date&.year,
+          "end_date(2i)" => end_date&.month,
+          "end_date(3i)" => end_date&.day
+        },
+        start_date: { fixed: start_date_fixed },
+        end_date: { fixed: end_date_fixed },
+        upload: {
+          license_id: licenses(:ccnc25).id,
+          copyright_holder: User.current&.name || "Someone Else",
+          copyright_year: 2023
+        }
       }
-    }
   end
 
   ##### Helpers (which also assert) ############################################
@@ -306,7 +307,10 @@ class ProjectsControllerTest < FunctionalTestCase
     start_date = Time.zone.today
     end_date = start_date + 4.days
     params =
-      build_params(title, summary, start_date: start_date, end_date: end_date)ß
+      build_params(title, summary,
+                   start_date: start_date, end_date: end_date,
+                   start_date_fixed: true, end_date_fixed: true)
+
     params[:project][:open_membership] = true
     params[:id] = project.id
 
@@ -488,6 +492,8 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def add_project_expectations(project)
     project.expect(:save, false)
+    project.expect(:start_date=, nil, [nil])
+    project.expect(:end_date=, nil, [nil])
     project.expect(:user=, nil, [User])
     project.expect(:user_group=, nil, [UserGroup])
     project.expect(:admin_group=, nil, [UserGroup])
