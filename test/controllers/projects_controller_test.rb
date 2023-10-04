@@ -386,4 +386,90 @@ class ProjectsControllerTest < FunctionalTestCase
       assert_flash_error
     end
   end
+
+  def image_setup
+    setup_image_dirs
+    Rack::Test::UploadedFile.new(
+      Rails.root.join("test/images/sticky.jpg").to_s, "image/jpeg"
+    )
+  end
+
+  def test_add_background_image
+    file = image_setup
+    num_images = Image.count
+    params = build_params("With background", "With background")
+    project = projects(:eol_project)
+    params[:id] = project.id
+    params[:project][:upload_image] = file
+    File.stub(:rename, false) do
+      login("rolf", "testpassword")
+      put(:update, params: params)
+    end
+    assert_redirected_to(project_path(project.id))
+    assert_flash_success
+
+    project.reload
+    assert_equal(num_images + 1, Image.count)
+    assert_equal(Image.last.id, project.image_id)
+    assert_equal(params[:upload][:copyright_holder],
+                 project.image.copyright_holder)
+    assert_equal(params[:upload][:copyright_year], project.image.when.year)
+    assert_equal(params[:upload][:license_id], project.image.license_id)
+  end
+
+  def test_bad_background_image
+    file = image_setup
+    num_images = Image.count
+    params = build_params("Bad background", "Bad background")
+    project = projects(:eol_project)
+    params[:id] = project.id
+    params[:project][:upload_image] = file
+    image = Minitest::Mock.new
+    add_bad_image_expectations(image)
+    File.stub(:rename, false) do
+      login("rolf", "testpassword")
+      Image.stub(:new, image) do
+        put(:update, params: params)
+      end
+    end
+
+    project.reload
+    assert_equal(num_images, Image.count)
+  end
+
+  def add_bad_image_expectations(image)
+    image.expect(:save, true)
+    image.expect(:original_name, "Name")
+    image.expect(:errors, "A bad thing happened")
+    image.expect(:errors, "A bad thing happened")
+    image.expect(:formatted_errors, [])
+    image.expect(:process_image, false)
+  end
+
+  def test_fail_save_background_image
+    file = image_setup
+    num_images = Image.count
+    params = build_params("Bad background", "Bad background")
+    project = projects(:eol_project)
+    params[:id] = project.id
+    params[:project][:upload_image] = file
+    image = Minitest::Mock.new
+    add_fail_save_image_expectations(image)
+    File.stub(:rename, false) do
+      login("rolf", "testpassword")
+      Image.stub(:new, image) do
+        put(:update, params: params)
+      end
+    end
+
+    project.reload
+    assert_equal(num_images, Image.count)
+  end
+
+  def add_fail_save_image_expectations(image)
+    image.expect(:save, false)
+    image.expect(:errors, "A bad thing happened")
+    image.expect(:errors, "A bad thing happened")
+    image.expect(:formatted_errors, [])
+  end
 end

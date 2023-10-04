@@ -96,6 +96,7 @@ module Projects
     end
 
     def return_to_caller(project, target)
+      # debugger
       if target == "project_index"
         redirect_to(project_path(project.id, q: get_query_param))
       else

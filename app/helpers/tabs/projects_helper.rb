@@ -50,18 +50,6 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    def project_add_members_tab(project)
-      [:show_project_add_members.t,
-       add_query_param(new_project_member_path(project_id: project.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
-    def edit_project_tab(project)
-      [:show_project_edit.t,
-       add_query_param(edit_project_path(project.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
-
     def destroy_project_tab(project)
       [nil, project, { button: :destroy }]
     end

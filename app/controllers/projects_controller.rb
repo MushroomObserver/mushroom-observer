@@ -26,13 +26,6 @@ class ProjectsController < ApplicationController
     store_location
     return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Project, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, Project, params[:id]) and return
-    end
-
     set_ivars_for_show
   end
 
@@ -271,11 +264,6 @@ class ProjectsController < ApplicationController
   #  :section: update, edit private methods
   #
   ##############################################################################
-
-  def permitted_project_params
-    params.require(:project).permit(:title, :summary, :open_membership,
-                                    :accepting_observations, :where)
-  end
 
   def project_create_params
     params.require(:project).permit(:title, :summary, :open_membership,

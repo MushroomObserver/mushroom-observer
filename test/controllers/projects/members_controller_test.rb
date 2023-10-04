@@ -200,10 +200,11 @@ module Projects
       assert_equal(false, target_user.in_group?(project.user_group.name))
       params = {
         project_id: project.id,
-        candidate: target_user.id
+        candidate: target_user.id,
+        target: :project_index
       }
       post_requires_login(:create, params, target_user.login)
-      assert_redirected_to(project_members_path(project.id))
+      assert_redirected_to(project_path(project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(project.admin_group.name))
       assert_equal(true, target_user.in_group?(project.user_group.name))
