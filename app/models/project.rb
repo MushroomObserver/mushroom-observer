@@ -50,6 +50,7 @@
 class Project < AbstractModel
   belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :location
+  belongs_to :image
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
@@ -105,6 +106,16 @@ class Project < AbstractModel
 
   def can_leave?(user)
     is_member?(user) && user.id != user_id
+  end
+
+  def member_status(user)
+    if user == self.user
+      :OWNER.t
+    elsif is_admin?(user)
+      :ADMIN.t
+    else
+      :MEMBER.t
+    end
   end
 
   def user_can_add_observation?(obs, user)
@@ -456,5 +467,8 @@ class Project < AbstractModel
 
   def ends_no_earlier_than?(date)
     !end_date&.before?(date)
+
+  def name_count
+    Checklist::ForProject.new(self).num_names
   end
 end

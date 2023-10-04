@@ -26,13 +26,6 @@ class ProjectsController < ApplicationController
     store_location
     return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Project, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, Project, params[:id]) and return
-    end
-
     set_ivars_for_show
   end
 
@@ -51,6 +44,7 @@ class ProjectsController < ApplicationController
   #   Outputs: @project
   # def add_project
   def new
+    image_ivars
     @project = Project.new
     @start_date_fixed = true
     @end_date_fixed = true
@@ -69,6 +63,7 @@ class ProjectsController < ApplicationController
   #   Outputs: @project
   # def edit_project
   def edit
+    image_ivars
     return unless find_project!
 
     @start_date_fixed = @project.start_date.present?
@@ -98,6 +93,7 @@ class ProjectsController < ApplicationController
       return create_project(title, admin_name, params[:project][:place_name])
     end
     @project = Project.new
+    image_ivars
     render(:new, location: new_project_path(q: get_query_param))
   end
 
@@ -108,6 +104,7 @@ class ProjectsController < ApplicationController
       return redirect_to(project_path(@project.id, q: get_query_param))
     end
 
+    upload_image_if_present
     @summary = params[:project][:summary]
     if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
@@ -121,6 +118,7 @@ class ProjectsController < ApplicationController
         flash_object_errors(@project)
       end
     end
+    image_ivars
     render(:edit, location: edit_project_path(@project.id, q: get_query_param))
   end
 
@@ -176,6 +174,19 @@ class ProjectsController < ApplicationController
 
   private ############################################################
 
+  def image_ivars
+    @licenses = License.current_names_and_ids(@user.license)
+    if @project&.image
+      @copyright_holder  = @project.image.copyright_holder
+      @copyright_year    = @project.image.when.year
+      @upload_license_id = @project.image.license.id
+    else
+      @copyright_holder  = @user.legal_name
+      @copyright_year    = Time.zone.now.year
+      @upload_license_id = @user.license&.id
+    end
+  end
+
   def set_ivars_for_show
     @where = @project&.place_name || ""
     @canonical_url = "#{MO.http_domain}/projects/#{@project.id}"
@@ -190,6 +201,19 @@ class ProjectsController < ApplicationController
 
     flash_warning(:show_project_violation_count.t(count: count,
                                                   id: @project.id))
+  end
+
+  def upload_image_if_present
+    # Check if we need to upload an image.
+    upload = params[:project][:upload_image]
+    return if upload.blank?
+
+    image = upload_image(upload, params[:upload][:copyright_holder],
+                         params[:upload][:license_id],
+                         params[:upload][:copyright_year])
+    return unless image
+
+    @project.image = image
   end
 
   ############ Index private methods
@@ -256,11 +280,6 @@ class ProjectsController < ApplicationController
   #
   ##############################################################################
 
-  def permitted_project_params
-    params.require(:project).permit(:title, :summary, :open_membership,
-                                    :accepting_observations, :where)
-  end
-
   def project_create_params
     params.require(:project).
       permit(:title, :summary, :open_membership,
@@ -272,6 +291,7 @@ class ProjectsController < ApplicationController
   def find_project!
     @project = find_or_goto_index(Project, params[:id].to_s)
     @where = @project&.location&.display_name || ""
+    @project
   end
 
   def create_members_group(title)
@@ -315,6 +335,7 @@ class ProjectsController < ApplicationController
       @project.start_date = nil if params.dig(:start_date, :fixed) == "false"
       @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
 
+      upload_image_if_present
       if @project.save
         @project.log_create
         flash_notice(:add_project_success.t)
@@ -327,6 +348,7 @@ class ProjectsController < ApplicationController
     admin_group&.destroy
     user_group&.destroy
     @project = Project.new
+    image_ivars
     render(:new, location: new_project_path(q: get_query_param))
   end
 

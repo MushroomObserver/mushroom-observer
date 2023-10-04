@@ -24,6 +24,7 @@ eol_project:
   summary: Project to make names for EOL
   created_at: 2008-09-24 21:33:30
   updated_at: 2008-09-24 21:33:30
+  image: peltigera_image
 
 # admins: dick (4)
 # members: dick (4)
