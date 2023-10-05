@@ -56,7 +56,6 @@ var AUTOCOMPLETERS = {};
 
 class MOAutocompleter {
   constructor(opts = {}) {
-    // console.log(JSON.stringify(opts));
     // These are potentially useful parameters the user might want to tweak.
     const defaultOpts = {
       // id of text field (after initialization becomes a unique identifier)
@@ -191,9 +190,6 @@ class MOAutocompleter {
 
     // Figure out a few browser-dependent dimensions.
     this.scrollbar_width = this.getScrollBarWidth();
-
-    // Initialize autocomplete primer with a blank newline.
-    this.primer.unshift('\n');
 
     // Create pulldown.
     this.create_pulldown();
@@ -953,7 +949,7 @@ class MOAutocompleter {
   }
 
   /**
-   * Index of string in primer array with IDs
+   * Index of string in future primer array with IDs
    * where primer == [[text_string, id], [text_string, id]]
    * @param primer {!Array} - the input array
    * @param val {object} - the value to search
@@ -1055,7 +1051,8 @@ class MOAutocompleter {
       if (old_str != new_str) {
         var old_scroll = this.input_elem.offsetTop;
         this.input_elem.value = new_str;
-        setCursorPosition(this.input_elem[0], s_ext.start + new_val.length);
+        this.setCursorPosition(this.input_elem[0],
+          s_ext.start + new_val.length);
         this.input_elem.offsetTop = old_scroll;
       }
     } else {
@@ -1066,19 +1063,15 @@ class MOAutocompleter {
 
   // Get index of first character and character after last of current token.
   search_token_extents() {
-    let start, end, sel = getInputSelection(this.input_elem[0]);
     const val = this.input_elem.value;
-    if (sel.start > 0)
-      start = val.lastIndexOf(this.separator, sel.start - 1);
-    else
-      start = 0;
+    let start = val.lastIndexOf(this.separator),
+      end = val.length;
+
     if (start < 0)
       start = 0;
     else
       start += this.separator.length;
-    end = val.indexOf(this.separator, start);
-    if (end <= start || end > sel.length)
-      end = sel.length;
+
     return { start: start, end: end };
   }
 
@@ -1160,7 +1153,6 @@ class MOAutocompleter {
     });
   }
 
-
   // Process response from server:
   // 1. first line is string actually used to match;
   // 2. the last string is "..." if the set of results is incomplete;
@@ -1175,14 +1167,10 @@ class MOAutocompleter {
     // than one sent in request.
     this.last_fetch_request = new_primer[0];
 
-    // Make sure there's a trailing newline.
-    if (new_primer[new_primer.length - 1] != '\n')
-      new_primer.push("\n");
-
     // Check for trailing "..." signaling incomplete set of results.
-    if (new_primer[new_primer.length - 2] == "...") {
+    if (new_primer[new_primer.length - 1] == "...") {
       this.last_fetch_incomplete = true;
-      new_primer = new_primer.slice(0, new_primer.length - 2);
+      new_primer = new_primer.slice(0, new_primer.length - 1);
       if (this.focused)
         // (just in case we need to refine the request due to
         //  activity while waiting for this response)
@@ -1194,7 +1182,7 @@ class MOAutocompleter {
     // Log requests and responses if in debug mode.
     if (this.log) {
       this.debug("Got response for " + this.escapeHTML(this.last_fetch_request) +
-        ": " + (new_primer.length - 2) + " strings (" +
+        ": " + (new_primer.length - 1) + " strings (" +
         (this.last_fetch_incomplete ? "incomplete" : "complete") + ").");
     }
 
@@ -1204,56 +1192,6 @@ class MOAutocompleter {
       this.update_matches();
       this.draw_pulldown();
     }
-  }
-
-  // ------------------------------ Input ------------------------------
-  // written by Tim Down
-  // http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
-
-  getInputSelection(el) {
-    let start, end, len, normalizedValue, range, textInputRange, endRange;
-    start = end = len = el.value.length;
-
-    if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
-      start = el.selectionStart;
-      end = el.selectionEnd;
-    } else {
-      range = document.selection.createRange();
-
-      if (range && range.parentElement == el) {
-        normalizedValue = el.value.replace(/\r\n/g, "\n");
-
-        // Create a working TextRange that lives only in the input
-        textInputRange = el.createTextRange();
-        textInputRange.moveToBookmark(range.getBookmark());
-
-        // Check if the start and end of the selection are at the very end
-        // of the input, since moveStart/moveEnd doesn't return what we want
-        // in those cases
-        endRange = el.createTextRange();
-        endRange.collapse(false);
-
-        if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
-          start = end = len;
-        } else {
-          start = -textInputRange.moveStart("character", -len);
-          start += normalizedValue.slice(0, start).split("\n").length - 1;
-
-          if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
-            end = len;
-          } else {
-            end = -textInputRange.moveEnd("character", -len);
-            end += normalizedValue.slice(0, end).split("\n").length - 1;
-          }
-        }
-      }
-    }
-
-    return {
-      start: start,
-      end: end,
-      len: len
-    };
   }
 
   setCursorPosition(el, pos) {

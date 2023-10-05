@@ -205,6 +205,9 @@ module CapybaraSessionExtensions
           form.uncheck(key)
         elsif change[:type] == :radio
           form.choose(change[:value])
+        elsif change[:type] == :autocompleter
+          form.fill_in(key, with: change[:value])
+          form.assert_field(key, with: change[:value])
         elsif change[:type] == :text
           form.fill_in(key, with: change[:value])
         end

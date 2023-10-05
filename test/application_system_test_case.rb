@@ -4,6 +4,7 @@ require("test_helper")
 require("database_cleaner/active_record")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  # Set it to :headless_firefox to run faster, or :firefox to enjoy the show
   driven_by :selenium, using: :headless_firefox
   # Include MO's helpers
   include GeneralExtensions
@@ -24,12 +25,12 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # Capybara.always_include_port = true
     # Capybara.raise_server_errors = true
     # default in test_helper = true. some SO threads suggest false
-    self.use_transactional_tests = false
+    self.use_transactional_tests = true
 
     # https://github.com/DatabaseCleaner/database_cleaner
     # https://github.com/DatabaseCleaner/database_cleaner#minitest-example
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
-    DatabaseCleaner.strategy = :truncation # :transaction :truncation
+    DatabaseCleaner.strategy = :transaction # :transaction :truncation
     DatabaseCleaner.start
 
     # Treat Rails html requests as coming from non-robots.
@@ -45,6 +46,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
     DatabaseCleaner.clean
 
-    # ApplicationController.allow_forgery_protection = false
+    ApplicationController.allow_forgery_protection = false
   end
 end
