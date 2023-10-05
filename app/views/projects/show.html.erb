@@ -29,6 +29,13 @@ add_project_banner(@project)
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
+  <p>
+    <b><%= :show_project_start_date.t %>:</b>
+      <%= @project.start_date || :form_projects_date_indefinite.t%><br/>
+    <b><%= :show_project_end_date.t %>:</b>
+      <%= @project.end_date || :form_projects_date_indefinite.t %>
+</p>
+
 
 <% end %>
 
@@ -60,26 +67,6 @@ add_project_banner(@project)
                                            candidate: @user.id,
                                            target: :project_index)) %>
 <% end %>
-<div class="row">
-  <div class="col-md-6">
-    <%= panel_block do %>
-      <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-      <p>
-        <b><%= :show_project_start_date.t %>:</b>
-          <%= @project.start_date || :form_projects_date_indefinite.t%><br/>
-        <b><%= :show_project_end_date.t %>:</b>
-          <%= @project.end_date || :form_projects_date_indefinite.t %>
-      </p>
-      <p><b><%= :show_project_by.t %>:</b> <%= user_link(@project.user) %></p>
-      <% if @project.location %>
-        <p><b><%= :show_project_location.t %>:</b> <%= location_link(@project.place_name, @project.location) %></p>
-      <% end %>
-      <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
-      <%= if @user && @project.user_group.users.member?(@user)
-        render(partial: "projects/groups", locals: { project: @project })
-      end %>
-    <% end %>
-  </div>
 
 <% if check_permission(@project) %>
   <%= link_to(:show_project_edit.t,

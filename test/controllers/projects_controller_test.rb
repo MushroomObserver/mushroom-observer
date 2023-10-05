@@ -61,7 +61,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_show_project
     login("zero") # Not the owner of eol_project
-    p_id = projects(:eol_project).id
+    proj = projects(:eol_project).id
     get(:show, params: { id: p_id })
     assert_template("show")
     assert_select(
