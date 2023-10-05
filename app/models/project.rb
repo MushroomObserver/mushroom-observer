@@ -439,18 +439,6 @@ class Project < AbstractModel
     end_date.nil? ? :INDEFINITE.t : end_date.strftime(format)
   end
 
-  def duration_str
-    if start_date && end_date
-      (end_date - start_date + 1).to_i.to_s
-    elsif start_date
-      :show_project_duration_unlimited_no_end.t
-    elsif end_date
-      :show_project_duration_unlimited_no_start.t
-    else
-      :show_project_duration_unlimited.t
-    end
-  end
-
   ##############################################################################
 
   private

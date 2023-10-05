@@ -134,17 +134,6 @@ class ProjectTest < UnitTestCase
                  projects(:future_project).end_date_str)
   end
 
-  def test_duration_in_days
-    assert_equal("4",
-                 projects(:pinned_date_range_project).duration_str)
-    assert_equal(:show_project_duration_unlimited_no_end.l,
-                 projects(:future_project).duration_str)
-    assert_equal(:show_project_duration_unlimited_no_start.l,
-                 projects(:past_project).duration_str)
-    assert_equal(:show_project_duration_unlimited.l,
-                 projects(:unlimited_project).duration_str)
-  end
-
   def test_out_of_range_observations
     assert_out_of_range_observations(projects(:current_project), expect: 0)
     assert_out_of_range_observations(projects(:unlimited_project), expect: 0)
