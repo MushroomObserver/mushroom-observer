@@ -29,7 +29,7 @@ test:
       :read: "/test_images"
     :remote1:
       :test: :transferred_flag
-      :read: "/remote_images"
+      :read: file://%{root}/public/test_server1
       :write: file://%{root}/public/test_server1
     :remote2:
       :write: file://%{root}/public/test_server2
