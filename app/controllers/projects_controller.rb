@@ -108,7 +108,7 @@ class ProjectsController < ApplicationController
     @summary = params[:project][:summary]
     if valid_title && valid_where && valid_dates
       if @project.update(project_create_params)
-        @project.start_date = nil if params.dig(:start_date,:fixed) == "false"
+        @project.start_date = nil if params.dig(:start_date, :fixed) == "false"
         @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
         @project.save
         @project.log_update
@@ -353,7 +353,7 @@ class ProjectsController < ApplicationController
   end
 
   def ends_before_start?
-    start_date = if params.dig(:start_date,:fixed) == "true"
+    start_date = if params.dig(:start_date, :fixed) == "true"
                    Date.new(start_year.to_i, start_month.to_i, start_day.to_i)
                  end
 

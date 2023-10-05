@@ -5,29 +5,29 @@ require("test_helper")
 class ProjectsControllerTest < FunctionalTestCase
   def build_params(
     title, summary, start_date: nil, end_date: nil,
-    start_date_fixed: false, end_date_fixed: false)
-    params =
-      {
-        project: {
-          title: title,
-          summary: summary,
-          place_name: "",
-          open_membership: false,
-          "start_date(1i)" => start_date&.year,
-          "start_date(2i)" => start_date&.month,
-          "start_date(3i)" => start_date&.day,
-          "end_date(1i)" => end_date&.year,
-          "end_date(2i)" => end_date&.month,
-          "end_date(3i)" => end_date&.day
-        },
-        start_date: { fixed: start_date_fixed },
-        end_date: { fixed: end_date_fixed },
-        upload: {
-          license_id: licenses(:ccnc25).id,
-          copyright_holder: User.current&.name || "Someone Else",
-          copyright_year: 2023
-        }
+    start_date_fixed: false, end_date_fixed: false
+  )
+    {
+      project: {
+        title: title,
+        summary: summary,
+        place_name: "",
+        open_membership: false,
+        "start_date(1i)" => start_date&.year,
+        "start_date(2i)" => start_date&.month,
+        "start_date(3i)" => start_date&.day,
+        "end_date(1i)" => end_date&.year,
+        "end_date(2i)" => end_date&.month,
+        "end_date(3i)" => end_date&.day
+      },
+      start_date: { fixed: start_date_fixed },
+      end_date: { fixed: end_date_fixed },
+      upload: {
+        license_id: licenses(:ccnc25).id,
+        copyright_holder: User.current&.name || "Someone Else",
+        copyright_year: 2023
       }
+    }
   end
 
   ##### Helpers (which also assert) ############################################
