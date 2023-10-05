@@ -186,10 +186,11 @@ class ProjectsControllerTest < FunctionalTestCase
     start_date = Date.tomorrow
     end_date = start_date + 3.days
 
-    post_requires_login(:create, build_params(title, summary,
-                        start_date: start_date, end_date: end_date,
-                        start_date_fixed: { fixed: true },
-                        end_date_fixed: { fixed: true }))
+    post_requires_login(:create,
+                        build_params(title, summary,
+                                     start_date: start_date, end_date: end_date,
+                                     start_date_fixed: { fixed: true },
+                                     end_date_fixed: { fixed: true }))
 
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
