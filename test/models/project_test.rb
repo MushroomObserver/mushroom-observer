@@ -159,6 +159,14 @@ class ProjectTest < UnitTestCase
     assert_out_of_range_observations(projects(:pinned_date_range_project))
   end
 
+  def test_in_range_observations
+    assert_in_range_observations(projects(:current_project))
+    assert_in_range_observations(projects(:unlimited_project))
+    assert_in_range_observations(projects(:future_project), expect: 0)
+    assert_in_range_observations(projects(:pinned_date_range_project),
+                                 expect: 0)
+  end
+
   def assert_out_of_range_observations(project,
                                        expect: project.observations.count)
     assert(
@@ -166,6 +174,15 @@ class ProjectTest < UnitTestCase
       "Test needs fixture with some Observations; #{project.title} has none"
     )
     assert_equal(expect, project.out_of_range_observations.count)
+  end
+
+  def assert_in_range_observations(project,
+                                   expect: project.observations.count)
+    assert(
+      project.observations.count.positive?,
+      "Test needs fixture with some Observations; #{project.title} has none"
+    )
+    assert_equal(expect, project.in_range_observations.count)
   end
 
   def test_place_name
