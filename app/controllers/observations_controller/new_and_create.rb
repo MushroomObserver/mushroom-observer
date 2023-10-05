@@ -68,12 +68,12 @@ module ObservationsController::NewAndCreate
       @observation.send("#{attr}=", last_observation.send(attr))
     end
 
-    last_observation.projects.each do |project|
-      next if project.open_membership ||
-              !project.current?
+    last_observation.projects.where(open_membership: false).
+      each do |project|
+        next unless project.current?
 
-      @project_checks[project.id] = true
-    end
+        @project_checks[project.id] = true
+      end
 
     last_observation.species_lists.each do |list|
       if check_permission(list)
