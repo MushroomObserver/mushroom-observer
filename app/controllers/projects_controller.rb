@@ -283,7 +283,6 @@ class ProjectsController < ApplicationController
   def project_create_params
     params.require(:project).
       permit(:title, :summary, :open_membership,
-             :accepting_observations,
              "start_date(1i)", "start_date(2i)", "start_date(3i)",
              "end_date(1i)", "end_date(2i)", "end_date(3i)")
   end

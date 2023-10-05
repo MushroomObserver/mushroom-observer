@@ -9,7 +9,6 @@ DEFAULTS: &DEFAULTS
   admin_group: dick_only
   title: $LABEL
   open_membership: false
-  accepting_observations: true
   start_date: nil
   end_date: nil
 
@@ -57,18 +56,6 @@ open_membership_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-
-not_accepting_observations_project:
-  <<: *DEFAULTS
-  user: roy
-  user_group: burbank_users
-  admin_group: burbank_admins
-  title: Closed Burbank Project
-  summary: Closed Project about Fungi of Burbank
-  created_at: 2008-09-25 07:00:50
-  updated_at: 2008-09-25 07:00:55
-  observations: amateur_obs
-  accepting_observations: false
 
 empty_project:
   <<: *DEFAULTS

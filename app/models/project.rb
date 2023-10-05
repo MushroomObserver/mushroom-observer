@@ -119,8 +119,7 @@ class Project < AbstractModel
   end
 
   def user_can_add_observation?(obs, user)
-    accepting_observations && (obs.user == user ||
-                               is_member?(user))
+    obs.user == user || is_member?(user)
   end
 
   def violates_constraints?(obs)
@@ -220,7 +219,7 @@ class Project < AbstractModel
   # Add observation (and its images) to this project if not already done so.
   # Saves it.
   def add_observation(obs)
-    return if observations.include?(obs) || !accepting_observations
+    return if observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     observations.push(obs)
