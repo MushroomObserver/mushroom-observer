@@ -4,6 +4,7 @@ require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
   def test_create_minimal_observation
+    browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
 
@@ -21,13 +22,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                       text: "Albion, Mendocino Co., California")
       fill_in("naming_name", with: "Elfin saddle")
       # don't wait for the autocompleter - we know it's an elfin saddle!
-      send_keys(:tab)
+      browser.keyboard.type(:tab)
       assert_field("naming_name", with: "Elfin saddle")
       # start typing the location...
       fill_in("observation_place_name", with: locations.first.name[0, 10])
       # wait for the autocompleter...
       assert_selector(".auto_complete")
-      send_keys(:down, :tab) # cursor down to first match + select row
+      browser.keyboard.type(:down, :tab) # cursor down to first match + select row
       assert_field("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -41,10 +42,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("naming_name", with: "Coprinus com")
       # wait for the autocompleter!
       assert_selector(".auto_complete")
-      send_keys(:down, :tab) # cursor down to first match + select row
-      # unfocus, let field validate. send_keys(:tab) doesn't work without sleep
+      browser.keyboard.type(:down, :tab) # cursor down to first match + select row
+      # unfocus, let field validate. browser.keyboard.type(:tab) doesn't work without sleep
       sleep(1)
-      send_keys(:tab)
+      browser.keyboard.type(:tab)
       assert_field("naming_name", with: "Coprinus comatus")
       # Place name should stay filled
       assert_field("observation_place_name", with: locations.first.name)
@@ -63,6 +64,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   }.freeze
 
   def test_post_edit_and_destroy_with_details_and_location
+    browser = page.driver.browser
     setup_image_dirs # in general_extensions
     local_now = Time.zone.now.in_time_zone
 
@@ -128,7 +130,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # submit_observation_form_without_errors
     fill_in("observation_place_name", with: "Pasadena, Calif")
     assert_selector(".auto_complete")
-    send_keys(:down, :tab) # cursor down to first match + select row
+    browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
     fill_in("observation_lat", with: " 12deg 34.56min N ")
     fill_in("observation_long", with: " 123 45 6.78 W ")
@@ -136,7 +138,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     fill_in("naming_name", with: "Agaricus campe")
     assert_selector(".auto_complete ul li", text: "Agaricus campestris")
-    send_keys(:down, :down, :tab) # down to second match + select row
+    browser.keyboard.type(:down, :down, :tab) # down to second match + select row
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
 
@@ -268,7 +270,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_selector(".set_thumb_image")
     end
 
-    # assert_field('observation_thumb_image_id', type: :hidden, with: ??)
+    # assert_field('observation_thumb_image_id', browser.keyboard.type: :hidden, with: ??)
 
     within("#observation_form") { click_commit }
 
@@ -326,7 +328,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # fixtures/files subdirectory for testing.
 
     # 2) In your unit test you can get your testing file by
-    # calling fixture_file_upload('path','mime-type'). e.g.:
+    # calling fixture_file_upload('path','mime-browser.keyboard.type'). e.g.:
 
     # `bulk_json = fixture_file_upload(
     #   'files/bulk_bookmark.json','application/json'
