@@ -97,7 +97,7 @@ module ObservationsController::NewAndCreate
     success = true
     success = false unless validate_params(params)
     success = false unless validate_object(@observation)
-    success = false unless validate_project_checkboxes
+    success = false unless validate_projects(params)
     success = false if @name && !validate_object(@naming)
     success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
@@ -313,25 +313,5 @@ module ObservationsController::NewAndCreate
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
     render(action: :new, location: new_observation_path(q: get_query_param))
-  end
-
-  def validate_project_checkboxes
-    return true if params[:project].empty? ||
-                   params[:project][:ignore_proj_conflicts]
-
-    @suspect_checked_projects = checked_out_of_range_projects
-    @suspect_checked_projects.empty?
-  end
-
-  def checked_out_of_range_projects
-    checked_proj_check_boxes =
-      params[:project].select { |_, value| value == "1" }.keys
-    return [] if checked_proj_check_boxes.none?
-
-    checked_proj_ids =
-      checked_proj_check_boxes.map { |str| str.gsub("id_", "") }
-    # Get the AR records so that we can call Project methods on them
-    Project.where(id: checked_proj_ids).
-      filter { |proj| proj.dates_exclude?(@observation.when) }
   end
 end
