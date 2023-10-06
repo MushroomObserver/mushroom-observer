@@ -84,6 +84,14 @@ module ObservationsController::FormHelpers
     @projects = User.current.projects_member(order: :title,
                                              include: :user_group)
     @project_checks = {}
+
+    # FIXME: Why wouold open-membership projects be treated different from
+    # closed-membership projects for initial auto-checking?
+    # And why auto-check non-compliant projects?
+    # @projects.each do |proj|
+    #   @project_checks[proj.id] = proj.open_membership
+    # end
+    # 2023-10-05 jdc
   end
 
   def init_project_vars_for_reload(obs)
