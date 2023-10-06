@@ -54,9 +54,7 @@
   <%= text_field_with_label(form: f, field: :place_name,
                             placeholder: :start_typing.l,
                             label: :WHERE.t + ":",
-                            between: :required,
                             data: { autocompleter: :location }) %>
-
 
   <%= file_field_with_label(
         form: f, field: :upload_image,
