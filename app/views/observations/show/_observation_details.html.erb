@@ -4,12 +4,12 @@
 
 <%= observation_details_when_where_who(obs: obs) %>
 
-<%= if @user
-  tag.div(class: "obs-projects", id: "observation_projects") do
-    obs.projects.each do |project|
-      tag.p("#{:PROJECT.t}: #{link_to_object(project)}")
-    end
-  end
+<% if @user
+  obs.projects.each do |project| %>
+    <%= "#{:PROJECT.t}: " %>
+    <%= link_to_object(project) %>
+    <br/>
+  <% end
 end %>
 
 <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
