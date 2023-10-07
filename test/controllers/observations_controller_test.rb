@@ -2878,21 +2878,26 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_empty(@controller.instance_variable_get(:@good_images))
   end
 
+  def test_inital_project_checkboxes
+    login("katrina")
+    get(:new)
+
+    assert_project_checks(
+      # open membership, meets date constrains
+      projects(:current_project).id => :checked,
+      # open-membership, doesn't meet date constraints
+      projects(:past_project).id => :unchecked,
+      # meets date constraints, but membership closed
+      projects(:eol_project).id => :unchecked
+    )
+  end
+
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
     login("rolf")
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-
-    login("katrina")
-    get(:new)
-    assert_project_checks(
-      projects(:past_project).id => :unchecked,
-      projects(:current_project).id => :unchecked,
-      projects(:future_project).id => :unchecked,
-      projects(:open_membership_project).id => :unchecked
-    )
 
     login("dick")
     get(:new)

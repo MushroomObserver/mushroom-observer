@@ -68,8 +68,6 @@ module ObservationsController::NewAndCreate
       @observation.send("#{attr}=", last_observation.send(attr))
     end
 
-    # FIXME: Why woold open-membership projects be treated different from
-    # closed-membership projects for check-box persistence?
     last_observation.projects.where(open_membership: false).
       find_each do |project|
         next unless project.current?
