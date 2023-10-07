@@ -19,7 +19,7 @@ module Projects
       }
 
       put_requires_login(:update, params, changer.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(admin_after,
                    target_user.in_group?(eol_project.admin_group.name))
@@ -156,7 +156,7 @@ module Projects
     def test_add_members_non_admin
       project_id = projects(:eol_project).id
       requires_login(:new, { project_id: project_id }, katrina.login)
-      assert_redirected_to(project_path(project_id))
+      assert_redirected_to(project_members_path(project_id))
     end
 
     # Make sure admin can add members.
@@ -170,7 +170,7 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, mary.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(true, target_user.in_group?(eol_project.user_group.name))
@@ -187,7 +187,7 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, katrina.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(false, target_user.in_group?(eol_project.user_group.name))
@@ -200,7 +200,8 @@ module Projects
       assert_equal(false, target_user.in_group?(project.user_group.name))
       params = {
         project_id: project.id,
-        candidate: target_user.id
+        candidate: target_user.id,
+        target: :project_index
       }
       post_requires_login(:create, params, target_user.login)
       assert_redirected_to(project_path(project.id))
@@ -219,7 +220,7 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, katrina.login)
-      assert_redirected_to(project_path(project.id))
+      assert_redirected_to(project_members_path(project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(project.admin_group.name))
       assert_equal(false, target_user.in_group?(project.user_group.name))
@@ -235,7 +236,7 @@ module Projects
         candidate: "#{target_user.login} <Should Ignore This>"
       }
       post_requires_login(:create, params, mary.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user.reload
       assert_not(target_user.in_group?(eol_project.admin_group.name))
       assert(target_user.in_group?(eol_project.user_group.name))
@@ -249,9 +250,18 @@ module Projects
         candidate: "freddymercury"
       }
       post_requires_login(:create, params, mary.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       assert_flash_error
       assert_equal(num_before, eol_project.reload.user_group.users.count)
+    end
+
+    def test_index
+      eol_project = projects(:eol_project)
+      login
+      get(:index, params: { project_id: eol_project.id })
+
+      assert_displayed_title("Members of #{eol_project.title}")
+      assert_template("index")
     end
   end
 end
