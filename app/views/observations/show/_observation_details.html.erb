@@ -4,12 +4,12 @@
 
 <%= observation_details_when_where_who(obs: obs) %>
 
-<% if @user
-  obs.projects.each do |project| %>
-    <%= "#{:PROJECT.t}: " %>
-    <%= link_to_object(project) %>
-    <br/>
-  <% end
+<%= tag.div(class: "obs-projects", id: "observation_projects") do
+  concat([tag.span("#{:PROJECTS.t}:")), tag.br].safe_join)
+  obs.projects.each do |project|
+    concat(tag.div(link_to_object(project), class: "indent"))
+  end
+end %>
 end %>
 
 <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
