@@ -62,6 +62,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login("zero") # Not the owner of eol_project
     p_id = projects(:eol_project).id
     get(:show, params: { id: p_id })
+
     assert_template("show")
     assert_select(
       "a[href*=?]", new_project_admin_request_path(project_id: p_id)
@@ -71,12 +72,6 @@ class ProjectsControllerTest < FunctionalTestCase
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
     assert_select("form[action=?]", project_path(p_id), count: 0)
-    assert_select("#content",
-                  { text: /#{:show_project_start_date.l}/, count: 1 },
-                  "Missing Project Start Date")
-    assert_select("#content",
-                  { text: /#{:show_project_end_date.l}/, count: 1 },
-                  "Missing Project End Date")
   end
 
   def test_show_project_logged_in

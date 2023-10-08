@@ -29,14 +29,6 @@ add_project_banner(@project)
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-  <p>
-    <b><%= :show_project_start_date.t %>:</b>
-      <%= @project.start_date || :form_projects_date_indefinite.t%><br/>
-    <b><%= :show_project_end_date.t %>:</b>
-      <%= @project.end_date || :form_projects_date_indefinite.t %>
-</p>
-
-
 <% end %>
 
 <p>
