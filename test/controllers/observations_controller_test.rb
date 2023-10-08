@@ -102,6 +102,14 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
   end
 
+  def test_show_project_observation
+    login
+    obs = observations(:owner_accepts_general_questions)
+    project = obs.projects[0]
+    get(:show, params: { id: obs.id })
+    assert_match(project.title, @response.body)
+  end
+
   def test_show_observation_change_thumbnail_size
     user = users(:small_thumbnail_user)
     login(user.name)
