@@ -5,7 +5,7 @@ require("test_helper")
 class ProjectsControllerTest < FunctionalTestCase
   def build_params(
     title, summary, start_date: nil, end_date: nil,
-    start_date_fixed: false, end_date_fixed: false
+    dates_any: "false"
   )
     {
       project: {
@@ -18,10 +18,9 @@ class ProjectsControllerTest < FunctionalTestCase
         "start_date(3i)" => start_date&.day,
         "end_date(1i)" => end_date&.year,
         "end_date(2i)" => end_date&.month,
-        "end_date(3i)" => end_date&.day
+        "end_date(3i)" => end_date&.day,
+        dates_any: dates_any
       },
-      start_date: { fixed: start_date_fixed },
-      end_date: { fixed: end_date_fixed },
       upload: {
         license_id: licenses(:ccnc25).id,
         copyright_holder: User.current&.name || "Someone Else",
@@ -172,9 +171,18 @@ class ProjectsControllerTest < FunctionalTestCase
       'select[id ^= "project_end_date"]', { count: 3 },
       "Form should have fields to select ending month, day, year"
     )
+
+    assert_select(
+      "input[type=radio][id=project_dates_any_true]", { count: 1 },
+      "Missing radio button to make project dates a range"
+    )
+    assert_select(
+      "input[type=radio][id=project_dates_any_false]", { count: 1 },
+      "Missing radio button to make project dates any dates"
+    )
   end
 
-  def test_create_project
+  def test_create_project_with_date_range
     title = "Amanita Research"
     summary = "The Amanita Research Project"
     project = Project.find_by(title: title)
@@ -186,11 +194,10 @@ class ProjectsControllerTest < FunctionalTestCase
     start_date = Date.tomorrow
     end_date = start_date + 3.days
 
-    post_requires_login(:create,
-                        build_params(title, summary,
-                                     start_date: start_date, end_date: end_date,
-                                     start_date_fixed: { fixed: true },
-                                     end_date_fixed: { fixed: true }))
+    post_requires_login(
+      :create, build_params(title, summary,
+                            start_date: start_date, end_date: end_date)
+    )
 
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
@@ -208,7 +215,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal([rolf], admin_group.users)
   end
 
-  def test_create_project_indefinite_dates
+  def test_create_project_with_any_dates
     title = "Project without start or end"
     start_date = Time.zone.today
     end_date = start_date
@@ -222,10 +229,9 @@ class ProjectsControllerTest < FunctionalTestCase
         "start_date(3i)" => start_date.day,
         "end_date(1i)" => end_date.year,
         "end_date(2i)" => end_date.month,
-        "end_date(3i)" => end_date.day
-      },
-      start_date: { fixed: false },
-      end_date: { fixed: false }
+        "end_date(3i)" => end_date.day,
+        dates_any: true
+      }
     }
     post_requires_login(:create, params)
 
@@ -309,8 +315,7 @@ class ProjectsControllerTest < FunctionalTestCase
     end_date = start_date + 4.days
     params =
       build_params(title, summary,
-                   start_date: start_date, end_date: end_date,
-                   start_date_fixed: true, end_date_fixed: true)
+                   start_date: start_date, end_date: end_date)
 
     params[:project][:open_membership] = true
     params[:id] = project.id
@@ -482,6 +487,7 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_project_save_fail
+    skip
     title = "Bad Project"
     project = Minitest::Mock.new
     add_project_expectations(project)

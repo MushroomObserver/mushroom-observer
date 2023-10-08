@@ -3175,17 +3175,22 @@
   edit_project_title: "[:edit_object(type=:project)]: [title]"
 
   # project/_form_projects
+  form_projects_any: Any
   form_projects_date_range: Date Range
   form_projects_date_fixed: Use above date
   form_projects_date_indefinite: Indefinite
   form_projects_dates_explain: "Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning."
   form_projects_end_date: Project End Date
+  form_projects_range: Range
   form_projects_start_date: Project Start Date
   form_projects_title: "[:Title]"
   form_projects_open_membership: Enable users to add themselves and disable shared editing
   form_projects_accepting_observations: Project is accepting new observations from members
   form_projects_where: Optional Project Location
   form_projects_image_upload: Upload photo
+  form_projects_ignore_date_range: Ignore above dates
+  form_projects_use_date_range: Use above dates
+
 
   # project/list_projects
   list_projects_title: "[:list_objects(type=:project)]"

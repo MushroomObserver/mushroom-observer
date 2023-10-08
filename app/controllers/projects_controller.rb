@@ -46,8 +46,7 @@ class ProjectsController < ApplicationController
   def new
     image_ivars
     @project = Project.new
-    @start_date_fixed = true
-    @end_date_fixed = true
+    @project_dates_any = false
   end
 
   # Form to edit a project
@@ -331,8 +330,10 @@ class ProjectsController < ApplicationController
       @project.user_group = user_group
       @project.admin_group = admin_group
       @project.location = location
-      @project.start_date = nil if params.dig(:start_date, :fixed) == "false"
-      @project.end_date = nil if params.dig(:end_date, :fixed) == "false"
+      if params.dig(:project, :dates_any) == "true"
+        @project.start_date = nil
+        @project.end_date = nil
+      end
 
       upload_image_if_present
       if @project.save
