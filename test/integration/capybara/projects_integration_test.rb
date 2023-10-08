@@ -45,7 +45,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
 
     project = Project.find_by_title(title)
     assert_equal(title, project.title)
-    assert_equal(nil, project.start_date, "Project Start Date should be nil")
-    assert_equal(nil, project.end_date, "Project Start Date should be nil")
+    assert_nil(project.start_date, "Project Start Date should be nil")
+    assert_nil(project.end_date, "Project Start Date should be nil")
   end
 end
