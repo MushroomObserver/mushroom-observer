@@ -95,6 +95,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*=?]", location_path(project.location.id))
   end
 
+  def test_show_project_with_date_range
+    project = projects(:pinned_date_range_project)
+    login
+    get(:show, params: { id: project.id })
+
+    assert_select("#header", { text: /#{project.date_range}/ },
+                  "Date range missing from Project header")
+  end
+
   def test_index
     login
     get(:index)
