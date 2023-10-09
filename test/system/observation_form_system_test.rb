@@ -97,7 +97,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     uncheck("observation_is_collection_location")
-    binding.break
+    # fix for check not working on
+    # find(id: "observation_specimen", visible: false).click
+    # check("observation_specimen", allow_label_click: true)
+    # page.find("label[for='observation_specimen']").click
+    # binding.break
     check("observation_specimen")
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")

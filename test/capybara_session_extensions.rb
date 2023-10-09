@@ -175,10 +175,14 @@ module CapybaraSessionExtensions
     button.click
   end
 
-  def check(locator, *options, session: self)
-    input = session.find_field(locator, *options)
-    session.scroll_to(input, align: :center)
-    check(input)
+  def check(locator, *_options, session: self)
+    # input = session.find_field(locator, *options)
+    # session.scroll_to(input, align: :center)
+    # binding.break
+    label = session.find("label[for='#{locator}']")
+    session.scroll_to(label, align: :center)
+    # session.check(locator, *options)
+    label.click
   end
 
   # def string_value_is_number?(string)
