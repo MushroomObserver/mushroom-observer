@@ -13,11 +13,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_selector("body.observations__new")
     within("#observation_form") do
-      # MOAutocompleter has replaced year select with text field
+      # MOAutocompleter replaces year select with text field
       assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
       assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
-      assert_select("observation_when_3i",
-                    text: Time.zone.today.strftime("%d").to_i)
+      # %e is day of month, no leading zero
+      assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
       assert_selector("#where_help",
                       text: "Albion, Mendocino Co., California")
       fill_in("naming_name", with: "Elfin saddle")
@@ -28,7 +28,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("observation_place_name", with: locations.first.name[0, 10])
       # wait for the autocompleter...
       assert_selector(".auto_complete")
-      browser.keyboard.type(:down, :tab) # cursor down to first match + select row
+      browser.keyboard.type(:down, :tab) # cursor to first match + select row
       assert_field("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -40,14 +40,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_form")
     within("#observation_form") do
       fill_in("naming_name", with: "Coprinus com")
+      browser.keyboard.type(:tab)
       # wait for the autocompleter!
       assert_selector(".auto_complete")
-      browser.keyboard.type(:down, :tab) # cursor down to first match + select row
-      # unfocus, let field validate. browser.keyboard.type(:tab) doesn't work without sleep
-      sleep(1)
+      browser.keyboard.type(:down, :tab) # cursor to first match + select row
       browser.keyboard.type(:tab)
       assert_field("naming_name", with: "Coprinus comatus")
       # Place name should stay filled
+      browser.keyboard.type(:tab)
       assert_field("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -79,15 +79,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_2i", text: local_now.strftime("%B"))
     assert_select("observation_when_3i", text: local_now.day.to_s)
 
-    assert_field("observation_place_name", text: "")
-    assert_field("observation_lat", text: "")
-    assert_field("observation_long", text: "")
-    assert_field("observation_alt", text: "")
+    assert_field("observation_place_name", with: "")
+    assert_field("observation_lat", with: "")
+    assert_field("observation_long", with: "")
+    assert_field("observation_alt", with: "")
 
-    assert_field("naming_name", text: "")
+    assert_field("naming_name", with: "")
     assert_checked_field("observation_is_collection_location")
     assert_no_checked_field("observation_specimen")
-    assert_field(other_notes_id, text: "")
+    assert_field(other_notes_id, with: "")
 
     # submit_observation_form_with_errors
     fill_in("observation_when_1i", with: "2010")
@@ -97,7 +97,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     uncheck("observation_is_collection_location")
-
+    binding.break
     check("observation_specimen")
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
@@ -117,11 +117,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    assert_field("observation_lat", text: "")
-    assert_field("observation_long", text: "")
-    assert_field("observation_alt", text: "")
+    assert_field("observation_lat", with: "")
+    assert_field("observation_long", with: "")
+    assert_field("observation_alt", with: "")
 
-    assert_field("naming_name", text: "")
+    assert_field("naming_name", with: "")
     assert_no_checked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
     assert_field("collection_number_number", with: "17-034a")
@@ -138,7 +138,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     fill_in("naming_name", with: "Agaricus campe")
     assert_selector(".auto_complete ul li", text: "Agaricus campestris")
-    browser.keyboard.type(:down, :down, :tab) # down to second match + select row
+    browser.keyboard.type(:down, :down, :tab) # down to second match + select
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
 

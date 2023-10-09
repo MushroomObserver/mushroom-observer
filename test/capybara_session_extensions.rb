@@ -46,11 +46,13 @@ module CapybaraSessionExtensions
             remember_me = true, session: self)
     login = login.login if login.is_a?(User) # get the right user field
     session.visit("/account/login/new")
+    session.assert_selector("body.login__new")
 
     session.within("#account_login_form") do
       session.fill_in("user_login", with: login)
       session.fill_in("user_password", with: password)
-      session.check("user_remember_me") if remember_me == true
+      session.assert_checked_field("user_remember_me")
+      session.uncheck("user_remember_me") if remember_me == false
 
       session.first(:button, type: "submit").click
     end
@@ -160,8 +162,23 @@ module CapybaraSessionExtensions
   end
 
   # Many forms have more than one submit button
+  # Cuprite: must scroll to the button or you can't click
   def click_commit(session: self)
-    session.first(:button, type: "submit").click
+    button = session.first(:button, type: "submit")
+    session.scroll_to(button, align: :center)
+    button.click
+  end
+
+  def click_button(locator, *options, session: self)
+    button = session.find_button(locator, *options)
+    session.scroll_to(button, align: :center)
+    button.click
+  end
+
+  def check(locator, *options, session: self)
+    input = session.find_field(locator, *options)
+    session.scroll_to(input, align: :center)
+    check(input)
   end
 
   # def string_value_is_number?(string)
