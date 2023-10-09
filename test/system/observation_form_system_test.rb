@@ -102,7 +102,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # check("observation_specimen", allow_label_click: true)
     # page.find("label[for='observation_specimen']").click
     # binding.break
-    check("observation_specimen")
+    cb = page.first("label[for='observation_specimen']")
+    page.scroll_to(cb, align: :center)
+    binding.break
+    cb.click
+
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation")
