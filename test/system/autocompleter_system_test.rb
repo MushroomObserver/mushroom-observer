@@ -72,4 +72,21 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       assert_field("content_filter_clade", with: "Agaricaceae")
     end
   end
+
+  def test_autocompleter_in_naming_modal
+    rolf = users("rolf")
+    login!(rolf)
+
+    visit(observation_path(Observation.last.id))
+
+    click_on("Propose")
+    assert_selector("#modal_naming")
+    assert_selector("#naming_form")
+    fill_in("naming_name", with: "Peltige")
+    assert_selector(".auto_complete ul li")
+    send_keys(:down, :down, :tab)
+    assert_field("naming_name", with: "Peltigeraceae ")
+    within("#naming_form") { click_commit }
+    within("#namings_table") { assert_text("Peltigeraceae") }
+  end
 end

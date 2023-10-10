@@ -157,6 +157,7 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
+    # debugger
     content_tag(:div, class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
@@ -168,7 +169,7 @@ module FormsHelper
 
   # default select_opts - also generate year options if start_year given
   def select_generate_default_options(args)
-    args[:select_opts] ||= {}
+    args[:select_opts] ||= (args[:value] ? { selected: args[:value] } : {})
 
     return args unless args[:start_year].present? && args[:end_year].present?
 
