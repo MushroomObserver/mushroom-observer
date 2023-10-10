@@ -103,9 +103,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation")
 
-    within("#observation_form") do
-      click_commit
-    end
+    within("#observation_form") { click_commit }
 
     # rejected
     assert_selector("body.observations__create")
@@ -197,7 +195,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Try removing it
-    binding.break
     scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_link").click }
 
@@ -247,14 +244,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Fix divergent dates: use the obs date
-    within("#observation_date_radio_container") { choose("14-March-2010") }
-    click_button("fix_dates")
+    scroll_to("#image_messages", align: :center)
+    within("#image_messages") do
+      within("#observation_date_radio_container") do
+        choose("14-March-2010", allow_label_click: true)
+        assert_checked_field("14-March-2010")
+      end
+      click_button("fix_dates")
+    end
+    sleep(1) # wait for css hide transition
     assert_no_selector("image_messages")
 
     # Ignore divergent GPS - maybe we took the second photo in the lab?
-    click_button("ignore_geocode")
+    scroll_to("#geocode_messages", align: :center)
+    within("#geocode_messages") do
+      click_button("ignore_geocode")
+    end
+    sleep(1) # wait for css hide transition
     assert_no_selector("geocode_messages")
 
+    sleep(1) # wait for css hide transition
     # Be sure the dates are applied
     within(first_image_wrapper) do
       assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
@@ -274,21 +283,21 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_selector(".set_thumb_image")
     end
 
-    # assert_field('observation_thumb_image_id', browser.keyboard.type: :hidden, with: ??)
-
     within("#observation_form") { click_commit }
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
     # The observation shoulda been created OK.
     assert_flash_for_create_observation
+    # Check the db values
     assert_new_observation_is_correct(expected_values_after_create)
 
+    # scroll_to("#location_low", align: :center)
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_field("location_high", text: "")
-    assert_field("location_low", text: "")
-    assert_field("location_notes", text: "")
+    assert_field("location_high", with: "")
+    assert_field("location_low", with: "")
+    assert_field("location_notes", with: "")
     assert_field("location_north", with: PASADENA_EXTENTS[:north])
     assert_field("location_south", with: PASADENA_EXTENTS[:south])
     assert_field("location_east", with: PASADENA_EXTENTS[:east])
@@ -402,7 +411,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       select("15", from: "good_image_#{img_id}_when_3i")
       fill_in("good_image_#{img_id}_notes", with: "New notes for image")
     end
-
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -420,7 +428,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     assert_selector("body.observations__show")
     accept_confirm do
-      click_button(class: "destroy_observation_link_#{new_obs.id}")
+      find(".destroy_observation_link_#{new_obs.id}").click
     end
     assert_flash_for_destroy_observation
     assert_selector("body.observations__index")
@@ -581,7 +589,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       is_collection_location: false,
       specimen: true,
       notes: "Notes for observation", # string displayed in observations/show
-      image_notes: "Notes for image"
+      image_notes: "Notes for image",
+      thumb_image_id: Image.find_by(original_name: "Coprinus_comatus.jpg").id
     }
   end
 

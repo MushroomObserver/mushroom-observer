@@ -170,10 +170,10 @@ module CapybaraSessionExtensions
     button.click
   end
 
-  def click_button(locator, **options)
-    session = options[:session] || self
+  def click_button(locator, *options)
+    session = self
 
-    button = session.find_button(locator, **options)
+    button = session.find_button(locator, *options)
     session.scroll_to(button, align: :center)
     # sleep(1) # because scroll-behavior: smooth
     button.click
@@ -194,6 +194,7 @@ module CapybaraSessionExtensions
     # sleep(1) # because scroll-behavior: smooth
     label.trigger(:click)
   end
+
   # def string_value_is_number?(string)
   #   Float(string, exception: false)
   # end
