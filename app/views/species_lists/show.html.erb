@@ -70,14 +70,16 @@ add_tab_set(species_list_show_tabs(list: @species_list))
                   <span><%= user_link(observation.user) %></span>:
                   <span><%= observation.when.web_date %></span>
                 </p>
-                <%= put_button(name: :REMOVE.t,
-                              path: observation_species_list_path(
-                                id: observation.id,
-                                species_list_id: @species_list.id,
-                                commit: "remove"
-                              ),
-                              class: "btn btn-default",
-                              data: { confirm: :are_you_sure.l }) %>
+                <% if check_permission(@species_list) %>
+                  <%= put_button(name: :REMOVE.t,
+                                 path: observation_species_list_path(
+                                   id: observation.id,
+                                   species_list_id: @species_list.id,
+                                   commit: "remove"
+                                 ),
+                                 class: "btn btn-default",
+                                 data: { confirm: :are_you_sure.l }) %>
+                <% end %>
               </div>
             </div>
           </div>

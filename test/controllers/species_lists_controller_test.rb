@@ -274,20 +274,43 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_show_species_list
-    sl_id = species_lists(:first_species_list).id
+  def test_show_species_list_non_owner_logged_in
+    list = species_lists(:unknown_species_list)
+    observations = list.observations
+    assert(observations.any?,
+           "Need SpeciesList fixture that has >= 1 Observation")
+    assert_not_equal(rolf, list.user)
 
-    # Show same list with non-owner logged in.
-    login("mary")
-    get(:show, params: { id: sl_id })
+    login(rolf.login)
+    get(:show, params: { id: list.id })
+
     assert_template(:show)
     assert_template("comments/_comments_for_object")
+    assert_select(
+      "form:match('action', ?)",
+      %r{/observations/\d+/species_lists/#{list.id}/remove},
+      { count: 0 },
+      "Non owner should not get buttons to remove Observations from List"
+    )
+  end
 
-    # Show non-empty list with owner logged in.
-    get(:show,
-        params: { id: species_lists(:unknown_species_list).id })
+  def test_show_species_list_owner_logged_in
+    list = species_lists(:unknown_species_list)
+    observations = list.observations
+    assert(observations.any?,
+           "Need SpeciesList fixture that has >= 1 Observation")
+
+    login(list.user.login)
+    get(:show, params: { id: list.id })
+
     assert_template(:show)
     assert_template("comments/_comments_for_object")
+    assert_select(
+      "form:match('action', ?)",
+      %r{/observations/\d+/species_lists/#{list.id}/remove},
+      { count: 2 },
+      "Species List owner should get 1 Remove button per Observation"
+    )
   end
 
   def test_show_species_lists_attached_to_projects
