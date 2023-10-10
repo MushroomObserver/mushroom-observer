@@ -746,7 +746,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/policy/privacy")
 
   resources :projects do
-    resources :members, only: [:new, :create, :edit, :update],
+    resources :members, only: [:new, :create, :edit, :update, :index],
                         controller: "projects/members", param: :candidate
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"

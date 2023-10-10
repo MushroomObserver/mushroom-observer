@@ -1,83 +1,77 @@
 <%
-add_page_title(:show_project_title.t(title: @project.title))
-add_pager_for(@project)
-add_interest_icons(@user, @project)
-add_tab_set(project_show_tabs(project: @project, user: @user))
+add_project_banner(@project)
+@container = :wide
 %>
 
+<br/>
+
+<%= panel_block do %>
+  <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
+
+  <% if @project.species_lists.any? %>
+    <p><b><%= :SPECIES_LISTS.t %>:</b>
+    <%= @project.species_lists.length %>
+    (<%= link_to(:SHOW.t,
+                  species_lists_path(for_project: @project.id)) %>)
+    </p>
+  <% end %>
+  <% if @drafts.any? %>
+    <p><b><%= :show_project_drafts.t %>:</b>
+    <%= @drafts.length %><br/>
+    <div class="ml-3">
+      <% @drafts.each do |draft| %>
+        <%= link_with_query(draft.name&.display_name&.t,
+                            name_description_path(draft.id)) %>
+        (<%= user_link(draft.user) %>)<br/>
+      <% end %>
+    </div>
+    </p>
+  <% end %>
+
+  <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
+
+<% end %>
+
+<p>
+  <% if @project.observations.any? %>
+    <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
+                   observations_path(project: @project.id),
+                   { class: "btn btn-default btn-lg" }) %></b>
+    <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
+                   checklist_path(project_id: @project.id),
+                   { class: "btn btn-default btn-lg" }) %></b>
+  <% end %>
+  <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
+                 project_members_path(project_id: @project.id),
+                 { class: "btn btn-default btn-lg" }) %></b>
+</p>
+<br/>
+<p>
 <% if @project.can_join?(@user) %>
   <%= post_button(name: :show_project_join.t,
-      path: project_members_path(project_id: @project.id,
-                                 candidate: @user.id)) %>
+                  class: "btn btn-default btn-sm",
+                  path: project_members_path(project_id: @project.id,
+                                             candidate: @user.id,
+                                             target: :project_index)) %>
 <% elsif @project.can_leave?(@user) %>
   <%= put_button(name: :show_project_leave.t,
+                 class: "btn btn-default btn-sm",
                  path: project_member_path(project_id: @project.id,
-                                           candidate: @user.id)) %>
+                                           candidate: @user.id,
+                                           target: :project_index)) %>
 <% end %>
-<div class="row">
-  <div class="col-md-6">
-    <%= panel_block do %>
-      <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-      <% if false %>
-        <p><b><%= :show_project_published.t %>:</b> <%= @name_count %></p>
-      <% end %>
-      <p><b><%= :show_project_by.t %>:</b> <%= user_link(@project.user) %></p>
-      <% if @project.location %>
-        <p><b><%= :show_project_location.t %>:</b> <%= location_link(@project.place_name, @project.location) %></p>
-      <% end %>
-      <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
-      <%= if @user && @project.user_group.users.member?(@user)
-        render(partial: "projects/groups", locals: { project: @project })
-      end %>
-    <% end %>
-  </div>
 
-  <div class="col-md-6">
-    <%= panel_block do %>
+<% if check_permission(@project) %>
+  <%= link_to(:show_project_edit.t,
+              edit_project_path(@project.id),
+              { class: "btn btn-default btn-sm" }) %>
+<% else %>
+  <%= link_to(:show_project_admin_request.t,
+              new_project_admin_request_path(project_id: @project.id),
+              { class: "btn btn-default btn-sm" }) %>
+<% end %>
 
-      <b><%= :OBSERVATIONS.t %>:</b>
-      <% if @project.observations.any? %>
-        <%= @project.observations.length %>
-        (<%= link_to(:SHOW.t, observations_path(project: @project.id)) %> |
-        <%= link_to(:app_checklist.t,
-                    checklist_path(project_id: @project.id)) %>)
-      <% else %>
-        <%= :NONE.t %>
-      <% end %>
-      <br/>
-
-      <b><%= :IMAGES.t %>:</b>
-      <% if @project.images.any? %>
-        <%= @project.images.length %>
-        (<%= link_to(:SHOW.t, images_path(for_project: @project.id)) %>)
-      <% else %>
-        <%= :NONE.t %>
-      <% end %>
-      <br/>
-
-      <b><%= :SPECIES_LISTS.t %>:</b>
-      <% if @project.species_lists.any? %>
-        <%= @project.species_lists.length %>
-        (<%= link_to(:SHOW.t,
-                      species_lists_path(for_project: @project.id)) %>)
-      <% else %>
-        <%= :NONE.t %>
-      <% end %>
-      <br/>
-
-      <b><%= :show_project_drafts.t %>:</b>
-      <%= @drafts.any? ? @drafts.length : :NONE.t %><br/>
-      <div class="ml-3">
-        <% @drafts.each do |draft| %>
-          <%= link_with_query(draft.name&.display_name&.t,
-                              name_description_path(draft.id)) %>
-          (<%= user_link(draft.user) %>)<br/>
-        <% end %>
-      </div>
-
-    <% end %>
-  </div>
-</div><!--.row-->
+</p>
 
 <%= render(partial: "comments/comments_for_object",
            locals: { object: @project, controls: true, limit: nil }) %>
