@@ -97,15 +97,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     uncheck("observation_is_collection_location")
-    # fix for check not working on
-    # find(id: "observation_specimen", visible: false).click
-    # check("observation_specimen", allow_label_click: true)
-    # page.find("label[for='observation_specimen']").click
-    # binding.break
-    cb = page.first("label[for='observation_specimen']")
-    page.scroll_to(cb, align: :center)
-    binding.break
-    cb.click
+    check("observation_specimen")
 
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
@@ -137,6 +129,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # submit_observation_form_without_errors
     fill_in("observation_place_name", with: "Pasadena, Calif")
+    browser.keyboard.type(:tab)
     assert_selector(".auto_complete")
     browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
@@ -145,6 +138,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_alt", with: " 56 ft. ")
 
     fill_in("naming_name", with: "Agaricus campe")
+    assert_selector(".auto_complete")
     assert_selector(".auto_complete ul li", text: "Agaricus campestris")
     browser.keyboard.type(:down, :down, :tab) # down to second match + select
     assert_field("naming_name", with: "Agaricus campestris")
@@ -153,7 +147,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
     attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
-      find(".file-field").click
+      click_file_field(".file-field")
     end
 
     assert_selector(".added_image_wrapper")
@@ -184,7 +178,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Add a second image that's not geotagged.
     attach_file(Rails.root.join("test/images/geotagged.jpg")) do
-      find(".file-field").click
+      click_file_field(".file-field")
     end
 
     # We should now get the option to set obs GPS
@@ -203,6 +197,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Try removing it
+    binding.break
+    scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_link").click }
 
     # We should now get no option to set obs GPS

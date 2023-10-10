@@ -166,25 +166,34 @@ module CapybaraSessionExtensions
   def click_commit(session: self)
     button = session.first(:button, type: "submit")
     session.scroll_to(button, align: :center)
+    # sleep(1) # because scroll-behavior: smooth
     button.click
   end
 
-  def click_button(locator, *options, session: self)
-    button = session.find_button(locator, *options)
+  def click_button(locator, **options)
+    session = options[:session] || self
+
+    button = session.find_button(locator, **options)
     session.scroll_to(button, align: :center)
+    # sleep(1) # because scroll-behavior: smooth
     button.click
   end
 
-  def check(locator, *_options, session: self)
-    # input = session.find_field(locator, *options)
-    # session.scroll_to(input, align: :center)
-    # binding.break
+  def check(locator, **options)
+    session = options[:session] || self
     label = session.find("label[for='#{locator}']")
     session.scroll_to(label, align: :center)
-    # session.check(locator, *options)
+    # trigger(:click) stubborn elements that Capybara says are not clickable
+    # sleep(1) # because scroll-behavior: smooth
     label.click
   end
 
+  def click_file_field(locator, session: self)
+    label = session.find(locator)
+    session.scroll_to(label, align: :center)
+    # sleep(1) # because scroll-behavior: smooth
+    label.trigger(:click)
+  end
   # def string_value_is_number?(string)
   #   Float(string, exception: false)
   # end
