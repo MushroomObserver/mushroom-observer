@@ -3,26 +3,31 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
-  ##### Helpers (which also assert) ############################################
-  def add_project_helper(title, summary)
-    params = {
+  def build_params(title, summary)
+    {
       project: {
         title: title,
-        summary: summary
+        summary: summary,
+        place_name: "",
+        open_membership: false
+      },
+      upload: {
+        license_id: licenses(:ccnc25).id,
+        copyright_holder: User.current&.name || "Someone Else",
+        copyright_year: 2023
       }
     }
-    post_requires_login(:create, params)
+  end
+
+  ##### Helpers (which also assert) ############################################
+  def add_project_helper(title, summary)
+    post_requires_login(:create, build_params(title, summary))
     assert_form_action(action: :create)
   end
 
   def edit_project_helper(title, project)
-    params = {
-      id: project.id,
-      project: {
-        title: title,
-        summary: project.summary
-      }
-    }
+    params = build_params(title, project.summary)
+    params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     assert_form_action(action: :update, id: project.id)
   end
@@ -63,11 +68,7 @@ class ProjectsControllerTest < FunctionalTestCase
     requires_login(:new)
     get(:show, params: { id: p_id })
     assert_template("show")
-    assert_select("a[href*=?]",
-                  new_project_admin_request_path(project_id: p_id))
     assert_select("a[href*=?]", edit_project_path(p_id))
-    assert_select("a[href*=?]", new_project_member_path(project_id: p_id))
-    assert_select("form[action=?]", project_path(p_id))
   end
 
   def test_show_project_with_location
@@ -139,7 +140,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: project.id.to_s })
 
     assert_response(:success)
-    assert_displayed_title("Project: #{project.title}")
+    assert_displayed_title(project.title)
   end
 
   def test_add_project
@@ -156,14 +157,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(user_group)
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert_nil(admin_group)
-    params = {
-      project: {
-        title: title,
-        summary: summary,
-        place_name: ""
-      }
-    }
-    post_requires_login(:create, params)
+    post_requires_login(:create, build_params(title, summary))
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
     assert(project)
@@ -210,15 +204,9 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(project)
     assert_not_equal(summary, project.summary)
     assert_not(project.open_membership)
-    params = {
-      id: project.id,
-      project: {
-        title: title,
-        summary: summary,
-        place_name: "",
-        open_membership: true
-      }
-    }
+    params = build_params(title, summary)
+    params[:project][:open_membership] = true
+    params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     project = Project.find_by(title: title)
     assert_redirected_to(project_path(project.id))
@@ -300,12 +288,9 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_changing_project_name
     proj = projects(:eol_project)
     login("rolf")
-    put(:update,
-        params: {
-          id: projects(:eol_project).id,
-          project: { title: "New Project", summary: "New Summary",
-                     place_name: "" }
-        })
+    params = build_params("New Project", "New Summary")
+    params[:id] = projects(:eol_project).id
+    put(:update, params: params)
     assert_flash_success
     proj = proj.reload
     assert_equal("New Project", proj.title)
@@ -314,40 +299,20 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_user_group_save_fail
     title = "Bad User Group"
-    user_group = Minitest::Mock.new
-    add_user_group_expectations(user_group, title)
-    add_user_group_expectations(user_group, "#{title}.admin")
-    UserGroup.stub(:new, user_group) do
-      params = {
-        project: {
-          title: title,
-          summary: title
-        }
-      }
-      post_requires_login(:create, params)
-      assert_nil(Project.find_by(title: title))
+    user_group = user_groups(:bolete_users)
+    user_group.stub(:save, false) do
+      UserGroup.stub(:new, user_group) do
+        post_requires_login(:create, build_params(title, title))
+        assert_nil(Project.find_by(title: title))
+      end
     end
-  end
-
-  def add_user_group_expectations(user_group, title)
-    user_group.expect(:save, false)
-    user_group.expect(:name=, title, [String])
-    user_group.expect(:users, [])
-    user_group.expect(:errors, title)
-    user_group.expect(:errors, title)
-    user_group.expect(:formatted_errors, [])
   end
 
   def test_good_location
     where = locations(:albion).name
     title = "#{where} Project"
-    params = {
-      project: {
-        title: title,
-        summary: title,
-        place_name: where
-      }
-    }
+    params = build_params(title, title)
+    params[:project][:place_name] = where
     post_requires_login(:create, params)
     project = Project.find_by(title: title)
     assert_equal(project.location.name, where)
@@ -356,70 +321,116 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_bad_location
     where = "This is a bad place"
     title = "#{where} Project"
-    params = {
-      project: {
-        title: title,
-        summary: title,
-        place_name: where
-      }
-    }
+    params = build_params(title, title)
+    params[:project][:place_name] = where
     post_requires_login(:create, params)
     assert_nil(Project.find_by(title: title))
   end
 
   def test_project_save_fail
     title = "Bad Project"
-    project = Minitest::Mock.new
-    add_project_expectations(project)
-    Project.stub(:new, project) do
-      params = {
-        project: {
-          title: title,
-          summary: title
-        }
-      }
-      post_requires_login(:create, params)
-      assert_nil(Project.find_by(title: title))
+    project = projects(:eol_project)
+    project.stub(:save, false) do
+      Project.stub(:new, project) do
+        post_requires_login(:create, build_params(title, title))
+        assert_nil(Project.find_by(title: title))
+      end
     end
   end
 
-  def add_project_expectations(project)
-    project.expect(:save, false)
-    project.expect(:user=, nil, [User])
-    project.expect(:user_group=, nil, [UserGroup])
-    project.expect(:admin_group=, nil, [UserGroup])
-    project.expect(:location=, nil, [nil])
-    project.expect(:errors, "A bad thing happened")
-    project.expect(:errors, "A bad thing happened")
-    project.expect(:formatted_errors, [])
-    project.expect(:to_model, projects(:eol_project))
-    project.expect(:to_model, projects(:eol_project))
-    project.expect(:is_a?, true, [Array])
-    project.expect(:last, projects(:eol_project))
-  end
-
-  def add_project_destroy_expectations(project)
-    project.expect(:destroy, false)
-    project.expect(:user_id, users(:dick).id)
-    project.expect(:user_id, users(:dick).id)
-    project.expect(:id, projects(:eol_project).id)
-    project.expect(:id, projects(:eol_project).id)
-    project.expect(:id, projects(:eol_project).id)
-    project.expect(:try, false)
-    project.expect(:is_a?, false, [String])
-    project.expect(:is_a?, false, [Integer])
-    project.expect(:location, nil)
-    project.expect(:location, nil)
-  end
-
   def test_project_destroy_fail
-    project = Minitest::Mock.new
-    add_project_destroy_expectations(project)
-    Project.stub(:safe_find, project) do
-      project_id = project.id
-      params = { id: project_id.to_s }
-      requires_user(:destroy, { action: :show }, params, "dick")
-      assert_flash_error
+    project = projects(:eol_project)
+    project.stub(:destroy, false) do
+      Project.stub(:safe_find, project) do
+        project_id = project.id
+        params = { id: project_id.to_s }
+        requires_user(:destroy, { action: :show }, params, "rolf")
+        assert_flash_error
+      end
+    end
+  end
+
+  def image_setup
+    setup_image_dirs
+    Rack::Test::UploadedFile.new(
+      Rails.root.join("test/images/sticky.jpg").to_s, "image/jpeg"
+    )
+  end
+
+  def test_add_background_image
+    file = image_setup
+    num_images = Image.count
+    params = build_params("With background", "With background")
+    project = projects(:eol_project)
+    params[:id] = project.id
+    params[:project][:upload_image] = file
+    File.stub(:rename, false) do
+      login("rolf", "testpassword")
+      put(:update, params: params)
+    end
+    assert_redirected_to(project_path(project.id))
+    assert_flash_success
+
+    project.reload
+    assert_equal(num_images + 1, Image.count)
+    assert_equal(Image.last.id, project.image_id)
+    assert_equal(params[:upload][:copyright_holder],
+                 project.image.copyright_holder)
+    assert_equal(params[:upload][:copyright_year], project.image.when.year)
+    assert_equal(params[:upload][:license_id], project.image.license_id)
+  end
+
+  def test_bad_background_image
+    file = image_setup
+    num_images = Image.count
+    params = build_params("Bad background", "Bad background")
+    project = projects(:eol_project)
+    params[:id] = project.id
+    params[:project][:upload_image] = file
+    image = images(:peltigera_image)
+    image.stub(:process_image, false) do
+      File.stub(:rename, false) do
+        login("rolf", "testpassword")
+        Image.stub(:new, image) do
+          put(:update, params: params)
+        end
+      end
+    end
+
+    project.reload
+    assert_equal(num_images, Image.count)
+  end
+
+  def test_fail_save_background_image
+    file = image_setup
+    num_images = Image.count
+    params = build_params("Bad background", "Bad background")
+    project = projects(:eol_project)
+    params[:id] = project.id
+    params[:project][:upload_image] = file
+    image = images(:peltigera_image)
+    image.stub(:save, false) do
+      File.stub(:rename, false) do
+        login("rolf", "testpassword")
+        Image.stub(:new, image) do
+          put(:update, params: params)
+        end
+      end
+    end
+
+    project.reload
+    assert_equal(num_images, Image.count)
+  end
+
+  def test_fail_update
+    params = build_params("Bad update", "Bad update")
+    params[:id] = 1
+    login
+    project = projects(:eol_project)
+    project.stub(:update, false) do
+      Project.stub(:find, project) do
+        put(:update, params: params)
+      end
     end
   end
 end

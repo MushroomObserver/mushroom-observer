@@ -51,9 +51,11 @@ module Account
           upload_image: file,
           mailing_address: rolf.mailing_address
         },
-        copyright_holder: "Someone Else",
-        upload: { license_id: licenses(:ccnc25).id },
-        date: { copyright_year: "2003" }
+        upload: {
+          license_id: licenses(:ccnc25).id,
+          copyright_holder: "Someone Else",
+          copyright_year: "2003"
+        }
       }
       File.stub(:rename, false) do
         login("rolf", "testpassword")

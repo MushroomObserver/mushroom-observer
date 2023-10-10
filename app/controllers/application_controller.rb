@@ -1817,4 +1817,32 @@ class ApplicationController < ActionController::Base
   def permitted_image_args
     [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
   end
+
+  def upload_image(upload, copyright_holder, license_id, copyright_year)
+    image = Image.new(
+      image: upload,
+      user: @user,
+      when: Date.parse("#{copyright_year}0101"),
+      copyright_holder: copyright_holder,
+      license: License.safe_find(license_id)
+    )
+    deal_with_upload_errors_or_success(image)
+  end
+
+  def deal_with_upload_errors_or_success(image)
+    if !image.save
+      flash_object_errors(image)
+    elsif !image.process_image
+      name = image.original_name
+      name = "???" if name.empty?
+      flash_error(:runtime_profile_invalid_image.t(name: name))
+      flash_object_errors(image)
+    else
+      name = image.original_name
+      name = "##{image.id}" if name.empty?
+      flash_notice(:runtime_profile_uploaded_image.t(name: name))
+      return image
+    end
+    nil
+  end
 end

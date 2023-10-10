@@ -127,3 +127,20 @@ svg.placeholder {
   }
 }
 
+
+//
+// project title image
+//
+
+.image-title {
+  height: 300px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.image-title-text {
+  background: $text_color;
+  color: $body_bg;
+  padding: 0.5em;
+  margin-left: 18px;
+}
