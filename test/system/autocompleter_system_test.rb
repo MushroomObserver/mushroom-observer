@@ -21,6 +21,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
       # Name
       fill_in("search_name", with: "agaricus camp")
+      browser.keyboard.type(:tab)
+      assert_selector(".auto_complete") # wait
       assert_selector(".auto_complete ul li", text: "Agaricus campestras")
       assert_selector(".auto_complete ul li", text: "Agaricus campestris")
       assert_selector(".auto_complete ul li", text: "Agaricus campestros")
@@ -35,6 +37,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
       # User
       fill_in("search_user", with: "r")
+      sleep(1)
+      assert_selector(".auto_complete") # wait
       assert_selector(".auto_complete ul li", text: "Rolf Singer")
       assert_selector(".auto_complete ul li", text: "Roy Halling")
       assert_selector(".auto_complete ul li", text: "Roy Rogers")
@@ -43,6 +47,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
       # Location: Roy's location pref is scientific
       fill_in("search_location", with: "USA, Califo")
+      sleep(1)
+      assert_selector(".auto_complete") # wait
       assert_selector(".auto_complete ul li", count: 10)
       assert_selector(
         ".auto_complete ul li",
@@ -57,6 +63,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       # Region
       fill_in("content_filter_region", with: "USA, Calif")
       sleep(1)
+      assert_selector(".auto_complete") # wait
       assert_selector(".auto_complete ul li", count: 10)
       browser.keyboard.type(:down, :tab)
       assert_field("content_filter_region", with: "USA, California")
@@ -68,6 +75,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       # Clade
       fill_in("content_filter_clade", with: "Agari")
       sleep(1)
+      assert_selector(".auto_complete") # wait
       assert_selector(".auto_complete ul li")
       browser.keyboard.type(:down, :tab)
       assert_field("content_filter_clade", with: "Agaricaceae")
@@ -75,6 +83,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   end
 
   def test_autocompleter_in_naming_modal
+    browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
 
@@ -84,8 +93,11 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector("#modal_naming")
     assert_selector("#naming_form")
     fill_in("naming_name", with: "Peltige")
+    browser.keyboard.type(:tab)
+    sleep(1)
+    assert_selector(".auto_complete") # wait
     assert_selector(".auto_complete ul li")
-    send_keys(:down, :down, :tab)
+    browser.keyboard.type(:tab)
     assert_field("naming_name", with: "Peltigeraceae ")
     within("#naming_form") { click_commit }
     within("#namings_table") { assert_text("Peltigeraceae") }
