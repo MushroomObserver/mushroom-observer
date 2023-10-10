@@ -453,22 +453,13 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_user_group_save_fail
     title = "Bad User Group"
-    user_group = Minitest::Mock.new
-    add_user_group_expectations(user_group, title)
-    add_user_group_expectations(user_group, "#{title}.admin")
-    UserGroup.stub(:new, user_group) do
-      post_requires_login(:create, build_params(title, title))
-      assert_nil(Project.find_by(title: title))
+    user_group = user_groups(:bolete_users)
+    user_group.stub(:save, false) do
+      UserGroup.stub(:new, user_group) do
+        post_requires_login(:create, build_params(title, title))
+        assert_nil(Project.find_by(title: title))
+      end
     end
-  end
-
-  def add_user_group_expectations(user_group, title)
-    user_group.expect(:save, false)
-    user_group.expect(:name=, title, [String])
-    user_group.expect(:users, [])
-    user_group.expect(:errors, title)
-    user_group.expect(:errors, title)
-    user_group.expect(:formatted_errors, [])
   end
 
   def test_good_location
@@ -491,32 +482,14 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_project_save_fail
-    skip
     title = "Bad Project"
-    project = Minitest::Mock.new
-    add_project_expectations(project)
-    Project.stub(:new, project) do
-      post_requires_login(:create, build_params(title, title))
-      assert_nil(Project.find_by(title: title))
+    project = projects(:eol_project)
+    project.stub(:save, false) do
+      Project.stub(:new, project) do
+        post_requires_login(:create, build_params(title, title))
+        assert_nil(Project.find_by(title: title))
+      end
     end
-  end
-
-  def add_project_expectations(project)
-    project.expect(:save, false)
-    project.expect(:start_date=, nil, [nil])
-    project.expect(:end_date=, nil, [nil])
-    project.expect(:user=, nil, [User])
-    project.expect(:user_group=, nil, [UserGroup])
-    project.expect(:admin_group=, nil, [UserGroup])
-    project.expect(:location=, nil, [nil])
-    project.expect(:errors, "A bad thing happened")
-    project.expect(:errors, "A bad thing happened")
-    project.expect(:formatted_errors, [])
-    project.expect(:to_model, projects(:eol_project))
-    project.expect(:to_model, projects(:eol_project))
-    project.expect(:is_a?, true, [Array])
-    project.expect(:last, projects(:eol_project))
-    project.expect(:image, nil)
   end
 
   def add_project_destroy_expectations(project)
