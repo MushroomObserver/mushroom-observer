@@ -308,7 +308,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_select(
       "form:match('action', ?)",
       %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: 2 },
+      { count: observations.size },
       "Species List owner should get 1 Remove button per Observation"
     )
   end
