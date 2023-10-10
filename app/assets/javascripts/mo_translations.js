@@ -20,8 +20,8 @@ function MOTranslations(localizedText) {
     };
     debugger;
     // annoying, cannot attach to window.hidden_frame in FF!
-    const iframe = document.getElementById('hidden_frame');
-    iframe.addEventListener('load', iframe_load);
+    const $frame = document.getElementById('hidden_frame');
+    $frame.addEventListener('load', frame_load);
 
     $tag_links.forEach((element) => {
       element.onclick = function (event) {
@@ -75,9 +75,9 @@ function MOTranslations(localizedText) {
     }
 
     // Helpers and callbacks
-    function iframe_load() {
-      const tag = window.hidden_frame.tag;
-      const str = window.hidden_frame.str;
+    function frame_load() {
+      const tag = $frame.tag;
+      const str = $frame.str;
       if (tag != undefined) {
         // Make tag in left column gray because it's now been translated.
         // Want only untranslated tags to be bold black to stand out better.
@@ -122,13 +122,13 @@ function MOTranslations(localizedText) {
         debugger;
         fetch(url, {
           method: 'GET',
-          headers: {
-            'X-CSRF-Token': csrfToken,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'text/html',
-            'Accept': 'text/html'
-          },
-          credentials: 'same-origin'
+          // headers: {
+          //   'X-CSRF-Token': csrfToken,
+          //   'X-Requested-With': 'XMLHttpRequest',
+          //   'Content-Type': 'text/html',
+          //   'Accept': 'text/html'
+          // },
+          // credentials: 'same-origin'
         }).then((response) => {
           if (response.ok) {
             if (200 <= response.status && response.status <= 299) {
@@ -171,13 +171,13 @@ function MOTranslations(localizedText) {
       // });
       fetch('/ajax/old_translation/' + id, {
         method: 'GET',
-        headers: {
-          'X-CSRF-Token': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Content-Type': 'text/html',
-          'Accept': 'text/html'
-        },
-        credentials: 'same-origin'
+        // headers: {
+        //   'X-CSRF-Token': csrfToken,
+        //   'X-Requested-With': 'XMLHttpRequest',
+        //   'Content-Type': 'text/html',
+        //   'Accept': 'text/html'
+        // },
+        // credentials: 'same-origin'
       }).then((response) => {
         if (response.ok) {
           if (200 <= response.status && response.status <= 299) {
