@@ -97,11 +97,11 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     click_on("Propose")
     assert_selector("#modal_naming")
     assert_selector("#naming_form")
-    find_field("naming_name").trigger(:focus)
+    find_field("naming_name").click
     browser.keyboard.type("Peltige")
     assert_selector(".auto_complete") # wait
     assert_selector(".auto_complete ul li")
-    browser.keyboard.type(:tab)
+    browser.keyboard.type(:down, :down, :tab)
     assert_field("naming_name", with: "Peltigeraceae ")
     within("#naming_form") { click_commit }
     within("#namings_table") { assert_text("Peltigeraceae") }
