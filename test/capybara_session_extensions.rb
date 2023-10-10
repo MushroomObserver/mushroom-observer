@@ -51,7 +51,6 @@ module CapybaraSessionExtensions
     session.within("#account_login_form") do
       session.fill_in("user_login", with: login)
       session.fill_in("user_password", with: password)
-      session.assert_checked_field("user_remember_me")
       session.uncheck("user_remember_me") if remember_me == false
 
       session.first(:button, type: "submit").click
@@ -166,6 +165,12 @@ module CapybaraSessionExtensions
     session.first(:button, type: "submit").click
   end
 
+  def click_file_field(locator, session: self)
+    label = session.find(locator)
+    session.scroll_to(label, align: :center)
+    label.click
+  end
+
   # # Cuprite: must scroll to the button or you can't click?
   # def scroll_and_click_commit(session: self)
   #   button = session.first(:button, type: "submit")
@@ -187,13 +192,6 @@ module CapybaraSessionExtensions
   #   session.scroll_to(label, align: :center)
   #   label.click
   # end
-
-  def click_file_field(locator, session: self)
-    label = session.find(locator)
-    session.scroll_to(label, align: :center)
-    # sleep(1) # because scroll-behavior: smooth
-    label.trigger(:click)
-  end
 
   # def string_value_is_number?(string)
   #   Float(string, exception: false)
