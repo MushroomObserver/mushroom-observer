@@ -492,28 +492,15 @@ class ProjectsControllerTest < FunctionalTestCase
     end
   end
 
-  def add_project_destroy_expectations(project)
-    project.expect(:destroy, false)
-    project.expect(:user_id, users(:dick).id)
-    project.expect(:user_id, users(:dick).id)
-    project.expect(:id, projects(:eol_project).id)
-    project.expect(:id, projects(:eol_project).id)
-    project.expect(:id, projects(:eol_project).id)
-    project.expect(:try, false)
-    project.expect(:is_a?, false, [String])
-    project.expect(:is_a?, false, [Integer])
-    project.expect(:location, nil)
-    project.expect(:location, nil)
-  end
-
   def test_project_destroy_fail
-    project = Minitest::Mock.new
-    add_project_destroy_expectations(project)
-    Project.stub(:safe_find, project) do
-      project_id = project.id
-      params = { id: project_id.to_s }
-      requires_user(:destroy, { action: :show }, params, "dick")
-      assert_flash_error
+    project = projects(:eol_project)
+    project.stub(:destroy, false) do
+      Project.stub(:safe_find, project) do
+        project_id = project.id
+        params = { id: project_id.to_s }
+        requires_user(:destroy, { action: :show }, params, "rolf")
+        assert_flash_error
+      end
     end
   end
 
@@ -554,26 +541,18 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:eol_project)
     params[:id] = project.id
     params[:project][:upload_image] = file
-    image = Minitest::Mock.new
-    add_bad_image_expectations(image)
-    File.stub(:rename, false) do
-      login("rolf", "testpassword")
-      Image.stub(:new, image) do
-        put(:update, params: params)
+    image = images(:peltigera_image)
+    image.stub(:process_image, false) do
+      File.stub(:rename, false) do
+        login("rolf", "testpassword")
+        Image.stub(:new, image) do
+          put(:update, params: params)
+        end
       end
     end
 
     project.reload
     assert_equal(num_images, Image.count)
-  end
-
-  def add_bad_image_expectations(image)
-    image.expect(:save, true)
-    image.expect(:original_name, "Name")
-    image.expect(:errors, "A bad thing happened")
-    image.expect(:errors, "A bad thing happened")
-    image.expect(:formatted_errors, [])
-    image.expect(:process_image, false)
   end
 
   def test_fail_save_background_image
@@ -583,12 +562,13 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:eol_project)
     params[:id] = project.id
     params[:project][:upload_image] = file
-    image = Minitest::Mock.new
-    add_fail_save_image_expectations(image)
-    File.stub(:rename, false) do
-      login("rolf", "testpassword")
-      Image.stub(:new, image) do
-        put(:update, params: params)
+    image = images(:peltigera_image)
+    image.stub(:save, false) do
+      File.stub(:rename, false) do
+        login("rolf", "testpassword")
+        Image.stub(:new, image) do
+          put(:update, params: params)
+        end
       end
     end
 
@@ -596,10 +576,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(num_images, Image.count)
   end
 
-  def add_fail_save_image_expectations(image)
-    image.expect(:save, false)
-    image.expect(:errors, "A bad thing happened")
-    image.expect(:errors, "A bad thing happened")
-    image.expect(:formatted_errors, [])
+  def test_fail_update
+    params = build_params("Bad update", "Bad update")
+    params[:id] = 1
+    login
+    project = projects(:eol_project)
+    project.stub(:update, false) do
+      Project.stub(:find, project) do
+        put(:update, params: params)
+      end
+    end
   end
 end
