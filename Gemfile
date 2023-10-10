@@ -180,8 +180,8 @@ group :test do
   # Use capybara to simulate user-browser interaction
   gem("capybara", "~> 3.37", ">= 3.37.1")
 
-  # Use selenium to execute javascript in Capybara tests
-  gem("selenium-webdriver")
+  # Use cuprite to run the browser in Capybara tests
+  gem("cuprite")
 
   # Selenium recommends Database Cleaner for cleaning db between tests.
   # Maybe needed after JS db transactions, because they run in a separate thread

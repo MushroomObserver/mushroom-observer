@@ -46,11 +46,12 @@ module CapybaraSessionExtensions
             remember_me = true, session: self)
     login = login.login if login.is_a?(User) # get the right user field
     session.visit("/account/login/new")
+    session.assert_selector("body.login__new")
 
     session.within("#account_login_form") do
       session.fill_in("user_login", with: login)
       session.fill_in("user_password", with: password)
-      session.check("user_remember_me") if remember_me == true
+      session.uncheck("user_remember_me") if remember_me == false
 
       session.first(:button, type: "submit").click
     end
@@ -163,6 +164,34 @@ module CapybaraSessionExtensions
   def click_commit(session: self)
     session.first(:button, type: "submit").click
   end
+
+  def click_file_field(locator, session: self)
+    label = session.find(locator)
+    session.scroll_to(label, align: :center)
+    label.click
+  end
+
+  # # Cuprite: must scroll to the button or you can't click?
+  # def scroll_and_click_commit(session: self)
+  #   button = session.first(:button, type: "submit")
+  #   session.scroll_to(button, align: :center)
+  #   button.click
+  # end
+
+  # def scroll_and_click_button(locator, *options)
+  #   session = self
+
+  #   button = session.find_button(locator, *options)
+  #   session.scroll_to(button, align: :center)
+  #   button.click
+  # end
+
+  # def scroll_and_check(locator, **options)
+  #   session = options[:session] || self
+  #   label = session.find("label[for='#{locator}']")
+  #   session.scroll_to(label, align: :center)
+  #   label.click
+  # end
 
   # def string_value_is_number?(string)
   #   Float(string, exception: false)
