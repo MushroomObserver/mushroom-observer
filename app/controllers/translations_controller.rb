@@ -92,23 +92,24 @@ class TranslationsController < ApplicationController
                         end
   end
 
+  # tag is now a rails helper, do not use as a method here
   def build_record_map(lang, _tags)
     result = {}
     # (If we just get the strings for the given tags, then it doesn't update
     # lang.translation_strings's cache correctly, and we have it end up loading
     # all the strings later, anyway!)
     lang.translation_strings.each do |str|
-      result[str.tag] = str
+      result[str.ttag] = str
     end
     result
   end
 
   def update_translations(tags)
     any_changes = false
-    tags.each do |tag|
-      old_val = @strings[tag].to_s
+    tags.each do |ttag|
+      old_val = @strings[ttag].to_s
       new_val = begin
-                  params["tag_#{tag}"].to_s
+                  params["tag_#{ttag}"].to_s
                 rescue StandardError
                   ""
                 end
@@ -116,7 +117,7 @@ class TranslationsController < ApplicationController
       new_val = @lang.clean_string(new_val)
       str = @translated_records[tag]
       if !str
-        create_translation(tag, new_val)
+        create_translation(ttag, new_val)
         any_changes = true
       elsif old_val != new_val
         change_translation(str, new_val)
@@ -124,7 +125,7 @@ class TranslationsController < ApplicationController
       else
         touch_translation(str)
       end
-      @strings[tag] = new_val
+      @strings[ttag] = new_val
     end
     if any_changes
       @lang.update_localization_file
@@ -134,13 +135,13 @@ class TranslationsController < ApplicationController
     end
   end
 
-  def create_translation(tag, val)
-    str = @lang.translation_strings.create(tag: tag, text: val)
-    @translated_records[tag] = str
+  def create_translation(ttag, val)
+    str = @lang.translation_strings.create(tag: ttag, text: val)
+    @translated_records[ttag] = str
     str.update_localization
     return if @ajax
 
-    flash_notice(:edit_translations_created_at.t(tag: tag, str: val))
+    flash_notice(:edit_translations_created_at.t(tag: ttag, str: val))
   end
 
   def change_translation(str, val)
@@ -148,7 +149,7 @@ class TranslationsController < ApplicationController
     str.update_localization
     return if @ajax
 
-    flash_notice(:edit_translations_changed.t(tag: str.tag, str: val))
+    flash_notice(:edit_translations_changed.t(tag: str.ttag, str: val))
   end
 
   def touch_translation(str)
@@ -163,13 +164,13 @@ class TranslationsController < ApplicationController
   end
   helper_method :preview_string
 
-  def tags_to_edit(tag, strings)
+  def tags_to_edit(ttag, strings)
     tag_list = []
-    if tag.present?
-      [tag, "#{tag}s", tag.upcase, "#{tag}s".upcase].each do |t|
-        tag_list << t if strings.key?(t)
+    if ttag.present?
+      [ttag, "#{ttag}s", ttag.upcase, "#{ttag}s".upcase].each do |tt|
+        tag_list << tt if strings.key?(tt)
       end
-      tag_list = [tag] if tag_list.empty?
+      tag_list = [ttag] if tag_list.empty?
     end
     tag_list
   end
@@ -185,8 +186,8 @@ class TranslationsController < ApplicationController
 
   def tags_to_show(for_page, strings)
     hash = {}
-    (tags_used_on_page(for_page) || strings.keys).each do |tag|
-      primary = primary_tag(tag, strings)
+    (tags_used_on_page(for_page) || strings.keys).each do |ttag|
+      primary = primary_tag(ttag, strings)
       hash[primary] = true
     end
     hash
@@ -204,8 +205,8 @@ class TranslationsController < ApplicationController
       tag3.upcase,
       tag1,
       tag2
-    ].each do |tag|
-      return tag if strings[tag]
+    ].each do |ttag|
+      return ttag if strings[ttag]
     end
     tag3
   end
@@ -238,8 +239,8 @@ class TranslationsController < ApplicationController
     @index << TranslationsUIMinorHeader.new(
       "These tags are missing from the export files."
     )
-    unlisted_tags.sort.each do |tag|
-      @index << TranslationsUITagField.new(tag)
+    unlisted_tags.sort.each do |ttag|
+      @index << TranslationsUITagField.new(ttag)
     end
   end
 
@@ -256,9 +257,9 @@ class TranslationsController < ApplicationController
 
   def process_template_line(line)
     if line =~ /^\s*['"]?(\w+)['"]?:\s*/
-      tag = Regexp.last_match(1)
+      ttag = Regexp.last_match(1)
       str = Regexp.last_match.post_match
-      process_tag_line(tag)
+      process_tag_line(ttag)
       @in_tag = true if str.start_with?(">")
     elsif @in_tag
       @in_tag = false unless /\S/.match?(line)
@@ -269,30 +270,30 @@ class TranslationsController < ApplicationController
     end
   end
 
-  def process_tag_line(tag)
+  def process_tag_line(ttag)
     @expecting_minor_head = false
-    if @tags[tag]
+    if @tags[ttag]
       if @on_pages
         @do_section = true
       else
         add_headers
         @index << TranslationsUIComment.new(*@comments) if @comments.any?
-        @index << TranslationsUITagField.new(tag)
+        @index << TranslationsUITagField.new(ttag)
       end
     end
     if @on_pages
       @section << TranslationsUIComment.new(*@comments) if @comments.any?
-      if @comments.any? || !secondary_tag?(tag)
-        @section << TranslationsUITagField.new(tag)
+      if @comments.any? || !secondary_tag?(ttag)
+        @section << TranslationsUITagField.new(ttag)
       end
     end
-    @tags_used[tag] = true
+    @tags_used[ttag] = true
     @comments.clear
   end
 
-  def secondary_tag?(tag)
-    @tags_used[tag.sub(/s$/i, "")] ||
-      @tags_used[tag.downcase]
+  def secondary_tag?(ttag)
+    @tags_used[ttag.sub(/s$/i, "")] ||
+      @tags_used[ttag.downcase]
   end
 
   def process_blank_line
@@ -347,6 +348,6 @@ class TranslationsController < ApplicationController
   end
 
   class TranslationsUITagField < TranslationsUIString
-    alias tag string
+    alias ttag string
   end
 end

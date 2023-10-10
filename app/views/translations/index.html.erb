@@ -37,10 +37,10 @@
             tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
                   class: "comment")
           when /TagField/
-            tag = item.tag
-            str = preview_string(@strings[tag])
-            official_record = @official_records[tag]
-            translated_record = @translated_records[tag]
+            ttag = item.ttag
+            str = preview_string(@strings[ttag])
+            official_record = @official_records[ttag]
+            translated_record = @translated_records[ttag]
             up_to_date = translated_record &&
               translated_record.updated_at >=
               official_record.updated_at - 1.second
@@ -51,10 +51,10 @@
               up_to_date = true
             end
             span_class = up_to_date ? "faint" : "font-weight-bold bright"
-            str = tag.span(h(str), class: span_class, id: "str_#{tag}")
-            label = tag.span(h(tag) + ":", class: "tag")
-            label = link_to(label, { page: @page, tag: tag },
-                                   data: { tag: tag, role: "show_tag" })
+            str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
+            label = tag.span(h(ttag) + ":", class: "tag")
+            label = link_to(label, { page: @page, tag: ttag },
+                                   data: { tag: ttag, role: "show_tag" })
             tag.p(label + " " + str, class: "tag_field")
           else
             raise "Unexpected form item type: #{line.class.name}"

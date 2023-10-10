@@ -11,9 +11,9 @@
     <% unless @lang.official %>
       <h3 class="font-weight-bold"><%= Language.official.name %>:</h3>
 
-      <% @edit_tags.each do |tag| %>
-        <% if record = @official_records[tag] %>
-          <span class="underline"><%= h(tag) %>:</span>
+      <% @edit_tags.each do |ttag| %>
+        <% if record = @official_records[ttag] %>
+          <span class="underline"><%= h(ttag) %>:</span>
           <p><%=
             str = record.text.gsub(/\\n/, "\n")
             h(str).gsub("\n", "<br/>\n")
@@ -29,10 +29,10 @@
 
     <h3 class="font-weight-bold"><%= @lang.name %>:</h3>
 
-    <% @edit_tags.each do |tag|
+    <% @edit_tags.each do |ttag|
 
       # Estimate number of rows needed for text area.
-      str = @strings[tag].to_s.gsub(/\\n/, "\n")
+      str = @strings[ttag].to_s.gsub(/\\n/, "\n")
       rows = 1
       str.each_line.each do |line|
         rows += (line.length / 80).truncate + 1
@@ -41,30 +41,32 @@
 
       # Add help notes for plurals and uppercase entries.
       notes = []
-      if tag.match(/s$/i) && @edit_tags.include?(tag.sub(/.$/,""))
+      if ttag.match(/s$/i) && @edit_tags.include?(ttag.sub(/.$/,""))
         notes << :edit_translations_plural.t
-      elsif @edit_tags.include?(tag+"s") || @edit_tags.include?(tag+"S")
+      elsif @edit_tags.include?(ttag+"s") || @edit_tags.include?(ttag+"S")
         notes << :edit_translations_singular.t
       end
-      if tag == tag.upcase && @edit_tags.include?(tag.downcase)
+      if ttag == ttag.upcase && @edit_tags.include?(ttag.downcase)
         notes << :edit_translations_uppercase.t
-      elsif tag == tag.downcase && @edit_tags.include?(tag.upcase)
+      elsif ttag == ttag.downcase && @edit_tags.include?(ttag.upcase)
         notes << :edit_translations_lowercase.t
       end %>
 
       <div class="form-group">
-        <%= f.label("tag_#{tag}", tag) %>
+        <%= f.label("tag_#{ttag}", ttag) %>
         <%= tag.span("(" + notes.safe_join(", ") + ")") if notes.any? %><br/>
-        <%= f.text_area("tag_#{tag}", str, rows: rows,
+        <%= f.text_area("tag_#{ttag}", str, rows: rows,
                         class: "form-control pb-2") %>
       </div>
 
     <% end %>
 
     <div class="center-text">
-      <%= submit_button(form: f, text: :SAVE.l, id: :save_button, class: "btn btn-default pl-4") %>
-      <%= submit_button(form: f, text: :CANCEL.l, id: :cancel_button, class: "btn btn-default pl-4",
-                    type: "cancel") %>
+      <%= submit_button(form: f, text: :SAVE.l, id: :save_button,
+                        class: "btn btn-default pl-4") %>
+      <%= submit_button(form: f, text: :CANCEL.l, id: :cancel_button,
+                        class: "btn btn-default pl-4",
+                        type: "cancel") %>
       <%= button_tag(:RELOAD.l, id: :reload_button, type: "button",
                      class: "btn btn-default pl-4", data: { tag: @tag }) %>
       <%= select_tag(:locale,
@@ -79,8 +81,8 @@
     done_header = false
     user_logins = { @user.id => @user.login }
 
-    @edit_tags.each do |tag|
-      if record = @translated_records[tag]
+    @edit_tags.each do |ttag|
+      if record = @translated_records[ttag]
         user_logins[record.user_id] ||= record.user.login rescue nil
         last_text = record.text
         versions_to_show = []
@@ -95,11 +97,13 @@
 
           if !done_header %>
             <hr class="pb-1 pt-3"/>
-            <h3 class="pb-2"><b><%= :edit_translations_old_versions.t %>:</b></h3>
+            <h3 class="pb-2">
+              <b><%= :edit_translations_old_versions.t %>:</b>
+            </h3>
             <% done_header = true %>
           <% end %>
 
-          <span class="underline"><%= h(tag) %>:</span><br/>
+          <span class="underline"><%= h(ttag) %>:</span><br/>
           <table class="table-striped old_versions pb-1">
             <% versions_to_show.each do |version| %>
               <tr>
