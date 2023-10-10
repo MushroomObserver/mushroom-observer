@@ -333,29 +333,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_for_create_location
     assert_selector("body.observations__show")
 
-    # sleep(5)
-    # binding.break
-    # erroring on image src="/remote_images/960/1062212457.jpg”
-    # https://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails
-    # 1) Put your file to be uploaded in the test in your
-    # fixtures/files subdirectory for testing.
-
-    # 2) In your unit test you can get your testing file by
-    # calling fixture_file_upload('path','mime-browser.keyboard.type'). e.g.:
-
-    # `bulk_json = fixture_file_upload(
-    #   'files/bulk_bookmark.json','application/json'
-    # )`
-
-    # 3) call the post method to hit the controller action you want, passing
-    # the object returned by fixture_file_upload as the parameter for the
-    # upload. e.g.:
-
-    # post :bookmark, params: { bulkfile: bulk_json }
-
-    # file_fixture_path
-    # fixture_file_upload
-
     # https://gorails.com/episodes/rails-system-testing-file-uploads
     #
     # attach_file "user[avatar]", file_fixture("avatar.jpg")
@@ -411,6 +388,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       select("15", from: "good_image_#{img_id}_when_3i")
       fill_in("good_image_#{img_id}_notes", with: "New notes for image")
     end
+    sleep(1)
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -468,9 +446,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def assert_new_observation_has_correct_data(expected_values)
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
-    # puts(new_obs.created_at)
-    # puts(new_obs.updated_at)
-    # puts(1.minute.ago)
 
     assert(new_obs.created_at > 1.minute.ago)
     assert(new_obs.updated_at > 1.minute.ago)

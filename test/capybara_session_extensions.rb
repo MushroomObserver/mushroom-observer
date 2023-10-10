@@ -162,31 +162,31 @@ module CapybaraSessionExtensions
   end
 
   # Many forms have more than one submit button
-  # Cuprite: must scroll to the button or you can't click
   def click_commit(session: self)
-    button = session.first(:button, type: "submit")
-    session.scroll_to(button, align: :center)
-    # sleep(1) # because scroll-behavior: smooth
-    button.click
+    session.first(:button, type: "submit").click
   end
 
-  def click_button(locator, *options)
-    session = self
+  # # Cuprite: must scroll to the button or you can't click?
+  # def scroll_and_click_commit(session: self)
+  #   button = session.first(:button, type: "submit")
+  #   session.scroll_to(button, align: :center)
+  #   button.click
+  # end
 
-    button = session.find_button(locator, *options)
-    session.scroll_to(button, align: :center)
-    # sleep(1) # because scroll-behavior: smooth
-    button.click
-  end
+  # def scroll_and_click_button(locator, *options)
+  #   session = self
 
-  def check(locator, **options)
-    session = options[:session] || self
-    label = session.find("label[for='#{locator}']")
-    session.scroll_to(label, align: :center)
-    # trigger(:click) stubborn elements that Capybara says are not clickable
-    # sleep(1) # because scroll-behavior: smooth
-    label.click
-  end
+  #   button = session.find_button(locator, *options)
+  #   session.scroll_to(button, align: :center)
+  #   button.click
+  # end
+
+  # def scroll_and_check(locator, **options)
+  #   session = options[:session] || self
+  #   label = session.find("label[for='#{locator}']")
+  #   session.scroll_to(label, align: :center)
+  #   label.click
+  # end
 
   def click_file_field(locator, session: self)
     label = session.find(locator)
