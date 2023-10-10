@@ -10,7 +10,7 @@ class TranslationsController < ApplicationController
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     @show_tags = tags_to_show(@for_page, @strings)
-    build_record_maps(@lang, @show_tags.keys + @edit_tags)
+    build_record_maps(@lang)
     @index = build_index(@lang, @show_tags)
   rescue StandardError => e
     raise(e) if Rails.env.test? && @lang
@@ -30,7 +30,7 @@ class TranslationsController < ApplicationController
     @tag = params[:tag]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    build_record_maps(@lang, @edit_tags)
+    build_record_maps(@lang)
     render(partial: "translations/form")
   rescue StandardError => e
     msg = error_message(e).join("\n")
@@ -44,7 +44,7 @@ class TranslationsController < ApplicationController
     @tag = params[:commit] == :CANCEL.l ? nil : params[:tag]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
-    build_record_maps(@lang, @edit_tags)
+    build_record_maps(@lang)
     update_translations(@edit_tags) if params[:commit] == :SAVE.l
     render(partial: "translations/ajax_post")
   rescue StandardError => e
@@ -83,23 +83,22 @@ class TranslationsController < ApplicationController
     raise(:edit_translations_reviewer_required.t) if lang.official && !reviewer?
   end
 
-  def build_record_maps(lang, tags)
-    @translated_records = build_record_map(lang, tags)
+  def build_record_maps(lang)
+    @translated_records = build_record_map(lang)
     @official_records = if lang.official
                           @translated_records
                         else
-                          build_record_map(Language.official, tags)
+                          build_record_map(Language.official)
                         end
   end
 
-  # tag is now a rails helper, do not use as a method here
-  def build_record_map(lang, _tags)
+  def build_record_map(lang)
     result = {}
     # (If we just get the strings for the given tags, then it doesn't update
     # lang.translation_strings's cache correctly, and we have it end up loading
     # all the strings later, anyway!)
     lang.translation_strings.each do |str|
-      result[str.ttag] = str
+      result[str.tag] = str
     end
     result
   end
