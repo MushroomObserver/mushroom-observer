@@ -1,138 +1,132 @@
-<%= form_with({ action: :update, for_page: @for_page },
-              id: "translation_form") do |f| %>
+<%= form_with(url:{ action: :update, for_page: @for_page },
+              id: "translation_form", method: :patch, local: false) do |f| %>
 
-  <div id="translation_fields">
+  <%= f.hidden_field(:tag, value: @tag) %>
 
-    <%= f.hidden_field(:tag, @tag) %>
+  <!-- Show "official" text at top -->
+  <!-- --------------------------- -->
 
-    <!-- Show "official" text at top -->
-    <!-- --------------------------- -->
+  <% unless @lang.official %>
+    <h3 class="font-weight-bold"><%= Language.official.name %>:</h3>
 
-    <% unless @lang.official %>
-      <h3 class="font-weight-bold"><%= Language.official.name %>:</h3>
-
-      <% @edit_tags.each do |ttag| %>
-        <% if record = @official_records[ttag] %>
-          <span class="underline"><%= h(ttag) %>:</span>
-          <p><%=
-            str = record.text.gsub(/\\n/, "\n")
-            h(str).gsub("\n", "<br/>\n")
-          %></p>
-        <% end %>
-      <% end %>
-
-      <hr class="pb-1 pt-3"/>
-    <% end %>
-
-    <!-- Show form for this language's translations -->
-    <!-- ------------------------------------------ -->
-
-    <h3 class="font-weight-bold"><%= @lang.name %>:</h3>
-
-    <% @edit_tags.each do |ttag|
-
-      # Estimate number of rows needed for text area.
-      str = @strings[ttag].to_s.gsub(/\\n/, "\n")
-      rows = 1
-      str.each_line.each do |line|
-        rows += (line.length / 80).truncate + 1
-      end
-      rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
-
-      # Add help notes for plurals and uppercase entries.
-      notes = []
-      if ttag.match(/s$/i) && @edit_tags.include?(ttag.sub(/.$/,""))
-        notes << :edit_translations_plural.t
-      elsif @edit_tags.include?(ttag+"s") || @edit_tags.include?(ttag+"S")
-        notes << :edit_translations_singular.t
-      end
-      if ttag == ttag.upcase && @edit_tags.include?(ttag.downcase)
-        notes << :edit_translations_uppercase.t
-      elsif ttag == ttag.downcase && @edit_tags.include?(ttag.upcase)
-        notes << :edit_translations_lowercase.t
-      end %>
-
-      <div class="form-group">
-        <%= f.label("tag_#{ttag}", ttag) %>
-        <%= tag.span("(" + notes.safe_join(", ") + ")") if notes.any? %><br/>
-        <%= f.text_area("tag_#{ttag}", str, rows: rows,
-                        class: "form-control pb-2") %>
-      </div>
-
-    <% end %>
-
-    <div class="center-text">
-      <%= submit_button(form: f, text: :SAVE.l, id: :save_button,
-                        class: "btn btn-default pl-4") %>
-      <%= submit_button(form: f, text: :CANCEL.l, id: :cancel_button,
-                        class: "btn btn-default pl-4",
-                        type: "cancel") %>
-      <%= button_tag(:RELOAD.l, id: :reload_button, type: "button",
-                     class: "btn btn-default pl-4", data: { tag: @tag }) %>
-      <%= select_tag(:locale,
-                     options_for_select(Language.menu_options, @lang.locale),
-                     class: "pl-4", data: { tag: @tag }) %>
-    </div>
-
-    <!-- Show past versions of translations -->
-    <!-- ---------------------------------- -->
-
-    <%
-    done_header = false
-    user_logins = { @user.id => @user.login }
-
-    @edit_tags.each do |ttag|
-      if record = @translated_records[ttag]
-        user_logins[record.user_id] ||= record.user.login rescue nil
-        last_text = record.text
-        versions_to_show = []
-        record.versions.reverse.each do |version|
-          if version.text != last_text
-            versions_to_show << version
-            last_text = version.text
-          end
-        end
-
-        if versions_to_show.any?
-
-          if !done_header %>
-            <hr class="pb-1 pt-3"/>
-            <h3 class="pb-2">
-              <b><%= :edit_translations_old_versions.t %>:</b>
-            </h3>
-            <% done_header = true %>
-          <% end %>
-
-          <span class="underline"><%= h(ttag) %>:</span><br/>
-          <table class="table-striped old_versions pb-1">
-            <% versions_to_show.each do |version| %>
-              <tr>
-                <td>
-                  <%=
-                    user_id = version.user_id
-                    login = user_logins[user_id] ||= User.find(user_id).login rescue ""
-                    login.blank? ? "--" : user_link(user_id, login)
-                  %>
-                </td>
-                <td>
-                  <%= version.updated_at.web_date %>
-                </td>
-                <td>
-                  <%= h(str = preview_string(version.text, 80)) %>
-                  <%= if str.length > 80
-                    label = "[" + :edit_translations_full_text.t + "]"
-                    link_to(label, ajax_old_translation_path(id: version.id),
-                            data:{ role: "show_old_version", id: version.id })
-                  end %>
-                </td>
-              </tr>
-            <% end %>
-          </table>
-
-        <% end %>
+    <% @edit_tags.each do |ttag| %>
+      <% if record = @official_records[ttag] %>
+        <span class="underline"><%= h(ttag) %>:</span>
+        <p><%=
+          str = record.text.gsub(/\\n/, "\n")
+          h(str).gsub("\n", "<br/>\n")
+        %></p>
       <% end %>
     <% end %>
 
+    <hr class="pb-1 pt-3"/>
+  <% end %>
+
+  <!-- Show form for this language's translations -->
+  <!-- ------------------------------------------ -->
+
+  <h3 class="font-weight-bold mt-0"><%= @lang.name %>:</h3>
+
+  <% @edit_tags.each do |ttag|
+
+    # Estimate number of rows needed for text area.
+    str = @strings[ttag].to_s.gsub(/\\n/, "\n")
+    rows = 1
+    str.each_line.each do |line|
+      rows += (line.length / 80).truncate + 1
+    end
+    rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
+
+    # Add help notes for plurals and uppercase entries.
+    notes = []
+    if ttag.match(/s$/i) && @edit_tags.include?(ttag.sub(/.$/,""))
+      notes << :edit_translations_plural.t
+    elsif (@edit_tags & [ttag+"s", ttag+"S"]).any? # like multi-include?
+      notes << :edit_translations_singular.t
+    end
+    if ttag == ttag.upcase && @edit_tags.include?(ttag.downcase)
+      notes << :edit_translations_uppercase.t
+    elsif ttag == ttag.downcase && @edit_tags.include?(ttag.upcase)
+      notes << :edit_translations_lowercase.t
+    end %>
+
+    <%=
+    between = notes.any? ? tag.span("(" + notes.safe_join(", ") + ")") : ""
+    text_area_with_label(form: f, field: "tag_#{ttag}", label: ttag,
+                              between: between, value: str, rows: rows) %>
+
+  <% end %>
+
+  <div class="form-group">
+    <%= button_tag(:SAVE.l, type: :submit,
+                    id: :save_button, class: "btn btn-default") %>
+    <%= button_tag(:CANCEL.l, type: :cancel,
+                    id: :cancel_button, class: "btn btn-default") %>
+    <%= button_tag(:RELOAD.l, id: :reload_button, type: :button,
+                    class: "btn btn-default", data: { tag: @tag }) %>
   </div>
+
+  <%= select_tag(:locale,
+                  options_for_select(Language.menu_options, @lang.locale),
+                  class: "form-control", data: { tag: @tag }) %>
+
+  <!-- Show past versions of translations -->
+  <!-- ---------------------------------- -->
+
+  <%
+  done_header = false
+  user_logins = { @user.id => @user.login }
+
+  @edit_tags.each do |ttag|
+    if record = @translated_records[ttag]
+      user_logins[record.user_id] ||= record.user.login rescue nil
+      last_text = record.text
+      versions_to_show = []
+      record.versions.reverse.each do |version|
+        if version.text != last_text
+          versions_to_show << version
+          last_text = version.text
+        end
+      end
+
+      if versions_to_show.any?
+
+        if !done_header %>
+          <hr class="pb-1 pt-3"/>
+          <h3 class="pb-2">
+            <b><%= :edit_translations_old_versions.t %>:</b>
+          </h3>
+          <% done_header = true %>
+        <% end %>
+
+        <span class="underline"><%= h(ttag) %>:</span><br/>
+        <table class="table-striped old_versions pb-1">
+          <% versions_to_show.each do |version| %>
+            <tr>
+              <td>
+                <%=
+                  user_id = version.user_id
+                  login = user_logins[user_id] ||= User.find(user_id).login rescue ""
+                  login.blank? ? "--" : user_link(user_id, login)
+                %>
+              </td>
+              <td>
+                <%= version.updated_at.web_date %>
+              </td>
+              <td>
+                <%= h(str = preview_string(version.text, 80)) %>
+                <%= if str.length > 80
+                  label = "[" + :edit_translations_full_text.t + "]"
+                  link_to(label, ajax_old_translation_path(id: version.id),
+                          data:{ role: "show_old_version", id: version.id })
+                end %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+
+      <% end %>
+    <% end %>
+  <% end %>
 
 <% end %>

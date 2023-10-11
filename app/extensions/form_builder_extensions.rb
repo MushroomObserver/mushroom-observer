@@ -13,7 +13,7 @@
 ################################################################################
 
 class ActionView::Helpers::FormBuilder
-  def hidden_field(method, options = {})
-    @template.hidden_field(@object_name, method, options.merge(object: @object))
-  end
+  # def hidden_field(method, options = {})
+  #   @template.hidden_field(@object_name, method, options.merge(object: @object))
+  # end
 end

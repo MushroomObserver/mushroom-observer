@@ -27,7 +27,7 @@ class TranslationsController < ApplicationController
   def edit
     @lang = set_language_and_authorize_user
     @ajax = true
-    @tag = params[:tag]
+    @tag = params[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
@@ -41,7 +41,7 @@ class TranslationsController < ApplicationController
   def update
     @lang = set_language_and_authorize_user
     @ajax = true
-    @tag = params[:commit] == :CANCEL.l ? nil : params[:tag]
+    @tag = params[:commit] == :CANCEL.l ? nil : params[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
@@ -212,6 +212,7 @@ class TranslationsController < ApplicationController
 
   # ----------------------------
   #  :section: Translation index
+  #  Giant helper method
   # ----------------------------
 
   def build_index(lang, tags, file_handle = nil)
