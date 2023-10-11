@@ -76,11 +76,11 @@ function MOTranslations(localizedText) {
       }
     });
 
-    $form.submit(function () {
-      CHANGED = false;
-      show_whirly(SAVING_STRING);
-      disableCommitButtons(true);
-    });
+    // $form.submit(function () {
+    //   CHANGED = false;
+    //   show_whirly(SAVING_STRING);
+    //   disableCommitButtons(true);
+    // });
   }
 
   // RESULTS
@@ -102,11 +102,6 @@ function MOTranslations(localizedText) {
       disableCommitButtons(false);
     }
     hide_whirly();
-  }
-
-  function formChanged() {
-    CHANGED = true;
-    disableCommitButtons(false);
   }
 
   // const csrfToken = document.querySelector("[name='csrf-token']").content;
@@ -169,12 +164,18 @@ function MOTranslations(localizedText) {
     });
   }
 
+  function formChanged() {
+    console.log("formChanged")
+    CHANGED = true;
+    disableCommitButtons(false);
+  }
+
   function disableCommitButtons(disabled) {
     const $save_button = document.getElementById('save_button'),
       $cancel_button = document.getElementById('cancel_button');
 
-    $save_button.setAttribute('disabled', disabled);
-    $cancel_button.setAttribute('disabled', !disabled);
+    $save_button.disabled = disabled;
+    $cancel_button.disabled = !disabled;
   }
 
   function show_whirly(text) {
