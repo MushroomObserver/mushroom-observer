@@ -52,11 +52,7 @@ module GlossaryTerms
       assert_objs_equal(image, glossary_term.thumb_image)
     end
 
-    # We need coverage for what happens if the attach action fails.
-    # This "stubs" the model to return false on the model method
-    # that adds the image to the g_t, so we can check the flash
     def test_reuse_image_for_glossary_term_add_image_fails
-      GlossaryTerm.any_instance.stubs(:add_image).returns(false)
       glossary_term = glossary_terms(:convex_glossary_term)
       image = images(:commercial_inquiry_image)
       assert_empty(glossary_term.images)
@@ -68,7 +64,13 @@ module GlossaryTerms
       login("mary")
       get(:reuse, params: { id: glossary_term.id.to_s })
       assert_form_action(action: :attach, id: glossary_term.id)
-      post(:attach, params: params)
+
+      # force glossary_term.add_image to fail
+      glossary_term.stub(:save, false) do
+        GlossaryTerm.stub(:safe_find, glossary_term) do
+          post(:attach, params: params)
+        end
+      end
       assert_flash_error
     end
 
