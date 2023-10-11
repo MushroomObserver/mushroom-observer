@@ -115,34 +115,10 @@ function MOTranslations(localizedText) {
     LOCALE = locale;
     if (!CHANGED || confirm(CONFIRM_STRING)) {
       show_whirly(LOADING_STRING);
-      // jQuery.ajax('/translation/edit_translations_ajax_get', {
-      //   data: { locale: locale, tag: tag, authenticity_token: csrf_token() },
-      //   dataType: 'text',
-      //   async: true,
-      //   error: function (response) {
-      //     hide_whirly();
-      //     alert(response.responseText);
-      //   },
-      //   success: function (html) {
-      //     hide_whirly();
-      //     $form_div.html(html);
-      //     CHANGED = false;
-      //     LOADED = true;
-      //   }
-      // });
       const url = '/translations/' + tag + '/edit'
         + '?locale=' + locale;
       debugger;
-      fetch(url, {
-        method: 'GET',
-        // headers: {
-        //   'X-CSRF-Token': csrfToken,
-        //   'X-Requested-With': 'XMLHttpRequest',
-        //   'Content-Type': 'text/html',
-        //   'Accept': 'text/html'
-        // },
-        // credentials: 'same-origin'
-      }).then((response) => {
+      fetch(url).then((response) => {
         if (response.ok) {
           if (200 <= response.status && response.status <= 299) {
             response.text().then((html) => {
@@ -174,25 +150,7 @@ function MOTranslations(localizedText) {
   // AJAX FETCH PREVIOUS VERSIONS
   function showOldVersion(id) {
     show_whirly(LOADING_STRING);
-    // jQuery.ajax('/ajax/old_translation/' + id, {
-    //   data: { authenticity_token: csrf_token() },
-    //   dataType: 'text',
-    //   async: true,
-    //   success: function (text) {
-    //     hide_whirly();
-    //     alert(text);
-    //   }
-    // });
-    fetch('/ajax/old_translation/' + id, {
-      method: 'GET',
-      // headers: {
-      //   'X-CSRF-Token': csrfToken,
-      //   'X-Requested-With': 'XMLHttpRequest',
-      //   'Content-Type': 'text/html',
-      //   'Accept': 'text/html'
-      // },
-      // credentials: 'same-origin'
-    }).then((response) => {
+    fetch('/ajax/old_translation/' + id).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
           response.text().then((html) => {
