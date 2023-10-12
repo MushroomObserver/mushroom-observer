@@ -40,7 +40,6 @@ class TranslationsController < ApplicationController
 
   # Only accessed by ajax from the index
   def update
-    binding.break
     @lang = set_language_and_authorize_user
     @ajax = true
     @tag = params[:commit] == :CANCEL.l ? nil : params[:id]
@@ -54,7 +53,9 @@ class TranslationsController < ApplicationController
       tag: @tag,
       str: preview_string(@translated_records[@tag].text)
     }
-    render(json: json)
+    respond_to do |format|
+      format.json { render(json: json) }
+    end
   rescue StandardError => e
     @error = error_message(e).join("\n")
     render(json: { error: @error })

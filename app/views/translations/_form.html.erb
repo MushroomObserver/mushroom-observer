@@ -1,5 +1,5 @@
 <%= form_with(url:{ action: :update, for_page: @for_page },
-              id: "translation_form", method: :patch, local: false) do |f| %>
+              id: "translation_form", method: :patch, local: true) do |f| %>
 
   <%= f.hidden_field(:tag, value: @tag) %>
 

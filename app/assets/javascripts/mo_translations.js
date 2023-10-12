@@ -77,8 +77,8 @@ function MOTranslations(localizedText) {
     });
 
     $form.onsubmit = (event) => {
-      debugger
       event.preventDefault();
+      event.stopPropagation();
       CHANGED = false;
       show_whirly(SAVING_STRING);
       disableCommitButtons(true);
@@ -98,7 +98,7 @@ function MOTranslations(localizedText) {
           if (200 <= response.status && response.status <= 299) {
             response.text().then((html) => {
               // debugger;
-              console.log("html: " + html);
+              // console.log("html: " + html);
               hide_whirly();
               $translation_ui.innerHTML = html;
               CHANGED = false;
@@ -128,18 +128,19 @@ function MOTranslations(localizedText) {
 
   // SUBMIT FORM - this is submitting twice
   function submitForm(form) {
-    const formData = new FormData(form),
-      url = form.action;
+    const url = form.action,
+      formData = new FormData(form),
+      plainFormData = Object.fromEntries(formData.entries());
 
     fetch(url, {
       method: 'PATCH',
       headers: {
         'X-CSRF-Token': getCSRFToken(),
-        'X-Requested-With': 'XMLHttpRequest',
+        // 'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(plainFormData)
       // credentials: 'same-origin'
     }).then((response) => {
       if (response.ok) {
@@ -163,15 +164,13 @@ function MOTranslations(localizedText) {
   $results.addEventListener('load', resultsLoaded);
 
   // Helpers and callbacks
-  function resultsLoaded(json) {
-    // debugger
-    // const tag = $results.querySelector("#tag");
-    // const str = $results.querySelector("#str");
-    if (json.tag != undefined) {
+  function resultsLoaded(jsonResponse) {
+    debugger
+    if (jsonResponse.tag != undefined) {
       // Make tag in left column gray because it's now been translated.
       // Want only untranslated tags to be bold black to stand out better.
-      const _str_tag = document.getElementById('str_' + json.tag);
-      _str_tag.innerHTML = json.str;
+      const _str_tag = document.getElementById('str_' + jsonResponse.tag);
+      _str_tag.innerHTML = jsonResponse.str;
       _str_tag.classList.add('translated').add('text-muted');
     } else if (LOADED) {
       CHANGED = true;
