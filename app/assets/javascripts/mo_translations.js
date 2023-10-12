@@ -165,7 +165,6 @@ function MOTranslations(localizedText) {
 
   // Helpers and callbacks
   function resultsLoaded(jsonResponse) {
-    debugger
     if (jsonResponse.tag != undefined) {
       // Make tag in left column gray because it's now been translated.
       // Want only untranslated tags to be bold black to stand out better.
