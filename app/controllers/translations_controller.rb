@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class TranslationsController < ApplicationController
   before_action :login_required
 
@@ -39,6 +40,7 @@ class TranslationsController < ApplicationController
 
   # Only accessed by ajax from the index
   def update
+    binding.break
     @lang = set_language_and_authorize_user
     @ajax = true
     @tag = params[:commit] == :CANCEL.l ? nil : params[:id]
@@ -46,10 +48,16 @@ class TranslationsController < ApplicationController
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
     update_translations(@edit_tags) if params[:commit] == :SAVE.l
-    render(partial: "translations/ajax_post")
+
+    json = {
+      locale: @lang.locale,
+      tag: @tag,
+      str: preview_string(@translated_records[@tag].text)
+    }
+    render(json: json)
   rescue StandardError => e
     @error = error_message(e).join("\n")
-    render(partial: "translations/ajax_error")
+    render(json: { error: @error })
   end
 
   # -------------------------------
@@ -351,3 +359,4 @@ class TranslationsController < ApplicationController
     alias ttag string
   end
 end
+# rubocop:enable Metrics/ClassLength
