@@ -58,12 +58,12 @@
   <% end %>
 
   <div class="form-group">
-    <%= button_tag(:SAVE.l, type: :submit,
-                    id: :save_button, class: "btn btn-default") %>
-    <%= button_tag(:CANCEL.l, type: :cancel,
-                    id: :cancel_button, class: "btn btn-default") %>
+    <%= button_tag(:SAVE.l, type: :submit, name: :commit, value: :submit,
+                   id: :save_button, class: "btn btn-default") %>
+    <%= button_tag(:CANCEL.l, type: :cancel, name: :commit, value: :cancel,
+                   id: :cancel_button, class: "btn btn-default") %>
     <%= button_tag(:RELOAD.l, id: :reload_button, type: :button,
-                    class: "btn btn-default", data: { tag: @tag }) %>
+                   class: "btn btn-default", data: { tag: @tag }) %>
   </div>
 
   <%= select_tag(:locale,
