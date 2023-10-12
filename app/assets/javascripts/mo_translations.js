@@ -76,48 +76,28 @@ function MOTranslations(localizedText) {
       }
     });
 
-    // $form.submit(function () {
-    //   CHANGED = false;
-    //   show_whirly(SAVING_STRING);
-    //   disableCommitButtons(true);
-    // });
+    $form.onsubmit = (event) => {
+      debugger
+      event.preventDefault();
+      CHANGED = false;
+      show_whirly(SAVING_STRING);
+      disableCommitButtons(true);
+      submitForm(event.target)
+    };
   }
 
-  // RESULTS
-  const $results = document.getElementById('translation_results');
-  $results.addEventListener('load', resultsLoaded);
-
-  // Helpers and callbacks
-  function resultsLoaded() {
-    const tag = $results.querySelector("#tag");
-    const str = $results.querySelector("#str");
-    if (tag != undefined) {
-      // Make tag in left column gray because it's now been translated.
-      // Want only untranslated tags to be bold black to stand out better.
-      const _str_tag = document.getElementById('str_' + tag);
-      _str_tag.innerHTML = str;
-      _str_tag.classList.add('translated text-muted');
-    } else if (LOADED) {
-      CHANGED = true;
-      disableCommitButtons(false);
-    }
-    hide_whirly();
-  }
-
-  // const csrfToken = document.querySelector("[name='csrf-token']").content;
-  // AJAX FETCH FORM
+  // FETCH FORM
   function loadEditForm(locale, tag) {
     LOCALE = locale;
     if (!CHANGED || confirm(CONFIRM_STRING)) {
       show_whirly(LOADING_STRING);
-      const url = '/translations/' + tag + '/edit'
-        + '?locale=' + locale;
-      debugger;
+      const url = '/translations/' + tag + '/edit' + '?locale=' + locale;
+      // debugger;
       fetch(url).then((response) => {
         if (response.ok) {
           if (200 <= response.status && response.status <= 299) {
             response.text().then((html) => {
-              debugger;
+              // debugger;
               console.log("html: " + html);
               hide_whirly();
               $translation_ui.innerHTML = html;
@@ -134,6 +114,70 @@ function MOTranslations(localizedText) {
         }
       })
     }
+  }
+
+  function getCSRFToken() {
+    const csrfToken = document.querySelector("[name='csrf-token']")
+
+    if (csrfToken) {
+      return csrfToken.content
+    } else {
+      return null
+    }
+  }
+
+  // SUBMIT FORM - this is submitting twice
+  function submitForm(form) {
+    const formData = new FormData(form),
+      url = form.action;
+
+    fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-Token': getCSRFToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(formData)
+      // credentials: 'same-origin'
+    }).then((response) => {
+      if (response.ok) {
+        if (200 <= response.status && response.status <= 299) {
+          response.json().then((json) => {
+            resultsLoaded(json);
+          }).catch((error) => {
+            console.error("no_content:", error);
+          });
+        } else {
+          hide_whirly();
+          alert(response.responseText);
+          console.log(`got a ${response.status}`);
+        }
+      }
+    })
+  }
+
+  // RESULTS
+  const $results = document.getElementById('translation_results');
+  $results.addEventListener('load', resultsLoaded);
+
+  // Helpers and callbacks
+  function resultsLoaded(json) {
+    // debugger
+    // const tag = $results.querySelector("#tag");
+    // const str = $results.querySelector("#str");
+    if (json.tag != undefined) {
+      // Make tag in left column gray because it's now been translated.
+      // Want only untranslated tags to be bold black to stand out better.
+      const _str_tag = document.getElementById('str_' + json.tag);
+      _str_tag.innerHTML = json.str;
+      _str_tag.classList.add('translated').add('text-muted');
+    } else if (LOADED) {
+      CHANGED = true;
+      disableCommitButtons(false);
+    }
+    hide_whirly();
   }
 
   function clearForm() {
