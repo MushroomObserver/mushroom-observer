@@ -40,7 +40,6 @@ class TranslationsController < ApplicationController
 
   # Only accessed by ajax from the index
   def update
-    binding.break
     @lang = set_language_and_authorize_user
     @ajax = true
     @tag = params[:id]
@@ -48,13 +47,16 @@ class TranslationsController < ApplicationController
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
     update_translations(@edit_tags)
-    new_str = preview_string(@translated_records[@tag].text)
-    json = {
-      locale: @lang.locale,
-      tag: @tag,
-      str: new_str
-    }
-    render(json: json)
+
+    @locale = @lang.locale
+    @new_str = preview_string(@translated_records[@tag].text)
+    render(partial: "translations/update")
+    # json = {
+    #   locale: @lang.locale,
+    #   tag: @tag,
+    #   str: new_str
+    # }
+    # render(json: json)
   rescue StandardError => e
     @error = error_message(e).join("\n")
     render(json: { error: @error })

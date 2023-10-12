@@ -1,3 +1,6 @@
+// TODO: maybe make this a class, or give it functions by extending prototype.
+// Those functions can be called by edit/update/show versions
+
 function MOTranslations(localizedText) {
   let LOCALE = localizedText.locale,
     CONFIRM_STRING = localizedText.confirm_string,
@@ -76,13 +79,14 @@ function MOTranslations(localizedText) {
       }
     });
 
+    // I think this goes AFTER ujs submits the form
     $form.onsubmit = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
+      // event.preventDefault();
+      // event.stopPropagation();
       CHANGED = false;
       show_whirly(SAVING_STRING);
       disableCommitButtons(true);
-      submitForm(event.target)
+      // submitForm(event.target)
     };
   }
 
@@ -126,57 +130,57 @@ function MOTranslations(localizedText) {
     }
   }
 
-  // SUBMIT FORM - this is submitting twice
-  function submitForm(form) {
-    const url = form.action,
-      formData = new FormData(form),
-      plainFormData = Object.fromEntries(formData.entries());
+  // SUBMIT FORM - this was submitting twice bc rails ujs
+  // function submitForm(form) {
+  //   const url = form.action,
+  //     formData = new FormData(form),
+  //     plainFormData = Object.fromEntries(formData.entries());
 
-    fetch(url, {
-      method: 'PATCH',
-      headers: {
-        'X-CSRF-Token': getCSRFToken(),
-        // 'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(plainFormData)
-      // credentials: 'same-origin'
-    }).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.json().then((json) => {
-            resultsLoaded(json);
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          hide_whirly();
-          alert(response.responseText);
-          console.log(`got a ${response.status}`);
-        }
-      }
-    })
-  }
+  //   fetch(url, {
+  //     method: 'PATCH',
+  //     headers: {
+  //       'X-CSRF-Token': getCSRFToken(),
+  //       // 'X-Requested-With': 'XMLHttpRequest',
+  //       'Content-Type': 'application/json',
+  //       'Accept': 'application/json'
+  //     },
+  //     body: JSON.stringify(plainFormData)
+  //     // credentials: 'same-origin'
+  //   }).then((response) => {
+  //     if (response.ok) {
+  //       if (200 <= response.status && response.status <= 299) {
+  //         response.json().then((json) => {
+  //           resultsLoaded(json);
+  //         }).catch((error) => {
+  //           console.error("no_content:", error);
+  //         });
+  //       } else {
+  //         hide_whirly();
+  //         alert(response.responseText);
+  //         console.log(`got a ${response.status}`);
+  //       }
+  //     }
+  //   })
+  // }
 
-  // RESULTS
-  const $results = document.getElementById('translation_results');
-  $results.addEventListener('load', resultsLoaded);
+  // RESULTS - update callback
+  // const $results = document.getElementById('translation_results');
+  // $results.addEventListener('load', resultsLoaded);
 
-  // Helpers and callbacks
-  function resultsLoaded(jsonResponse) {
-    if (jsonResponse.tag != undefined) {
-      // Make tag in left column gray because it's now been translated.
-      // Want only untranslated tags to be bold black to stand out better.
-      const _str_tag = document.getElementById('str_' + jsonResponse.tag);
-      _str_tag.innerHTML = jsonResponse.str;
-      _str_tag.classList.add('translated').add('text-muted');
-    } else if (LOADED) {
-      CHANGED = true;
-      disableCommitButtons(false);
-    }
-    hide_whirly();
-  }
+  // // Helpers and callbacks
+  // function resultsLoaded(jsonResponse) {
+  //   if (jsonResponse.tag != undefined) {
+  //     // Make tag in left column gray because it's now been translated.
+  //     // Want only untranslated tags to be bold black to stand out better.
+  //     const _str_tag = document.getElementById('str_' + jsonResponse.tag);
+  //     _str_tag.innerHTML = jsonResponse.str;
+  //     _str_tag.classList.add('translated').add('text-muted');
+  //   } else if (LOADED) {
+  //     CHANGED = true;
+  //     disableCommitButtons(false);
+  //   }
+  //   hide_whirly();
+  // }
 
   function clearForm() {
     $translation_ui.innerHTML = '';
