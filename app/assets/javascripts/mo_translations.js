@@ -1,4 +1,5 @@
-// TODO: maybe make this a class, or give it functions by extending prototype.
+// TODO: maybe make this a class, with own functions,
+// or give it functions by extending prototype.
 // Those functions can be called by edit/update/show versions
 
 function MOTranslations(localizedText) {
