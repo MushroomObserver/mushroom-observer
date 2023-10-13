@@ -92,12 +92,6 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
     # DatabaseCleaner.strategy = :transaction
     # DatabaseCleaner.start
-
-    # Treat Rails html requests as coming from non-robots.
-    # If it's a bot, controllers often do not serve the expected content.
-    # The requester looks like a bot to the `browser` gem because the User Agent
-    # in the request is blank. I don't see an easy way to change that. -JDC
-    Browser::Bot.any_instance.stubs(:bot?).returns(false)
   end
 
   def teardown
