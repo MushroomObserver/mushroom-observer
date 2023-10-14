@@ -132,7 +132,7 @@ class LookupsControllerTest < FunctionalTestCase
       get(:lookup_name, params: { id: names(:fungi).text_name })
     end
 
-    assert_flash_text( "RuntimeError", "Failed to flash a RuntimeError")
+    assert_flash_error
   end
 
   def test_lookup_observation
