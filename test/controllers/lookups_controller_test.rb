@@ -126,16 +126,13 @@ class LookupsControllerTest < FunctionalTestCase
   end
 
   def test_lookup_name_with_error
-    # Stub a method called by lookup_name in order to provoke an error.
-    LookupsController.any_instance.stubs(:fix_name_matches).
-      raises(RuntimeError)
     login
+    # Stub a method used inside `lookup_name` to provoke an error
+    Name.stub(:parse_name, -> { raise(RuntimeError) }) do
+      get(:lookup_name, params: { id: names(:fungi).text_name })
+    end
 
-    get(:lookup_name, params: { id: names(:fungi).text_name })
-    assert_flash_text(
-      "RuntimeError",
-      "Error should provoke a flash if looking up by non-integer"
-    )
+    assert_flash_text( "RuntimeError", "Failed to flash a RuntimeError")
   end
 
   def test_lookup_observation
