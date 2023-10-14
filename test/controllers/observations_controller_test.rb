@@ -417,13 +417,15 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    ObservationsController.any_instance.stubs(:show_selected_observations).
-      raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    @controller.stub(:show_selected_observations, -> { raise(RuntimeError) }) do
+      get(:index,
+          params: @controller.query_params(query).merge(
+            { advanced_search: "1" }
+          ))
+    end
 
     assert_redirected_to(
       search_advanced_path,
