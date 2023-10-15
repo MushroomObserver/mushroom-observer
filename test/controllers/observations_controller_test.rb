@@ -2852,36 +2852,34 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_image_upload_when_process_image_fails
-    login("rolf")
-
     setup_image_dirs
     file = Rails.root.join("test/images/Coprinus_comatus.jpg")
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
+    image = Image.create(user: users(:rolf),
+                         copyright_holder: "zuul",
+                         when: Time.current,
+                         notes: "stubbed in test")
+    params = { observation: { place_name: "USA",
+                              when: Time.current },
+               image: { "0" => { image: file,
+                                 copyright_holder: "zuul",
+                                 when: Time.current } } }
+    login("rolf")
 
     # Simulate process_image failure.
-    Image.any_instance.stubs(:process_image).returns(false)
+    Image.stub(:new, image) do
+      image.stub(:process_image, false) do
+        post(:create, params: params)
+      end
+    end
 
-    post(
-      :create,
-      params: {
-        observation: {
-          place_name: "USA",
-          when: Time.current
-        },
-        image: {
-          "0" => {
-            image: file,
-            copyright_holder: "zuul",
-            when: Time.current
-          }
-        }
-      }
-    )
-
-    # Prove that an image was created, but that it is unattached, is in the
+    # Prove that an image was created, but is unattached, is in the
     # @bad_images array, and has not been kept in the @good_images array
     # for attachment later.
-    img = Image.find_by(copyright_holder: "zuul")
+
+    # img = Image.find_by(copyright_holder: "zuul")
+    img = Image.order(updated_at: :asc).last
+
     assert(img)
     assert_equal([], img.observations)
     assert_includes(@controller.instance_variable_get(:@bad_images), img)
