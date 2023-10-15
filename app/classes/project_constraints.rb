@@ -1,0 +1,34 @@
+# frozen_string_literal: true
+
+# limitations on Projects
+class ProjectConstraints
+  attr_reader :params
+
+  def initialize(params)
+    @params = params
+  end
+
+  def ends_before_start?
+    start_date = parse_date(:start_date)
+    end_date = parse_date(:end_date)
+
+    start_date.present? && end_date.present? && (end_date < start_date)
+  end
+
+  def allow_any_dates?
+    params.dig(:project, :dates_any) == "true"
+  end
+
+  ##########
+
+  private
+
+  def parse_date(date_key)
+    return unless params.dig(date_key, :fixed) == "true"
+
+    year = params[:project]["#{date_key}(1i)"].to_i
+    month = params[:project]["#{date_key}(2i)"].to_i
+    day = params[:project]["#{date_key}(3i)"].to_i
+    Date.new(year, month, day)
+  end
+end

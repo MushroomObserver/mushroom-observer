@@ -82,7 +82,7 @@ class ProjectsController < ApplicationController
       flash_error(:add_project_need_title.t)
     elsif project
       flash_error(:add_project_already_exists.t(title: project.title))
-    elsif ends_before_start?
+    elsif ProjectConstraints.new(params).ends_before_start?
       flash_error(:add_project_ends_before_start.t)
     elsif user_group
       flash_error(:add_project_group_exists.t(group: title))
@@ -144,7 +144,7 @@ class ProjectsController < ApplicationController
   end
 
   def valid_dates
-    return true unless ends_before_start?
+    return true unless ProjectConstraints.new(params).ends_before_start?
 
     flash_error(:add_project_ends_before_start.t)
     false
@@ -330,7 +330,7 @@ class ProjectsController < ApplicationController
       @project.user_group = user_group
       @project.admin_group = admin_group
       @project.location = location
-      if params.dig(:project, :dates_any) == "true"
+      if ProjectConstraints.new(params).allow_any_dates?
         @project.start_date = nil
         @project.end_date = nil
       end
@@ -350,42 +350,5 @@ class ProjectsController < ApplicationController
     @project = Project.new
     image_ivars
     render(:new, location: new_project_path(q: get_query_param))
-  end
-
-  def ends_before_start?
-    start_date = if params.dig(:start_date, :fixed) == "true"
-                   Date.new(start_year.to_i, start_month.to_i, start_day.to_i)
-                 end
-
-    end_date = if params.dig(:end_date, :fixed) == "true"
-                 Date.new(end_year.to_i, end_month.to_i, end_day.to_i)
-               end
-
-    # uses `present?` in order to return boolean rather than truthy
-    start_date.present? && end_date.present? && (end_date < start_date)
-  end
-
-  def start_year
-    params[:project]["start_date(1i)"]
-  end
-
-  def start_month
-    params[:project]["start_date(2i)"]
-  end
-
-  def start_day
-    params[:project]["start_date(3i)"]
-  end
-
-  def end_year
-    params[:project]["end_date(1i)"]
-  end
-
-  def end_month
-    params[:project]["end_date(2i)"]
-  end
-
-  def end_day
-    params[:project]["end_date(3i)"]
   end
 end
