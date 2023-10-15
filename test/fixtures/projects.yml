@@ -129,7 +129,7 @@ future_project:
   updated_at: 2008-09-25 07:00:55
   observations: owner_accepts_general_questions, unknown_with_lat_long
   open_membership: true
-  start_date: <%= Time.zone.tomorrow%>
+  start_date: <%= Time.zone.tomorrow %>
   end_date: nil
 
 current_project:
