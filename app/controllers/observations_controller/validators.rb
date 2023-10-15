@@ -60,8 +60,6 @@ module ObservationsController::Validators
     checked_proj_ids =
       checked_proj_check_boxes.map { |str| str.gsub("id_", "") }
     # Get the AR records so that we can call Project methods on them
-    # Project.where(id: checked_proj_ids).includes(:location).
-      # filter { |proj| proj.violates_constraints?(@observation) }
     Project.where(id: checked_proj_ids).includes(:location).select do |proj|
       violates_project_constraints?(proj)
     end
