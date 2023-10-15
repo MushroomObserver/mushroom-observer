@@ -180,7 +180,7 @@ class ProjectsController < ApplicationController
     (@copyright_holder, @copyright_year, @upload_license_id) =
       if @project&.image
         [@project.image.copyright_holder, @project.image.when.year,
-        @project.image.license.id]
+         @project.image.license.id]
       else
         [@user.legal_name, Time.zone.now.year, @user.license&.id]
       end
