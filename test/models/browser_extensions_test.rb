@@ -2,7 +2,6 @@
 
 require("test_helper")
 
-
 # test MO extensions to the browser gem, https://github.com/fnando/browser
 class BrowserExtensionsTest < UnitTestCase
   def test_bot
