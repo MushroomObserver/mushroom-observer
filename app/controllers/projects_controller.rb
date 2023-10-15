@@ -125,13 +125,14 @@ class ProjectsController < ApplicationController
     @title = params[:project][:title].to_s
     if @title.blank?
       flash_error(:add_project_need_title.t)
+      false
     elsif (project2 = Project.find_by_title(@title)) &&
           (project2 != @project)
       flash_error(:add_project_already_exists.t(title: @title))
+      false
     else
-      return true
+      true
     end
-    false
   end
 
   def valid_where
@@ -175,15 +176,14 @@ class ProjectsController < ApplicationController
 
   def image_ivars
     @licenses = License.current_names_and_ids(@user.license)
-    if @project&.image
-      @copyright_holder  = @project.image.copyright_holder
-      @copyright_year    = @project.image.when.year
-      @upload_license_id = @project.image.license.id
-    else
-      @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license&.id
-    end
+
+    (@copyright_holder, @copyright_year, @upload_license_id) =
+      if @project&.image
+        [@project.image.copyright_holder, @project.image.when.year,
+        @project.image.license.id]
+      else
+        [@user.legal_name, Time.zone.now.year, @user.license&.id]
+      end
   end
 
   def set_ivars_for_show
@@ -331,16 +331,14 @@ class ProjectsController < ApplicationController
       @project.admin_group = admin_group
       @project.location = location
       if ProjectConstraints.new(params).allow_any_dates?
-        @project.start_date = nil
-        @project.end_date = nil
+        @project.start_date = @project.end_date = nil
       end
 
       upload_image_if_present
       if @project.save
         @project.log_create
         flash_notice(:add_project_success.t)
-        redirect_to(project_path(@project.id, q: get_query_param))
-        return
+        return redirect_to(project_path(@project.id, q: get_query_param))
       else
         flash_object_errors(@project)
       end
