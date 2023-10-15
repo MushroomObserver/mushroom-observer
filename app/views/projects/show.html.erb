@@ -29,21 +29,22 @@ add_project_banner(@project)
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
+  <p>
+    <% if @project.observations.any? %>
+      <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
+                    observations_path(project: @project.id),
+                    { class: "btn btn-default btn-lg" }) %></b>
+      <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
+                    checklist_path(project_id: @project.id),
+                    { class: "btn btn-default btn-lg" }) %></b>
+    <% end %>
+    <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
+                  project_members_path(project_id: @project.id),
+                  { class: "btn btn-default btn-lg" }) %></b>
+  </p>
 <% end %>
 
-<p>
-  <% if @project.observations.any? %>
-    <b><%= link_to("#{@project.observations.length} #{:OBSERVATIONS.t}",
-                   observations_path(project: @project.id),
-                   { class: "btn btn-default btn-lg" }) %></b>
-    <b><%= link_to("#{@project.name_count} #{:NAMES.t}",
-                   checklist_path(project_id: @project.id),
-                   { class: "btn btn-default btn-lg" }) %></b>
-  <% end %>
-  <b><%= link_to("#{@project.user_group.users.count} #{:MEMBERS.t}",
-                 project_members_path(project_id: @project.id),
-                 { class: "btn btn-default btn-lg" }) %></b>
-</p>
+
 <br/>
 <p>
 <% if @project.can_join?(@user) %>
