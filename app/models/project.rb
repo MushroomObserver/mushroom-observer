@@ -122,20 +122,6 @@ class Project < AbstractModel
     obs.user == user || is_member?(user)
   end
 
-  def violates_constraints?(obs)
-    violates_location?(obs) || violates_dates?(obs)
-  end
-
-  def violates_location?(obs)
-    return false if location.blank?
-
-    !location.found_here?(obs)
-  end
-
-  def violates_dates?(obs)
-    dates_exclude?(obs.when)
-  end
-
   def count_violations
     return out_of_range_observations.count unless location
 
@@ -390,14 +376,6 @@ class Project < AbstractModel
     !future? && !past?
   end
 
-  def dates_exclude?(date)
-    !dates_include?(date)
-  end
-
-  def dates_include?(date)
-    starts_no_later_than?(date) && ends_no_earlier_than?(date)
-  end
-
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
       # performant query that returns empty ActiveRecord_Relation
@@ -449,13 +427,5 @@ class Project < AbstractModel
 
   def past?
     end_date&.past?
-  end
-
-  def starts_no_later_than?(date)
-    !start_date&.after?(date)
-  end
-
-  def ends_no_earlier_than?(date)
-    !end_date&.before?(date)
   end
 end

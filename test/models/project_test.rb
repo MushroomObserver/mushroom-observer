@@ -111,17 +111,6 @@ class ProjectTest < UnitTestCase
     assert_not(projects(:future_project).current?)
   end
 
-  def test_dates_include
-    assert(projects(:past_project).
-      dates_include?(projects(:past_project).end_date))
-    assert(projects(:current_project).
-      dates_include?(Time.zone.today))
-    assert(projects(:future_project).
-      dates_include?(projects(:future_project).start_date))
-    assert_not(projects(:past_project).dates_include?(Time.zone.today))
-    assert_not(projects(:future_project).dates_include?(Time.zone.today))
-  end
-
   def test_date_strings
     nama2023 = projects(:pinned_date_range_project)
     assert_equal("2023-08-24", nama2023.start_date_str)
