@@ -45,9 +45,10 @@
 #  ==== Callbacks
 #  orphan_drafts::     Orphan draft descriptions whe destroyed.
 #
-################################################################################
-#
+###############################################################################
 class Project < AbstractModel
+  include Date
+
   belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :location
   belongs_to :image
@@ -368,13 +369,9 @@ class Project < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Dates
+  #  :section: queries re related Observations
   #
   ##############################################################################
-
-  def current?
-    !future? && !past?
-  end
 
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
@@ -402,30 +399,5 @@ class Project < AbstractModel
       observations.where(Observation[:when] <= end_date).
         and(observations.where(Observation[:when] >= start_date))
     end
-  end
-
-  # convenience methods for date range display
-  def date_range(format = "%Y-%m-%d")
-    "#{start_date_str(format)} - #{end_date_str(format)}"
-  end
-
-  def start_date_str(format = "%Y-%m-%d")
-    start_date.nil? ? :INDEFINITE.t : start_date.strftime(format)
-  end
-
-  def end_date_str(format = "%Y-%m-%d")
-    end_date.nil? ? :INDEFINITE.t : end_date.strftime(format)
-  end
-
-  ##############################################################################
-
-  private
-
-  def future?
-    start_date&.future?
-  end
-
-  def past?
-    end_date&.past?
   end
 end
