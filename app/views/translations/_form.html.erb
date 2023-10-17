@@ -53,7 +53,7 @@
     <%=
     between = notes.any? ? tag.span("(" + notes.safe_join(", ") + ")") : ""
     text_area_with_label(form: f, field: "tag_#{ttag}", label: ttag,
-                              between: between, value: str, rows: rows) %>
+                         between: between, value: str, rows: rows) %>
 
   <% end %>
 

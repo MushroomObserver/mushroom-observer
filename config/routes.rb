@@ -25,10 +25,10 @@ ACTIONS = {
     external_link: {},
     geocode: {},
     image: {},
-    location_primer: {},
-    name_primer: {},
+    # location_primer: {},
+    # name_primer: {},
     multi_image_template: {},
-    old_translation: {},
+    # old_translation: {},
     test: {},
     visual_group_status: {}
   },
@@ -815,6 +815,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Translations: standard actions  -------------------------------------
   resources :translations, only: [:index, :edit, :update]
+  get("translations/:id/versions", to: "translations/versions#show",
+                                   as: "translation_versions")
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show]
