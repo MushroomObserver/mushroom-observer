@@ -4,6 +4,7 @@ require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
   def test_create_minimal_observation
+    browser = page.driver.browser
     rolf = users("rolf")
     login!(rolf)
 
@@ -12,22 +13,22 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_selector("body.observations__new")
     within("#observation_form") do
-      # MOAutocompleter has replaced year select with text field
+      # MOAutocompleter replaces year select with text field
       assert_field("observation_when_1i", with: Time.zone.today.year.to_s)
       assert_select("observation_when_2i", text: Time.zone.today.strftime("%B"))
-      assert_select("observation_when_3i",
-                    text: Time.zone.today.strftime("%d").to_i)
+      # %e is day of month, no leading zero
+      assert_select("observation_when_3i", text: Time.zone.today.strftime("%e"))
       assert_selector("#where_help",
                       text: "Albion, Mendocino Co., California")
       fill_in("naming_name", with: "Elfin saddle")
       # don't wait for the autocompleter - we know it's an elfin saddle!
-      send_keys(:tab)
+      browser.keyboard.type(:tab)
       assert_field("naming_name", with: "Elfin saddle")
       # start typing the location...
       fill_in("observation_place_name", with: locations.first.name[0, 10])
       # wait for the autocompleter...
       assert_selector(".auto_complete")
-      send_keys(:down, :tab) # cursor down to first match + select row
+      browser.keyboard.type(:down, :tab) # cursor to first match + select row
       assert_field("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -39,14 +40,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_form")
     within("#observation_form") do
       fill_in("naming_name", with: "Coprinus com")
+      browser.keyboard.type(:tab)
       # wait for the autocompleter!
       assert_selector(".auto_complete")
-      send_keys(:down, :down, :tab) # cursor down to first match + select row
-      # unfocus, let field validate. send_keys(:tab) doesn't work without sleep
-      sleep(1)
-      send_keys(:tab)
+      browser.keyboard.type(:down, :tab) # cursor to first match + select row
+      browser.keyboard.type(:tab)
       assert_field("naming_name", with: "Coprinus comatus")
       # Place name should stay filled
+      browser.keyboard.type(:tab)
       assert_field("observation_place_name", with: locations.first.name)
       click_commit
     end
@@ -63,6 +64,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   }.freeze
 
   def test_post_edit_and_destroy_with_details_and_location
+    browser = page.driver.browser
     setup_image_dirs # in general_extensions
     local_now = Time.zone.now.in_time_zone
 
@@ -77,15 +79,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_2i", text: local_now.strftime("%B"))
     assert_select("observation_when_3i", text: local_now.day.to_s)
 
-    assert_field("observation_place_name", text: "")
-    assert_field("observation_lat", text: "")
-    assert_field("observation_long", text: "")
-    assert_field("observation_alt", text: "")
+    assert_field("observation_place_name", with: "")
+    assert_field("observation_lat", with: "")
+    assert_field("observation_long", with: "")
+    assert_field("observation_alt", with: "")
 
-    assert_field("naming_name", text: "")
+    assert_field("naming_name", with: "")
     assert_checked_field("observation_is_collection_location")
     assert_no_checked_field("observation_specimen")
-    assert_field(other_notes_id, text: "")
+    assert_field(other_notes_id, with: "")
 
     # submit_observation_form_with_errors
     fill_in("observation_when_1i", with: "2010")
@@ -95,15 +97,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     uncheck("observation_is_collection_location")
-
     check("observation_specimen")
+
     assert_selector("#collection_number_number")
     fill_in("collection_number_number", with: "17-034a")
     fill_in(other_notes_id, with: "Notes for observation")
 
-    within("#observation_form") do
-      click_commit
-    end
+    within("#observation_form") { click_commit }
 
     # rejected
     assert_selector("body.observations__create")
@@ -115,11 +115,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_3i", text: "14")
 
     assert_field("observation_place_name", with: "USA, California, Pasadena")
-    assert_field("observation_lat", text: "")
-    assert_field("observation_long", text: "")
-    assert_field("observation_alt", text: "")
+    assert_field("observation_lat", with: "")
+    assert_field("observation_long", with: "")
+    assert_field("observation_alt", with: "")
 
-    assert_field("naming_name", text: "")
+    assert_field("naming_name", with: "")
     assert_no_checked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen")
     assert_field("collection_number_number", with: "17-034a")
@@ -127,23 +127,25 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # submit_observation_form_without_errors
     fill_in("observation_place_name", with: "Pasadena, Calif")
+    browser.keyboard.type(:tab)
     assert_selector(".auto_complete")
-    send_keys(:down, :tab) # cursor down to first match + select row
+    browser.keyboard.type(:down, :tab) # cursor down to first match + select row
     assert_field("observation_place_name", with: "Pasadena, California, USA")
     fill_in("observation_lat", with: " 12deg 34.56min N ")
     fill_in("observation_long", with: " 123 45 6.78 W ")
     fill_in("observation_alt", with: " 56 ft. ")
 
     fill_in("naming_name", with: "Agaricus campe")
+    assert_selector(".auto_complete")
     assert_selector(".auto_complete ul li", text: "Agaricus campestris")
-    send_keys(:down, :down, :down, :tab) # down to second match + select row
+    browser.keyboard.type(:down, :down, :tab) # down to second match + select
     assert_field("naming_name", with: "Agaricus campestris")
     select(Vote.confidence(Vote.next_best_vote), from: "naming_vote_value")
 
     # Add the images separately, so we can be sure of the order. Otherwise,
     # images appear in the order each upload finishes, which is unpredictable.
     attach_file(Rails.root.join("test/images/Coprinus_comatus.jpg")) do
-      find(".file-field").click
+      click_file_field(".file-field")
     end
 
     assert_selector(".added_image_wrapper")
@@ -174,7 +176,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Add a second image that's not geotagged.
     attach_file(Rails.root.join("test/images/geotagged.jpg")) do
-      find(".file-field").click
+      click_file_field(".file-field")
     end
 
     # We should now get the option to set obs GPS
@@ -193,6 +195,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Try removing it
+    scroll_to(second_image_wrapper, align: :center)
     within(second_image_wrapper) { find(".remove_image_link").click }
 
     # We should now get no option to set obs GPS
@@ -241,14 +244,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Fix divergent dates: use the obs date
-    within("#observation_date_radio_container") { choose("14-March-2010") }
-    click_button("fix_dates")
+    scroll_to("#image_messages", align: :center)
+    within("#image_messages") do
+      within("#observation_date_radio_container") do
+        choose("14-March-2010", allow_label_click: true)
+        assert_checked_field("14-March-2010")
+      end
+      click_button("fix_dates")
+    end
+    sleep(1) # wait for css hide transition
     assert_no_selector("image_messages")
 
     # Ignore divergent GPS - maybe we took the second photo in the lab?
-    click_button("ignore_geocode")
+    scroll_to("#geocode_messages", align: :center)
+    within("#geocode_messages") do
+      click_button("ignore_geocode")
+    end
+    sleep(1) # wait for css hide transition
     assert_no_selector("geocode_messages")
 
+    sleep(1) # wait for css hide transition
     # Be sure the dates are applied
     within(first_image_wrapper) do
       assert_equal("2010", find('[id$="_temp_image_when_1i"]').value)
@@ -268,21 +283,21 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_no_selector(".set_thumb_image")
     end
 
-    # assert_field('observation_thumb_image_id', type: :hidden, with: ??)
-
     within("#observation_form") { click_commit }
 
     # It should take us to create a new location
     assert_selector("body.locations__new")
     # The observation shoulda been created OK.
     assert_flash_for_create_observation
+    # Check the db values
     assert_new_observation_is_correct(expected_values_after_create)
 
+    # scroll_to("#location_low", align: :center)
     # check default values of location form
     assert_field("location_display_name", with: "Pasadena, California, USA")
-    assert_field("location_high", text: "")
-    assert_field("location_low", text: "")
-    assert_field("location_notes", text: "")
+    assert_field("location_high", with: "")
+    assert_field("location_low", with: "")
+    assert_field("location_notes", with: "")
     assert_field("location_north", with: PASADENA_EXTENTS[:north])
     assert_field("location_south", with: PASADENA_EXTENTS[:south])
     assert_field("location_east", with: PASADENA_EXTENTS[:east])
@@ -317,29 +332,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_flash_for_create_location
     assert_selector("body.observations__show")
-
-    # sleep(5)
-    # binding.break
-    # erroring on image src="/remote_images/960/1062212457.jpg”
-    # https://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails
-    # 1) Put your file to be uploaded in the test in your
-    # fixtures/files subdirectory for testing.
-
-    # 2) In your unit test you can get your testing file by
-    # calling fixture_file_upload('path','mime-type'). e.g.:
-
-    # `bulk_json = fixture_file_upload(
-    #   'files/bulk_bookmark.json','application/json'
-    # )`
-
-    # 3) call the post method to hit the controller action you want, passing
-    # the object returned by fixture_file_upload as the parameter for the
-    # upload. e.g.:
-
-    # post :bookmark, params: { bulkfile: bulk_json }
-
-    # file_fixture_path
-    # fixture_file_upload
 
     # https://gorails.com/episodes/rails-system-testing-file-uploads
     #
@@ -396,7 +388,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       select("15", from: "good_image_#{img_id}_when_3i")
       fill_in("good_image_#{img_id}_notes", with: "New notes for image")
     end
-
+    sleep(1)
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
@@ -414,7 +406,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     assert_selector("body.observations__show")
     accept_confirm do
-      click_button(class: "destroy_observation_link_#{new_obs.id}")
+      find(".destroy_observation_link_#{new_obs.id}").click
     end
     assert_flash_for_destroy_observation
     assert_selector("body.observations__index")
@@ -454,9 +446,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def assert_new_observation_has_correct_data(expected_values)
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
-    # puts(new_obs.created_at)
-    # puts(new_obs.updated_at)
-    # puts(1.minute.ago)
 
     assert(new_obs.created_at > 1.minute.ago)
     assert(new_obs.updated_at > 1.minute.ago)
@@ -575,7 +564,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       is_collection_location: false,
       specimen: true,
       notes: "Notes for observation", # string displayed in observations/show
-      image_notes: "Notes for image"
+      image_notes: "Notes for image",
+      thumb_image_id: Image.find_by(original_name: "Coprinus_comatus.jpg").id
     }
   end
 

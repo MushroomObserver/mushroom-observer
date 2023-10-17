@@ -12,6 +12,12 @@ module Projects
     before_action :login_required
     before_action :pass_query_params
 
+    def index
+      return unless find_project!
+
+      @users = @project.user_group.users
+    end
+
     # View that lists all verified users with links to add each as a member.
     # Linked from: show_project (for admins only)
     # Inputs:
@@ -20,7 +26,6 @@ module Projects
     # Outputs:
     #   @project, @users
     # "Posts" to the same action.  Stays on this view until done.
-    # def add_members
     def new
       return unless find_project!
       unless @project.is_admin?(@user)
@@ -87,7 +92,16 @@ module Projects
       else
         flash_error(:add_members_not_found.t(str))
       end
-      redirect_to(project_path(project.id, q: get_query_param))
+      return_to_caller(project, params[:target])
+    end
+
+    def return_to_caller(project, target)
+      # debugger
+      if target == "project_index"
+        redirect_to(project_path(project.id, q: get_query_param))
+      else
+        redirect_to(project_members_path(project.id, q: get_query_param))
+      end
     end
 
     def find_member(str)
@@ -114,12 +128,12 @@ module Projects
                    admin)
       end
       set_status(project, :member, candidate, member)
-      redirect_to(project_path(project.id, q: get_query_param))
+      return_to_caller(project, params[:target])
     end
 
     def must_be_project_admin!(id)
       flash_error(:change_member_status_denied.t)
-      redirect_to(project_path(id, q: get_query_param))
+      redirect_to(project_members_path(id, q: get_query_param))
     end
 
     # Add/remove a given User to/from a given UserGroup.

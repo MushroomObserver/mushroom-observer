@@ -136,10 +136,10 @@ const moObserveContent = function () {
         // console.log("Adding autocompleter for " + type)
         // Only initialize the `year` sub-field in Rails date_selects (1i, 2i, 3i)
         if (type != "year" || type == "year" && input_id.indexOf("_1i") > 0) {
-          new MOAutocompleter({
-            input_id: input_id,
-            separator: element.dataset.autocomplete_separator
-          });
+          opts = { input_id: input_id }
+          if ("separator" in element.dataset)
+            opts.separator = element.dataset.separator
+          new MOAutocompleter(opts);
         }
       }
     });
