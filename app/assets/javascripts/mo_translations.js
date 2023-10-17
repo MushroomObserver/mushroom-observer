@@ -2,52 +2,65 @@
 // or give it functions by extending prototype.
 // Those functions can be called by edit/update/show versions
 
-function MOTranslations(localizedText) {
-  let LOCALE = localizedText.locale,
-    CONFIRM_STRING = localizedText.confirm_string,
-    LOADING_STRING = localizedText.loading_string,
-    SAVING_STRING = localizedText.saving_string,
-    LOADED = false,
-    CHANGED = false;
-  const $whirly = document.getElementById('whirly'),
-    $tag_links = document.querySelectorAll('[data-role="show_tag"]');
+class MOTranslations {
 
+  constructor(localizedText = {}) {
+    this.LOCALE = localizedText.locale,
+      this.CONFIRM_STRING = localizedText.confirm_string,
+      this.LOADING_STRING = localizedText.loading_string,
+      this.SAVING_STRING = localizedText.saving_string,
+      this.LOADED = false,
+      this.CHANGED = false,
+      this.$whirly = document.getElementById('whirly'),
+      this.$tag_links = document.querySelectorAll('[data-role="show_tag"]');
 
-  // EVENT LISTENERS (note the delegates!)
-  window.onbeforeunload = function () {
-    if (CHANGED)
-      return CONFIRM_STRING;
-  };
+    // TRANSLATION UI - EDIT FORM
+    this.$translation_ui = document.getElementById('translation_ui');
+    // this.$results = document.getElementById('translation_results');
+
+    this.indexBindings();
+    this.formObserver();
+
+  }
 
   // INDEX OF TRANSLATABLE TAGS
-  $tag_links.forEach((element) => {
-    element.onclick = function (event) {
-      event.preventDefault();
-      if (CHANGED)
-        confirm
-      loadEditForm(LOCALE, this.dataset.tag);
+  indexBindings() {
+    // EVENT LISTENERS (note the delegates!)
+    window.onbeforeunload = function () {
+      if (this.CHANGED)
+        return this.CONFIRM_STRING;
     };
-  });
 
-  // TRANSLATION UI - EDIT FORM
-  const $translation_ui = document.getElementById('translation_ui'),
+    this.$tag_links.forEach((element) => {
+      element.onclick = (e) => {
+        e.preventDefault();
+        if (this.CHANGED)
+          confirm
+        this.loadEditForm(this.LOCALE, e.target.dataset.tag);
+      };
+    });
+  }
+
+  formObserver() {
     // Options for the observer (which mutations to observe)
-    obsConfig = { childList: true, subtree: true },
-    // Callback function to execute when mutations are observed
-    obsCallback = (mutationList, observer) => {
-      for (const mutation of mutationList) {
-        if (mutation.type === "childList") {
-          // console.log("A child node has been added or removed.");
-          translationUIBindings();
+    const obsConfig = { childList: true, subtree: true },
+      // Callback function to execute when mutations are observed
+      obsCallback = (mutationList, observer) => {
+        for (const mutation of mutationList) {
+          if (mutation.type === "childList") {
+            // console.log("A child node has been added or removed.");
+            this.translationUIBindings();
+          }
         }
-      }
-    },
-    observer = new MutationObserver(obsCallback);
+      },
+      observer = new MutationObserver(obsCallback);
 
-  // Start observing the target node for configured mutations
-  observer.observe($translation_ui, obsConfig);
+    // Start observing the target node for configured mutations
+    observer.observe(this.$translation_ui, obsConfig);
+  }
 
-  const translationUIBindings = () => {
+  // These are loaded dynamically so must be rebound via formObserver()
+  translationUIBindings() {
     const $cancel_button = document.getElementById('cancel_button'),
       $reload_button = document.getElementById('reload_button'),
       $form = document.getElementById('translation_form'),
@@ -57,45 +70,49 @@ function MOTranslations(localizedText) {
 
     // Attach listeners as delegates since they are injected into the dom.
     $textareas.forEach((element) => {
-      element.onchange = () => { formChanged() };
-      element.onkeydown = () => { formChanged() };
+      element.onchange = () => { this.formChanged() };
+      element.onkeydown = () => { this.formChanged() };
     });
 
     $cancel_button.onclick = () => {
-      clearForm();
+      this.clearForm();
     };
 
+    // just give the reload button the url of the edit action
     $reload_button.onclick = (e) => {
-      loadEditForm(LOCALE, e.target.dataset.tag);
+      this.loadEditForm(this.LOCALE, e.target.dataset.tag);
     };
 
+    // change the locale of the reload button and fire it
     $locale.onchange = (e) => {
-      loadEditForm(e.target.value, e.target.dataset.tag);
+      this.loadEditForm(e.target.value, e.target.dataset.tag);
     };
 
+    // make this a controller action versions/show
     $show_versions.forEach((element) => {
-      element.onclick = function (event) {
-        event.preventDefault();
-        showOldVersion(this.dataset.id);
+      element.onclick = (e) => {
+        e.preventDefault();
+        this.showOldVersion(e.target.dataset.id);
       }
     });
 
-    // I think this goes AFTER ujs submits the form
-    $form.onsubmit = (event) => {
+    // I think this is fired AFTER ujs submits the form. Anyway unpredictable
+    $form.onsubmit = (e) => {
       // event.preventDefault();
       // event.stopPropagation();
-      CHANGED = false;
-      show_whirly(SAVING_STRING);
-      disableCommitButtons(true);
+      this.CHANGED = false;
+      this.show_whirly(SAVING_STRING);
+      this.disableCommitButtons(true);
       // submitForm(event.target)
     };
   }
 
-  // FETCH FORM
-  function loadEditForm(locale, tag) {
-    LOCALE = locale;
-    if (!CHANGED || confirm(CONFIRM_STRING)) {
-      show_whirly(LOADING_STRING);
+  // FETCH THE FORM FOR ONE TAG. links are ok. why not use edit actions
+  loadEditForm(locale, tag) {
+    this.LOCALE = locale;
+    if (!this.CHANGED || confirm(this.CONFIRM_STRING)) {
+      this.show_whirly(this.LOADING_STRING);
+
       const url = '/translations/' + tag + '/edit' + '?locale=' + locale;
       // debugger;
       fetch(url).then((response) => {
@@ -104,15 +121,15 @@ function MOTranslations(localizedText) {
             response.text().then((html) => {
               // debugger;
               // console.log("html: " + html);
-              hide_whirly();
-              $translation_ui.innerHTML = html;
-              CHANGED = false;
-              LOADED = true;
+              this.hide_whirly();
+              this.$translation_ui.innerHTML = html;
+              this.CHANGED = false;
+              this.LOADED = true;
             }).catch((error) => {
               console.error("no_content:", error);
             });
           } else {
-            hide_whirly();
+            this.hide_whirly();
             alert(response.responseText);
             console.log(`got a ${response.status}`);
           }
@@ -121,17 +138,17 @@ function MOTranslations(localizedText) {
     }
   }
 
-  function getCSRFToken() {
-    const csrfToken = document.querySelector("[name='csrf-token']")
+  // function getCSRFToken() {
+  //   const csrfToken = document.querySelector("[name='csrf-token']")
 
-    if (csrfToken) {
-      return csrfToken.content
-    } else {
-      return null
-    }
-  }
+  //   if (csrfToken) {
+  //     return csrfToken.content
+  //   } else {
+  //     return null
+  //   }
+  // }
 
-  // SUBMIT FORM - this was submitting twice bc rails ujs
+  // SUBMIT FORM - this was submitting twice bc rails ujs, just let rails submit
   // function submitForm(form) {
   //   const url = form.action,
   //     formData = new FormData(form),
@@ -164,46 +181,46 @@ function MOTranslations(localizedText) {
   //   })
   // }
 
-  // RESULTS - update callback
+  // RESULTS - update callback. Needs tag and new_str
   // const $results = document.getElementById('translation_results');
-  // $results.addEventListener('load', resultsLoaded);
+  // $results.addEventListener('load', resultsLoaded); // parse resultsLoaded
 
-  // // Helpers and callbacks
-  // function resultsLoaded(jsonResponse) {
-  //   if (jsonResponse.tag != undefined) {
-  //     // Make tag in left column gray because it's now been translated.
-  //     // Want only untranslated tags to be bold black to stand out better.
-  //     const _str_tag = document.getElementById('str_' + jsonResponse.tag);
-  //     _str_tag.innerHTML = jsonResponse.str;
-  //     _str_tag.classList.add('translated').add('text-muted');
-  //   } else if (LOADED) {
-  //     CHANGED = true;
-  //     disableCommitButtons(false);
-  //   }
-  //   hide_whirly();
-  // }
+  // Called by update action onload, with the tag and new_str
+  resultsLoaded(tag, new_str, e) {
+    if (tag != undefined) {
+      // Make tag in left column gray because it's now been translated.
+      // Want only untranslated tags to be bold black to stand out better.
+      const _str_tag = document.getElementById('str_' + tag);
+      _str_tag.innerHTML = new_str;
+      _str_tag.classList.add('translated').add('text-muted');
+    } else if (LOADED) {
+      this.CHANGED = true;
+      this.disableCommitButtons(false);
+    }
+    this.hide_whirly();
+  }
 
-  function clearForm() {
-    $translation_ui.innerHTML = '';
-    LOADED = false;
-    CHANGED = false;
+  clearForm() {
+    this.$translation_ui.innerHTML = '';
+    this.LOADED = false;
+    this.CHANGED = false;
   }
 
   // AJAX FETCH PREVIOUS VERSIONS
-  function showOldVersion(id) {
-    show_whirly(LOADING_STRING);
+  showOldVersion(id) {
+    this.show_whirly(this.LOADING_STRING);
     fetch('/ajax/old_translation/' + id).then((response) => {
       if (response.ok) {
         if (200 <= response.status && response.status <= 299) {
           response.text().then((html) => {
             // console.log("html: " + html);
-            hide_whirly();
+            this.hide_whirly();
             alert(html);
           }).catch((error) => {
             console.error("no_content:", error);
           });
         } else {
-          hide_whirly();
+          this.hide_whirly();
           alert(response.responseText);
           console.log(`got a ${response.status}`);
         }
@@ -211,13 +228,13 @@ function MOTranslations(localizedText) {
     });
   }
 
-  function formChanged() {
+  formChanged() {
     console.log("formChanged")
-    CHANGED = true;
-    disableCommitButtons(false);
+    this.CHANGED = true;
+    this.disableCommitButtons(false);
   }
 
-  function disableCommitButtons(disabled) {
+  disableCommitButtons(disabled) {
     const $save_button = document.getElementById('save_button'),
       $cancel_button = document.getElementById('cancel_button');
 
@@ -225,29 +242,29 @@ function MOTranslations(localizedText) {
     $cancel_button.disabled = !disabled;
   }
 
-  function show_whirly(text) {
+  show_whirly(text) {
     document.getElementById('whirly_text').innerHTML = text;
     // $whirly.center().show();
-    show($whirly);
+    this.show($whirly);
   }
 
-  function hide_whirly() {
-    hide($whirly);
+  hide_whirly() {
+    this.hide($whirly);
   }
 
-  /*********************/
-  /*      Helpers      */
-  /*********************/
+  /**********************/
+  /*     MO Helpers     */
+  /**********************/
 
   // notice this is for block-level
-  function show(element) {
+  show(element) {
     if (element !== undefined) {
       element.style.display = 'block';
       element.classList.add('in');
     }
   }
 
-  function hide(element) {
+  hide(element) {
     if (element !== undefined) {
       element.classList.remove('in');
       window.setTimeout(() => { element.style.display = 'none'; }, 600);

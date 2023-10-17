@@ -1,20 +1,10 @@
 const $results = document.getElementById('translation_results');
-// $results.addEventListener('load', resultsLoaded);
 
 const tag = "<%= @tag %>"
 const new_str = "<%= @new_str %>"
 
-// maybe call functions of MOTranslations (extend prototype)
-// function resultsLoaded(jsonResponse) {
-  if (tag != '') {
-    // Make tag in left column gray because it's now been translated.
-    // Want only untranslated tags to be bold black to stand out better.
-    const _str_tag = document.getElementById('str_' + tag);
-    _str_tag.innerHTML = new_str;
-    _str_tag.classList.add('translated').add('text-muted');
-  } else if (LOADED) {
-    CHANGED = true;
-    disableCommitButtons(false);
-  }
-  hide_whirly();
-// }
+$results.addEventListener(
+  'load', (e) => MOTranslations.resultsLoaded(tag, new_str, e)
+);
+
+

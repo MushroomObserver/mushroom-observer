@@ -32,7 +32,8 @@ class TranslationsController < ApplicationController
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
-    render(partial: "translations/form")
+    # render(partial: "translations/form")
+    # render(js: :edit)
   rescue StandardError => e
     msg = error_message(e).join("\n")
     render(plain: msg, status: :internal_server_error)

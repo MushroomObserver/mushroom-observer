@@ -54,9 +54,10 @@ javascript_include("mo_translations")
             span_class = up_to_date ? "text-muted" : "font-weight-bold bright"
             str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
             label = tag.span(h(ttag) + ":", class: "tag")
-            link = link_to(label,
-                           edit_translation_path(id: ttag, for_page: @for_page),
-                           data: { tag: ttag, role: "show_tag" })
+            link = link_to(
+              label,
+              edit_translation_path(id: ttag, locale: @lang.locale),
+                                    data: { tag: ttag, role: "show_tag" })
             tag.p(link + " " + str, class: "tag_field")
           else
             raise "Unexpected form item type: #{line.class.name}"
