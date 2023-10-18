@@ -1,28 +1,17 @@
 function updateIndex() {
-  // const $results = document.getElementById('translation_results');
-
   const tag = "<%= @tag %>";
   const new_str = "<%= @new_str %>";
-
-  // mo_translations.resultsLoaded(tag, new_str, e);
-
-  // this was for old iframe
-  // $results.addEventListener(
-  //  'load', (e) => mo_translations.resultsLoaded(tag, new_str, e)
-  // );
-  console.log("tag: "+ tag);
 
   if (tag != undefined) {
     // Make tag in left column gray because it's now been translated.
     // Want only untranslated tags to be bold black to stand out better.
     const _str_tag = document.getElementById('str_' + tag);
     _str_tag.innerHTML = new_str;
-    _str_tag.classList.add('translated').add('text-muted');
+    _str_tag.classList.add('translated', 'text-muted');
   } else if (this.LOADED) {
     mo_translations.CHANGED = true;
     mo_translations.disableCommitButtons(false);
   }
-  mo_translations.hide_whirly();
 }
-alert("Here");
+
 updateIndex();

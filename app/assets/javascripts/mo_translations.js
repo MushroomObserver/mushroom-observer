@@ -82,9 +82,7 @@ class MOTranslations {
     // $reload_button.onclick = (e) => {
     //   this.loadEditForm(this.LOCALE, e.target.dataset.tag);
     // };
-
-    // change the locale of the reload button and fire it
-    $locale_select.onchange = (e) => {
+    function changeReloadLocale(e) {
       const _href = $reload_button.href,
         _locale_query = "?locale=",
         _path_components = _href.split(_locale_query),
@@ -94,6 +92,11 @@ class MOTranslations {
         _new_href = _path + _locale_query + _new_locale;
 
       $reload_button.setAttribute("href", _new_href);
+    }
+
+    // change the locale of the reload button and fire it
+    $locale_select.onchange = (e) => {
+      changeReloadLocale(e);
       $reload_button.click();
     };
 
@@ -239,7 +242,7 @@ class MOTranslations {
   // }
 
   formChanged() {
-    console.log("formChanged")
+    // console.log("formChanged")
     this.CHANGED = true;
     this.disableCommitButtons(false);
   }

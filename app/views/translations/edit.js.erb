@@ -4,20 +4,20 @@ function loadEditForm() {
   const $translation_ui = document.getElementById('translation_ui'),
     msg = '<%= @msg %>';
 
-  if (!mo_translations.CHANGED || confirm(mo_translations.CONFIRM_STRING)) {
-    mo_translations.show_whirly(mo_translations.LOADING_STRING);
-  }
+  // if (!mo_translations.CHANGED || confirm(mo_translations.CONFIRM_STRING)) {
+  //   mo_translations.show_whirly(mo_translations.LOADING_STRING);
+  // }
 
-  console.log("msg: " + msg);
+  // console.log("msg: " + msg);
 
   if( msg == '' ) {
-    mo_translations.hide_whirly();
+    // mo_translations.hide_whirly();
 
     $translation_ui.innerHTML = '<%= j render(partial: "translations/form") %>';
     mo_translations.CHANGED = false;
     mo_translations.LOADED = true;
   } else {
-    mo_translations.hide_whirly();
+    // mo_translations.hide_whirly();
     alert(msg);
     // console.log(`got a ${response.status}`);
   }
