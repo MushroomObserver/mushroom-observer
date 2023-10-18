@@ -13,11 +13,6 @@ javascript_include("mo_translations")
   });
 ) %>
 
-<div id="whirly" class="hidden">
-  <span id="whirly_text" class="pb-2"></span>
-  <%= image_tag("indicator.gif") %>
-</div>
-
 <div class="container-text">
   <p class="help-block"><%= :edit_translations_help.t %></p>
 </div>
@@ -51,7 +46,8 @@ javascript_include("mo_translations")
               # Mark as translated if there is nothing to actually translate!
               up_to_date = true
             end
-            span_class = up_to_date ? "text-muted" : "font-weight-bold bright"
+            span_class = up_to_date ?
+              "translated text-muted" : "font-weight-bold"
             str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
             label = tag.span(h(ttag) + ":", class: "tag")
             link = link_to(label,
@@ -71,8 +67,6 @@ javascript_include("mo_translations")
       <div id="translation_ui">
         <%= render(partial: "translations/form") if @edit_tags.any? %>
       </div>
-      <div id="translation_results" name="translation_results"
-           src="" style="display:none"></div>
     </div>
   </div>
 </div><!--.row-->
