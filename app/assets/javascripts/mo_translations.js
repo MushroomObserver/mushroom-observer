@@ -110,7 +110,7 @@ class MOTranslations {
       // event.preventDefault();
       // event.stopPropagation();
       this.CHANGED = false;
-      this.show_whirly(SAVING_STRING);
+      this.show_whirly(this.SAVING_STRING);
       this.disableCommitButtons(true);
       // submitForm(event.target)
     };
@@ -196,6 +196,7 @@ class MOTranslations {
 
   // Called by update action onload, with the tag and new_str
   resultsLoaded(tag, new_str, e) {
+    console.log("resultsLoaded");
     if (tag != undefined) {
       // Make tag in left column gray because it's now been translated.
       // Want only untranslated tags to be bold black to stand out better.
