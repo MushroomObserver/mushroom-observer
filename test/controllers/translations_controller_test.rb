@@ -258,60 +258,61 @@ class TranslationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_edit_translation_ajax_form
-    use_test_locales do
-      old_one = :one.l
-      initial_locale = I18n.locale
-      I18n.with_locale(:el) do
-        greek_one = :one.l
-        I18n.with_locale(initial_locale) do
-          login("rolf")
-          get(:edit, params: { locale: "en", tag: "two" })
-          assert_no_flash
-          assert_response(:success)
-          assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-          assert_select("textarea[name=tag_two]", 1)
-          assert_select("textarea[name=tag_twos]", 1)
-          assert_select("textarea[name=tag_TWO]", 1)
-          assert_select("textarea[name=tag_TWOS]", 1)
-          assert_textarea_value(:tag_two, "two")
-          assert_textarea_value(:tag_twos, "twos")
-          assert_textarea_value(:tag_TWO, "Two")
-          assert_textarea_value(:tag_TWOS, "Twos")
+  # Moved to translations system test. Functions differently
+  # def test_edit_translation_ajax_form
+  #   use_test_locales do
+  #     old_one = :one.l
+  #     initial_locale = I18n.locale
+  #     I18n.with_locale(:el) do
+  #       greek_one = :one.l
+  #       I18n.with_locale(initial_locale) do
+  #         login("rolf")
+  #         get(:edit, params: { locale: "en", tag: "two" })
+  #         assert_no_flash
+  #         assert_response(:success)
+  #         assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+  #         assert_select("textarea[name=tag_two]", 1)
+  #         assert_select("textarea[name=tag_twos]", 1)
+  #         assert_select("textarea[name=tag_TWO]", 1)
+  #         assert_select("textarea[name=tag_TWOS]", 1)
+  #         assert_textarea_value(:tag_two, "two")
+  #         assert_textarea_value(:tag_twos, "twos")
+  #         assert_textarea_value(:tag_TWO, "Two")
+  #         assert_textarea_value(:tag_TWOS, "Twos")
 
-          assert_equal(old_one, :one.l)
-          old_one = :one.l
-          translation_for_one("en", "uno")
-          assert_no_flash
-          assert_match(/locale = "en"/, @response.body)
-          assert_match(/tag = "one"/, @response.body)
-          assert_match(/str = "uno"/, @response.body)
-          assert_equal("uno", :one.l)
+  #         assert_equal(old_one, :one.l)
+  #         old_one = :one.l
+  #         translation_for_one("en", "uno")
+  #         assert_no_flash
+  #         assert_match(/locale = "en"/, @response.body)
+  #         assert_match(/tag = "one"/, @response.body)
+  #         assert_match(/str = "uno"/, @response.body)
+  #         assert_equal("uno", :one.l)
 
-          get(:edit, params: { locale: "en", tag: "one" })
-          assert_no_flash
-          assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-          assert_select("textarea[name=tag_one]", 1)
-          assert_textarea_value(:tag_one, "uno")
-          translation_for_one("en", old_one)
+  #         get(:edit, params: { locale: "en", tag: "one" })
+  #         assert_no_flash
+  #         assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+  #         assert_select("textarea[name=tag_one]", 1)
+  #         assert_textarea_value(:tag_one, "uno")
+  #         translation_for_one("en", old_one)
 
-          translation_for_one("el", "ichi")
-          assert_no_flash
-          assert_match(/locale = "el"/, @response.body)
-          assert_match(/tag = "one"/, @response.body)
-          assert_match(/str = "ichi"/, @response.body)
-          assert_equal("one", :one.l)
+  #         translation_for_one("el", "ichi")
+  #         assert_no_flash
+  #         assert_match(/locale = "el"/, @response.body)
+  #         assert_match(/tag = "one"/, @response.body)
+  #         assert_match(/str = "ichi"/, @response.body)
+  #         assert_equal("one", :one.l)
 
-          get(:edit, params: { locale: "el", tag: "one" })
-          assert_no_flash
-          assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-          assert_textarea_value(:tag_one, "ichi")
-        end
-        assert_equal("ichi", :one.l)
-        translation_for_one("el", greek_one)
-      end
-    end
-  end
+  #         get(:edit, params: { locale: "el", tag: "one" })
+  #         assert_no_flash
+  #         assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+  #         assert_textarea_value(:tag_one, "ichi")
+  #       end
+  #       assert_equal("ichi", :one.l)
+  #       translation_for_one("el", greek_one)
+  #     end
+  #   end
+  # end
 
   def test_page_expired
     login("rolf")
