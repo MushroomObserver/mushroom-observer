@@ -216,7 +216,7 @@ module LanguageExporter
   private
 
   def merge_localization_strings_into(data)
-    translation_strings.each do |str|
+    translation_strings.includes([:user, :versions]).each do |str|
       data[str.tag] = str.text
     end
     data

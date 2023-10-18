@@ -18,8 +18,10 @@
     <% if Language.tracking_usage %>
       <% file = Language.save_tags %>
       <%= link_to(:app_edit_translations_on_page.t,
-                  translations_path(for_page: file)) %> |
-      <%= link_to(:app_edit_translations.t, translations_path) %>
+                  translations_path(for_page: file),
+                  id: "translations_for_page_link") %> |
+      <%= link_to(:app_edit_translations.t, translations_path,
+                  id: "translations_index_link") %>
     <% end %>
   </div>
 <% end %>
