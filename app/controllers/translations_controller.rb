@@ -32,11 +32,8 @@ class TranslationsController < ApplicationController
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
-    # render(partial: "translations/form")
-    # render(js: :edit)
   rescue StandardError => e
-    msg = error_message(e).join("\n")
-    render(plain: msg, status: :internal_server_error)
+    @msg = error_message(e).join("\n")
   end
 
   # Only accessed by ajax from the index; only responds to js
@@ -53,8 +50,8 @@ class TranslationsController < ApplicationController
     @new_str = preview_string(@translated_records[@tag].text)
     render(partial: "translations/update")
   rescue StandardError => e
-    @error = error_message(e).join("\n")
-    render(json: { error: @error })
+    @msg = error_message(e).join("\n")
+    render(:edit)
   end
 
   # -------------------------------
