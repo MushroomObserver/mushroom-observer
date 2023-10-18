@@ -31,14 +31,14 @@ class MOTranslations {
         return this.CONFIRM_STRING;
     };
 
-    this.$tag_links.forEach((element) => {
-      element.onclick = (e) => {
-        e.preventDefault();
-        if (this.CHANGED)
-          confirm
-        this.loadEditForm(this.LOCALE, e.target.dataset.tag);
-      };
-    });
+    // this.$tag_links.forEach((element) => {
+    //   element.onclick = (e) => {
+    //     e.preventDefault();
+    //     if (this.CHANGED)
+    //       confirm
+    //     this.loadEditForm(this.LOCALE, e.target.dataset.tag);
+    //   };
+    // });
   }
 
   formObserver() {
@@ -94,7 +94,7 @@ class MOTranslations {
         _new_href = _path + _locale_query + _new_locale;
 
       $reload_button.setAttribute("href", _new_href);
-      $reload_button.trigger("click");
+      $reload_button.click();
     };
 
     // make this a controller action versions/show
@@ -254,11 +254,11 @@ class MOTranslations {
   show_whirly(text) {
     document.getElementById('whirly_text').innerHTML = text;
     // $whirly.center().show();
-    this.show($whirly);
+    this.show(this.$whirly);
   }
 
   hide_whirly() {
-    this.hide($whirly);
+    this.hide(this.$whirly);
   }
 
   /**********************/

@@ -1,18 +1,26 @@
+// mo_translations is the current instance of MO_Translations
 
-const $translation_ui = document.getElementById('translation_ui'),
-  msg = '<%= @msg %>';
+function loadEditForm() {
+  const $translation_ui = document.getElementById('translation_ui'),
+    msg = '<%= @msg %>';
 
-if (!MOTranslations.CHANGED || confirm(MOTranslations.CONFIRM_STRING)) {
-  MOTranslations.show_whirly(MOTranslations.LOADING_STRING);
+  if (!mo_translations.CHANGED || confirm(mo_translations.CONFIRM_STRING)) {
+    mo_translations.show_whirly(mo_translations.LOADING_STRING);
+  }
 
-if( msg == '' ) {
-  MOTranslations.hide_whirly();
+  console.log("msg: " + msg);
 
-  $translation_ui.innerHTML = '<%= j render(partial: "translations/form") %>';
-  MOTranslations.CHANGED = false;
-  MOTranslations.LOADED = true;
-} else {
-  MOTranslations.hide_whirly();
-  alert(msg);
-  // console.log(`got a ${response.status}`);
+  if( msg == '' ) {
+    mo_translations.hide_whirly();
+
+    $translation_ui.innerHTML = '<%= j render(partial: "translations/form") %>';
+    mo_translations.CHANGED = false;
+    mo_translations.LOADED = true;
+  } else {
+    mo_translations.hide_whirly();
+    alert(msg);
+    // console.log(`got a ${response.status}`);
+  }
 }
+
+loadEditForm();

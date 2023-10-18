@@ -62,9 +62,10 @@
                    id: "save_button", class: "btn btn-default") %>
     <%= button_tag(:CANCEL.l, type: :button, name: :commit, value: :cancel,
                    id: "cancel_button", class: "btn btn-default") %>
-    <%= link_to(:RELOAD.l, id: "reload_button", # type: :button,
+    <%= link_to(:RELOAD.l,
                 edit_translation_path(id: @tag, locale: @lang.locale),
-                class: "btn btn-default", data: { tag: @tag }) %>
+                id: "reload_button", # type: :button,
+                class: "btn btn-default", remote: true, data: { tag: @tag }) %>
   </div>
 
   <%= select_tag(:locale,
@@ -119,6 +120,7 @@
                 <%= if str.length > 80
                   label = "[" + :edit_translations_full_text.t + "]"
                   link_to(label, translation_versions_path(id: version.id),
+                          remote: true,
                           data: { role: "show_versions", id: version.id })
                 end %>
               </td>

@@ -17,7 +17,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           # login("rolf")
           # get(:edit, params: { locale: "en", tag: "two" })
           # visit(edit_translation_path(id: "two", locale: "en"))
-          within("#translations_index") { click_on("#two") }
+          within("#translations_index") { click_link("[data-tag='two']")  }
 
           assert_no_flash
           # assert_response(:success)
@@ -29,7 +29,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
 
           old_one = :one.l
           # translation_for_one("en", "uno")
-          within("#translations_index") { click_on("#one") }
+          within("#translations_index") { click_link("[data-tag='one']") }
           # visit(edit_translation_path(id: "one", locale: "en"))
           assert_select("locale", with: "en")
           assert_field("textarea[name=tag_one]", with: old_one)

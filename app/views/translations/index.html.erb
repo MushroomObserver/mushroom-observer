@@ -5,7 +5,7 @@ javascript_include("mo_translations")
 %>
 
 <% inject_javascript_at_end %(
-  MOTranslations({
+  const mo_translations = new MOTranslations({
     locale: "#{j @lang.locale}",
     confirm_string: "#{j :edit_translations_will_lose_changes.l}",
     loading_string: "#{j :edit_translations_loading.l}",
@@ -54,10 +54,9 @@ javascript_include("mo_translations")
             span_class = up_to_date ? "text-muted" : "font-weight-bold bright"
             str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
             label = tag.span(h(ttag) + ":", class: "tag")
-            link = link_to(
-              label,
+            link = link_to(label,
               edit_translation_path(id: ttag, locale: @lang.locale),
-                                    data: { tag: ttag, role: "show_tag" })
+              remote: true, data: { tag: ttag, role: "show_tag" })
             tag.p(link + " " + str, class: "tag_field")
           else
             raise "Unexpected form item type: #{line.class.name}"
