@@ -195,20 +195,20 @@ class MOTranslations {
   // $results.addEventListener('load', resultsLoaded); // parse resultsLoaded
 
   // Called by update action onload, with the tag and new_str
-  resultsLoaded(tag, new_str, e) {
-    console.log("resultsLoaded");
-    if (tag != undefined) {
-      // Make tag in left column gray because it's now been translated.
-      // Want only untranslated tags to be bold black to stand out better.
-      const _str_tag = document.getElementById('str_' + tag);
-      _str_tag.innerHTML = new_str;
-      _str_tag.classList.add('translated').add('text-muted');
-    } else if (this.LOADED) {
-      this.CHANGED = true;
-      this.disableCommitButtons(false);
-    }
-    this.hide_whirly();
-  }
+  // resultsLoaded(tag, new_str, e) {
+  //   console.log("resultsLoaded");
+  //   if (tag != undefined) {
+  //     // Make tag in left column gray because it's now been translated.
+  //     // Want only untranslated tags to be bold black to stand out better.
+  //     const _str_tag = document.getElementById('str_' + tag);
+  //     _str_tag.innerHTML = new_str;
+  //     _str_tag.classList.add('translated').add('text-muted');
+  //   } else if (this.LOADED) {
+  //     this.CHANGED = true;
+  //     this.disableCommitButtons(false);
+  //   }
+  //   this.hide_whirly();
+  // }
 
   clearForm() {
     this.$translation_ui.innerHTML = '';
