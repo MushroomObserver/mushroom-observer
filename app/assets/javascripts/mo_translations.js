@@ -65,8 +65,8 @@ class MOTranslations {
       $reload_button = document.getElementById('reload_button'),
       $form = document.getElementById('translation_form'),
       $textareas = $form.querySelectorAll('textarea'),
-      $show_versions = $form.querySelectorAll('[data-role="show_old_version"]'),
-      $locale = document.getElementById('locale');
+      // $show_versions = $form.querySelectorAll('[data-role="show_versions"]'),
+      $locale_select = document.getElementById('locale');
 
     // Attach listeners as delegates since they are injected into the dom.
     $textareas.forEach((element) => {
@@ -78,23 +78,32 @@ class MOTranslations {
       this.clearForm();
     };
 
-    // just give the reload button the url of the edit action
-    $reload_button.onclick = (e) => {
-      this.loadEditForm(this.LOCALE, e.target.dataset.tag);
-    };
+    // todo: just give the reload button the url of the edit action
+    // $reload_button.onclick = (e) => {
+    //   this.loadEditForm(this.LOCALE, e.target.dataset.tag);
+    // };
 
     // change the locale of the reload button and fire it
-    $locale.onchange = (e) => {
-      this.loadEditForm(e.target.value, e.target.dataset.tag);
+    $locale_select.onchange = (e) => {
+      const _href = $reload_button.href,
+        _locale_query = "?locale=",
+        _path_components = _href.split(_locale_query),
+        _path = _path_components[0],
+        // _old_locale = _path_components[1],
+        _new_locale = e.target.value,
+        _new_href = _path + _locale_query + _new_locale;
+
+      $reload_button.setAttribute("href", _new_href);
+      $reload_button.trigger("click");
     };
 
     // make this a controller action versions/show
-    $show_versions.forEach((element) => {
-      element.onclick = (e) => {
-        e.preventDefault();
-        this.showOldVersion(e.target.dataset.id);
-      }
-    });
+    // $show_versions.forEach((element) => {
+    //   element.onclick = (e) => {
+    //     e.preventDefault();
+    //     this.showOldVersion(e.target.dataset.id);
+    //   }
+    // });
 
     // I think this is fired AFTER ujs submits the form. Anyway unpredictable
     $form.onsubmit = (e) => {
@@ -108,35 +117,35 @@ class MOTranslations {
   }
 
   // FETCH THE FORM FOR ONE TAG. links are ok. why not use edit actions
-  loadEditForm(locale, tag) {
-    this.LOCALE = locale;
-    if (!this.CHANGED || confirm(this.CONFIRM_STRING)) {
-      this.show_whirly(this.LOADING_STRING);
+  // loadEditForm(locale, tag) {
+  //   this.LOCALE = locale;
+  //   if (!this.CHANGED || confirm(this.CONFIRM_STRING)) {
+  //     this.show_whirly(this.LOADING_STRING);
 
-      const url = '/translations/' + tag + '/edit' + '?locale=' + locale;
-      // debugger;
-      fetch(url).then((response) => {
-        if (response.ok) {
-          if (200 <= response.status && response.status <= 299) {
-            response.text().then((html) => {
-              // debugger;
-              // console.log("html: " + html);
-              this.hide_whirly();
-              this.$translation_ui.innerHTML = html;
-              this.CHANGED = false;
-              this.LOADED = true;
-            }).catch((error) => {
-              console.error("no_content:", error);
-            });
-          } else {
-            this.hide_whirly();
-            alert(response.responseText);
-            console.log(`got a ${response.status}`);
-          }
-        }
-      })
-    }
-  }
+  //     const url = '/translations/' + tag + '/edit' + '?locale=' + locale;
+  //     // debugger;
+  //     fetch(url).then((response) => {
+  //       if (response.ok) {
+  //         if (200 <= response.status && response.status <= 299) {
+  //           response.text().then((html) => {
+  //             // debugger;
+  //             // console.log("html: " + html);
+  //             this.hide_whirly();
+  //             this.$translation_ui.innerHTML = html;
+  //             this.CHANGED = false;
+  //             this.LOADED = true;
+  //           }).catch((error) => {
+  //             console.error("no_content:", error);
+  //           });
+  //         } else {
+  //           this.hide_whirly();
+  //           alert(response.responseText);
+  //           console.log(`got a ${response.status}`);
+  //         }
+  //       }
+  //     })
+  //   }
+  // }
 
   // function getCSRFToken() {
   //   const csrfToken = document.querySelector("[name='csrf-token']")
@@ -193,7 +202,7 @@ class MOTranslations {
       const _str_tag = document.getElementById('str_' + tag);
       _str_tag.innerHTML = new_str;
       _str_tag.classList.add('translated').add('text-muted');
-    } else if (LOADED) {
+    } else if (this.LOADED) {
       this.CHANGED = true;
       this.disableCommitButtons(false);
     }
@@ -207,26 +216,26 @@ class MOTranslations {
   }
 
   // AJAX FETCH PREVIOUS VERSIONS
-  showOldVersion(id) {
-    this.show_whirly(this.LOADING_STRING);
-    fetch('/ajax/old_translation/' + id).then((response) => {
-      if (response.ok) {
-        if (200 <= response.status && response.status <= 299) {
-          response.text().then((html) => {
-            // console.log("html: " + html);
-            this.hide_whirly();
-            alert(html);
-          }).catch((error) => {
-            console.error("no_content:", error);
-          });
-        } else {
-          this.hide_whirly();
-          alert(response.responseText);
-          console.log(`got a ${response.status}`);
-        }
-      }
-    });
-  }
+  // showOldVersion(id) {
+  //   this.show_whirly(this.LOADING_STRING);
+  //   fetch('/ajax/old_translation/' + id).then((response) => {
+  //     if (response.ok) {
+  //       if (200 <= response.status && response.status <= 299) {
+  //         response.text().then((html) => {
+  //           // console.log("html: " + html);
+  //           this.hide_whirly();
+  //           alert(html);
+  //         }).catch((error) => {
+  //           console.error("no_content:", error);
+  //         });
+  //       } else {
+  //         this.hide_whirly();
+  //         alert(response.responseText);
+  //         console.log(`got a ${response.status}`);
+  //       }
+  //     }
+  //   });
+  // }
 
   formChanged() {
     console.log("formChanged")

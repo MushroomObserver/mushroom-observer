@@ -73,7 +73,7 @@ class TranslationsControllerTest < FunctionalTestCase
     :name.l
     assert_equal(["name"], Language.tags_used)
     page = Language.save_tags
-    get(:index, params: { page: page })
+    get(:index, params: { for_page: page })
   end
 
   def test_primary_tag
@@ -170,7 +170,7 @@ class TranslationsControllerTest < FunctionalTestCase
 
   def test_edit_tag
     login("rolf")
-    get(:index, params: { locale: "en", tag: "xxx" })
+    get(:edit, params: { locale: "en", tag: "xxx" })
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_select("textarea[name=tag_xxx]", 1)
     assert_textarea_value(:tag_xxx, "")
@@ -178,7 +178,7 @@ class TranslationsControllerTest < FunctionalTestCase
 
   def test_edit_tag_two
     login("rolf")
-    get(:index, params: { locale: "en", tag: "two" })
+    get(:edit, params: { locale: "en", tag: "two" })
     assert_no_flash
     assert_response(:success)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
@@ -193,8 +193,7 @@ class TranslationsControllerTest < FunctionalTestCase
   end
 
   def translation_for_one(locale, value, _commit = :SAVE.l)
-    patch(:update,
-          params: {
+    patch(:update, params: {
             locale: locale, tag: "one", tag_one: value, commit: :SAVE.l
           })
   end
@@ -324,13 +323,13 @@ class TranslationsControllerTest < FunctionalTestCase
     page = Language.save_tags
 
     # Page is good, should only display the two tags used above.
-    get(:index, params: { locale: "en", page: page })
+    get(:index, params: { locale: "en", for_page: page })
     assert_no_flash
     assert_equal(2, assigns(:show_tags).length)
 
     # Simulate page expiration:
     # result is it will display all tags, not just the two used above.
-    get(:index, params: { locale: "en", page: "xxx" })
+    get(:index, params: { locale: "en", for_page: "xxx" })
     assert_flash_error
     assert(assigns(:show_tags).length > 2)
   end
