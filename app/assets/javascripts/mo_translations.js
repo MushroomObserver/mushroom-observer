@@ -11,7 +11,7 @@ class MOTranslations {
       this.SAVING_STRING = localizedText.saving_string,
       this.LOADED = false,
       this.CHANGED = false,
-      this.$whirly = document.getElementById('whirly'),
+      // this.$whirly = document.getElementById('whirly'),
       this.$tag_links = document.querySelectorAll('[data-role="show_tag"]');
 
     // TRANSLATION UI - EDIT FORM
@@ -113,7 +113,7 @@ class MOTranslations {
       // event.preventDefault();
       // event.stopPropagation();
       this.CHANGED = false;
-      this.show_whirly(this.SAVING_STRING);
+      // this.show_whirly(this.SAVING_STRING);
       this.disableCommitButtons(true);
       // submitForm(event.target)
     };
@@ -255,15 +255,15 @@ class MOTranslations {
     $cancel_button.disabled = !disabled;
   }
 
-  show_whirly(text) {
-    document.getElementById('whirly_text').innerHTML = text;
-    // $whirly.center().show();
-    this.show(this.$whirly);
-  }
+  // show_whirly(text) {
+  //   document.getElementById('whirly_text').innerHTML = text;
+  //   // $whirly.center().show();
+  //   this.show(this.$whirly);
+  // }
 
-  hide_whirly() {
-    this.hide(this.$whirly);
-  }
+  // hide_whirly() {
+  //   this.hide(this.$whirly);
+  // }
 
   /**********************/
   /*     MO Helpers     */

@@ -14,9 +14,11 @@ function updateIndex() {
   }
 }
 
+// Note that the same user's versions are aggregated for a day.
 function updateVersions() {
   const versions = document.getElementById("translation_versions");
-  versions.replaceWith('<%= j render(partial: "translations/versions") %>');
+  const new_versions = '<%= j render(partial: "translations/versions") %>';
+  versions.outerHTML = new_versions;
 }
 
 updateIndex();

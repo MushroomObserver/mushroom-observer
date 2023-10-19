@@ -9,7 +9,7 @@ end %>
   <%= f.hidden_field(:tag, value: @tag) %>
 
   <%# Form for this language's translations %>
-  <%= tag.h4("#{@lang.name}:", class:"font-weight-bold mt-2") %>
+  <%= tag.h4("#{@lang.name}:", class:"font-weight-bold mt-3") %>
 
   <%# textarea for each tag %>
   <% @edit_tags.each do |ttag|
