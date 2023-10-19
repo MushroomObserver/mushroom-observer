@@ -15,6 +15,9 @@ class TranslationsSystemTest < ApplicationSystemTestCase
 
       I18n.with_locale(:el) do
         greek_one = :one.l
+        # until we figure out why I18n.t("mo.one", default: "") == "Ένα"
+        greek_one = greek_one.downcase
+        # assert_equal(greek_one.downcase, greek_one)
 
         I18n.with_locale(initial_locale) do
           assert_selector("#translators_credit")
@@ -23,14 +26,38 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           end
           assert_selector("body.translations__index")
           within("#translations_index") { first("[data-tag='two']").click }
+          assert_selector("#translation_form")
 
-          assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
-          assert_field("tag_two", type: :textarea, with: "two")
-          assert_field("tag_twos", type: :textarea, with: "twos")
-          assert_field("tag_TWO", type: :textarea, with: "Two")
-          assert_field("tag_TWOS", type: :textarea, with: "Twos")
+          within("#translation_form") do
+            assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
+            assert_field("tag_two", type: :textarea, with: "two")
+            assert_field("tag_twos", type: :textarea, with: "twos")
+            assert_field("tag_TWO", type: :textarea, with: "Two")
+            assert_field("tag_TWOS", type: :textarea, with: "Twos")
+            click_button("Cancel")
+          end
+          assert_no_selector("#translation_official")
+          assert_no_selector("#translation_form")
+          assert_no_selector("#translation_versions")
+
+          # test the reload button
+          within("#translations_index") { first("[data-tag='two']").click }
+          assert_selector("#translation_form")
+
+          within("#translation_form") do
+            fill_in("tag_two", with: "three")
+            fill_in("tag_twos", with: "threes")
+            fill_in("tag_TWO", with: "Three")
+            fill_in("tag_TWOS", with: "Threes")
+            click_link("Reload")
+            assert_field("tag_two", type: :textarea, with: "two")
+            assert_field("tag_twos", type: :textarea, with: "twos")
+            assert_field("tag_TWO", type: :textarea, with: "Two")
+            assert_field("tag_TWOS", type: :textarea, with: "Twos")
+          end
 
           within("#translations_index") { first("[data-tag='one']").click }
+          assert_selector("#translation_form")
           assert_select("locale", selected: "English")
           assert_field("tag_one", type: :textarea, with: old_one)
           fill_in("tag_one", with: "uno")
@@ -47,7 +74,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           select("Ελληνικά", from: "locale")
           assert_selector("#translation_form h4", text: "Ελληνικά:")
           # downcase necessary because of translation glitch, greek_one == "Ένα"
-          assert_field("tag_one", type: :textarea, with: greek_one.downcase)
+          assert_field("tag_one", type: :textarea, with: greek_one)
           fill_in("tag_one", with: "ichi")
           within("#translation_form") { click_commit }
           within("#translations_index") { assert_text("ichi") }
@@ -57,10 +84,10 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           assert_field("tag_one", type: :textarea, with: "ichi")
           I18n.with_locale(:el) { assert_equal("ichi", :one.l) }
 
-          fill_in("tag_one", with: greek_one.downcase)
+          fill_in("tag_one", with: greek_one)
           within("#translation_form") { click_commit }
         end
-        assert_equal(greek_one.downcase, :one.l)
+        assert_equal(greek_one, :one.l)
       end
     end
   end
