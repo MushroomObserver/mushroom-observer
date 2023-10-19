@@ -15,14 +15,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
 
       I18n.with_locale(:el) do
         greek_one = :one.l
-        # scroll_to("#language_dropdown_toggle", align: :center)
-        # click_link("language_dropdown_toggle")
-        # within("#language_dropdown_menu") { first("[data-locale='fr']").click }
-        # assert_selector("body.observations__index")
-        # binding.break
-        # click_link("language_dropdown_toggle")
-        # within("#language_dropdown_menu") { first("[data-locale='en']").click }
-        # binding.break
+
         I18n.with_locale(initial_locale) do
           assert_selector("#translators_credit")
           within("#translators_credit") do
@@ -31,21 +24,18 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           assert_selector("body.translations__index")
           within("#translations_index") { first("[data-tag='two']").click }
 
-          # assert_no_flash
           assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
           assert_field("tag_two", type: :textarea, with: "two")
           assert_field("tag_twos", type: :textarea, with: "twos")
           assert_field("tag_TWO", type: :textarea, with: "Two")
           assert_field("tag_TWOS", type: :textarea, with: "Twos")
 
-          # old_one = :one.l
           within("#translations_index") { first("[data-tag='one']").click }
           assert_select("locale", selected: "English")
           assert_field("tag_one", type: :textarea, with: old_one)
           fill_in("tag_one", with: "uno")
           within("#translation_form") { click_commit }
 
-          # assert_no_flash
           within("#translations_index") { assert_text("uno") }
           assert_equal("uno", :one.l)
           assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
@@ -61,10 +51,8 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           fill_in("tag_one", with: "ichi")
           within("#translation_form") { click_commit }
           within("#translations_index") { assert_text("ichi") }
-          # binding.break
           assert_equal("one", :one.l)
 
-          # assert_no_flash
           assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
           assert_field("tag_one", type: :textarea, with: "ichi")
           I18n.with_locale(:el) { assert_equal("ichi", :one.l) }
@@ -77,4 +65,5 @@ class TranslationsSystemTest < ApplicationSystemTestCase
     end
   end
 
+  def test_cancel_and_reload; end
 end
