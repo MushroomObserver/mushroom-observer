@@ -64,7 +64,7 @@ class MOTranslations {
     const $cancel_button = document.getElementById('cancel_button'),
       $reload_button = document.getElementById('reload_button'),
       $form = document.getElementById('translation_form'),
-      $textareas = $form.querySelectorAll('textarea'),
+      $textareas = this.$translation_ui.querySelectorAll('textarea'),
       // $show_versions = $form.querySelectorAll('[data-role="show_versions"]'),
       $locale_select = document.getElementById('locale');
 
@@ -74,14 +74,24 @@ class MOTranslations {
       element.onkeydown = () => { this.formChanged() };
     });
 
-    $cancel_button.onclick = () => {
-      this.clearForm();
-    };
+    // clear the form
+    if ($cancel_button) {
+      $cancel_button.onclick = () => {
+        this.$translation_ui.innerHTML = '';
+        this.LOADED = false;
+        this.CHANGED = false;
+      };
+    }
 
-    // todo: just give the reload button the url of the edit action
-    // $reload_button.onclick = (e) => {
-    //   this.loadEditForm(this.LOCALE, e.target.dataset.tag);
-    // };
+    // change the locale of the reload button and fire it
+    if ($locale_select) {
+      $locale_select.onchange = (e) => {
+        changeReloadLocale(e);
+        $reload_button.click();
+      };
+    }
+
+    // give the reload button the url of the edit action with new locale
     function changeReloadLocale(e) {
       const _href = $reload_button.href,
         _locale_query = "?locale=",
@@ -94,12 +104,6 @@ class MOTranslations {
       $reload_button.setAttribute("href", _new_href);
     }
 
-    // change the locale of the reload button and fire it
-    $locale_select.onchange = (e) => {
-      changeReloadLocale(e);
-      $reload_button.click();
-    };
-
     // make this a controller action versions/show
     // $show_versions.forEach((element) => {
     //   element.onclick = (e) => {
@@ -109,14 +113,16 @@ class MOTranslations {
     // });
 
     // I think this is fired AFTER ujs submits the form. Anyway unpredictable
-    $form.onsubmit = (e) => {
-      // event.preventDefault();
-      // event.stopPropagation();
-      this.CHANGED = false;
-      // this.show_whirly(this.SAVING_STRING);
-      this.disableCommitButtons(true);
-      // submitForm(event.target)
-    };
+    if ($form) {
+      $form.onsubmit = (e) => {
+        // event.preventDefault();
+        // event.stopPropagation();
+        this.CHANGED = false;
+        // this.show_whirly(this.SAVING_STRING);
+        this.disableCommitButtons(true);
+        // submitForm(event.target)
+      };
+    }
   }
 
   // FETCH THE FORM FOR ONE TAG. links are ok. why not use edit actions
@@ -213,11 +219,11 @@ class MOTranslations {
   //   this.hide_whirly();
   // }
 
-  clearForm() {
-    this.$translation_ui.innerHTML = '';
-    this.LOADED = false;
-    this.CHANGED = false;
-  }
+  // clearForm() {
+  //   this.$translation_ui.innerHTML = '';
+  //   this.LOADED = false;
+  //   this.CHANGED = false;
+  // }
 
   // AJAX FETCH PREVIOUS VERSIONS
   // showOldVersion(id) {
