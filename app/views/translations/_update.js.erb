@@ -14,4 +14,10 @@ function updateIndex() {
   }
 }
 
+function updateVersions() {
+  const versions = document.getElementById("translation_versions");
+  versions.replaceWith('<%= j render(partial: "translations/versions") %>');
+}
+
 updateIndex();
+updateVersions();

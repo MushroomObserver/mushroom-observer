@@ -19,54 +19,51 @@ javascript_include("mo_translations")
 
 <div class="row">
   <div class="col-xs-6 translation_container">
-    <div>
-      <div id="translations_index">
-        <% @index.each do |item| %>
-          <%= case item.class.name
-          when /MajorHeader/
-            tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
-                  class: "major_header")
-          when /MinorHeader/
-            tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
-                  class: "minor_header")
-          when /Comment/
-            tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
-                  class: "comment")
-          when /TagField/
-            ttag = item.ttag
-            str = preview_string(@strings[ttag])
-            official_record = @official_records[ttag]
-            translated_record = @translated_records[ttag]
-            up_to_date = translated_record &&
-              translated_record.updated_at >=
-              official_record.updated_at - 1.second
-            if !up_to_date &&
-               official_record &&
-               official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
-              # Mark as translated if there is nothing to actually translate!
-              up_to_date = true
-            end
-            span_class = up_to_date ?
-              "translated text-muted" : "font-weight-bold"
-            str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
-            label = tag.span(h(ttag) + ":", class: "tag")
-            link = link_to(label,
-              edit_translation_path(id: ttag, locale: @lang.locale),
-              remote: true, data: { tag: ttag, role: "show_tag" })
-            tag.p(link + " " + str, class: "tag_field")
-          else
-            raise "Unexpected form item type: #{line.class.name}"
-          end %>
-        <% end %>
-      </div>
+    <div id="translations_index">
+      <% @index.each do |item| %>
+        <%= case item.class.name
+        when /MajorHeader/
+          tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
+                class: "major_header")
+        when /MinorHeader/
+          tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
+                class: "minor_header")
+        when /Comment/
+          tag.p(h(item.string).gsub('\n', '<br/>').html_safe,
+                class: "comment")
+        when /TagField/
+          ttag = item.ttag
+          str = preview_string(@strings[ttag])
+          official_record = @official_records[ttag]
+          translated_record = @translated_records[ttag]
+          up_to_date = translated_record &&
+            translated_record.updated_at >=
+            official_record.updated_at - 1.second
+          if !up_to_date &&
+              official_record &&
+              official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
+            # Mark as translated if there is nothing to actually translate!
+            up_to_date = true
+          end
+          span_class = up_to_date ?
+            "translated text-muted" : "font-weight-bold"
+          str = tag.span(h(str), class: span_class, id: "str_#{ttag}")
+          label = tag.span(h(ttag) + ":", class: "tag")
+          link = link_to(label,
+            edit_translation_path(id: ttag, locale: @lang.locale),
+            remote: true, data: { tag: ttag, role: "show_tag" })
+          tag.p(link + " " + str, class: "tag_field")
+        else
+          raise "Unexpected form item type: #{line.class.name}"
+        end %>
+      <% end %>
     </div>
   </div>
 
   <div class="col-xs-6 translation_container">
-    <div>
-      <div id="translation_ui">
-        <%= render(partial: "translations/form") if @edit_tags.any? %>
-      </div>
+    <div id="translation_ui">
+      <%= render(partial: "translations/form") if @edit_tags.any? %>
+      <%= render(partial: "translations/versions") %>
     </div>
   </div>
 </div><!--.row-->

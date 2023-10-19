@@ -1,24 +1,12 @@
+<%# "Official" text at top. Here so that it gets loaded with every tag %>
+<% unless @lang.official
+  render(partial: "translations/official")
+end %>
+
 <%= form_with(url: { action: :update, for_page: @for_page },
               id: "translation_form", method: :patch, local: false) do |f| %>
 
   <%= f.hidden_field(:tag, value: @tag) %>
-
-  <%# "Official" text at top %>
-  <% unless @lang.official
-    concat(tag.h4("#{Language.official.name}:", class: "font-weight-bold"))
-
-    @edit_tags.each do |ttag|
-      if record = @official_records[ttag]
-        concat(tag.span("#{h(ttag)}:", class: "underline"))
-        concat(tag.p do
-          str = record.text.gsub(/\\n/, "\n")
-          h(str).gsub("\n", "<br/>\n")
-        end)
-      end
-    end
-
-    concat(tag.hr(class: "pb-1 pt-3"))
-  end %>
 
   <%# Form for this language's translations %>
   <%= tag.h4("#{@lang.name}:", class:"font-weight-bold mt-2") %>
@@ -72,63 +60,5 @@
   <%= select_tag(:locale,
                  options_for_select(Language.menu_options, @lang.locale),
                  class: "form-control", data: { tag: @tag }) %>
-
-  <%# Past versions of translations %>
-  <%
-    done_header = false
-    user_logins = { @user.id => @user.login }
-
-    @edit_tags.each do |ttag|
-      if record = @translated_records[ttag]
-        user_logins[record.user_id] ||= record.user.login rescue nil
-        last_text = record.text
-        versions_to_show = []
-        record.versions.reverse.each do |version|
-          if version.text != last_text
-            versions_to_show << version
-            last_text = version.text
-          end
-        end
-
-        if versions_to_show.any?
-          if !done_header
-            concat(tag.hr(class: "pb-1 pt-3"))
-            concat(tag.h4("#{:edit_translations_old_versions.t}:",
-                          class: "pb-2 font-weight-bold"))
-            done_header = true
-          end
-
-          concat(tag.span("#{h(ttag)}:", class: "underline"))
-          concat(tag.br)
-          concat(tag.table(class: "table-striped old_versions pb-1") do
-            versions_to_show.each do |version|
-              concat(tag.tr do
-                [
-                  tag.td do
-                    user_id = version.user_id
-                    login = user_logins[user_id] ||=
-                      User.find(user_id).login rescue ""
-                    login.blank? ? "--" : user_link(user_id, login)
-                  end,
-                  tag.td(version.updated_at.web_date),
-                  tag.td do
-                    concat(h(str = preview_string(version.text, 80)))
-                    if str.length > 80
-                      concat(
-                        link_to("[#{:edit_translations_full_text.t}]",
-                                translation_versions_path(id: version.id),
-                                remote: true,
-                                data: { role: "show_versions", id: version.id })
-                      )
-                    end
-                  end
-                ].safe_join
-              end)
-            end
-          end)
-        end
-      end
-    end
-  %>
 
 <% end %>

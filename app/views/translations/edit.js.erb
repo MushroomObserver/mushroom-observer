@@ -14,6 +14,7 @@ function loadEditForm() {
     // mo_translations.hide_whirly();
 
     $translation_ui.innerHTML = '<%= j render(partial: "translations/form") %>';
+    $translation_ui.append('<%= j render(partial: "translations/versions") %>';
     mo_translations.CHANGED = false;
     mo_translations.LOADED = true;
   } else {
