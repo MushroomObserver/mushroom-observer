@@ -17,6 +17,8 @@ class TranslationsSystemTest < ApplicationSystemTestCase
         greek_one = :one.l
         # until we figure out why I18n.t("mo.one", default: "") == "Ένα"
         greek_one = greek_one.downcase
+        # downcase necessary because of translation glitch
+        # if it's fixed, it should be I18n.t("mo.one", default: "") == "ένα"
         # assert_equal(greek_one.downcase, greek_one)
 
         I18n.with_locale(initial_locale) do
@@ -73,7 +75,6 @@ class TranslationsSystemTest < ApplicationSystemTestCase
 
           select("Ελληνικά", from: "locale")
           assert_selector("#translation_form h4", text: "Ελληνικά:")
-          # downcase necessary because of translation glitch, greek_one == "Ένα"
           assert_field("tag_one", type: :textarea, with: greek_one)
           fill_in("tag_one", with: "ichi")
           within("#translation_form") { click_commit }
@@ -91,6 +92,4 @@ class TranslationsSystemTest < ApplicationSystemTestCase
       end
     end
   end
-
-  def test_cancel_and_reload; end
 end
