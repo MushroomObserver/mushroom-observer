@@ -6,7 +6,6 @@ class TranslationsController < ApplicationController
 
   def index
     @lang = set_language_and_authorize_user
-    # @ajax = false
     @for_page = params[:for_page]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
@@ -27,7 +26,6 @@ class TranslationsController < ApplicationController
   # Form is only loaded by ajax from the index; only responds to js
   def edit
     @lang = set_language_and_authorize_user
-    # @ajax = true
     @tag = params[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
@@ -39,7 +37,6 @@ class TranslationsController < ApplicationController
   # Only accessed by ajax from the index; only responds to js
   def update
     @lang = set_language_and_authorize_user
-    # @ajax = true
     @tag = params[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
@@ -128,29 +125,21 @@ class TranslationsController < ApplicationController
       end
       @strings[ttag] = new_val
     end
-    if any_changes
-      @lang.update_localization_file
-      @lang.update_export_file
-    # else
-    #   flash_warning(:edit_translations_no_changes.t) unless @ajax
-    end
+    return unless any_changes
+
+    @lang.update_localization_file
+    @lang.update_export_file
   end
 
   def create_translation(ttag, val)
     str = @lang.translation_strings.create(tag: ttag, text: val)
     @translated_records[ttag] = str
     str.update_localization
-    # return if @ajax
-
-    # flash_notice(:edit_translations_created_at.t(tag: ttag, str: val))
   end
 
   def change_translation(str, val)
     str.update!(text: val)
     str.update_localization
-    # return if @ajax
-
-    # flash_notice(:edit_translations_changed.t(tag: str.ttag, str: val))
   end
 
   def touch_translation(str)

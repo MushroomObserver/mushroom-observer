@@ -25,10 +25,7 @@ ACTIONS = {
     external_link: {},
     geocode: {},
     image: {},
-    # location_primer: {},
-    # name_primer: {},
     multi_image_template: {},
-    # old_translation: {},
     test: {},
     visual_group_status: {}
   },
@@ -85,11 +82,6 @@ ACTIONS = {
   theme: {
     color_themes: {}
   }
-  # translation: {
-  #   edit_translations: {},
-  #   edit_translations_ajax_get: {},
-  #   edit_translations_ajax_post: {}
-  # }
 }.freeze
 
 # -------------------------------------------------------
