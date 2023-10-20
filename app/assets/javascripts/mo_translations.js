@@ -1,7 +1,3 @@
-// TODO: maybe make this a class, with own functions,
-// or give it functions by extending prototype.
-// Those functions can be called by edit/update/show versions
-
 class MOTranslations {
 
   constructor(localizedText = {}) {
@@ -29,7 +25,7 @@ class MOTranslations {
     };
   }
 
-  // reset bindings on the translation UI whenever the form is reloaded
+  // Observer resets bindings on translation UI whenever form is reloaded
   formObserver() {
     // Options for the observer (which mutations to observe)
     const obsConfig = { childList: true, subtree: true },
