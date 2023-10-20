@@ -25,6 +25,8 @@ ACTIONS = {
     external_link: {},
     geocode: {},
     image: {},
+    location_primer: {},
+    name_primer: {},
     multi_image_template: {},
     test: {},
     visual_group_status: {}
