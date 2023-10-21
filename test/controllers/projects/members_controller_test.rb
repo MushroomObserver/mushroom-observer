@@ -7,24 +7,36 @@ module Projects
     ##### Helpers (which also assert) ##########################################
     def change_member_status_helper(changer, target_user, commit, admin_before,
                                     user_before, admin_after, user_after)
-      eol_project = projects(:eol_project)
+      project = projects(:eol_project)
       assert_equal(admin_before,
-                   target_user.in_group?(eol_project.admin_group.name))
+                   target_user.in_group?(project.admin_group.name))
       assert_equal(user_before,
-                   target_user.in_group?(eol_project.user_group.name))
+                   target_user.in_group?(project.user_group.name))
+      check_project_membership(project, target_user, admin_before, user_before)
       params = {
-        project_id: eol_project.id,
+        project_id: project.id,
         candidate: target_user.id,
         commit: commit.l
       }
 
       put_requires_login(:update, params, changer.login)
-      assert_redirected_to(project_members_path(eol_project.id))
+      assert_redirected_to(project_members_path(project.id))
       target_user = User.find(target_user.id)
       assert_equal(admin_after,
-                   target_user.in_group?(eol_project.admin_group.name))
+                   target_user.in_group?(project.admin_group.name))
       assert_equal(user_after,
-                   target_user.in_group?(eol_project.user_group.name))
+                   target_user.in_group?(project.user_group.name))
+      check_project_membership(project, target_user, admin_after, user_after)
+    end
+
+    def check_project_membership(project, user, admin, member)
+      membership = ProjectMember.find_by(project:, user:)
+      if member
+        assert_not_nil(membership)
+        assert_equal(membership.admin, admin)
+      else
+        assert_nil(membership)
+      end
     end
 
     # Huh? If it requires login, there ain't gonna be a form

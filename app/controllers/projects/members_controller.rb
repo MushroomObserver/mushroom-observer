@@ -96,7 +96,6 @@ module Projects
     end
 
     def return_to_caller(project, target)
-      # debugger
       if target == "project_index"
         redirect_to(project_path(project.id, q: get_query_param))
       else
@@ -139,9 +138,21 @@ module Projects
     # Add/remove a given User to/from a given UserGroup.
     # Changes should get logged
     def set_status(project, type, user, mode)
+      update_project_membership(project, type, user, mode)
       group = project.send(type == :member ? :user_group : :admin_group)
       set_status_add(project, type, user, group) if mode == :add
       set_status_remove(project, type, user, group) if mode == :remove
+    end
+
+    def update_project_membership(project, type, user, mode)
+      project_member = ProjectMember.find_or_create_by(project:, user:)
+      return unless project_member
+
+      if type == :admin
+        project_member.update!(admin: mode == :add)
+      elsif mode == :remove
+        project_member.destroy
+      end
     end
 
     def set_status_add(project, type, user, group)
