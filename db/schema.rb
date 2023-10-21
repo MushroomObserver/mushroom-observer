@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_10_01_144823) do
+ActiveRecord::Schema.define(version: 2023_10_19_202655) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -489,6 +489,15 @@ ActiveRecord::Schema.define(version: 2023_10_01_144823) do
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
+  end
+
+  create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id"
+    t.integer "user_id"
+    t.boolean "admin"
+    t.boolean "share_gps"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "project_observations", charset: "utf8mb3", force: :cascade do |t|

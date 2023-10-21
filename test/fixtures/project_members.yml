@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  project: one
+  user: one
+  admin: false
+  share_gps: false
+
+two:
+  project: two
+  user: two
+  admin: false
+  share_gps: false

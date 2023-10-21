@@ -55,6 +55,8 @@ class Project < AbstractModel
 
   has_many :admin_group_users, through: :admin_group, source: :users
   has_many :member_group_users, through: :user_group, source: :users
+  has_many :project_members, dependent: :destroy
+  has_many :members, through: :project_members, source: :users
 
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
