@@ -1435,12 +1435,12 @@
   download_observations_format: Choose format
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
-  download_observations_dwca: Occurrence Darwin Core Archive
-  download_observations_gbif: Occurrence Darwin Core Archive for GBIF
-  download_observations_eol: Taxon Darwin Core Archive for EOL
+  download_observations_dwca: Occurrence DwCA for All Names
+  download_observations_gbif: Occurrence DwCA for GBIF Names Only
+  download_observations_eol: Taxon DwCA for EOL
+  download_observations_what_is_dwca: What is Darwin Core Archive (DwCA)?
   download_observations_symbiota: Symbiota
   download_observations_fundis: FunDiS
-  download_observations_what_is_this: what is this?
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)
   download_observations_windows: WINDOWS-1252 (best for Excel)

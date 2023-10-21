@@ -14,21 +14,20 @@
     <%= radio_with_label(form: f, field: :format, value: :adolf,
                           checked: (@format == "adolf") && "checked",
                           label: :download_observations_adolf.t) %>
+    <br/>
+    <span class="ml-5"><%= link_to(:download_observations_what_is_dwca.t,
+                 "http://rs.tdwg.org/dwc/index.htm",
+                  target: "_new") %></span>
     <%= radio_with_label(form: f, field: :format, value: :dwca,
                           checked: (@format == "dwca") && "checked",
                           label: :download_observations_dwca.t) %>
-    (<%= link_to(:download_observations_what_is_this.t,
-                  "http://rs.tdwg.org/dwc/index.htm",
-                  target: "_new") %>)
     <%= radio_with_label(form: f, field: :format, value: :gbif,
                           checked: (@format == "gbif") && "checked",
                           label: :download_observations_gbif.t) %>
-    (<%= link_to(:download_observations_what_is_this.t,
-                  "http://rs.tdwg.org/dwc/index.htm",
-                  target: "_new") %>)
     <%= radio_with_label(form: f, field: :format, value: :eol,
                           checked: (@format == "eol") && "checked",
                           label: :download_observations_eol.t) %>
+    <br/>
     <%= radio_with_label(form: f, field: :format, value: :symbiota,
                           checked: (@format == "symbiota") && "checked",
                           label: :download_observations_symbiota.t) %>
