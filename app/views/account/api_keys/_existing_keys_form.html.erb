@@ -1,3 +1,9 @@
+<%# it's a double-duty form with two different commit buttons.
+the edit links un-collapse the edit key notes field with a save button,
+and the checkboxes are for the remove button at the bottom.
+
+Could instead be separate edit forms, with a remove button on each line. %>
+
 <%= form_with(url: account_remove_api_key_path,
               id: "account_api_keys_form") do |f| %>
 
@@ -34,15 +40,16 @@
                                data: { role: "key_notes_input",
                                        id: key.id } }) %>
             <%= f.button(:SAVE.l, type: "button", class: "btn btn-default",
-                            data: { role: "key_notes_save", id: key.id }) %>
+                         data: { role: "key_notes_save", id: key.id }) %>
             <%= f.button(:CANCEL.l, type: "button",
-                            class: "btn btn-default",
-                            data: { role: "key_notes_cancel", id: key.id }) %>
+                         class: "btn btn-default",
+                         data: { role: "key_notes_cancel", id: key.id }) %>
           </div>
           <div class="view_key_notes_container"
                data-target-key="<%= key.id %>">
             <%= content_tag(:span, key.notes.t, class: "current_notes") %>
             <%= link_to(:EDIT.t, edit_account_api_key_path(id: key.id),
+                        # remote: true,? no, it's just a collapse opener
                         data: { role: "edit_api_key", id: key.id }) %>
           </div>
         </td>

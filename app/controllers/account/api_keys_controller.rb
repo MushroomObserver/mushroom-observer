@@ -12,6 +12,10 @@ module Account
       @key = APIKey.new
     end
 
+    def new
+      # maybe the form
+    end
+
     def create
       @key = APIKey.new
 
@@ -21,9 +25,16 @@ module Account
 
     # The edit view seems to be only for no-js users.
     def edit
-      unless (@key = find_or_goto_index(APIKey, params[:id].to_s)) &&
-             check_permission!(@key)
-        redirect_to(account_api_keys_path)
+      respond_to do |format|
+        format.html do
+          unless (@key = find_or_goto_index(APIKey, params[:id].to_s)) &&
+                 check_permission!(@key)
+            redirect_to(account_api_keys_path)
+          end
+        end
+        format.js do
+          verify_user_owns_key
+        end
       end
     end
 
@@ -43,7 +54,14 @@ module Account
       redirect_to(account_api_keys_path)
     end
 
-    private
+    # no `find_or_goto_index`` cause it's a js request
+    def activate
+      return unless verify_user_owns_key
+
+      activate_api_key
+    end
+
+    # private
 
     def create_api_key
       @key = APIKey.new(params.require(:key).permit(:user_id, :notes))
@@ -53,6 +71,14 @@ module Account
       flash_notice(:account_api_keys_create_success.t)
     rescue StandardError => e
       flash_error(:account_api_keys_create_failed.t + e.to_s)
+    end
+
+    def verify_user_owns_key
+      @user = session_user!
+      @key   = APIKey.find(params[:id])
+      raise("Permission denied") and return false if @key.user != @user
+
+      true
     end
 
     def remove_api_keys
@@ -74,5 +100,17 @@ module Account
       @key.update!(params[:key].permit(:notes))
       flash_notice(:account_api_keys_updated.t)
     end
+
+    def activate_api_key
+      @key.verify!
+    end
+
+    # what js was doing. but we should be just hitting update with the @key
+    # def update_api_key(key, value)
+    #   raise(:runtime_api_key_notes_cannot_be_blank.l) if value.blank?
+
+    #   key.update_attribute(:notes, value.strip_squeeze)
+    #   render(plain: key.notes)
+    # end
   end
 end
